@@ -11,6 +11,24 @@ services:
       - $PWD/srcs/site:/var/www/html/
     environment:
       - GUESTNAME
+  postgres:
+    image: postgres:latest
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+#Error: Database is uninitialized and superuser password is not specified.
+#2024-09-02T13:14:06.121415569Z        You must specify POSTGRES_PASSWORD to a non-empty value for the
+#2024-09-02T13:14:06.121417358Z        superuser. For example, "-e POSTGRES_PASSWORD=password" on "docker run".
+#2024-09-02T13:14:06.121427793Z
+#2024-09-02T13:14:06.121429148Z        You may also use "POSTGRES_HOST_AUTH_METHOD=trust" to allow all
+#2024-09-02T13:14:06.121430494Z        connections without a password. This is *not* recommended.
+#2024-09-02T13:14:06.121431834Z
+#2024-09-02T13:14:06.121433083Z        See PostgreSQL documentation about "trust":
+#2024-09-02T13:14:06.121434724Z        https://www.postgresql.org/docs/current/auth-trust.html
 #      - caddy_data:/data
 #      - caddy_config:/config
 #    secrets :
@@ -71,11 +89,11 @@ services:
 #  wp_admin_pass:
 #    file: $WP_ADMIN_PASS_PATH_HOST
 #
-#networks:
-#  inception:
-#    name: inception-network
-#    driver: bridge
-#
+networks:
+  transendence:
+    name: transendence-network
+    driver: bridge
+
 volumes:
   caddy_data:
     external: true
