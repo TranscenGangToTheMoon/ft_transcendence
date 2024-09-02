@@ -90,8 +90,8 @@ services:
 #    file: $WP_ADMIN_PASS_PATH_HOST
 #
 networks:
-  transendence:
-    name: transendence-network
+  transcendence:
+    name: transcendence-network
     driver: bridge
 
 volumes:
