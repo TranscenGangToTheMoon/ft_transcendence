@@ -18,9 +18,9 @@ services:
 #      - ssl_key
 #    networks:
 #      - inception
-#
-#  mariadb:
-#    build: ./requirements/mariadb
+
+#  postgres:
+#    image: postgres:latest
 #    environment:
 #      - DB_NAME
 #      - DB_USER
@@ -31,7 +31,7 @@ services:
 #      - database-volume:/var/lib/mysql
 #      # - "$HOME/data/database:/var/lib/mysql"
 #    networks:
-#      - inception
+#      - transcendence
 #    secrets :
 #      - db_pass
 #      - db_root_pass
@@ -71,11 +71,11 @@ services:
 #  wp_admin_pass:
 #    file: $WP_ADMIN_PASS_PATH_HOST
 #
-#networks:
-#  inception:
-#    name: inception-network
-#    driver: bridge
-#
+networks:
+  transcendence:
+    name: transcendence-network
+    driver: bridge
+
 volumes:
   caddy_data:
     external: true
