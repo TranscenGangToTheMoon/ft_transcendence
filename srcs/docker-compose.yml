@@ -1,7 +1,7 @@
 services:
   caddy:
     image: caddy:latest
-    restart: unless-stopped
+    restart: on-failure
     ports:
       - "8080:80"
       - "4443:443"
