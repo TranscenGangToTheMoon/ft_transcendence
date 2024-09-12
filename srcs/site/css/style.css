@@ -8,6 +8,7 @@
     font-style: normal;
     font-weight: 400;
 }
+
 html { background: #111;
     padding: 1em;
     font-family: Noto Sans Display;
@@ -15,19 +16,17 @@ html { background: #111;
     font-size: 1em;
     line-height: 1;
     text-shadow: 0.06rem 0 0.06rem #ea36af, -0.125rem 0 0.06rem #75fa69;
+    /* box-shadow: 0.06rem 0 0.06rem #ea36af, -0.125rem 0 0.06rem #75fa69; */
     letter-spacing: 0.125em;
-    animation-duration: 0.01s;
+    animation-duration: 0.05s;
     animation-name: textflicker;
     animation-iteration-count: infinite;
     animation-direction: alternate;
 }
+
 h1 {
     font-size: 5em;
     text-align: center;
-}
-
-a {
-    color: white;
 }
 
 @media screen and (min-width: 1200px) {
@@ -46,9 +45,9 @@ a {
 
 @keyframes textflicker {
     from {
-        text-shadow: 1px 0 0 #ea36af, -2px 0 0 #75fa69;
+        text-shadow: 0.06rem 0 0.06rem #ea36af, -0.125rem 0 0.06rem #75fa69;
     }
     to {
-        text-shadow: 1.5px 0.5px 1px #ea36af, -1.5px -0.5px 1px #75fa69;
+        text-shadow: 0.12em 0.06em 0.083em #ea36af, -0.12em -0.06em 0.083em #75fa69;
     }
 }
