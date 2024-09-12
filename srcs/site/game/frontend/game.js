@@ -1,11 +1,12 @@
-function draw() {
+//has to take coords as parameters
+function draw(x_coord, y_coord) {
 	const canvas = document.getElementById("canvas");
 	if (canvas.getContext) {
 		const ctx = canvas.getContext("2d");
 
 		ctx.beginPath();
-		const x = 25 + 2 * 50; // x coordinate
-		const y = 25 + 3 * 50; // y coordinate
+		const x = x_coord;
+		const y = y_coord;
 		const radius = 20; // Arc radius
 		const startAngle = 0; // Starting point on circle
 		const endAngle = Math.PI + (Math.PI * 2) / 2; // End point on circle
@@ -16,4 +17,5 @@ function draw() {
 	}
 }
 
-draw();
+//JavaScript game code here
+draw(50, 50);
