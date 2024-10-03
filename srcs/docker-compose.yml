@@ -1,7 +1,7 @@
 services:
   caddy:
     image: caddy:latest
-    restart: unless-stopped
+    restart: on-failure
     ports:
       - "8080:80"
       - "4443:443"
@@ -36,9 +36,9 @@ services:
 #      - ssl_key
 #    networks:
 #      - inception
-#
-#  mariadb:
-#    build: ./requirements/mariadb
+
+#  postgres:
+#    image: postgres:latest
 #    environment:
 #      - DB_NAME
 #      - DB_USER
@@ -49,7 +49,7 @@ services:
 #      - database-volume:/var/lib/mysql
 #      # - "$HOME/data/database:/var/lib/mysql"
 #    networks:
-#      - inception
+#      - transcendence
 #    secrets :
 #      - db_pass
 #      - db_root_pass
