@@ -1,115 +1,28 @@
 services:
-  caddy:
-    image: caddy:latest
-    restart: on-failure
-    ports:
-      - "8080:80"
-      - "4443:443"
-#      - "443:443"
-    volumes:
-      - $PWD/srcs/Caddyfile:/etc/caddy/Caddyfile
-      - $PWD/srcs/site:/var/www/html/
-    environment:
-      - GUESTNAME
   postgres:
-    image: postgres:latest
+    image: postgres:14
     restart: always
     ports:
-      - "5432:5432"
+      - "5432:300"
+    volumes:
+      - /Users/florianguiramand/Desktop/ft_transcendence/postgre_data/:/var/lib/postgresql/data
     environment:
-      - POSTGRES_DB
-      - POSTGRES_USER
-      - POSTGRES_PASSWORD
-#Error: Database is uninitialized and superuser password is not specified.
-#2024-09-02T13:14:06.121415569Z        You must specify POSTGRES_PASSWORD to a non-empty value for the
-#2024-09-02T13:14:06.121417358Z        superuser. For example, "-e POSTGRES_PASSWORD=password" on "docker run".
-#2024-09-02T13:14:06.121427793Z
-#2024-09-02T13:14:06.121429148Z        You may also use "POSTGRES_HOST_AUTH_METHOD=trust" to allow all
-#2024-09-02T13:14:06.121430494Z        connections without a password. This is *not* recommended.
-#2024-09-02T13:14:06.121431834Z
-#2024-09-02T13:14:06.121433083Z        See PostgreSQL documentation about "trust":
-#2024-09-02T13:14:06.121434724Z        https://www.postgresql.org/docs/current/auth-trust.html
-#      - caddy_data:/data
-#      - caddy_config:/config
-#    secrets :
-#      - ssl_crt
-#      - ssl_key
-#    networks:
-#      - inception
+      - POSTGRES_DB=ft_transcendence_db
+      - POSTGRES_USER=fguirama
+      - POSTGRES_PASSWORD=123456
+    networks:
+      - transcendence
 
-#  postgres:
-#    image: postgres:latest
-#    environment:
-#      - DB_NAME
-#      - DB_USER
-#      - DB_PASS
-#      - DB_ROOT_PASS
-#    restart: on-failure
-#    volumes:
-#      - database-volume:/var/lib/mysql
-#      # - "$HOME/data/database:/var/lib/mysql"
-#    networks:
-#      - transcendence
-#    secrets :
-#      - db_pass
-#      - db_root_pass
-#
-#  wp-php:
-#    build: ./requirements/wordpress
-#    depends_on:
-#      - mariadb
-#    environment:
-#      - COMPOSE_PROJECT_NAME
-#      - HOSTNAME
-#      - DB_NAME
-#      - DB_USER
-#      - DB_PASS
-#      - WP_ADMIN
-#      - WP_ADMIN_MAIL
-#      - WP_ADMIN_PASS
-#    restart: on-failure
-#    volumes:
-#      - wordpress-volume:/var/www/html/
-#      # - "$HOME/data/wordpress:/var/www/html/"
-#    networks:
-#      - inception
-#    secrets:
-#      - db_pass
-#      - wp_admin_pass
-#
-#secrets:
-#  ssl_crt:
-#    file: $SSL_CRT_PATH
-#  ssl_key:
-#    file: $SSL_KEY_PATH
-#  db_pass:
-#    file: $DB_PASS_PATH_HOST
-#  db_root_pass:
-#    file: $DB_ROOT_PASS_PATH_HOST
-#  wp_admin_pass:
-#    file: $WP_ADMIN_PASS_PATH_HOST
-#
 networks:
   transcendence:
     name: transcendence-network
     driver: bridge
 
 volumes:
-  caddy_data:
-    external: true
-  caddy_config:
-
-#  database-volume:
-#    name: database-volume
-#    driver: local
-#    driver_opts:
-#      type: none
-#      o: bind
-#      device: $HOME/data/database
-#  wordpress-volume:
-#    name: wordpress-volume
-#    driver: local
-#    driver_opts:
-#      type: none
-#      o: bind
-#      device: $HOME/data/wordpress
+  database-volume:
+    name: database-volume
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /Users/florianguiramand/Desktop/ft_transcendence/postgre_data/
