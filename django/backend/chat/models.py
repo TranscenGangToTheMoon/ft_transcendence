@@ -1,10 +1,17 @@
+from datetime import datetime
+
 from django.db import models
+from django.dispatch import receiver
+
+from user.models import Users
+
 
 # Create your models here.
 class Chats(models.Model):
     participants = models.ManyToManyField(Users)
     created_at = models.DateTimeField(auto_now_add=True)
     type = models.CharField(max_length=20) # todo: we do that ?
+
 
 class Messages(models.Model):
     chat = models.ForeignKey(Chats, on_delete=models.CASCADE)
