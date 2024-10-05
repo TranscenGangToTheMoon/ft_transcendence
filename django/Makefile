@@ -18,7 +18,7 @@ POSTGRES_IP			=	$(shell ifconfig -u | grep 'inet ' | grep -v 127.0.0.1 | cut -d\
 all:				$(NAME)
 
 $(NAME):			$(HOST_PATH)
-					docker run --name $(NAME) -e POSTGRES_USER=$(POSTGRES_USER) -e POSTGRES_PASSWORD=$(POSTGRES_PASSWORD) -e POSTGRES_DB=$(POSTGRES_USER) -p ${PORTS} -v $(VOLUMES) -d postgres:14
+					docker run --name $(NAME) -e POSTGRES_USER=$(POSTGRES_USER) -e POSTGRES_PASSWORD=$(POSTGRES_PASSWORD) -e POSTGRES_DB=$(POSTGRES_DB) -p ${PORTS} -v $(VOLUMES) -d postgres:14
 
 up:
 					docker start $(NAME)
@@ -39,7 +39,6 @@ clean:
 					docker stop $(NAME)
 
 fclean:
-					docker run --rm -v $(HOST_PATH):$(CONTAINER_PATH) busybox sh -c "rm -rf $(CONTAINER_PATH)"
 					docker rm $(NAME)
 					rm -rf $(HOST_PATH)
 
