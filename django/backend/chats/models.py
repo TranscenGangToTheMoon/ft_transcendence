@@ -3,7 +3,7 @@ from datetime import datetime
 from django.db import models
 from django.dispatch import receiver
 
-from user.models import Users
+from users.models import Users
 
 
 # Create your models here.
@@ -15,7 +15,7 @@ class Chats(models.Model):
 
 class Messages(models.Model):
     chat = models.ForeignKey(Chats, on_delete=models.CASCADE)
-    user_send = models.ForeignKey(Users, on_delete=models.SET_NULL, null=True)
+    author = models.ForeignKey(Users, on_delete=models.SET_NULL, null=True)
     content = models.TextField()
     send_at = models.DateTimeField(auto_now_add=True)
     read_at = models.DateTimeField(blank=True, null=True)
@@ -34,7 +34,7 @@ class Messages(models.Model):
 @receiver(models.signals.post_delete, sender=Users)
 def delete_chat_if_both_users_deleted(sender, instance, **kwargs):
     print("coucou")
-    # Get all chat instances involving the deleted user
+    # Get all chats instances involving the deleted users
     user_chats = instance.chats_set.all()
 
     for user_chat in user_chats:
