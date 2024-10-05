@@ -1,14 +1,13 @@
-from math import log2
 
 from django.db import models
-from django.utils.text import slugify
 
 import GameState
-from user.models import Users
+from users.models import Users
 
 
 # Create your models here.
 class Matches(models.Model):
+    # how to make that id is generated randomly and not auto increment
     game_mode = models.ForeignKey('GameModes', on_delete=models.SET_NULL, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     teams = models.ManyToManyField('Teams')
@@ -37,6 +36,7 @@ class Players(models.Model):
 class Tournaments(models.Model):
     name = models.CharField(max_length=50)
     participants = models.ManyToManyField(Players)
+    is_public = models.BooleanField(default=True)
     max_players = models.ForeignKey('TournamentSize', on_delete=models.SET_NULL, null=True)
     state = models.CharField(max_length=20, default=GameState.lobby)
     rounds = models.ManyToManyField(Matches)
@@ -44,51 +44,3 @@ class Tournaments(models.Model):
     @property
     def current_round(self):
         return len(self.rounds.all())
-
-
-class TournamentSize(models.Model):
-    places = models.PositiveSmallIntegerField(default=8)
-    nb_rounds = models.IntegerField(default=None, null=True)
-
-    def save(self, *args, **kwargs):
-        if self.nb_rounds is None:
-            self.nb_rounds = int(log2(self.places))
-
-        super().save(*args, **kwargs)
-
-
-class Seasons(models.Model):
-    name = models.CharField(max_length=50)
-    n = models.IntegerField(default=1)
-    start_at = models.DateTimeField()
-    end_at = models.DateTimeField()
-
-    @property
-    def title(self):
-        return f"Season {self.n}"
-
-    @property
-    def full_title(self):
-        return f"{self.title}: {self.name}"
-
-
-class Ranks(models.Model):
-    name = models.CharField(max_length=20)
-    trophy = models.IntegerField()
-
-
-class GameModes(models.Model):
-    name = models.CharField(max_length=30)
-    slug = models.SlugField(unique=True, null=True, default=None)
-
-    def save(self, *args, **kwargs):
-        if self.slug is None:
-            self.slug = slugify(self.name)
-
-        super().save(*args, **kwargs)
-
-
-class Spells(models.Model):
-    name = models.CharField(max_length=20)
-    icon = models.FilePathField()
-    reload_time = models.DurationField(default=30)
