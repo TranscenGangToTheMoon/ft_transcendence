@@ -1,108 +1,66 @@
 import random
 import string
 
-from django.forms import model_to_dict
-from rest_framework import generics
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
+from rest_framework import generics, permissions
 
+from api.permissions import IsMePermission
 from users.models import Users
-from users.serializer import UsersSerializer
+from users.serializers import UsersRetrieveSerializer, UsersMeSerializer
 
 
 # Create your views here.
-class UsersMixinView(generics.RetrieveUpdateDestroyAPIView):
+class UsersListCreateView(generics.ListCreateAPIView):
     queryset = Users.objects.all()
-    serializer_class = UsersSerializer
+    serializer_class = UsersRetrieveSerializer
+
+    # permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self, *args, **kwargs):
+        request = self.request
+        print(request)
+        print(request.user)
+        if not request.user.is_authenticated:
+            return Users.objects.none()
+        return super().get_queryset(*args, **kwargs)
+
+
+users_list_create_view = UsersListCreateView.as_view()
+
+
+class UsersRetrieveUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Users.objects.all()
+    serializer_class = UsersMeSerializer
+
+    permission_classes = [IsMePermission]
+
+    def get_object(self):
+        me = self.queryset.get(id=self.request.user.id)
+        if me is not None:
+            return me
+        return None
+
+
+users_retrieve_update_delete_view = UsersRetrieveUpdateDeleteView.as_view()
+
+
+class UsersRetrieveView(generics.RetrieveAPIView):
+    queryset = Users.objects.all()
+    serializer_class = UsersRetrieveSerializer
     lookup_field = 'pk'
 
+    permission_classes = [permissions.IsAuthenticated]
 
 
+users_retrieve_view = UsersRetrieveView.as_view()
 
 
+# class UsersListCreateView(generics.ListCreateAPIView):
+#     def perform_create(self, serializer):
+#         kwarg = {}
+#         if serializer.validated_data.get('username') is None:
+#             kwarg['username'] = 'Guest' + ''.join(random.choices(string.digits, k=5))
+#         serializer.save(**kwarg)
 
 
-
-
-
-
-@api_view(["GET"])
-def user_index(request):
-    instance = Users.objects.all()
-    data = {}
-    print(instance)
-    if instance:
-        for user in instance:
-            print(user)
-            # data[users.id] = UsersSerializer(users).data
-            data[user.id] = model_to_dict(user)
-    return Response(data)
-    # data = {}
-    # instance = Users.objects.all().order_by("?").first()
-    # data = {}
-    # if instance:
-    #     data = UsersSerializer(instance).data
-    # return Response(data)
-
-
-@api_view(["POST"])
-def user_index_post(request):
-    serializer = UsersSerializer(data=request.data)
-    if serializer.is_valid(raise_exception=True):
-        data = serializer.data
-        serializer.save()
-        print(data)
-        return Response(data)
-    return Response({"error": "invalid data type"})
-
-
-class UsersDetailView(generics.RetrieveAPIView):
-    queryset = Users.objects.all()
-    serializer_class = UsersSerializer
-    # lookup_field = "username"
-
-
-class UsersUpdateView(generics.UpdateAPIView):
-    queryset = Users.objects.all()
-    serializer_class = UsersSerializer
-    lookup_field = "pk"
-
-    def perform_update(self, serializer):
-        instance = serializer.save()
-
-
-class UsersDeleteView(generics.DestroyAPIView):
-    #  return 204 if delete object
-    queryset = Users.objects.all()
-    serializer_class = UsersSerializer
-    lookup_field = "pk"
-
-    def perform_destroy(self, instance):
-        super().perform_destroy(instance)
-
-
-class UsersListDetailView(generics.ListAPIView):
-    queryset = Users.objects.all()
-    serializer_class = UsersSerializer
-    # lookup_field = "username"
-
-
-class UsersCreateView(generics.CreateAPIView):
-    queryset = Users.objects.all()
-    serializer_class = UsersSerializer
-
-    def perform_create(self, serializer):
-        print(serializer.validated_data.get('username'))
-        kwarg = {}
-        if serializer.validated_data.get('username') is None:
-            kwarg['username'] = 'Guest' + ''.join(random.choices(string.digits, k=5))
-        serializer.save(**kwarg)
-
-
-def user_alt_view(request):
-    method = request.method
-    if method == "GET":
-        pass
-    if method == "POST":
-        pass
-
+# users_mixin_view = UsersMixinView.as_view()
+# users_list_create_view = UsersListCreateView.as_view()
