@@ -31,16 +31,16 @@ class Messages(models.Model):
 
 
 # Signal to check if both users are deleted
-@receiver(models.signals.post_delete, sender=Users)
-def delete_chat_if_both_users_deleted(sender, instance, **kwargs):
-    print("coucou")
-    # Get all chats instances involving the deleted users
-    user_chats = instance.chats_set.all()
-
-    for user_chat in user_chats:
-        print(user_chat)
-        chat = user_chat.chat
-
-        if not chat.participants.exists():
-            chat.delete()
-            chat.save() # todo doesnt work
+# @receiver(models.signals.post_delete, sender=Users)
+# def delete_chat_if_both_users_deleted(sender, instance, **kwargs):
+#     print("coucou salut toi comment ca va")
+#     # Get all chats instances involving the deleted users
+#     user_chats = instance.chats_set.all()
+#
+#     for user_chat in user_chats:
+#         print(user_chat)
+#         chat = user_chat.chat
+#
+#         if not chat.participants.exists():
+#             chat.delete()
+#             chat.save() # todo doesnt work
