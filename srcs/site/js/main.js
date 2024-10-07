@@ -21,3 +21,7 @@ form.addEventListener("submit", (e) => {
 		}),
 	});
 });
+
+function test() {
+	history.pushState({}, '', "pong");
+}

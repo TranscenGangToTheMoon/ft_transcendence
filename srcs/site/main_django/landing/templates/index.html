@@ -1,0 +1,18 @@
+{% load static %}
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <title>pong</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+</head>
+<body>  
+    <button type="button" onclick="changePage('test')">test</button>
+    <button type="button" onclick="triggerPopup('login')">login</button>
+    <div id="login">
+
+    </div>
+    <script src="{% static 'main.js' %}"></script>
+</body>
+</html>
+

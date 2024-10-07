@@ -9,7 +9,7 @@ RUN pip install -r requirements.txt
 
 COPY . .
 
-EXPOSE 443
+EXPOSE 4433
 EXPOSE 8000
 
 ENTRYPOINT ["python", "manage.py"]
