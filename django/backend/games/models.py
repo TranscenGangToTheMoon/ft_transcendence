@@ -1,3 +1,5 @@
+import string
+import random
 
 from django.db import models
 
@@ -7,7 +9,7 @@ from users.models import Users
 
 # Create your models here.
 class Matches(models.Model):
-    # how to make that id is generated randomly and not auto increment
+    id = models.CharField(default=random.choices(string.digits, k=4), max_length=4, primary_key=True, unique=True, editable=False)
     game_mode = models.ForeignKey('GameModes', on_delete=models.SET_NULL, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     teams = models.ManyToManyField('Teams')
@@ -34,6 +36,7 @@ class Players(models.Model):
 
 
 class Tournaments(models.Model):
+    id = models.CharField(default=random.choices(string.digits, k=4), max_length=4, primary_key=True, unique=True, editable=False)
     name = models.CharField(max_length=50)
     participants = models.ManyToManyField(Players)
     is_public = models.BooleanField(default=True)
