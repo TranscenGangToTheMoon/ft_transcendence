@@ -1,13 +1,9 @@
 from django.urls import path
 
-from users.views import user_index, UsersDetailView, UsersCreateView, UsersListDetailView, UsersUpdateView, \
-    UsersDeleteView, UsersMixinView
+from users.views import users_retrieve_update_delete_view, users_list_create_view, users_retrieve_view
 
 urlpatterns = [
-    # path('', user_index, name="api-users-index"),
-    path('', UsersCreateView.as_view(), name="api-users-create"),
-    path('<int:pk>/', UsersMixinView.as_view(), name="api-users-details"),
-    path('<int:pk>/update', UsersUpdateView.as_view(), name="api-users-update"),
-    path('<int:pk>/delete', UsersDeleteView.as_view(), name="api-users-delete"),
-    path('all/', UsersListDetailView.as_view(), name="api-users-details"),
+    path('', users_list_create_view, name="users-list"),
+    path('<int:pk>/', users_retrieve_view, name="users-detail"),
+    path('me/', users_retrieve_update_delete_view, name="users-me"),
 ]
