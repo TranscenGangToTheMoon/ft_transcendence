@@ -2,7 +2,7 @@ services:
   main-django:
     image: main_django
     build:
-      context: site/main_django
+      context: transcendence
       dockerfile: Dockerfile
     restart: on-failure
     ports:
