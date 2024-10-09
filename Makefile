@@ -1,7 +1,7 @@
 ########################################################################################################################
 #                                                       VARIABLE                                                       #
 ########################################################################################################################
-NAME		:=	ft_transcendence
+NAME		:=	ft_transcentest
 
 SRCS_D		:=	srcs
 
@@ -46,13 +46,13 @@ dettach		:	build
 
 banner		:
 			@echo -e '$(BLUE)'
-			@echo -e '    ______      __                                            __                   '
-			@echo -e '   / __/ /_    / /__________ _____  _____________  ____  ____/ /__  ____  ________ '
-			@echo -e '  / /_/ __/   / __/ ___/ __ `/ __ \/ ___/ ___/ _ \/ __ \/ __  / _ \/ __ \/ ___/ _ \'
-			@echo -e ' / __/ /_    / /_/ /  / /_/ / / / (__  ) /__/  __/ / / / /_/ /  __/ / / / /__/  __/'
-			@echo -e '/_/  \__/____\__/_/   \__,_/_/ /_/____/\___/\___/_/ /_/\__,_/\___/_/ /_/\___/\___/ '
+			@echo -e '    ______      __                                        __            __ '
+			@echo -e '   / __/ /_    / /__________ _____  _____________  ____  / /____  _____/ /_'
+			@echo -e '  / /_/ __/   / __/ ___/ __ `/ __ \/ ___/ ___/ _ \/ __ \/ __/ _ \/ ___/ __/'
+			@echo -e ' / __/ /_    / /_/ /  / /_/ / / / (__  ) /__/  __/ / / / /_/  __(__  ) /_  '
+			@echo -e '/_/  \__/____\__/_/   \__,_/_/ /_/____/\___/\___/_/ /_/\__/\___/____/\__/  '
 			@echo -en '$(BOLD)''$(ITALIC)'
-			@echo -e '                                          bajeanno fguirama jcoquard nfaust xcharra'
+			@echo -e '                                                                    xcharra'
 			@echo -e '$(RESET)'
 
 clean		:
@@ -66,7 +66,7 @@ secrets		:
 			openssl rand -hex -out ./secrets/wp_admin_pass 32
 fclean		:
 			# docker run --rm -v $(HOME)/data:/data debian:11 bash -c "rm -rf /data/database/*  /data/wordpress/*"
-			#docker run --rm -v $(HOME)/data:/data busybox sh -c "rm -rf /data/database/* /data/wordpress/*"
+			# docker run --rm -v $(HOME)/data:/data busybox sh -c "rm -rf /data/database/* /data/wordpress/*"
 			docker image prune -af
 			$(COMPOSE) $(FLAGS) down -v --rmi all
 			rm -rf $(SECRETS_D)
