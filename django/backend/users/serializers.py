@@ -1,6 +1,7 @@
 import random
 import string
 
+from django.contrib.auth.models import User
 from django.db.models import Q
 from rest_framework import serializers
 
@@ -8,15 +9,71 @@ from users.models import Users, Friends
 from users.validators import validate_username
 
 
+# class UserRegisterSerializer(serializers.ModelSerializer):
+#     password = serializers.CharField(write_only=True)
+#
+#     class Meta:
+#         model = User
+#         fields = ('username', 'password', 'email')
+#
+#     def post(self, request):
+#         serializer = UserRegisterSerializer(data=request.data)
+#         if serializer.is_valid():
+#             serializer.save()
+#             return generi({"message": "User created successfully"}, status=status.HTTP_201_CREATED)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+#
+#     def create(self, validated_data):
+#         user = User.objects.create_user(
+#             username=validated_data['username'],
+#             email=validated_data['email'],
+#             password=validated_data['password']
+#         )
+#         return user
+#
+#     def create(self, validated_data):
+#         request = self.context.get('request')
+#         print(request)
+#         if request is not None:
+#             if Users.objects.filter(django_user=request.id).exist():
+#                 raise serializers.ValidationError("You already connected")
+#             if Users.objects.filter(django_user=request.id).exist():
+#                 raise serializers.ValidationError("")
+#             validated_data['username'] = request.user.username
+#         print(validated_data)
+#         if validated_data.get('username') is None:
+#             validated_data['username'] = 'Guest' + ''.join(random.choices(string.digits, k=5))
+#         return super().create(validated_data)
+
+
+class UserPublicSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(read_only=True)
+    username = serializers.CharField(read_only=True)
+    email = serializers.CharField(read_only=True)
+
+    class Meta:
+        model = User
+        fields = [
+            'id',
+            'username',
+            'email'
+        ]
+
+
 class UsersRetrieveSerializer(serializers.ModelSerializer):
     url = serializers.HyperlinkedIdentityField(view_name='users-detail', lookup_field='pk')
     username = serializers.CharField(validators=[validate_username], read_only=True)
+    user = UserPublicSerializer(source='django_user', read_only=True)
+    email = serializers.EmailField(source="django_user.email", write_only=True)
+    coucou = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Users
         fields = [
             'id',
             'username',
+            'user',
+            'email',
             'profile_picture',
             'accept_friend_request',
             'online_status',
@@ -28,7 +85,12 @@ class UsersRetrieveSerializer(serializers.ModelSerializer):
             'title',
             'rank',
             'url',
+            'coucou'
         ]
+
+    def get_coucou(self, obj):
+        print("hey salut")
+        return "coucou"
 
     def validate_username(self, value):
         request = self.context.get('request').user
@@ -44,6 +106,7 @@ class UsersRetrieveSerializer(serializers.ModelSerializer):
         return value
 
     def create(self, validated_data):
+        validated_data.pop('email')
         request = self.context.get('request')
         print(request)
         if request is not None:
