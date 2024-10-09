@@ -1,25 +1,238 @@
 services:
-  project-main-django:
-    image: project-main-django
-    build: ./project-main
-    restart: on-failure
-    ports:
-      - "2006:2006"
-    networks:
-      - transcendence
+  # users:
+  #   image: users
+  #   depends_on:
+  #     - users_db
+  #   build:
+  #     context: requirements/users
+  #     dockerfile: Dockerfile
+  #   restart: on-failure
+  #   # ports:
+  #   #   - "8000:8000"
+  #   #   - "443:443"
+  #   networks:
+  #     - "transcendence_nw"
+  #     - "users_nw"
+  #   volumes:
+  #     - site-volume:/site
+  # users_db:
+  #   image: postgres:14
+  #   restart: on_failure
+  #   ports:
+  #     - "5432:300"
+  #   volumes:
+  #     - user_db_volume:/var/lib/postgresql/data
+  #   environment:
+  #     - POSTGRES_DB=ft_transcendence_db
+  #     - POSTGRES_USER=fguirama
+  #     - POSTGRES_PASSWORD=123456
+  #   networks:
+  #     - authentication_db_nw
+
+  # game:
+  #   image: game
+  #   depends_on:
+  #     - game_db
+  #   build:
+  #     context: requirements/game
+  #     dockerfile: Dockerfile
+  #   restart: on-failure
+  #   # ports:
+  #   #   - "8000:8000"
+  #   #   - "443:443"
+  #   networks:
+  #     - "transcendence_nw"
+  #     - "game_nw"
+  #   volumes:
+  #     - site-volume:/site
+  # game_db:
+  #   image: postgres:14
+  #   restart: always
+  #   ports:
+  #     - "5432:300"
+  #   volumes:
+  #     - game_db_volume:/var/lib/postgresql/data
+  #   environment:
+  #     - POSTGRES_DB=ft_transcendence_db
+  #     - POSTGRES_USER=fguirama
+  #     - POSTGRES_PASSWORD=123456
+  #   networks:
+  #     - game_nw
+
+  # matchmaking:
+  #   image: matchmaking
+  #   depends_on:
+  #     - matchmaking_db
+  #   build:
+  #     context: requirements/matchmaking
+  #     dockerfile: Dockerfile
+  #   restart: on-failure
+  #   # ports:
+  #   #   - "8000:8000"
+  #   #   - "443:443"
+  #   networks:
+  #     - "transcendence_nw"
+  #     - "matchmaking_nw"
+  #   volumes:
+  #     - site-volume:/site
+  # matchmaking_db:
+  #   image: postgres:14
+  #   restart: always
+  #   ports:
+  #     - "5432:300"
+  #   volumes:
+  #     - maatchmaking_db_volume:/var/lib/postgresql/data
+  #   environment:
+  #     - POSTGRES_DB=ft_transcendence_db
+  #     - POSTGRES_USER=fguirama
+  #     - POSTGRES_PASSWORD=123456
+  #   networks:
+  #     - maatchmaking_nw
+
+  # chat:
+  #   image: chat
+  #   depends_on:
+  #     - chat_db
+  #   build:
+  #     context: requirements/chat
+  #     dockerfile: Dockerfile
+  #   restart: on-failure
+  #   # ports:
+  #   #   - "8000:8000"
+  #   #   - "443:443"
+  #   networks:
+  #     - "transcendence_nw"
+  #     - "chat_nw"
+  #   volumes:
+  #     - site-volume:/site
+  # chat_db:
+  #   image: postgres:14
+  #   restart: always
+  #   ports:
+  #     - "5432:300"
+  #   volumes:
+  #     - char_db_volume:/var/lib/postgresql/data
+  #   environment:
+  #     - POSTGRES_DB=ft_transcendence_db
+  #     - POSTGRES_USER=fguirama
+  #     - POSTGRES_PASSWORD=123456
+  #   networks:
+  #     - chat_nw
+
+  authentication:
+    image: authentication
+    depends_on:
+      - authentication_db
+    build:
+      context: requirements/authentication
+      dockerfile: Dockerfile
+    restart: always
     volumes:
-      - project-main-volume:/project-main
+      - authentication_volume:/code
+    ports:
+      - "8000:8000"
+    networks:
+      - transcendence_nw
+      - authentication_db_nw
+  authentication_db:
+    image: postgres:14
+    restart: always
+    volumes:
+      - authentication_db_volume:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=ft_transcendence_db
+      - POSTGRES_USER=fguirama
+      - POSTGRES_PASSWORD=123456
+    networks:
+      - authentication_db_nw
+
+  # statistics:
+  #   image: requirements/statistics
+  #   restart: always
+  #   build:
+  #     context: requirements/statistics
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "5432:300"
+  #   volumes:
+  #     - auth_db
+  #   networks:
+  #     - statistics_nw
+  #     - transcendence_nw
+  # statistics_db:
+  #   image: postgres:14
+  #   restart: always
+  #   ports:
+  #     - "5432:300"
+  #   volumes:
+  #     - statistics_db_volume:/var/lib/postgresql/data
+  #   environment:
+  #     - POSTGRES_DB=ft_transcendence_db
+  #     - POSTGRES_USER=fguirama
+  #     - POSTGRES_PASSWORD=123456
+  #   networks:
+  #     - statistics_db_nw
+
+networks:
+  transcendence_nw:
+    name: transcendence_global_network
+    driver: bridge
+  authentication_db_nw:
+    name: authentication_db_network
+    driver: bridge
+  statistics_nw:
+    name: match_history_network
+    driver: bridge
+  game_nw:
+    name: match_history_network
+    driver: bridge
+  chat_nw:
+    name: match_history_network
+    driver: bridge
+  users_nw:
+    name: match_history_network
+    driver: bridge
 
 volumes:
-  project-main-volume:
-    name: project-main-volume
+  users_db_volume:
+    name: database-volume
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: ./project-main/project-main-django
-
-networks:
-  transcendence:
-    name: transcendence-network
-    driver: bridge
+      device: requirements/users-db
+  game_db_volume:
+    name: database-volume
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: requirements/game-db
+  chat_db_volume:
+    name: database-volume
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: requirements/char-db
+  authentication_db_volume:
+    name: database-volume
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: requirements/authentication-db
+  authentication_volume:
+    name: auth_volume
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./requirements/authentication/auth
+  statistics_db_volume:
+    name: database-volume
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: requirements/statistics-db
