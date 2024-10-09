@@ -1,6 +1,7 @@
 import random
 import string
 
+from django.db.models.expressions import result
 from rest_framework import generics, permissions
 
 from api.permissions import IsMePermission
@@ -15,13 +16,14 @@ class UsersListCreateView(generics.ListCreateAPIView):
 
     # permission_classes = [permissions.IsAuthenticated]
 
-    def get_queryset(self, *args, **kwargs):
-        request = self.request
-        print(request)
-        print(request.user)
-        if not request.user.is_authenticated:
-            return Users.objects.none()
-        return super().get_queryset(*args, **kwargs)
+
+    # def get_queryset(self, *args, **kwargs):
+    #     request = self.request
+    #     print(request)
+    #     print(request.user)
+    #     if not request.user.is_authenticated:
+    #         return Users.objects.none()
+    #     return super().get_queryset(*args, **kwargs)
 
 
 users_list_create_view = UsersListCreateView.as_view()
@@ -53,6 +55,21 @@ class UsersRetrieveView(generics.RetrieveAPIView):
 
 users_retrieve_view = UsersRetrieveView.as_view()
 
+
+class UsersSearchListView(generics.ListAPIView):
+    queryset = Users.objects.all()
+    serializer_class = UsersRetrieveSerializer
+
+    def get_queryset(self, *args, **kwargs):
+        qs = super().get_queryset(*args, **kwargs)
+        q = self.request.GET.get('q')
+        results = Users.objects.none()
+        if q is not None:
+            user = None
+            if self.request.user.is_authenticated:
+                user = self.request.user
+            results = qs.search(q, user)
+        return results
 
 # class UsersListCreateView(generics.ListCreateAPIView):
 #     def perform_create(self, serializer):
