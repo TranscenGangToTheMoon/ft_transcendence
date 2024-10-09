@@ -18,9 +18,11 @@ from django.contrib import admin
 from django.urls import path
 from login import views as login_views
 from home import views as home_views
+from pongame import views as game_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', login_views.login, name='transcendence - login'),
     path('home/', home_views.home, name='transcendence - home'),
+    path('game/', game_views.game, name='transcendence - game'),
 ]
