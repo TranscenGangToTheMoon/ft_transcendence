@@ -1,0 +1,9 @@
+https://localhost/
+https://localhost/login
+https://localhost/user
+https://localhost/player
+https://localhost/game
+https://localhost/custom
+https://localhost/ranked
+https://localhost/multiplayer
+https://localhost/tournament
