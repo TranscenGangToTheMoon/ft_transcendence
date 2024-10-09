@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework.validators import UniqueValidator
 
 from users.models import Users
 
@@ -12,3 +13,6 @@ def validate_username(value):
     if value is not None:
         value = value.upper()
     return value
+
+
+unique_username = UniqueValidator(queryset=Users, message="Username already exists", lookup="iexact")
