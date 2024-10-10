@@ -26,9 +26,9 @@ services:
     volumes:
       - "users-db-volume:/var/lib/postgresql/data"
     environment:
-      - POSTGRES_DB=ft_transcendence_db
-      - POSTGRES_USER=fguirama
-      - POSTGRES_PASSWORD=123456
+      - POSTGRES_DB=users_db
+      - POSTGRES_USER=fguirama # todo : use .env
+      - POSTGRES_PASSWORD=123456 # todo : use .env
     networks:
       - users-nw
 
