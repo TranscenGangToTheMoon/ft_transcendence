@@ -10,15 +10,6 @@ class Titles(models.Model):
     name = models.CharField(max_length=70, unique=True, editable=False)
 
 
-class ProfilePictures(models.Model):
-    name = models.CharField(max_length=20, unique=True, editable=False)
-    path = models.FilePathField()
-
-
-class OnlineStatus(models.Model):
-    name = models.CharField(max_length=30, unique=True, editable=False)
-
-
 class UsersQuerySet(models.QuerySet):
     def is_not_guest(self):
         return self.filter(is_guest=False)
@@ -41,40 +32,6 @@ class UsersManager(models.Manager):
 
     def search(self, query, user=None):
         return self.get_queryset().search(query, user=user)
-
-
-class Users(models.Model):
-    # todo utils:
-    # Users.objects.first().chats_set.all()
-    # Chats.objects.last().participants.all().exists()
-    username = models.CharField(max_length=40, null=True, unique=True, blank=True)#, validators=[validate_username])
-    password = models.TextField(default=None, null=True, blank=True)
-    django_user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, default=None)
-    profile_picture = models.ForeignKey(ProfilePictures, on_delete=models.SET_NULL, null=True, blank=True)
-    own_profile_picture = models.ManyToManyField(ProfilePictures, default=None, symmetrical=False, related_name='own_profile_picture', blank=True)
-    # point to default profile_picture
-    accept_friend_request = models.BooleanField(default=True)
-    objects = UsersManager()
-    blocked_users = models.ManyToManyField('self', default=None, symmetrical=False, blank=True)
-    # friend_requests_sent = models.ManyToManyField('self', through='FriendRequests', symmetrical=False)
-    # friends = models.ManyToManyField('self', through='Friends', symmetrical=True, related_name='friends_list')
-
-    online_status = models.ForeignKey(OnlineStatus, default=None, on_delete=models.SET_NULL, null=True, blank=True)
-    last_online = models.DateTimeField(auto_now_add=True)
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    @property
-    def is_guest(self):
-        return self.django_user is None
-
-    trophy = models.IntegerField(default=0)
-    level = models.IntegerField(default=0)
-    title = models.ForeignKey(Titles, on_delete=models.SET_NULL, default=None, null=True, related_name='use_title', blank=True)
-    own_titles = models.ManyToManyField(Titles, default=None, symmetrical=False, related_name='own_titles', blank=True)
-    rank = models.ForeignKey(Ranks, default=None, on_delete=models.SET_NULL, null=True, blank=True)
-
 
 class FriendRequests(models.Model):
     sender = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='sent_friend_requests')
