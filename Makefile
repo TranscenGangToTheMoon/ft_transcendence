@@ -42,19 +42,15 @@ RESET		:=	\001\033[0m\002
 
 all			:	banner $(NAME)
 
-$(NAME)		:	db-dirs #secrets
+$(NAME)		:	volumes #secrets
 			$(COMPOSE) $(FLAGS) up --build
 
-<<<<<<< Updated upstream
 volumes		:	$(VOLUMES)
 
 $(VOLUMES)	:
 			mkdir -p $@
 
 build		:
-=======
-build		:
->>>>>>> Stashed changes
 			$(COMPOSE) $(FLAGS) $@
 
 up			:	build
@@ -112,9 +108,6 @@ network-rm	:
 
 prune		:
 			docker system prune -af
-
-db-dirs		:
-			mkdir -p $(DB_DIRS)
 
 re			:	fclean all
 

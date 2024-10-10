@@ -1,79 +1,65 @@
 services:
   frontend:
-    build: ./requirements/frontend
+    image: caddy:2.8.4
     ports:
       - "4443:443"
     volumes:
       - frontend_volume:/var/www/html
       - ./requirements/frontend/Caddyfile:/etc/caddy/Caddyfile
 
+  users:
+    # image: users
+    depends_on:
+      - users_db
+    build: requirements/users
+    restart: on-failure
+    ports:
+      - "8005:8000"
+    networks:
+      - "transcendence_nw"
+      - "users_nw"
+    volumes:
+      - users_volume:/code
+  users_db:
+    image: postgres:14
+    restart: on-failure
+    volumes:
+      - users_db_volume:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=ft_transcendence_db
+      - POSTGRES_USER=fguirama
+      - POSTGRES_PASSWORD=123456
+    networks:
+      - users_nw
 
-
-  # users:
-  #   image: users
-  #   depends_on:
-  #     - users_db
-  #   build:
-  #     context: requirements/users
-  #     dockerfile: Dockerfile
-  #   restart: on-failure
-  #   # ports:
-  #   #   - "8000:8000"
-  #   #   - "443:443"
-  #   networks:
-  #     - "transcendence_nw"
-  #     - "users_nw"
-  #   volumes:
-  #     - site-volume:/site
-  # users_db:
-  #   image: postgres:14
-  #   restart: on_failure
-  #   ports:
-  #     - "5432:300"
-  #   volumes:
-  #     - user_db_volume:/var/lib/postgresql/data
-  #   environment:
-  #     - POSTGRES_DB=ft_transcendence_db
-  #     - POSTGRES_USER=fguirama
-  #     - POSTGRES_PASSWORD=123456
-  #   networks:
-  #     - authentication_db_nw
-
-  # game:
-  #   image: game
-  #   depends_on:
-  #     - game_db
-  #   build:
-  #     context: requirements/game
-  #     dockerfile: Dockerfile
-  #   restart: on-failure
-  #   # ports:
-  #   #   - "8000:8000"
-  #   #   - "443:443"
-  #   networks:
-  #     - "transcendence_nw"
-  #     - "game_nw"
-  #   volumes:
-  #     - site-volume:/site
-  # game_db:
-  #   image: postgres:14
-  #   restart: always
-  #   ports:
-  #     - "5432:300"
-  #   volumes:
-  #     - game_db_volume:/var/lib/postgresql/data
-  #   environment:
-  #     - POSTGRES_DB=ft_transcendence_db
-  #     - POSTGRES_USER=fguirama
-  #     - POSTGRES_PASSWORD=123456
-  #   networks:
-  #     - game_nw
+  game:
+    # image: game
+    depends_on:
+      - game_db
+    build: requirements/game
+    restart: on-failure
+    ports:
+      - "8004:8000"
+    networks:
+      - "transcendence_nw"
+      - "game_nw"
+    volumes:
+      - game_volume:/code
+  game_db:
+    image: postgres:14
+    restart: always
+    volumes:
+      - game_db_volume:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=ft_transcendence_db
+      - POSTGRES_USER=fguirama
+      - POSTGRES_PASSWORD=123456
+    networks:
+      - game_nw
 
   matchmaking:
-    image: matchmaking
-    build:
-      context: requirements/matchmaking
-      dockerfile: Dockerfile
+    # image: matchmaking
+    build: requirements/matchmaking
     restart: on-failure
     ports:
       - "8003:8000"
@@ -83,12 +69,10 @@ services:
       - matchmaking_volume:/code
 
   chat:
-    image: chat
+    # image: chat
     depends_on:
       - chat_db
-    build:
-      context: requirements/chat
-      dockerfile: Dockerfile
+    build: requirements/chat
     restart: on-failure
     ports:
       - "8002:8000"
@@ -110,12 +94,10 @@ services:
       - chat_nw
 
   authentication:
-    image: authentication
+    # image: authentication
     depends_on:
       - authentication_db
-    build:
-      context: requirements/authentication
-      dockerfile: Dockerfile
+    build: requirements/authentication
     restart: always
     volumes:
       - authentication_volume:/code
@@ -137,11 +119,9 @@ services:
       - auth_nw
 
   statistics:
-    image: requirements/algo-sats
+    # image: requirements/algo-sats
     restart: always
-    build:
-      context: requirements/algo-stats
-      dockerfile: Dockerfile
+    build: requirements/algo-stats
     ports:
       - "8001:8000"
     volumes:
@@ -166,7 +146,7 @@ networks:
     name: transcendence_global_network
     driver: bridge
   auth_nw:
-    name: authentication_db_network
+    name: authentication_network
     driver: bridge
   statistics_nw:
     name: statistics_network
@@ -196,6 +176,13 @@ volumes:
       type: none
       o: bind
       device: requirements/frontend/Caddyfile
+  users_volume:
+    name: users-volume
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: requirements/users/users
   users_db_volume:
     name: database-volume
     driver: local
@@ -203,6 +190,13 @@ volumes:
       type: none
       o: bind
       device: $HOME/transcendence/users
+  game_volume:
+    name: game-volume
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: requirements/game/game
   game_db_volume:
     name: database-volume
     driver: local
