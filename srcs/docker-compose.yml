@@ -177,42 +177,42 @@ volumes:
       o: bind
       device: requirements/frontend/Caddyfile
   users_volume:
-    name: users-volume
+    name: users_volume
     driver: local
     driver_opts:
       type: none
       o: bind
       device: requirements/users/users
   users_db_volume:
-    name: database-volume
+    name: users_db_volume
     driver: local
     driver_opts:
       type: none
       o: bind
       device: $HOME/transcendence/users
   game_volume:
-    name: game-volume
+    name: game_volume
     driver: local
     driver_opts:
       type: none
       o: bind
       device: requirements/game/game
   game_db_volume:
-    name: database-volume
+    name: game_db_volume
     driver: local
     driver_opts:
       type: none
       o: bind
       device: $HOME/transcendence/game
   chat_db_volume:
-    name: database-volume
+    name: chat_db_volume
     driver: local
     driver_opts:
       type: none
       o: bind
       device: $HOME/transcendence/chat
   chat_volume:
-    name: chat-volume
+    name: chat_volume
     driver: local
     driver_opts:
       type: none
@@ -233,21 +233,21 @@ volumes:
       o: bind
       device: requirements/authentication/auth
   statistics_db_volume:
-    name: stat_db-volume
+    name: stat_db_volume
     driver: local
     driver_opts:
       type: none
       o: bind
       device: $HOME/transcendence/stats
   statistics_volume:
-    name: stat-volume
+    name: stat_volume
     driver: local
     driver_opts:
       type: none
       o: bind
       device: requirements/algo-stats/algo_stats
   matchmaking_volume:
-    name: stat-volume
+    name: matchmaking_volume
     driver: local
     driver_opts:
       type: none
