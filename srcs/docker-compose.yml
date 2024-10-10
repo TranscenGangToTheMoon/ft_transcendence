@@ -90,12 +90,9 @@ services:
     networks:
       - chat-nw
 
-  authentication:
-    # image: authentication
+  auth:
     depends_on:
-      - authentication_db
-    build: requirements/authentication
-      - auth_db
+      - auth-db
     build:
       context: requirements/auth
       dockerfile: Dockerfile
@@ -105,9 +102,9 @@ services:
     ports:
       - "8000:8000"
     networks:
-      - transcendence_nw
-      - auth_nw
-  authentication_db:
+      - transcendence-nw
+      - auth-nw
+  auth-db:
     image: postgres:14
     restart: always
     volumes:
