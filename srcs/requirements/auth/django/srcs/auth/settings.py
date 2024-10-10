@@ -25,7 +25,10 @@ SECRET_KEY = 'django-insecure-r43o9es_-^2#(!q)6w7@x0+ae*j!2+!(4y^94@paa6sn!eg=jn
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'auth',
+    'localhost',
+]
 
 
 # Application definition
@@ -39,14 +42,15 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework_simplejwt',
+    'corsheaders',
     'guest',
-    'register',
     'verify',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -55,6 +59,11 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'auth.urls'
+CORS_URLS_REGEX = r"^/api/.*"
+CORS_ALLOWED_ORIGINS = [ # todo useless if in production
+    'http://localhost:8111',
+    'https://localhost:8111',
+]
 
 TEMPLATES = [
     {
@@ -84,7 +93,7 @@ DATABASES = {
         'NAME': 'auth_db',
         'USER': 'fguirama',
         'PASSWORD': '123456',
-        'HOST': 'auth_db',
+        'HOST': 'auth-db',
         'PORT': '5432',
     }
 }
