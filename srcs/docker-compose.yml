@@ -19,8 +19,8 @@ services:
   auth_db:
     image: postgres:14
     restart: always
-    volumes:
-      - "auth-db-volume:/var/lib/postgresql/data/"
+    # volumes:
+    #   - "auth-db-volume:/var/lib/postgresql/data/"
     environment:
       - POSTGRES_DB=auth_db
       - POSTGRES_USER=fguirama # todo : use .env
@@ -43,9 +43,9 @@ volumes:
       type: 'none'
       o: 'bind'
       device: './requirements/auth/django/'
-  auth-db-volume:
-    driver: local
-    driver_opts:
-      type: 'none'
-      o: 'bind'
-      device: './requirements/auth_db/'
+  # auth-db-volume:
+  #   driver: local
+  #   driver_opts:
+  #     type: 'none'
+  #     o: 'bind'
+  #     device: './requirements/auth_db/'

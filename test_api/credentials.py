@@ -58,4 +58,4 @@ def verify_token(token=None):
     return r.json()
 
 
-print(verify_token())
+print(register())

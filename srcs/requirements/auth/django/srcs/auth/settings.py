@@ -42,9 +42,11 @@ INSTALLED_APPS = [
     'guest',
     'register',
     'verify',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -52,6 +54,11 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
+
+CORS_URLS_REGEX = r"^/api/auth/.*"
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:8111',
 ]
 
 ROOT_URLCONF = 'auth.urls'
@@ -84,7 +91,7 @@ DATABASES = {
         'NAME': 'auth_db',
         'USER': 'fguirama',
         'PASSWORD': '123456',
-        'HOST': '172.18.0.2',
+        'HOST': 'auth_db',
         'PORT': '5432',
     }
 }
