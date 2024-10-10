@@ -7,6 +7,16 @@ SRCS_D		:=	srcs
 
 SECRETS_D	:=	secrets/
 
+VOLS		:=	\
+				algo-stats-db\
+				authentication-db\
+				chat-db\
+				game-db
+
+VOLS_PATH	:=	$(HOME)/transcendence/
+
+VOLUMES		:=	$(addprefix $(VOLS_PATH),$(VOLS))
+
 ########################################################################################################################
 #                                                        FLAGS                                                         #
 ########################################################################################################################
@@ -32,10 +42,15 @@ RESET		:=	\001\033[0m\002
 
 all			:	banner $(NAME)
 
-$(NAME)		:	#secrets
+$(NAME)		:	volumes #secrets
 			$(COMPOSE) $(FLAGS) up --build
 
-build		:	
+volumes		:	$(VOLUMES)
+
+$(VOLUMES)	:
+			mkdir -p $@
+
+build		:
 			$(COMPOSE) $(FLAGS) $@
 
 up			:	build
@@ -56,7 +71,7 @@ banner		:
 			@echo -e '$(RESET)'
 
 clean		:
-			$(COMPOSE) $(FLAGS) down 
+			$(COMPOSE) $(FLAGS) down
 
 secrets		:
 			mkdir $@
@@ -89,7 +104,7 @@ volume-rm	:
 network-ls	:
 			docker network ls
 network-rm	:
-			docker network rm `docker network ls -qa` 
+			docker network rm `docker network ls -qa`
 
 prune		:
 			docker system prune -af
