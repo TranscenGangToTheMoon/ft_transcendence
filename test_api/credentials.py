@@ -16,21 +16,11 @@ def auth_guest():
     return r.json()
 
 
-def register_guest():
+def register():
     access_token = auth_guest()['access']
     r = requests.post(
-        base_enpoint + 'guest/register/',
-        headers={'Content-Type': 'application/json', 'Authorization': 'Bearer ' + access_token},
-        data=json.dumps({'username': ipt_username(), 'password': getpass()})
-    )
-    print(r.status_code, r.json())
-    return r.json()
-
-
-def register():
-    r = requests.post(
         base_enpoint + 'register/',
-        headers={'Content-Type': 'application/json'},
+        headers={'Content-Type': 'application/json', 'Authorization': 'Bearer ' + access_token},
         data=json.dumps({'username': ipt_username(), 'password': getpass()})
     )
     print(r.status_code, r.json())
@@ -58,4 +48,4 @@ def verify_token(token=None):
     return r.json()
 
 
-print(verify_token())
+print(verify_token(register()))
