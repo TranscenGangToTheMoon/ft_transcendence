@@ -1,6 +1,6 @@
 https://localhost/
 https://localhost/login
-https://localhost/user
+https://localhost/user		||http://localhost:8000
 https://localhost/player
 https://localhost/game
 https://localhost/custom

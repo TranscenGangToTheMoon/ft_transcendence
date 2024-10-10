@@ -13,9 +13,9 @@ VOLS		:=	\
 				chat-db\
 				game-db
 
-VOLS_TRGT	:=	$(HOME)/transcendence/
+VOLS_PATH	:=	$(HOME)/transcendence/
 
-VOLUMES		:=	$(addprefix $(VOLS_TRGT),$(VOLS))
+VOLUMES		:=	$(addprefix $(VOLS_PATH),$(VOLS))
 
 ########################################################################################################################
 #                                                        FLAGS                                                         #
@@ -42,15 +42,19 @@ RESET		:=	\001\033[0m\002
 
 all			:	banner $(NAME)
 
-$(NAME)		:	#secrets
+$(NAME)		:	db-dirs #secrets
 			$(COMPOSE) $(FLAGS) up --build
 
+<<<<<<< Updated upstream
 volumes		:	$(VOLUMES)
 
 $(VOLUMES)	:
 			mkdir -p $@
 
-build		:	
+build		:
+=======
+build		:
+>>>>>>> Stashed changes
 			$(COMPOSE) $(FLAGS) $@
 
 up			:	build
@@ -71,7 +75,7 @@ banner		:
 			@echo -e '$(RESET)'
 
 clean		:
-			$(COMPOSE) $(FLAGS) down 
+			$(COMPOSE) $(FLAGS) down
 
 secrets		:
 			mkdir $@
@@ -104,10 +108,13 @@ volume-rm	:
 network-ls	:
 			docker network ls
 network-rm	:
-			docker network rm `docker network ls -qa` 
+			docker network rm `docker network ls -qa`
 
 prune		:
 			docker system prune -af
+
+db-dirs		:
+			mkdir -p $(DB_DIRS)
 
 re			:	fclean all
 

@@ -69,65 +69,45 @@ services:
   #   networks:
   #     - game_nw
 
-  # matchmaking:
-  #   image: matchmaking
-  #   depends_on:
-  #     - matchmaking_db
-  #   build:
-  #     context: requirements/matchmaking
-  #     dockerfile: Dockerfile
-  #   restart: on-failure
-  #   # ports:
-  #   #   - "8000:8000"
-  #   #   - "443:443"
-  #   networks:
-  #     - "transcendence_nw"
-  #     - "matchmaking_nw"
-  #   volumes:
-  #     - site-volume:/site
-  # matchmaking_db:
-  #   image: postgres:14
-  #   restart: always
-  #   ports:
-  #     - "5432:300"
-  #   volumes:
-  #     - maatchmaking_db_volume:/var/lib/postgresql/data
-  #   environment:
-  #     - POSTGRES_DB=ft_transcendence_db
-  #     - POSTGRES_USER=fguirama
-  #     - POSTGRES_PASSWORD=123456
-  #   networks:
-  #     - maatchmaking_nw
+  matchmaking:
+    image: matchmaking
+    build:
+      context: requirements/matchmaking
+      dockerfile: Dockerfile
+    restart: on-failure
+    ports:
+      - "8003:8000"
+    networks:
+      - "transcendence_nw"
+    volumes:
+      - matchmaking_volume:/code
 
-  # chat:
-  #   image: chat
-  #   depends_on:
-  #     - chat_db
-  #   build:
-  #     context: requirements/chat
-  #     dockerfile: Dockerfile
-  #   restart: on-failure
-  #   # ports:
-  #   #   - "8000:8000"
-  #   #   - "443:443"
-  #   networks:
-  #     - "transcendence_nw"
-  #     - "chat_nw"
-  #   volumes:
-  #     - site-volume:/site
-  # chat_db:
-  #   image: postgres:14
-  #   restart: always
-  #   ports:
-  #     - "5432:300"
-  #   volumes:
-  #     - char_db_volume:/var/lib/postgresql/data
-  #   environment:
-  #     - POSTGRES_DB=ft_transcendence_db
-  #     - POSTGRES_USER=fguirama
-  #     - POSTGRES_PASSWORD=123456
-  #   networks:
-  #     - chat_nw
+  chat:
+    image: chat
+    depends_on:
+      - chat_db
+    build:
+      context: requirements/chat
+      dockerfile: Dockerfile
+    restart: on-failure
+    ports:
+      - "8002:8000"
+    networks:
+      - "transcendence_nw"
+      - "chat_nw"
+    volumes:
+      - chat_volume:/code
+  chat_db:
+    image: postgres:14
+    restart: always
+    volumes:
+      - chat_db_volume:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=ft_transcendence_db
+      - POSTGRES_USER=fguirama
+      - POSTGRES_PASSWORD=123456
+    networks:
+      - chat_nw
 
   authentication:
     image: authentication
@@ -143,7 +123,7 @@ services:
       - "8000:8000"
     networks:
       - transcendence_nw
-      - authentication_db_nw
+      - auth_nw
   authentication_db:
     image: postgres:14
     restart: always
@@ -154,7 +134,7 @@ services:
       - POSTGRES_USER=fguirama
       - POSTGRES_PASSWORD=123456
     networks:
-      - authentication_db_nw
+      - auth_nw
 
   statistics:
     image: requirements/algo-sats
@@ -185,20 +165,20 @@ networks:
   transcendence_nw:
     name: transcendence_global_network
     driver: bridge
-  authentication_db_nw:
+  auth_nw:
     name: authentication_db_network
     driver: bridge
   statistics_nw:
-    name: match_history_network
+    name: statistics_network
     driver: bridge
   game_nw:
-    name: match_history_network
+    name: game_network
     driver: bridge
   chat_nw:
-    name: match_history_network
+    name: chat_network
     driver: bridge
   users_nw:
-    name: match_history_network
+    name: users_network
     driver: bridge
 
 volumes:
@@ -222,42 +202,49 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: requirements/users-db
+      device: $HOME/transcendence/users
   game_db_volume:
     name: database-volume
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: requirements/game-db
+      device: $HOME/transcendence/game
   chat_db_volume:
     name: database-volume
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: requirements/chat-db
+      device: $HOME/transcendence/chat
+  chat_volume:
+    name: chat-volume
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: requirements/chat/chat
   authentication_db_volume:
     name: auth_db_volume
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: requirements/authentication-db
+      device: $HOME/transcendence/auth
   authentication_volume:
     name: auth_volume
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: ./requirements/authentication/auth
+      device: requirements/authentication/auth
   statistics_db_volume:
     name: stat_db-volume
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: requirements/algo-stats-db
+      device: $HOME/transcendence/stats
   statistics_volume:
     name: stat-volume
     driver: local
@@ -265,3 +252,10 @@ volumes:
       type: none
       o: bind
       device: requirements/algo-stats/algo_stats
+  matchmaking_volume:
+    name: stat-volume
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: requirements/matchmaking/matchmaking
