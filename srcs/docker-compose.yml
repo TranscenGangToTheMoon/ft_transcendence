@@ -1,4 +1,14 @@
 services:
+  frontend:
+    build: ./requirements/frontend
+    ports:
+      - "4443:443"
+    volumes:
+      - frontend_volume:/var/www/html
+      - ./requirements/frontend/Caddyfile:/etc/caddy/Caddyfile
+
+
+
   # users:
   #   image: users
   #   depends_on:
@@ -192,6 +202,20 @@ networks:
     driver: bridge
 
 volumes:
+  frontend_volume:
+    name: frontend_volume
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: requirements/frontend/static/
+  caddyfile_volume:
+    name: caddyfile_volume
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: requirements/frontend/Caddyfile
   users_db_volume:
     name: database-volume
     driver: local

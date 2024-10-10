@@ -7,6 +7,16 @@ SRCS_D		:=	srcs
 
 SECRETS_D	:=	secrets/
 
+VOLS		:=	\
+				algo-stats-db\
+				authentication-db\
+				chat-db\
+				game-db
+
+VOLS_TRGT	:=	$(HOME)/transcendence/
+
+VOLUMES		:=	$(addprefix $(VOLS_TRGT),$(VOLS))
+
 ########################################################################################################################
 #                                                        FLAGS                                                         #
 ########################################################################################################################
@@ -34,6 +44,11 @@ all			:	banner $(NAME)
 
 $(NAME)		:	#secrets
 			$(COMPOSE) $(FLAGS) up --build
+
+volumes		:	$(VOLUMES)
+
+$(VOLUMES)	:
+			mkdir -p $@
 
 build		:	
 			$(COMPOSE) $(FLAGS) $@
