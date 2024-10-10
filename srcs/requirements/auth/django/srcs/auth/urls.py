@@ -1,9 +1,10 @@
 from django.contrib import admin
 from django.urls import path
-from rest_framework_simplejwt.views import token_obtain_pair, token_refresh, token_verify
+from rest_framework_simplejwt.views import token_obtain_pair, token_refresh
 
 from guest.views import guest_token, guest_register
 from register.views import register
+from verify.views import token_verify
 
 urlpatterns = [
     path('api/auth/guest/', guest_token, name="api-guest-token"),

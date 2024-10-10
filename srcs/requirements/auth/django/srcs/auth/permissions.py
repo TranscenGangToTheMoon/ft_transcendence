@@ -1,6 +1,6 @@
 from rest_framework import permissions
 
-from auth.static import group_guests
+from guest.group import group_guests
 
 
 class IsNotAuthenticated(permissions.BasePermission):

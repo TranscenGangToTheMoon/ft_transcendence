@@ -1,17 +1,12 @@
 from random import choices
 from string import digits
 
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import User
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from auth.static import group_guests
 from auth.validators import validate_username
-
-try:
-    guest_group = Group.objects.get(name=group_guests)
-except Group.DoesNotExist:
-    guest_group = None
+from guest.group import get_group_guest
 
 
 class GuestTokenSerializer(serializers.ModelSerializer):
@@ -25,8 +20,7 @@ class GuestTokenSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         guest_username = 'Guest' + "".join(choices(digits, k=4))
         user = User.objects.create_user(username=guest_username)
-        if guest_group is None:
-            raise serializers.ValidationError({'group': f'group \'{group_guests}\' not found'})
+        guest_group = get_group_guest()
         user.groups.add(guest_group)
         refresh_token = RefreshToken.for_user(user)
         return {'refresh': str(refresh_token), 'access': str(refresh_token.access_token),}
@@ -40,7 +34,6 @@ class GuestRegisterSerializer(serializers.ModelSerializer):
         fields = ['username', 'password']
 
     def update(self, instance, validated_data):
-        if guest_group is None:
-            raise serializers.ValidationError({'group': f'group \'{group_guests}\' not found'})
+        guest_group = get_group_guest()
         instance.groups.remove(guest_group)
         return super().update(instance, validated_data)
