@@ -6,6 +6,6 @@ EXPOSE      8000
 WORKDIR     /code
 
 COPY        tools/install_django.sh /
-RUN         chmod u+x /start_django.sh
+RUN         chmod u+x /install_django.sh
 
-ENTRYPOINT  ["/start_django.sh"]
+ENTRYPOINT  ["/install_django.sh"]
