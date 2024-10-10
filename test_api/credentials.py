@@ -45,3 +45,16 @@ def get_token():
     )
     print(r.status_code, r.json())
     return r.json()
+
+
+def verify_token():
+    token = get_token()
+    r = requests.get(
+        base_enpoint + 'token/verify/',
+        headers={'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token['access']}
+    )
+    print(r.status_code, r.json())
+    return r.json()
+
+
+print(verify_token())
