@@ -1,199 +1,53 @@
 services:
-  # users:
-  #   image: users
-  #   depends_on:
-  #     - users_db
-  #   build:
-  #     context: requirements/users
-  #     dockerfile: Dockerfile
-  #   restart: on-failure
-  #   # ports:
-  #   #   - "8000:8000"
-  #   #   - "443:443"
-  #   networks:
-  #     - "transcendence_nw"
-  #     - "users_nw"
-  #   volumes:
-  #     - site-volume:/site
-  # users_db:
-  #   image: postgres:14
-  #   restart: on_failure
-  #   ports:
-  #     - "5432:300"
-  #   volumes:
-  #     - user_db_volume:/var/lib/postgresql/data
-  #   environment:
-  #     - POSTGRES_DB=ft_transcendence_db
-  #     - POSTGRES_USER=fguirama
-  #     - POSTGRES_PASSWORD=123456
-  #   networks:
-  #     - authentication_db_nw
 
-  # game:
-  #   image: game
-  #   depends_on:
-  #     - game_db
-  #   build:
-  #     context: requirements/game
-  #     dockerfile: Dockerfile
-  #   restart: on-failure
-  #   # ports:
-  #   #   - "8000:8000"
-  #   #   - "443:443"
-  #   networks:
-  #     - "transcendence_nw"
-  #     - "game_nw"
-  #   volumes:
-  #     - site-volume:/site
-  # game_db:
-  #   image: postgres:14
-  #   restart: always
-  #   ports:
-  #     - "5432:300"
-  #   volumes:
-  #     - game_db_volume:/var/lib/postgresql/data
-  #   environment:
-  #     - POSTGRES_DB=ft_transcendence_db
-  #     - POSTGRES_USER=fguirama
-  #     - POSTGRES_PASSWORD=123456
-  #   networks:
-  #     - game_nw
-
-  # matchmaking:
-  #   image: matchmaking
-  #   depends_on:
-  #     - matchmaking_db
-  #   build:
-  #     context: requirements/matchmaking
-  #     dockerfile: Dockerfile
-  #   restart: on-failure
-  #   # ports:
-  #   #   - "8000:8000"
-  #   #   - "443:443"
-  #   networks:
-  #     - "transcendence_nw"
-  #     - "matchmaking_nw"
-  #   volumes:
-  #     - site-volume:/site
-  # matchmaking_db:
-  #   image: postgres:14
-  #   restart: always
-  #   ports:
-  #     - "5432:300"
-  #   volumes:
-  #     - maatchmaking_db_volume:/var/lib/postgresql/data
-  #   environment:
-  #     - POSTGRES_DB=ft_transcendence_db
-  #     - POSTGRES_USER=fguirama
-  #     - POSTGRES_PASSWORD=123456
-  #   networks:
-  #     - maatchmaking_nw
-
-  # chat:
-  #   image: chat
-  #   depends_on:
-  #     - chat_db
-  #   build:
-  #     context: requirements/chat
-  #     dockerfile: Dockerfile
-  #   restart: on-failure
-  #   # ports:
-  #   #   - "8000:8000"
-  #   #   - "443:443"
-  #   networks:
-  #     - "transcendence_nw"
-  #     - "chat_nw"
-  #   volumes:
-  #     - site-volume:/site
-  # chat_db:
-  #   image: postgres:14
-  #   restart: always
-  #   ports:
-  #     - "5432:300"
-  #   volumes:
-  #     - char_db_volume:/var/lib/postgresql/data
-  #   environment:
-  #     - POSTGRES_DB=ft_transcendence_db
-  #     - POSTGRES_USER=fguirama
-  #     - POSTGRES_PASSWORD=123456
-  #   networks:
-  #     - chat_nw
-
-  authentication:
-    image: authentication
+  auth:
+    container_name: transcendence-auth
     depends_on:
-      - authentication_db
+      - auth_db
     build:
-      context: requirements/authentication
+      context: requirements/auth
       dockerfile: Dockerfile
     restart: always
     volumes:
-      - authentication_volume:/code
+      - auth-volume:/code
     ports:
       - "8000:8000"
     networks:
-      - transcendence_nw
-      - authentication_db_nw
-  authentication_db:
+      - transcendence-network
+      - auth-network
+
+  auth_db:
     image: postgres:14
     restart: always
     volumes:
-      - authentication_db_volume:/var/lib/postgresql/data
+      - "auth-db-volume:/var/lib/postgresql/data/"
     environment:
-      - POSTGRES_DB=ft_transcendence_db
-      - POSTGRES_USER=fguirama
-      - POSTGRES_PASSWORD=123456
+      - POSTGRES_DB=auth_db
+      - POSTGRES_USER=fguirama # todo : use .env
+      - POSTGRES_PASSWORD=123456 # todo : use .env
+    ports:
+      - "5432"
     networks:
-      - authentication_db_nw
-
-  # statistics:
-  #   image: requirements/statistics
-  #   restart: always
-  #   build:
-  #     context: requirements/statistics
-  #     dockerfile: Dockerfile
-  #   ports:
-  #     - "5432:300"
-  #   volumes:
-  #     - auth_db
-  #   networks:
-  #     - statistics_nw
-  #     - transcendence_nw
-  # statistics_db:
-  #   image: postgres:14
-  #   restart: always
-  #   ports:
-  #     - "5432:300"
-  #   volumes:
-  #     - statistics_db_volume:/var/lib/postgresql/data
-  #   environment:
-  #     - POSTGRES_DB=ft_transcendence_db
-  #     - POSTGRES_USER=fguirama
-  #     - POSTGRES_PASSWORD=123456
-  #   networks:
-  #     - statistics_db_nw
+      - auth-network
 
 networks:
-  transcendence:
+  transcendence-network:
     name: transcendence-network
+    driver: bridge
+  auth-network:
+    name: auth-network
     driver: bridge
 
 volumes:
-  caddy_data:
-    external: true
-  caddy_config:
-
-#  database-volume:
-#    name: database-volume
-#    driver: local
-#    driver_opts:
-#      type: none
-#      o: bind
-#      device: $HOME/data/database
-#  wordpress-volume:
-#    name: wordpress-volume
-#    driver: local
-#    driver_opts:
-#      type: none
-#      o: bind
-#      device: $HOME/data/wordpress
+  auth-volume:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: './requirements/auth/django/'
+  auth-db-volume:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: './requirements/auth_db/'
