@@ -9,9 +9,10 @@ SECRETS_D	:=	secrets/
 
 VOLS		:=	\
 				algo-stats-db\
-				authentication-db\
+				auth-db\
 				chat-db\
-				game-db
+				game-db\
+				users-db
 
 VOLS_PATH	:=	$(HOME)/transcendence/
 
@@ -43,7 +44,7 @@ RESET		:=	\001\033[0m\002
 all			:	banner $(NAME)
 
 $(NAME)		:	volumes #secrets
-			$(COMPOSE) $(FLAGS) up --build
+			$(COMPOSE) $(FLAGS) up --build users
 
 volumes		:	$(VOLUMES)
 
