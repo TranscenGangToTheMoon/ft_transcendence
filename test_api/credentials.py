@@ -47,8 +47,9 @@ def get_token():
     return r.json()
 
 
-def verify_token():
-    token = get_token()
+def verify_token(token=None):
+    if token is None:
+        token = get_token()
     r = requests.get(
         base_enpoint + 'token/verify/',
         headers={'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token['access']}
