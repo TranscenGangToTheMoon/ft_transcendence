@@ -6,7 +6,7 @@ CONTAINER_PATH		=	/var/lib/postgresql/data
 
 POSTGRES_USER		=	fguirama
 POSTGRES_PASSWORD	=	123456
-POSTGRES_DB			=	ft_transcendence_db
+POSTGRES_DB			=	auth_db
 PORT				=	5432
 PORTS				=	$(PORT):$(PORT)
 VOLUMES				=	$(HOST_PATH):$(CONTAINER_PATH)
