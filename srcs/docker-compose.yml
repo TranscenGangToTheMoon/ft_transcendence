@@ -146,32 +146,30 @@ services:
     networks:
       - authentication_db_nw
 
-  # statistics:
-  #   image: requirements/statistics
-  #   restart: always
-  #   build:
-  #     context: requirements/statistics
-  #     dockerfile: Dockerfile
-  #   ports:
-  #     - "5432:300"
-  #   volumes:
-  #     - auth_db
-  #   networks:
-  #     - statistics_nw
-  #     - transcendence_nw
-  # statistics_db:
-  #   image: postgres:14
-  #   restart: always
-  #   ports:
-  #     - "5432:300"
-  #   volumes:
-  #     - statistics_db_volume:/var/lib/postgresql/data
-  #   environment:
-  #     - POSTGRES_DB=ft_transcendence_db
-  #     - POSTGRES_USER=fguirama
-  #     - POSTGRES_PASSWORD=123456
-  #   networks:
-  #     - statistics_db_nw
+  statistics:
+    image: requirements/algo-sats
+    restart: always
+    build:
+      context: requirements/algo-stats
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8000"
+    volumes:
+      - statistics_volume:/code
+    networks:
+      - statistics_nw
+      - transcendence_nw
+  statistics_db:
+    image: postgres:14
+    restart: always
+    volumes:
+      - statistics_db_volume:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=ft_transcendence_db
+      - POSTGRES_USER=fguirama
+      - POSTGRES_PASSWORD=123456
+    networks:
+      - statistics_nw
 
 networks:
   transcendence_nw:
@@ -214,9 +212,9 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: requirements/char-db
+      device: requirements/chat-db
   authentication_db_volume:
-    name: database-volume
+    name: auth_db_volume
     driver: local
     driver_opts:
       type: none
@@ -230,9 +228,16 @@ volumes:
       o: bind
       device: ./requirements/authentication/auth
   statistics_db_volume:
-    name: database-volume
+    name: stat_db-volume
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: requirements/statistics-db
+      device: requirements/algo-stats-db
+  statistics_volume:
+    name: stat-volume
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: requirements/algo-stats/algo_stats
