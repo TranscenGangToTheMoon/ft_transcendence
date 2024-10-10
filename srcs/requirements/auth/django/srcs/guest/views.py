@@ -20,4 +20,4 @@ class GuestRegisterView(generics.UpdateAPIView):
 
 
 guest_token = GuestTokenView.as_view()
-guest_register = GuestRegisterView.as_view()
+register = GuestRegisterView.as_view()
