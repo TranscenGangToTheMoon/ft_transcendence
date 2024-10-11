@@ -1,5 +1,5 @@
 services:
-#####Django Projetcs
+#####Django Projects
   algo-stats:
     build: ./requirements/algo-stats
     restart: always
@@ -228,6 +228,7 @@ volumes:
       o: bind
       device: requirements/users/django
 
+#####Database Volumes
   algo-stats-db-volume:
     name: algo-stats-db-volume
     driver: local
@@ -236,7 +237,6 @@ volumes:
       o: bind
       device: $HOME/transcendence/algo-stats-db
 
-#####Database Volumes
   authentication-db-volume:
     name: authentication-db-volume
     driver: local
