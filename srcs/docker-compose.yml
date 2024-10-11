@@ -1,255 +1,270 @@
 services:
-  frontend:
-    image: caddy:2.8.4
+#####Django Projetcs
+  algo-stats:
+    build: ./requirements/algo-stats
+    restart: always
     ports:
-      - "4443:443"
+      - "8001:8000"
     volumes:
-      - frontend_volume:/var/www/html
-      - ./requirements/frontend/Caddyfile:/etc/caddy/Caddyfile
+      - algo-stats-volume:/code
+    networks:
+      - algo-stats-network
+      - transcendence-network
 
-  users:
-    # image: users
+  authentication:
+    build: ./requirements/authentication
     depends_on:
-      - users_db
-    build: requirements/users
-    restart: on-failure
-    ports:
-      - "8005:8000"
-    networks:
-      - "transcendence_nw"
-      - "users_nw"
-    volumes:
-      - users_volume:/code
-  users_db:
-    image: postgres:14
-    restart: on-failure
-    volumes:
-      - users_db_volume:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_DB=ft_transcendence_db
-      - POSTGRES_USER=fguirama
-      - POSTGRES_PASSWORD=123456
-    networks:
-      - users_nw
-
-  game:
-    # image: game
-    depends_on:
-      - game_db
-    build: requirements/game
-    restart: on-failure
-    ports:
-      - "8004:8000"
-    networks:
-      - "transcendence_nw"
-      - "game_nw"
-    volumes:
-      - game_volume:/code
-  game_db:
-    image: postgres:14
+      - authentication-db
     restart: always
     volumes:
-      - game_db_volume:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_DB=ft_transcendence_db
-      - POSTGRES_USER=fguirama
-      - POSTGRES_PASSWORD=123456
-    networks:
-      - game_nw
-
-  matchmaking:
-    # image: matchmaking
-    build: requirements/matchmaking
-    restart: on-failure
+      - authentication-volume:/code
     ports:
-      - "8003:8000"
+      - "8000:8000"
     networks:
-      - "transcendence_nw"
-    volumes:
-      - matchmaking_volume:/code
+      - transcendence-network
+      - authentication-network
 
   chat:
-    # image: chat
+    build: ./requirements/chat
     depends_on:
-      - chat_db
-    build: requirements/chat
+      - chat-db
     restart: on-failure
     ports:
       - "8002:8000"
     networks:
-      - "transcendence_nw"
-      - "chat_nw"
+      - "transcendence-network"
+      - "chat-network"
     volumes:
-      - chat_volume:/code
-  chat_db:
-    image: postgres:14
-    restart: always
-    volumes:
-      - chat_db_volume:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_DB=ft_transcendence_db
-      - POSTGRES_USER=fguirama
-      - POSTGRES_PASSWORD=123456
-    networks:
-      - chat_nw
+      - chat-volume:/code
 
-  authentication:
-    # image: authentication
+  frontend:
+    build: ./requirements/frontend
+    ports:
+      - "4443:443"
+    volumes:
+      - frontend-volume:/var/www/html
+      - ./requirements/frontend/Caddyfile:/etc/caddy/Caddyfile ###Do copy when project is finished HUGE SECURITY FAIL
+
+  game:
+    build: ./requirements/game
     depends_on:
-      - authentication_db
-    build: requirements/authentication
-    restart: always
-    volumes:
-      - authentication_volume:/code
+      - game-db
+    restart: on-failure
     ports:
-      - "8000:8000"
+      - "8004:8000"
     networks:
-      - transcendence_nw
-      - auth_nw
-  authentication_db:
-    image: postgres:14
-    restart: always
+      - "transcendence-network"
+      - "game-network"
     volumes:
-      - authentication_db_volume:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_DB=ft_transcendence_db
-      - POSTGRES_USER=fguirama
-      - POSTGRES_PASSWORD=123456
-    networks:
-      - auth_nw
+      - game-volume:/code
 
-  statistics:
-    # image: requirements/algo-sats
-    restart: always
-    build: requirements/algo-stats
+  matchmaking:
+    build: ./requirements/matchmaking
+    restart: on-failure
     ports:
-      - "8001:8000"
-    volumes:
-      - statistics_volume:/code
+      - "8003:8000"
     networks:
-      - statistics_nw
-      - transcendence_nw
-  statistics_db:
+      - "transcendence-network"
+    volumes:
+      - matchmaking-volume:/code
+
+
+  users:
+    build: ./requirements/users
+    depends_on:
+      - users-db
+    restart: on-failure
+    ports:
+      - "8005:8000"
+    networks:
+      - "transcendence-network"
+      - "users-network"
+    volumes:
+      - users-volume:/code
+
+######Database
+  algo-stats-db:
     image: postgres:14
     restart: always
     volumes:
-      - statistics_db_volume:/var/lib/postgresql/data
+      - algo-stats-db-volume:/var/lib/postgresql/data
     environment:
       - POSTGRES_DB=ft_transcendence_db
       - POSTGRES_USER=fguirama
       - POSTGRES_PASSWORD=123456
     networks:
-      - statistics_nw
+      - algo-stats-network
+
+  authentication-db:
+    image: postgres:14
+    restart: always
+    volumes:
+      - authentication-db-volume:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=ft_transcendence_db
+      - POSTGRES_USER=fguirama
+      - POSTGRES_PASSWORD=123456
+    networks:
+      - authentication-network
+
+  chat-db:
+    image: postgres:14
+    restart: always
+    volumes:
+      - chat-db-volume:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=ft_transcendence_db
+      - POSTGRES_USER=fguirama
+      - POSTGRES_PASSWORD=123456
+    networks:
+      - chat-network
+
+  game-db:
+    image: postgres:14
+    restart: always
+    volumes:
+      - game-db-volume:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=ft_transcendence_db
+      - POSTGRES_USER=fguirama
+      - POSTGRES_PASSWORD=123456
+    networks:
+      - game-network
+
+  users-db:
+    image: postgres:14
+    restart: on-failure
+    volumes:
+      - users-db-volume:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=ft_transcendence_db
+      - POSTGRES_USER=fguirama
+      - POSTGRES_PASSWORD=123456
+    networks:
+      - users-network
 
 networks:
-  transcendence_nw:
-    name: transcendence_global_network
+#####Global network
+  transcendence-network:
+    name: transcendence-network
     driver: bridge
-  auth_nw:
-    name: authentication_network
+
+#####DB to Django networks
+  algo-stats-network:
+    name: algo-stats-network
     driver: bridge
-  statistics_nw:
-    name: statistics_network
+
+  authentication-network:
+    name: authentication-network
     driver: bridge
-  game_nw:
-    name: game_network
+
+  chat-network:
+    name: chat-network
     driver: bridge
-  chat_nw:
-    name: chat_network
+
+  game-network:
+    name: game-network
     driver: bridge
-  users_nw:
-    name: users_network
+
+  users-network:
+    name: users-network
     driver: bridge
 
 volumes:
-  frontend_volume:
-    name: frontend_volume
+#####Django Volumes
+  algo-stats-volume:
+    name: algo-stats-volume
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: requirements/algo-stats/django
+
+  authentication-volume:
+    name: authentication-volume
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: requirements/authentication/django
+
+  chat-volume:
+    name: chat-volume
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: requirements/chat/django
+
+  frontend-volume:
+    name: frontend-volume
     driver: local
     driver_opts:
       type: none
       o: bind
       device: requirements/frontend/static/
-  caddyfile_volume:
-    name: caddyfile_volume
+
+  game-volume:
+    name: game-volume
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: requirements/frontend/Caddyfile
-  users_volume:
-    name: users_volume
+      device: requirements/game/django
+
+  matchmaking-volume:
+    name: matchmaking-volume
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: requirements/users/users
-  users_db_volume:
-    name: users_db_volume
+      device: requirements/matchmaking/django
+
+  users-volume:
+    name: users-volume
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: $HOME/transcendence/users
-  game_volume:
-    name: game_volume
+      device: requirements/users/django
+
+  algo-stats-db-volume:
+    name: algo-stats-db-volume
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: requirements/game/game
-  game_db_volume:
-    name: game_db_volume
+      device: $HOME/transcendence/algo-stats-db
+
+#####Database Volumes
+  authentication-db-volume:
+    name: authentication-db-volume
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: $HOME/transcendence/game
-  chat_db_volume:
-    name: chat_db_volume
+      device: $HOME/transcendence/authentication-db
+
+  chat-db-volume:
+    name: chat-db-volume
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: $HOME/transcendence/chat
-  chat_volume:
-    name: chat_volume
+      device: $HOME/transcendence/chat-db
+
+  game-db-volume:
+    name: game-db-volume
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: requirements/chat/chat
-  authentication_db_volume:
-    name: auth_db_volume
+      device: $HOME/transcendence/game-db
+
+  users-db-volume:
+    name: users-db-volume
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: $HOME/transcendence/auth
-  authentication_volume:
-    name: auth_volume
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: requirements/authentication/auth
-  statistics_db_volume:
-    name: stat_db_volume
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: $HOME/transcendence/stats
-  statistics_volume:
-    name: stat_volume
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: requirements/algo-stats/algo_stats
-  matchmaking_volume:
-    name: matchmaking_volume
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: requirements/matchmaking/matchmaking
+      device: $HOME/transcendence/users-db
