@@ -3,7 +3,6 @@ from django.db import models
 from profile_pictures.models import ProfilePictures
 
 
-# Create your models here.
 class Users(models.Model):
     id = models.IntegerField(unique=True, primary_key=True)
     username = models.CharField(unique=True, max_length=20)
@@ -26,3 +25,6 @@ class Users(models.Model):
     trophy = models.IntegerField(default=0)
     current_rank = models.IntegerField(default=None, null=True)
     highest_rank = models.IntegerField(default=None, null=True)
+
+    def __str__(self):
+        return f'{self.id} {self.username}'
