@@ -33,5 +33,13 @@ class UsersMeView(generics.RetrieveUpdateDestroyAPIView):
             auth_update(request.headers.get('Authorization'), data)
         return super().update(request, *args, **kwargs)
 
+    def destroy(self, request, *args, **kwargs):
+        result = super().destroy(request, *args, **kwargs)
+        password = self.request.data.get('password')
+        if password is None:
+            raise ValidationError({'password': 'Password confirmation is required to delete the account.'})
+        auth_delete(self.request.headers.get('Authorization'), {'password': password})
+        return result
+
 
 users_me_view = UsersMeView.as_view()
