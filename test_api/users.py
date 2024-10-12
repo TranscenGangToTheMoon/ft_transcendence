@@ -1,16 +1,26 @@
 import json
-
+from pyperclip import copy, paste
 import requests
 
-from test_api.credentials import login
+from test_api.credentials import login, register
 
-token = login()['access']
-# print(token)
+token = input('whats token type -> ')
+if token == 'login':
+    token = login()['access']
+elif token == 'register':
+    token = register()['access']
+else:
+    token = paste()
+copy(token)
 
-r = requests.patch('http://localhost:8005/api/users/me/', headers={
+
+
+password = input('delete password -> ')
+
+r = requests.delete('http://localhost:8005/api/users/me/', headers={
     'Authorization': 'Bearer ' + token,
     'Content-Type': 'application/json'
-}, data=json.dumps({'accept_friend_request': False}))
+}, data=json.dumps({'password': password}))
 
 print(r.status_code)
 print('{')
