@@ -1,6 +1,6 @@
 #!/bin/bash
 
-pip install -r requirements.txt
+pip install --root-user-action -r requirements.txt
 cd ./srcs/
 python manage.py startproject
 python manage.py makemigrations
