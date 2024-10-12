@@ -1,12 +1,23 @@
-from credentials import get_token
+import json
+
 import requests
 
-token = get_token()['token']
+from test_api.credentials import login
 
-r = requests.get('http://localhost:8005/api/users/me/', headers={
+token = login()['access']
+# print(token)
+
+r = requests.patch('http://localhost:8005/api/users/me/', headers={
     'Authorization': 'Bearer ' + token,
     'Content-Type': 'application/json'
-})
+}, data=json.dumps({'accept_friend_request': False}))
 
 print(r.status_code)
-print(r.json())
+print('{')
+for k, v in r.json().items():
+    if type(k) is str:
+        k = '"' + str(k) + '"'
+    if type(v) is str:
+        v = '"' + v + '"'
+    print('\t' + k + ':', str(v) + ',')
+print('}')
