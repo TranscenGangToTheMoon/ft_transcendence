@@ -1,9 +1,7 @@
-from django.contrib.auth.models import User
 from rest_framework import generics
-from rest_framework.permissions import IsAuthenticated
 
 from auth.permissions import IsNotAuthenticated, IsGuest
-from guest.serializers import GuestTokenSerializer, GuestRegisterSerializer
+from guest.serializers import GuestTokenSerializer
 
 
 class GuestTokenView(generics.CreateAPIView):
@@ -11,13 +9,4 @@ class GuestTokenView(generics.CreateAPIView):
     permission_classes = [IsNotAuthenticated]
 
 
-class GuestRegisterView(generics.UpdateAPIView):
-    serializer_class = GuestRegisterSerializer
-    permission_classes = [IsAuthenticated, IsGuest]
-
-    def get_object(self):
-        return self.request.user
-
-
 guest_token = GuestTokenView.as_view()
-register = GuestRegisterView.as_view()

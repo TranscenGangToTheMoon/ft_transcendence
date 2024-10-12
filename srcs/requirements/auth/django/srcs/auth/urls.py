@@ -2,14 +2,17 @@ from django.contrib import admin
 from django.urls import path
 from rest_framework_simplejwt.views import token_obtain_pair, token_refresh
 
-from guest.views import guest_token, register
+from guest.views import guest_token
+from register.views import register_view
+from update.views import update_view
 from verify.views import token_verify
 
 urlpatterns = [
-    path('api/auth/guest/', guest_token, name="api-guest-token"),
-    path('api/auth/register/', register, name='api-register'), #todo : create own app
-    path('api/auth/token/', token_obtain_pair, name='api-token-obtain-pair'),
-    path('api/auth/refresh', token_refresh, name='api-token-refresh'),
-    path('api/auth/verify/', token_verify, name='api-token-verify'),
+    path('api/auth/guest/', guest_token, name="api-auth-guest-token"),
+    path('api/auth/update/', update_view, name='api-auth-update-user'),
+    path('api/auth/register/', register_view, name='api-auth-register'), #todo : create own app
+    path('api/auth/login/', token_obtain_pair, name='api-auth-login'),
+    path('api/auth/refresh', token_refresh, name='api-auth-token-refresh'),
+    path('api/auth/verify/', token_verify, name='api-auth-token-verify'),
     path('auth/admin/', admin.site.urls),
 ]

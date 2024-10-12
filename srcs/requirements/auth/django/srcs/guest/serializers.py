@@ -5,7 +5,6 @@ from django.contrib.auth.models import User
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from auth.validators import validate_username
 from guest.group import get_group_guest
 
 
@@ -23,17 +22,4 @@ class GuestTokenSerializer(serializers.ModelSerializer):
         guest_group = get_group_guest()
         user.groups.add(guest_group)
         refresh_token = RefreshToken.for_user(user)
-        return {'refresh': str(refresh_token), 'access': str(refresh_token.access_token),}
-
-
-class GuestRegisterSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(validators=[validate_username])
-
-    class Meta:
-        model = User
-        fields = ['username', 'password']
-
-    def update(self, instance, validated_data):
-        guest_group = get_group_guest()
-        instance.groups.remove(guest_group)
-        return super().update(instance, validated_data)
+        return {'access': str(refresh_token.access_token), 'refresh': str(refresh_token)}

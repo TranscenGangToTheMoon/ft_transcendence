@@ -44,6 +44,8 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'corsheaders',
     'guest',
+    'register',
+    'update',
     'verify',
 ]
 
