@@ -1,9 +1,8 @@
-from rest_framework import generics, status
+from rest_framework import generics
 from rest_framework.exceptions import ValidationError
-from rest_framework.response import Response
 
-from user_management.auth import auth_verify, auth_update, auth_delete
-from users.models import Users
+from user_management.auth import auth_update, auth_delete
+from user_management.permissions import get_object
 from users.serializers import UsersSerializer
 
 
@@ -11,15 +10,7 @@ class UsersMeView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = UsersSerializer
 
     def get_object(self):
-        json_data = auth_verify(self.request.headers.get('Authorization'))
-
-        try:
-            user = Users.objects.get(id=json_data['id'])
-            if user.is_guest != json_data['is_guest']:
-                user.update(is_guest=json_data['is_guest'])
-            return user
-        except Users.DoesNotExist:
-            return Users.objects.create(**json_data)
+        return get_object(self.request)
 
     def update(self, request, *args, **kwargs):
         username = request.data.get('username')
