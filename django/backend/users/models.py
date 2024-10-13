@@ -33,49 +33,6 @@ class UsersManager(models.Manager):
     def search(self, query, user=None):
         return self.get_queryset().search(query, user=user)
 
-class FriendRequests(models.Model):
-    sender = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='sent_friend_requests')
-    receiver = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='received_friend_requests')
-    send_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        unique_together = ('sender', 'receiver')
-
-    def accept(self):
-        # friend_request = FriendRequest.objects.get(sender=sender, receiver=receiver)
-        # friend_request.accept()
-
-        self.sender.friends.add(self.receiver)
-
-        self.delete()
-
-
-class Friends(models.Model):
-    # user1 is users that sent friends request
-    user1 = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='friends_user1')
-    user2 = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='friends_user2')
-    # users = models.ManyToManyField(Users, symmetrical=True, related_name='friends_set')
-    friends_since = models.DateTimeField(auto_now_add=True)
-    matches_play_against = models.PositiveIntegerField(default=0)
-    user1_win = models.PositiveIntegerField(default=0)
-    matches_play_together = models.PositiveIntegerField(default=0)
-    matches_win_together = models.PositiveIntegerField(default=0)
-
-    def play_against(self, winner: Users):
-        if winner.pk == self.user1_win:
-            self.user1_win += 1
-        self.matches_play_against += 1
-        self.save()
-
-    def play_together(self, win: bool):
-        if win:
-            self.matches_win_together += 1
-        self.matches_play_together += 1
-        self.save()
-
-    class Meta:
-        unique_together = ('user1', 'user2')
-
 
 class Stats(models.Model):
     # auto update when register new match
