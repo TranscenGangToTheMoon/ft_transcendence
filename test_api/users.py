@@ -17,7 +17,7 @@ copy(token)
 
 password = input('delete password -> ')
 
-r = requests.delete('http://localhost:8005/api/users/me/', headers={
+r = requests.get('http://localhost:8005/api/users/me/', headers={
     'Authorization': 'Bearer ' + token,
     'Content-Type': 'application/json'
 }, data=json.dumps({'password': password}))
