@@ -2,7 +2,7 @@ from rest_framework import generics
 from rest_framework.exceptions import ValidationError
 
 from user_management.auth import auth_update, auth_delete
-from user_management.permissions import get_object
+from users.models import Users
 from users.serializers import UsersSerializer
 
 
@@ -10,7 +10,7 @@ class UsersMeView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = UsersSerializer
 
     def get_object(self):
-        return get_object(self.request)
+        return Users.objects.get(pk=self.request.user.id)
 
     def update(self, request, *args, **kwargs):
         username = request.data.get('username')

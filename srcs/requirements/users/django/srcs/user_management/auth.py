@@ -2,7 +2,10 @@ import json
 from typing import Literal
 
 import requests
+from rest_framework import permissions
 from rest_framework.exceptions import AuthenticationFailed
+
+from users.models import Users
 
 
 def requests_auth(token, enpoint: Literal['update/', 'verify/', 'delete/'], method: Literal['GET', 'PUT', 'PATCH', 'DELETE'], data=None):
@@ -39,3 +42,24 @@ def auth_update(token, data):
 
 def auth_delete(token, data):
     requests_auth(token, 'delete/', method='DELETE', data=json.dumps(data))
+
+
+class IsAuthenticated(permissions.BasePermission):
+
+    def has_permission(self, request, view):
+
+        json_data = auth_verify(request.headers.get('Authorization'))
+
+        try:
+            user = Users.objects.get(id=json_data['id'])
+            if user.is_guest != json_data['is_guest']:
+                user.update(is_guest=json_data['is_guest'])
+        except Users.DoesNotExist:
+            user = Users.objects.create(**json_data)
+        request.user.id = user.id
+        request.user.username = user.username
+        return True
+
+
+def get_user(pk):
+    return Users.objects.get(pk=pk)
