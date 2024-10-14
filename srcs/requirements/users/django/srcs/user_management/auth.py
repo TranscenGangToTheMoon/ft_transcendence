@@ -2,9 +2,10 @@ import json
 from typing import Literal
 
 import requests
-from rest_framework import permissions
+from rest_framework import permissions, serializers
 from rest_framework.exceptions import AuthenticationFailed
 
+from block.models import Block
 from users.models import Users
 
 
@@ -61,5 +62,20 @@ class IsAuthenticated(permissions.BasePermission):
         return True
 
 
-def get_user(pk):
-    return Users.objects.get(pk=pk)
+def get_user(request=None, id=None):
+    if id is None:
+        if request is None:
+            raise serializers.ValidationError({'error': 'Request is required.'})
+        id = request.user.id
+    return Users.objects.get(pk=id)
+
+
+def validate_username(username, user):
+    try:
+        assert username is not None
+        valide_username = Users.objects.get(username=username)
+        assert valide_username.is_guest is False
+        assert not Block.objects.filter(user=valide_username, blocked=user).exists()
+    except (Users.DoesNotExist, AssertionError):
+        raise serializers.ValidationError({'username': ['This user does not exist.']})
+    return valide_username

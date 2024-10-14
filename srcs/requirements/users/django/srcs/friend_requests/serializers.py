@@ -1,8 +1,9 @@
 from rest_framework import serializers
 
+from block.models import Block
 from friend_requests.models import FriendRequests
 from friends.models import Friends
-from user_management.auth import get_user
+from user_management.auth import get_user, validate_username
 from users.models import Users
 
 
@@ -22,24 +23,17 @@ class FriendRequestsSerializer(serializers.ModelSerializer):
         ]
 
     def create(self, validated_data):
-        request = self.context.get('request')
-        if request is None:
-            raise serializers.ValidationError({'error': 'Request is required.'})
-        sender = get_user(request.user.id)
+        sender = get_user(self.context.get('request'))
 
         if FriendRequests.objects.filter(sender=sender.pk).count() > 20:
             raise serializers.ValidationError({'error': 'You cannot send more than 20 friend requests at the same time.'})
 
-        try:
-            receiver = Users.objects.get(username=validated_data.pop('username'))
-            assert not receiver.blocked_users.filter(pk=sender.pk).exists()
-        except (Users.DoesNotExist, AssertionError):
-            raise serializers.ValidationError({'username': ['This user does not exist.']})
+        receiver = validate_username(validated_data.pop('username'), sender)
 
         if receiver == sender:
             raise serializers.ValidationError({'username': ['You cannot send a friend request to yourself.']})
 
-        if sender.blocked_users.filter(pk=receiver.pk).exists():
+        if Block.objects.filter(user=sender, blocked=receiver).exists():
             raise serializers.ValidationError({'username': ['You block this user.']})
 
         if Friends.objects.filter(friends__in=[sender]).filter(friends__in=[receiver]).distinct().exists():

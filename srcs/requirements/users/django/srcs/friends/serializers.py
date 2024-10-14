@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from friend_requests.models import FriendRequests
 from friends.models import Friends
-from user_management.auth import get_user
+from user_management.auth import get_user, validate_username
 from users.models import Users
 
 
@@ -27,16 +27,8 @@ class FriendsSerializer(serializers.ModelSerializer):
         return [user.username for user in obj.friends.all()]
 
     def create(self, validated_data):
-        request = self.context.get('request')
-        if request is None:
-            raise serializers.ValidationError({'error': 'Request is required.'})
-
-        user_accept = get_user(request.user.id)
-
-        try:
-            user_send_friend_request = Users.objects.get(username=validated_data.pop('username'))
-        except (Users.DoesNotExist, AssertionError):
-            raise serializers.ValidationError({'username': ['This user does not exist.']})
+        user_accept = get_user(self.context.get('request'))
+        user_send_friend_request = validate_username(validated_data.pop('username'), user_accept)
 
         if Friends.objects.filter(friends__in=[user_accept]).filter(friends__in=[user_send_friend_request]).distinct().exists():
             raise serializers.ValidationError({'username': ['You are already friends with this user.']})
