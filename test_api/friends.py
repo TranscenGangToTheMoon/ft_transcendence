@@ -21,11 +21,11 @@ else:#if token == 'token':
 # copy(token)
 
 
-r = requests.get('http://localhost:8005/api/users/me/friend_requests/', headers={
+r = requests.post('http://localhost:8005/api/users/me/friend_requests/', headers={
     'Authorization': 'Bearer ' + token,
     'Content-Type': 'application/json'
 },
-                  data=json.dumps({'username': 'pipi'}))
+                  data=json.dumps({'userntame': 'pipi'}))
 
 print(r.status_code)
 if r.status_code == 204:
