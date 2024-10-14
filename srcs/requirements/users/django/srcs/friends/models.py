@@ -3,23 +3,6 @@ from django.db import models
 from users.models import Users
 
 
-class FriendRequests(models.Model):
-    sender = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='sent_friend_requests')
-    receiver = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='received_friend_requests')
-    send_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        unique_together = ('sender', 'receiver')
-
-    def accept(self):
-        friend = Friends.objects.create()
-        friend.friends.add(self.sender, self.receiver)
-        self.delete()
-
-    def __str__(self):
-        return f'{self.sender.username} sent to {self.receiver.username}'
-
-
 class Friends(models.Model):
     friends = models.ManyToManyField(Users, symmetrical=False)
     friends_since = models.DateTimeField(auto_now_add=True)
@@ -41,4 +24,4 @@ class Friends(models.Model):
         self.save()
 
     def __str__(self):
-        return f'{self.friends.all()}'
+        return f'{self.id} {" - ".join([user.username for user in self.friends.all()])}'
