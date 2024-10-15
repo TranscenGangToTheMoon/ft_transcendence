@@ -16,7 +16,7 @@ class Users(models.Model):
 
     accept_friend_request = models.BooleanField(default=True)
 
-    is_online = models.BooleanField(default=True)
+    is_online = models.BooleanField(default=False)
     game_playing = models.CharField(max_length=5, default=None, null=True)
     last_online = models.DateTimeField(auto_now_add=True)
 

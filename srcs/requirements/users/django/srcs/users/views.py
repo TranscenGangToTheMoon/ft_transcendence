@@ -33,4 +33,11 @@ class UsersMeView(generics.RetrieveUpdateDestroyAPIView):
         return result
 
 
+class UserRetrieveView(generics.RetrieveAPIView):
+    queryset = Users.objects.all()
+    serializer_class = UsersSerializer
+    lookup_field = 'pk'
+
+
 users_me_view = UsersMeView.as_view()
+user_retrieve_view = UserRetrieveView.as_view()
