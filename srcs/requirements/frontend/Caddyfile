@@ -1,0 +1,4 @@
+localhost:443 {
+    root * /var/www/html
+    file_server browse
+}

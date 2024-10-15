@@ -1,11 +1,22 @@
 ########################################################################################################################
 #                                                       VARIABLE                                                       #
 ########################################################################################################################
-NAME		:=	ft_transcentest
+NAME		:=	ft_transcendence
 
 SRCS_D		:=	srcs
 
 SECRETS_D	:=	secrets/
+
+VOLS		:=	\
+				algo-stats-db\
+				auth-db\
+				chat-db\
+				game-db\
+				users-db\
+
+VOLS_PATH	:=	$(HOME)/transcendence/
+
+VOLUMES		:=	$(addprefix $(VOLS_PATH),$(VOLS))
 
 ########################################################################################################################
 #                                                        FLAGS                                                         #
@@ -32,10 +43,15 @@ RESET		:=	\001\033[0m\002
 
 all			:	banner $(NAME)
 
-$(NAME)		:	#secrets
+$(NAME)		:	volumes #secrets
 			$(COMPOSE) $(FLAGS) up --build
 
-build		:	
+volumes		:	$(VOLUMES)
+
+$(VOLUMES)	:
+			mkdir -p $@
+
+build		:
 			$(COMPOSE) $(FLAGS) $@
 
 up			:	build
@@ -46,17 +62,17 @@ dettach		:	build
 
 banner		:
 			@echo -e '$(BLUE)'
-			@echo -e '    ______      __                                        __            __ '
-			@echo -e '   / __/ /_    / /__________ _____  _____________  ____  / /____  _____/ /_'
-			@echo -e '  / /_/ __/   / __/ ___/ __ `/ __ \/ ___/ ___/ _ \/ __ \/ __/ _ \/ ___/ __/'
-			@echo -e ' / __/ /_    / /_/ /  / /_/ / / / (__  ) /__/  __/ / / / /_/  __(__  ) /_  '
-			@echo -e '/_/  \__/____\__/_/   \__,_/_/ /_/____/\___/\___/_/ /_/\__/\___/____/\__/  '
+			@echo -e '    ______      __                                            __                   '
+			@echo -e '   / __/ /_    / /__________ _____  _____________  ____  ____/ /__  ____  ________ '
+			@echo -e '  / /_/ __/   / __/ ___/ __ `/ __ \/ ___/ ___/ _ \/ __ \/ __  / _ \/ __ \/ ___/ _ \'
+			@echo -e ' / __/ /_    / /_/ /  / /_/ / / / (__  ) /__/  __/ / / / /_/ /  __/ / / / /__/  __/'
+			@echo -e '/_/  \__/____\__/_/   \__,_/_/ /_/____/\___/\___/_/ /_/\__,_/\___/_/ /_/\___/\___/ '
 			@echo -en '$(BOLD)''$(ITALIC)'
-			@echo -e '                                                                    xcharra'
+			@echo -e '                                          bajeanno fguirama jcoquard nfaust xcharra'
 			@echo -e '$(RESET)'
 
 clean		:
-			$(COMPOSE) $(FLAGS) down 
+			$(COMPOSE) $(FLAGS) down
 
 secrets		:
 			mkdir $@
@@ -89,7 +105,7 @@ volume-rm	:
 network-ls	:
 			docker network ls
 network-rm	:
-			docker network rm `docker network ls -qa` 
+			docker network rm `docker network ls -qa`
 
 prune		:
 			docker system prune -af

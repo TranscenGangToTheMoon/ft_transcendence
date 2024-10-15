@@ -1,3 +1,5 @@
 .idea
+.vscode
 *.txt
 __pycache__
+*.pyc

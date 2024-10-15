@@ -1,12 +1,20 @@
 services:
+##### ========== Django Projects ========================================= #####
+  algo-stats:
+    build: "requirements/algo-stats"
+    restart: always
+    ports:
+      - "8001:8000"
+    volumes:
+      - algo-stats-volume:/code
+    networks:
+      - algo-stats-network
+      - transcendence-network
 
   auth:
-    container_name: transcendence-auth
+    build: "requirements/auth"
     depends_on:
-      - auth_db
-    build:
-      context: requirements/auth
-      dockerfile: Dockerfile
+      - auth-db
     restart: always
     volumes:
       - auth-volume:/code
@@ -16,36 +24,247 @@ services:
       - transcendence-network
       - auth-network
 
-  auth_db:
+  chat:
+    build: "requirements/chat"
+    depends_on:
+      - chat-db
+    restart: on-failure
+    ports:
+      - "8002:8000"
+    networks:
+      - "transcendence-network"
+      - "chat-network"
+    volumes:
+      - chat-volume:/code
+
+  frontend:
+    build: "requirements/frontend"
+    ports:
+      - "4443:443"
+    volumes:
+      - frontend-volume:/var/www/html
+      - ./requirements/frontend/Caddyfile:/etc/caddy/Caddyfile #Do copy when project is finished HUGE SECURITY FAIL
+
+  game:
+    build: "requirements/game"
+    depends_on:
+      - game-db
+    restart: on-failure
+    ports:
+      - "8004:8000"
+    networks:
+      - "transcendence-network"
+      - "game-network"
+    volumes:
+      - game-volume:/code
+
+  matchmaking:
+    build: "requirements/matchmaking"
+    restart: on-failure
+    ports:
+      - "8003:8000"
+    networks:
+      - "transcendence-network"
+    volumes:
+      - matchmaking-volume:/code
+
+
+  users:
+    build: "requirements/users"
+    depends_on:
+      - users-db
+    restart: on-failure
+    ports:
+      - "8005:8000"
+    networks:
+      - transcendence-network
+      - users-network
+    volumes:
+      - users-volume:/code
+
+##### ========== Database ================================================ #####
+  algo-stats-db:
     image: postgres:14
     restart: always
-    # volumes:
-    #   - "auth-db-volume:/var/lib/postgresql/data/"
+    volumes:
+      - algo-stats-db-volume:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=algo_stats_db
+      - POSTGRES_USER=fguirama
+      - POSTGRES_PASSWORD=123456
+    networks:
+      - algo-stats-network
+
+  auth-db:
+    image: postgres:14
+    restart: always
+    volumes:
+      - auth-db-volume:/var/lib/postgresql/data
     environment:
       - POSTGRES_DB=auth_db
-      - POSTGRES_USER=fguirama # todo : use .env
-      - POSTGRES_PASSWORD=123456 # todo : use .env
+      - POSTGRES_USER=fguirama
+      - POSTGRES_PASSWORD=123456
     networks:
       - auth-network
 
+  chat-db:
+    image: postgres:14
+    restart: always
+    volumes:
+      - chat-db-volume:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=chat_db
+      - POSTGRES_USER=fguirama
+      - POSTGRES_PASSWORD=123456
+    networks:
+      - chat-network
+
+  game-db:
+    image: postgres:14
+    restart: always
+    volumes:
+      - game-db-volume:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=game_db
+      - POSTGRES_USER=fguirama
+      - POSTGRES_PASSWORD=123456
+    networks:
+      - game-network
+
+  users-db:
+    image: postgres:14
+    restart: on-failure
+    volumes:
+      - users-db-volume:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=user_db
+      - POSTGRES_USER=fguirama
+      - POSTGRES_PASSWORD=123456
+    networks:
+      - users-network
+
 networks:
+##### ========== Global network ========================================== #####
   transcendence-network:
     name: transcendence-network
     driver: bridge
+
+##### ========== DB to Django networks =================================== #####
+  algo-stats-network:
+    name: algo-stats-network
+    driver: bridge
+
   auth-network:
     name: auth-network
     driver: bridge
 
+  chat-network:
+    name: chat-network
+    driver: bridge
+
+  game-network:
+    name: game-network
+    driver: bridge
+
+  users-network:
+    name: users-network
+    driver: bridge
+
 volumes:
-  auth-volume:
+##### ========== Django Volumes ========================================== #####
+  algo-stats-volume:
+    name: algo-stats-volume
     driver: local
     driver_opts:
-      type: 'none'
-      o: 'bind'
-      device: './requirements/auth/django/'
-  # auth-db-volume:
-  #   driver: local
-  #   driver_opts:
-  #     type: 'none'
-  #     o: 'bind'
-  #     device: './requirements/auth_db/'
+      type: none
+      o: bind
+      device: "requirements/algo-stats/django"
+
+  auth-volume:
+    name: auth-volume
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: "requirements/auth/django"
+
+  chat-volume:
+    name: chat-volume
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: "requirements/chat/django"
+
+  frontend-volume:
+    name: frontend-volume
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: "requirements/frontend/static"
+
+  game-volume:
+    name: game-volume
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: "requirements/game/django"
+
+  matchmaking-volume:
+    name: matchmaking-volume
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: "requirements/matchmaking/django"
+
+  users-volume:
+    name: users-volume
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: "requirements/users/django"
+
+#####Database Volumes
+  algo-stats-db-volume:
+    name: algo-stats-db-volume
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: "$HOME/transcendence/algo-stats-db"
+
+  auth-db-volume:
+    name: auth-db-volume
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: "$HOME/transcendence/auth-db"
+
+  chat-db-volume:
+    name: chat-db-volume
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: "$HOME/transcendence/chat-db"
+
+  game-db-volume:
+    name: game-db-volume
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: "$HOME/transcendence/game-db"
+
+  users-db-volume:
+    name: users-db-volume
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: "$HOME/transcendence/users-db"
