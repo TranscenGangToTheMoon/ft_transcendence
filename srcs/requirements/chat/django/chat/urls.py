@@ -18,5 +18,7 @@ from django.contrib import admin
 from django.urls import path
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('api/chat/', admin.site.urls), # todo : POST (create new chat), GET (list all chat)
+    path('api/chat/<int:pk>/', admin.site.urls), # todo : GET (retrieve chat message), DELETE (delete chat), UPDATE (add user, remove user...)
+    path('api/chat/<int:pk>/messages/', admin.site.urls), # todo : GET (retrieve chat message), DELETE (delete chat)
 ]
