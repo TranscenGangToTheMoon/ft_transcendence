@@ -14,18 +14,27 @@ elif token == 'register':
     copy(token)
 elif token == 'paste':
     token = paste()
-else:#if token == 'token':
-    token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzI4ODk0ODgyLCJpYXQiOjE3Mjg4OTEyODIsImp0aSI6IjU5NWVlMDA5OWFjNjQ4YjVhZGI5MzNiZDk1YzQxNGQ1IiwidXNlcl9pZCI6MzR9.nv1vl5ximFxqpLZ7Emrk4BFTqZHNJtt2IH63i2_hyZE'
-# else:
-#     token = paste()
-# copy(token)
+else:
+    token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzI4OTYwNDU0LCJpYXQiOjE3Mjg5NTY4NTQsImp0aSI6IjJmMTI0MTc0OTBjYzQxZWZhY2RiODEyMTA3MjA4MjlhIiwidXNlcl9pZCI6MTV9.B0jbbTDRbUr3Bn3GCZFyi21mL4mxcuZzurL9yCPihoI'
 
 
-r = requests.post('http://localhost:8005/api/users/me/friend_requests/', headers={
+print(requests.post('http://localhost:8005/api/users/me/friend_requests/', headers={
     'Authorization': 'Bearer ' + token,
     'Content-Type': 'application/json'
 },
-                  data=json.dumps({'userntame': 'pipi'}))
+                 data=json.dumps({'username': 'blba'})))
+
+print(requests.post('http://localhost:8005/api/users/me/friends/', headers={
+    'Authorization': 'Bearer ' + login()['access'],
+    'Content-Type': 'application/json'
+},
+                  data=json.dumps({'username': 'root'})))
+
+r = requests.get('http://localhost:8005/api/users/32/', headers={
+    'Authorization': 'Bearer ' + token,
+    'Content-Type': 'application/json'
+},
+                  data=json.dumps({'username': 'blba'}))
 
 print(r.status_code)
 if r.status_code == 204:
