@@ -1,13 +1,11 @@
-FROM python:3.12.6-slim-bullseye
-LABEL authors="basil"
+FROM        python:3.12.6-slim-bullseye
+LABEL       authors="basil"
 
-WORKDIR /code
+EXPOSE      8000
 
-COPY requirements.txt .
+WORKDIR     /code
 
-RUN pip install -r requirements.txt
+COPY        ./install_django.sh /
+RUN         chmod u+x /install_django.sh
 
-EXPOSE 8000
-
-ENTRYPOINT ["python", "manage.py"]
-CMD ["runserver", "0.0.0.0:8000"]
+ENTRYPOINT  ["/install_django.sh"]

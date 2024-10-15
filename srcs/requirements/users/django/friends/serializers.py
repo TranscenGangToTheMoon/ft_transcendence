@@ -3,7 +3,7 @@ from rest_framework import serializers
 from friend_requests.models import FriendRequests
 from friends.exist import is_friendship
 from friends.models import Friends
-from user_management.auth import get_user, validate_username
+from users.auth import get_user, validate_username
 
 
 class FriendsSerializer(serializers.ModelSerializer):

@@ -1,7 +1,7 @@
 from rest_framework import generics
 from rest_framework.exceptions import ValidationError
 
-from user_management.auth import auth_update, auth_delete
+from users.auth import auth_update, auth_delete
 from users.models import Users
 from users.serializers import UsersSerializer
 
