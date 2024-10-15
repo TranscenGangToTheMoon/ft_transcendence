@@ -2,9 +2,8 @@ from rest_framework import serializers
 
 from block.models import Block
 from friend_requests.models import FriendRequests
-from friends.models import Friends
+from friends.exist import get_friendship
 from user_management.auth import get_user, validate_username
-from users.models import Users
 
 
 class BlockSerializer(serializers.ModelSerializer):
@@ -33,7 +32,7 @@ class BlockSerializer(serializers.ModelSerializer):
         if Block.objects.filter(user=user, blocked=block_user).exists():
             raise serializers.ValidationError({'username': ['You already block this user.']})
 
-        Friends.objects.filter(friends__in=[user]).filter(friends__in=[block_user]).delete()
+        get_friendship(user, block_user).delete()
         (FriendRequests.objects.filter(sender=user, receiver=block_user) | FriendRequests.objects.filter(sender=block_user, receiver=user)).delete()
         validated_data['user'] = user
         validated_data['blocked'] = block_user

@@ -1,9 +1,9 @@
 from rest_framework import serializers
 
 from friend_requests.models import FriendRequests
+from friends.exist import is_friendship
 from friends.models import Friends
 from user_management.auth import get_user, validate_username
-from users.models import Users
 
 
 class FriendsSerializer(serializers.ModelSerializer):
@@ -30,7 +30,7 @@ class FriendsSerializer(serializers.ModelSerializer):
         user_accept = get_user(self.context.get('request'))
         user_send_friend_request = validate_username(validated_data.pop('username'), user_accept)
 
-        if Friends.objects.filter(friends__in=[user_accept]).filter(friends__in=[user_send_friend_request]).distinct().exists():
+        if is_friendship(user_accept, user_send_friend_request):
             raise serializers.ValidationError({'username': ['You are already friends with this user.']})
 
         try:
