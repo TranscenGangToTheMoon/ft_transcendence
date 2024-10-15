@@ -28,13 +28,13 @@ print(requests.post('http://localhost:8005/api/users/me/friends/', headers={
     'Authorization': 'Bearer ' + login()['access'],
     'Content-Type': 'application/json'
 },
-                  data=json.dumps({'username': 'root'})))
+                  data=json.dumps({'username': 'test'})))
 
 r = requests.get('http://localhost:8005/api/users/32/', headers={
     'Authorization': 'Bearer ' + token,
     'Content-Type': 'application/json'
 },
-                  data=json.dumps({'username': 'coucou'}))
+                  data=json.dumps({'username': 'test'}))
 
 print(r.status_code)
 if r.status_code == 204:
