@@ -8,8 +8,8 @@ services:
     volumes:
       - algo-stats-volume:/code
     networks:
-      - algo-stats-network
       - transcendence-network
+      - algo-stats-network
 
   auth:
     build: "requirements/auth"
@@ -32,8 +32,8 @@ services:
     ports:
       - "8002:8000"
     networks:
-      - "transcendence-network"
-      - "chat-network"
+      - transcendence-network
+      - chat-network
     volumes:
       - chat-volume:/code
 
@@ -53,8 +53,8 @@ services:
     ports:
       - "8004:8000"
     networks:
-      - "transcendence-network"
-      - "game-network"
+      - transcendence-network
+      - game-network
     volumes:
       - game-volume:/code
 
@@ -64,7 +64,7 @@ services:
     ports:
       - "8003:8000"
     networks:
-      - "transcendence-network"
+      - transcendence-network
     volumes:
       - matchmaking-volume:/code
 
@@ -138,7 +138,7 @@ services:
     volumes:
       - users-db-volume:/var/lib/postgresql/data
     environment:
-      - POSTGRES_DB=user_db
+      - POSTGRES_DB=users_db
       - POSTGRES_USER=fguirama
       - POSTGRES_PASSWORD=123456
     networks:
