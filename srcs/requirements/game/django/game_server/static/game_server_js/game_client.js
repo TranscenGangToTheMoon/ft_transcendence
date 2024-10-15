@@ -3,9 +3,22 @@ import {Ball} from './ball.js';
 import {Racket} from './racket.js';
 import {Player} from './player.js';
 
-let url = `ws://${window.location.host}/ws/socket-server/`
+let url = `ws://${window.location.host}/game_server/`
 let socket = new WebSocket(url);
 
+let start
+
+socket.onopen = function() {
+  console.log('WebSocket connection established.');
+  const message = {
+    'message': 'Hello, world!'
+  };
+  socket.send(JSON.stringify(message));
+};
+socket.onmessage = function(event) {
+  const message = JSON.parse(event.data);
+  console.log('Received message:', message);
+};
 
 function draw(ball, player, opponent) {
 	let ctx = canvas.getContext("2d");

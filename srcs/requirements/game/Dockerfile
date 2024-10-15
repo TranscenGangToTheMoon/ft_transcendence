@@ -7,6 +7,8 @@ COPY requirements.txt .
 
 RUN pip install -r requirements.txt
 
+# RUN daphne game.asgi:application
+
 EXPOSE 8000
 
 ENTRYPOINT ["python", "manage.py"]
