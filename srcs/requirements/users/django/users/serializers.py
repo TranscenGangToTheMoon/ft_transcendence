@@ -5,12 +5,7 @@ from users.models import Users
 
 
 class UsersSerializer(serializers.ModelSerializer):
-    id = serializers.IntegerField(read_only=True)
-    is_guest = serializers.BooleanField(read_only=True)
-    profile_picture = serializers.IntegerField(read_only=True)
     status = serializers.SerializerMethodField(read_only=True)
-    coins = serializers.IntegerField(read_only=True)
-    trophy = serializers.IntegerField(read_only=True)
     current_rank = serializers.IntegerField(read_only=True)
     accept_friend_request = serializers.BooleanField(write_only=True)
     password = serializers.CharField(write_only=True)
@@ -31,6 +26,7 @@ class UsersSerializer(serializers.ModelSerializer):
             'password',
             'accept_friend_request',
         ]
+        read_only_fields = ('id', 'is_guest', 'profile_picture', 'status', 'coins', 'trophy', 'current_rank', 'friends')
 
     def get_status(self, obj):
         return {

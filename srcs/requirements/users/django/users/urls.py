@@ -24,7 +24,7 @@ from users.views import users_me_view, user_retrieve_view
 from validate.views import validate_chat_view
 
 urlpatterns = [
-    path('api/users/me/', users_me_view, name='users_view'),
+    path('api/users/me/', users_me_view, name='api-users-me-retrieve'),
     path('api/users/<int:pk>/', user_retrieve_view, name='api-user-retrieve'),
 
     path('api/users/me/friends/', friends_list_create_view, name='api-friend-create-list'),
