@@ -73,7 +73,6 @@ services:
     build: "requirements/users"
     depends_on:
       - users-db
-      - auth
     restart: on-failure
     ports:
       - "8005:8000"

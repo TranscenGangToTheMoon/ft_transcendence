@@ -1,3 +1,6 @@
 .idea
-.vscode
+vscode
+*.pyc
+.zed
 __pycache__
+**db.sqlite3
