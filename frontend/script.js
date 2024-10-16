@@ -1,187 +1,60 @@
-const baseAPIUrl = "http://localhost:8000/api"
-const baseAPIUrlusers = "http://localhost:8005/api/users"
-let guestLogin = undefined;
-
-function apiRequest(token, endpoint, method="GET", authType="Bearer",
-    contentType="application/json", body=undefined){ 
-    let options = {
-        method: method,
-        headers: {
-            "content-type": contentType
-        }
-    }
-    if (token)
-        options.headers["Authorization"] = `${authType} ${token}`;
-    if (body)
-        options.body = JSON.stringify(body);
-    console.log(endpoint, options)
-    return fetch(endpoint, options)
-        .then(response => {
-            return response.json();
-        })
-        .catch(error =>{
-            throw error;
-        })
+function loadScript(scriptSrc) {
+    const script = document.createElement('script');
+    script.src = scriptSrc;
+    script.onload = () => {
+        console.log(`Script ${scriptSrc} loaded.`);
+    };
+    script.onerror = () => {
+        console.error(`Error while loading script ${scriptSrc}.`);
+    };
+    document.body.appendChild(script);
 }
 
-// function getLogin() {
-//     const token = localStorage.getItem('token');
-//     const endpoint = `${baseAPIUrlusers}/me/`;
-//     apiRequest(token, endpoint, data=>{
-//         console.log(data);
-//         return data;
-//     });
-// }
+async function loadContent(url) {
+    const contentDiv = document.getElementById('content');
 
-function changePlayFieldValue(login){
-    const playLoginField = document.getElementById("playLoginField");
-    playLoginField.value = login;
-}
-
-async function getDataFromApi(token, endpoint, method="GET", authType="Bearer",
-    contentType="application/json", body=undefined){
     try {
-        let data = await apiRequest(token, endpoint, method, authType, contentType, body);
-        return data;
-    }
-    catch (error) {
-        console.log(error);
-        throw error;
-    }
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    if (localStorage.getItem('token'))
-        return;
-    getDataFromApi(undefined, `${baseAPIUrl}/auth/guest/`, "POST")
-        .then(data => {
-            if (data.access) {
-                localStorage.setItem('refresh', data.refresh);
-                localStorage.setItem('token', data.access);
-                fillGuestPlaceHolder();
-            }
-            else
-                console.log('error a gerer', data);
-        })
-        .catch(error => {
-            console.log('error a gerer1', error);
-        })
-})
-
-function fillGuestPlaceHolder(){
-    const guestLoginField = document.getElementById('playLoginField');
-    getDataFromApi(localStorage.getItem('token'), `${baseAPIUrlusers}/me/`)
-        .then(data => {
-            if (data.username)
-                guestLoginField.placeholder = data.username;
-            else if (data.detail)
-                console.log('Error: ', data.detail);
-        })
-        .catch(error => {
-            console.log('error a gerer1', error);
-        })
-}
-
-document.getElementById('playDuel').addEventListener('click', async event => {
-    event.preventDefault(); //todo modify guest login 
-    guestUsername = document.getElementById('playLoginField').value;
-    if (guestUsername) {
-        try {
-            let data = await apiRequest(localStorage.getItem('token'), `${baseAPIUrlusers}/me/`, "PATCH",
-            undefined, undefined, {'username' : guestUsername});
-            console.log(data);
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error('Page non trouvée');
         }
-        catch (error){
-            console.log('error on guest change', error);
-        }
+        const html = await response.text();
+        contentDiv.innerHTML = html;
+
+        const script = contentDiv.querySelector('[script]');
+        if (script)
+            loadScript(script.getAttribute('script'));
+    } catch (error) {
+        contentDiv.innerHTML = '<h1>Erreur 404 : Page non trouvée</h1>';
     }
-})
-
-document.getElementById('playClash').addEventListener('click', event => {
-    event.preventDefault(); //todo modify guest login 
-})
-
-document.getElementById('logoutButton').addEventListener('click', event => {
-    getDataFromApi(undefined, `${baseAPIUrl}/auth/guest/`, "POST")
-        .then(data => {
-            if (data.access) {
-                localStorage.setItem('refresh', data.refresh);
-                localStorage.setItem('token', data.access);
-                fillGuestPlaceHolder();
-            }
-            else
-                console.log('error a gerer', data);
-        })
-        .catch(error => {
-            console.log('error a gerer1', error);
-        })
-})
-
-document.getElementById('switchButton').addEventListener('click', event => {
-    event.preventDefault();
-    const loginButton = document.getElementById("loginButton");
-    if (loginButton.innerText === "Register"){
-        loginButton.innerText = "Login";
-        event.target.innerText = "New? Create an account"
-    }
-    else{
-        loginButton.innerText = "Register";
-        event.target.innerText = "Already have an account? log in"
-    }
-})
-
-function loginSuccess() {
-    // getDataFromApi(localStorage.getItem('token'), `${baseAPIUrlusers}/me/`)
-    //     .then(data => {
-    //         var username = data.username;
-    //         document.body.innerHTML = `<h1>page de jeu</h1> (logged as: ${username})`;
-    //     })
-    //     .catch(error => console.log('error a gerer', error));
-    document.getElementById('container').innerText = "bien login mais je peux pas afficher parcce que erreur 500"
 }
 
-document.getElementById("loginButton").addEventListener('click', event => {
-    event.preventDefault();
-    const loginButton = document.getElementById("loginButton");
-    const usernameField = document.getElementById('usernameLogin');
-    const passwordField = document.getElementById('passwordLogin');
-    usernameField.style = 'none';
-    passwordField.style = 'none';
-    const userInfo = {
-        'username': usernameField.value,
-        'password': passwordField.value
+function navigateTo(url, doNavigate=true){
+    history.pushState(null, null, url);
+    if (doNavigate  )
+        handleRoute();
+}
+
+window.navigateTo = navigateTo;
+
+function handleRoute() {
+    const path = window.location.pathname;
+
+    const routes = {
+        '/': '/homePage.html',
+    };
+
+    const page = routes[path] || '/404.html';
+    loadContent(page);
+}
+
+document.addEventListener('click', event => {
+    if (event.target.matches('[data-link]')) {
+        event.preventDefault();
+        navigateTo(event.target.href);
     }
-    let endpoint;
-    let method;
-    if (loginButton.innerText === "Login") {
-        endpoint = `${baseAPIUrl}/auth/login/`;
-        method = 'POST';
-    }
-    else {
-        endpoint = `${baseAPIUrl}/auth/register/`;
-        method = 'PUT';
-    }
-    getDataFromApi(localStorage.getItem('token'), endpoint, method, undefined, undefined, userInfo)
-        .then(data => {
-            if (data.access){
-                localStorage.setItem('token', data.access);
-                localStorage.setItem('refresh', data.refresh);
-                return loginSuccess();
-            }
-            if (data.username) {
-                document.getElementById('container').innerText = data.username[0];
-                usernameField.style = "background-color:red;"
-            }
-            if (data.password) {
-                console.log(data)
-                document.getElementById('container').innerText = data.password[0];
-                passwordField.style = "background-color:red;"
-            }
-            if (data.detail) {
-                document.getElementById('container').innerText = data.detail;
-            }
-            else
-                console.log('error a gerer', data);
-        })
-        .catch(error => console.log('error a gerer1', error));
-})
+});
+
+// window.addEventListener('popstate', handleRoute);
+
+handleRoute();
