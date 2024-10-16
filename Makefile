@@ -81,7 +81,6 @@ secrets		:
 			openssl rand -hex -out ./secrets/db_root_pass 32
 			openssl rand -hex -out ./secrets/wp_admin_pass 32
 fclean		:
-			# docker run --rm -v $(HOME)/data:/data debian:11 bash -c "rm -rf /data/database/*  /data/wordpress/*"
 			docker run --rm -v $(HOME)/transcendence:/data busybox sh -c "rm -rf /data/*"
 			docker image prune -af
 			$(COMPOSE) $(FLAGS) down -v --rmi all

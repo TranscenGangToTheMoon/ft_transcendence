@@ -15,6 +15,7 @@ class Users(models.Model):
     own_profile_pictures = models.ManyToManyField(ProfilePictures, default=None, symmetrical=False, related_name='own_profile_pictures', blank=True)
 
     accept_friend_request = models.BooleanField(default=True)
+    accept_chat_state = models.SmallIntegerField(default=3) # 0: no, 1: friends only, 3: everyone
 
     is_online = models.BooleanField(default=False)
     game_playing = models.CharField(max_length=5, default=None, null=True)
@@ -24,6 +25,10 @@ class Users(models.Model):
     trophy = models.IntegerField(default=0)
     current_rank = models.IntegerField(default=None, null=True)
     highest_rank = models.IntegerField(default=None, null=True)
+
+    @property
+    def accept_chat_str(self):
+        return ['no one', 'friends only', '', 'everyone'][int(self.accept_chat_state)]
 
     def __str__(self):
         return f'{self.id} {self.username}'
