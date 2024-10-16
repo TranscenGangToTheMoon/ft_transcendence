@@ -10,7 +10,6 @@ class GameClient(WebsocketConsumer):
 			'type': 'connect',
 			'message': 'Connected to the game server.'
 		}))
-		if (pending_game_request):
 
 
 	def disconnect(self, code = None):
@@ -18,6 +17,7 @@ class GameClient(WebsocketConsumer):
 			'type': 'disconnect',
 			'message': 'Disconnected from the game server.'
 		}))
+
 
 	def receive(self, text_data = None, bytes_data = None):
 		if text_data is not None:
