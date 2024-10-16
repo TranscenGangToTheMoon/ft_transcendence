@@ -5,19 +5,36 @@ import {Player} from './player.js';
 
 let url = `ws://${window.location.host}/game_server/`
 let socket = new WebSocket(url);
+let start = false;
+let username = 'player1';
 
-let start
+socket.onclose = function() {
+	console.log('WebSocket connection closed.');
+};
 
 socket.onopen = function() {
-  console.log('WebSocket connection established.');
-  const message = {
-    'message': 'Hello, world!'
-  };
-  socket.send(JSON.stringify(message));
+	console.log('WebSocket connection established.');
+	console.prompt('Enter your username: ', function(username) {
+		username = username;
+	});
+	const message = {
+		'type': 'username',
+		'username': username,
+	};
+	socket.send(JSON.stringify(message));
 };
+
+let playerid;
 socket.onmessage = function(event) {
-  const message = JSON.parse(event.data);
-  console.log('Received message:', message);
+	const message = JSON.parse(event.data);
+	console.log('Received message:', message);
+	if (message.message === 'start') {
+		start = true;
+	}
+	if (message.type === 'playerid') {
+	playerid = message.playerid;
+		console.log(playerid);
+	}
 };
 
 function draw(ball, player, opponent) {
@@ -106,8 +123,6 @@ function reset_ball_direction(ball, player, opponent) {
 	}
 }
 
-console.log("ball direction: " + ball.direction);
-
 function drawCountdown(end_time) {
     const currentTime = new Date().getTime();
     const timeLeft = Math.max(0, end_time - currentTime);
@@ -170,6 +185,7 @@ function game_loop(ball, player, opponent) {
 
 
 window.onload = function () {
+	while (start == false);
 	reset_ball_direction(ball, player, opponent);
 	console.log("start countdown");
 	drawCountdown(new Date().getTime() + 3000);
