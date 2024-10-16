@@ -13,6 +13,7 @@ class UsersMeView(generics.RetrieveUpdateDestroyAPIView):
         return Users.objects.get(pk=self.request.user.id)
 
     def update(self, request, *args, **kwargs):
+        #todo cans update info if guest (exept username)
         username = request.data.get('username')
         password = request.data.pop('password', None)
         data = {}
