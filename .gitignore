@@ -1,6 +1,6 @@
-**.idea
-**.vscode
-**.pyc
+.idea
+vscode
+*.pyc
 .zed
-**db.sqlite3
+*.txt
 __pycache__

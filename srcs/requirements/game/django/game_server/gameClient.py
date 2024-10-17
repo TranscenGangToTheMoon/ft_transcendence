@@ -1,7 +1,9 @@
 import json
 from channels.generic.websocket import WebsocketConsumer
 
+
 class GameClient(WebsocketConsumer):
+	pending_game_request = False
 	def connect(self):
 		self.accept()
 		self.send(text_data=json.dumps({
@@ -9,11 +11,13 @@ class GameClient(WebsocketConsumer):
 			'message': 'Connected to the game server.'
 		}))
 
+
 	def disconnect(self, code = None):
 		self.send(text_data=json.dumps({
 			'type': 'disconnect',
 			'message': 'Disconnected from the game server.'
 		}))
+
 
 	def receive(self, text_data = None, bytes_data = None):
 		if text_data is not None:

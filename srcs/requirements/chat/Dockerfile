@@ -9,3 +9,5 @@ COPY        ./install_django.sh /
 RUN         chmod u+x /install_django.sh
 
 ENTRYPOINT  ["/install_django.sh"]
+
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
