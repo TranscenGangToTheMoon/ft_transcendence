@@ -9,7 +9,7 @@ SECRETS_D	:=	secrets/
 
 VOLS		:=	\
 				algo-stats-db\
-				authentication-db\
+				auth-db\
 				chat-db\
 				game-db\
 				users-db\

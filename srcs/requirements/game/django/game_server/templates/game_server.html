@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="fr">
+	<head>
+	    <meta charset="UTF-8">
+	    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	    <title>Transcendence - PONG</title>
+	    {% load static %}
+		<link rel="stylesheet", type="text/css" href="{% static 'game_server_css/style.css' %}"></link>
+	</head>
+	<body>
+		<!-- <style href="{% static 'game_server_css/style.css' %}"></style> -->
+	    <h1 class="title">le pong</h1>
+	    <canvas id="gameCanvas" width="800" height="600"></canvas>
+	    <script type="module" src="{% static 'game_server_js/game_client.js' %}"></script>
+	</body>
+</html>
