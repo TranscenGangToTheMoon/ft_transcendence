@@ -1,4 +1,28 @@
 localhost:443 {
-    root * /var/www/html
-    file_server browse
+	handle /api/auth/* {
+		reverse_proxy auth:8002
+	}
+	handle {
+		root * /var/www/html
+		try_files /index.html
+		file_server browse
+	}
 }
+
+# https://localhost:443 {
+#     redir https://localhost:443{uri}
+# }
+
+# https://localhost:443/api/algo-stats {
+#     # respond "Hello"
+#     reverse_proxy algo-stats:8001
+# }
+
+
+# https://localhost:443/api/auth/* {
+# 	reverse_proxy auth:8002
+# }
+# localhost:443/api/chat
+# localhost:443/api/game
+# localhost:443/api/matchmaking
+# localhost:443/api/users
