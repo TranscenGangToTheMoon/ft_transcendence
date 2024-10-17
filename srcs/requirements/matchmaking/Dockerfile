@@ -1,13 +1,11 @@
-FROM python:3.12.6-slim-bullseye
-LABEL authors="basil"
+FROM        python:3.12.6-slim-bullseye
 
-WORKDIR /code
+EXPOSE      8000
 
-COPY requirements.txt .
+COPY        requirements.txt /
+RUN         pip install -r requirements.txt
 
-RUN pip install -r requirements.txt
+WORKDIR     /code
 
-EXPOSE 8000
-
-ENTRYPOINT ["python", "manage.py"]
-CMD ["runserver", "0.0.0.0:8000"]
+ENTRYPOINT  ["python", "manage.py"]
+CMD         ["runserver", "0.0.0.0:8000"]

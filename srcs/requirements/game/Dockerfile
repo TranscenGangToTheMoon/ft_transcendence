@@ -1,18 +1,16 @@
-FROM python:3.12.6-slim-bullseye
-LABEL authors="basil"
+FROM        python:3.12.6-slim-bullseye
 
-EXPOSE 8000
+EXPOSE      8000
 
-COPY /django/requirements.txt /
-RUN pip install -r requirements.txt
+COPY        requirements.txt /
+RUN         pip install -r requirements.txt
 
-WORKDIR /code
+WORKDIR     /code
 
-# RUN daphne game.asgi:application
+# RUN       daphne game.asgi:application
 
-COPY entrypoint.sh /
-RUN chmod u+x /entrypoint.sh
+COPY        entrypoint.sh /
+RUN         chmod u+x /entrypoint.sh
 
-ENTRYPOINT ["/entrypoint.sh"]
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
-
+ENTRYPOINT  ["/entrypoint.sh"]
+CMD         ["python", "manage.py", "runserver", "0.0.0.0:8000"]
