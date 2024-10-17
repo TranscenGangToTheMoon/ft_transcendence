@@ -101,7 +101,7 @@ services:
     volumes:
       - auth-db-volume:/var/lib/postgresql/data
     environment:
-      - POSTGRES_DB=auth_db
+      - POSTGRES_DB=auth-db
       - POSTGRES_USER=fguirama
       - POSTGRES_PASSWORD=123456
     networks:
@@ -113,7 +113,7 @@ services:
     volumes:
       - chat-db-volume:/var/lib/postgresql/data
     environment:
-      - POSTGRES_DB=chat_db
+      - POSTGRES_DB=chat-db
       - POSTGRES_USER=fguirama
       - POSTGRES_PASSWORD=123456
     networks:
@@ -125,7 +125,7 @@ services:
     volumes:
       - game-db-volume:/var/lib/postgresql/data
     environment:
-      - POSTGRES_DB=game_db
+      - POSTGRES_DB=game-db
       - POSTGRES_USER=fguirama
       - POSTGRES_PASSWORD=123456
     networks:
@@ -137,7 +137,7 @@ services:
     volumes:
       - users-db-volume:/var/lib/postgresql/data
     environment:
-      - POSTGRES_DB=user_db
+      - POSTGRES_DB=users-db
       - POSTGRES_USER=fguirama
       - POSTGRES_PASSWORD=123456
     networks:
