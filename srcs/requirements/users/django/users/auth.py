@@ -38,7 +38,7 @@ def auth_verify(token):
 
 
 def auth_update(token, data):
-    return requests_auth(token, 'update/', method='PUT', data=json.dumps(data))
+    return requests_auth(token, 'update/', method='PATCH', data=json.dumps(data))
 
 
 def auth_delete(token, data):
