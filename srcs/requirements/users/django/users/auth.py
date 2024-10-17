@@ -56,6 +56,9 @@ class IsAuthenticated(permissions.BasePermission):
             if user.is_guest != json_data['is_guest']:
                 user.is_guest = json_data['is_guest']
                 user.save()
+            if user.username != json_data['username']:
+                user.username = json_data['username']
+                user.save()
         except Users.DoesNotExist:
             user = Users.objects.create(**json_data)
         request.user.id = user.id
