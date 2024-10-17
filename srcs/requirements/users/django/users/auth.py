@@ -69,7 +69,7 @@ class IsAuthenticated(permissions.BasePermission):
 def get_user(request=None, id=None):
     if id is None:
         if request is None:
-            raise serializers.ValidationError({'error': 'Request is required.'})
+            raise serializers.ValidationError({'detail': 'Request is required.'})
         id = request.user.id
     return Users.objects.get(pk=id)
 

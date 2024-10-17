@@ -8,7 +8,7 @@ from rest_framework.exceptions import AuthenticationFailed
 
 def requests_users(request, enpoint: Literal['me/', 'validate/chat/'], method: Literal['GET', 'PUT', 'PATCH', 'DELETE'], data=None):
     if request is None:
-        raise serializers.ValidationError({'error': 'Request is required.'})
+        raise serializers.ValidationError({'detail': 'Request is required.'})
     token = request.headers.get('Authorization')
     if token is None:
         raise AuthenticationFailed('Authentication credentials were not provided.')
@@ -48,5 +48,5 @@ class IsAuthenticated(permissions.BasePermission):
 
 def get_auth_user(request=None):
     if request is None:
-        raise serializers.ValidationError({'error': 'Request is required.'})
+        raise serializers.ValidationError({'detail': 'Request is required.'})
     return request.data['auth_user']
