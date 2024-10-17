@@ -1,6 +1,6 @@
 #!/bin/bash
 
-pip install -r requirements.txt
+sleep 5 # Replace with a healthcheck
 python manage.py makemigrations
 python manage.py migrate
 
