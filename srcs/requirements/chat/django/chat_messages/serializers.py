@@ -13,7 +13,7 @@ class MessagesSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         pk = self.context.get('pk')
         if pk is None:
-            raise serializers.ValidationError({'error': 'Chat id is required'})
+            raise serializers.ValidationError({'detail': 'Chat id is required'})
         if not Chats.objects.filter(pk=pk).exists():
             raise serializers.ValidationError({'chat_id': 'Chat does not exist.'})
         user = self.context['auth_user']
