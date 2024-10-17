@@ -2,5 +2,5 @@
 vscode
 *.pyc
 .zed
-*.txt
+**db.sqlite3
 __pycache__
