@@ -12,6 +12,7 @@ VOLS		:=	\
 				auth-db\
 				chat-db\
 				game-db\
+				matchmaking-db\
 				users-db\
 
 VOLS_PATH	:=	$(HOME)/transcendence/
