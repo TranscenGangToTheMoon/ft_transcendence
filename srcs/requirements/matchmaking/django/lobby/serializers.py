@@ -72,7 +72,7 @@ class LobbySerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
 
 
-class LobbyParticipantsSerializer(serializers.ModelSerializer):
+class ParticipantsSerializer(serializers.ModelSerializer):
     is_admin = serializers.BooleanField(read_only=True)
 
     class Meta:

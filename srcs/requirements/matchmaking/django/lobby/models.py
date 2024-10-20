@@ -4,7 +4,7 @@ from lobby.static import team_a, team_b, team_spectator, match_type_1v1
 
 
 class Lobby(models.Model):
-    code = models.CharField(max_length=5, unique=True, editable=False)
+    code = models.CharField(max_length=4, unique=True, editable=False)
     max_participants = models.IntegerField(editable=False) # 3 or 6
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     game_mode = models.CharField(max_length=11) # clash, custom_game
@@ -22,16 +22,11 @@ class Lobby(models.Model):
         return 3
 
     @property
-    def participants(self):
-        return LobbyParticipants.objects.filter(lobby_id=self.id)
-
-    @property
     def teams_count(self):
-        participants = self.participants
         result = {
-            team_a: participants.filter(team=team_a).count(),
-            team_b: participants.filter(team=team_b).count(),
-            team_spectator: participants.filter(team=team_a).count()
+            team_a: self.participants.filter(team=team_a).count(),
+            team_b: self.participants.filter(team=team_b).count(),
+            team_spectator: self.participants.filter(team=team_a).count()
         }
         return result
 
@@ -41,7 +36,7 @@ class Lobby(models.Model):
 
 
 class LobbyParticipants(models.Model):
-    lobby = models.ForeignKey(Lobby, on_delete=models.CASCADE)
+    lobby = models.ForeignKey(Lobby, on_delete=models.CASCADE, related_name='participants')
     lobby_code = models.CharField(max_length=5, editable=False)
     user_id = models.IntegerField(unique=True)
     username = models.CharField(max_length=20)
@@ -56,7 +51,7 @@ class LobbyParticipants(models.Model):
         is_admin = self.is_admin
         lobby = Lobby.objects.get(id=self.lobby.id)
         super().delete(using=using, keep_parents=keep_parents)
-        participants = LobbyParticipants.objects.filter(lobby_id=lobby.id)
+        participants = lobby.participants.all()
         if not participants.exists():
             lobby.delete()
         elif is_admin:
