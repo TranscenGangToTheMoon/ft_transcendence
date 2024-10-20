@@ -5,7 +5,6 @@ import requests
 from rest_framework import permissions, serializers
 from rest_framework.exceptions import AuthenticationFailed
 
-from block.models import Block
 from users.models import Users
 
 
@@ -55,6 +54,7 @@ class IsAuthenticated(permissions.BasePermission):
             user = Users.objects.get(id=json_data['id'])
             if user.is_guest != json_data['is_guest']:
                 user.is_guest = json_data['is_guest']
+                # todo remake
                 user.save()
             if user.username != json_data['username']:
                 user.username = json_data['username']
@@ -79,7 +79,7 @@ def validate_username(username, user):
         assert username is not None
         valide_username = Users.objects.get(username=username)
         assert valide_username.is_guest is False
-        assert not Block.objects.filter(user=valide_username, blocked=user).exists()
+        assert not valide_username.block.filter(blocked=user).exists()
     except (Users.DoesNotExist, AssertionError):
         raise serializers.ValidationError({'username': ['This user does not exist.']})
     return valide_username
