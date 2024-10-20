@@ -8,7 +8,6 @@ SRCS_D		:=	srcs
 SECRETS_D	:=	secrets/
 
 VOLS		:=	\
-				algo-stats-db\
 				auth-db\
 				chat-db\
 				game-db\

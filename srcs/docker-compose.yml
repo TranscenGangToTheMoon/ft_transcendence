@@ -1,16 +1,5 @@
 services:
 ##### ========== Django Projects ========================================= #####
-  algo-stats:
-    build: "requirements/algo-stats"
-    restart: always
-    ports:
-      - "8001:8000"
-    volumes:
-      - algo-stats-volume:/code
-    networks:
-      - transcendence-network
-      - algo-stats-network
-
   auth:
     build: "requirements/auth"
     depends_on:
@@ -86,18 +75,6 @@ services:
       - users-volume:/code
 
 ##### ========== Database ================================================ #####
-  algo-stats-db:
-    image: postgres:14
-    restart: always
-    volumes:
-      - algo-stats-db-volume:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_DB=postgres-algo-stats-db
-      - POSTGRES_USER=fguirama
-      - POSTGRES_PASSWORD=123456
-    networks:
-      - algo-stats-network
-
   auth-db:
     image: postgres:14
     restart: always
@@ -165,10 +142,6 @@ networks:
     driver: bridge
 
 ##### ========== DB to Django networks =================================== #####
-  algo-stats-network:
-    name: algo-stats-network
-    driver: bridge
-
   auth-network:
     name: auth-network
     driver: bridge
@@ -191,14 +164,6 @@ networks:
 
 volumes:
 ##### ========== Django Volumes ========================================== #####
-  algo-stats-volume:
-    name: algo-stats-volume
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: "requirements/algo-stats/django"
-
   auth-volume:
     name: auth-volume
     driver: local
@@ -248,14 +213,6 @@ volumes:
       device: "requirements/users/django"
 
 #####Database Volumes
-  algo-stats-db-volume:
-    name: algo-stats-db-volume
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: "$HOME/transcendence/algo-stats-db"
-
   auth-db-volume:
     name: auth-db-volume
     driver: local
