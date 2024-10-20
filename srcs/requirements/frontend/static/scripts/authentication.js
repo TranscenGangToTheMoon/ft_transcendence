@@ -39,7 +39,7 @@ function fillGuestPlaceHolder(){
 }
 
 document.getElementById('playDuel').addEventListener('click', async event => {
-    event.preventDefault(); //todo modify guest login
+    event.preventDefault();
     guestUsername = document.getElementById('playLoginField').value;
     if (!guestUsername)
     {
@@ -50,10 +50,13 @@ document.getElementById('playDuel').addEventListener('click', async event => {
         try {
             let data = await apiRequest(localStorage.getItem('temp_token'), `${baseAPIUrlusers}/me/`, "PATCH",
             undefined, undefined, {'username' : guestUsername});
-            if (data.password)
-                console.log('erreur de backend mais normalement ca marche')
             console.log(data);
-            untemporizeTokens();
+            if (!data.id)
+                document.getElementById('container').innerText = data.username;
+            else {
+                untemporizeTokens();
+                navigateTo();
+            }
         }
         catch (error){
             console.log('error on guest change', error);
@@ -62,7 +65,7 @@ document.getElementById('playDuel').addEventListener('click', async event => {
 })
 
 document.getElementById('playClash').addEventListener('click', async event => {
-    event.preventDefault(); //todo modify guest login 
+    event.preventDefault();
     guestUsername = document.getElementById('playLoginField').value;
     if (!guestUsername)
     {
@@ -74,9 +77,12 @@ document.getElementById('playClash').addEventListener('click', async event => {
             let data = await apiRequest(localStorage.getItem('temp_token'), `${baseAPIUrlusers}/me/`, "PATCH",
             undefined, undefined, {'username' : guestUsername});
             console.log(data);
-            if (data.password)
-                console.log('erreur de backend mais normalement ca marche')
-            untemporizeTokens();
+            if (!data.id)
+                document.getElementById('container').innerText = data.username;
+            else {
+                untemporizeTokens();
+                navigateTo();
+            }
         }
         catch (error){
             console.log('error on guest change', error);
