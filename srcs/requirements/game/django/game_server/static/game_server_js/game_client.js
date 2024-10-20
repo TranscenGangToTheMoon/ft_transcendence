@@ -5,7 +5,7 @@ import {Player} from './player.js';
 
 let url = `ws://${window.location.host}/game_server/`
 let socket = new WebSocket(url);
-
+// let auth_token = document.getElementById('auth_token').innerText;
 let start
 
 socket.onopen = function() {
