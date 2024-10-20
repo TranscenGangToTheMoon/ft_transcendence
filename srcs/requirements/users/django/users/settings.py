@@ -64,6 +64,8 @@ ROOT_URLCONF = 'users.urls'
 CORS_URLS_REGEX = r"^/api/.*"
 CORS_ALLOWED_ORIGINS = [ # todo useless if in production
     'http://localhost:8111',
+    'https://localhost:4443',
+    'http://localhost:4443',
     'https://localhost:8111',
 ]
 

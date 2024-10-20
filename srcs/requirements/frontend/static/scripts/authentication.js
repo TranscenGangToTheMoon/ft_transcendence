@@ -13,7 +13,7 @@ function loadGuest() {
     if (localStorage.getItem('temp_token'))
         return fillGuestPlaceHolder();
     getDataFromApi(undefined, `${baseAPIUrl}/auth/guest/`, "POST")
-        .then(data => {
+        .then (data => {
             if (data.access) {
                 localStorage.setItem('temp_refresh', data.refresh);
                 localStorage.setItem('temp_token', data.access);
@@ -22,24 +22,20 @@ function loadGuest() {
             else
                 console.log('error a gerer', data);
         })
-        .catch(error => {
-            console.log('error a gerer1', error);
-        })
+        .catch(error => console.log('error a gerer1', error))
 }
 
 function fillGuestPlaceHolder(){
     const guestLoginField = document.getElementById('playLoginField');
-    getDataFromApi(localStorage.getItem('temp_token'), `${baseAPIUrlusers}/me/`)
-        .then(data => {
+    getDataFromApi(getAccessToken(), `${baseAPIUrlusers}/me/`)
+        .then (data => {
             console.log(data);
-            if (data.username)
-                guestLoginField.placeholder = data.username;
-            else if (data.detail)
-                console.log('Error: ', data.detail);
+        if (data.username)
+            guestLoginField.placeholder = data.username;
+        else if (data.detail)
+            console.log('Error: ', data.detail);
         })
-        .catch(error => {
-            console.log('error a gerer1', error);
-        })
+    .catch(error => console.log('error a gerer', error))
 }
 
 document.getElementById('playDuel').addEventListener('click', async event => {
@@ -103,18 +99,6 @@ document.getElementById('switchButton').addEventListener('click', event => {
     }
 })
 
-function loginSuccess() {
-    removeTokens(true);
-    getDataFromApi(localStorage.getItem('token'), `${baseAPIUrlusers}/me/`)
-        .then(data => {
-            console.log('data received : ', data);
-            var username = data.username;
-            navigateTo('/');
-            document.getElementById('debugLoggedInfo').innerText = `<h1>page de jeu</h1> (logged as: ${username})`;
-        })
-        .catch(error => console.log('error a gerer', error));
-}
-
 document.getElementById("loginButton").addEventListener('click', event => {
     event.preventDefault();
     const loginButton = document.getElementById("loginButton");
@@ -136,12 +120,14 @@ document.getElementById("loginButton").addEventListener('click', event => {
         endpoint = `${baseAPIUrl}/auth/register/`;
         method = 'PUT';
     }
-    getDataFromApi(localStorage.getItem('temp_token'), endpoint, method, undefined, undefined, userInfo)
-        .then(data => {
+    getDataFromApi(getAccessToken(), endpoint, method, undefined, undefined, userInfo)
+        .then (data => {
+            console.log(data)
             if (data.access){
+                removeTokens();
                 localStorage.setItem('token', data.access);
                 localStorage.setItem('refresh', data.refresh);
-                return loginSuccess();
+                return navigateTo('/');
             }
             if (data.username) {
                 document.getElementById('container').innerText = data.username[0];
@@ -158,8 +144,13 @@ document.getElementById("loginButton").addEventListener('click', event => {
             else
                 console.log('error a gerer', data);
         })
-        .catch(error => console.log('error a gerer1', error));
+        .catch(error => console.log('error a gerer1', error))
 })
 
-// removeTokens(true);
+document.getElementById('deleteCredentials').addEventListener('click', event => {
+    event.preventDefault();
+    removeTokens();
+    loadGuest();
+})
+
 loadGuest();
