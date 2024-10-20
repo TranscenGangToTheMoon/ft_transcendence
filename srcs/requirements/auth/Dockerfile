@@ -1,13 +1,15 @@
 FROM        python:3.12.6-slim-bullseye
-LABEL       authors="basil"
 
 EXPOSE      8000
 
+COPY        requirements.txt /
+RUN         pip install -r requirements.txt
+
 WORKDIR     /code
 
-COPY        ./install_django.sh /
-RUN         chmod u+x /install_django.sh
 
-ENTRYPOINT  ["/install_django.sh"]
+COPY        entrypoint.sh /
+RUN         chmod u+x /entrypoint.sh
 
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+ENTRYPOINT  ["/entrypoint.sh"]
+CMD         ["python", "manage.py", "runserver", "0.0.0.0:8000"]

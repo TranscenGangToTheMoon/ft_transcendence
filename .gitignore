@@ -2,5 +2,5 @@
 vscode
 *.pyc
 .zed
-*.txt
 __pycache__
+.venv
