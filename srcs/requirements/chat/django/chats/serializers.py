@@ -20,7 +20,7 @@ class ChatsSerializer(serializers.ModelSerializer):
 
     def get_participants(self, obj):
         participants = []
-        for user in ChatParticipants.objects.filter(chat=obj.id):
+        for user in obj.chatparticipants_set.all():
             participants.append({'id': user.user_id, 'username': user.username})
         return participants
 

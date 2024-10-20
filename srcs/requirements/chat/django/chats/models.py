@@ -7,7 +7,7 @@ class Chats(models.Model):
 
 
 class ChatParticipants(models.Model):
-    chat = models.ForeignKey(Chats, on_delete=models.CASCADE)
+    chat = models.ForeignKey(Chats, on_delete=models.CASCADE, related_name='participants')
     user_id = models.IntegerField() # todo send user delete
     username = models.CharField(max_length=20) # todo send user rename
     # todo option for delete chat only for one user
