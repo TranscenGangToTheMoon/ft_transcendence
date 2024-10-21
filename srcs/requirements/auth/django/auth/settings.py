@@ -65,6 +65,8 @@ ROOT_URLCONF = 'auth.urls'
 CORS_URLS_REGEX = r"^/api/.*"
 CORS_ALLOWED_ORIGINS = [ # todo useless if in production
     'http://localhost:8111',
+    'https://localhost:4443',
+    'http://localhost:4443',
     'https://localhost:8111',
 ]
 
@@ -93,7 +95,7 @@ WSGI_APPLICATION = 'auth.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'auth-db',
+        'NAME': 'postgres-auth-db',
         'USER': 'fguirama',
         'PASSWORD': '123456',
         'HOST': 'auth-db',
@@ -153,5 +155,8 @@ REST_FRAMEWORK = {
 SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ['Bearer'],
     'ACCESS_TOKEN_LIFETIME': timedelta(hours=1),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'UPDATE_LAST_LOGIN': True,
 }

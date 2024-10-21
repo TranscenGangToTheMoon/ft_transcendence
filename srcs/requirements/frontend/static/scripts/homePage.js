@@ -1,24 +1,36 @@
 function checkAuthentication(){
-    if (!localStorage.getItem('token'))
-        navigateTo("login");
+    if (getAccessToken(true) !== 'token'){
+        navigateTo("/login");
+        removeTokens();
+        return false;
+    }
+    return true;
 }
 
 document.getElementById('logoutButton').addEventListener('click', () => {
-    getDataFromApi(undefined, `${baseAPIUrl}/auth/guest/`, "POST")
-        .then(data => {
-            if (data.access) {
-                removeTokens();
-                localStorage.setItem('temp_refresh', data.refresh);
-                localStorage.setItem('temp_token', data.access);
-                navigateTo('/login');
-                // fillGuestPlaceHolder();
-            }
-            else
-                console.log('error a gerer', data);
+    relog();
+})
+
+document.getElementById('testRefresh').addEventListener('click', event => {
+    event.preventDefault();
+    getDataFromApi(localStorage.getItem('token'), `${baseAPIUrlusers}/me/`)
+        .then (data => {
+            console.log(data);
         })
-        .catch(error => {
-            console.log('error a gerer1', error);
+        .catch (error => {
+            console.log( error);
         })
 })
 
-checkAuthentication();
+function printDebug(){
+    getDataFromApi(getAccessToken(), `${baseAPIUrlusers}/me/`)
+        .then(data => {
+            if (data.username)
+                document.getElementById('debugLoggedInfo').innerText = `(logged as ${data.username})`;
+            else console.log('error a gerer', data);
+        })
+        .catch(error => console.log('error a gerer', error));
+}
+
+if (checkAuthentication())
+    printDebug();

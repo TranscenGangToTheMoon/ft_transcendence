@@ -7,15 +7,15 @@ RUN apt-get update
 RUN apt-get upgrade
 RUN apt-get install -y --no-install-recommends curl net-tools
 
-COPY /django/requirements.txt /
-RUN pip install -r requirements.txt
+COPY        requirements.txt /
+RUN         pip install -r requirements.txt
 
-WORKDIR /code
+WORKDIR     /code
 
-# RUN daphne game.asgi:application
+# RUN       daphne game.asgi:application
 
-COPY entrypoint.sh /
-RUN chmod u+x /entrypoint.sh
+COPY        entrypoint.sh /
+RUN         chmod u+x /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]

@@ -3,3 +3,4 @@ vscode
 *.pyc
 .zed
 __pycache__
+.venv

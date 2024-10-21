@@ -64,6 +64,8 @@ ROOT_URLCONF = 'users.urls'
 CORS_URLS_REGEX = r"^/api/.*"
 CORS_ALLOWED_ORIGINS = [ # todo useless if in production
     'http://localhost:8111',
+    'https://localhost:4443',
+    'http://localhost:4443',
     'https://localhost:8111',
 ]
 
@@ -92,7 +94,7 @@ WSGI_APPLICATION = 'users.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'users-db',
+        'NAME': 'postgres-users-db',
         'USER': 'fguirama',
         'PASSWORD': '123456',
         'HOST': 'users-db',

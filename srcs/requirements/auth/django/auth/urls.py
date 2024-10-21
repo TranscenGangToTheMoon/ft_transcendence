@@ -14,7 +14,7 @@ urlpatterns = [
     path('api/auth/delete/', delete_view, name='api-auth-delete-user'),
     path('api/auth/register/', register_view, name='api-auth-register'),
     path('api/auth/login/', token_obtain_pair, name='api-auth-login'),
-    path('api/auth/refresh', token_refresh, name='api-auth-token-refresh'),
+    path('api/auth/refresh/', token_refresh, name='api-auth-token-refresh'),
     path('api/auth/verify/', token_verify, name='api-auth-token-verify'),
     path('auth/admin/', admin.site.urls),
 ]

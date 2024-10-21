@@ -1,11 +1,11 @@
 const baseAPIUrl = "http://localhost:8000/api"
-const baseAPIUrlusers = "http://localhost:8006/api/users"
+const baseAPIUrlusers = "http://localhost:8005/api/users"
 
 window.baseAPIUrl = baseAPIUrl;
 window.baseAPIUrlusers = baseAPIUrlusers;
 
 function apiRequest(token, endpoint, method="GET", authType="Bearer",
-    contentType="application/json", body=undefined){ 
+    contentType="application/json", body=undefined, currentlyRefreshing=false){ 
     let options = {
         method: method,
         headers: {
@@ -16,14 +16,64 @@ function apiRequest(token, endpoint, method="GET", authType="Bearer",
         options.headers["Authorization"] = `${authType} ${token}`;
     if (body)
         options.body = JSON.stringify(body);
-    console.log(endpoint, options)
+    // console.log(endpoint, options)
     return fetch(endpoint, options)
-        .then(response => {
-            return response.json();
+        .then(async response => {
+            let data = await response.json();
+            if (data.code === 'token_not_valid') {
+                if (currentlyRefreshing)
+                    return {};
+                token = await refreshToken(token);
+                if (token) {
+                    console.log('done, reposting request');
+                    return apiRequest(token, endpoint, method, authType, contentType, body);
+                }
+            }
+            return data;
         })
         .catch(error =>{
             throw error;
         })
+}
+
+function relog() {
+    removeTokens();
+    navigateTo('/login');
+}
+
+async function reloadTempToken() {
+    let data = await apiRequest(undefined, `${baseAPIUrl}/auth/guest/`, 'POST')
+    if (data.access){
+        localStorage.setItem('temp_token', data.access);
+        return data.access;
+    }
+    else
+        console.log('error a gerer', data);
+}
+
+async function refreshToken(token) {
+    var refresh = getRefreshToken();
+    try {
+        console.log('token expired. refreshing.')
+        let data = await apiRequest(token, `${baseAPIUrl}/auth/refresh/`, 'POST', undefined, undefined, {'refresh':refresh}, true)
+        if (data.access) {
+            token = data.access;
+            localStorage.setItem(getAccessToken(true), token);
+            // localStorage.setItem(getRefreshToken(true), token);
+            return token;
+        }
+        else {
+            if (getAccessToken(true) === 'temp_token'){
+                return reloadTempToken();
+            }
+            console.log('refresh token expired must relog')
+            relog();
+            return undefined;
+        }
+    }
+    catch (error) {
+        console.log("ERROR", error);
+    }
 }
 
 async function getDataFromApi(token, endpoint, method="GET", authType="Bearer",
@@ -33,33 +83,55 @@ async function getDataFromApi(token, endpoint, method="GET", authType="Bearer",
         return data;
     }
     catch (error) {
-        console.log(error);
         throw error;
     }
 }
 
-function removeTokens(temp=false) {
-    if (temp)
-    {
-        localStorage.removeItem('temp_token');
-        localStorage.removeItem('temp_refresh');
+function getAccessToken(name = false) {
+    let token = localStorage.getItem('token');
+    if (!token){
+        token = localStorage.getItem('temp_token');
+        if (name && token)
+            return 'temp_token';
+        else if (name)
+            return '';
     }
-    else{
-        localStorage.removeItem('token');
-        localStorage.removeItem('refresh');
+    else if (name)
+        return 'token';
+    return token;
+}
+
+function getRefreshToken(name = false) {
+    let token = localStorage.getItem('refresh');
+    if (!token){
+        if (name)
+            return 'temp_refresh';
+        token = localStorage.getItem('temp_refresh');
     }
+    else if (name)
+        return 'refresh';
+    return token;
+}
+
+function removeTokens() {
+    localStorage.removeItem(getAccessToken(true));
+    localStorage.removeItem(getRefreshToken(true));
 }
 
 function untemporizeTokens() {
     localStorage.setItem('token', localStorage.getItem('temp_token'));
     localStorage.setItem('refresh', localStorage.getItem('temp_refresh'));
-    removeTokens(true);
+    localStorage.removeItem('temp_refresh');
+    localStorage.removeItem('temp_token');
 }
 
 window.apiRequest = apiRequest;
 window.getDataFromApi = getDataFromApi;
 window.removeTokens = removeTokens;
 window.untemporizeTokens = untemporizeTokens;
+window.refreshToken = refreshToken;
+window.getAccessToken = getAccessToken;
+window.getRefreshToken = getRefreshToken;
 
 
 function loadScript(scriptSrc) {
