@@ -25,7 +25,7 @@ class FriendRequestsSerializer(serializers.ModelSerializer):
         sender = get_user(self.context.get('request'))
 
         if FriendRequests.objects.filter(sender=sender.pk).count() > 20:
-            raise serializers.ValidationError({'error': 'You cannot send more than 20 friend requests at the same time.'})
+            raise serializers.ValidationError({'detail': 'You cannot send more than 20 friend requests at the same time.'})
 
         receiver = validate_username(validated_data.pop('username'), sender)
 

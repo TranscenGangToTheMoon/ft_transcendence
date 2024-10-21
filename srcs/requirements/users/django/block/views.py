@@ -4,16 +4,16 @@ from block.models import Block
 from block.serializers import BlockSerializer
 
 
-class FriendRequestsMixin(generics.GenericAPIView):
+class BlockMixin(generics.GenericAPIView):
     queryset = Block.objects.all()
     serializer_class = BlockSerializer
 
 
-class BlockListCreateView(generics.ListCreateAPIView, FriendRequestsMixin):
+class BlockListCreateView(generics.ListCreateAPIView, BlockMixin):
     pass
 
 
-class BlockDeleteView(generics.DestroyAPIView, FriendRequestsMixin):
+class BlockDeleteView(generics.DestroyAPIView, BlockMixin):
     lookup_field = 'pk'
 
 

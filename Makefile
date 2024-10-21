@@ -12,6 +12,7 @@ VOLS		:=	\
 				auth-db\
 				chat-db\
 				game-db\
+				matchmaking-db\
 				users-db\
 
 VOLS_PATH	:=	$(HOME)/transcendence/
@@ -81,8 +82,8 @@ secrets		:
 			openssl rand -hex -out ./secrets/db_root_pass 32
 			openssl rand -hex -out ./secrets/wp_admin_pass 32
 fclean		:
-			# docker run --rm -v $(HOME)/data:/data debian:11 bash -c "rm -rf /data/database/*  /data/wordpress/*"
-			# docker run --rm -v $(HOME)/data:/data busybox sh -c "rm -rf /data/database/* /data/wordpress/*"
+			docker run --rm -v $(VOLS_PATH):/transcendence busybox sh -c "rm -rf transcendence/*"
+			rm -rf $(VOLS_PATH)
 			docker image prune -af
 			$(COMPOSE) $(FLAGS) down -v --rmi all
 			rm -rf $(SECRETS_D)

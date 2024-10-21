@@ -27,6 +27,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     'localhost',
+    'users',
 ]
 
 
@@ -41,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'block',
+    'corsheaders',
     'friend_requests',
     'friends',
     'profile_pictures',
@@ -50,6 +52,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -58,6 +61,13 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'users.urls'
+CORS_URLS_REGEX = r"^/api/.*"
+CORS_ALLOWED_ORIGINS = [ # todo useless if in production
+    'http://localhost:8111',
+    'https://localhost:4443',
+    'http://localhost:4443',
+    'https://localhost:8111',
+]
 
 TEMPLATES = [
     {
@@ -84,7 +94,7 @@ WSGI_APPLICATION = 'users.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'users_db',
+        'NAME': 'postgres-users-db',
         'USER': 'fguirama',
         'PASSWORD': '123456',
         'HOST': 'users-db',

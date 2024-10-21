@@ -3,4 +3,4 @@ vscode
 *.pyc
 .zed
 __pycache__
-**db.sqlite3
+.venv

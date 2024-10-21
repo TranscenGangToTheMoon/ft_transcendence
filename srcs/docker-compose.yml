@@ -8,8 +8,8 @@ services:
     volumes:
       - algo-stats-volume:/code
     networks:
-      - algo-stats-network
       - transcendence-network
+      - algo-stats-network
 
   auth:
     build: "requirements/auth"
@@ -60,11 +60,14 @@ services:
 
   matchmaking:
     build: "requirements/matchmaking"
+    depends_on:
+      - matchmaking-db
     restart: on-failure
     ports:
       - "8003:8000"
     networks:
       - transcendence-network
+      - matchmaking-network
     volumes:
       - matchmaking-volume:/code
 
@@ -89,7 +92,7 @@ services:
     volumes:
       - algo-stats-db-volume:/var/lib/postgresql/data
     environment:
-      - POSTGRES_DB=algo_stats_db
+      - POSTGRES_DB=postgres-algo-stats-db
       - POSTGRES_USER=fguirama
       - POSTGRES_PASSWORD=123456
     networks:
@@ -101,7 +104,7 @@ services:
     volumes:
       - auth-db-volume:/var/lib/postgresql/data
     environment:
-      - POSTGRES_DB=auth_db
+      - POSTGRES_DB=postgres-auth-db
       - POSTGRES_USER=fguirama
       - POSTGRES_PASSWORD=123456
     networks:
@@ -113,7 +116,7 @@ services:
     volumes:
       - chat-db-volume:/var/lib/postgresql/data
     environment:
-      - POSTGRES_DB=chat_db
+      - POSTGRES_DB=postgres-chat-db
       - POSTGRES_USER=fguirama
       - POSTGRES_PASSWORD=123456
     networks:
@@ -125,11 +128,23 @@ services:
     volumes:
       - game-db-volume:/var/lib/postgresql/data
     environment:
-      - POSTGRES_DB=game_db
+      - POSTGRES_DB=postgres-game-db
       - POSTGRES_USER=fguirama
       - POSTGRES_PASSWORD=123456
     networks:
       - game-network
+
+  matchmaking-db:
+    image: postgres:14
+    restart: always
+    volumes:
+      - matchmaking-db-volume:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=postgres-matchmaking-db
+      - POSTGRES_USER=fguirama
+      - POSTGRES_PASSWORD=123456
+    networks:
+      - matchmaking-network
 
   users-db:
     image: postgres:14
@@ -137,7 +152,7 @@ services:
     volumes:
       - users-db-volume:/var/lib/postgresql/data
     environment:
-      - POSTGRES_DB=users_db
+      - POSTGRES_DB=postgres-users-db
       - POSTGRES_USER=fguirama
       - POSTGRES_PASSWORD=123456
     networks:
@@ -164,6 +179,10 @@ networks:
 
   game-network:
     name: game-network
+    driver: bridge
+
+  matchmaking-network:
+    name: matchmaking-network
     driver: bridge
 
   users-network:
@@ -260,6 +279,14 @@ volumes:
       type: none
       o: bind
       device: "$HOME/transcendence/game-db"
+
+  matchmaking-db-volume:
+    name: matchmaking-db-volume
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: "$HOME/transcendence/matchmaking-db"
 
   users-db-volume:
     name: users-db-volume

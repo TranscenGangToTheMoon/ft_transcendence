@@ -38,7 +38,7 @@ def auth_verify(token):
 
 
 def auth_update(token, data):
-    return requests_auth(token, 'update/', method='PUT', data=json.dumps(data))
+    return requests_auth(token, 'update/', method='PATCH', data=json.dumps(data))
 
 
 def auth_delete(token, data):
@@ -54,7 +54,11 @@ class IsAuthenticated(permissions.BasePermission):
         try:
             user = Users.objects.get(id=json_data['id'])
             if user.is_guest != json_data['is_guest']:
-                user.update(is_guest=json_data['is_guest'])
+                user.is_guest = json_data['is_guest']
+                user.save()
+            if user.username != json_data['username']:
+                user.username = json_data['username']
+                user.save()
         except Users.DoesNotExist:
             user = Users.objects.create(**json_data)
         request.user.id = user.id
@@ -65,7 +69,7 @@ class IsAuthenticated(permissions.BasePermission):
 def get_user(request=None, id=None):
     if id is None:
         if request is None:
-            raise serializers.ValidationError({'error': 'Request is required.'})
+            raise serializers.ValidationError({'detail': 'Request is required.'})
         id = request.user.id
     return Users.objects.get(pk=id)
 
