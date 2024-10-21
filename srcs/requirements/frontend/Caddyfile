@@ -7,27 +7,27 @@ localhost:443 {
 
 	# API route to micro-services
 	handle /api/algo-stats/* {
-		reverse_proxy http://localhost:8001
+		reverse_proxy http://algo-stats:8000
 	}
 
 	handle /api/auth/* {
-		reverse_proxy http://auth:8002
+		reverse_proxy http://auth:8000
 	}
 
 	handle /api/chat/* {
-		reverse_proxy http://localhost:8003
+		reverse_proxy http://chat:8000
 	}
 
 	handle /api/game/* {
-		reverse_proxy http://localhost:8004
+		reverse_proxy http://game:8000
 	}
 
 	handle /api/matchmaking/* {
-		reverse_proxy http://localhost:8005
+		reverse_proxy http://matchmaking:8000
 	}
 
 	handle /api/users/* {
-		reverse_proxy http://localhost:8006
+		reverse_proxy http://users:8000
 	}
 
 	# tls self_signed

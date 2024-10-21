@@ -41,6 +41,8 @@ services:
     build: "requirements/frontend"
     ports:
       - "4443:443"
+    networks:
+      - transcendence-network
     volumes:
       - frontend-volume:/var/www/html
       - ./requirements/frontend/Caddyfile:/etc/caddy/Caddyfile #Do copy when project is finished HUGE SECURITY FAIL
