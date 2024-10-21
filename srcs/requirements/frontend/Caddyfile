@@ -1,28 +1,39 @@
 localhost:443 {
-	handle /api/auth/* {
-		reverse_proxy auth:8002
-	}
 	handle {
 		root * /var/www/html
 		try_files /index.html
 		file_server browse
 	}
+
+	# API route to micro-services
+	handle /api/algo-stats/* {
+		reverse_proxy http://localhost:8001
+	}
+
+	handle /api/auth/* {
+		reverse_proxy http://auth:8002
+	}
+
+	handle /api/chat/* {
+		reverse_proxy http://localhost:8003
+	}
+
+	handle /api/game/* {
+		reverse_proxy http://localhost:8004
+	}
+
+	handle /api/matchmaking/* {
+		reverse_proxy http://localhost:8005
+	}
+
+	handle /api/users/* {
+		reverse_proxy http://localhost:8006
+	}
+
+	# tls self_signed
+
+	# @http {
+	# 	protocol http
+	# }
+	# redir @http https://{host}{uri}
 }
-
-# https://localhost:443 {
-#     redir https://localhost:443{uri}
-# }
-
-# https://localhost:443/api/algo-stats {
-#     # respond "Hello"
-#     reverse_proxy algo-stats:8001
-# }
-
-
-# https://localhost:443/api/auth/* {
-# 	reverse_proxy auth:8002
-# }
-# localhost:443/api/chat
-# localhost:443/api/game
-# localhost:443/api/matchmaking
-# localhost:443/api/users
