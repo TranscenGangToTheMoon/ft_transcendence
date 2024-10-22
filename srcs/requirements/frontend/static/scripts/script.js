@@ -1,5 +1,5 @@
-const baseAPIUrl = "http://localhost:8000/api"
-const baseAPIUrlusers = "http://localhost:8005/api/users"
+const baseAPIUrl = "https://localhost:4443/api"
+const baseAPIUrlusers = "https://localhost:4443/api/users"
 
 window.baseAPIUrl = baseAPIUrl;
 window.baseAPIUrlusers = baseAPIUrlusers;
