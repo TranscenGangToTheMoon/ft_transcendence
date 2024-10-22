@@ -1,7 +1,7 @@
 localhost:443 {
 	handle {
 		root * /var/www/html
-		try_files /index.html
+		try_files {uri} /index.html
 		file_server browse
 	}
 

@@ -1,8 +1,11 @@
-const baseAPIUrl = "http://localhost:8000/api"
-const baseAPIUrlusers = "http://localhost:8005/api/users"
+// ========================== GLOBAL VALUES ==========================
 
+const baseAPIUrl = "https://localhost:4443/api"
+let userInformations = undefined;
 window.baseAPIUrl = baseAPIUrl;
-window.baseAPIUrlusers = baseAPIUrlusers;
+window.userInformations = userInformations;
+
+// ========================== API REQUESTS ==========================
 
 function apiRequest(token, endpoint, method="GET", authType="Bearer",
     contentType="application/json", body=undefined, currentlyRefreshing=false){ 
@@ -16,9 +19,12 @@ function apiRequest(token, endpoint, method="GET", authType="Bearer",
         options.headers["Authorization"] = `${authType} ${token}`;
     if (body)
         options.body = JSON.stringify(body);
-    // console.log(endpoint, options)
+    console.log(endpoint, options)
     return fetch(endpoint, options)
         .then(async response => {
+            if (!response.ok && response.status > 499){
+                throw {code: response.status};
+            }
             let data = await response.json();
             if (data.code === 'token_not_valid') {
                 if (currentlyRefreshing)
@@ -32,23 +38,56 @@ function apiRequest(token, endpoint, method="GET", authType="Bearer",
             return data;
         })
         .catch(error =>{
+            if (error.code || error.message === 'Failed to fetch')
+                document.getElementById('container').innerText = `alala pas bien ${error.code? `: ${error.code}` : ''} (jcrois c'est pas bon)`;
             throw error;
         })
 }
 
-function relog() {
-    removeTokens();
-    navigateTo('/login');
+async function getDataFromApi(token, endpoint, method="GET", authType="Bearer",
+    contentType="application/json", body=undefined){
+    try {
+        let data = await apiRequest(token, endpoint, method, authType, contentType, body);
+        return data;
+    }
+    catch (error) {
+        throw error;
+    }
 }
 
+window.apiRequest = apiRequest;
+window.getDataFromApi = getDataFromApi;
+    
+// ========================== TOKEN UTILS ==========================
 async function reloadTempToken() {
-    let data = await apiRequest(undefined, `${baseAPIUrl}/auth/guest/`, 'POST')
-    if (data.access){
-        localStorage.setItem('temp_token', data.access);
-        return data.access;
+    try {
+        let data = await apiRequest(undefined, `${baseAPIUrl}/auth/guest/`, 'POST')
+        if (data.access){
+            localStorage.setItem('temp_token', data.access);
+            return data.access;
+        }
+        else
+            console.log('error a gerer', data);
     }
-    else
-        console.log('error a gerer', data);
+    catch (error) {
+        console.log('error a gerer', error);
+    }
+}
+
+async function generateGuestToken() {
+    try {
+        let data = await apiRequest(undefined, `${baseAPIUrl}/auth/guest/`, "POST");
+        console.log(data)
+        if (data.access) {
+            localStorage.setItem('token', data.access);
+            localStorage.setItem('refresh', data.refresh);
+        }
+        else
+            console.log('error a gerer', data);
+    }
+    catch(error){
+        console.log('error a gerer', error)
+    }
 }
 
 async function refreshToken(token) {
@@ -73,17 +112,6 @@ async function refreshToken(token) {
     }
     catch (error) {
         console.log("ERROR", error);
-    }
-}
-
-async function getDataFromApi(token, endpoint, method="GET", authType="Bearer",
-    contentType="application/json", body=undefined){
-    try {
-        let data = await apiRequest(token, endpoint, method, authType, contentType, body);
-        return data;
-    }
-    catch (error) {
-        throw error;
     }
 }
 
@@ -125,14 +153,18 @@ function untemporizeTokens() {
     localStorage.removeItem('temp_token');
 }
 
-window.apiRequest = apiRequest;
-window.getDataFromApi = getDataFromApi;
+function relog() {
+    removeTokens();
+    navigateTo('/login');   
+}
 window.removeTokens = removeTokens;
 window.untemporizeTokens = untemporizeTokens;
 window.refreshToken = refreshToken;
 window.getAccessToken = getAccessToken;
 window.getRefreshToken = getRefreshToken;
+window.generateGuestToken = generateGuestToken;
 
+// ========================== SPA SCRIPTS ==========================
 
 function loadScript(scriptSrc) {
     const script = document.createElement('script');
@@ -144,6 +176,19 @@ function loadScript(scriptSrc) {
         console.error(`Error while loading script ${scriptSrc}.`);
     };
     document.body.appendChild(script);
+}
+
+function loadCSS(cssHref) {
+    const existingLink = document.querySelector('link[dynamic-css]');
+    if (existingLink) {
+        existingLink.remove();
+    }
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = cssHref;
+    link.setAttribute('dynamic-css', 'true');
+    document.head.appendChild(link);
+    console.log(`Style ${cssHref} loaded.`)
 }
 
 async function loadContent(url) {
@@ -160,6 +205,15 @@ async function loadContent(url) {
         const script = contentDiv.querySelector('[script]');
         if (script)
             loadScript(script.getAttribute('script'));
+        let style;
+        console.log(userInformations);
+        if (!userInformations || !userInformations.is_guest)
+            style = '_style'
+        else if (userInformations.is_guest)
+            style = 'guestStyle'
+        css = contentDiv.querySelector(`[${style}]`);
+        if (css)
+            loadCSS(css.getAttribute(style));
     } catch (error) {
         contentDiv.innerHTML = '<h1>Erreur 404 : Page non trouvée</h1>';
     }
@@ -192,6 +246,25 @@ document.addEventListener('click', event => {
     }
 });
 
-// window.addEventListener('popstate', handleRoute);
+// ========================== OTHER UTILS ==========================
 
-handleRoute();
+async function fetchUserInfos(forced=false) {
+    if (!getAccessToken())
+        return;
+    if (!userInformations || forced) {
+        try {
+            let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/users/me/`);
+            userInformations = data;
+        }
+        catch (error) {
+            console.log(error);
+        }
+    }
+}
+
+async function atStart() {
+    await fetchUserInfos();
+    handleRoute();
+}
+
+atStart();

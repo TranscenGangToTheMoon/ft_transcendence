@@ -1,10 +1,6 @@
-function checkAuthentication(){
-    if (getAccessToken(true) !== 'token'){
-        navigateTo("/login");
-        removeTokens();
-        return false;
-    }
-    return true;
+async function checkAuthentication(){
+    if (!getAccessToken())
+        await generateGuestToken();
 }
 
 document.getElementById('logoutButton').addEventListener('click', () => {
@@ -13,24 +9,35 @@ document.getElementById('logoutButton').addEventListener('click', () => {
 
 document.getElementById('testRefresh').addEventListener('click', event => {
     event.preventDefault();
-    getDataFromApi(localStorage.getItem('token'), `${baseAPIUrlusers}/me/`)
-        .then (data => {
-            console.log(data);
-        })
-        .catch (error => {
-            console.log( error);
-        })
+    getDataFromApi(localStorage.getItem('token'), `${baseAPIUrl}/users/me/`)
+    .then (data => {
+        console.log(data);
+    })
+    .catch (error => {
+        console.log( error);
+    })
 })
 
 function printDebug(){
-    getDataFromApi(getAccessToken(), `${baseAPIUrlusers}/me/`)
-        .then(data => {
-            if (data.username)
-                document.getElementById('debugLoggedInfo').innerText = `(logged as ${data.username})`;
-            else console.log('error a gerer', data);
-        })
-        .catch(error => console.log('error a gerer', error));
+    document.getElementById('debugLoggedInfo').innerText = `(logged as ${userInformations.username})`;
 }
 
-if (checkAuthentication())
+document.getElementById('delete').addEventListener('click', event => {
+    event.preventDefault();
+    console.log('delete');
+    removeTokens();
+})
+
+// NAVIGAtORS
+
+// document.getElementById('duel').addEventListener('click', event => {
+//     navigateTo
+// })
+
+async function atStart() {
+    await fetchUserInfos();
+    checkAuthentication();
     printDebug();
+}
+
+atStart();

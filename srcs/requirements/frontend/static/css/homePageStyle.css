@@ -1,0 +1,8 @@
+button {
+    transition: ease-in-out 0.3s;
+}
+
+button:hover {
+    background-color: purple;
+    transform: scale(1.3);
+}

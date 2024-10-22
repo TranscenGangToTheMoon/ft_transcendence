@@ -7,9 +7,9 @@ function changePlayFieldValue(login){
 }
 
 function loadGuest() {
-    if (localStorage.getItem('token')){
-        return navigateTo('/');
-    }
+    // if (localStorage.getItem('token')){
+    //     return navigateTo('/');
+    // }
     if (localStorage.getItem('temp_token'))
         return fillGuestPlaceHolder();
     getDataFromApi(undefined, `${baseAPIUrl}/auth/guest/`, "POST")
@@ -22,12 +22,12 @@ function loadGuest() {
             else
                 console.log('error a gerer', data);
         })
-        .catch(error => console.log('error a gerer1', error))
+        .catch(error => console.log('error a gerer', error))
 }
 
 function fillGuestPlaceHolder(){
     const guestLoginField = document.getElementById('playLoginField');
-    getDataFromApi(getAccessToken(), `${baseAPIUrlusers}/me/`)
+    getDataFromApi(getAccessToken(), `${baseAPIUrl}/users/me/`)
         .then (data => {
             console.log(data);
         if (data.username)
@@ -41,14 +41,14 @@ function fillGuestPlaceHolder(){
 document.getElementById('playDuel').addEventListener('click', async event => {
     event.preventDefault();
     guestUsername = document.getElementById('playLoginField').value;
-    if (!guestUsername)
+    if (!guestUsername && getAccessToken)
     {
         untemporizeTokens();
-        return navigateTo()
+        return navigateTo();
     }
     if (guestUsername) {
         try {
-            let data = await apiRequest(localStorage.getItem('temp_token'), `${baseAPIUrlusers}/me/`, "PATCH",
+            let data = await apiRequest(localStorage.getItem('temp_token'), `${baseAPIUrl}/users/me/`, "PATCH",
             undefined, undefined, {'username' : guestUsername});
             console.log(data);
             if (!data.id)
@@ -67,14 +67,14 @@ document.getElementById('playDuel').addEventListener('click', async event => {
 document.getElementById('playClash').addEventListener('click', async event => {
     event.preventDefault();
     guestUsername = document.getElementById('playLoginField').value;
-    if (!guestUsername)
+    if (!guestUsername && getAccessToken)
     {
         untemporizeTokens();
-        return navigateTo()
+        return navigateTo();
     }
     if (guestUsername) {
         try {
-            let data = await apiRequest(localStorage.getItem('temp_token'), `${baseAPIUrlusers}/me/`, "PATCH",
+            let data = await apiRequest(localStorage.getItem('temp_token'), `${baseAPIUrl}/users/me/`, "PATCH",
             undefined, undefined, {'username' : guestUsername});
             console.log(data);
             if (!data.id)
@@ -127,13 +127,14 @@ document.getElementById("loginButton").addEventListener('click', event => {
         method = 'PUT';
     }
     getDataFromApi(getAccessToken(), endpoint, method, undefined, undefined, userInfo)
-        .then (data => {
+        .then (async data => {
             console.log(data)
             if (data.access){
                 removeTokens();
                 localStorage.setItem('token', data.access);
                 localStorage.setItem('refresh', data.refresh);
-                return navigateTo('/');
+                await fetchUserInfos(true);
+                return navigateTo('/'); //todo redirect to uri
             }
             if (data.username) {
                 document.getElementById('container').innerText = data.username[0];
@@ -157,6 +158,12 @@ document.getElementById('deleteCredentials').addEventListener('click', event => 
     event.preventDefault();
     removeTokens();
     loadGuest();
+})
+
+document.getElementById('delete').addEventListener('click', event => {
+    event.preventDefault();
+    console.log('delete');
+    removeTokens();
 })
 
 loadGuest();
