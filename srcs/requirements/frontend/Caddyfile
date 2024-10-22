@@ -1,7 +1,7 @@
 localhost:443 {
 	handle {
 		root * /var/www/html
-		try_files /index.html
+		try_files {uri} /index.html
 		file_server browse
 	}
 
@@ -32,8 +32,8 @@ localhost:443 {
 
 	# tls self_signed
 
-	# @http {
-	# 	protocol http
-	# }
-	# redir @http https://{host}{uri}
+	@http {
+		protocol http
+	}
+	redir @http https://{host}{uri}
 }
