@@ -2,6 +2,9 @@ services:
 ##### ========== Django Projects ========================================= #####
   algo-stats:
     build: "requirements/algo-stats"
+    depends_on:
+      algo-stats-db:
+        condition: service_healthy
     restart: always
     ports:
       - "8001:8000"
@@ -14,7 +17,8 @@ services:
   auth:
     build: "requirements/auth"
     depends_on:
-      - auth-db
+      auth-db:
+        condition: service_healthy
     restart: always
     volumes:
       - auth-volume:/code
@@ -27,7 +31,8 @@ services:
   chat:
     build: "requirements/chat"
     depends_on:
-      - chat-db
+      chat-db:
+        condition: service_healthy
     restart: on-failure
     ports:
       - "8003:8000"
@@ -50,7 +55,8 @@ services:
   game:
     build: "requirements/game"
     depends_on:
-      - game-db
+      game-db:
+        condition: service_healthy
     restart: on-failure
     ports:
       - "8004:8000"
@@ -63,7 +69,8 @@ services:
   matchmaking:
     build: "requirements/matchmaking"
     depends_on:
-      - matchmaking-db
+      matchmaking-db:
+        condition: service_healthy
     restart: on-failure
     ports:
       - "8005:8000"
@@ -73,11 +80,11 @@ services:
     volumes:
       - matchmaking-volume:/code
 
-
   users:
     build: "requirements/users"
     depends_on:
-      - users-db
+      users-db:
+        condition: service_healthy
     restart: on-failure
     ports:
       - "8006:8000"
@@ -99,6 +106,11 @@ services:
       - POSTGRES_PASSWORD=123456
     networks:
       - algo-stats-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready --dbname=$$POSTGRES_DB --username=$$POSTGRES_USER"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   auth-db:
     image: postgres:14
@@ -111,6 +123,11 @@ services:
       - POSTGRES_PASSWORD=123456
     networks:
       - auth-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready --dbname=$$POSTGRES_DB --username=$$POSTGRES_USER"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   chat-db:
     image: postgres:14
@@ -123,6 +140,11 @@ services:
       - POSTGRES_PASSWORD=123456
     networks:
       - chat-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready --dbname=$$POSTGRES_DB --username=$$POSTGRES_USER"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   game-db:
     image: postgres:14
@@ -135,6 +157,11 @@ services:
       - POSTGRES_PASSWORD=123456
     networks:
       - game-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready --dbname=$$POSTGRES_DB --username=$$POSTGRES_USER"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   matchmaking-db:
     image: postgres:14
@@ -147,6 +174,11 @@ services:
       - POSTGRES_PASSWORD=123456
     networks:
       - matchmaking-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready --dbname=$$POSTGRES_DB --username=$$POSTGRES_USER"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   users-db:
     image: postgres:14
@@ -159,6 +191,11 @@ services:
       - POSTGRES_PASSWORD=123456
     networks:
       - users-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready --dbname=$$POSTGRES_DB --username=$$POSTGRES_USER"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 networks:
 ##### ========== Global network ========================================== #####
