@@ -1,4 +1,39 @@
 localhost:443 {
-    root * /var/www/html
-    file_server browse
+	handle {
+		root * /var/www/html
+		try_files /index.html
+		file_server browse
+	}
+
+	# API route to micro-services
+	handle /api/algo-stats/* {
+		reverse_proxy http://algo-stats:8000
+	}
+
+	handle /api/auth/* {
+		reverse_proxy http://auth:8000
+	}
+
+	handle /api/chat/* {
+		reverse_proxy http://chat:8000
+	}
+
+	handle /api/game/* {
+		reverse_proxy http://game:8000
+	}
+
+	handle /api/matchmaking/* {
+		reverse_proxy http://matchmaking:8000
+	}
+
+	handle /api/users/* {
+		reverse_proxy http://users:8000
+	}
+
+	# tls self_signed
+
+	# @http {
+	# 	protocol http
+	# }
+	# redir @http https://{host}{uri}
 }

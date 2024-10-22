@@ -19,7 +19,7 @@ services:
     volumes:
       - auth-volume:/code
     ports:
-      - "8000:8000"
+      - "8002:8000"
     networks:
       - transcendence-network
       - auth-network
@@ -30,7 +30,7 @@ services:
       - chat-db
     restart: on-failure
     ports:
-      - "8002:8000"
+      - "8003:8000"
     networks:
       - transcendence-network
       - chat-network
@@ -41,6 +41,8 @@ services:
     build: "requirements/frontend"
     ports:
       - "4443:443"
+    networks:
+      - transcendence-network
     volumes:
       - frontend-volume:/var/www/html
       - ./requirements/frontend/Caddyfile:/etc/caddy/Caddyfile #Do copy when project is finished HUGE SECURITY FAIL
@@ -64,7 +66,7 @@ services:
       - matchmaking-db
     restart: on-failure
     ports:
-      - "8003:8000"
+      - "8005:8000"
     networks:
       - transcendence-network
       - matchmaking-network
@@ -78,7 +80,7 @@ services:
       - users-db
     restart: on-failure
     ports:
-      - "8005:8000"
+      - "8006:8000"
     networks:
       - transcendence-network
       - users-network
