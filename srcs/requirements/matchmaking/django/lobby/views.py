@@ -1,5 +1,5 @@
 from rest_framework import generics, serializers
-
+from django.shortcuts import render
 from lobby.models import Lobby, LobbyParticipants
 from lobby.serializers import LobbySerializer, LobbyParticipantsSerializer
 from lobby.static import lobby_clash
@@ -50,3 +50,6 @@ class LobbyCreateListUpdateDeleteView(generics.ListCreateAPIView, generics.Updat
 
 lobby_create_update_view = LobbyCreateUpdateView.as_view()
 lobby_create_list_delete_view = LobbyCreateListUpdateDeleteView.as_view()
+
+def lobby_test_view(request):
+	return render(request, "lobby_test.html")

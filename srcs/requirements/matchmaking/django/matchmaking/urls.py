@@ -16,11 +16,12 @@ Including another URLconf
 """
 from django.urls import path
 
-from lobby.views import lobby_create_update_view, lobby_create_list_delete_view
+from lobby.views import lobby_create_update_view, lobby_create_list_delete_view, lobby_test_view
 
 urlpatterns = [
     path('api/lobby/', lobby_create_update_view), #todo : remove all get list
     path('api/lobby/<str:code>/', lobby_create_list_delete_view),
+    path('', lobby_test_view),
 
     # path('api/game/play/ranked/', ranked_view),
 ]
