@@ -14,7 +14,6 @@ WORKDIR /code
 
 # COPY entrypoint.sh /
 # RUN chmod u+x /entrypoint.sh
-# RUN daphne -b 0.0.0.0 -p 8000 matchmaking.asgi:application
 
 # ENTRYPOINT ["/entrypoint.sh"]
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]

@@ -19,6 +19,10 @@ VOLS_PATH	:=	$(HOME)/transcendence/
 
 VOLUMES		:=	$(addprefix $(VOLS_PATH),$(VOLS))
 
+ENV_EXEMPLE	:=	.env_exemple
+
+ENV_FILE	:=	./srcs/.env
+
 ########################################################################################################################
 #                                                        FLAGS                                                         #
 ########################################################################################################################
@@ -44,7 +48,7 @@ RESET		:=	\001\033[0m\002
 
 all			:	banner $(NAME)
 
-$(NAME)		:	volumes #secrets
+$(NAME)		:	volumes secrets
 			$(COMPOSE) $(FLAGS) up --build
 
 volumes		:	$(VOLUMES)
@@ -75,18 +79,19 @@ banner		:
 clean		:
 			$(COMPOSE) $(FLAGS) down
 
-secrets		:
-			mkdir $@
-			openssl req -x509 -newkey rsa:2048 -keyout ./secrets/ssl.key -out ./secrets/ssl.crt -days 365 -nodes -subj "/CN=xcharra.42.fr"
-			openssl rand -hex -out ./secrets/db_pass 32
-			openssl rand -hex -out ./secrets/db_root_pass 32
-			openssl rand -hex -out ./secrets/wp_admin_pass 32
+secrets		:	$(ENV_FILE)
+#			mkdir $@
+
+$(ENV_FILE)	:	$(ENV_EXEMPLE)
+			./launch.d/01passwords.sh $(ENV_EXEMPLE) $(ENV_FILE)
+
 fclean		:
 			docker run --rm -v $(VOLS_PATH):/transcendence busybox sh -c "rm -rf transcendence/*"
 			rm -rf $(VOLS_PATH)
 			docker image prune -af
 			$(COMPOSE) $(FLAGS) down -v --rmi all
 			rm -rf $(SECRETS_D)
+			rm -rf $(ENV_FILE)
 
 image-ls	:
 			docker image ls -a
