@@ -33,7 +33,7 @@ elif [ $# -eq 2 ]; then
 fi
 echo $ENV_OUTPUT
 generate_password() {
-    echo $(tr -dc 'A-Za-z0-9!?%' < /dev/urandom | head -c 32)
+    echo $(LC_ALL=C; tr -dc 'A-Za-z0-9!?%' < /dev/urandom | head -c 32)
 }
 
 while IFS= read -r line; do
