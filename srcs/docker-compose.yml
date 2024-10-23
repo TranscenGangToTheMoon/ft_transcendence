@@ -10,6 +10,11 @@ services:
       - "8001:8000"
     volumes:
       - algo-stats-volume:/code
+    environment:
+      - POSTGRES_DB=${POSTGRES_ALGO_STATS_DB_NAME}
+      - POSTGRES_USER=${POSTGRES_ALGO_STATS_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_ALGO_STATS_PASSWORD}
+      - POSTGRES_HOST=${POSTGRES_ALGO_STATS_HOST}
     networks:
       - transcendence-network
       - algo-stats-network
@@ -22,6 +27,11 @@ services:
     restart: always
     volumes:
       - auth-volume:/code
+    environment:
+      - POSTGRES_DB=${POSTGRES_AUTH_DB_NAME}
+      - POSTGRES_USER=${POSTGRES_AUTH_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_AUTH_PASSWORD}
+      - POSTGRES_HOST=${POSTGRES_AUTH_HOST}
     ports:
       - "8002:8000"
     networks:
@@ -36,11 +46,16 @@ services:
     restart: on-failure
     ports:
       - "8003:8000"
+    volumes:
+      - chat-volume:/code
+    environment:
+      - POSTGRES_DB=${POSTGRES_CHAT_DB_NAME}
+      - POSTGRES_USER=${POSTGRES_CHAT_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_CHAT_PASSWORD}
+      - POSTGRES_HOST=${POSTGRES_CHAT_HOST}
     networks:
       - transcendence-network
       - chat-network
-    volumes:
-      - chat-volume:/code
 
   frontend:
     build: "requirements/frontend"
@@ -60,11 +75,16 @@ services:
     restart: on-failure
     ports:
       - "8004:8000"
+    volumes:
+      - game-volume:/code
+    environment:
+      - POSTGRES_DB=${POSTGRES_GAME_DB_NAME}
+      - POSTGRES_USER=${POSTGRES_GAME_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_GAME_PASSWORD}
+      - POSTGRES_HOST=${POSTGRES_GAME_HOST}
     networks:
       - transcendence-network
       - game-network
-    volumes:
-      - game-volume:/code
 
   matchmaking:
     build: "requirements/matchmaking"
@@ -74,11 +94,16 @@ services:
     restart: on-failure
     ports:
       - "8005:8000"
+    volumes:
+      - matchmaking-volume:/code
+    environment:
+      - POSTGRES_DB=${POSTGRES_MATCHMAKING_DB_NAME}
+      - POSTGRES_USER=${POSTGRES_MATCHMAKING_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_MATCHMAKING_PASSWORD}
+      - POSTGRES_HOST=${POSTGRES_MATCHMAKING_HOST}
     networks:
       - transcendence-network
       - matchmaking-network
-    volumes:
-      - matchmaking-volume:/code
 
   users:
     build: "requirements/users"
@@ -88,11 +113,16 @@ services:
     restart: on-failure
     ports:
       - "8006:8000"
+    volumes:
+      - users-volume:/code
+    environment:
+      - POSTGRES_DB=${POSTGRES_USERS_DB_NAME}
+      - POSTGRES_USER=${POSTGRES_USERS_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_USERS_PASSWORD}
+      - POSTGRES_HOST=${POSTGRES_USERS_HOST}
     networks:
       - transcendence-network
       - users-network
-    volumes:
-      - users-volume:/code
 
 ##### ========== Database ================================================ #####
   algo-stats-db:
@@ -101,9 +131,9 @@ services:
     volumes:
       - algo-stats-db-volume:/var/lib/postgresql/data
     environment:
-      - POSTGRES_DB=postgres-algo-stats-db
-      - POSTGRES_USER=fguirama
-      - POSTGRES_PASSWORD=123456
+      - POSTGRES_DB=${POSTGRES_ALGO_STATS_DB_NAME}
+      - POSTGRES_USER=${POSTGRES_ALGO_STATS_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_ALGO_STATS_PASSWORD}
     networks:
       - algo-stats-network
     healthcheck:
@@ -118,9 +148,9 @@ services:
     volumes:
       - auth-db-volume:/var/lib/postgresql/data
     environment:
-      - POSTGRES_DB=postgres-auth-db
-      - POSTGRES_USER=fguirama
-      - POSTGRES_PASSWORD=123456
+      - POSTGRES_DB=${POSTGRES_AUTH_DB_NAME}
+      - POSTGRES_USER=${POSTGRES_AUTH_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_AUTH_PASSWORD}
     networks:
       - auth-network
     healthcheck:
@@ -135,9 +165,9 @@ services:
     volumes:
       - chat-db-volume:/var/lib/postgresql/data
     environment:
-      - POSTGRES_DB=postgres-chat-db
-      - POSTGRES_USER=fguirama
-      - POSTGRES_PASSWORD=123456
+      - POSTGRES_DB=${POSTGRES_CHAT_DB_NAME}
+      - POSTGRES_USER=${POSTGRES_CHAT_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_CHAT_PASSWORD}
     networks:
       - chat-network
     healthcheck:
@@ -152,9 +182,9 @@ services:
     volumes:
       - game-db-volume:/var/lib/postgresql/data
     environment:
-      - POSTGRES_DB=postgres-game-db
-      - POSTGRES_USER=fguirama
-      - POSTGRES_PASSWORD=123456
+      - POSTGRES_DB=${POSTGRES_GAME_DB_NAME}
+      - POSTGRES_USER=${POSTGRES_GAME_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_GAME_PASSWORD}
     networks:
       - game-network
     healthcheck:
@@ -169,9 +199,9 @@ services:
     volumes:
       - matchmaking-db-volume:/var/lib/postgresql/data
     environment:
-      - POSTGRES_DB=postgres-matchmaking-db
-      - POSTGRES_USER=fguirama
-      - POSTGRES_PASSWORD=123456
+      - POSTGRES_DB=${POSTGRES_MATCHMAKING_DB_NAME}
+      - POSTGRES_USER=${POSTGRES_MATCHMAKING_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_MATCHMAKING_PASSWORD}
     networks:
       - matchmaking-network
     healthcheck:
@@ -186,9 +216,9 @@ services:
     volumes:
       - users-db-volume:/var/lib/postgresql/data
     environment:
-      - POSTGRES_DB=postgres-users-db
-      - POSTGRES_USER=fguirama
-      - POSTGRES_PASSWORD=123456
+      - POSTGRES_DB=${POSTGRES_USERS_DB_NAME}
+      - POSTGRES_USER=${POSTGRES_USERS_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_USERS_PASSWORD}
     networks:
       - users-network
     healthcheck:
