@@ -90,70 +90,6 @@ document.getElementById('playClash').addEventListener('click', async event => {
     } 
 })
 
-document.getElementById('switchButton').addEventListener('click', event => {
-    event.preventDefault();
-    const loginButton = document.getElementById("loginButton");
-    if (loginButton.innerText === "Register"){
-        loginButton.innerText = "Login";
-        event.target.innerText = "New? Create an account"
-        navigateTo("login", false);
-    }
-    else{
-        loginButton.innerText = "Register";
-        event.target.innerText = "Already have an account? log in"
-        navigateTo("#", false);
-    }
-})
-
-document.getElementById("loginButton").addEventListener('click', event => {
-    event.preventDefault();
-    const loginButton = document.getElementById("loginButton");
-    const usernameField = document.getElementById('usernameLogin');
-    const passwordField = document.getElementById('passwordLogin');
-    usernameField.style = 'none';
-    passwordField.style = 'none';
-    const userInfo = {
-        'username': usernameField.value,
-        'password': passwordField.value
-    }
-    let endpoint;
-    let method;
-    if (loginButton.innerText === "Login") {
-        endpoint = `${baseAPIUrl}/auth/login/`;
-        method = 'POST';
-    }
-    else {
-        endpoint = `${baseAPIUrl}/auth/register/`;
-        method = 'PUT';
-    }
-    getDataFromApi(getAccessToken(), endpoint, method, undefined, undefined, userInfo)
-        .then (async data => {
-            console.log(data)
-            if (data.access){
-                removeTokens();
-                localStorage.setItem('token', data.access);
-                localStorage.setItem('refresh', data.refresh);
-                await fetchUserInfos(true);
-                return navigateTo('/'); //todo redirect to uri
-            }
-            if (data.username) {
-                document.getElementById('container').innerText = data.username[0];
-                usernameField.style = "background-color:red;"
-            }
-            if (data.password) {
-                console.log(data)
-                document.getElementById('container').innerText = data.password[0];
-                passwordField.style = "background-color:red;"
-            }
-            if (data.detail) {
-                document.getElementById('container').innerText = data.detail;
-            }
-            else
-                console.log('error a gerer', data);
-        })
-        .catch(error => console.log('error a gerer1', error))
-})
-
 document.getElementById('deleteCredentials').addEventListener('click', event => {
     event.preventDefault();
     removeTokens();
@@ -166,4 +102,9 @@ document.getElementById('delete').addEventListener('click', event => {
     removeTokens();
 })
 
-loadGuest();
+async function atStart(){
+    await loadContent('/authenticationForm.html', 'authentication');
+    loadGuest();
+}
+
+atStart();

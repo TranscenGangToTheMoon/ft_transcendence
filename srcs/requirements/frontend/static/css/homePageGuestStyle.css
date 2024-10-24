@@ -1,18 +1,8 @@
-#interface button {
+button.guest {
     transition: ease-in-out 0.3s;
 }
 
-#interface button:hover {
+button.guest:hover {
     background-color: purple;
     transform: scale(1.3);
-}
-
-#interface #ranked:hover {
-    transform: none;
-    background-color: grey;
-}
-
-#interface #friends:hover {
-    transform: none;
-    background-color: grey;
 }

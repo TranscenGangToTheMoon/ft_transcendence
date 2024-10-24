@@ -191,9 +191,8 @@ function loadCSS(cssHref) {
     console.log(`Style ${cssHref} loaded.`)
 }
 
-async function loadContent(url) {
-    const contentDiv = document.getElementById('content');
-
+async function loadContent(url, container='content') {
+    const contentDiv = document.getElementById(container);
     try {
         const response = await fetch(url);
         if (!response.ok) {
@@ -246,11 +245,13 @@ document.addEventListener('click', event => {
     }
 });
 
+window.loadContent = loadContent;
+
 // ========================== OTHER UTILS ==========================
 
 async function fetchUserInfos(forced=false) {
     if (!getAccessToken())
-        return;
+        await generateGuestToken();
     if (!userInformations || forced) {
         try {
             let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/users/me/`);
@@ -262,9 +263,32 @@ async function fetchUserInfos(forced=false) {
     }
 }
 
+// ========================== INDEX SCRIPT ==========================
+
+async function loadUserProfile(){
+    let profileMenu = 'profileMenu.html';
+
+    console.log(userInformations);
+    document.getElementById('username').innerText = userInformations.username;
+    if (userInformations.is_guest){
+        profileMenu = 'guestProfileMenu.html'
+        document.getElementById('trophies').innerText = "";
+        document.getElementById('balance').innerText = "";
+    }
+    else {
+        document.getElementById('trophies').innerText = userInformations.trophy;
+        document.getElementById('balance').innerText = userInformations.coins;
+    }
+    await loadContent(`/${profileMenu}`, 'profileMenu');
+    // document.getElementById('title').innerText = userInformations.title;
+}
+
 async function atStart() {
     await fetchUserInfos();
+    await loadUserProfile();
     handleRoute();
 }
+
+window.loadUserProfile = loadUserProfile;
 
 atStart();
