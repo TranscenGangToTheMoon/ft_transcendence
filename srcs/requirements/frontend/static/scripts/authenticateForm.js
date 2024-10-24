@@ -1,20 +1,22 @@
 document.getElementById('switchButton').addEventListener('click', event => {
     event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
     const loginButton = document.getElementById("loginButton");
     if (loginButton.innerText === "Register"){
         loginButton.innerText = "Login";
         event.target.innerText = "New? Create an account"
-        navigateTo("login", false);
     }
     else{
         loginButton.innerText = "Register";
         event.target.innerText = "Already have an account? log in"
-        navigateTo("#", false);
     }
 })
 
 document.getElementById("loginButton").addEventListener('click', event => {
     event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
     const loginButton = document.getElementById("loginButton");
     const usernameField = document.getElementById('usernameLogin');
     const passwordField = document.getElementById('passwordLogin');
@@ -36,7 +38,6 @@ document.getElementById("loginButton").addEventListener('click', event => {
     }
     getDataFromApi(getAccessToken(), endpoint, method, undefined, undefined, userInfo)
         .then (async data => {
-            console.log(data)
             if (data.access){
                 removeTokens();
                 localStorage.setItem('token', data.access);
@@ -50,7 +51,6 @@ document.getElementById("loginButton").addEventListener('click', event => {
                 usernameField.style = "background-color:red;"
             }
             if (data.password) {
-                console.log(data)
                 document.getElementById('container').innerText = data.password[0];
                 passwordField.style = "background-color:red;"
             }
@@ -62,3 +62,7 @@ document.getElementById("loginButton").addEventListener('click', event => {
         })
         .catch(error => console.log('error a gerer1', error))
 })
+
+// document.querySelector('dropdown-menu').addEventListener('mousedown', event => {
+//     event.preventDefault();
+// })

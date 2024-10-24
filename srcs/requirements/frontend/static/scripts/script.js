@@ -77,7 +77,6 @@ async function reloadTempToken() {
 async function generateGuestToken() {
     try {
         let data = await apiRequest(undefined, `${baseAPIUrl}/auth/guest/`, "POST");
-        console.log(data)
         if (data.access) {
             localStorage.setItem('token', data.access);
             localStorage.setItem('refresh', data.refresh);
@@ -178,7 +177,7 @@ function loadScript(scriptSrc) {
     document.body.appendChild(script);
 }
 
-function loadCSS(cssHref) {
+function loadCSS(cssHref, toUpdate=true) {
     const existingLink = document.querySelector('link[dynamic-css]');
     if (existingLink) {
         existingLink.remove();
@@ -186,7 +185,8 @@ function loadCSS(cssHref) {
     const link = document.createElement('link');
     link.rel = 'stylesheet';
     link.href = cssHref;
-    link.setAttribute('dynamic-css', 'true');
+    if (toUpdate)
+        link.setAttribute('dynamic-css', 'true');
     document.head.appendChild(link);
     console.log(`Style ${cssHref} loaded.`)
 }
@@ -205,14 +205,14 @@ async function loadContent(url, container='content') {
         if (script)
             loadScript(script.getAttribute('script'));
         let style;
-        console.log(userInformations);
         if (!userInformations || !userInformations.is_guest)
             style = '_style'
         else if (userInformations.is_guest)
             style = 'guestStyle'
         css = contentDiv.querySelector(`[${style}]`);
         if (css)
-            loadCSS(css.getAttribute(style));
+            loadCSS(css.getAttribute(style), !css.getAttribute(style).includes('rofileMenu'));
+        console.log('finished 1rst')
     } catch (error) {
         contentDiv.innerHTML = '<h1>Erreur 404 : Page non trouvée</h1>';
     }
@@ -268,7 +268,6 @@ async function fetchUserInfos(forced=false) {
 async function loadUserProfile(){
     let profileMenu = 'profileMenu.html';
 
-    console.log(userInformations);
     document.getElementById('username').innerText = userInformations.username;
     if (userInformations.is_guest){
         profileMenu = 'guestProfileMenu.html'
@@ -280,6 +279,7 @@ async function loadUserProfile(){
         document.getElementById('balance').innerText = userInformations.coins;
     }
     await loadContent(`/${profileMenu}`, 'profileMenu');
+    console.log('then finished loading');
     // document.getElementById('title').innerText = userInformations.title;
 }
 

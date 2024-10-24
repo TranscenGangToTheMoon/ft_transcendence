@@ -2,6 +2,10 @@ button.guest {
     transition: ease-in-out 0.3s;
 }
 
+header {
+    user-select: none;
+}
+
 button.guest:hover {
     background-color: purple;
     transform: scale(1.3);
