@@ -32,8 +32,8 @@ localhost:443 {
 
 	# tls self_signed
 
-	# @http {
-	# 	protocol http
-	# }
-	# redir @http https://{host}{uri}
+	@http {
+		protocol http
+	}
+	redir @http https://{host}{uri}
 }

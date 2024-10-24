@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+from os import environ
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -81,10 +82,10 @@ WSGI_APPLICATION = 'chat.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres-chat-db',
-        'USER': 'fguirama',
-        'PASSWORD': '123456',
-        'HOST': 'chat-db',
+        'NAME': environ["POSTGRES_DB"],
+        'USER': environ["POSTGRES_USER"],
+        'PASSWORD': environ["POSTGRES_PASSWORD"],
+        'HOST': environ["POSTGRES_HOST"],
         'PORT': '5432',
     }
 }
