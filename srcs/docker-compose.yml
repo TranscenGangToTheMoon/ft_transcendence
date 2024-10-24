@@ -11,10 +11,11 @@ services:
     volumes:
       - algo-stats-volume:/code
     environment:
-      - POSTGRES_DB=${POSTGRES_ALGO_STATS_DB_NAME}
-      - POSTGRES_USER=${POSTGRES_ALGO_STATS_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_ALGO_STATS_PASSWORD}
-      - POSTGRES_HOST=${POSTGRES_ALGO_STATS_HOST}
+      TZ: Europe/Paris
+      POSTGRES_DB: ${POSTGRES_ALGO_STATS_DB_NAME}
+      POSTGRES_USER: ${POSTGRES_ALGO_STATS_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_ALGO_STATS_PASSWORD}
+      POSTGRES_HOST: ${POSTGRES_ALGO_STATS_HOST}
     networks:
       - transcendence-network
       - algo-stats-network
@@ -28,10 +29,11 @@ services:
     volumes:
       - auth-volume:/code
     environment:
-      - POSTGRES_DB=${POSTGRES_AUTH_DB_NAME}
-      - POSTGRES_USER=${POSTGRES_AUTH_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_AUTH_PASSWORD}
-      - POSTGRES_HOST=${POSTGRES_AUTH_HOST}
+      TZ: Europe/Paris
+      POSTGRES_DB: ${POSTGRES_AUTH_DB_NAME}
+      POSTGRES_USER: ${POSTGRES_AUTH_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_AUTH_PASSWORD}
+      POSTGRES_HOST: ${POSTGRES_AUTH_HOST}
     ports:
       - "8002:8000"
     networks:
@@ -49,10 +51,11 @@ services:
     volumes:
       - chat-volume:/code
     environment:
-      - POSTGRES_DB=${POSTGRES_CHAT_DB_NAME}
-      - POSTGRES_USER=${POSTGRES_CHAT_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_CHAT_PASSWORD}
-      - POSTGRES_HOST=${POSTGRES_CHAT_HOST}
+      TZ: Europe/Paris
+      POSTGRES_DB: ${POSTGRES_CHAT_DB_NAME}
+      POSTGRES_USER: ${POSTGRES_CHAT_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_CHAT_PASSWORD}
+      POSTGRES_HOST: ${POSTGRES_CHAT_HOST}
     networks:
       - transcendence-network
       - chat-network
@@ -66,6 +69,8 @@ services:
     volumes:
       - frontend-volume:/var/www/html
       - ./requirements/frontend/Caddyfile:/etc/caddy/Caddyfile #Do copy when project is finished HUGE SECURITY FAIL
+    environment:
+      TZ: Europe/Paris
 
   game:
     build: "requirements/game"
@@ -78,10 +83,11 @@ services:
     volumes:
       - game-volume:/code
     environment:
-      - POSTGRES_DB=${POSTGRES_GAME_DB_NAME}
-      - POSTGRES_USER=${POSTGRES_GAME_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_GAME_PASSWORD}
-      - POSTGRES_HOST=${POSTGRES_GAME_HOST}
+      TZ: Europe/Paris
+      POSTGRES_DB: ${POSTGRES_GAME_DB_NAME}
+      POSTGRES_USER: ${POSTGRES_GAME_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_GAME_PASSWORD}
+      POSTGRES_HOST: ${POSTGRES_GAME_HOST}
     networks:
       - transcendence-network
       - game-network
@@ -97,10 +103,11 @@ services:
     volumes:
       - matchmaking-volume:/code
     environment:
-      - POSTGRES_DB=${POSTGRES_MATCHMAKING_DB_NAME}
-      - POSTGRES_USER=${POSTGRES_MATCHMAKING_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_MATCHMAKING_PASSWORD}
-      - POSTGRES_HOST=${POSTGRES_MATCHMAKING_HOST}
+      TZ: Europe/Paris
+      POSTGRES_DB: ${POSTGRES_MATCHMAKING_DB_NAME}
+      POSTGRES_USER: ${POSTGRES_MATCHMAKING_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_MATCHMAKING_PASSWORD}
+      POSTGRES_HOST: ${POSTGRES_MATCHMAKING_HOST}
     networks:
       - transcendence-network
       - matchmaking-network
@@ -116,10 +123,11 @@ services:
     volumes:
       - users-volume:/code
     environment:
-      - POSTGRES_DB=${POSTGRES_USERS_DB_NAME}
-      - POSTGRES_USER=${POSTGRES_USERS_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_USERS_PASSWORD}
-      - POSTGRES_HOST=${POSTGRES_USERS_HOST}
+      TZ: Europe/Paris
+      POSTGRES_DB: ${POSTGRES_USERS_DB_NAME}
+      POSTGRES_USER: ${POSTGRES_USERS_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_USERS_PASSWORD}
+      POSTGRES_HOST: ${POSTGRES_USERS_HOST}
     networks:
       - transcendence-network
       - users-network
@@ -131,9 +139,10 @@ services:
     volumes:
       - algo-stats-db-volume:/var/lib/postgresql/data
     environment:
-      - POSTGRES_DB=${POSTGRES_ALGO_STATS_DB_NAME}
-      - POSTGRES_USER=${POSTGRES_ALGO_STATS_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_ALGO_STATS_PASSWORD}
+      TZ: Europe/Paris
+      POSTGRES_DB: ${POSTGRES_ALGO_STATS_DB_NAME}
+      POSTGRES_USER: ${POSTGRES_ALGO_STATS_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_ALGO_STATS_PASSWORD}
     networks:
       - algo-stats-network
     healthcheck:
@@ -148,9 +157,10 @@ services:
     volumes:
       - auth-db-volume:/var/lib/postgresql/data
     environment:
-      - POSTGRES_DB=${POSTGRES_AUTH_DB_NAME}
-      - POSTGRES_USER=${POSTGRES_AUTH_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_AUTH_PASSWORD}
+      TZ: Europe/Paris
+      POSTGRES_DB: ${POSTGRES_AUTH_DB_NAME}
+      POSTGRES_USER: ${POSTGRES_AUTH_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_AUTH_PASSWORD}
     networks:
       - auth-network
     healthcheck:
@@ -165,9 +175,10 @@ services:
     volumes:
       - chat-db-volume:/var/lib/postgresql/data
     environment:
-      - POSTGRES_DB=${POSTGRES_CHAT_DB_NAME}
-      - POSTGRES_USER=${POSTGRES_CHAT_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_CHAT_PASSWORD}
+      TZ: Europe/Paris
+      POSTGRES_DB: ${POSTGRES_CHAT_DB_NAME}
+      POSTGRES_USER: ${POSTGRES_CHAT_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_CHAT_PASSWORD}
     networks:
       - chat-network
     healthcheck:
@@ -182,9 +193,10 @@ services:
     volumes:
       - game-db-volume:/var/lib/postgresql/data
     environment:
-      - POSTGRES_DB=${POSTGRES_GAME_DB_NAME}
-      - POSTGRES_USER=${POSTGRES_GAME_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_GAME_PASSWORD}
+      TZ: Europe/Paris
+      POSTGRES_DB: ${POSTGRES_GAME_DB_NAME}
+      POSTGRES_USER: ${POSTGRES_GAME_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_GAME_PASSWORD}
     networks:
       - game-network
     healthcheck:
@@ -199,9 +211,10 @@ services:
     volumes:
       - matchmaking-db-volume:/var/lib/postgresql/data
     environment:
-      - POSTGRES_DB=${POSTGRES_MATCHMAKING_DB_NAME}
-      - POSTGRES_USER=${POSTGRES_MATCHMAKING_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_MATCHMAKING_PASSWORD}
+      TZ: Europe/Paris
+      POSTGRES_DB: ${POSTGRES_MATCHMAKING_DB_NAME}
+      POSTGRES_USER: ${POSTGRES_MATCHMAKING_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_MATCHMAKING_PASSWORD}
     networks:
       - matchmaking-network
     healthcheck:
@@ -216,9 +229,10 @@ services:
     volumes:
       - users-db-volume:/var/lib/postgresql/data
     environment:
-      - POSTGRES_DB=${POSTGRES_USERS_DB_NAME}
-      - POSTGRES_USER=${POSTGRES_USERS_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_USERS_PASSWORD}
+      TZ: Europe/Paris
+      POSTGRES_DB: ${POSTGRES_USERS_DB_NAME}
+      POSTGRES_USER: ${POSTGRES_USERS_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_USERS_PASSWORD}
     networks:
       - users-network
     healthcheck:
