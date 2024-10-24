@@ -1,8 +1,11 @@
-const baseAPIUrl = "https://localhost:4443/api"
-const baseAPIUrlusers = "https://localhost:4443/api/users"
+// ========================== GLOBAL VALUES ==========================
 
+const baseAPIUrl = "https://localhost:4443/api"
+let userInformations = undefined;
 window.baseAPIUrl = baseAPIUrl;
-window.baseAPIUrlusers = baseAPIUrlusers;
+window.userInformations = userInformations;
+
+// ========================== API REQUESTS ==========================
 
 function apiRequest(token, endpoint, method="GET", authType="Bearer",
     contentType="application/json", body=undefined, currentlyRefreshing=false){ 
@@ -16,9 +19,12 @@ function apiRequest(token, endpoint, method="GET", authType="Bearer",
         options.headers["Authorization"] = `${authType} ${token}`;
     if (body)
         options.body = JSON.stringify(body);
-    // console.log(endpoint, options)
+    console.log(endpoint, options)
     return fetch(endpoint, options)
         .then(async response => {
+            if (!response.ok && response.status > 499){
+                throw {code: response.status};
+            }
             let data = await response.json();
             if (data.code === 'token_not_valid') {
                 if (currentlyRefreshing)
@@ -32,23 +38,55 @@ function apiRequest(token, endpoint, method="GET", authType="Bearer",
             return data;
         })
         .catch(error =>{
+            if (error.code || error.message === 'Failed to fetch')
+                document.getElementById('container').innerText = `alala pas bien ${error.code? `: ${error.code}` : ''} (jcrois c'est pas bon)`;
             throw error;
         })
 }
 
-function relog() {
-    removeTokens();
-    navigateTo('/login');
+async function getDataFromApi(token, endpoint, method="GET", authType="Bearer",
+    contentType="application/json", body=undefined){
+    try {
+        let data = await apiRequest(token, endpoint, method, authType, contentType, body);
+        return data;
+    }
+    catch (error) {
+        throw error;
+    }
 }
 
+window.apiRequest = apiRequest;
+window.getDataFromApi = getDataFromApi;
+    
+// ========================== TOKEN UTILS ==========================
 async function reloadTempToken() {
-    let data = await apiRequest(undefined, `${baseAPIUrl}/auth/guest/`, 'POST')
-    if (data.access){
-        localStorage.setItem('temp_token', data.access);
-        return data.access;
+    try {
+        let data = await apiRequest(undefined, `${baseAPIUrl}/auth/guest/`, 'POST')
+        if (data.access){
+            localStorage.setItem('temp_token', data.access);
+            return data.access;
+        }
+        else
+            console.log('error a gerer', data);
     }
-    else
-        console.log('error a gerer', data);
+    catch (error) {
+        console.log('error a gerer', error);
+    }
+}
+
+async function generateGuestToken() {
+    try {
+        let data = await apiRequest(undefined, `${baseAPIUrl}/auth/guest/`, "POST");
+        if (data.access) {
+            localStorage.setItem('token', data.access);
+            localStorage.setItem('refresh', data.refresh);
+        }
+        else
+            console.log('error a gerer', data);
+    }
+    catch(error){
+        console.log('error a gerer', error)
+    }
 }
 
 async function refreshToken(token) {
@@ -73,17 +111,6 @@ async function refreshToken(token) {
     }
     catch (error) {
         console.log("ERROR", error);
-    }
-}
-
-async function getDataFromApi(token, endpoint, method="GET", authType="Bearer",
-    contentType="application/json", body=undefined){
-    try {
-        let data = await apiRequest(token, endpoint, method, authType, contentType, body);
-        return data;
-    }
-    catch (error) {
-        throw error;
     }
 }
 
@@ -125,14 +152,18 @@ function untemporizeTokens() {
     localStorage.removeItem('temp_token');
 }
 
-window.apiRequest = apiRequest;
-window.getDataFromApi = getDataFromApi;
+function relog() {
+    removeTokens();
+    navigateTo('/login');   
+}
 window.removeTokens = removeTokens;
 window.untemporizeTokens = untemporizeTokens;
 window.refreshToken = refreshToken;
 window.getAccessToken = getAccessToken;
 window.getRefreshToken = getRefreshToken;
+window.generateGuestToken = generateGuestToken;
 
+// ========================== SPA SCRIPTS ==========================
 
 function loadScript(scriptSrc) {
     const script = document.createElement('script');
@@ -146,9 +177,22 @@ function loadScript(scriptSrc) {
     document.body.appendChild(script);
 }
 
-async function loadContent(url) {
-    const contentDiv = document.getElementById('content');
+function loadCSS(cssHref, toUpdate=true) {
+    const existingLink = document.querySelector('link[dynamic-css]');
+    if (existingLink) {
+        existingLink.remove();
+    }
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = cssHref;
+    if (toUpdate)
+        link.setAttribute('dynamic-css', 'true');
+    document.head.appendChild(link);
+    console.log(`Style ${cssHref} loaded.`)
+}
 
+async function loadContent(url, container='content') {
+    const contentDiv = document.getElementById(container);
     try {
         const response = await fetch(url);
         if (!response.ok) {
@@ -160,6 +204,15 @@ async function loadContent(url) {
         const script = contentDiv.querySelector('[script]');
         if (script)
             loadScript(script.getAttribute('script'));
+        let style;
+        if (!userInformations || !userInformations.is_guest)
+            style = '_style'
+        else if (userInformations.is_guest)
+            style = 'guestStyle'
+        css = contentDiv.querySelector(`[${style}]`);
+        if (css)
+            loadCSS(css.getAttribute(style), !css.getAttribute(style).includes('rofileMenu'));
+        console.log('finished 1rst')
     } catch (error) {
         contentDiv.innerHTML = '<h1>Erreur 404 : Page non trouvée</h1>';
     }
@@ -192,6 +245,50 @@ document.addEventListener('click', event => {
     }
 });
 
-// window.addEventListener('popstate', handleRoute);
+window.loadContent = loadContent;
 
-handleRoute();
+// ========================== OTHER UTILS ==========================
+
+async function fetchUserInfos(forced=false) {
+    if (!getAccessToken())
+        await generateGuestToken();
+    if (!userInformations || forced) {
+        try {
+            let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/users/me/`);
+            userInformations = data;
+        }
+        catch (error) {
+            console.log(error);
+        }
+    }
+}
+
+// ========================== INDEX SCRIPT ==========================
+
+async function loadUserProfile(){
+    let profileMenu = 'profileMenu.html';
+
+    document.getElementById('username').innerText = userInformations.username;
+    if (userInformations.is_guest){
+        profileMenu = 'guestProfileMenu.html'
+        document.getElementById('trophies').innerText = "";
+        document.getElementById('balance').innerText = "";
+    }
+    else {
+        document.getElementById('trophies').innerText = userInformations.trophy;
+        document.getElementById('balance').innerText = userInformations.coins;
+    }
+    await loadContent(`/${profileMenu}`, 'profileMenu');
+    console.log('then finished loading');
+    // document.getElementById('title').innerText = userInformations.title;
+}
+
+async function atStart() {
+    await fetchUserInfos();
+    await loadUserProfile();
+    handleRoute();
+}
+
+window.loadUserProfile = loadUserProfile;
+
+atStart();
