@@ -19,7 +19,7 @@ from django.urls import path
 from lobby.views import lobby_create_update_view, lobby_create_list_delete_view
 
 urlpatterns = [
-    path('api/lobby/', lobby_create_update_view), #todo : remove all get list
+    path('api/lobby/', lobby_create_update_view),
     path('api/lobby/<str:code>/', lobby_create_list_delete_view),
 
     # path('api/game/play/ranked/', ranked_view),
