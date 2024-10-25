@@ -22,14 +22,14 @@ class UsersSerializer(serializers.ModelSerializer):
             'profile_picture',
             'status',
             'coins',
-            'trophy',
+            'trophies',
             'current_rank',
             'friends',
             'password',
             'accept_friend_request',
             'accept_chat_state',
         ]
-        read_only_fields = ('id', 'is_guest', 'profile_picture', 'status', 'coins', 'trophy', 'current_rank', 'friends')
+        read_only_fields = ('id', 'is_guest', 'profile_picture', 'status', 'coins', 'trophies', 'current_rank', 'friends')
 
     def get_status(self, obj):
         return {

@@ -19,7 +19,6 @@ class ChatsListCreateView(generics.ListCreateAPIView, ChatsMixin):
 
 class ChatsRetrieveDeleteView(generics.RetrieveDestroyAPIView, ChatsMixin):
     lookup_field = 'pk'
-    # todo add secure, only users service can delete chat
 
 
 chats_list_create_view = ChatsListCreateView.as_view()

@@ -10,7 +10,6 @@ class ValidateChatView(generics.RetrieveAPIView):
     queryset = Users.objects.all()
     serializer_class = UsersSerializer
     lookup_field = 'username'
-    #permission_classes = [isAuthenticated] todo : restric to http://chat:8000/api/
 
     def get_object(self):
         valide_user = validate_username(self.request.data.get('username'))
