@@ -1,0 +1,68 @@
+<!-- <h1>======================= DEBUG   ==========================</h1>
+<button id="logoutButton">Log out</button>
+<button id="testRefresh">test refresh</button>
+<div id="container"></div>
+<button id="delete">delete</button>
+
+<h1>========================================================</h1> -->
+
+<h1>play</h1>
+<div id="interface">
+    <div id="gamemodes">
+        <button class="game guest" id="duel">duel</button>
+        <button class="game" id="ranked">ranked</button>
+        <button class="game guest" id="friendlyBattle">friendlyBattle</button>
+        <button class="game guest" id="clash">clash</button>
+    </div>
+    <div id="actions">
+        <button id="friends" type="button" data-bs-toggle="modal" data-bs-target="#friendListModal">friends</button>
+        <button id="leaderBoard" class="guest" type="button" data-bs-toggle="modal" data-bs-target="#leaderBoardModal">leaderBoard</button>
+    </div>
+</div>
+
+<!-- <div class="container mt-5"> -->
+    <!-- Bouton pour ouvrir la modale -->
+    <!-- <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#monModal"> -->
+        <!-- Ouvrir la modale -->
+    <!-- </button> -->
+<!-- </div> -->
+
+<!-- Modale -->
+<div class="modal fade" id="friendListModal" tabindex="-1" aria-labelledby="friendListModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="friendListModalLabel">Friend List</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="onlineFriends"></div>
+                <div id="friendList"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="leaderBoardModal" tabindex="-1" aria-labelledby="leaderBoardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="leaderBoardModalLabel">Leaderboard</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="onlineFriends"></div>
+                <div id="friends"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div script="scripts/homePage.js"></div>
+<div _style="css/homePageStyle.css"></div>
+<div guestStyle="css/homePageGuestStyle.css"></div>

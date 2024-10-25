@@ -18,6 +18,10 @@ VOLS_PATH	:=	$(HOME)/transcendence/
 
 VOLUMES		:=	$(addprefix $(VOLS_PATH),$(VOLS))
 
+ENV_EXEMPLE	:=	.env_exemple
+
+ENV_FILE	:=	./srcs/.env
+
 ########################################################################################################################
 #                                                        FLAGS                                                         #
 ########################################################################################################################
@@ -43,7 +47,7 @@ RESET		:=	\001\033[0m\002
 
 all			:	banner $(NAME)
 
-$(NAME)		:	volumes #secrets
+$(NAME)		:	volumes secrets
 			$(COMPOSE) $(FLAGS) up --build
 
 volumes		:	$(VOLUMES)
@@ -55,6 +59,9 @@ build		:
 			$(COMPOSE) $(FLAGS) $@
 
 up			:	build
+			$(COMPOSE) $(FLAGS) $@
+
+down		:
 			$(COMPOSE) $(FLAGS) $@
 
 dettach		:	build
@@ -71,21 +78,26 @@ banner		:
 			@echo -e '                                          bajeanno fguirama jcoquard nfaust xcharra'
 			@echo -e '$(RESET)'
 
-clean		:
-			$(COMPOSE) $(FLAGS) down
+secrets		:	$(ENV_FILE) #if secrets directory are needed delete phony secrets
+#			mkdir $@
+			
+$(ENV_FILE)	:	$(ENV_EXEMPLE)
 
-secrets		:
-			mkdir $@
-			openssl req -x509 -newkey rsa:2048 -keyout ./secrets/ssl.key -out ./secrets/ssl.crt -days 365 -nodes -subj "/CN=xcharra.42.fr"
-			openssl rand -hex -out ./secrets/db_pass 32
-			openssl rand -hex -out ./secrets/db_root_pass 32
-			openssl rand -hex -out ./secrets/wp_admin_pass 32
-fclean		:
+			./launch.d/01passwords.sh $(ENV_EXEMPLE) $(ENV_FILE)
+
+clean		:
+			$(COMPOSE) $(FLAGS) down -v --rmi local
 			docker run --rm -v $(VOLS_PATH):/transcendence busybox sh -c "rm -rf transcendence/*"
-			rm -rf $(VOLS_PATH)
-			docker image prune -af
+			rm -rf $(ENV_FILE)
+#			rm -rf $(SECRETS_D)
+
+fclean		:
 			$(COMPOSE) $(FLAGS) down -v --rmi all
-			rm -rf $(SECRETS_D)
+			docker run --rm -v $(VOLS_PATH):/transcendence busybox sh -c "rm -rf transcendence/*"
+			docker image prune -af
+			rm -rf $(VOLS_PATH)
+			rm -rf $(ENV_FILE)
+#			rm -rf $(SECRETS_D)
 
 image-ls	:
 			docker image ls -a
@@ -112,4 +124,8 @@ prune		:
 
 re			:	fclean all
 
-.PHONY		: all re clean fclean
+sre			:	clean all
+
+.PHONY		:	all volumes build up down dettach banner secrets clean fclean \
+				image-ls image-rm container-ls container-rm volume-ls volume-rm \
+				network-ls network-rm prune re
