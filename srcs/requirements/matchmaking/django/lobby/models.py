@@ -9,11 +9,9 @@ class Lobby(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     game_mode = models.CharField(max_length=11) # clash, custom_game
 
-    # Custom settings
     match_type = models.CharField(max_length=3) # 1v1, 3v3
     bo = models.IntegerField(default=1) # bo1 bo3 bo5
     game_time = models.IntegerField(default=300) # in seconds
-    # todo other settings
 
     @property
     def max_team_participants(self):
@@ -40,7 +38,7 @@ class LobbyParticipants(models.Model):
     lobby_code = models.CharField(max_length=5, editable=False)
     user_id = models.IntegerField(unique=True)
     username = models.CharField(max_length=20)
-    is_admin = models.BooleanField(default=False)
+    creator = models.BooleanField(default=False)
     is_ready = models.BooleanField(default=False)
     join_at = models.DateTimeField(auto_now_add=True, editable=False)
 
@@ -48,13 +46,13 @@ class LobbyParticipants(models.Model):
     team = models.CharField(default=team_a)
 
     def delete(self, using=None, keep_parents=False):
-        is_admin = self.is_admin
+        creator = self.creator
         lobby = Lobby.objects.get(id=self.lobby.id)
         super().delete(using=using, keep_parents=keep_parents)
         participants = lobby.participants.all()
         if not participants.exists():
             lobby.delete()
-        elif is_admin:
+        elif creator:
             first_join = participants.order_by('join_at').first()
-            first_join.is_admin = True
+            first_join.creator = True
             first_join.save()
