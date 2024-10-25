@@ -17,10 +17,15 @@ Including another URLconf
 from django.urls import path
 
 from lobby.views import lobby_create_update_view, lobby_create_list_delete_view
+from tournament.views import tournament_view, tournament_participants_view, tournament_kick_view, \
+    tournament_result_match_view
 
 urlpatterns = [
     path('api/lobby/', lobby_create_update_view),
     path('api/lobby/<str:code>/', lobby_create_list_delete_view),
 
-    # path('api/game/play/ranked/', ranked_view),
+    path('api/tournament/', tournament_view),
+    path('api/tournament/result-match/', tournament_result_match_view),
+    path('api/tournament/<str:code>/', tournament_participants_view),
+    path('api/tournament/<str:code>/kick/<int:user_id>/', tournament_kick_view),
 ]
