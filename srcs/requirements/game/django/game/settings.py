@@ -25,7 +25,10 @@ SECRET_KEY = 'django-insecure-gu4rw&odpj!qua2b9m&t0ft0#03x6-c+7x=-nb_cvoxnak3-4v
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'game',
+    'localhost', # todo remove
+]
 
 
 # Application definition
@@ -37,11 +40,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'channels',
-    'daphne',
+    # 'channels',
+    # 'daphne',
     'rest_framework',
-    'game_server',
+    # 'game_server',
     'matches',
+    'tournaments'
 ]
 
 MIDDLEWARE = [
@@ -72,8 +76,8 @@ TEMPLATES = [
     },
 ]
 
-# WSGI_APPLICATION = 'game.wsgi.application'
-ASGI_APPLICATION = 'game.asgi.application'
+WSGI_APPLICATION = 'game.wsgi.application'
+# ASGI_APPLICATION = 'game.asgi.application'
 
 
 # Database
@@ -136,7 +140,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
-        'game.auth.IsAuthenticated',
+        'rest_framework.permissions.AllowAny',
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     'PAGE_SIZE': 10,
