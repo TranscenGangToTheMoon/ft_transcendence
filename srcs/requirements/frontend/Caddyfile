@@ -7,14 +7,6 @@ localhost:443 {
 
 	handle /api/* {
 		# API route to micro-services
-		
-		handle /api/algo-stats/* {
-			@notJSON {
-				not header Content-Type application/json
-			}
-			respond @notJSON "Unsupported Media Type" 415
-			reverse_proxy http://algo-stats:8000
-		}
 
 		handle /api/auth/* {
 			@notJSON {
