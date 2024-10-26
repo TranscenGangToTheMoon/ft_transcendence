@@ -26,7 +26,7 @@ def request_service(service: Literal['users', 'game'], enpoint: str, method: Lit
     try:
         response = requests.request(
             method=method,
-            url=f'http://{service}:8000/api/{service}/{enpoint}',
+            url=f'http://{service}:8000/api/{enpoint}',
             headers=headers,
             data=data
         )
@@ -49,8 +49,8 @@ def requests_users(request, enpoint: Literal['me/', 'validate/game/'], method: L
     if token is None:
         raise AuthenticationFailed('Authentication credentials were not provided.')
 
-    return request_service('users', enpoint, method, data, token)
+    return request_service('users', 'users/' + enpoint, method, data, token)
 
 
-def requests_game(enpoint: Literal['match/', 'tournament/'], data):
+def requests_game(enpoint: Literal['match/', 'tournaments/'], data):
     return request_service('game', enpoint, 'POST', data)
