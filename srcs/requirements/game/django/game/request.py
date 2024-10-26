@@ -2,7 +2,7 @@ import json
 from typing import Literal
 
 import requests
-from rest_framework import status
+from rest_framework import status, serializers
 from rest_framework.exceptions import AuthenticationFailed, APIException
 
 
@@ -40,6 +40,16 @@ def request_service(service: Literal['users', 'matchmaking'], enpoint: str, meth
     except (requests.ConnectionError, requests.exceptions.JSONDecodeError):
         raise ServiceUnavailable(service)
     return json_data
+
+
+def requests_users(request, enpoint: Literal['me/', 'validate/game/'], method: Literal['GET', 'PUT', 'PATCH', 'DELETE'], data=None):
+    if request is None:
+        raise serializers.ValidationError({'detail': 'Request is required.'})
+    token = request.headers.get('Authorization')
+    if token is None:
+        raise AuthenticationFailed('Authentication credentials were not provided.')
+
+    return request_service('users', 'users/' + enpoint, method, data, token)
 
 
 def requests_matchmaking(tournament_id, stage_id, winner, looser):
