@@ -15,7 +15,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_AUTH_PASSWORD}
       POSTGRES_HOST: ${POSTGRES_AUTH_HOST}
     ports:
-      - "8002:8000"
+      - "8001:8000"
     networks:
       - transcendence-network
       - auth-network
@@ -27,7 +27,7 @@ services:
         condition: service_healthy
     restart: on-failure
     ports:
-      - "8003:8000"
+      - "8002:8000"
     volumes:
       - chat-volume:/code
     environment:
@@ -59,7 +59,7 @@ services:
         condition: service_healthy
     restart: on-failure
     ports:
-      - "8004:8000"
+      - "8003:8000"
     volumes:
       - game-volume:/code
     environment:
@@ -79,7 +79,7 @@ services:
         condition: service_healthy
     restart: on-failure
     ports:
-      - "8005:8000"
+      - "8004:8000"
     volumes:
       - matchmaking-volume:/code
     environment:
@@ -99,7 +99,7 @@ services:
         condition: service_healthy
     restart: on-failure
     ports:
-      - "8006:8000"
+      - "8005:8000"
     volumes:
       - users-volume:/code
     environment:
