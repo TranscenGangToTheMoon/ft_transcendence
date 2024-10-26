@@ -32,11 +32,15 @@ localhost:443 {
 			reverse_proxy http://chat:8000
 		}
 
-		# handle /api/game/* {
-		# 	reverse_proxy http://game:8000
-		# }
+		handle /api/lobby/* {
+			@notJSON {
+				not header Content-Type application/json
+			}
+			respond @notJSON "Unsupported Media Type" 415
+			reverse_proxy http://matchmaking:8000
+		}
 
-		handle /api/matchmaking/* {
+		handle /api/tournament/* {
 			@notJSON {
 				not header Content-Type application/json
 			}
