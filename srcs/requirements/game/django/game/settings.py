@@ -85,8 +85,12 @@ ASGI_APPLICATION = 'game.asgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': environ["POSTGRES_DB"],
+        'USER': environ["POSTGRES_USER"],
+        'PASSWORD': environ["POSTGRES_PASSWORD"],
+        'HOST': environ["POSTGRES_HOST"],
+        'PORT': '5432',
     }
 }
 
