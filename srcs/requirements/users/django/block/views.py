@@ -1,11 +1,11 @@
 from rest_framework import generics
 
-from block.models import Block
+from block.models import Blocks
 from block.serializers import BlockSerializer
 
 
 class BlockMixin(generics.GenericAPIView):
-    queryset = Block.objects.all()
+    queryset = Blocks.objects.all()
     serializer_class = BlockSerializer
 
 

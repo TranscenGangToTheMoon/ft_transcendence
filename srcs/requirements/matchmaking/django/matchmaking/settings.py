@@ -26,7 +26,10 @@ SECRET_KEY = 'django-insecure-njs%e3niu%k(6!0tjqnwe(eg64no%lt#l*-_&rh$m_&3kr+!ou
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'localhost', # todo remove
+    'matchmaking',
+]
 
 
 # Application definition
@@ -38,7 +41,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
     'lobby',
+    'tournament'
 ]
 
 MIDDLEWARE = [

@@ -5,7 +5,6 @@ import requests
 from rest_framework import permissions, serializers
 from rest_framework.exceptions import AuthenticationFailed
 
-from block.models import Block
 from users.models import Users
 
 
@@ -79,7 +78,7 @@ def validate_username(username, user):
         assert username is not None
         valide_username = Users.objects.get(username=username)
         assert valide_username.is_guest is False
-        assert not Block.objects.filter(user=valide_username, blocked=user).exists()
+        assert not valide_username.block.filter(blocked=user).exists()
     except (Users.DoesNotExist, AssertionError):
         raise serializers.ValidationError({'username': ['This user does not exist.']})
     return valide_username

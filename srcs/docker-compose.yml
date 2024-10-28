@@ -1,25 +1,5 @@
 services:
 ##### ========== Django Projects ========================================= #####
-  algo-stats:
-    build: "requirements/algo-stats"
-    depends_on:
-      algo-stats-db:
-        condition: service_healthy
-    restart: always
-    ports:
-      - "8001:8000"
-    volumes:
-      - algo-stats-volume:/code
-    environment:
-      TZ: Europe/Paris
-      POSTGRES_DB: ${POSTGRES_ALGO_STATS_DB_NAME}
-      POSTGRES_USER: ${POSTGRES_ALGO_STATS_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_ALGO_STATS_PASSWORD}
-      POSTGRES_HOST: ${POSTGRES_ALGO_STATS_HOST}
-    networks:
-      - transcendence-network
-      - algo-stats-network
-
   auth:
     build: "requirements/auth"
     depends_on:
@@ -35,7 +15,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_AUTH_PASSWORD}
       POSTGRES_HOST: ${POSTGRES_AUTH_HOST}
     ports:
-      - "8002:8000"
+      - "8001:8000"
     networks:
       - transcendence-network
       - auth-network
@@ -47,7 +27,7 @@ services:
         condition: service_healthy
     restart: on-failure
     ports:
-      - "8003:8000"
+      - "8002:8000"
     volumes:
       - chat-volume:/code
     environment:
@@ -79,7 +59,7 @@ services:
         condition: service_healthy
     restart: on-failure
     ports:
-      - "8004:8000"
+      - "8003:8000"
     volumes:
       - game-volume:/code
     environment:
@@ -99,7 +79,7 @@ services:
         condition: service_healthy
     restart: on-failure
     ports:
-      - "8005:8000"
+      - "8004:8000"
     volumes:
       - matchmaking-volume:/code
     environment:
@@ -119,7 +99,7 @@ services:
         condition: service_healthy
     restart: on-failure
     ports:
-      - "8006:8000"
+      - "8005:8000"
     volumes:
       - users-volume:/code
     environment:
@@ -133,24 +113,6 @@ services:
       - users-network
 
 ##### ========== Database ================================================ #####
-  algo-stats-db:
-    image: postgres:14
-    restart: always
-    volumes:
-      - algo-stats-db-volume:/var/lib/postgresql/data
-    environment:
-      TZ: Europe/Paris
-      POSTGRES_DB: ${POSTGRES_ALGO_STATS_DB_NAME}
-      POSTGRES_USER: ${POSTGRES_ALGO_STATS_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_ALGO_STATS_PASSWORD}
-    networks:
-      - algo-stats-network
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready --dbname=$$POSTGRES_DB --username=$$POSTGRES_USER"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
   auth-db:
     image: postgres:14
     restart: always
@@ -248,10 +210,6 @@ networks:
     driver: bridge
 
 ##### ========== DB to Django networks =================================== #####
-  algo-stats-network:
-    name: algo-stats-network
-    driver: bridge
-
   auth-network:
     name: auth-network
     driver: bridge
@@ -274,14 +232,6 @@ networks:
 
 volumes:
 ##### ========== Django Volumes ========================================== #####
-  algo-stats-volume:
-    name: algo-stats-volume
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: "requirements/algo-stats/django"
-
   auth-volume:
     name: auth-volume
     driver: local
@@ -331,14 +281,6 @@ volumes:
       device: "requirements/users/django"
 
 #####Database Volumes
-  algo-stats-db-volume:
-    name: algo-stats-db-volume
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: "$HOME/transcendence/algo-stats-db"
-
   auth-db-volume:
     name: auth-db-volume
     driver: local

@@ -12,8 +12,8 @@ class LobbyCreateUpdateView(generics.CreateAPIView, generics.UpdateAPIView):
     def get_object(self):
         try:
             participant = LobbyParticipants.objects.get(user_id=self.request.user.id)
-            if not participant.is_admin:
-                raise serializers.ValidationError({'code': 'You are not admin of this lobby.'})
+            if not participant.creator:
+                raise serializers.ValidationError({'code': 'You are not creator of this lobby.'})
             lobby = Lobby.objects.get(id=participant.lobby_id)
             if lobby.game_mode == lobby_clash:
                 raise serializers.ValidationError({'code': 'You cannot update Clash lobby.'})
