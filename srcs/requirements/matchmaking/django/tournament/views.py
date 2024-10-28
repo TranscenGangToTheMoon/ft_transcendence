@@ -64,7 +64,7 @@ class TournamentResultMatchView(generics.CreateAPIView):
     def create(self, request, *args, **kwargs):
         tournament_id = request.data.get('tournament_id')
         if tournament_id is None:
-            raise serializers.ValidationError({'tournament_id': ['Tournament id is required.']})
+            raise serializers.ValidationError({'detail': 'Tournament id is required.'})
         tournament = get_tournament(id=tournament_id)
 
         current_stage = None
@@ -73,7 +73,7 @@ class TournamentResultMatchView(generics.CreateAPIView):
             # todo websocket: send to chat tournament that 'xxx' win the game
             user_id = request.data.get(player)
             if user_id is None:
-                raise serializers.ValidationError({player: [f'{player} is required.']})
+                raise serializers.ValidationError({'detail': f'{player} is required.'})
             try:
                 participant = tournament.participants.get(user_id=user_id)
                 if current_stage is None:
