@@ -12,7 +12,6 @@ class IsAuthenticated(permissions.BasePermission):
         json_data = requests_users(request, 'me/', 'GET')
         request.data['auth_user'] = json_data
         request.user.id = json_data['id']
-        request.user.username = json_data['username']
         return True
 
 
