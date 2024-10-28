@@ -159,6 +159,12 @@ class LobbyParticipantsSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         if 'team' in validated_data:
-            if self.instance.lobby.teams_count[validated_data['team']] == self.instance.lobby.max_team_participants:
+            if instance.lobby.game_mode != lobby_custom_game:
+                validated_data.pop('team', None)
+            elif self.instance.lobby.teams_count[validated_data['team']] == self.instance.lobby.max_team_participants:
                 raise serializers.ValidationError({'team': [f"Team {validated_data['team']} is full."]})
-        return super().update(instance, validated_data)
+        result = super().update(instance, validated_data)
+        if instance.lobby.is_ready:
+            # todo websocket: send that lobby is ready and start game
+            pass
+        return result
