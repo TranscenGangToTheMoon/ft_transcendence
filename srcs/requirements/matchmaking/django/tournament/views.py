@@ -24,14 +24,19 @@ class TournamentView(generics.CreateAPIView, generics.RetrieveUpdateDestroyAPIVi
 class TournamentParticipantsView(generics.ListCreateAPIView, generics.DestroyAPIView):
     queryset = TournamentParticipants.objects.all()
     serializer_class = TournamentParticipantsSerializer
+    # todo return tournament instance when list
 
     def filter_queryset(self, queryset):
         tournament = get_tournament(code=self.kwargs.get('code'))
         return queryset.filter(tournament_id=tournament.id)
 
     def get_object(self):
-        return get_user_participant(get_tournament(code=self.kwargs.get('code')), self.request.user.id)
         tournament = get_tournament(code=self.kwargs.get('code'))
+
+        if tournament.is_started and self.request.method == 'DELETE':
+            raise serializers.ValidationError({'detail': 'You cannot quit the tournament after he started.'})
+
+        return get_tournament_participants(tournament, self.request.user.id)
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
