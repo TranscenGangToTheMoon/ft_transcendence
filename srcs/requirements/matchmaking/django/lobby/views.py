@@ -22,7 +22,7 @@ class LobbyView(generics.CreateAPIView, generics.RetrieveUpdateDestroyAPIView):
         return lobby
 
 
-class LobbyCreateListUpdateDeleteView(generics.ListCreateAPIView, generics.UpdateAPIView, generics.DestroyAPIView):
+class LobbyParticipantsView(generics.ListCreateAPIView, generics.UpdateAPIView, generics.DestroyAPIView):
     queryset = LobbyParticipants.objects.all()
     serializer_class = LobbyParticipantsSerializer
     lookup_field = 'code'
@@ -48,5 +48,5 @@ class LobbyCreateListUpdateDeleteView(generics.ListCreateAPIView, generics.Updat
         return context
 
 
-lobby_create_update_view = LobbyCreateUpdateView.as_view()
-lobby_create_list_delete_view = LobbyCreateListUpdateDeleteView.as_view()
+lobby_view = LobbyView.as_view()
+lobby_participants_view = LobbyParticipantsView.as_view()
