@@ -50,12 +50,18 @@ class TournamentKickView(generics.DestroyAPIView):
     lookup_field = 'user_id'
 
     def get_object(self):
-        tournament = get_tournament(code=self.kwargs.get('code'))
-        get_user_participant(tournament, self.request.user.id, True)
-
         user_id = self.kwargs.get('user_id')
         if user_id is None:
             raise serializers.ValidationError({'detail': 'User id is required.'})
+
+        if user_id == self.request.user.id:
+            raise serializers.ValidationError({'detail': 'You cannot kick yourself.'})
+
+        tournament = get_tournament(code=self.kwargs.get('code'))
+        get_tournament_participants(tournament, self.request.user.id, True)
+
+        if tournament.is_started:
+            raise serializers.ValidationError({'detail': 'You cannot kick participant after the tournament has started.'})
 
         try:
             return tournament.participants.get(user_id=user_id)
