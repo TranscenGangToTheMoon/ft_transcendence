@@ -69,7 +69,10 @@ class LobbySerializer(serializers.ModelSerializer):
             validated_data['match_type'] = match_type_1v1
             validated_data['max_participants'] = 6
         result = super().create(validated_data)
-        LobbyParticipants.objects.create(lobby_id=result.id, lobby_code=validated_data['code'], user_id=user['id'], username=user['username'], creator=True)
+        creator = LobbyParticipants.objects.create(lobby_id=result.id, lobby_code=validated_data['code'], user_id=user['id'], creator=True)
+        if validated_data['game_mode'] == lobby_custom_game:
+            creator.team = team_a
+            creator.save()
         return result
 
     def update(self, instance, validated_data):
