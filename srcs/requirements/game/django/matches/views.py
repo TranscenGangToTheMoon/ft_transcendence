@@ -1,8 +1,9 @@
 from rest_framework import generics, serializers
+from rest_framework.exceptions import NotFound
 
 from game.auth import IsAuthenticated
 from matches.models import Matches
-from matches.serializers import MatchSerializer
+from matches.serializers import MatchSerializer, validate_user_id
 
 
 class MatchCreateView(generics.CreateAPIView):
@@ -23,5 +24,17 @@ class MatchListView(generics.ListAPIView):
         return queryset.filter(players__user_id=user_id)
 
 
+class PlayingView(generics.RetrieveAPIView):
+    serializer_class = MatchSerializer
+    queryset = Matches.objects.all()
+
+    def get_object(self):
+        player = validate_user_id(self.kwargs.get('user_id'), True)
+        if player is None:
+            raise NotFound()
+        return player.match
+
+
 match_create_view = MatchCreateView.as_view()
 match_list_view = MatchListView.as_view()
+playing_view = PlayingView.as_view()

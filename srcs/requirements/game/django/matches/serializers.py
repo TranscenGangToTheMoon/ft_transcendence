@@ -4,6 +4,19 @@ from game.static import GameMode, generate_game_code
 from matches.models import Matches, Teams, Players
 
 
+def validate_user_id(value, return_user=False):
+    if type(value) is not int:
+        raise serializers.ValidationError(['User id is required.'])
+
+    try:
+        player = Players.objects.get(user_id=value, match__finished=False)
+        if return_user:
+            return player
+        raise serializers.ValidationError(['User is already in a match.'])
+    except Players.DoesNotExist:
+        return None
+
+
 def validate_team(value):
     if len(value) != 2:
         raise serializers.ValidationError(['Two teams are required.'])
@@ -15,6 +28,8 @@ def validate_team(value):
         for user in team:
             if type(user) is not int:
                 raise serializers.ValidationError(['User id is required.'])
+            if Players.objects.filter(user_id=user).exists():
+                raise serializers.ValidationError(['User is already in a match.'])
     return value
 
 
