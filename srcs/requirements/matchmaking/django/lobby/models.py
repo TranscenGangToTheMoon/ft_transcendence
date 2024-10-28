@@ -32,6 +32,10 @@ class Lobby(models.Model):
     def is_full(self):
         return self.participants.count() == self.max_participants
 
+    @property
+    def is_ready(self):
+        return self.participants.filter(is_ready=False).count() == 0
+
 
 class LobbyParticipants(models.Model):
     lobby = models.ForeignKey(Lobby, on_delete=models.CASCADE, related_name='participants')
