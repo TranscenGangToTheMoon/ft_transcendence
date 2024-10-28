@@ -9,16 +9,6 @@ from tournament.models import TournamentParticipants
 
 def verify(user_id, join_tournament=True):
     try:
-        Players.objects.get(user_id=user_id).delete()
-    except Players.DoesNotExist:
-        pass
-
-    try:
-        LobbyParticipants.objects.get(user_id=user_id).delete()
-    except LobbyParticipants.DoesNotExist:
-        pass
-
-    try:
         participant = TournamentParticipants.objects.get(user_id=user_id, still_in=True)
         if participant.creator:
             if join_tournament:
@@ -26,6 +16,16 @@ def verify(user_id, join_tournament=True):
             raise serializers.ValidationError({'detail': 'You cannot create more than one tournament at the same time.'})
         participant.delete()
     except TournamentParticipants.DoesNotExist:
+        pass
+
+    try:
+        Players.objects.get(user_id=user_id).delete()
+    except Players.DoesNotExist:
+        pass
+
+    try:
+        LobbyParticipants.objects.get(user_id=user_id).delete()
+    except LobbyParticipants.DoesNotExist:
         pass
 
     try:
