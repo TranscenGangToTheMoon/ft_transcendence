@@ -5,13 +5,13 @@ from lobby.static import team_a, team_b, team_spectator, match_type_1v1
 
 class Lobby(models.Model):
     code = models.CharField(max_length=4, unique=True, editable=False)
-    max_participants = models.IntegerField(editable=False) # 3 or 6
+    max_participants = models.IntegerField(editable=False)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
-    game_mode = models.CharField(max_length=11) # clash, custom_game
+    game_mode = models.CharField(max_length=11)
 
-    match_type = models.CharField(max_length=3) # 1v1, 3v3
-    bo = models.IntegerField(default=1) # bo1 bo3 bo5
-    game_time = models.IntegerField(default=300) # in seconds
+    match_type = models.CharField(max_length=3)
+    bo = models.IntegerField(default=1)
+    game_time = models.IntegerField(default=180)
 
     @property
     def max_team_participants(self):
