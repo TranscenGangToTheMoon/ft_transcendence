@@ -6,24 +6,20 @@ from tournament.models import Tournaments, TournamentStage, TournamentParticipan
 from tournament.utils import get_tournament, create_match
 
 
-def valide_participant_create(user_id, join=False):
-    try:
-        LobbyParticipants.objects.get(user_id=user_id).delete()
-    except LobbyParticipants.DoesNotExist:
-        pass
+class TournamentGetParticipantsSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(source='user_id')
 
-    try:
-        participant = TournamentParticipants.objects.get(user_id=user_id)
-        if participant.creator:
-            if join:
-                raise serializers.ValidationError({'detail': 'You already join a tournament.'})
-            raise serializers.ValidationError({'detail': 'You cannot create more than one tournament at the same time.'})
-        participant.delete()
-    except TournamentParticipants.DoesNotExist:
-        pass
+    class Meta:
+        model = TournamentParticipants
+        fields = [
+            'id',
+            'creator',
+            'join_at',
+        ]
 
 
 class TournamentSerializer(serializers.ModelSerializer):
+    participants = TournamentGetParticipantsSerializer(many=True, read_only=True)
 
     class Meta:
         model = Tournaments

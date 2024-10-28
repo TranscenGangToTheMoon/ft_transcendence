@@ -3,9 +3,25 @@ from rest_framework import serializers
 from lobby.static import match_type_1v1, match_type_3v3, team_a, team_b, team_spectator, lobby_clash, lobby_custom_game
 from matchmaking.auth import get_auth_user, generate_code
 from lobby.models import Lobby, LobbyParticipants
+from matchmaking.verify import verify
+
+
+class LobbyGetParticipantsSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(source='user_id')
+
+    class Meta:
+        model = LobbyParticipants
+        fields = [
+            'id',
+            'creator',
+            'team',
+            'join_at',
+            'is_ready',
+        ]
 
 
 class LobbySerializer(serializers.ModelSerializer):
+    participants = LobbyGetParticipantsSerializer(many=True, read_only=True)
 
     class Meta:
         model = Lobby
