@@ -26,6 +26,7 @@ function apiRequest(token, endpoint, method="GET", authType="Bearer",
                 throw {code: response.status};
             }
             let data = await response.json();
+            console.log(data);
             if (data.code === 'token_not_valid') {
                 if (currentlyRefreshing)
                     return {};
@@ -59,11 +60,11 @@ window.apiRequest = apiRequest;
 window.getDataFromApi = getDataFromApi;
     
 // ========================== TOKEN UTILS ==========================
-async function reloadTempToken() {
+async function forceReloadGuestToken() {
     try {
         let data = await apiRequest(undefined, `${baseAPIUrl}/auth/guest/`, 'POST')
         if (data.access){
-            localStorage.setItem('temp_token', data.access);
+            localStorage.setItem('token', data.access);
             return data.access;
         }
         else
@@ -74,7 +75,7 @@ async function reloadTempToken() {
     }
 }
 
-async function generateGuestToken() {
+async function generateToken() {
     try {
         let data = await apiRequest(undefined, `${baseAPIUrl}/auth/guest/`, "POST");
         if (data.access) {
@@ -96,13 +97,13 @@ async function refreshToken(token) {
         let data = await apiRequest(token, `${baseAPIUrl}/auth/refresh/`, 'POST', undefined, undefined, {'refresh':refresh}, true)
         if (data.access) {
             token = data.access;
-            localStorage.setItem(getAccessToken(true), token);
-            // localStorage.setItem(getRefreshToken(true), token);
+            localStorage.setItem('token', token);
+            // localStorage.setItem('refresh', token);
             return token;
         }
         else {
-            if (getAccessToken(true) === 'temp_token'){
-                return reloadTempToken();
+            if (userInformations.is_guest === true){
+                return forceReloadGuestToken();
             }
             console.log('refresh token expired must relog')
             relog();
@@ -114,42 +115,17 @@ async function refreshToken(token) {
     }
 }
 
-function getAccessToken(name = false) {
-    let token = localStorage.getItem('token');
-    if (!token){
-        token = localStorage.getItem('temp_token');
-        if (name && token)
-            return 'temp_token';
-        else if (name)
-            return '';
-    }
-    else if (name)
-        return 'token';
-    return token;
+function getAccessToken() {
+    return localStorage.getItem('token');
 }
 
 function getRefreshToken(name = false) {
-    let token = localStorage.getItem('refresh');
-    if (!token){
-        if (name)
-            return 'temp_refresh';
-        token = localStorage.getItem('temp_refresh');
-    }
-    else if (name)
-        return 'refresh';
-    return token;
+    return localStorage.getItem('refresh');
 }
 
 function removeTokens() {
-    localStorage.removeItem(getAccessToken(true));
-    localStorage.removeItem(getRefreshToken(true));
-}
-
-function untemporizeTokens() {
-    localStorage.setItem('token', localStorage.getItem('temp_token'));
-    localStorage.setItem('refresh', localStorage.getItem('temp_refresh'));
-    localStorage.removeItem('temp_refresh');
-    localStorage.removeItem('temp_token');
+    localStorage.removeItem('token');
+    localStorage.removeItem('refresh');
 }
 
 function relog() {
@@ -157,11 +133,10 @@ function relog() {
     navigateTo('/login');   
 }
 window.removeTokens = removeTokens;
-window.untemporizeTokens = untemporizeTokens;
 window.refreshToken = refreshToken;
 window.getAccessToken = getAccessToken;
 window.getRefreshToken = getRefreshToken;
-window.generateGuestToken = generateGuestToken;
+window.generateToken = generateToken;
 
 // ========================== SPA SCRIPTS ==========================
 
@@ -251,16 +226,27 @@ window.loadContent = loadContent;
 
 async function fetchUserInfos(forced=false) {
     if (!getAccessToken())
-        await generateGuestToken();
+        await generateToken();
     if (!userInformations || forced) {
         try {
             let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/users/me/`);
             userInformations = data;
+            console.log('info fetch finished');
         }
         catch (error) {
             console.log(error);
         }
     }
+}
+
+function displayMainError(errorTitle, errorContent) {
+    const errorContentDiv = document.getElementById('errorContent');
+    const errorTitleDiv = document.getElementById('errorModalLabel');
+    const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+
+    errorContentDiv.innerText = errorContent;
+    errorTitleDiv.innerText = errorTitle;
+    errorModal.show();
 }
 
 // ========================== INDEX SCRIPT ==========================
@@ -279,12 +265,17 @@ async function loadUserProfile(){
         document.getElementById('balance').innerText = userInformations.coins;
     }
     await loadContent(`/${profileMenu}`, 'profileMenu');
-    console.log('then finished loading');
     // document.getElementById('title').innerText = userInformations.title;
 }
 
 async function atStart() {
     await fetchUserInfos();
+    if (userInformations.code === 'user_not_found'){
+        console.log('user was deleted from database, switching to guest mode');
+        displayMainError("Unable to retrieve your account","We're sorry your account has been permanently deleted and cannot be recovered.");
+        await generateToken();
+        await fetchUserInfos(true);
+    }
     await loadUserProfile();
     handleRoute();
 }
