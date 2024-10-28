@@ -5,21 +5,21 @@ from lobby.serializers import LobbySerializer, LobbyParticipantsSerializer
 from lobby.static import lobby_clash
 
 
-class LobbyCreateUpdateView(generics.CreateAPIView, generics.UpdateAPIView):
+class LobbyView(generics.CreateAPIView, generics.RetrieveUpdateDestroyAPIView):
     queryset = Lobby.objects.all()
     serializer_class = LobbySerializer
 
     def get_object(self):
         try:
             participant = LobbyParticipants.objects.get(user_id=self.request.user.id)
-            if not participant.creator:
+            if self.request.method != 'GET' and not participant.creator:
                 raise serializers.ValidationError({'code': 'You are not creator of this lobby.'})
             lobby = Lobby.objects.get(id=participant.lobby_id)
-            if lobby.game_mode == lobby_clash:
+            if self.request.method in ('PUT', 'PATCH') and lobby.game_mode == lobby_clash:
                 raise serializers.ValidationError({'code': 'You cannot update Clash lobby.'})
-            return lobby
         except LobbyParticipants.DoesNotExist:
             raise serializers.ValidationError({'code': 'You are not in any lobby.'})
+        return lobby
 
 
 class LobbyCreateListUpdateDeleteView(generics.ListCreateAPIView, generics.UpdateAPIView, generics.DestroyAPIView):
