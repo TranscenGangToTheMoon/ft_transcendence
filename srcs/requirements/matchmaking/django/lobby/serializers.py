@@ -39,7 +39,7 @@ class LobbySerializer(serializers.ModelSerializer):
             self.fields['match_type'].read_only = True
 
     def validate_game_mode(self, value):
-        if value not in (lobby_clash, lobby_custom_game):
+        if value not in (lobby_clash, lobby_custom_game): # todo put in library
             raise serializers.ValidationError([f"Game mode must be '{lobby_clash}' or '{lobby_custom_game}'."])
         return value
 
@@ -54,8 +54,7 @@ class LobbySerializer(serializers.ModelSerializer):
         return value
 
     def create(self, validated_data):
-        request = self.context.get('request')
-        user = get_auth_user(request)
+        user = get_auth_user(self.context.get('request'))
 
         if user['is_guest']:
             raise serializers.ValidationError({'detail': 'Guest cannot create lobby.'})
