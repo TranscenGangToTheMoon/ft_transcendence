@@ -42,13 +42,11 @@ class LobbyParticipants(models.Model):
     lobby_code = models.CharField(max_length=5, editable=False)
     is_guest = models.BooleanField(default=False)
     user_id = models.IntegerField(unique=True)
-    username = models.CharField(max_length=20)
     creator = models.BooleanField(default=False)
     is_ready = models.BooleanField(default=False)
     join_at = models.DateTimeField(auto_now_add=True, editable=False)
 
-    # Custom settings
-    team = models.CharField(default=team_a)
+    team = models.CharField(default=None, null=True)
 
     def delete(self, using=None, keep_parents=False):
         creator = self.creator
