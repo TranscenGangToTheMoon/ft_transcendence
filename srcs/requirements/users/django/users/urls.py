@@ -36,5 +36,5 @@ urlpatterns = [
     path('api/users/me/block/', block_list_create_view, name='api-block-list-update'),
     path('api/users/me/block/<int:pk>/', block_delete_view, name='api-block-delete'),
 
-    path('api/users/validate/chat/', validate_chat_view, name='api-validate-chat'),
+    path('api/validate/chat/', validate_chat_view, name='api-validate-chat'),
 ]

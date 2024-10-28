@@ -6,7 +6,7 @@ from rest_framework import permissions, serializers
 from rest_framework.exceptions import AuthenticationFailed
 
 
-def requests_users(request, enpoint: Literal['me/', 'validate/chat/'], method: Literal['GET', 'PUT', 'PATCH', 'DELETE'], data=None):
+def requests_users(request, enpoint: Literal['users/me/', 'validate/chat/'], method: Literal['GET', 'PUT', 'PATCH', 'DELETE'], data=None):
     if request is None:
         raise serializers.ValidationError({'detail': 'Request is required.'})
     token = request.headers.get('Authorization')
@@ -19,7 +19,7 @@ def requests_users(request, enpoint: Literal['me/', 'validate/chat/'], method: L
     try:
         response = requests.request(
             method=method,
-            url='http://users:8000/api/users/' + enpoint,
+            url='http://users:8000/api/' + enpoint,
             headers={
                 'Authorization': token,
                 'Content-Type': 'application/json'
@@ -39,10 +39,9 @@ def requests_users(request, enpoint: Literal['me/', 'validate/chat/'], method: L
 class IsAuthenticated(permissions.BasePermission):
 
     def has_permission(self, request, view):
-        json_data = requests_users(request, 'me/', 'GET')
+        json_data = requests_users(request, 'users/me/', 'GET')
         request.data['auth_user'] = json_data
         request.user.id = json_data['id']
-        request.user.username = json_data['username']
         return True
 
 
