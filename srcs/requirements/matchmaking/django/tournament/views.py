@@ -21,6 +21,16 @@ class TournamentView(generics.CreateAPIView, generics.RetrieveUpdateDestroyAPIVi
         return Tournaments.objects.get(id=p.tournament_id)
 
 
+class TournamentSearchView(generics.ListAPIView):
+    serializer_class = TournamentSerializer
+
+    def get_queryset(self):
+        query = self.request.data.pop('q', None)
+        if query is None:
+            raise serializers.ValidationError({'q': ['Query is required.']})
+        return Tournaments.objects.filter(name__icontains=query)
+
+
 class TournamentParticipantsView(generics.ListCreateAPIView, generics.DestroyAPIView):
     queryset = TournamentParticipants.objects.all()
     serializer_class = TournamentParticipantsSerializer
