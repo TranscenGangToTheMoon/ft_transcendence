@@ -91,17 +91,30 @@ class LobbySerializer(serializers.ModelSerializer):
 
 class LobbyParticipantsSerializer(serializers.ModelSerializer):
     creator = serializers.BooleanField(read_only=True)
+    id = serializers.IntegerField(source='user_id', read_only=True)
 
     class Meta:
         model = LobbyParticipants
-        fields = '__all__'
-        read_only_fields = [
-            'lobby',
+        fields = [
+            'id',
             'lobby_code',
-            'user_id',
-            'username',
+            'team',
+            'is_ready',
+            'creator',
+            'join_at',
+        ]
+        read_only_fields = [
+            'id',
+            'lobby_code',
             'creator',
         ]
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+
+        if instance.lobby.game_mode != lobby_custom_game:
+            representation.pop('team', None)
+        return representation
 
     def validate_team(self, value):
         if value not in (team_a, team_b, team_spectator):
@@ -127,11 +140,10 @@ class LobbyParticipantsSerializer(serializers.ModelSerializer):
         if lobby.is_full:
             raise serializers.ValidationError({'code': ['Lobby is full.']})
 
-        validated_data['lobby_id'] = lobby.id
+        validated_data['lobby'] = lobby
         validated_data['lobby_code'] = lobby.code
         validated_data['user_id'] = user['id']
-        validated_data['username'] = user['username']
-
+        validated_data['is_guest'] = user['is_guest']
         if lobby.game_mode == lobby_custom_game:
             teams_count = lobby.teams_count
             max_team = lobby.max_team_participants
