@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from matchmaking.request import requests_game
 from tournament.models import Tournaments, TournamentParticipants
 from tournament.serializers import TournamentSerializer, TournamentParticipantsSerializer, TournamentStageSerializer
-from tournament.utils import get_tournament, get_user_participant, create_match
+from tournament.utils import get_tournament, get_tournament_participants, create_match
 
 
 class TournamentView(generics.CreateAPIView, generics.RetrieveUpdateDestroyAPIView):
@@ -15,7 +15,7 @@ class TournamentView(generics.CreateAPIView, generics.RetrieveUpdateDestroyAPIVi
     serializer_class = TournamentSerializer
 
     def get_object(self):
-        p = get_user_participant(None, self.request.user.id)
+        p = get_tournament_participants(None, self.request.user.id)
         if self.request.method != 'GET' and not p.creator:
             raise serializers.ValidationError({'detail': 'You do not have permission to update or delete this tournament.'})
         return Tournaments.objects.get(id=p.tournament_id)
@@ -31,6 +31,7 @@ class TournamentParticipantsView(generics.ListCreateAPIView, generics.DestroyAPI
 
     def get_object(self):
         return get_user_participant(get_tournament(code=self.kwargs.get('code')), self.request.user.id)
+        tournament = get_tournament(code=self.kwargs.get('code'))
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -52,7 +53,7 @@ class TournamentKickView(generics.DestroyAPIView):
             raise serializers.ValidationError({'detail': 'User id is required.'})
 
         try:
-            return TournamentParticipants.objects.get(user_id=user_id, tournament=tournament)
+            return tournament.participants.get(user_id=user_id)
         except TournamentParticipants.DoesNotExist:
             raise serializers.ValidationError({'detail': f"User id '{user_id}' is not participant of this tournament."})
 
