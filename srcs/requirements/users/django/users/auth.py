@@ -73,12 +73,12 @@ def get_user(request=None, id=None):
     return Users.objects.get(pk=id)
 
 
-def validate_username(username, user):
+def validate_username(username, self_user):
     try:
         assert username is not None
         valide_username = Users.objects.get(username=username)
         assert valide_username.is_guest is False
-        assert not valide_username.block.filter(blocked=user).exists()
+        assert not valide_username.block.filter(blocked=self_user).exists()
     except (Users.DoesNotExist, AssertionError):
         raise serializers.ValidationError({'username': ['This user does not exist.']})
     return valide_username
