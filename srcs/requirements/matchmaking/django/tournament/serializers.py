@@ -68,18 +68,25 @@ class TournamentStageSerializer(serializers.ModelSerializer):
 
 
 class TournamentParticipantsSerializer(serializers.ModelSerializer):
-    creator = serializers.BooleanField(read_only=True)
+    id = serializers.IntegerField(source='user_id', read_only=True)
+    tournament = serializers.CharField(source='tournament.code', read_only=True)
 
     class Meta:
         model = TournamentParticipants
-        fields = '__all__'
-        read_only_fields = [
+        fields = [
             'id',
-            'user_id',
             'tournament',
             'stage',
             'seeding',
-            'index',
+            'still_in',
+            'creator',
+            'join_at',
+        ]
+        read_only_fields = [
+            'id',
+            'tournament',
+            'stage',
+            'seeding',
             'still_in',
             'creator',
             'join_at',
@@ -88,14 +95,14 @@ class TournamentParticipantsSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         tournament = get_tournament(code=self.context.get('code'))
 
-        user = self.context['auth_user']
-        verify(user['id'])
-
         if tournament.is_started:
             raise serializers.ValidationError({'code': ['Tournament has already started.']})
 
         if tournament.is_full:
             raise serializers.ValidationError({'code': ['Tournament is full.']})
+
+        user = self.context['auth_user']
+        verify(user['id'])
 
         validated_data['user_id'] = user['id']
         validated_data['tournament'] = tournament
