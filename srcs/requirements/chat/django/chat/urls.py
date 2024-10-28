@@ -16,11 +16,15 @@ Including another URLconf
 """
 from django.urls import path
 
-from chat_messages.views import messages_list_create_view
-from chats.views import chats_list_create_view, chats_retrieve_delete_view
+from chat_messages.views import messages_view
+from chats.views import chats_view, chat_view
+from users.views import rename_user_view, delete_user_view
 
 urlpatterns = [
-    path('api/chat/', chats_list_create_view, name='api-chat-list-create'),
-    path('api/chat/<int:pk>/', chats_retrieve_delete_view, name='api-chat-retrieve-delete'),
-    path('api/chat/<int:pk>/messages/', messages_list_create_view),
+    path('api/chat/', chats_view),
+    path('api/chat/<int:pk>/', chat_view),
+    path('api/chat/<int:pk>/messages/', messages_view),
+
+    path('api/rename-user/<int:user_id>/', rename_user_view),
+    path('api/delete-user/<int:user_id>/', delete_user_view),
 ]

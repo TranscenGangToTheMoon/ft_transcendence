@@ -1,28 +1,64 @@
 from rest_framework import serializers
+from rest_framework.exceptions import MethodNotAllowed
 
 from chat.auth import get_auth_user, requests_users
 from chat.type import chat_type
 from chats.models import Chats, ChatParticipants
 
 
+class ChatPaticipantsSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(source='user_id', read_only=True)
+
+    class Meta:
+        model = ChatParticipants
+        fields = [
+            'id',
+            'username',
+            'view_chat',
+        ]
+
+
 class ChatsSerializer(serializers.ModelSerializer):
     username = serializers.CharField(write_only=True)
-    participants = serializers.SerializerMethodField(read_only=True)
+    participants = ChatPaticipantsSerializer(many=True, read_only=True)
+    type = serializers.CharField(required=False)
+    view_chat = serializers.BooleanField(write_only=True, required=False)
 
     class Meta:
         model = Chats
-        fields = '__all__'
+        fields = [
+            'id',
+            'type',
+            'participants',
+            'created_at',
+            'username',
+            'view_chat',
+        ]
+        read_only_fields = [
+            'id',
+            'participants',
+            'created_at',
+        ]
+
+    def validate(self, data):
+        request = self.context.get('request')
+        if request is None:
+            raise serializers.ValidationError({'detail': 'Request is required.'}) # todo move in library
+        if request.get_host().split(':')[0] == 'chat' and 'type' not in data:
+            raise serializers.ValidationError({'type': ['This field is required.']})
+        return data
 
     def validate_type(self, value):
+        request = self.context.get('request')
+        if request is None:
+            raise serializers.ValidationError({'detail': 'Request is required.'})
+        if request.method in ('PATCH', 'PUT'):
+            raise MethodNotAllowed(request.method)
         if value not in chat_type:
             raise serializers.ValidationError('Invalid type, only accept "' + '", "'.join(chat_type) + '"')
+        if request.get_host().split(':')[0] != 'chat' and value != 'private_message':
+            raise serializers.ValidationError('You can only create private messages')
         return value
-
-    def get_participants(self, obj):
-        participants = []
-        for user in obj.chatparticipants_set.all():
-            participants.append({'id': user.user_id, 'username': user.username})
-        return participants
 
     def create(self, validated_data):
         request = self.context.get('request')
@@ -39,7 +75,21 @@ class ChatsSerializer(serializers.ModelSerializer):
 
         user2 = requests_users(request, 'validate/chat/', 'GET', data={'username': username})
 
+        if request.get_host().split(':')[0] != 'chat':
+            validated_data['type'] = 'private_message'
         result = super().create(validated_data)
         ChatParticipants.objects.create(user_id=user['id'], username=user['username'], chat_id=result.id)
         ChatParticipants.objects.create(user_id=user2['id'], username=user2['username'], chat_id=result.id)
         return result
+
+    def update(self, instance, validated_data):
+        view_chat = validated_data.pop('view_chat', None)
+        if view_chat is not None:
+            user = get_auth_user(self.context.get('request'))
+            try:
+                p = instance.participants.get(user_id=user['id'])
+                p.view_chat = view_chat
+                p.save()
+            except ChatParticipants.DoesNotExist:
+                raise serializers.ValidationError({'detail': 'You are not in this chat.'})
+        return super().update(instance, validated_data)
