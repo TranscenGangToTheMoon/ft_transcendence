@@ -134,6 +134,7 @@ class TournamentResultMatchView(generics.CreateAPIView):
 
 
 tournament_view = TournamentView.as_view()
+tournament_search_view = TournamentSearchView.as_view()
 tournament_participants_view = TournamentParticipantsView.as_view()
 tournament_kick_view = TournamentKickView.as_view()
 tournament_result_match_view = TournamentResultMatchView.as_view()
