@@ -61,6 +61,9 @@ build		:
 up			:	build
 			$(COMPOSE) $(FLAGS) $@
 
+down		:
+			$(COMPOSE) $(FLAGS) $@
+
 dettach		:	build
 			$(COMPOSE) $(FLAGS) up -d
 
@@ -75,22 +78,26 @@ banner		:
 			@echo -e '                                          bajeanno fguirama jcoquard nfaust xcharra'
 			@echo -e '$(RESET)'
 
-clean		:
-			$(COMPOSE) $(FLAGS) down
-
-secrets		:	$(ENV_FILE)
-
-
+secrets		:	$(ENV_FILE) #if secrets directory are needed delete phony secrets
+#			mkdir $@
+			
 $(ENV_FILE)	:	$(ENV_EXEMPLE)
+
 			./launch.d/01passwords.sh $(ENV_EXEMPLE) $(ENV_FILE)
 
-fclean		:
+clean		:
+			$(COMPOSE) $(FLAGS) down -v --rmi local
 			docker run --rm -v $(VOLS_PATH):/transcendence busybox sh -c "rm -rf transcendence/*"
-			rm -rf $(VOLS_PATH)
-			docker image prune -af
-			$(COMPOSE) $(FLAGS) down -v --rmi all
-			rm -rf $(SECRETS_D)
 			rm -rf $(ENV_FILE)
+#			rm -rf $(SECRETS_D)
+
+fclean		:
+			$(COMPOSE) $(FLAGS) down -v --rmi all
+			docker run --rm -v $(VOLS_PATH):/transcendence busybox sh -c "rm -rf transcendence/*"
+			docker image prune -af
+			rm -rf $(VOLS_PATH)
+			rm -rf $(ENV_FILE)
+#			rm -rf $(SECRETS_D)
 
 image-ls	:
 			docker image ls -a
