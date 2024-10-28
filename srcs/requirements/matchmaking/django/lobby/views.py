@@ -49,5 +49,26 @@ class LobbyParticipantsView(generics.ListCreateAPIView, generics.UpdateAPIView, 
         return context
 
 
+class LobbyKickView(generics.DestroyAPIView):
+    serializer_class = LobbyParticipantsSerializer
+    lookup_field = 'user_id'
+
+    def get_object(self):
+        user_id = self.kwargs.get('user_id')
+        if user_id is None:
+            raise serializers.ValidationError({'detail': 'User id is required.'})
+
+        lobby = get_lobby(self.kwargs.get('code'))
+
+        if user_id == self.request.user.id:
+            raise serializers.ValidationError({'detail': 'You cannot kick yourself.'})
+        get_lobby_participants(lobby, self.request.user.id, True)
+
+        try:
+            return lobby.participants.get(user_id=user_id)
+        except LobbyParticipants.DoesNotExist:
+            raise serializers.ValidationError({'detail': f"User id '{user_id}' is not participant of this lobby."})
+
+
 lobby_view = LobbyView.as_view()
 lobby_participants_view = LobbyParticipantsView.as_view()
