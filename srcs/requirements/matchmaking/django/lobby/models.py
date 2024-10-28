@@ -40,6 +40,7 @@ class Lobby(models.Model):
 class LobbyParticipants(models.Model):
     lobby = models.ForeignKey(Lobby, on_delete=models.CASCADE, related_name='participants')
     lobby_code = models.CharField(max_length=5, editable=False)
+    is_guest = models.BooleanField(default=False)
     user_id = models.IntegerField(unique=True)
     username = models.CharField(max_length=20)
     creator = models.BooleanField(default=False)
@@ -53,9 +54,10 @@ class LobbyParticipants(models.Model):
         creator = self.creator
         lobby = Lobby.objects.get(id=self.lobby.id)
         super().delete(using=using, keep_parents=keep_parents)
-        participants = lobby.participants.all()
+        participants = lobby.participants.filter(is_guest=False)
         if not participants.exists():
             lobby.delete()
+            # todo close websocket connection
         elif creator:
             first_join = participants.order_by('join_at').first()
             first_join.creator = True
