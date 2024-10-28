@@ -72,3 +72,4 @@ class LobbyKickView(generics.DestroyAPIView):
 
 lobby_view = LobbyView.as_view()
 lobby_participants_view = LobbyParticipantsView.as_view()
+lobby_kick_view = LobbyKickView.as_view()
