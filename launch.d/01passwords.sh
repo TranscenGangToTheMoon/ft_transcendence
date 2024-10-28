@@ -1,39 +1,33 @@
 #!/bin/bash
 
 if [ $# -eq 0 ]; then
-    echo "No arguments provided"
-    echo "Usage: "
     exit 1
 elif [ $# -eq 1 ]; then
     if [ -z "$1" ]; then
-        echo "Argument 1 is empty!"
         exit 1
     else
         echo "Case 1"
         ENV_DEFAULT=$1
         if [[ ! -f $ENV_DEFAULT ]]; then
-            echo No env file found !
-            exit
+            exit 1
         fi
     fi
 elif [ $# -eq 2 ]; then
     if [ -z "$2" ]; then
-        echo "Argument 2 is empty!"
         exit 1
     else
         echo "Case 2"
         ENV_DEFAULT=$1
         ENV_OUTPUT=$2
         if [[ ! -f $ENV_DEFAULT ]]; then
-            echo No env file found !
-            exit
+            exit 1
         fi
         echo -n "" > "$ENV_OUTPUT"
     fi
 fi
-echo $ENV_OUTPUT
+
 generate_password() {
-	echo $(LC_CTYPE=C ; tr -dc 'A-Za-z0-9!?%' < /dev/urandom | head -c 32)
+    echo $(LC_ALL=C; tr -dc 'A-Za-z0-9!?%' < /dev/urandom | head -c 32)
 }
 
 while IFS= read -r line; do

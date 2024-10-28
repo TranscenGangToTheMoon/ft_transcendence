@@ -7,22 +7,9 @@ function changePlayFieldValue(login){
 }
 
 function loadGuest() {
-    // if (localStorage.getItem('token')){
-    //     return navigateTo('/');
-    // }
-    if (localStorage.getItem('temp_token'))
-        return fillGuestPlaceHolder();
-    getDataFromApi(undefined, `${baseAPIUrl}/auth/guest/`, "POST")
-        .then (data => {
-            if (data.access) {
-                localStorage.setItem('temp_refresh', data.refresh);
-                localStorage.setItem('temp_token', data.access);
-                fillGuestPlaceHolder();
-            }
-            else
-                console.log('error a gerer', data);
-        })
-        .catch(error => console.log('error a gerer', error))
+    if (!getAccessToken())
+        generateToken();
+    fillGuestPlaceHolder();
 }
 
 function fillGuestPlaceHolder(){
@@ -41,20 +28,15 @@ document.getElementById('playDuel').addEventListener('click', async event => {
     event.preventDefault();
     guestUsername = document.getElementById('playLoginField').value;
     if (!guestUsername && getAccessToken())
-    {
-        untemporizeTokens();
-        return navigateTo();
-    }
+        return navigateTo('/');
     if (guestUsername) {
         try {
-            let data = await apiRequest(localStorage.getItem('temp_token'), `${baseAPIUrl}/users/me/`, "PATCH",
+            let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/users/me/`, "PATCH",
             undefined, undefined, {'username' : guestUsername});
             if (!data.id)
                 document.getElementById('container').innerText = data.username;
-            else {
-                untemporizeTokens();
-                navigateTo();
-            }
+            else
+                navigateTo('/');
         }
         catch (error){
             console.log('error on guest change', error);
@@ -66,10 +48,7 @@ document.getElementById('playClash').addEventListener('click', async event => {
     event.preventDefault();
     guestUsername = document.getElementById('playLoginField').value;
     if (!guestUsername && getAccessToken())
-    {
-        untemporizeTokens();
         return navigateTo('/');
-    }
     if (guestUsername) {
         try {
             let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/users/me/`, "PATCH",
@@ -78,7 +57,6 @@ document.getElementById('playClash').addEventListener('click', async event => {
                 document.getElementById('container').innerText = data.username;
             else {
                 await fetchUserInfos(true);
-                untemporizeTokens();
                 await loadUserProfile();
                 console.log('then changing')
                 // navigateTo('/');
