@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
-from lobby.models import LobbyParticipants
 from matchmaking.auth import get_auth_user, generate_code
+from matchmaking.verify import verify
 from tournament.models import Tournaments, TournamentStage, TournamentParticipants
 from tournament.utils import get_tournament, create_match
 
@@ -47,7 +47,7 @@ class TournamentSerializer(serializers.ModelSerializer):
         if user['is_guest']:
             raise serializers.ValidationError({'detail': 'Guest cannot create tournament.'})
 
-        valide_participant_create(user['id'])
+        verify(user['id'], False)
 
         validated_data['code'] = generate_code()
         validated_data['created_by'] = user['id']
@@ -89,7 +89,7 @@ class TournamentParticipantsSerializer(serializers.ModelSerializer):
         tournament = get_tournament(code=self.context.get('code'))
 
         user = self.context['auth_user']
-        valide_participant_create(user['id'], join=True)
+        verify(user['id'])
 
         if tournament.is_started:
             raise serializers.ValidationError({'code': ['Tournament has already started.']})

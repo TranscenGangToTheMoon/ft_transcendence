@@ -60,10 +60,7 @@ class LobbySerializer(serializers.ModelSerializer):
         if user['is_guest']:
             raise serializers.ValidationError({'detail': 'Guest cannot create lobby.'})
 
-        try:
-            LobbyParticipants.objects.get(user_id=user['id']).delete()
-        except LobbyParticipants.DoesNotExist:
-            pass
+        verify(user['id'])
 
         validated_data['code'] = generate_code()
         if validated_data['game_mode'] == lobby_clash:
@@ -119,14 +116,11 @@ class LobbyParticipantsSerializer(serializers.ModelSerializer):
         except Lobby.DoesNotExist:
             raise serializers.ValidationError({'code': [f"Lobby '{lobby_code}' does not exist."]})
 
-        user = self.context['auth_user']
-        try:
-            lobby_join = LobbyParticipants.objects.get(user_id=user['id'])
-            if lobby_join.filter(lobby_id=lobby.id).exists():
-                raise serializers.ValidationError({'code': ['You already joined this lobby.']})
-            lobby_join.delete()
-        except LobbyParticipants.DoesNotExist:
-            pass
+        user = get_auth_user(self.context.get('request'))
+        verify(user['id'])
+
+        if lobby.participants.filter(user_id=user['id']).exists():
+            raise serializers.ValidationError({'code': ['You already joined this lobby.']})
 
         if lobby.is_full:
             raise serializers.ValidationError({'code': ['Lobby is full.']})
