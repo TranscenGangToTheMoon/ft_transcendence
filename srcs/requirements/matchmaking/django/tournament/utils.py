@@ -12,7 +12,7 @@ def create_match(tournament_id, stage_id, teams):
         'teams': teams
     }
 
-    requests_game('match/', data)
+    requests_game('match/', data=data)
 
 
 def get_tournament(**kwargs):

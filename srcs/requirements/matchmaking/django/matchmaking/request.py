@@ -52,5 +52,5 @@ def requests_users(request, enpoint: Literal['me/', 'validate/game/'], method: L
     return request_service('users', 'users/' + enpoint, method, data, token)
 
 
-def requests_game(enpoint: Literal['match/', 'tournaments/'], data):
-    return request_service('game', enpoint, 'POST', data)
+def requests_game(enpoint: Literal['match/', 'tournaments/', 'playing/{user_id}/'], method: Literal['GET', 'POST'] = 'POST', data=None):
+    return request_service('game', enpoint, method, data)

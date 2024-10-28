@@ -89,7 +89,7 @@ class TournamentResultMatchView(generics.CreateAPIView):
             data = TournamentSerializer(tournament).data
             data['finish_at'] = datetime.now() #todo probleme
             data['stages'] = TournamentStageSerializer(tournament.stages.all(), many=True).data # todo erreur create two stages
-            requests_game('tournaments/', data)
+            requests_game('tournaments/', data=data)
             tournament.delete()
             # todo websocket: send to chat tournament that 'xxx' win the tournament
             return Response(f'The tournament is over, and player {finished} is the winner!', status=201)

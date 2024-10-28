@@ -31,5 +31,6 @@ urlpatterns = [
     path('api/play/tournament/', tournament_view),
     path('api/play/tournament/<str:code>/', tournament_participants_view),
     path('api/play/tournament/<str:code>/kick/<int:user_id>/', tournament_kick_view),
+
     path('api/tournament/result-match/', tournament_result_match_view),
 ]
