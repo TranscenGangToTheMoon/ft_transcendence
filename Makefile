@@ -22,7 +22,7 @@ ENV_EXEMPLE	:=	.env_exemple
 
 ENV_FILE	:=	./srcs/.env
 
-SERVICE		?=	#
+SERVICE		?=	#Leave blank
 
 ########################################################################################################################
 #                                                        FLAGS                                                         #
@@ -70,7 +70,7 @@ down		:
 dettach		:	build
 			$(COMPOSE) $(FLAGS) up -d $(SERVICE)
 
-exec		:	dettach
+exec		:
 			$(COMPOSE) $(FLAGS) $@ $(SERVICE) $(DSHELL)
 
 banner		:
