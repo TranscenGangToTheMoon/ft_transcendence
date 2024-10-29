@@ -6,7 +6,6 @@ elif [ $# -eq 1 ]; then
     if [ -z "$1" ]; then
         exit 1
     else
-        echo "Case 1"
         ENV_DEFAULT=$1
         if [[ ! -f $ENV_DEFAULT ]]; then
             exit 1
@@ -16,7 +15,6 @@ elif [ $# -eq 2 ]; then
     if [ -z "$2" ]; then
         exit 1
     else
-        echo "Case 2"
         ENV_DEFAULT=$1
         ENV_OUTPUT=$2
         if [[ ! -f $ENV_DEFAULT ]]; then
@@ -47,5 +45,4 @@ while IFS= read -r line; do
     fi
 done < "$ENV_DEFAULT"
 
-echo "Passwords changed !"
 exit 0

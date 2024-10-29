@@ -52,7 +52,7 @@ services:
     networks:
       - transcendence-network
     volumes:
-      - frontend-volume:/var/www/html
+      - frontend-volume:/var/www/html #Do copy when project is finished HUGE SECURITY FAIL
       - ./requirements/frontend/Caddyfile:/etc/caddy/Caddyfile #Do copy when project is finished HUGE SECURITY FAIL
     environment:
       TZ: Europe/Paris
