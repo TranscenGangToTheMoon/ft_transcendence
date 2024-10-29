@@ -80,9 +80,8 @@ banner		:
 
 secrets		:	$(ENV_FILE) #if secrets directory are needed delete phony secrets
 #			mkdir $@
-			
-$(ENV_FILE)	:	$(ENV_EXEMPLE)
 
+$(ENV_FILE)	:	$(ENV_EXEMPLE)
 			./launch.d/01passwords.sh $(ENV_EXEMPLE) $(ENV_FILE)
 
 clean		:
