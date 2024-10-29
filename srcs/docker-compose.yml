@@ -5,17 +5,19 @@ services:
     depends_on:
       auth-db:
         condition: service_healthy
-    restart: always
+    restart: on-failure
+    ports:
+      - "8001:8000"
     volumes:
       - auth-volume:/code
+      - shared-code-volume:/shared
     environment:
       TZ: Europe/Paris
+      DEBUG: ${DEBUG}
       POSTGRES_DB: ${POSTGRES_AUTH_DB_NAME}
       POSTGRES_USER: ${POSTGRES_AUTH_USER}
       POSTGRES_PASSWORD: ${POSTGRES_AUTH_PASSWORD}
       POSTGRES_HOST: ${POSTGRES_AUTH_HOST}
-    ports:
-      - "8001:8000"
     networks:
       - transcendence-network
       - auth-network
@@ -30,8 +32,10 @@ services:
       - "8002:8000"
     volumes:
       - chat-volume:/code
+      - shared-code-volume:/shared
     environment:
       TZ: Europe/Paris
+      DEBUG: ${DEBUG}
       POSTGRES_DB: ${POSTGRES_CHAT_DB_NAME}
       POSTGRES_USER: ${POSTGRES_CHAT_USER}
       POSTGRES_PASSWORD: ${POSTGRES_CHAT_PASSWORD}
@@ -42,6 +46,7 @@ services:
 
   frontend:
     build: "requirements/frontend"
+    restart: on-failure
     ports:
       - "4443:443"
     networks:
@@ -62,8 +67,10 @@ services:
       - "8003:8000"
     volumes:
       - game-volume:/code
+      - shared-code-volume:/shared
     environment:
       TZ: Europe/Paris
+      DEBUG: ${DEBUG}
       POSTGRES_DB: ${POSTGRES_GAME_DB_NAME}
       POSTGRES_USER: ${POSTGRES_GAME_USER}
       POSTGRES_PASSWORD: ${POSTGRES_GAME_PASSWORD}
@@ -82,8 +89,10 @@ services:
       - "8004:8000"
     volumes:
       - matchmaking-volume:/code
+      - shared-code-volume:/shared
     environment:
       TZ: Europe/Paris
+      DEBUG: ${DEBUG}
       POSTGRES_DB: ${POSTGRES_MATCHMAKING_DB_NAME}
       POSTGRES_USER: ${POSTGRES_MATCHMAKING_USER}
       POSTGRES_PASSWORD: ${POSTGRES_MATCHMAKING_PASSWORD}
@@ -102,8 +111,10 @@ services:
       - "8005:8000"
     volumes:
       - users-volume:/code
+      - shared-code-volume:/shared
     environment:
       TZ: Europe/Paris
+      DEBUG: ${DEBUG}
       POSTGRES_DB: ${POSTGRES_USERS_DB_NAME}
       POSTGRES_USER: ${POSTGRES_USERS_USER}
       POSTGRES_PASSWORD: ${POSTGRES_USERS_PASSWORD}
@@ -115,7 +126,7 @@ services:
 ##### ========== Database ================================================ #####
   auth-db:
     image: postgres:14
-    restart: always
+    restart: on-failure
     volumes:
       - auth-db-volume:/var/lib/postgresql/data
     environment:
@@ -133,7 +144,7 @@ services:
 
   chat-db:
     image: postgres:14
-    restart: always
+    restart: on-failure
     volumes:
       - chat-db-volume:/var/lib/postgresql/data
     environment:
@@ -151,7 +162,7 @@ services:
 
   game-db:
     image: postgres:14
-    restart: always
+    restart: on-failure
     volumes:
       - game-db-volume:/var/lib/postgresql/data
     environment:
@@ -169,7 +180,7 @@ services:
 
   matchmaking-db:
     image: postgres:14
-    restart: always
+    restart: on-failure
     volumes:
       - matchmaking-db-volume:/var/lib/postgresql/data
     environment:
@@ -320,3 +331,12 @@ volumes:
       type: none
       o: bind
       device: "$HOME/transcendence/users-db"
+
+#####Shared Code Volume
+  shared-code-volume:
+    name: shared-code-volume
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: "./shared-code"
