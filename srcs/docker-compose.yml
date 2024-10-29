@@ -292,45 +292,15 @@ volumes:
       device: "requirements/users/django"
 
 #####Database Volumes
-  auth-db-volume:
-    name: auth-db-volume
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: "$HOME/transcendence/auth-db"
+  auth-db-volume: {}
 
-  chat-db-volume:
-    name: chat-db-volume
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: "$HOME/transcendence/chat-db"
+  chat-db-volume: {}
 
-  game-db-volume:
-    name: game-db-volume
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: "$HOME/transcendence/game-db"
+  game-db-volume: {}
 
-  matchmaking-db-volume:
-    name: matchmaking-db-volume
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: "$HOME/transcendence/matchmaking-db"
+  matchmaking-db-volume: {}
 
-  users-db-volume:
-    name: users-db-volume
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: "$HOME/transcendence/users-db"
+  users-db-volume: {}
 
 #####Shared Code Volume
   shared-code-volume:
