@@ -1,7 +1,7 @@
+from lib-transcendence.auth import get_auth_user
 from rest_framework import serializers
 
-from matchmaking.auth import get_auth_user, generate_code
-from matchmaking.verify import verify
+from matchmaking.utils import verify_user
 from tournament.models import Tournaments, TournamentStage, TournamentParticipants
 from tournament.utils import get_tournament, create_match
 
@@ -31,7 +31,8 @@ class TournamentSerializer(serializers.ModelSerializer):
             'start_at',
         ]
 
-    def validate_size(self, value):
+    @staticmethod
+    def validate_size(value):
         if (value % 4) != 0:
             raise serializers.ValidationError(['Size must be a multiple of 4.'])
         if value > 32:
@@ -47,7 +48,7 @@ class TournamentSerializer(serializers.ModelSerializer):
         if user['is_guest']:
             raise serializers.ValidationError({'detail': 'Guest cannot create tournament.'})
 
-        verify(user['id'], False)
+        verify_user(user['id'], False)
 
         validated_data['code'] = generate_code()
         validated_data['created_by'] = user['id']
@@ -102,7 +103,7 @@ class TournamentParticipantsSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({'code': ['Tournament is full.']})
 
         user = self.context['auth_user']
-        verify(user['id'])
+        verify_user(user['id'])
 
         validated_data['user_id'] = user['id']
         validated_data['tournament'] = tournament

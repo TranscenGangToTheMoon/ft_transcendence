@@ -7,7 +7,7 @@ RUN apt-get update
 RUN apt-get upgrade
 RUN apt-get install -y --no-install-recommends curl net-tools
 
-COPY /django/requirements.txt /
+COPY requirements.txt /
 RUN pip install -r requirements.txt
 
 WORKDIR /code

@@ -1,8 +1,8 @@
+from lib-transcendence.GameMode import GameMode
 from rest_framework import generics, serializers
 
 from lobby.models import Lobby, LobbyParticipants
 from lobby.serializers import LobbySerializer, LobbyParticipantsSerializer
-from lobby.static import lobby_clash
 from matchmaking.utils import get_participants
 
 
@@ -25,7 +25,7 @@ class LobbyView(generics.CreateAPIView, generics.RetrieveUpdateDestroyAPIView):
 
     def get_object(self):
         participant = get_lobby_participants(None, self.request.user.id, self.request.method != 'GET')
-        if self.request.method in ('PUT', 'PATCH') and participant.lobby.game_mode == lobby_clash:
+        if self.request.method in ('PUT', 'PATCH') and participant.lobby.game_mode == GameMode.clash:
             raise serializers.ValidationError({'code': 'You cannot update Clash lobby.'})
         return participant.lobby
 

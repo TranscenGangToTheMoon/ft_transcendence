@@ -1,10 +1,10 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
+from lib-transcendence.services import requests_game
 from rest_framework import generics, serializers
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
-from matchmaking.request import requests_game
 from tournament.models import Tournaments, TournamentParticipants
 from tournament.serializers import TournamentSerializer, TournamentParticipantsSerializer, TournamentStageSerializer
 from tournament.utils import get_tournament, get_tournament_participants, create_match
@@ -109,8 +109,8 @@ class TournamentResultMatchView(generics.CreateAPIView):
 
         if finished is not None:
             data = TournamentSerializer(tournament).data
-            data['finish_at'] = datetime.now() #todo probleme
-            data['stages'] = TournamentStageSerializer(tournament.stages.all(), many=True).data # todo erreur create two stages
+            data['finish_at'] = datetime.now(timezone.utc)
+            data['stages'] = TournamentStageSerializer(tournament.stages.all(), many=True).data
             requests_game('tournaments/', data=data)
             tournament.delete()
             # todo websocket: send to chat tournament that 'xxx' win the tournament

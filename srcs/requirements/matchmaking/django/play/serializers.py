@@ -1,7 +1,7 @@
+from lib-transcendence.auth import get_auth_user
 from rest_framework import serializers
 
-from matchmaking.auth import get_auth_user
-from matchmaking.verify import verify
+from matchmaking.utils import verify_user
 from play.models import Players
 
 
@@ -19,7 +19,7 @@ class PlayersSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user = get_auth_user(self.context.get('request'))
 
-        verify(user['id'])
+        verify_user(user['id'])
 
         if user['is_guest'] and validated_data.get('game_mode') == 'ranked':
             raise serializers.ValidationError({'detail': 'Guest cannot play ranked game.'})

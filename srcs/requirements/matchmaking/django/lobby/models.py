@@ -1,6 +1,5 @@
 from django.db import models
-
-from lobby.static import team_a, team_b, team_spectator, match_type_1v1
+from lib-transcendence.Lobby import MatchType, Teams
 
 
 class Lobby(models.Model):
@@ -15,16 +14,16 @@ class Lobby(models.Model):
 
     @property
     def max_team_participants(self):
-        if self.match_type == match_type_1v1:
+        if self.match_type == MatchType.m1v1:
             return 1
         return 3
 
     @property
     def teams_count(self):
         result = {
-            team_a: self.participants.filter(team=team_a).count(),
-            team_b: self.participants.filter(team=team_b).count(),
-            team_spectator: self.participants.filter(team=team_a).count()
+            Teams.a: self.participants.filter(team=Teams.a).count(),
+            Teams.b: self.participants.filter(team=Teams.b).count(),
+            Teams.spectator: self.participants.filter(team=Teams.spectator).count()
         }
         return result
 

@@ -11,7 +11,7 @@ Differents ranking :
 | Rank			| Divisions (*3w)	| Info						|
 |---------------|-------------------|---------------------------|
 | (Nebuleuse)	| •••				| Start for the beginners	|
-| Etoile		| •••				| Start for the beginners	|
+| Étoile		| •••				| Start for the beginners	|
 | Nova			| ••••				| 							|
 | Supernova		| ••••				| 							|
 | Pulsar		| •••••				| 							|
