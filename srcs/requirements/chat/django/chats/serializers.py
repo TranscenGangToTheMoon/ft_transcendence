@@ -1,4 +1,4 @@
-from lib_transcendence.ChatType import ChatType
+from lib_transcendence.Chat import ChatType
 from lib_transcendence.auth import get_auth_user
 from lib_transcendence.services import requests_users
 from rest_framework import serializers
