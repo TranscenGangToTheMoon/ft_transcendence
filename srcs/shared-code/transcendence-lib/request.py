@@ -1,9 +1,9 @@
 import json
 from typing import Literal
 
+from rest_framework import status
+from rest_framework.exceptions import APIException, AuthenticationFailed
 import requests
-from rest_framework import status, serializers
-from rest_framework.exceptions import AuthenticationFailed, APIException
 
 
 class ServiceUnavailable(APIException):
@@ -15,7 +15,7 @@ class ServiceUnavailable(APIException):
         self.detail = ServiceUnavailable.default_detail.format(service=service)
 
 
-def request_service(service: Literal['users', 'matchmaking'], enpoint: str, method: Literal['GET', 'POST', 'PUT', 'PATCH', 'DELETE'], data=None, authorization=None):
+def request_service(service: Literal['auth', 'chat', 'game', 'matchmaking', 'users'], enpoint: str, method: Literal['GET', 'POST', 'PUT', 'PATCH', 'DELETE'], data=None, authorization=None):
     if data is not None:
         data = json.dumps(data)
 
@@ -40,24 +40,3 @@ def request_service(service: Literal['users', 'matchmaking'], enpoint: str, meth
     except (requests.ConnectionError, requests.exceptions.JSONDecodeError):
         raise ServiceUnavailable(service)
     return json_data
-
-
-def requests_users(request, enpoint: Literal['me/', 'validate/game/'], method: Literal['GET', 'PUT', 'PATCH', 'DELETE'], data=None):
-    if request is None:
-        raise serializers.ValidationError({'detail': 'Request is required.'})
-    token = request.headers.get('Authorization')
-    if token is None:
-        raise AuthenticationFailed('Authentication credentials were not provided.')
-
-    return request_service('users', 'users/' + enpoint, method, data, token)
-
-
-def requests_matchmaking(tournament_id, stage_id, winner, looser):
-    data = {
-        'tournament_id': tournament_id,
-        'stage_id': stage_id,
-        'winner': winner,
-        'loser': looser,
-    }
-
-    return request_service('matchmaking', 'tournament/result-match/', 'POST', data)
