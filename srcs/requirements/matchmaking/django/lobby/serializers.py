@@ -1,6 +1,7 @@
-from lib-transcendence.GameMode import GameMode
-from lib-transcendence.Lobby import MatchType, Teams
-from lib-transcendence.auth import get_auth_user
+from lib_transcendence.GameMode import GameMode
+from lib_transcendence.Lobby import MatchType, Teams
+from lib_transcendence.auth import get_auth_user
+from lib_transcendence.utils import generate_code
 from rest_framework import serializers
 
 from lobby.models import Lobby, LobbyParticipants

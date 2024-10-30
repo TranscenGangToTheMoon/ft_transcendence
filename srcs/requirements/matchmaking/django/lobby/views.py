@@ -1,4 +1,4 @@
-from lib-transcendence.GameMode import GameMode
+from lib_transcendence.GameMode import GameMode
 from rest_framework import generics, serializers
 
 from lobby.models import Lobby, LobbyParticipants

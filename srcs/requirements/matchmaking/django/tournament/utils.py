@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from lib-transcendence.services import requests_game
+from lib_transcendence.services import requests_game
 from matchmaking.utils import get_participants
 from tournament.models import Tournaments, TournamentParticipants
 

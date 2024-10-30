@@ -2,7 +2,7 @@ from datetime import datetime, timedelta, timezone
 from math import log2
 
 from django.db import models
-from lib-transcendence.Tournament import Tournament
+from lib_transcendence.Tournament import Tournament
 
 
 class Tournaments(models.Model):

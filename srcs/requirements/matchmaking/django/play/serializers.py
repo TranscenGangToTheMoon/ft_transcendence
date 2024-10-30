@@ -1,4 +1,4 @@
-from lib-transcendence.auth import get_auth_user
+from lib_transcendence.auth import get_auth_user
 from rest_framework import serializers
 
 from matchmaking.utils import verify_user

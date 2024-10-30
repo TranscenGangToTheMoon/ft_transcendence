@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from lib-transcendence.services import requests_game
+from lib_transcendence.services import requests_game
 from rest_framework import generics, serializers
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response

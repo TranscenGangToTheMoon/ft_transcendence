@@ -1,5 +1,5 @@
 from django.db import models
-from lib-transcendence.Lobby import MatchType, Teams
+from lib_transcendence.Lobby import MatchType, Teams
 
 
 class Lobby(models.Model):

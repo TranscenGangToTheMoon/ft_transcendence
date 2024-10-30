@@ -1,6 +1,6 @@
 from typing import Literal
 
-from lib-transcendence.services import requests_game
+from lib_transcendence.services import requests_game
 from rest_framework import serializers
 from rest_framework.exceptions import AuthenticationFailed
 
