@@ -1,8 +1,9 @@
+from lib_transcendence.ChatType import ChatType
+from lib_transcendence.auth import get_auth_user
+from lib_transcendence.services import requests_users
 from rest_framework import serializers
 from rest_framework.exceptions import MethodNotAllowed
 
-from chat.auth import get_auth_user, requests_users
-from chat.type import chat_type
 from chats.models import Chats, ChatParticipants
 
 
@@ -54,9 +55,8 @@ class ChatsSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({'detail': 'Request is required.'})
         if request.method in ('PATCH', 'PUT'):
             raise MethodNotAllowed(request.method)
-        if value not in chat_type:
-            raise serializers.ValidationError('Invalid type, only accept "' + '", "'.join(chat_type) + '"')
-        if request.get_host().split(':')[0] != 'chat' and value != 'private_message':
+        ChatType.validate(value)
+        if request.get_host().split(':')[0] != 'chat' and value != ChatType.private_message:
             raise serializers.ValidationError('You can only create private messages')
         return value
 
