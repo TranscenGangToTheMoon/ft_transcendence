@@ -1,8 +1,7 @@
 from datetime import timedelta, datetime, timezone
 
 from django.db import models
-
-from game.request import requests_matchmaking
+from lib_transcendence.services import requests_matchmaking
 
 
 class Matches(models.Model):

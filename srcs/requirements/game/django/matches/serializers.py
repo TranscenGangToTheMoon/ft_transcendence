@@ -1,6 +1,7 @@
+from lib_transcendence.GameMode import GameMode
+from lib_transcendence.utils import generate_code
 from rest_framework import serializers
 
-from game.static import GameMode, generate_game_code
 from matches.models import Matches, Teams, Players
 
 
@@ -44,10 +45,9 @@ class MatchSerializer(serializers.ModelSerializer):
             'created_at',
         ]
 
-    def validate_game_mode(self, value):
-        if value not in GameMode.all():
-            raise serializers.ValidationError([f"Game mode must be {GameMode.str()}."])
-        return value
+    @staticmethod
+    def validate_game_mode(value):
+        return GameMode.validate(value)
 
     def create(self, validated_data):
         if validated_data['game_mode'] == GameMode.tournament:
@@ -59,7 +59,7 @@ class MatchSerializer(serializers.ModelSerializer):
             validated_data.pop('tournament_id', None)
             validated_data.pop('tournament_stage_id', None)
 
-        validated_data['code'] = generate_game_code()
+        validated_data['code'] = generate_code()
         teams = validated_data.pop('teams')
         if len(teams[0]) == 1 and validated_data['game_mode'] == GameMode.clash:
             raise serializers.ValidationError(['Clash must have 3 players in each teams.'])
