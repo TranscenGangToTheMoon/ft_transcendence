@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from friend_requests.models import FriendRequests
-from friends.exist import is_friendship
+from friends.utils import is_friendship
 from friends.models import Friends
 from users.auth import get_user, validate_username
 
@@ -23,7 +23,8 @@ class FriendsSerializer(serializers.ModelSerializer):
             'matches_win_together',
         ]
 
-    def get_friends(self, obj):
+    @staticmethod
+    def get_friends(obj):
         return [user.username for user in obj.friends.all()]
 
     def create(self, validated_data):
