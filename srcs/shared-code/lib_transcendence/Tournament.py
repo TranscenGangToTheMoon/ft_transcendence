@@ -1,4 +1,3 @@
-
 class Tournament:
     stage_labels = {0: 'final', 1: 'semi-final', 2: 'quarter-final', 3: 'round of 16'}
 

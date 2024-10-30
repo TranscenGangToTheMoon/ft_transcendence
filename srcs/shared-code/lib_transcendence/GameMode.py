@@ -1,4 +1,4 @@
-from utils import validate_type
+from lib_transcendence.utils import validate_type
 
 
 class GameMode:

@@ -3,7 +3,7 @@ from typing import Literal
 from rest_framework import serializers
 from rest_framework.exceptions import AuthenticationFailed
 
-from request import request_service
+from lib_transcendence.request import request_service
 
 
 def requests_users(request, enpoint: Literal['users/me/', 'validate/chat/'], method: Literal['GET', 'PUT', 'PATCH', 'DELETE'], data=None):

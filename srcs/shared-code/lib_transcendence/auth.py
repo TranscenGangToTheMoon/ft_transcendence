@@ -1,7 +1,7 @@
 from rest_framework import serializers, permissions
 from rest_framework.exceptions import PermissionDenied
 
-from services import requests_users
+from lib_transcendence.services import requests_users
 
 
 class IsAuthenticated(permissions.BasePermission):
