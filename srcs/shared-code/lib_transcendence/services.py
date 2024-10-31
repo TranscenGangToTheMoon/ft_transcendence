@@ -6,14 +6,14 @@ from rest_framework.exceptions import AuthenticationFailed
 from lib_transcendence.request import request_service
 
 
-def requests_users(request, enpoint: Literal['users/me/', 'validate/chat/'], method: Literal['GET', 'PUT', 'PATCH', 'DELETE'], data=None):
+def requests_users(request, endpoint: Literal['users/me/', 'validate/chat/'], method: Literal['GET', 'PUT', 'PATCH', 'DELETE'], data=None):
     if request is None:
         raise serializers.ValidationError({'detail': 'Request is required.'})
     token = request.headers.get('Authorization')
     if token is None:
         raise AuthenticationFailed('Authentication credentials were not provided.')
 
-    return request_service('users', 'users/' + enpoint, method, data, token)
+    return request_service('users', 'users/' + endpoint, method, data, token)
 
 
 def requests_matchmaking(tournament_id, stage_id, winner, looser):
@@ -27,5 +27,5 @@ def requests_matchmaking(tournament_id, stage_id, winner, looser):
     return request_service('matchmaking', 'tournament/result-match/', 'POST', data)
 
 
-def requests_game(enpoint: Literal['match/', 'tournaments/', 'playing/{user_id}/'], method: Literal['GET', 'POST'] = 'POST', data=None):
-    return request_service('game', enpoint, method, data)
+def requests_game(endpoint: Literal['match/', 'tournaments/', 'playing/{user_id}/'], method: Literal['GET', 'POST'] = 'POST', data=None):
+    return request_service('game', endpoint, method, data)

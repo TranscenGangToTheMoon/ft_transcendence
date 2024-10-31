@@ -15,7 +15,7 @@ class ServiceUnavailable(APIException):
         self.detail = ServiceUnavailable.default_detail.format(service=service)
 
 
-def request_service(service: Literal['auth', 'chat', 'game', 'matchmaking', 'users'], enpoint: str, method: Literal['GET', 'POST', 'PUT', 'PATCH', 'DELETE'], data=None, authorization=None):
+def request_service(service: Literal['auth', 'chat', 'game', 'matchmaking', 'users'], endpoint: str, method: Literal['GET', 'POST', 'PUT', 'PATCH', 'DELETE'], data=None, authorization=None):
     if data is not None:
         data = json.dumps(data)
 
@@ -26,7 +26,7 @@ def request_service(service: Literal['auth', 'chat', 'game', 'matchmaking', 'use
     try:
         response = requests.request(
             method=method,
-            url=f'http://{service}:8000/api/{enpoint}',
+            url=f'http://{service}:8000/api/{endpoint}',
             headers=headers,
             data=data
         )

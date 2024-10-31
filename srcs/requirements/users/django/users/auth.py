@@ -8,14 +8,14 @@ from rest_framework.exceptions import AuthenticationFailed
 from users.models import Users
 
 
-def requests_auth(token, enpoint: Literal['update/', 'verify/', 'delete/'], method: Literal['GET', 'PUT', 'PATCH', 'DELETE'], data=None):
+def requests_auth(token, endpoint: Literal['update/', 'verify/', 'delete/'], method: Literal['GET', 'PUT', 'PATCH', 'DELETE'], data=None):
     if token is None:
         raise AuthenticationFailed('Authentication credentials were not provided.')
 
     try:
         response = requests.request(
             method=method,
-            url='http://auth:8000/api/auth/' + enpoint,
+            url='http://auth:8000/api/auth/' + endpoint,
             headers={
                 'Authorization': token,
                 'Content-Type': 'application/json'
