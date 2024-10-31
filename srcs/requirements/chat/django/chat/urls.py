@@ -10,5 +10,6 @@ urlpatterns = [
     path('api/chat/<int:pk>/messages/', messages_view),
 
     path('api/rename-user/<int:user_id>/', rename_user_view),
+    path('api/block-user/<int:user_id>/', block_user_view),
     path('api/delete-user/<int:user_id>/', delete_user_view),
 ]

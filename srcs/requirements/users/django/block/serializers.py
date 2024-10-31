@@ -1,3 +1,5 @@
+from lib_transcendence.request import request_service
+from lib_transcendence.services import requests_matchmaking
 from rest_framework import serializers
 
 from block.models import Blocks
@@ -32,6 +34,20 @@ class BlockSerializer(serializers.ModelSerializer):
 
         if user.block.filter(blocked=block_user).exists():
             raise serializers.ValidationError({'username': ['You already block this user.']})
+
+        def requests_chat(endpoint, method='GET', data=None):
+            return request_service('chat', endpoint, method, data)
+
+        requests_chat(
+            endpoint=f'block-user/{block_user.id}/',
+            method='DELETE',
+        )
+
+        requests_matchmaking(
+            endpoint=f'block-user/{block_user.id}/',
+            method='DELETE',
+        )
+
 
         # todo remove chat
         # todo check remove from lobby

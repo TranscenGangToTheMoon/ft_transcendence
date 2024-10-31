@@ -29,3 +29,7 @@ def requests_matchmaking(tournament_id, stage_id, winner, looser):
 
 def requests_game(endpoint: Literal['match/', 'tournaments/', 'playing/{user_id}/'], method: Literal['GET', 'POST'] = 'POST', data=None):
     return request_service('game', endpoint, method, data)
+
+
+def requests_chat(endpoint: Literal['block-user/{user_id}/'], method: Literal['DELETE'] = 'POST', data=None):
+    return request_service('chat', endpoint, method, data)
