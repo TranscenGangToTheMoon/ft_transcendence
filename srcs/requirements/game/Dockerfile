@@ -5,7 +5,8 @@ EXPOSE 8000
 
 RUN apt-get update
 RUN apt-get upgrade -y
-RUN apt-get install -y --no-install-recommends curl net-tools libpq-dev
+RUN apt-get install -y build-essential
+RUN apt-get install -y --no-install-recommends curl net-tools libpq-dev gcc
 
 COPY        requirements.txt /
 RUN         pip install -r requirements.txt
