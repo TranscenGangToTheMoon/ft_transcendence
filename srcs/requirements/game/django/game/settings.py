@@ -24,23 +24,29 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-!n=o9b(mm2d==26n44c_5nwzkj7##k8dv68m2t9pnztybe-o-*'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = environ["DEBUG"]
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'localhost', # todo remove
+    'game',
+]
 
 
 # Application definition
 
 INSTALLED_APPS = [
-	'daphne',
-	'channels',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'game_server',
+    # 'channels',
+    # 'daphne',
+    'rest_framework',
+    # 'game_server',
+    'matches',
+    'tournaments'
 ]
 
 MIDDLEWARE = [
@@ -114,7 +120,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = environ["TZ"]
 
 USE_I18N = True
 
@@ -132,3 +138,11 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'game.auth.AllowedHostPermission',
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 10,
+}

@@ -22,7 +22,7 @@ class Users(models.Model):
     last_online = models.DateTimeField(auto_now_add=True)
 
     coins = models.IntegerField(default=100)
-    trophy = models.IntegerField(default=0)
+    trophies = models.IntegerField(default=0)
     current_rank = models.IntegerField(default=None, null=True)
     highest_rank = models.IntegerField(default=None, null=True)
 
@@ -32,3 +32,13 @@ class Users(models.Model):
 
     def __str__(self):
         return f'{self.id} {self.username}'
+
+# class Stats(models.Model):
+#     # auto update when register new match
+#     user = models.ForeignKey(Users, on_delete=models.CASCADE)
+#     game_mode = models.ForeignKey(GameModes, on_delete=models.SET_NULL, null=True)
+#     score_points = models.IntegerField(default=0)
+#     cashed_points = models.IntegerField(default=0)
+#     game_played = models.IntegerField(default=0)
+#     win = models.IntegerField(default=0)
+#     longest_win_streak = models.IntegerField(default=0)

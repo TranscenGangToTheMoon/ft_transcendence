@@ -24,9 +24,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-njs%e3niu%k(6!0tjqnwe(eg64no%lt#l*-_&rh$m_&3kr+!ou'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = environ["DEBUG"]
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'localhost', # todo remove
+    'matchmaking',
+]
 
 
 # Application definition
@@ -40,7 +43,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
     'lobby',
+    'tournament'
 ]
 
 MIDDLEWARE = [
@@ -114,7 +119,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = environ["TZ"]
 
 USE_I18N = True
 

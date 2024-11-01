@@ -7,21 +7,11 @@ SRCS_D		:=	srcs
 
 SECRETS_D	:=	secrets/
 
-VOLS		:=	\
-				algo-stats-db\
-				auth-db\
-				chat-db\
-				game-db\
-				matchmaking-db\
-				users-db\
-
-VOLS_PATH	:=	$(HOME)/transcendence/
-
-VOLUMES		:=	$(addprefix $(VOLS_PATH),$(VOLS))
-
 ENV_EXEMPLE	:=	.env_exemple
 
-ENV_FILE	:=	./srcs/.env
+ENV_FILE	:=	./$(SRCS_D)/.env
+
+SERVICE		?=	#Leave blank
 
 ########################################################################################################################
 #                                                        FLAGS                                                         #
@@ -30,6 +20,7 @@ FLAGS		=	--project-directory $(SRCS_D)
 
 COMPOSE		=	docker compose
 
+DSHELL		=	sh -c bash
 ########################################################################################################################
 #                                                        COLORS                                                        #
 ########################################################################################################################
@@ -48,22 +39,25 @@ RESET		:=	\001\033[0m\002
 
 all			:	banner $(NAME)
 
-$(NAME)		:	volumes secrets
-			$(COMPOSE) $(FLAGS) up --build
+$(NAME)		:	secrets
+			$(COMPOSE) $(FLAGS) up --build $(SERVICE)
 
 volumes		:	$(VOLUMES)
 
-$(VOLUMES)	:
-			mkdir -p $@
-
 build		:
-			$(COMPOSE) $(FLAGS) $@
+			$(COMPOSE) $(FLAGS) $@ $(SERVICE)
 
 up			:	build
-			$(COMPOSE) $(FLAGS) $@
+			$(COMPOSE) $(FLAGS) $@ $(SERVICE)
+
+down		:
+			$(COMPOSE) $(FLAGS) $@ $(SERVICE)
 
 dettach		:	build
-			$(COMPOSE) $(FLAGS) up -d
+			$(COMPOSE) $(FLAGS) up -d $(SERVICE)
+
+exec		:
+			$(COMPOSE) $(FLAGS) $@ $(SERVICE) $(DSHELL)
 
 banner		:
 			@echo -e '$(BLUE)'
@@ -76,22 +70,23 @@ banner		:
 			@echo -e '                                          bajeanno fguirama jcoquard nfaust xcharra'
 			@echo -e '$(RESET)'
 
-clean		:
-			$(COMPOSE) $(FLAGS) down
-
-secrets		:	$(ENV_FILE)
+secrets		:	$(ENV_FILE) #if secrets directory are needed delete phony secrets
 #			mkdir $@
 
 $(ENV_FILE)	:	$(ENV_EXEMPLE)
 			./launch.d/01passwords.sh $(ENV_EXEMPLE) $(ENV_FILE)
 
+clean		:
+			$(COMPOSE) $(FLAGS) down --rmi local --remove-orphans
+#			rm -rf $(ENV_FILE)
+#			rm -rf $(SECRETS_D)
+
 fclean		:
-			docker run --rm -v $(VOLS_PATH):/transcendence busybox sh -c "rm -rf transcendence/*"
-			rm -rf $(VOLS_PATH)
+			$(COMPOSE) $(FLAGS) down -v --rmi all --remove-orphans
 			docker image prune -af
-			$(COMPOSE) $(FLAGS) down -v --rmi all
-			rm -rf $(SECRETS_D)
+			rm -rf $(VOLS_PATH)
 			rm -rf $(ENV_FILE)
+#			rm -rf $(SECRETS_D)
 
 image-ls	:
 			docker image ls -a
@@ -118,4 +113,8 @@ prune		:
 
 re			:	fclean all
 
-.PHONY		: all re clean fclean
+sre			:	clean all
+
+.PHONY		:	all volumes build up down dettach banner secrets clean fclean \
+				image-ls image-rm container-ls container-rm volume-ls volume-rm \
+				network-ls network-rm prune re

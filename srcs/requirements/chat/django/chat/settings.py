@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-=%^a3b_pxi%nkemyd7wn*_a-$tq9crulbfdc!klnoqm(m_%x&0'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = environ["DEBUG"]
 
 ALLOWED_HOSTS = [
     'localhost',
@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
     'chat_messages',
     'chats',
 ]
@@ -115,7 +116,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = environ["TZ"]
 
 USE_I18N = True
 

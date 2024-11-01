@@ -34,8 +34,7 @@ class FriendsSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({'username': ['You are already friends with this user.']})
 
         try:
-            friend_request = FriendRequests.objects.get(sender=user_send_friend_request, receiver=user_accept)
-            friend_request.delete()
+            user_accept.received_friend_requests.get(sender=user_send_friend_request).delete()
         except FriendRequests.DoesNotExist:
             raise serializers.ValidationError({'username': ['No friend request exists with this user.']})
 

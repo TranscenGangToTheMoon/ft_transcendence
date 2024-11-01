@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-h05nsx7g&5c*_&b4op7t*m@#r9t$4l2v*oec^098rv6of42^n9'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = environ["DEBUG"]
 
 ALLOWED_HOSTS = [
     'localhost',
@@ -62,13 +62,6 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'users.urls'
-CORS_URLS_REGEX = r"^/api/.*"
-CORS_ALLOWED_ORIGINS = [ # todo useless if in production
-    'http://localhost:8111',
-    'https://localhost:4443',
-    'http://localhost:4443',
-    'https://localhost:8111',
-]
 
 TEMPLATES = [
     {
@@ -128,7 +121,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = environ["TZ"]
 
 USE_I18N = True
 

@@ -8,15 +8,15 @@ RUN apt-get upgrade -y
 RUN apt-get install -y build-essential
 RUN apt-get install -y --no-install-recommends curl net-tools libpq-dev gcc
 
-COPY        requirements.txt /
-RUN         pip install -r requirements.txt
+COPY requirements.txt /
+RUN pip install -r requirements.txt
 
-WORKDIR     /code
+WORKDIR /code
 
 # RUN       daphne game.asgi:application
 
-COPY        entrypoint.sh /
-RUN         chmod u+x /entrypoint.sh
+COPY entrypoint.sh /
+RUN chmod u+x /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
