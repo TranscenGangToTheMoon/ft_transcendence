@@ -11,10 +11,13 @@ class ChatsMixin(generics.GenericAPIView):
 
     def filter_queryset(self, queryset):
         query = self.request.data.pop('q', None)
-        join_chats = ChatParticipants.objects.filter(user_id=self.request.user.id).values_list('chat_id', flat=True)
+        kwars = {'user_id': self.request.user.id}
+        if query is None:
+            kwars['view_chat'] = True
+        join_chats = ChatParticipants.objects.filter(**kwars).values_list('chat_id', flat=True)
         if query is not None:
-            return queryset.filter(id__in=join_chats, participants__username__icontains=query)
-        return queryset.filter(id__in=join_chats, participant__view_chat=True)
+            return queryset.filter(id__in=join_chats, participants__username__icontains=query, blocked=False)
+        return queryset.filter(id__in=join_chats, blocked=False)
 
 
 class ChatsView(generics.ListCreateAPIView, ChatsMixin):

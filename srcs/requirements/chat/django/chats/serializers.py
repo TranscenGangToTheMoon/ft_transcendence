@@ -5,6 +5,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import MethodNotAllowed
 
 from chats.models import Chats, ChatParticipants
+from chats.utils import get_chat_together
 
 
 class ChatPaticipantsSerializer(serializers.ModelSerializer):
@@ -93,3 +94,17 @@ class ChatsSerializer(serializers.ModelSerializer):
             except ChatParticipants.DoesNotExist:
                 raise serializers.ValidationError({'detail': 'You are not in this chat.'})
         return super().update(instance, validated_data)
+
+
+class BlockChatSerializer(serializers.ModelSerializer):
+    user_id = serializers.IntegerField(write_only=True)
+
+    class Meta:
+        model = Chats
+        fields = [
+            'id',
+            'blocked',
+        ]
+        read_only_fields = [
+            'id',
+        ]
