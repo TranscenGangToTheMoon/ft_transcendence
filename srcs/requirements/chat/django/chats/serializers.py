@@ -5,6 +5,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import MethodNotAllowed
 
 from chats.models import Chats, ChatParticipants
+from chats.utils import get_chat_together
 
 
 class ChatPaticipantsSerializer(serializers.ModelSerializer):
@@ -68,9 +69,7 @@ class ChatsSerializer(serializers.ModelSerializer):
         if username == user['username']:
             raise serializers.ValidationError({'username': ["You can't chat with yourself."]})
 
-        user_1_chats = ChatParticipants.objects.filter(username=user['username']).values_list('chat_id', flat=True)
-        user_2_chats = ChatParticipants.objects.filter(username=username).values_list('chat_id', flat=True)
-        if set(user_1_chats).intersection(set(user_2_chats)):
+        if get_chat_together(user['username'], username):
             raise serializers.ValidationError({'username': ['You are already chat with this user.']})
 
         user2 = requests_users(request, 'validate/chat/', 'GET', data={'username': username})
@@ -93,3 +92,17 @@ class ChatsSerializer(serializers.ModelSerializer):
             except ChatParticipants.DoesNotExist:
                 raise serializers.ValidationError({'detail': 'You are not in this chat.'})
         return super().update(instance, validated_data)
+
+
+class BlockChatSerializer(serializers.ModelSerializer):
+    user_id = serializers.IntegerField(write_only=True)
+
+    class Meta:
+        model = Chats
+        fields = [
+            'id',
+            'blocked',
+        ]
+        read_only_fields = [
+            'id',
+        ]

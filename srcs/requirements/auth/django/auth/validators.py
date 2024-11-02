@@ -8,7 +8,7 @@ valid_charset = ascii_letters + digits + '_-'
 
 
 def validate_username(value):
-    if value in ('me', 'anonymous',):
+    if value in ('me', 'anonymous', 'admin', 'staff'):
         raise serializers.ValidationError(f"Username can't be '{value}'")
     if len(value) < 3:
         raise serializers.ValidationError('Username must be at least 3 characters long')
@@ -16,7 +16,7 @@ def validate_username(value):
         raise serializers.ValidationError('Username must be less than 20 characters long')
     for char in value:
         if char not in valid_charset:
-            raise serializers.ValidationError(f"Use invalid char '{char}'")
+            raise serializers.ValidationError(f"Use invalid char.")
     if User.objects.filter(username__iexact=value).exists():
-        raise serializers.ValidationError(f"Username '{value}' already exists")
+        raise serializers.ValidationError('Username already exists.') #todo not value / never make on all error and move in lib
     return value

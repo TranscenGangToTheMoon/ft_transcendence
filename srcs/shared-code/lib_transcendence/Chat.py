@@ -11,7 +11,7 @@ class ChatType:
 
     @staticmethod
     def validate(chat_type):
-        return validate_type(chat_type, ChatType, ChatType.types)
+        return validate_type(chat_type, ChatType(), ChatType.types)
 
     def __str__(self):
         return 'Chat type'
@@ -26,7 +26,7 @@ class AcceptChat:
 
     @staticmethod
     def validate(chat_status):
-        return validate_type(chat_status, AcceptChat, AcceptChat.accept)
+        return validate_type(chat_status, AcceptChat(), AcceptChat.accept)
 
     @staticmethod
     def is_accept(accept_chat, is_friend):
