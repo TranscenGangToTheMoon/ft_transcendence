@@ -41,6 +41,6 @@ class FriendRequestsSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({'username': ['This user does not accept friend requests.']})
 
         if sender.sent_friend_requests.filter(receiver=receiver).exists():
-            raise serializers.ValidationError({'username': ['You already send a friend requests.']})
+            raise serializers.ValidationError({'username': ['You already send a friend requests to this user.']})
 
         return super().create({'sender': sender, 'receiver': receiver})
