@@ -69,9 +69,7 @@ class ChatsSerializer(serializers.ModelSerializer):
         if username == user['username']:
             raise serializers.ValidationError({'username': ["You can't chat with yourself."]})
 
-        user_1_chats = ChatParticipants.objects.filter(username=user['username']).values_list('chat_id', flat=True)
-        user_2_chats = ChatParticipants.objects.filter(username=username).values_list('chat_id', flat=True)
-        if set(user_1_chats).intersection(set(user_2_chats)):
+        if get_chat_together(user['username'], username):
             raise serializers.ValidationError({'username': ['You are already chat with this user.']})
 
         user2 = requests_users(request, 'validate/chat/', 'GET', data={'username': username})
