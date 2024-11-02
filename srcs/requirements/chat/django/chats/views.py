@@ -16,8 +16,8 @@ class ChatsMixin(generics.GenericAPIView):
             kwars['view_chat'] = True
         join_chats = ChatParticipants.objects.filter(**kwars).values_list('chat_id', flat=True)
         if query is not None:
-            return queryset.filter(id__in=join_chats, participants__username__icontains=query, blocked=False)
-        return queryset.filter(id__in=join_chats, blocked=False)
+            join_chats = ChatParticipants.objects.exclude(user_id=self.request.user.id).filter(chat_id__in=join_chats, username__icontains=query).values_list('chat_id', flat=True)
+        return queryset.filter(id__in=join_chats, blocked=False).distinct()
 
 
 class ChatsView(generics.ListCreateAPIView, ChatsMixin):
