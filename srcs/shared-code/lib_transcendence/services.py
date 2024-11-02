@@ -13,7 +13,7 @@ def requests_users(request, endpoint: Literal['users/me/', 'validate/chat/'], me
     if token is None:
         raise AuthenticationFailed('Authentication credentials were not provided.')
 
-    return request_service('users', 'users/' + endpoint, method, data, token)
+    return request_service('users', endpoint, method, data, token)
 
 
 def requests_matchmaking(tournament_id, stage_id, winner, looser):
