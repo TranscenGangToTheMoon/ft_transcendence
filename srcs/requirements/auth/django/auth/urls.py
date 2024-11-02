@@ -15,6 +15,6 @@ urlpatterns = [
     path('api/auth/register/', register_view, name='api-auth-register'),
     path('api/auth/login/', token_obtain_pair, name='api-auth-login'),
     path('api/auth/refresh/', token_refresh, name='api-auth-token-refresh'),
-    path('api/auth/verify/', token_verify, name='api-auth-token-verify'),
+    path('api/auth/verify/', token_verify, name='api-auth-token-verify'), # todo change to verify
     path('auth/admin/', admin.site.urls),
 ]
