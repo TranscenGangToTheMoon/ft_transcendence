@@ -1,3 +1,4 @@
+from django.http import Http404
 from rest_framework import generics, status, serializers
 from rest_framework.response import Response
 
@@ -22,10 +23,21 @@ class RenameUserView(generics.UpdateAPIView):
 
 
 class UpdateBlockUserView(generics.UpdateAPIView):
-    serializers = BlockChatSerializer
+    serializer_class = BlockChatSerializer
+    permission_classes = []
 
-    def get_object(self): #todo test si ca marche
-        return get_chat_together(self.kwargs['user_id'], self.kwargs['user_block'])
+    def update(self, request, *args, **kwargs):
+        try:
+            self.get_object()
+        except Http404:
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        return super().update(request, *args, **kwargs)
+
+    def get_object(self):
+        together = get_chat_together(self.kwargs['user_id'], self.kwargs['user_block'], field='user_id')
+        if together is None:
+            raise Http404 # serializers.ValidationError({'detail': 'Chat does not exist.'})
+        return together
 
 
 class DeleteUserView(generics.DestroyAPIView):
