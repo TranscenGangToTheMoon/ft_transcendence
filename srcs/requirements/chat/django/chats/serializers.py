@@ -95,8 +95,6 @@ class ChatsSerializer(serializers.ModelSerializer):
 
 
 class BlockChatSerializer(serializers.ModelSerializer):
-    user_id = serializers.IntegerField(write_only=True)
-
     class Meta:
         model = Chats
         fields = [
