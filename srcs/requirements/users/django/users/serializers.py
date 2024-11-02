@@ -10,7 +10,6 @@ class UsersSerializer(serializers.ModelSerializer):
     status = serializers.SerializerMethodField(read_only=True)
     current_rank = serializers.IntegerField(read_only=True)
     accept_friend_request = serializers.BooleanField(write_only=True)
-    accept_chat_from = serializers.IntegerField(write_only=True) # todo if user himself can view this (and other info)
     password = serializers.CharField(write_only=True)
     friends = serializers.SerializerMethodField(read_only=True)
 
