@@ -1,45 +1,46 @@
+from lib_transcendence.GameMode import GameMode
 from rest_framework import generics, serializers
 from django.shortcuts import render
 from lobby.models import Lobby, LobbyParticipants
 from lobby.serializers import LobbySerializer, LobbyParticipantsSerializer
-from lobby.static import lobby_clash
+from matchmaking.utils import get_participants
 
 
-class LobbyCreateUpdateView(generics.CreateAPIView, generics.UpdateAPIView):
+def get_lobby_participants(lobby, user_id, creator_check=False):
+    return get_participants('lobby', LobbyParticipants, lobby, user_id, creator_check)
+
+
+def get_lobby(code):
+    if code is None:
+        raise serializers.ValidationError({'code': 'Lobby code is required.'})
+    try:
+        return Lobby.objects.get(code=code)
+    except Lobby.DoesNotExist:
+        raise serializers.ValidationError({'code': f"Lobby '{code}' does not exist."})
+
+
+class LobbyView(generics.CreateAPIView, generics.RetrieveUpdateDestroyAPIView):
     queryset = Lobby.objects.all()
     serializer_class = LobbySerializer
 
     def get_object(self):
-        try:
-            participant = LobbyParticipants.objects.get(user_id=self.request.user.id)
-            if not participant.creator:
-                raise serializers.ValidationError({'code': 'You are not creator of this lobby.'})
-            lobby = Lobby.objects.get(id=participant.lobby_id)
-            if lobby.game_mode == lobby_clash:
-                raise serializers.ValidationError({'code': 'You cannot update Clash lobby.'})
-            return lobby
-        except LobbyParticipants.DoesNotExist:
-            raise serializers.ValidationError({'code': 'You are not in any lobby.'})
+        participant = get_lobby_participants(None, self.request.user.id, self.request.method != 'GET')
+        if self.request.method in ('PUT', 'PATCH') and participant.lobby.game_mode == GameMode.clash:
+            raise serializers.ValidationError({'code': 'You cannot update Clash lobby.'})
+        return participant.lobby
 
 
-class LobbyCreateListUpdateDeleteView(generics.ListCreateAPIView, generics.UpdateAPIView, generics.DestroyAPIView):
+class LobbyParticipantsView(generics.ListCreateAPIView, generics.UpdateAPIView, generics.DestroyAPIView):
     queryset = LobbyParticipants.objects.all()
     serializer_class = LobbyParticipantsSerializer
     lookup_field = 'code'
 
     def filter_queryset(self, queryset):
-        code = self.kwargs.get('code')
-        try:
-            lobby_id = Lobby.objects.get(code=code).id
-        except Lobby.DoesNotExist:
-            raise serializers.ValidationError({'code': f"Lobby '{code}' does not exist."})
-        return queryset.filter(lobby_id=lobby_id)
+        lobby = get_lobby(self.kwargs.get('code'))
+        return queryset.filter(lobby_id=lobby.id) # todo change for see Lobby serializer when list
 
     def get_object(self):
-        try:
-            return LobbyParticipants.objects.get(user_id=self.request.user.id)
-        except LobbyParticipants.DoesNotExist:
-            raise serializers.ValidationError({'code': 'You are not participant of this lobby.'})
+        return get_lobby_participants(get_lobby(self.kwargs.get('code')), self.request.user.id)
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -47,9 +48,27 @@ class LobbyCreateListUpdateDeleteView(generics.ListCreateAPIView, generics.Updat
         context['auth_user'] = self.request.data['auth_user']
         return context
 
+class LobbyKickView(generics.DestroyAPIView):
+    serializer_class = LobbyParticipantsSerializer
+    lookup_field = 'user_id'
 
-lobby_create_update_view = LobbyCreateUpdateView.as_view()
-lobby_create_list_delete_view = LobbyCreateListUpdateDeleteView.as_view()
+    def get_object(self):
+        user_id = self.kwargs.get('user_id')
+        if user_id is None:
+            raise serializers.ValidationError({'detail': 'User id is required.'})
 
-def lobby_test_view(request):
-	return render(request, "lobby_test.html")
+        lobby = get_lobby(self.kwargs.get('code'))
+
+        if user_id == self.request.user.id:
+            raise serializers.ValidationError({'detail': 'You cannot kick yourself.'})
+        get_lobby_participants(lobby, self.request.user.id, True)
+
+        try:
+            return lobby.participants.get(user_id=user_id)
+        except LobbyParticipants.DoesNotExist:
+            raise serializers.ValidationError({'detail': f"User id '{user_id}' is not participant of this lobby."})
+
+
+lobby_view = LobbyView.as_view()
+lobby_participants_view = LobbyParticipantsView.as_view()
+lobby_kick_view = LobbyKickView.as_view()

@@ -2,8 +2,7 @@ from datetime import datetime, timedelta, timezone
 from math import log2
 
 from django.db import models
-
-from tournament.static import get_label
+from lib_transcendence.Tournament import Tournament
 
 
 class Tournaments(models.Model):
@@ -19,7 +18,7 @@ class Tournaments(models.Model):
         # todo websocket: send that game start in ...
         self.start_at = datetime.now(timezone.utc) + timedelta(seconds=20)
         self.save()
-        return TournamentStage.objects.create(tournament=self, label=get_label(self.n_stage))
+        return TournamentStage.objects.create(tournament=self, label=Tournament.get_label(self.n_stage))
 
     @property
     def is_started(self):
@@ -60,7 +59,7 @@ class TournamentParticipants(models.Model):
         try:
             next_stage = self.tournament.stages.get(stage=self.stage.stage + 1)
         except TournamentStage.DoesNotExist:
-            next_stage = TournamentStage.objects.create(tournament=self.tournament, label=get_label(self.tournament.n_stage, self.stage.stage + 1), stage=self.stage.stage + 1)
+            next_stage = TournamentStage.objects.create(tournament=self.tournament, label=Tournament.get_label(self.tournament.n_stage, self.stage.stage + 1), stage=self.stage.stage + 1)
         self.stage = next_stage
         self.save()
         return None

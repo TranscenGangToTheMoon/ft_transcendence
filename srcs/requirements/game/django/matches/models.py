@@ -1,8 +1,7 @@
 from datetime import timedelta, datetime, timezone
 
 from django.db import models
-
-from game.request import requests_matchmaking
+from lib_transcendence.services import requests_matchmaking
 
 
 class Matches(models.Model):
@@ -19,7 +18,7 @@ class Matches(models.Model):
     def winner(self):
         if not self.finished:
             return None
-        return self.teams.get(score=max(self.teams.all().values_list('score', flat=True)))
+        return self.teams.get(score=max(self.teams.all().values_list('score', flat=True))) # todo remake for work when abandon
 
     @property
     def finish_str(self):

@@ -1,29 +1,26 @@
+from lib_transcendence.auth import get_auth_user
+from lib_transcendence.utils import generate_code
 from rest_framework import serializers
 
-from lobby.models import LobbyParticipants
-from matchmaking.auth import get_auth_user, generate_code
+from matchmaking.utils import verify_user
 from tournament.models import Tournaments, TournamentStage, TournamentParticipants
 from tournament.utils import get_tournament, create_match
 
 
-def valide_participant_create(user_id, join=False):
-    try:
-        LobbyParticipants.objects.get(user_id=user_id).delete()
-    except LobbyParticipants.DoesNotExist:
-        pass
+class TournamentGetParticipantsSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(source='user_id')
 
-    try:
-        participant = TournamentParticipants.objects.get(user_id=user_id)
-        if participant.creator:
-            if join:
-                raise serializers.ValidationError({'detail': 'You already join a tournament.'})
-            raise serializers.ValidationError({'detail': 'You cannot create more than one tournament at the same time.'})
-        participant.delete()
-    except TournamentParticipants.DoesNotExist:
-        pass
+    class Meta:
+        model = TournamentParticipants
+        fields = [
+            'id',
+            'creator',
+            'join_at',
+        ]
 
 
 class TournamentSerializer(serializers.ModelSerializer):
+    participants = TournamentGetParticipantsSerializer(many=True, read_only=True)
 
     class Meta:
         model = Tournaments
@@ -35,7 +32,8 @@ class TournamentSerializer(serializers.ModelSerializer):
             'start_at',
         ]
 
-    def validate_size(self, value):
+    @staticmethod
+    def validate_size(value):
         if (value % 4) != 0:
             raise serializers.ValidationError(['Size must be a multiple of 4.'])
         if value > 32:
@@ -51,7 +49,7 @@ class TournamentSerializer(serializers.ModelSerializer):
         if user['is_guest']:
             raise serializers.ValidationError({'detail': 'Guest cannot create tournament.'})
 
-        valide_participant_create(user['id'])
+        verify_user(user['id'], False)
 
         validated_data['code'] = generate_code()
         validated_data['created_by'] = user['id']
@@ -72,18 +70,25 @@ class TournamentStageSerializer(serializers.ModelSerializer):
 
 
 class TournamentParticipantsSerializer(serializers.ModelSerializer):
-    creator = serializers.BooleanField(read_only=True)
+    id = serializers.IntegerField(source='user_id', read_only=True)
+    tournament = serializers.CharField(source='tournament.code', read_only=True)
 
     class Meta:
         model = TournamentParticipants
-        fields = '__all__'
-        read_only_fields = [
+        fields = [
             'id',
-            'user_id',
             'tournament',
             'stage',
             'seeding',
-            'index',
+            'still_in',
+            'creator',
+            'join_at',
+        ]
+        read_only_fields = [
+            'id',
+            'tournament',
+            'stage',
+            'seeding',
             'still_in',
             'creator',
             'join_at',
@@ -92,14 +97,14 @@ class TournamentParticipantsSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         tournament = get_tournament(code=self.context.get('code'))
 
-        user = self.context['auth_user']
-        valide_participant_create(user['id'], join=True)
-
         if tournament.is_started:
             raise serializers.ValidationError({'code': ['Tournament has already started.']})
 
         if tournament.is_full:
             raise serializers.ValidationError({'code': ['Tournament is full.']})
+
+        user = self.context['auth_user']
+        verify_user(user['id'])
 
         validated_data['user_id'] = user['id']
         validated_data['tournament'] = tournament

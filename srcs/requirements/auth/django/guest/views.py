@@ -1,6 +1,6 @@
 from rest_framework import generics
 
-from auth.permissions import IsNotAuthenticated, IsGuest
+from auth.permissions import IsNotAuthenticated
 from guest.serializers import GuestTokenSerializer
 
 

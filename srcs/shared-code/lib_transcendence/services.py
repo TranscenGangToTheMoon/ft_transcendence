@@ -1,0 +1,35 @@
+from typing import Literal
+
+from rest_framework import serializers
+from rest_framework.exceptions import AuthenticationFailed
+
+from lib_transcendence.request import request_service
+
+
+def requests_users(request, endpoint: Literal['users/me/', 'validate/chat/'], method: Literal['GET', 'PUT', 'PATCH', 'DELETE'], data=None):
+    if request is None:
+        raise serializers.ValidationError({'detail': 'Request is required.'})
+    token = request.headers.get('Authorization')
+    if token is None:
+        raise AuthenticationFailed('Authentication credentials were not provided.')
+
+    return request_service('users', 'users/' + endpoint, method, data, token)
+
+
+def requests_matchmaking(tournament_id, stage_id, winner, looser):
+    data = {
+        'tournament_id': tournament_id,
+        'stage_id': stage_id,
+        'winner': winner,
+        'loser': looser,
+    }
+
+    return request_service('matchmaking', 'tournament/result-match/', 'POST', data)
+
+
+def requests_game(endpoint: Literal['match/', 'tournaments/', 'playing/{user_id}/'], method: Literal['GET', 'POST'] = 'POST', data=None):
+    return request_service('game', endpoint, method, data)
+
+
+def requests_chat(endpoint: Literal['block-user/{user_id}/'], method: Literal['DELETE'] = 'POST', data=None):
+    return request_service('chat', endpoint, method, data)

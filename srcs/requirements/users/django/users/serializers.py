@@ -1,6 +1,7 @@
+from lib_transcendence.Chat import AcceptChat
 from rest_framework import serializers
 
-from friends.exist import get_friendship
+from friends.utils import get_friendship
 from users.auth import auth_update
 from users.models import Users
 
@@ -9,7 +10,7 @@ class UsersSerializer(serializers.ModelSerializer):
     status = serializers.SerializerMethodField(read_only=True)
     current_rank = serializers.IntegerField(read_only=True)
     accept_friend_request = serializers.BooleanField(write_only=True)
-    accept_chat_state = serializers.IntegerField(write_only=True)
+    accept_chat_from = serializers.IntegerField(write_only=True) # todo if user himself can view this (and other info)
     password = serializers.CharField(write_only=True)
     friends = serializers.SerializerMethodField(read_only=True)
 
@@ -27,11 +28,21 @@ class UsersSerializer(serializers.ModelSerializer):
             'friends',
             'password',
             'accept_friend_request',
-            'accept_chat_state',
+            'accept_chat_from',
         ]
-        read_only_fields = ('id', 'is_guest', 'profile_picture', 'status', 'coins', 'trophies', 'current_rank', 'friends')
+        read_only_fields = [
+            'id',
+            'is_guest',
+            'profile_picture',
+            'status',
+            'coins',
+            'trophies',
+            'current_rank',
+            'friends'
+        ]
 
-    def get_status(self, obj):
+    @staticmethod
+    def get_status(obj):
         return {
             'is_online': obj.is_online,
             'game_playing': obj.game_playing,
@@ -47,10 +58,9 @@ class UsersSerializer(serializers.ModelSerializer):
             return None
         return {'id': friendship.id, 'friends_since': friendship.friends_since}
 
-    def validate_accept_chat_state(self, value):
-        if value not in [0, 1, 3]:
-            raise serializers.ValidationError('Invalid chat state.')
-        return value
+    @staticmethod
+    def validate_accept_chat_from(value):
+        return AcceptChat.validate(value)
 
     def update(self, instance, validated_data):
         if instance.is_guest and any([k != 'username' for k in validated_data]):

@@ -1,11 +1,29 @@
+from lib_transcendence.GameMode import GameMode
+from lib_transcendence.Lobby import MatchType, Teams
+from lib_transcendence.auth import get_auth_user
+from lib_transcendence.utils import generate_code
 from rest_framework import serializers
 
-from lobby.static import match_type_1v1, match_type_3v3, team_a, team_b, team_spectator, lobby_clash, lobby_custom_game
-from matchmaking.auth import get_auth_user, generate_code
 from lobby.models import Lobby, LobbyParticipants
+from matchmaking.utils import verify_user
+
+
+class LobbyGetParticipantsSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(source='user_id')
+
+    class Meta:
+        model = LobbyParticipants
+        fields = [
+            'id',
+            'creator',
+            'team',
+            'join_at',
+            'is_ready',
+        ]
 
 
 class LobbySerializer(serializers.ModelSerializer):
+    participants = LobbyGetParticipantsSerializer(many=True, read_only=True)
 
     class Meta:
         model = Lobby
@@ -22,53 +40,51 @@ class LobbySerializer(serializers.ModelSerializer):
         if not self.instance:
             self.fields['match_type'].read_only = True
 
-    def validate_game_mode(self, value):
-        if value not in (lobby_clash, lobby_custom_game):
-            raise serializers.ValidationError([f"Game mode must be '{lobby_clash}' or '{lobby_custom_game}'."])
-        return value
+    @staticmethod
+    def validate_game_mode(value):
+        return GameMode.validate_lobby(value)
 
-    def validate_match_type(self, value):
-        if value not in (match_type_1v1, match_type_3v3):
-            raise serializers.ValidationError([f"Match type must be '{match_type_1v1}' or '{match_type_3v3}'."])
-        return value
+    @staticmethod
+    def validate_match_type(value):
+        return MatchType.validate(value)
 
-    def validate_bo(self, value):
+    @staticmethod
+    def validate_bo(value):
         if value not in (1, 3, 5):
             raise serializers.ValidationError(['BO must be 1, 3 or 5.'])
         return value
 
     def create(self, validated_data):
-        request = self.context.get('request')
-        user = get_auth_user(request)
+        user = get_auth_user(self.context.get('request'))
 
         if user['is_guest']:
             raise serializers.ValidationError({'detail': 'Guest cannot create lobby.'})
 
-        try:
-            LobbyParticipants.objects.get(user_id=user['id']).delete()
-        except LobbyParticipants.DoesNotExist:
-            pass
+        verify_user(user['id'])
 
         validated_data['code'] = generate_code()
-        if validated_data['game_mode'] == lobby_clash:
-            validated_data['match_type'] = match_type_3v3
+        if validated_data['game_mode'] == GameMode.clash:
+            validated_data['match_type'] = MatchType.m3v3
             validated_data['max_participants'] = 3
         else:
-            validated_data['match_type'] = match_type_1v1
+            validated_data['match_type'] = MatchType.m1v1
             validated_data['max_participants'] = 6
         result = super().create(validated_data)
-        LobbyParticipants.objects.create(lobby_id=result.id, lobby_code=validated_data['code'], user_id=user['id'], username=user['username'], creator=True)
+        creator = LobbyParticipants.objects.create(lobby_id=result.id, lobby_code=validated_data['code'], user_id=user['id'], creator=True)
+        if validated_data['game_mode'] == GameMode.custom_game:
+            creator.team = Teams.a
+            creator.save()
         return result
 
     def update(self, instance, validated_data):
         if 'game_mode' in validated_data:
             raise serializers.ValidationError({'game_mode': ['You cannot update game mode.']})
-        if validated_data.get('match_type') == match_type_1v1 and instance.match_type == match_type_3v3:
+        if validated_data.get('match_type') == MatchType.m1v1 and instance.match_type == MatchType.m3v3:
             participants = instance.participants
 
-            for team in (team_a, team_b):
+            for team in Teams.play:
                 for p in participants.filter(team=team)[1:]:
-                    p.team = team_spectator
+                    p.team = Teams.spectator
                     p.save()
 
         return super().update(instance, validated_data)
@@ -76,22 +92,34 @@ class LobbySerializer(serializers.ModelSerializer):
 
 class LobbyParticipantsSerializer(serializers.ModelSerializer):
     creator = serializers.BooleanField(read_only=True)
+    id = serializers.IntegerField(source='user_id', read_only=True)
 
     class Meta:
         model = LobbyParticipants
-        fields = '__all__'
-        read_only_fields = [
-            'lobby',
+        fields = [
+            'id',
             'lobby_code',
-            'user_id',
-            'username',
+            'team',
+            'is_ready',
+            'creator',
+            'join_at',
+        ]
+        read_only_fields = [
+            'id',
+            'lobby_code',
             'creator',
         ]
 
-    def validate_team(self, value):
-        if value not in (team_a, team_b, team_spectator):
-            raise serializers.ValidationError([f"Team must be '{team_a}', '{team_b}' or '{team_spectator}'."])
-        return value
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+
+        if instance.lobby.game_mode != GameMode.custom_game:
+            representation.pop('team', None)
+        return representation
+
+    @staticmethod
+    def validate_team(value):
+        return Teams.validate(value)
 
     def create(self, validated_data):
         lobby_code = self.context.get('code')
@@ -103,38 +131,40 @@ class LobbyParticipantsSerializer(serializers.ModelSerializer):
         except Lobby.DoesNotExist:
             raise serializers.ValidationError({'code': [f"Lobby '{lobby_code}' does not exist."]})
 
-        user = self.context['auth_user']
-        try:
-            lobby_join = LobbyParticipants.objects.get(user_id=user['id'])
-            if lobby_join.filter(lobby_id=lobby.id).exists():
-                raise serializers.ValidationError({'code': ['You already joined this lobby.']})
-            lobby_join.delete()
-        except LobbyParticipants.DoesNotExist:
-            pass
+        user = get_auth_user(self.context.get('request'))
+        verify_user(user['id'])
+
+        if lobby.participants.filter(user_id=user['id']).exists():
+            raise serializers.ValidationError({'code': ['You already joined this lobby.']})
 
         if lobby.is_full:
             raise serializers.ValidationError({'code': ['Lobby is full.']})
 
-        validated_data['lobby_id'] = lobby.id
+        validated_data['lobby'] = lobby
         validated_data['lobby_code'] = lobby.code
         validated_data['user_id'] = user['id']
-        validated_data['username'] = user['username']
-
-        if lobby.game_mode == lobby_custom_game:
+        validated_data['is_guest'] = user['is_guest']
+        if lobby.game_mode == GameMode.custom_game:
             teams_count = lobby.teams_count
             max_team = lobby.max_team_participants
 
-            if teams_count[team_a] < max_team:
-                validated_data['team'] = team_a
-            elif teams_count[team_b] < max_team:
-                validated_data['team'] = team_b
+            if teams_count[Teams.a] < max_team:
+                validated_data['team'] = Teams.a
+            elif teams_count[Teams.b] < max_team:
+                validated_data['team'] = Teams.b
             else:
-                validated_data['team'] = team_spectator
+                validated_data['team'] = Teams.spectator
         return super().create(validated_data)
         #todo websocket: send to chat that user 'xxx' join team
 
     def update(self, instance, validated_data):
         if 'team' in validated_data:
-            if self.instance.lobby.teams_count[validated_data['team']] == self.instance.lobby.max_team_participants:
+            if instance.lobby.game_mode != GameMode.custom_game:
+                validated_data.pop('team', None)
+            elif self.instance.lobby.teams_count[validated_data['team']] == self.instance.lobby.max_team_participants:
                 raise serializers.ValidationError({'team': [f"Team {validated_data['team']} is full."]})
-        return super().update(instance, validated_data)
+        result = super().update(instance, validated_data)
+        if instance.lobby.is_ready:
+            # todo websocket: send that lobby is ready and start game
+            pass
+        return result

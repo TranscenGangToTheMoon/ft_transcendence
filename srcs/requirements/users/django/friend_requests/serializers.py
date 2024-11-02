@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from friend_requests.models import FriendRequests
-from friends.exist import is_friendship
+from friends.utils import is_friendship
 from users.auth import get_user, validate_username
 
 
