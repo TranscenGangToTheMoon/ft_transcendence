@@ -1,6 +1,6 @@
-from lib_transcendence.request import request_service
-from lib_transcendence.services import requests_matchmaking
+from lib_transcendence.services import requests_chat
 from rest_framework import serializers
+from rest_framework.exceptions import AuthenticationFailed
 
 from block.models import Blocks
 from friends.utils import get_friendship
@@ -29,24 +29,21 @@ class BlockSerializer(serializers.ModelSerializer):
 
         block_user = validate_username(validated_data.pop('username'), user)
 
-        if block_user == user:
+        if block_user.id == user.id:
             raise serializers.ValidationError({'username': ['You cannot block yourself.']})
 
         if user.block.filter(blocked=block_user).exists():
-            raise serializers.ValidationError({'username': ['You already block this user.']})
-
-        def requests_chat(endpoint, method='GET', data=None):
-            return request_service('chat', endpoint, method, data)
+            raise serializers.ValidationError({'username': ['You have already blocked this user.']})
 
         requests_chat(
-            endpoint=f'block-user/{block_user.id}/',
-            method='DELETE',
+            endpoint=f'block-user/{user.id}/{block_user.id}/',
+            data={'blocked': True},
         )
 
-        requests_matchmaking(
-            endpoint=f'block-user/{block_user.id}/',
-            method='DELETE',
-        )
+        # requests_matchmaking(
+        #     endpoint=f'block-user/{block_user.id}/',
+        #     method='DELETE',
+        # )
 
 
         # todo remove chat
