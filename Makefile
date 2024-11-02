@@ -86,6 +86,8 @@ fclean		:
 			docker image prune -af
 			rm -rf $(VOLS_PATH)
 			rm -rf $(ENV_FILE)
+			rm -rf ./srcs/shared-code/lib_transcendence.egg-info/ # todo remove in prod
+			rm -rf ./srcs/shared-code/build/ # todo remove in prod
 #			rm -rf $(SECRETS_D)
 
 image-ls	:
