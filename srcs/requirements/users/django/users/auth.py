@@ -33,6 +33,8 @@ class IsAuthenticated(permissions.BasePermission):
     def has_permission(self, request, view):
 
         json_data = auth_verify(request.headers.get('Authorization'))
+        if json_data is None:
+            return False
 
         try:
             user = Users.objects.get(id=json_data['id'])
@@ -54,7 +56,10 @@ def get_user(request=None, id=None):
         if request is None:
             raise serializers.ValidationError({'detail': 'Request is required.'})
         id = request.user.id
-    return Users.objects.get(pk=id)
+    try:
+        return Users.objects.get(pk=id)
+    except Users.DoesNotExist:
+        raise serializers.ValidationError({'detail': 'User does not exist.'})
 
 
 def validate_username(username, self_user):
