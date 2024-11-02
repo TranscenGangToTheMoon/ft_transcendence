@@ -2,6 +2,7 @@ import json
 from typing import Literal
 
 import requests
+from lib_transcendence.request import request_service
 from rest_framework import permissions, serializers
 from rest_framework.exceptions import AuthenticationFailed
 
@@ -12,24 +13,7 @@ def requests_auth(token, endpoint: Literal['update/', 'verify/', 'delete/'], met
     if token is None:
         raise AuthenticationFailed('Authentication credentials were not provided.')
 
-    try:
-        response = requests.request(
-            method=method,
-            url='http://auth:8000/api/auth/' + endpoint,
-            headers={
-                'Authorization': token,
-                'Content-Type': 'application/json'
-            },
-            data=data
-        )
-        if response.status_code == 204:
-            return
-        json_data = response.json()
-        if response.status_code not in (200, 201, 202, 203, 205, 206):
-            raise AuthenticationFailed(json_data)
-    except (requests.ConnectionError, requests.exceptions.JSONDecodeError):
-        raise AuthenticationFailed('Failed to connect to auth service')
-    return json_data
+    return request_service('auth', 'auth/' + endpoint, method, data, token)
 
 
 def auth_verify(token):
@@ -37,11 +21,11 @@ def auth_verify(token):
 
 
 def auth_update(token, data):
-    return requests_auth(token, 'update/', method='PATCH', data=json.dumps(data))
+    return requests_auth(token, 'update/', method='PATCH', data=data)
 
 
 def auth_delete(token, data):
-    requests_auth(token, 'delete/', method='DELETE', data=json.dumps(data))
+    requests_auth(token, 'delete/', method='DELETE', data=data)
 
 
 class IsAuthenticated(permissions.BasePermission):
