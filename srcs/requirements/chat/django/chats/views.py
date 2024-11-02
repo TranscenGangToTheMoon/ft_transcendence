@@ -1,3 +1,4 @@
+from django.http import Http404
 from rest_framework import generics
 from rest_framework.exceptions import MethodNotAllowed
 
@@ -26,6 +27,12 @@ class ChatsView(generics.ListCreateAPIView, ChatsMixin):
 
 class ChatView(generics.RetrieveUpdateDestroyAPIView, ChatsMixin):
     lookup_field = 'pk'
+
+    def get_object(self):
+        obj = super().get_object()
+        if obj.blocked:
+            raise Http404
+        return obj
 
     def destroy(self, request, *args, **kwargs):
         if self.request.get_host().split(':')[0] != 'game': #todo in librairy
