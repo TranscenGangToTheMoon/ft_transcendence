@@ -26,3 +26,4 @@ class PlayersSerializer(serializers.ModelSerializer):
 
         validated_data['user_id'] = user['id']
         return super().create(validated_data)
+        # todo block user can't play together
