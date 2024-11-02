@@ -12,11 +12,11 @@ class GameMode:
 
     @staticmethod
     def validate(mode):
-        return validate_type(mode, GameMode, GameMode.modes)
+        return validate_type(mode, GameMode(), GameMode.modes)
 
     @staticmethod
     def validate_lobby(mode):
-        return validate_type(mode, GameMode, (GameMode.clash, GameMode.custom_game))
+        return validate_type(mode, GameMode(), (GameMode.clash, GameMode.custom_game))
 
     def __str__(self):
         return 'Game mode'
