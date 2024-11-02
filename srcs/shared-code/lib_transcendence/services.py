@@ -31,5 +31,5 @@ def requests_game(endpoint: Literal['match/', 'tournaments/', 'playing/{user_id}
     return request_service('game', endpoint, method, data)
 
 
-def requests_chat(endpoint: Literal['block-user/{user_id}/'], method: Literal['DELETE'] = 'POST', data=None):
+def requests_chat(endpoint: str, method: Literal['PATCH', 'DELETE'] = 'PATCH', data=None):
     return request_service('chat', endpoint, method, data)
