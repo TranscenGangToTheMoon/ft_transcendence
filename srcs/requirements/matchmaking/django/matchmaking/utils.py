@@ -1,6 +1,6 @@
 from typing import Literal
 
-from lib_transcendence.services import requests_game
+from lib_transcendence.services import requests_game, requests_users
 from rest_framework.exceptions import PermissionDenied, NotFound
 
 from lobby.models import LobbyParticipants
@@ -50,3 +50,16 @@ def verify_user(user_id, join_tournament=True):
         raise PermissionDenied('You are already in a game.')
     except NotFound:
         pass
+
+
+def can_join(request, obj, new_user):
+    try:
+        self_user = obj.participants.get(creator=True).user_id
+    except obj.DoesNotExist:
+        raise NotFound('Creator not found.')
+
+    try:
+        requests_users(request, f'block/{self_user}/{new_user}/', 'GET')
+        return False
+    except NotFound:
+        return True
