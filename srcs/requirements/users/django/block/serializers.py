@@ -1,4 +1,4 @@
-from lib_transcendence.services import requests_chat
+from lib_transcendence.services import requests_chat, requests_matchmaking
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied, NotFound
 
@@ -43,10 +43,13 @@ class BlockSerializer(serializers.ModelSerializer):
         except NotFound:
             pass
 
-        # requests_matchmaking(
-        #     endpoint=f'block-user/{block_user.id}/',
-        #     method='DELETE',
-        # )
+        try:
+            requests_matchmaking(
+                endpoint=f'block-user/{user.id}/{block_user.id}/',
+                method='DELETE',
+            )
+        except NotFound:
+            pass
 
 
         # todo remove chat
