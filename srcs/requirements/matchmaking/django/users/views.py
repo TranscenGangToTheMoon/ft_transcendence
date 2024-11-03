@@ -26,7 +26,7 @@ class BlockUserView(generics.DestroyAPIView):
         if user is None:
             return
 
-        block_user = get_user(self.kwargs['user_block'])
+        block_user = get_user(self.kwargs['user_block_id'])
         if block_user is None:
             return
 
