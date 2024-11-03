@@ -6,7 +6,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied, NotFound
 
 from lobby.models import Lobby, LobbyParticipants
-from matchmaking.utils import verify_user
+from matchmaking.utils import verify_user, can_join
 
 
 class LobbyGetParticipantsSerializer(serializers.ModelSerializer):
@@ -137,6 +137,9 @@ class LobbyParticipantsSerializer(serializers.ModelSerializer):
 
         if lobby.participants.filter(user_id=user['id']).exists():
             raise PermissionDenied('You already joined this lobby.')
+
+        if not can_join(self.context.get('request'), lobby, user['id']):
+            raise NotFound({'code': ['Lobby code does not exist.']}) # todo move to library
 
         verify_user(user['id'])
 
