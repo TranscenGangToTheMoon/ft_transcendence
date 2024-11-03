@@ -21,6 +21,6 @@ urlpatterns = [
 
     path('api/tournament/result-match/', tournament_result_match_view),
 
-    path('api/block-user/<int:user_id>/', block_user_view), # todo move in library
+    path('api/block-user/<int:user_id>/<int:block_user_id>/', block_user_view), # todo move in library
     path('api/delete-user/<int:user_id>/', delete_user_view),
 ]
