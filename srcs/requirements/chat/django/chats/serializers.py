@@ -67,7 +67,7 @@ class ChatsSerializer(serializers.ModelSerializer):
 
         username = validated_data.pop('username')
         if username == user['username']:
-            raise PermissionDenied({'username': ["You can't chat with yourself."]})
+            raise PermissionDenied({'username': ['You cannot chat with yourself.']})
 
         if get_chat_together(user['username'], username):
             raise PermissionDenied({'username': ['You are already chat with this user.']})
