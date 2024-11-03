@@ -63,7 +63,7 @@ class MatchSerializer(serializers.ModelSerializer):
         teams = validated_data.pop('teams')
         if len(teams[0]) == 1 and validated_data['game_mode'] == GameMode.clash:
             raise serializers.ValidationError(['Clash must have 3 players in each teams.'])
-        if len(teams[0]) == 3 and validated_data['game_mode'] != GameMode.clash:
+        if len(teams[0]) == 3 and (validated_data['game_mode'] != GameMode.clash or validated_data['game_mode'] != GameMode.custom_game):
             raise serializers.ValidationError([f'{validated_data["game_mode"].replace("_", " ").capitalize()} must have 1 player in each team.'])
         if validated_data['game_mode'] != GameMode.tournament:
             validated_data['tournament_id'] = None
