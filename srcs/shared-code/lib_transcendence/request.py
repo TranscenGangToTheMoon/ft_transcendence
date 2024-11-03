@@ -2,7 +2,7 @@ import json
 from typing import Literal
 
 from rest_framework import status
-from rest_framework.exceptions import APIException, AuthenticationFailed, PermissionDenied, MethodNotAllowed
+from rest_framework.exceptions import APIException, AuthenticationFailed, PermissionDenied, MethodNotAllowed, NotFound
 import requests
 
 
@@ -36,13 +36,15 @@ def request_service(service: Literal['auth', 'chat', 'game', 'matchmaking', 'use
             return
 
         json_data = response.json()
-        print(json_data, flush=True)
-        if response.status_code == 401:
-            raise AuthenticationFailed(json_data)
+        print('JSON =', json_data, flush=True)
         if response.status_code == 400:
             raise PermissionDenied(json_data)
+        if response.status_code == 401:
+            raise AuthenticationFailed(json_data)
         if response.status_code == 403:
             raise PermissionDenied(json_data)
+        if response.status_code == 404:
+            raise NotFound(json_data)
         if response.status_code == 405:
             raise MethodNotAllowed(method)
         if response.status_code == 503:
