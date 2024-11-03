@@ -24,7 +24,7 @@ def request_service(service: Literal['auth', 'chat', 'game', 'matchmaking', 'use
         headers['Authorization'] = authorization
 
     try:
-        print(method, f'=> {service}/api/{endpoint}', flush=True)
+        print(method, f'[{service}] => /api/{endpoint}', flush=True)
         response = requests.request(
             method=method,
             url=f'http://{service}:8000/api/{endpoint}',

@@ -16,7 +16,11 @@ def requests_users(request, endpoint: Literal['users/me/', 'validate/chat/'], me
     return request_service('users', endpoint, method, data, token)
 
 
-def requests_matchmaking(tournament_id, stage_id, winner, looser):
+def requests_matchmaking(endpoint: str, method: Literal['POST', 'DELETE'], data=None):
+    return request_service('matchmaking', endpoint, method, data)
+
+
+def requests_tournament_matchmaking(tournament_id, stage_id, winner, looser):
     data = {
         'tournament_id': tournament_id,
         'stage_id': stage_id,
@@ -24,7 +28,7 @@ def requests_matchmaking(tournament_id, stage_id, winner, looser):
         'loser': looser,
     }
 
-    return request_service('matchmaking', 'tournament/result-match/', 'POST', data)
+    return requests_matchmaking('tournament/result-match/', 'POST', data)
 
 
 def requests_game(endpoint: Literal['match/', 'tournaments/', 'playing/{user_id}/'], method: Literal['GET', 'POST'] = 'POST', data=None):
