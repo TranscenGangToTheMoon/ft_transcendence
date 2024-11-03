@@ -10,7 +10,6 @@ class Lobby(models.Model):
 
     match_type = models.CharField(max_length=3)
     bo = models.IntegerField(default=1)
-    game_time = models.IntegerField(default=180)
 
     @property
     def max_team_participants(self):
