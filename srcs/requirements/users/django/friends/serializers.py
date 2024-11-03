@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework.exceptions import NotFound, PermissionDenied
 
 from friend_requests.models import FriendRequests
 from friends.utils import is_friendship
@@ -32,12 +33,12 @@ class FriendsSerializer(serializers.ModelSerializer):
         user_send_friend_request = validate_username(validated_data.pop('username'), user_accept)
 
         if is_friendship(user_accept, user_send_friend_request):
-            raise serializers.ValidationError({'username': ['You are already friends with this user.']})
+            raise PermissionDenied({'username': ['You are already friends with this user.']})
 
         try:
             user_accept.received_friend_requests.get(sender=user_send_friend_request).delete()
         except FriendRequests.DoesNotExist:
-            raise serializers.ValidationError({'username': ['No friend request exists with this user.']})
+            raise NotFound({'username': ['No friend request exists with this user.']})
 
         result = super().create(validated_data)
         result.friends.add(user_accept, user_send_friend_request)

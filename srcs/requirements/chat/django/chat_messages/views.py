@@ -1,4 +1,5 @@
 from rest_framework import generics, serializers
+from rest_framework.exceptions import PermissionDenied
 
 from chat_messages.models import Messages
 from chat_messages.serializers import MessagesSerializer
@@ -13,12 +14,12 @@ class MessagesView(generics.ListCreateAPIView):
     def filter_queryset(self, queryset):
         pk = self.kwargs.get('pk')
         if pk is None:
-            raise serializers.ValidationError({'detail': 'Pk is required.'})
+            raise serializers.ValidationError('Pk is required.')
         try:
             ChatParticipants.objects.get(chat_id=pk, user_id=self.request.user.id)
             return queryset.filter(chat_id=pk)
         except ChatParticipants.DoesNotExist:
-            raise serializers.ValidationError({'detail': 'You are not a participant of this chat.'})
+            raise PermissionDenied('You are not a participant of this chat.')
 
     def get_serializer_context(self):
         context = super().get_serializer_context()

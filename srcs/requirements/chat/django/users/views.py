@@ -1,5 +1,5 @@
-from django.http import Http404
 from rest_framework import generics, status, serializers
+from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 
 from chats.models import ChatParticipants, Chats
@@ -27,17 +27,12 @@ class UpdateBlockUserView(generics.UpdateAPIView):
     permission_classes = []
 
     def update(self, request, *args, **kwargs):
-        try:
-            self.get_object()
-        except Http404:
-            return Response(status=status.HTTP_204_NO_CONTENT)
+        if self.get_object() is None:
+            raise NotFound()
         return super().update(request, *args, **kwargs)
 
     def get_object(self):
-        together = get_chat_together(self.kwargs['user_id'], self.kwargs['user_block'], field='user_id')
-        if together is None:
-            raise Http404 # serializers.ValidationError({'detail': 'Chat does not exist.'})
-        return together
+        return get_chat_together(self.kwargs['user_id'], self.kwargs['user_block'], field='user_id')
 
 
 class DeleteUserView(generics.DestroyAPIView):

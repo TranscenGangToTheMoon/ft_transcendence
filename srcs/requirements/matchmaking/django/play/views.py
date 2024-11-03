@@ -1,4 +1,5 @@
-from rest_framework import generics, serializers
+from rest_framework import generics
+from rest_framework.exceptions import PermissionDenied
 
 from play.models import Players
 from play.serializers import PlayersSerializer
@@ -11,7 +12,7 @@ class PlayMixin(generics.CreateAPIView, generics.DestroyAPIView):
         try:
             return Players.objects.get(user_id=self.request.user.id)
         except Players.DoesNotExist:
-            raise serializers.ValidationError({'detail': "You're not currently playing."})
+            raise PermissionDenied("You're not currently playing.")
 
 
 class DuelView(PlayMixin):

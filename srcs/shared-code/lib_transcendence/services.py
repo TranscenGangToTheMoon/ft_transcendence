@@ -1,17 +1,17 @@
 from typing import Literal
 
 from rest_framework import serializers
-from rest_framework.exceptions import AuthenticationFailed
+from rest_framework.exceptions import NotAuthenticated
 
 from lib_transcendence.request import request_service
 
 
 def requests_users(request, endpoint: Literal['users/me/', 'validate/chat/'], method: Literal['GET', 'PUT', 'PATCH', 'DELETE'], data=None):
     if request is None:
-        raise serializers.ValidationError({'detail': 'Request is required.'})
+        raise serializers.ValidationError('Request is required.')
     token = request.headers.get('Authorization')
     if token is None:
-        raise AuthenticationFailed('Authentication credentials were not provided.')
+        raise NotAuthenticated()
 
     return request_service('users', endpoint, method, data, token)
 

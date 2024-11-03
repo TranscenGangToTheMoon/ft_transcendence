@@ -1,6 +1,7 @@
 from lib_transcendence.auth import get_auth_user
 from lib_transcendence.utils import generate_code
 from rest_framework import serializers
+from rest_framework.exceptions import PermissionDenied
 
 from matchmaking.utils import verify_user
 from tournament.models import Tournaments, TournamentStage, TournamentParticipants
@@ -47,7 +48,7 @@ class TournamentSerializer(serializers.ModelSerializer):
         user = get_auth_user(request)
 
         if user['is_guest']:
-            raise serializers.ValidationError({'detail': 'Guest cannot create tournament.'})
+            raise PermissionDenied('Guest cannot create tournament.')
 
         verify_user(user['id'], False)
 
@@ -59,7 +60,7 @@ class TournamentSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         if instance.is_started:
-            raise serializers.ValidationError({'detail': 'Tournament has already started.'})
+            raise PermissionDenied('Tournament has already started.')
         return super().update(instance, validated_data)
 
 
@@ -98,10 +99,10 @@ class TournamentParticipantsSerializer(serializers.ModelSerializer):
         tournament = get_tournament(code=self.context.get('code'))
 
         if tournament.is_started:
-            raise serializers.ValidationError({'code': ['Tournament has already started.']})
+            raise PermissionDenied('Tournament has already started.')
 
         if tournament.is_full:
-            raise serializers.ValidationError({'code': ['Tournament is full.']})
+            raise PermissionDenied('Tournament is full.')
 
         user = self.context['auth_user']
         verify_user(user['id'])

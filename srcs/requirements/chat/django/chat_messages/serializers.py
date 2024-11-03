@@ -23,18 +23,18 @@ class MessagesSerializer(serializers.ModelSerializer):
     def create(self, validated_data): # todo useless, delete ?
         pk = self.context.get('pk')
         if pk is None:
-            raise serializers.ValidationError({'detail': 'Chat id is required'})
+            raise serializers.ValidationError('Chat id is required')
 
         user = self.context['auth_user']
         try:
             chats = Chats.objects.get(pk=pk)
         except Chats.DoesNotExist:
-            raise serializers.ValidationError({'detail': 'Chat does not exist.'})
+            raise serializers.ValidationError('Chat does not exist.')
 
         try:
             participant = chats.participants.get(user_id=user['id'])
         except ChatParticipants.DoesNotExist:
-            raise serializers.ValidationError({'detail': 'You are not participant of this chat'})
+            raise serializers.ValidationError('You are not participant of this chat')
 
         validated_data['chat_id'] = pk
         validated_data['author'] = participant

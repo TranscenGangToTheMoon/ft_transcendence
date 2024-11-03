@@ -1,17 +1,15 @@
-import json
 from typing import Literal
 
-import requests
 from lib_transcendence.request import request_service
 from rest_framework import permissions, serializers
-from rest_framework.exceptions import AuthenticationFailed
+from rest_framework.exceptions import NotAuthenticated, NotFound
 
 from users.models import Users
 
 
 def requests_auth(token, endpoint: Literal['update/', 'verify/', 'delete/'], method: Literal['GET', 'PUT', 'PATCH', 'DELETE'], data=None):
     if token is None:
-        raise AuthenticationFailed('Authentication credentials were not provided.')
+        raise NotAuthenticated()
 
     return request_service('auth', 'auth/' + endpoint, method, data, token)
 
@@ -54,12 +52,12 @@ class IsAuthenticated(permissions.BasePermission):
 def get_user(request=None, id=None):
     if id is None:
         if request is None:
-            raise serializers.ValidationError({'detail': 'Request is required.'})
+            raise serializers.ValidationError('Request is required.')
         id = request.user.id
     try:
         return Users.objects.get(pk=id)
     except Users.DoesNotExist:
-        raise serializers.ValidationError({'detail': 'User does not exist.'})
+        raise NotFound('User does not exist.')
 
 
 def validate_username(username, self_user):
@@ -69,5 +67,5 @@ def validate_username(username, self_user):
         assert valide_username.is_guest is False
         assert not valide_username.block.filter(blocked=self_user).exists()
     except (Users.DoesNotExist, AssertionError):
-        raise serializers.ValidationError({'username': ['This user does not exist.']})
+        raise NotFound({'username': ['This user does not exist.']})
     return valide_username

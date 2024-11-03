@@ -27,5 +27,5 @@ class AllowedHostPermission(permissions.BasePermission):
 
 def get_auth_user(request=None):
     if request is None:
-        raise serializers.ValidationError({'detail': 'Request is required.'})
+        raise serializers.ValidationError('Request is required.')
     return request.data['auth_user']

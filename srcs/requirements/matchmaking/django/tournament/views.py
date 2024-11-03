@@ -2,6 +2,7 @@ from datetime import datetime, timezone
 
 from lib_transcendence.services import requests_game
 from rest_framework import generics, serializers
+from rest_framework.exceptions import PermissionDenied, NotFound
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
@@ -17,7 +18,7 @@ class TournamentView(generics.CreateAPIView, generics.RetrieveUpdateDestroyAPIVi
     def get_object(self):
         p = get_tournament_participants(None, self.request.user.id)
         if self.request.method != 'GET' and not p.creator:
-            raise serializers.ValidationError({'detail': 'You do not have permission to update or delete this tournament.'})
+            raise PermissionDenied()
         return Tournaments.objects.get(id=p.tournament_id)
 
 
@@ -44,7 +45,7 @@ class TournamentParticipantsView(generics.ListCreateAPIView, generics.DestroyAPI
         tournament = get_tournament(code=self.kwargs.get('code'))
 
         if tournament.is_started and self.request.method == 'DELETE':
-            raise serializers.ValidationError({'detail': 'You cannot quit the tournament after he started.'})
+            raise PermissionDenied('You cannot leave this tournament after he started.')
 
         return get_tournament_participants(tournament, self.request.user.id)
 
@@ -62,21 +63,21 @@ class TournamentKickView(generics.DestroyAPIView):
     def get_object(self):
         user_id = self.kwargs.get('user_id')
         if user_id is None:
-            raise serializers.ValidationError({'detail': 'User id is required.'})
+            raise serializers.ValidationError('User id is required.')
 
         if user_id == self.request.user.id:
-            raise serializers.ValidationError({'detail': 'You cannot kick yourself.'})
+            raise PermissionDenied('You cannot kick yourself.')
 
         tournament = get_tournament(code=self.kwargs.get('code'))
         get_tournament_participants(tournament, self.request.user.id, True)
 
         if tournament.is_started:
-            raise serializers.ValidationError({'detail': 'You cannot kick participant after the tournament has started.'})
+            raise PermissionDenied('You cannot kick participant after the tournament has started.')
 
         try:
             return tournament.participants.get(user_id=user_id)
         except TournamentParticipants.DoesNotExist:
-            raise serializers.ValidationError({'detail': f"User id '{user_id}' is not participant of this tournament."})
+            raise NotFound('This user is not participant of this tournament.')
 
 
 class TournamentResultMatchView(generics.CreateAPIView):
@@ -86,7 +87,7 @@ class TournamentResultMatchView(generics.CreateAPIView):
     def create(self, request, *args, **kwargs):
         tournament_id = request.data.get('tournament_id')
         if tournament_id is None:
-            raise serializers.ValidationError({'detail': 'Tournament id is required.'})
+            raise serializers.ValidationError('Tournament id is required.')
         tournament = get_tournament(id=tournament_id)
 
         current_stage = None
@@ -95,7 +96,7 @@ class TournamentResultMatchView(generics.CreateAPIView):
             # todo websocket: send to chat tournament that 'xxx' win the game
             user_id = request.data.get(player)
             if user_id is None:
-                raise serializers.ValidationError({'detail': f'{player} is required.'})
+                raise serializers.ValidationError(f'{player.title()} is required.')
             try:
                 participant = tournament.participants.get(user_id=user_id)
                 if current_stage is None:
@@ -105,7 +106,7 @@ class TournamentResultMatchView(generics.CreateAPIView):
                 else:
                     participant.eliminate()
             except TournamentParticipants.DoesNotExist:
-                raise serializers.ValidationError({'detail': f"Participant '{user_id}' does not exist."})
+                raise NotFound('This participant does not exist.')
 
         if finished is not None:
             data = TournamentSerializer(tournament).data

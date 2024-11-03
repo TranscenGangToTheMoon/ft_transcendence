@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework.exceptions import NotFound
 
 from lib_transcendence.services import requests_game
 from matchmaking.utils import get_participants
@@ -24,11 +25,11 @@ def get_tournament(**kwargs):
 
     value = kwargs[key]
     if value is None:
-        raise serializers.ValidationError({'detail': f'Tournament {key} is required.'})
+        raise serializers.ValidationError(f'Tournament {key} is required.')
     try:
         return Tournaments.objects.get(**kwargs)
     except Tournaments.DoesNotExist:
-        raise serializers.ValidationError({'detail': f"Tournament '{value}' does not exist."})
+        raise NotFound('Tournament does not exist.')
 
 
 def get_tournament_participants(tournament, user_id, creator_check=False):

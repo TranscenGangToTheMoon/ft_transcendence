@@ -1,8 +1,7 @@
 from typing import Literal
 
 from lib_transcendence.services import requests_game
-from rest_framework import serializers
-from rest_framework.exceptions import AuthenticationFailed
+from rest_framework.exceptions import PermissionDenied, NotFound
 
 from lobby.models import LobbyParticipants
 from play.models import Players
@@ -17,12 +16,12 @@ def get_participants(name: Literal['lobby', 'tournament'], model, obj, user_id, 
     try:
         p = model.objects.get(**kwargs)
         if creator_check and not p.creator:
-            raise serializers.ValidationError({'detail': f'You are not creator of this {name}.'})
+            raise PermissionDenied(f'You are not creator of this {name}.')
         return p
     except model.DoesNotExist:
         if obj is None:
-            raise serializers.ValidationError({'detail': f'You are not in any {name}.'})
-        raise serializers.ValidationError({'detail': f'You are not participant of this {name}.'})
+            raise NotFound(f'You are not in any {name}.')
+        raise NotFound(f'You are not a participant of this {name}.')
 
 
 def verify_user(user_id, join_tournament=True):
@@ -30,8 +29,8 @@ def verify_user(user_id, join_tournament=True):
         participant = TournamentParticipants.objects.get(user_id=user_id, still_in=True)
         if participant.creator:
             if join_tournament:
-                raise serializers.ValidationError({'detail': 'You already join a tournament.'})
-            raise serializers.ValidationError({'detail': 'You cannot create more than one tournament at the same time.'})
+                raise PermissionDenied('You already join a tournament.')
+            raise PermissionDenied('You cannot create more than one tournament at the same time.')
         participant.delete()
     except TournamentParticipants.DoesNotExist:
         pass
@@ -48,7 +47,6 @@ def verify_user(user_id, join_tournament=True):
 
     try:
         requests_game(f'playing/{user_id}/', method='GET')
-        raise serializers.ValidationError({'detail': 'You are already in a game.'})
-    except AuthenticationFailed as e:
-        if e.detail.get('detail') != 'Not found.': # todo in library
-            raise e
+        raise PermissionDenied('You are already in a game.')
+    except NotFound:
+        pass
