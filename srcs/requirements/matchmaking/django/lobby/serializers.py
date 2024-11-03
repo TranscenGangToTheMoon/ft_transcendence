@@ -166,10 +166,13 @@ class LobbyParticipantsSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         if 'team' in validated_data:
             if instance.lobby.game_mode != GameMode.custom_game:
-                validated_data.pop('team', None)
+                raise PermissionDenied('You cannot update team in Clash mode.')
+            elif instance.team == validated_data['team']:
+                raise PermissionDenied('You are already in this team.')
             elif self.instance.lobby.teams_count[validated_data['team']] == self.instance.lobby.max_team_participants:
-                raise PermissionDenied('Team  is full.')
+                raise PermissionDenied('Team is full.')
         result = super().update(instance, validated_data)
+        # todo websocket: send that lobby thas x change team
         if instance.lobby.is_ready:
             # todo websocket: send that lobby is ready and start game
             pass
