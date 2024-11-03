@@ -6,12 +6,12 @@ from play.models import Players
 from tournament.models import TournamentParticipants, Tournaments
 
 
-#todo try to make with generics view
-class BlockUserView(generics.UpdateAPIView):
-    def update(self, request, *args, **kwargs):
-        user_block = request.data.get('user_block_id')
-        if not user_block:
-            raise serializers.ValidationError({'user_block_id': ['This field is required.']})
+class BlockUserView(generics.DestroyAPIView):
+    permission_classes = []
+
+    def destroy(self, request, *args, **kwargs):
+        self.kick_block_user_or_leave(LobbyParticipants)
+        self.kick_block_user_or_leave(TournamentParticipants)
 
         # tryy:
         #     Tournaments.objects.get(kwargs['user_id']).delete()
