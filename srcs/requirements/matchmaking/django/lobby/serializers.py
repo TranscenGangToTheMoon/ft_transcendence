@@ -25,6 +25,7 @@ class LobbyGetParticipantsSerializer(serializers.ModelSerializer):
 
 class LobbySerializer(serializers.ModelSerializer):
     participants = LobbyGetParticipantsSerializer(many=True, read_only=True)
+    # todo print is full
 
     class Meta:
         model = Lobby
