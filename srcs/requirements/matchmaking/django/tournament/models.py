@@ -48,6 +48,11 @@ class TournamentParticipants(models.Model):
     still_in = models.BooleanField(default=True)
     creator = models.BooleanField(default=False)
     join_at = models.DateTimeField(auto_now_add=True)
+    # todo add delete method and inform players that xxx leave the tournament
+    # todo cans leave the tournament if started
+
+    def get_location_id(self):
+        return self.tournament.id
 
     def eliminate(self):
         self.still_in = False
