@@ -83,6 +83,10 @@ function removeDropdown() {
 }
 
 async function atStart(){
+    if (!userInformations.is_guest) {
+        await navigateTo('/');
+        return; //TODO replace with URI or maybe not
+    }
     document.getElementById('username').innerText = userInformations.username;
     await loadContent('/authenticationForm.html', 'authentication');
     loadGuest();

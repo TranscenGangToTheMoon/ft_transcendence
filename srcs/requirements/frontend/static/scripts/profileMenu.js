@@ -4,7 +4,7 @@ document.getElementById('logOut').addEventListener('click', async event => {
     generateToken();
     await fetchUserInfos(true);
     await loadUserProfile();
-    await loadContent('/homePage.html');
+    await navigateTo(window.location.pathname);
 })
 
 document.getElementById('settings').addEventListener('click', event => {
