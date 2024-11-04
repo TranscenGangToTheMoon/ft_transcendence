@@ -1,0 +1,53 @@
+<div id="banner">
+    <div id="pProfilePicture">
+
+    </div>
+    <div id="pTitle"></div>
+    <div id="pRank"></div>
+</div>
+<div id="options">
+    <div id="pNickname">
+        Nickname
+        <form id="pChangeNickname">
+            <input type="text" id="pNicknameInput">
+            <button type="submit">[insert change username icon]</button>
+        </form>
+    </div>
+    <div id="pPassword"></div>
+        Password
+        <form id="pChangePassword">
+            <input type="password" id="pPasswordInput" value="Password123">
+            <button type="submit">[insert change password icon]</button>
+        </form>
+    </div>
+    <div id="pDownload"></div>
+        Download Account data
+        <div id="pDownloadData">
+            [insert download icon]
+        </div>
+    </div>
+    <div id="pDelete"></div>
+        Delete Account
+        <div id="pDeleteAccount">[insert delete icon]</div>
+    </div>
+</div>
+
+<div class="modal fade" id="pDeleteAccountModal" tabindex="-1" aria-labelledby="pDeleteAccountModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="pDeleteAccountModalLabel">Delete account</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete your account? This action is permanent and cannot be undone.
+                To confirm your request, please re-enter your password below:
+                <form id="test">
+                    <input type="password" id="pConfirmDeletion">
+                    <button type="submit" class="btn btn-danger">Confirm</button>
+                </form>
+                </div>
+        </div>
+    </div>
+</div>
+<div script="/profileTemplates/scripts/account.js"></div>

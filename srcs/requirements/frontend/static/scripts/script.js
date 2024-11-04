@@ -206,7 +206,8 @@ function handleRoute() {
 
     const routes = {
         '/login': '/authentication.html',
-        '/': '/homePage.html'
+        '/': '/homePage.html',
+        '/profile' : 'profile.html'
     };
 
     const page = routes[path] || '/404.html';
@@ -268,6 +269,7 @@ async function loadUserProfile(){
 }
 
 async function atStart() {
+    loadCSS('/css/styles.css', false);
     await fetchUserInfos();
     if (userInformations.code === 'user_not_found'){
         console.log('user was deleted from database, switching to guest mode');

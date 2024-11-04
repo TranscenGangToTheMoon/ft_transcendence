@@ -44,7 +44,11 @@ document.getElementById("loginButton").addEventListener('click', event => {
                 localStorage.setItem('refresh', data.refresh);
                 await fetchUserInfos(true);
                 loadUserProfile();
-                return navigateTo('/'); //todo redirect to uri
+                if (window.location.pathname.includes('login'))
+                    await navigateTo('/');
+                else
+                    await navigateTo(window.location.pathname);
+                return;//todo redirect to uri
             }
             if (data.username) {
                 document.getElementById('container').innerText = data.username[0];
