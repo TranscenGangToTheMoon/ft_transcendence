@@ -22,7 +22,7 @@ function apiRequest(token, endpoint, method="GET", authType="Bearer",
     console.log(endpoint, options)
     return fetch(endpoint, options)
         .then(async response => {
-            if (!response.ok && response.status > 499){
+            if (!response.ok && (response.status > 499 || response.status === 404)){
                 throw {code: response.status};
             }
             let data = await response.json();
@@ -157,6 +157,7 @@ function loadCSS(cssHref, toUpdate=true) {
     if (existingLink) {
         existingLink.remove();
     }
+    // console.log('will update =', toUpdate);
     const link = document.createElement('link');
     link.rel = 'stylesheet';
     link.href = cssHref;
@@ -186,8 +187,7 @@ async function loadContent(url, container='content') {
             style = 'guestStyle'
         css = contentDiv.querySelector(`[${style}]`);
         if (css)
-            loadCSS(css.getAttribute(style), !css.getAttribute(style).includes('rofileMenu'));
-        console.log('finished 1rst')
+            loadCSS(css.getAttribute(style), !css.getAttribute(style).includes('Guest'));
     } catch (error) {
         contentDiv.innerHTML = '<h1>Erreur 404 : Page non trouvée</h1>';
     }
@@ -229,9 +229,8 @@ async function fetchUserInfos(forced=false) {
         await generateToken();
     if (!userInformations || forced) {
         try {
-            let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/users/me/`);
+            let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/users/me`);
             userInformations = data;
-            console.log('info fetch finished');
         }
         catch (error) {
             console.log(error);
@@ -261,7 +260,7 @@ async function loadUserProfile(){
         document.getElementById('balance').innerText = "";
     }
     else {
-        document.getElementById('trophies').innerText = userInformations.trophy;
+        document.getElementById('trophies').innerText = userInformations.trophies;
         document.getElementById('balance').innerText = userInformations.coins;
     }
     await loadContent(`/${profileMenu}`, 'profileMenu');
@@ -272,11 +271,10 @@ async function atStart() {
     await fetchUserInfos();
     if (userInformations.code === 'user_not_found'){
         console.log('user was deleted from database, switching to guest mode');
-        displayMainError("Unable to retrieve your account","We're sorry your account has been permanently deleted and cannot be recovered.");
+        displayMainError("Unable to retrieve your account/guest profile","We're sorry your account has been permanently deleted and cannot be recovered.");
         await generateToken();
         await fetchUserInfos(true);
     }
-    await loadUserProfile();
     handleRoute();
 }
 
