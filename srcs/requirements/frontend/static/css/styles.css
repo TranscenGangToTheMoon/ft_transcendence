@@ -1,7 +1,4 @@
-div {
-    display: block;
-}
-
-div.hidden {
-    display: none;
+.dropdown-item:active {
+    background-color: unset;
+    color: unset;
 }

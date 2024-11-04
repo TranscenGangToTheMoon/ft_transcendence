@@ -1,29 +1,23 @@
 services:
 ##### ========== Django Projects ========================================= #####
-  algo-stats:
-    build: "requirements/algo-stats"
-    depends_on:
-      algo-stats-db:
-        condition: service_healthy
-    restart: always
-    ports:
-      - "8001:8000"
-    volumes:
-      - algo-stats-volume:/code
-    networks:
-      - transcendence-network
-      - algo-stats-network
-
   auth:
     build: "requirements/auth"
     depends_on:
       auth-db:
         condition: service_healthy
-    restart: always
+    restart: on-failure
+    ports:
+      - "8001:8000"
     volumes:
       - auth-volume:/code
-    ports:
-      - "8002:8000"
+      - shared-code-volume:/shared
+    environment:
+      TZ: Europe/Paris
+      DEBUG: ${DEBUG}
+      POSTGRES_DB: ${POSTGRES_AUTH_DB_NAME}
+      POSTGRES_USER: ${POSTGRES_AUTH_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_AUTH_PASSWORD}
+      POSTGRES_HOST: ${POSTGRES_AUTH_HOST}
     networks:
       - transcendence-network
       - auth-network
@@ -35,22 +29,33 @@ services:
         condition: service_healthy
     restart: on-failure
     ports:
-      - "8003:8000"
+      - "8002:8000"
+    volumes:
+      - chat-volume:/code
+      - shared-code-volume:/shared
+    environment:
+      TZ: Europe/Paris
+      DEBUG: ${DEBUG}
+      POSTGRES_DB: ${POSTGRES_CHAT_DB_NAME}
+      POSTGRES_USER: ${POSTGRES_CHAT_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_CHAT_PASSWORD}
+      POSTGRES_HOST: ${POSTGRES_CHAT_HOST}
     networks:
       - transcendence-network
       - chat-network
-    volumes:
-      - chat-volume:/code
 
   frontend:
     build: "requirements/frontend"
+    restart: on-failure
     ports:
       - "4443:443"
     networks:
       - transcendence-network
     volumes:
-      - frontend-volume:/var/www/html
+      - frontend-volume:/var/www/html #Do copy when project is finished HUGE SECURITY FAIL
       - ./requirements/frontend/Caddyfile:/etc/caddy/Caddyfile #Do copy when project is finished HUGE SECURITY FAIL
+    environment:
+      TZ: Europe/Paris
 
   game:
     build: "requirements/game"
@@ -59,12 +64,20 @@ services:
         condition: service_healthy
     restart: on-failure
     ports:
-      - "8004:8000"
+      - "8003:8000"
+    volumes:
+      - game-volume:/code
+      - shared-code-volume:/shared
+    environment:
+      TZ: Europe/Paris
+      DEBUG: ${DEBUG}
+      POSTGRES_DB: ${POSTGRES_GAME_DB_NAME}
+      POSTGRES_USER: ${POSTGRES_GAME_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_GAME_PASSWORD}
+      POSTGRES_HOST: ${POSTGRES_GAME_HOST}
     networks:
       - transcendence-network
       - game-network
-    volumes:
-      - game-volume:/code
 
   matchmaking:
     build: "requirements/matchmaking"
@@ -73,12 +86,20 @@ services:
         condition: service_healthy
     restart: on-failure
     ports:
-      - "8005:8000"
+      - "8004:8000"
+    volumes:
+      - matchmaking-volume:/code
+      - shared-code-volume:/shared
+    environment:
+      TZ: Europe/Paris
+      DEBUG: ${DEBUG}
+      POSTGRES_DB: ${POSTGRES_MATCHMAKING_DB_NAME}
+      POSTGRES_USER: ${POSTGRES_MATCHMAKING_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_MATCHMAKING_PASSWORD}
+      POSTGRES_HOST: ${POSTGRES_MATCHMAKING_HOST}
     networks:
       - transcendence-network
       - matchmaking-network
-    volumes:
-      - matchmaking-volume:/code
 
   users:
     build: "requirements/users"
@@ -87,40 +108,32 @@ services:
         condition: service_healthy
     restart: on-failure
     ports:
-      - "8006:8000"
+      - "8005:8000"
+    volumes:
+      - users-volume:/code
+      - shared-code-volume:/shared
+    environment:
+      TZ: Europe/Paris
+      DEBUG: ${DEBUG}
+      POSTGRES_DB: ${POSTGRES_USERS_DB_NAME}
+      POSTGRES_USER: ${POSTGRES_USERS_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_USERS_PASSWORD}
+      POSTGRES_HOST: ${POSTGRES_USERS_HOST}
     networks:
       - transcendence-network
       - users-network
-    volumes:
-      - users-volume:/code
 
 ##### ========== Database ================================================ #####
-  algo-stats-db:
-    image: postgres:14
-    restart: always
-    volumes:
-      - algo-stats-db-volume:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_DB=postgres-algo-stats-db
-      - POSTGRES_USER=fguirama
-      - POSTGRES_PASSWORD=123456
-    networks:
-      - algo-stats-network
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready --dbname=$$POSTGRES_DB --username=$$POSTGRES_USER"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
   auth-db:
     image: postgres:14
-    restart: always
+    restart: on-failure
     volumes:
       - auth-db-volume:/var/lib/postgresql/data
     environment:
-      - POSTGRES_DB=postgres-auth-db
-      - POSTGRES_USER=fguirama
-      - POSTGRES_PASSWORD=123456
+      TZ: Europe/Paris
+      POSTGRES_DB: ${POSTGRES_AUTH_DB_NAME}
+      POSTGRES_USER: ${POSTGRES_AUTH_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_AUTH_PASSWORD}
     networks:
       - auth-network
     healthcheck:
@@ -131,13 +144,14 @@ services:
 
   chat-db:
     image: postgres:14
-    restart: always
+    restart: on-failure
     volumes:
       - chat-db-volume:/var/lib/postgresql/data
     environment:
-      - POSTGRES_DB=postgres-chat-db
-      - POSTGRES_USER=fguirama
-      - POSTGRES_PASSWORD=123456
+      TZ: Europe/Paris
+      POSTGRES_DB: ${POSTGRES_CHAT_DB_NAME}
+      POSTGRES_USER: ${POSTGRES_CHAT_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_CHAT_PASSWORD}
     networks:
       - chat-network
     healthcheck:
@@ -148,13 +162,14 @@ services:
 
   game-db:
     image: postgres:14
-    restart: always
+    restart: on-failure
     volumes:
       - game-db-volume:/var/lib/postgresql/data
     environment:
-      - POSTGRES_DB=postgres-game-db
-      - POSTGRES_USER=fguirama
-      - POSTGRES_PASSWORD=123456
+      TZ: Europe/Paris
+      POSTGRES_DB: ${POSTGRES_GAME_DB_NAME}
+      POSTGRES_USER: ${POSTGRES_GAME_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_GAME_PASSWORD}
     networks:
       - game-network
     healthcheck:
@@ -165,13 +180,14 @@ services:
 
   matchmaking-db:
     image: postgres:14
-    restart: always
+    restart: on-failure
     volumes:
       - matchmaking-db-volume:/var/lib/postgresql/data
     environment:
-      - POSTGRES_DB=postgres-matchmaking-db
-      - POSTGRES_USER=fguirama
-      - POSTGRES_PASSWORD=123456
+      TZ: Europe/Paris
+      POSTGRES_DB: ${POSTGRES_MATCHMAKING_DB_NAME}
+      POSTGRES_USER: ${POSTGRES_MATCHMAKING_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_MATCHMAKING_PASSWORD}
     networks:
       - matchmaking-network
     healthcheck:
@@ -186,9 +202,10 @@ services:
     volumes:
       - users-db-volume:/var/lib/postgresql/data
     environment:
-      - POSTGRES_DB=postgres-users-db
-      - POSTGRES_USER=fguirama
-      - POSTGRES_PASSWORD=123456
+      TZ: Europe/Paris
+      POSTGRES_DB: ${POSTGRES_USERS_DB_NAME}
+      POSTGRES_USER: ${POSTGRES_USERS_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_USERS_PASSWORD}
     networks:
       - users-network
     healthcheck:
@@ -204,10 +221,6 @@ networks:
     driver: bridge
 
 ##### ========== DB to Django networks =================================== #####
-  algo-stats-network:
-    name: algo-stats-network
-    driver: bridge
-
   auth-network:
     name: auth-network
     driver: bridge
@@ -230,14 +243,6 @@ networks:
 
 volumes:
 ##### ========== Django Volumes ========================================== #####
-  algo-stats-volume:
-    name: algo-stats-volume
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: "requirements/algo-stats/django"
-
   auth-volume:
     name: auth-volume
     driver: local
@@ -287,50 +292,21 @@ volumes:
       device: "requirements/users/django"
 
 #####Database Volumes
-  algo-stats-db-volume:
-    name: algo-stats-db-volume
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: "$HOME/transcendence/algo-stats-db"
+  auth-db-volume: {}
 
-  auth-db-volume:
-    name: auth-db-volume
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: "$HOME/transcendence/auth-db"
+  chat-db-volume: {}
 
-  chat-db-volume:
-    name: chat-db-volume
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: "$HOME/transcendence/chat-db"
+  game-db-volume: {}
 
-  game-db-volume:
-    name: game-db-volume
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: "$HOME/transcendence/game-db"
+  matchmaking-db-volume: {}
 
-  matchmaking-db-volume:
-    name: matchmaking-db-volume
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: "$HOME/transcendence/matchmaking-db"
+  users-db-volume: {}
 
-  users-db-volume:
-    name: users-db-volume
+#####Shared Code Volume
+  shared-code-volume:
+    name: shared-code-volume
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: "$HOME/transcendence/users-db"
+      device: "./shared-code"

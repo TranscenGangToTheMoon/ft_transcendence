@@ -37,10 +37,4 @@ urlpatterns = [
     path('api/users/me/block/<int:pk>/', block_delete_view, name='api-block-delete'),
 
     path('api/users/validate/chat/', validate_chat_view, name='api-validate-chat'),
-
-    # path('api/users/me/profile_picture/', users, name='users'), # todo : make POST, UPDATE
-    # path('api/users/me/online_status/', users, name='users'), # todo : UPDATE is_online game_playing last_online by notif service
-    # path('api/users/me/coins/', users, name='users'), # todo : UPDATE only transcendence-nw / game service
-    # path('api/users/me/trophy/', users, name='users'), # todo : UPDATE only transcendence-nw / game service
-    # path('api/users/me/rank/', users, name='users'), # todo : UPDATE only transcendence-nw / game service
 ]

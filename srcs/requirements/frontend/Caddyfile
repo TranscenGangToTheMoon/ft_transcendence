@@ -5,35 +5,47 @@ localhost:443 {
 		file_server browse
 	}
 
-	# API route to micro-services
-	handle /api/algo-stats/* {
-		reverse_proxy http://algo-stats:8000
-	}
+	handle /api/* {
+		# API route to micro-services
+		@notJSON {
+			not header Content-Type application/json
+		}
 
-	handle /api/auth/* {
-		reverse_proxy http://auth:8000
-	}
+		handle /api/auth/* {
+			respond @notJSON "Unsupported Media Type" 415
+			reverse_proxy http://auth:8000
+		}
 
-	handle /api/chat/* {
-		reverse_proxy http://chat:8000
-	}
+		handle /api/chat/* {
+			respond @notJSON "Unsupported Media Type" 415
+			reverse_proxy http://chat:8000
+		}
 
-	handle /api/game/* {
-		reverse_proxy http://game:8000
-	}
+		handle /api/game/* {
+			respond @notJSON "Unsupported Media Type" 415
+			reverse_proxy http://game:8000
+		}
 
-	handle /api/matchmaking/* {
-		reverse_proxy http://matchmaking:8000
-	}
+		handle /api/play/* {
+			respond @notJSON "Unsupported Media Type" 415
+			reverse_proxy http://matchmaking:8000
+		}
 
-	handle /api/users/* {
-		reverse_proxy http://users:8000
+		handle /api/users/* {
+			respond @notJSON "Unsupported Media Type" 415
+			reverse_proxy http://users:8000
+		}
+		# route /* {
+		respond "ft_transcendence : api not found" 404 #must serv a 404.html
+		# }
 	}
-
+	# route /* {
+	# 	respond "ft_transcendence : page not found" 404
+	# }
 	# tls self_signed
+	# @http { # doesn't work
+	# 	protocol http
+	# }
+	# redir @http https://{host}{uri}
 
-	@http {
-		protocol http
-	}
-	redir @http https://{host}{uri}
 }

@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 from datetime import timedelta
 from pathlib import Path
+from os import environ
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -23,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-ranyb=dsky&upv%^1*b7$bg%yqbqvbk6hupucn!0jju&adfwl)'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = environ["DEBUG"]
 
 ALLOWED_HOSTS = [
     'localhost',
@@ -62,13 +63,6 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'auth.urls'
-CORS_URLS_REGEX = r"^/api/.*"
-CORS_ALLOWED_ORIGINS = [ # todo useless if in production
-    'http://localhost:8111',
-    'https://localhost:4443',
-    'http://localhost:4443',
-    'https://localhost:8111',
-]
 
 TEMPLATES = [
     {
@@ -95,14 +89,13 @@ WSGI_APPLICATION = 'auth.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres-auth-db',
-        'USER': 'fguirama',
-        'PASSWORD': '123456',
-        'HOST': 'auth-db',
+        'NAME': environ["POSTGRES_DB"],
+        'USER': environ["POSTGRES_USER"],
+        'PASSWORD': environ["POSTGRES_PASSWORD"],
+        'HOST': environ["POSTGRES_HOST"],
         'PORT': '5432',
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -128,7 +121,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = environ["TZ"]
 
 USE_I18N = True
 

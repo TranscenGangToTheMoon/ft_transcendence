@@ -1,11 +1,10 @@
 from rest_framework import serializers
 
 from lobby.static import match_type_1v1, match_type_3v3, team_a, team_b, team_spectator, lobby_clash, lobby_custom_game
-from matchmaking.auth import get_auth_user, generate_lobby_code
+from matchmaking.auth import get_auth_user, generate_code
 from lobby.models import Lobby, LobbyParticipants
 
 
-# todo add option for kick people
 class LobbySerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -45,9 +44,12 @@ class LobbySerializer(serializers.ModelSerializer):
         if user['is_guest']:
             raise serializers.ValidationError({'detail': 'Guest cannot create lobby.'})
 
-        LobbyParticipants.objects.filter(user_id=user['id']).delete()
+        try:
+            LobbyParticipants.objects.get(user_id=user['id']).delete()
+        except LobbyParticipants.DoesNotExist:
+            pass
 
-        validated_data['code'] = generate_lobby_code()
+        validated_data['code'] = generate_code()
         if validated_data['game_mode'] == lobby_clash:
             validated_data['match_type'] = match_type_3v3
             validated_data['max_participants'] = 3
@@ -55,7 +57,7 @@ class LobbySerializer(serializers.ModelSerializer):
             validated_data['match_type'] = match_type_1v1
             validated_data['max_participants'] = 6
         result = super().create(validated_data)
-        LobbyParticipants.objects.create(lobby_id=result.id, lobby_code=validated_data['code'], user_id=user['id'], username=user['username'], is_admin=True)
+        LobbyParticipants.objects.create(lobby_id=result.id, lobby_code=validated_data['code'], user_id=user['id'], username=user['username'], creator=True)
         return result
 
     def update(self, instance, validated_data):
@@ -73,7 +75,7 @@ class LobbySerializer(serializers.ModelSerializer):
 
 
 class LobbyParticipantsSerializer(serializers.ModelSerializer):
-    is_admin = serializers.BooleanField(read_only=True)
+    creator = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = LobbyParticipants
@@ -83,7 +85,7 @@ class LobbyParticipantsSerializer(serializers.ModelSerializer):
             'lobby_code',
             'user_id',
             'username',
-            'is_admin',
+            'creator',
         ]
 
     def validate_team(self, value):
@@ -102,12 +104,13 @@ class LobbyParticipantsSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({'code': [f"Lobby '{lobby_code}' does not exist."]})
 
         user = self.context['auth_user']
-        lobby_join = LobbyParticipants.objects.filter(user_id=user['id'])
-        if lobby_join.filter(lobby_id=lobby.id).exists():
-            raise serializers.ValidationError({'code': ['You already joined this lobby.']})
-
-        if lobby_join.exists():
+        try:
+            lobby_join = LobbyParticipants.objects.get(user_id=user['id'])
+            if lobby_join.filter(lobby_id=lobby.id).exists():
+                raise serializers.ValidationError({'code': ['You already joined this lobby.']})
             lobby_join.delete()
+        except LobbyParticipants.DoesNotExist:
+            pass
 
         if lobby.is_full:
             raise serializers.ValidationError({'code': ['Lobby is full.']})
@@ -127,11 +130,11 @@ class LobbyParticipantsSerializer(serializers.ModelSerializer):
                 validated_data['team'] = team_b
             else:
                 validated_data['team'] = team_spectator
-        return super().create(validated_data) #todo: send to chat that user xxx join team
+        return super().create(validated_data)
+        #todo websocket: send to chat that user 'xxx' join team
 
     def update(self, instance, validated_data):
         if 'team' in validated_data:
             if self.instance.lobby.teams_count[validated_data['team']] == self.instance.lobby.max_team_participants:
                 raise serializers.ValidationError({'team': [f"Team {validated_data['team']} is full."]})
-        # todo : if all user are ready, play game
         return super().update(instance, validated_data)

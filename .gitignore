@@ -1,7 +1,8 @@
 .idea
 vscode
+.DS_Store
 *.pyc
 .zed
 __pycache__
 .venv
-db.sqlite3
+/srcs/.env

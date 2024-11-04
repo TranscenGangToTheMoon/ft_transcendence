@@ -1,36 +1,38 @@
-function checkAuthentication(){
-    if (getAccessToken(true) !== 'token'){
-        navigateTo("/login");
-        removeTokens();
-        return false;
-    }
-    return true;
-}
 
-document.getElementById('logoutButton').addEventListener('click', () => {
-    relog();
-})
 
-document.getElementById('testRefresh').addEventListener('click', event => {
-    event.preventDefault();
-    getDataFromApi(localStorage.getItem('token'), `${baseAPIUrlusers}/me/`)
-        .then (data => {
+// document.getElementById('logoutButton').addEventListener('click', () => {
+//     relog();
+// })
+
+// document.getElementById('testRefresh').addEventListener('click', event => {
+//     event.preventDefault();
+//     getDataFromApi(localStorage.getItem('token'), `${baseAPIUrl}/users/me/`)
+//     .then (data => {
+//         console.log(data);
+//     })
+//     .catch (error => {
+//         console.log( error);
+//     })
+// })
+
+// document.getElementById('delete').addEventListener('click', event => {
+//     event.preventDefault();
+//     console.log('delete');
+//     removeTokens();
+// })
+
+// NAVIGAtORS
+
+document.getElementById('friends').addEventListener('click', event => {
+    getDataFromApi(getAccessToken(), `${baseAPIUrl}/users/me/friends/`)
+        .then(data => {
             console.log(data);
         })
-        .catch (error => {
-            console.log( error);
-        })
 })
 
-function printDebug(){
-    getDataFromApi(getAccessToken(), `${baseAPIUrlusers}/me/`)
-        .then(data => {
-            if (data.username)
-                document.getElementById('debugLoggedInfo').innerText = `(logged as ${data.username})`;
-            else console.log('error a gerer', data);
-        })
-        .catch(error => console.log('error a gerer', error));
+async function atStart() {
+    await fetchUserInfos(true);
+    await loadUserProfile();
 }
 
-if (checkAuthentication())
-    printDebug();
+atStart();
