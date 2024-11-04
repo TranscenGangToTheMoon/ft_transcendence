@@ -1,4 +1,5 @@
 from rest_framework import generics, status, serializers
+from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 
 from chats.models import ChatParticipants, Chats
@@ -22,10 +23,16 @@ class RenameUserView(generics.UpdateAPIView):
 
 
 class UpdateBlockUserView(generics.UpdateAPIView):
-    serializers = BlockChatSerializer
+    serializer_class = BlockChatSerializer
+    permission_classes = []
 
-    def get_object(self): #todo test si ca marche
-        return get_chat_together(self.kwargs['user_id'], self.kwargs['user_block'])
+    def update(self, request, *args, **kwargs):
+        if self.get_object() is None:
+            raise NotFound()
+        return super().update(request, *args, **kwargs)
+
+    def get_object(self):
+        return get_chat_together(self.kwargs['user_id'], self.kwargs['user_block'], field='user_id')
 
 
 class DeleteUserView(generics.DestroyAPIView):

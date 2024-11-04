@@ -2,7 +2,7 @@ from lib_transcendence.Chat import ChatType
 from lib_transcendence.auth import get_auth_user
 from lib_transcendence.services import requests_users
 from rest_framework import serializers
-from rest_framework.exceptions import MethodNotAllowed
+from rest_framework.exceptions import MethodNotAllowed, NotFound, PermissionDenied
 
 from chats.models import Chats, ChatParticipants
 from chats.utils import get_chat_together
@@ -45,7 +45,7 @@ class ChatsSerializer(serializers.ModelSerializer):
     def validate(self, data):
         request = self.context.get('request')
         if request is None:
-            raise serializers.ValidationError({'detail': 'Request is required.'}) # todo move in library
+            raise serializers.ValidationError('Request is required.') # todo move in library
         if request.get_host().split(':')[0] == 'chat' and 'type' not in data:
             raise serializers.ValidationError({'type': ['This field is required.']})
         return data
@@ -53,12 +53,12 @@ class ChatsSerializer(serializers.ModelSerializer):
     def validate_type(self, value):
         request = self.context.get('request')
         if request is None:
-            raise serializers.ValidationError({'detail': 'Request is required.'})
+            raise serializers.ValidationError('Request is required.')
         if request.method in ('PATCH', 'PUT'):
             raise MethodNotAllowed(request.method)
         ChatType.validate(value)
         if request.get_host().split(':')[0] != 'chat' and value != ChatType.private_message:
-            raise serializers.ValidationError('You can only create private messages')
+            raise PermissionDenied('You can only create private messages')
         return value
 
     def create(self, validated_data):
@@ -67,10 +67,10 @@ class ChatsSerializer(serializers.ModelSerializer):
 
         username = validated_data.pop('username')
         if username == user['username']:
-            raise serializers.ValidationError({'username': ["You can't chat with yourself."]})
+            raise PermissionDenied({'username': ['You cannot chat with yourself.']})
 
         if get_chat_together(user['username'], username):
-            raise serializers.ValidationError({'username': ['You are already chat with this user.']})
+            raise PermissionDenied({'username': ['You are already chat with this user.']})
 
         user2 = requests_users(request, 'validate/chat/', 'GET', data={'username': username})
 
@@ -90,13 +90,11 @@ class ChatsSerializer(serializers.ModelSerializer):
                 p.view_chat = view_chat
                 p.save()
             except ChatParticipants.DoesNotExist:
-                raise serializers.ValidationError({'detail': 'You are not in this chat.'})
+                raise NotFound('You are not in this chat.')
         return super().update(instance, validated_data)
 
 
 class BlockChatSerializer(serializers.ModelSerializer):
-    user_id = serializers.IntegerField(write_only=True)
-
     class Meta:
         model = Chats
         fields = [

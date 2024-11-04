@@ -1,7 +1,7 @@
 from datetime import timedelta, datetime, timezone
 
 from django.db import models
-from lib_transcendence.services import requests_matchmaking
+from lib_transcendence.services import requests_tournament_matchmaking
 
 
 class Matches(models.Model):
@@ -33,7 +33,7 @@ class Matches(models.Model):
         self.game_duration = self.created_at - datetime.now(timezone.utc)
         if self.tournament_id is not None:
             winner, looser = self.players.order_by('-score')
-            requests_matchmaking(self.tournament_id, self.tournament_stage_id, winner.user_id, looser.user_id)
+            requests_tournament_matchmaking(self.tournament_id, self.tournament_stage_id, winner.user_id, looser.user_id)
         self.save()
 
     def __str__(self):

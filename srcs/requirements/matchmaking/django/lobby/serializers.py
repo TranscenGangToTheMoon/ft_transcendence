@@ -3,9 +3,10 @@ from lib_transcendence.Lobby import MatchType, Teams
 from lib_transcendence.auth import get_auth_user
 from lib_transcendence.utils import generate_code
 from rest_framework import serializers
+from rest_framework.exceptions import PermissionDenied, NotFound
 
 from lobby.models import Lobby, LobbyParticipants
-from matchmaking.utils import verify_user
+from matchmaking.utils import verify_user, can_join
 
 
 class LobbyGetParticipantsSerializer(serializers.ModelSerializer):
@@ -24,6 +25,7 @@ class LobbyGetParticipantsSerializer(serializers.ModelSerializer):
 
 class LobbySerializer(serializers.ModelSerializer):
     participants = LobbyGetParticipantsSerializer(many=True, read_only=True)
+    # todo print is full
 
     class Meta:
         model = Lobby
@@ -58,7 +60,7 @@ class LobbySerializer(serializers.ModelSerializer):
         user = get_auth_user(self.context.get('request'))
 
         if user['is_guest']:
-            raise serializers.ValidationError({'detail': 'Guest cannot create lobby.'})
+            raise PermissionDenied('Guest cannot create lobby.')
 
         verify_user(user['id'])
 
@@ -78,7 +80,7 @@ class LobbySerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         if 'game_mode' in validated_data:
-            raise serializers.ValidationError({'game_mode': ['You cannot update game mode.']})
+            raise PermissionDenied({'game_mode': ['You cannot update game mode.']})
         if validated_data.get('match_type') == MatchType.m1v1 and instance.match_type == MatchType.m3v3:
             participants = instance.participants
 
@@ -124,21 +126,25 @@ class LobbyParticipantsSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         lobby_code = self.context.get('code')
         if lobby_code is None:
-            raise serializers.ValidationError({'detail': 'Lobby code is required.'})
+            raise serializers.ValidationError('Lobby code is required.')
 
         try:
             lobby = Lobby.objects.get(code=lobby_code)
         except Lobby.DoesNotExist:
-            raise serializers.ValidationError({'code': [f"Lobby '{lobby_code}' does not exist."]})
+            raise NotFound({'code': ['Lobby code does not exist.']})
 
         user = get_auth_user(self.context.get('request'))
-        verify_user(user['id'])
 
         if lobby.participants.filter(user_id=user['id']).exists():
-            raise serializers.ValidationError({'code': ['You already joined this lobby.']})
+            raise PermissionDenied('You already joined this lobby.')
+
+        if not can_join(self.context.get('request'), lobby, user['id']):
+            raise NotFound({'code': ['Lobby code does not exist.']}) # todo move to library
+
+        verify_user(user['id'])
 
         if lobby.is_full:
-            raise serializers.ValidationError({'code': ['Lobby is full.']})
+            raise PermissionDenied('Lobby is full.')
 
         validated_data['lobby'] = lobby
         validated_data['lobby_code'] = lobby.code
@@ -160,10 +166,13 @@ class LobbyParticipantsSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         if 'team' in validated_data:
             if instance.lobby.game_mode != GameMode.custom_game:
-                validated_data.pop('team', None)
+                raise PermissionDenied('You cannot update team in Clash mode.')
+            elif instance.team == validated_data['team']:
+                raise PermissionDenied('You are already in this team.')
             elif self.instance.lobby.teams_count[validated_data['team']] == self.instance.lobby.max_team_participants:
-                raise serializers.ValidationError({'team': [f"Team {validated_data['team']} is full."]})
+                raise PermissionDenied('Team is full.')
         result = super().update(instance, validated_data)
+        # todo websocket: send that lobby thas x change team
         if instance.lobby.is_ready:
             # todo websocket: send that lobby is ready and start game
             pass

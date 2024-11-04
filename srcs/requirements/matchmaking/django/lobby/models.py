@@ -10,7 +10,6 @@ class Lobby(models.Model):
 
     match_type = models.CharField(max_length=3)
     bo = models.IntegerField(default=1)
-    game_time = models.IntegerField(default=180)
 
     @property
     def max_team_participants(self):
@@ -47,7 +46,11 @@ class LobbyParticipants(models.Model):
 
     team = models.CharField(default=None, null=True)
 
+    def get_location_id(self):
+        return self.lobby.id
+
     def delete(self, using=None, keep_parents=False):
+        # todo inform other players that xxx leave the lobby
         creator = self.creator
         lobby = Lobby.objects.get(id=self.lobby.id)
         super().delete(using=using, keep_parents=keep_parents)

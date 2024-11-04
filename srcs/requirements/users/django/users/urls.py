@@ -5,7 +5,7 @@ from friend_requests.views import friend_requests_list_create_view, friend_reque
     friend_requests_receive_list_view
 from friends.views import friends_list_create_view, friends_delete_view
 from users.views import users_me_view, user_retrieve_view
-from validate.views import validate_chat_view
+from validate.views import validate_chat_view, validate_block_view
 
 urlpatterns = [
     path('api/users/me/', users_me_view, name='api-users-me-retrieve'),
@@ -21,4 +21,5 @@ urlpatterns = [
     path('api/users/me/block/<int:pk>/', block_delete_view, name='api-block-delete'),
 
     path('api/validate/chat/', validate_chat_view, name='api-validate-chat'),
+    path('api/block/<int:user1>/<int:user2>/', validate_block_view, name='api-validate-chat'), # todo remove name in urls
 ]

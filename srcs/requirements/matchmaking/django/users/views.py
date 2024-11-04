@@ -6,29 +6,35 @@ from play.models import Players
 from tournament.models import TournamentParticipants, Tournaments
 
 
-#todo try to make with generics view
-class BlockUserView(generics.UpdateAPIView):
-    def update(self, request, *args, **kwargs):
-        user_block = request.data.get('user_block_id')
-        if not user_block:
-            raise serializers.ValidationError({'user_block_id': ['This field is required.']})
+class BlockUserView(generics.DestroyAPIView):
+    permission_classes = []
 
-        # tryy:
-        #     Tournaments.objects.get(kwargs['user_id']).delete()
-        #     tournament = TournamentParticipants.objects.get(kwargs['user_id'])
-        #     if
-        # except TournamentParticipants.DoesNotExist:
-        #     pass
-        try:
-            # todo tesst that
-            LobbyParticipants.objects.get(kwargs['user_id']).delete()
-        except LobbyParticipants.DoesNotExist:
-            pass
+    def destroy(self, request, *args, **kwargs):
+        self.kick_block_user_or_leave(LobbyParticipants)
+        self.kick_block_user_or_leave(TournamentParticipants)
 
-        return Response(
-            {'message': 'Remove commun participation with user blocked successfully'},
-            status=status.HTTP_200_OK
-        )
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def kick_block_user_or_leave(self, model):
+        def get_user(user_id):
+            try:
+                return model.objects.get(user_id=user_id)
+            except model.DoesNotExist:
+                return None
+
+        user = get_user(self.kwargs['user_id'])
+        if user is None:
+            return
+
+        block_user = get_user(self.kwargs['user_block_id'])
+        if block_user is None:
+            return
+
+        if user.get_location_id() == block_user.get_location_id():
+            if user.creator:
+                block_user.delete()
+            else:
+                user.delete()
 
 
 class DeleteUserView(generics.DestroyAPIView):

@@ -1,4 +1,5 @@
-from rest_framework import generics, serializers
+from rest_framework import generics
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated
 
 from guest.group import group_guests
@@ -16,7 +17,7 @@ class UpdateView(generics.UpdateAPIView):
         data = request.data
         password = data.get('password')
         if password is not None and request.user.groups.filter(name=group_guests).exists():
-            raise serializers.ValidationError("Guest users are not allowed to change their password.")
+            raise PermissionDenied('Guest users are not allowed to change their password.')
         return super().update(request, *args, **kwargs)
 
 
