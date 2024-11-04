@@ -55,7 +55,7 @@ class TournamentSerializer(serializers.ModelSerializer):
         validated_data['code'] = generate_code()
         validated_data['created_by'] = user['id']
         result = super().create(validated_data)
-        TournamentParticipants.objects.create(user_id=user['id'], tournament=result, creator=True)
+        TournamentParticipants.objects.create(user_id=user['id'], trophies=user['trophies'], tournament=result, creator=True)
         return result
 
     def update(self, instance, validated_data):
@@ -108,6 +108,7 @@ class TournamentParticipantsSerializer(serializers.ModelSerializer):
         verify_user(user['id'])
 
         validated_data['user_id'] = user['id']
+        validated_data['trophies'] = user['trophies']
         validated_data['tournament'] = tournament
         result = super().create(validated_data)
         # todo websocket: send to tournament chat that user 'xxx' join team
