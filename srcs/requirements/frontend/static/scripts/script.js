@@ -206,7 +206,8 @@ function handleRoute() {
 
     const routes = {
         '/login': '/authentication.html',
-        '/': '/homePage.html'
+        '/': '/homePage.html',
+        '/profile' : 'profile.html'
     };
 
     const page = routes[path] || '/404.html';
