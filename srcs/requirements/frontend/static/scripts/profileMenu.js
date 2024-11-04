@@ -6,3 +6,8 @@ document.getElementById('logOut').addEventListener('click', async event => {
     await loadUserProfile();
     await loadContent('/homePage.html');
 })
+
+document.getElementById('settings').addEventListener('click', event => {
+    event.preventDefault();
+    navigateTo('/profile');
+})
