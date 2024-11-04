@@ -31,7 +31,8 @@ document.getElementById('friends').addEventListener('click', event => {
 })
 
 async function atStart() {
-    await fetchUserInfos();
+    await fetchUserInfos(true);
+    await loadUserProfile();
 }
 
 atStart();
