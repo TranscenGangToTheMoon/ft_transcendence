@@ -27,7 +27,7 @@ class LobbyParticipantsView(generics.ListCreateAPIView, generics.UpdateAPIView, 
         lobby = get_lobby(self.kwargs.get('code'))
         queryset = queryset.filter(lobby_id=lobby.id) # todo change for see Lobby serializer when list
         if self.request.user.id not in queryset.values_list('user_id', flat=True):
-            raise NotFound('You are not a participant of this lobby.')
+            raise NotFound('You do not belong to this lobby.') # todo move to library
         return queryset
 
     def get_object(self):
