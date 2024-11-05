@@ -16,11 +16,18 @@ class LobbyGetParticipantsSerializer(serializers.ModelSerializer):
         model = LobbyParticipants
         fields = [
             'id',
-            'creator',
             'team',
+            'creator',
             'join_at',
             'is_ready',
         ]
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+
+        if instance.lobby.game_mode != GameMode.custom_game:
+            representation.pop('team', None)
+        return representation
 
 
 class LobbySerializer(serializers.ModelSerializer):
