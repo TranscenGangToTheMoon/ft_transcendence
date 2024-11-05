@@ -32,11 +32,24 @@ class Tournaments(models.Model):
     def n_stage(self):
         return int(log2(self.size))
 
+    def __str__(self):
+        if not self.is_public:
+            name = '*'
+        else:
+            name = ''
+        name += f'{self.code}/{self.name} ({self.participants.count()}/{self.size})'
+        if self.is_started:
+            name += ' STARTED'
+        return name
+
 
 class TournamentStage(models.Model):
     tournament = models.ForeignKey(Tournaments, on_delete=models.CASCADE, related_name='stages')
     label = models.CharField(max_length=50)
     stage = models.IntegerField(default=1)
+
+    def __str__(self):
+        return f'{self.tournament.code}/{self.label} ({self.participants.count()})'
 
 
 class TournamentParticipants(models.Model):
@@ -69,6 +82,17 @@ class TournamentParticipants(models.Model):
         self.stage = next_stage
         self.save()
         return None
+
+    def __str__(self):
+        name = f'{self.tournament.code}/ {self.user_id}'
+        if self.creator:
+            name += '*'
+        if self.still_in:
+            name += ' in'
+        else:
+            name += ' eliminate at'
+        name += ' ' + self.stage.label
+        return
 
 #
 # class UsersQuerySet(models.QuerySet):
