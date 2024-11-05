@@ -32,7 +32,7 @@ class LobbyGetParticipantsSerializer(serializers.ModelSerializer):
 
 class LobbySerializer(serializers.ModelSerializer):
     participants = LobbyGetParticipantsSerializer(many=True, read_only=True)
-    # todo print is full
+    is_full = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = Lobby
@@ -48,6 +48,10 @@ class LobbySerializer(serializers.ModelSerializer):
 
         if not self.instance:
             self.fields['match_type'].read_only = True
+
+    @staticmethod
+    def get_is_full(obj):
+        return obj.is_full
 
     @staticmethod
     def validate_game_mode(value):
