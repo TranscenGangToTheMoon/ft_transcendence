@@ -21,7 +21,7 @@ class LobbyView(generics.CreateAPIView, generics.RetrieveUpdateAPIView):
 class LobbyParticipantsView(generics.ListCreateAPIView, generics.UpdateAPIView, generics.DestroyAPIView):
     queryset = LobbyParticipants.objects.all()
     serializer_class = LobbyParticipantsSerializer
-    lookup_field = 'code'
+    pagination_class = None
 
     def filter_queryset(self, queryset):
         lobby = get_lobby(self.kwargs.get('code'))
