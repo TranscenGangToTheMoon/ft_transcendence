@@ -17,14 +17,11 @@ class Lobby(models.Model):
             return 1
         return 3
 
-    @property
-    def teams_count(self):
-        result = {
-            Teams.a: self.participants.filter(team=Teams.a).count(),
-            Teams.b: self.participants.filter(team=Teams.b).count(),
-            Teams.spectator: self.participants.filter(team=Teams.spectator).count()
-        }
-        return result
+    def get_team_count(self, team):
+        return self.participants.filter(team=team).count()
+
+    def is_team_full(self, team):
+        return self.get_team_count(team) >= self.max_team_participants
 
     @property
     def is_full(self):

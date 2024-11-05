@@ -151,15 +151,10 @@ class LobbyParticipantsSerializer(serializers.ModelSerializer):
         validated_data['user_id'] = user['id']
         validated_data['is_guest'] = user['is_guest']
         if lobby.game_mode == GameMode.custom_game:
-            teams_count = lobby.teams_count
-            max_team = lobby.max_team_participants
-
-            if teams_count[Teams.a] < max_team:
-                validated_data['team'] = Teams.a
-            elif teams_count[Teams.b] < max_team:
-                validated_data['team'] = Teams.b
-            else:
-                validated_data['team'] = Teams.spectator
+            for t in Teams.all:
+                if not lobby.is_team_full(t):
+                    validated_data['team'] = t
+                    break
         return super().create(validated_data)
         #todo websocket: send to chat that user 'xxx' join team
 
@@ -169,7 +164,7 @@ class LobbyParticipantsSerializer(serializers.ModelSerializer):
                 raise PermissionDenied('You cannot update team in Clash mode.')
             elif instance.team == validated_data['team']:
                 raise PermissionDenied('You are already in this team.')
-            elif self.instance.lobby.teams_count[validated_data['team']] == self.instance.lobby.max_team_participants:
+            elif self.instance.lobby.is_team_full(validated_data['team']):
                 raise PermissionDenied('Team is full.')
         result = super().update(instance, validated_data)
         # todo websocket: send that lobby thas x change team
