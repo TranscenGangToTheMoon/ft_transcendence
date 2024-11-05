@@ -60,7 +60,7 @@ class LobbyParticipants(models.Model):
     def delete(self, using=None, keep_parents=False):
         # todo inform other players that xxx leave the lobby
         creator = self.creator
-        lobby = Lobby.objects.get(id=self.lobby.id)
+        lobby = self.lobby
         super().delete(using=using, keep_parents=keep_parents)
         participants = lobby.participants.filter(is_guest=False)
         if not participants.exists():
