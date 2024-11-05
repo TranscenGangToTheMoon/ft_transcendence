@@ -6,9 +6,9 @@ from rest_framework.exceptions import PermissionDenied, NotFound
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
+from matchmaking.utils import get_tournament_participant, get_tournament, create_match, get_kick_participants
 from tournament.models import Tournaments, TournamentParticipants
 from tournament.serializers import TournamentSerializer, TournamentParticipantsSerializer, TournamentStageSerializer
-from tournament.utils import get_tournament, get_tournament_participants, create_match
 
 
 class TournamentView(generics.CreateAPIView, generics.RetrieveUpdateDestroyAPIView):
@@ -16,7 +16,7 @@ class TournamentView(generics.CreateAPIView, generics.RetrieveUpdateDestroyAPIVi
     serializer_class = TournamentSerializer
 
     def get_object(self):
-        p = get_tournament_participants(None, self.request.user.id)
+        p = get_tournament_participant(None, self.request.user.id, True)
         if self.request.method != 'GET' and not p.creator:
             raise PermissionDenied()
         return Tournaments.objects.get(id=p.tournament_id)
@@ -47,7 +47,7 @@ class TournamentParticipantsView(generics.ListCreateAPIView, generics.DestroyAPI
         if tournament.is_started and self.request.method == 'DELETE':
             raise PermissionDenied('You cannot leave this tournament after he started.')
 
-        return get_tournament_participants(tournament, self.request.user.id)
+        return get_tournament_participant(tournament, self.request.user.id)
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -69,15 +69,12 @@ class TournamentKickView(generics.DestroyAPIView):
             raise PermissionDenied('You cannot kick yourself.')
 
         tournament = get_tournament(code=self.kwargs.get('code'))
-        get_tournament_participants(tournament, self.request.user.id, True)
+        get_tournament_participant(tournament, self.request.user.id, True)
 
         if tournament.is_started:
             raise PermissionDenied('You cannot kick participant after the tournament has started.')
 
-        try:
-            return tournament.participants.get(user_id=user_id)
-        except TournamentParticipants.DoesNotExist:
-            raise NotFound('This user is not participant of this tournament.')
+        return get_kick_participants('tournament', tournament, user_id)
 
 
 class TournamentResultMatchView(generics.CreateAPIView):
