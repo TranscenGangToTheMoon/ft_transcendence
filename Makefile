@@ -11,12 +11,14 @@ ENV_EXEMPLE	:=	.env_exemple
 
 ENV_FILE	:=	./$(SRCS_D)/.env
 
+COMPOSE_F	:=	./$(SRCS_D)/docker-compose-dev.yml
+
 SERVICE		?=	#Leave blank
 
 ########################################################################################################################
 #                                                        FLAGS                                                         #
 ########################################################################################################################
-FLAGS		=	--project-directory $(SRCS_D)
+FLAGS		=	-f $(COMPOSE_F)
 
 COMPOSE		=	docker compose
 
