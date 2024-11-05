@@ -37,7 +37,6 @@ class Lobby(models.Model):
 
 class LobbyParticipants(models.Model):
     lobby = models.ForeignKey(Lobby, on_delete=models.CASCADE, related_name='participants')
-    lobby_code = models.CharField(max_length=5, editable=False)
     is_guest = models.BooleanField(default=False)
     user_id = models.IntegerField(unique=True)
     creator = models.BooleanField(default=False)
