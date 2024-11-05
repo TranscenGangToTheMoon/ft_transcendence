@@ -32,7 +32,12 @@ class Lobby(models.Model):
 
     @property
     def is_ready(self):
-        return self.participants.filter(is_ready=False).count() == 0
+        qs = self.participants
+        if self.game_mode == GameMode.custom_game:
+            qs.exclude(team=Teams.spectator)
+            if not self.is_team_full(Teams.a) or not self.is_team_full(Teams.b):
+                return False
+        return qs.filter(is_ready=False).count() == 0
 
 
 class LobbyParticipants(models.Model):
