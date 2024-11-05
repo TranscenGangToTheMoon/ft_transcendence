@@ -6,7 +6,6 @@ async function loadTabs() {
 
     for (const key in tabFiles){
         loadContent(tabFiles[key], key);
-        console.log(`je load ${tabFiles[key]} dans la div ${key}`);
     }
 }
 

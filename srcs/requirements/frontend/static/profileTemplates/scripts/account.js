@@ -2,14 +2,24 @@ document.getElementById('pDeleteAccount').addEventListener('click', event => {
     event.preventDefault();
     const deleteAccountModal = new bootstrap.Modal(document.getElementById('pDeleteAccountModal'));
     deleteAccountModal.show();
+    window.deleteModal = deleteAccountModal;
 })
 
 async function deleteAccount(password) {
-    getDataFromApi(getAccessToken(), `${baseAPIUrl}/users/me`, 'DELETE', undefined, undefined, {
+    getDataFromApi(getAccessToken(), `${baseAPIUrl}/users/me/`, 'DELETE', undefined, undefined, {
         'password' : password
     })
-        .then(data => {
-            console.log(data);
+        .then(async data => {
+            if (data?.password){
+                document.getElementById('pContextError').innerText = data.password;
+            }
+            else if (!data){
+                deleteModal.hide();
+                removeTokens();
+                await generateToken();
+                navigateTo('/');
+                displayMainError('Account deleted', 'Your account has been successfully deleted. You have been redirected to homepage.');
+            }
         })
         .catch(error => {
             console.log('error', error)
