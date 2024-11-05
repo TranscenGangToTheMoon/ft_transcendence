@@ -1,4 +1,5 @@
 from django.db import models
+from lib_transcendence.GameMode import GameMode
 from lib_transcendence.Lobby import MatchType, Teams
 
 
