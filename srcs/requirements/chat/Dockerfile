@@ -5,7 +5,6 @@ EXPOSE 8000
 
 RUN apt-get update
 RUN apt-get upgrade
-RUN apt-get install -y --no-install-recommends curl net-tools
 
 COPY init.d /init.d
 
@@ -16,6 +15,8 @@ WORKDIR /code
 
 ##### Development build
 FROM base AS development
+
+RUN apt-get install -y --no-install-recommends curl net-tools
 
 ENTRYPOINT ["/init.d/entrypoint.sh"]
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
