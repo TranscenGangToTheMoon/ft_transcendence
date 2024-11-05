@@ -14,7 +14,7 @@ class LobbyView(generics.CreateAPIView, generics.RetrieveUpdateAPIView):
     def get_object(self):
         participant = get_lobby_participant(None, self.request.user.id, self.request.method != 'GET', True)
         if self.request.method in ('PUT', 'PATCH') and participant.lobby.game_mode == GameMode.clash:
-            raise PermissionDenied('You cannot update Clash lobby.')
+            raise PermissionDenied(f'You cannot update {GameMode.clash} lobby.')
         return participant.lobby
 
 

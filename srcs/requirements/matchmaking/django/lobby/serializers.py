@@ -164,7 +164,7 @@ class LobbyParticipantsSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         if 'team' in validated_data:
             if instance.lobby.game_mode != GameMode.custom_game:
-                raise PermissionDenied('You cannot update team in Clash mode.')
+                raise PermissionDenied(f'You cannot update team in {GameMode.clash} mode.')
             elif instance.team == validated_data['team']:
                 raise PermissionDenied('You are already in this team.')
             elif self.instance.lobby.is_team_full(validated_data['team']):
