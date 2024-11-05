@@ -52,7 +52,7 @@ class TournamentSerializer(serializers.ModelSerializer):
 
         verify_user(user['id'], False)
 
-        validated_data['code'] = generate_code()
+        validated_data['code'] = generate_code(Tournaments)
         validated_data['created_by'] = user['id']
         result = super().create(validated_data)
         TournamentParticipants.objects.create(user_id=user['id'], trophies=user['trophies'], tournament=result, creator=True)

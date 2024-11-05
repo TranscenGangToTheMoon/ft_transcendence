@@ -2,10 +2,15 @@ import random
 import string
 
 from rest_framework import serializers
+from rest_framework.exceptions import PermissionDenied
 
 
-def generate_code():
-    return ''.join(random.choices(string.digits, k=4))
+def generate_code(model):
+    for _ in range(100000):
+        code = ''.join(random.choices(string.digits, k=4))
+        if not model.objects.filter(code=code).exists():
+            return code
+    raise PermissionDenied('Code generation failed.')
 
 
 def validate_type(value, name, choices):

@@ -75,7 +75,7 @@ class LobbySerializer(serializers.ModelSerializer):
 
         verify_user(user['id'])
 
-        validated_data['code'] = generate_code()
+        validated_data['code'] = generate_code(Lobby)
         if validated_data['game_mode'] == GameMode.clash:
             validated_data['match_type'] = MatchType.m3v3
             validated_data['max_participants'] = 3
