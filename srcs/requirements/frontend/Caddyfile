@@ -1,8 +1,7 @@
 localhost:443 {
 	root * /var/www/html
-
 	handle {
-		@trailing path_regexp trailing ^(.*)/$
+		@trailing path_regexp trailing ^(/.+)/$
 		redir @trailing {re.trailing.1} permanent
 		try_files {path} /index.html
 		file_server
