@@ -91,6 +91,9 @@ fclean		:
 			rm -rf $(ENV_FILE)
 #			rm -rf $(SECRETS_D)
 
+caddy-reload:
+			$(COMPOSE) $(FLAGS) exec -w /etc/caddy frontend caddy reload
+
 image-ls	:
 			docker image ls -a
 image-rm	:
