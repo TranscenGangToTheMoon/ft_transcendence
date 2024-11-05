@@ -86,7 +86,7 @@ def verify_user(user_id, join_tournament=True):
         participant = TournamentParticipants.objects.get(user_id=user_id, still_in=True)
         if participant.creator:
             if join_tournament:
-                raise PermissionDenied('You already join a tournament.')
+                raise PermissionDenied('You are already in a tournament.')
             raise PermissionDenied('You cannot create more than one tournament at the same time.')
         participant.delete()
     except TournamentParticipants.DoesNotExist:
