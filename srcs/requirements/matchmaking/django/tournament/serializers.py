@@ -3,9 +3,8 @@ from lib_transcendence.utils import generate_code
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
 
-from matchmaking.utils import verify_user
+from matchmaking.utils import verify_user, get_tournament, create_match
 from tournament.models import Tournaments, TournamentStage, TournamentParticipants
-from tournament.utils import get_tournament, create_match
 
 
 class TournamentGetParticipantsSerializer(serializers.ModelSerializer):
@@ -96,7 +95,7 @@ class TournamentParticipantsSerializer(serializers.ModelSerializer):
         ]
 
     def create(self, validated_data):
-        tournament = get_tournament(code=self.context.get('code'))
+        tournament = get_tournament(create=True, code=self.context.get('code'))
 
         if tournament.is_started:
             raise PermissionDenied('Tournament has already started.')

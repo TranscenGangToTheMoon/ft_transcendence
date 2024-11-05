@@ -4,28 +4,15 @@ from rest_framework.exceptions import NotFound, PermissionDenied
 
 from lobby.models import Lobby, LobbyParticipants
 from lobby.serializers import LobbySerializer, LobbyParticipantsSerializer
-from matchmaking.utils import get_participants
+from matchmaking.utils import get_lobby, get_lobby_participant, get_kick_participants
 
 
-def get_lobby_participants(lobby, user_id, creator_check=False):
-    return get_participants('lobby', LobbyParticipants, lobby, user_id, creator_check)
-
-
-def get_lobby(code):
-    if not code:
-        raise serializers.ValidationError({'code': ['Lobby code is required.']})
-    try:
-        return Lobby.objects.get(code=code)
-    except Lobby.DoesNotExist:
-        raise NotFound({'code': ['Lobby does not exist.']})
-
-
-class LobbyView(generics.CreateAPIView, generics.RetrieveUpdateDestroyAPIView):
+class LobbyView(generics.CreateAPIView, generics.RetrieveUpdateAPIView):
     queryset = Lobby.objects.all()
     serializer_class = LobbySerializer
 
     def get_object(self):
-        participant = get_lobby_participants(None, self.request.user.id, self.request.method != 'GET')
+        participant = get_lobby_participant(None, self.request.user.id, self.request.method != 'GET', True)
         if self.request.method in ('PUT', 'PATCH') and participant.lobby.game_mode == GameMode.clash:
             raise PermissionDenied('You cannot update Clash lobby.')
         return participant.lobby
@@ -44,7 +31,7 @@ class LobbyParticipantsView(generics.ListCreateAPIView, generics.UpdateAPIView, 
         return queryset
 
     def get_object(self):
-        return get_lobby_participants(get_lobby(self.kwargs.get('code')), self.request.user.id)
+        return get_lobby_participant(get_lobby(self.kwargs.get('code')), self.request.user.id)
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -66,12 +53,9 @@ class LobbyKickView(generics.DestroyAPIView):
 
         if user_id == self.request.user.id:
             raise PermissionDenied('You cannot kick yourself.')
-        get_lobby_participants(lobby, self.request.user.id, True)
+        get_lobby_participant(lobby, self.request.user.id, True)
 
-        try:
-            return lobby.participants.get(user_id=user_id)
-        except LobbyParticipants.DoesNotExist:
-            raise NotFound('This user is not participant of this lobby.')
+        return get_kick_participants('lobby', lobby, user_id)
 
 
 lobby_view = LobbyView.as_view()

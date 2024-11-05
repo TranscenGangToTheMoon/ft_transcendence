@@ -1,11 +1,12 @@
 from typing import Literal
 
 from lib_transcendence.services import requests_game, requests_users
+from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied, NotFound
 
-from lobby.models import LobbyParticipants
+from lobby.models import Lobby, LobbyParticipants
 from play.models import Players
-from tournament.models import TournamentParticipants
+from tournament.models import Tournaments, TournamentParticipants
 
 
 def get_participants(name: Literal['lobby', 'tournament'], model, obj, user_id, creator_check):

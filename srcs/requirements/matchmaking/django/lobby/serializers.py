@@ -6,7 +6,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied, NotFound
 
 from lobby.models import Lobby, LobbyParticipants
-from matchmaking.utils import verify_user, can_join
+from matchmaking.utils import verify_user, can_join, get_lobby
 
 
 class LobbyGetParticipantsSerializer(serializers.ModelSerializer):
@@ -135,15 +135,7 @@ class LobbyParticipantsSerializer(serializers.ModelSerializer):
         return Teams.validate(value)
 
     def create(self, validated_data):
-        lobby_code = self.context.get('code')
-        if lobby_code is None:
-            raise serializers.ValidationError('Lobby code is required.')
-
-        try:
-            lobby = Lobby.objects.get(code=lobby_code)
-        except Lobby.DoesNotExist:
-            raise NotFound({'code': ['Lobby code does not exist.']})
-
+        lobby = get_lobby(self.context.get('code'), True)
         user = get_auth_user(self.context.get('request'))
 
         if lobby.participants.filter(user_id=user['id']).exists():
