@@ -36,6 +36,12 @@ class Lobby(models.Model):
                 return False
         return qs.filter(is_ready=False).count() == 0
 
+    def __str__(self):
+        name = f'{self.code}/{self.game_mode} ({self.participants.count()}/{self.max_participants})'
+        if self.game_mode == GameMode.custom_game:
+            name += ' {bo' + str(self.bo) + ', ' + self.match_type + '}'
+        return name
+
 
 class LobbyParticipants(models.Model):
     lobby = models.ForeignKey(Lobby, on_delete=models.CASCADE, related_name='participants')
@@ -63,3 +69,13 @@ class LobbyParticipants(models.Model):
             first_join = participants.order_by('join_at').first()
             first_join.creator = True
             first_join.save()
+
+    def __str__(self):
+        name = f'{self.lobby.code}/{self.lobby.game_mode} {self.user_id}'
+        if self.creator:
+            name += '*'
+        if self.is_ready:
+            name += ' ready'
+        if self.team is not None:
+            name += f" '{self.team}'"
+        return name
