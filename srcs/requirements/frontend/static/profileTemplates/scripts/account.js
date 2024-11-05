@@ -2,14 +2,24 @@ document.getElementById('pDeleteAccount').addEventListener('click', event => {
     event.preventDefault();
     const deleteAccountModal = new bootstrap.Modal(document.getElementById('pDeleteAccountModal'));
     deleteAccountModal.show();
+    window.deleteModal = deleteAccountModal;
 })
 
 async function deleteAccount(password) {
-    getDataFromApi(getAccessToken(), `${baseAPIUrl}/users/me`, 'DELETE', undefined, undefined, {
+    getDataFromApi(getAccessToken(), `${baseAPIUrl}/users/me/`, 'DELETE', undefined, undefined, {
         'password' : password
     })
-        .then(data => {
-            console.log(data);
+        .then(async data => {
+            if (data?.password){
+                document.getElementById('pContextError').innerText = data.password;
+            }
+            else if (!data){
+                deleteModal.hide();
+                removeTokens();
+                await generateToken();
+                navigateTo('/');
+                displayMainError('Account deleted', 'Your account has been successfully deleted. You have been redirected to homepage.');
+            }
         })
         .catch(error => {
             console.log('error', error)
@@ -31,8 +41,10 @@ document.getElementById('pChangeNickname').addEventListener('submit', async even
         undefined, undefined, {'username' : newUsername});
         if (!data.id)
             document.getElementById('container').innerText = data.username;
-        else 
+        else {
+            indexInit();
             navigateTo('/profile');
+        }
     }
     catch (error){
         console.log('error on username change', error);
@@ -72,10 +84,8 @@ document.getElementById('pPasswordInput').addEventListener('focusout', function 
 function fillNicknamePlaceholder() {
     document.getElementById('pNicknameInput').placeholder = userInformations.username;
 }
-
-async function atStart(){
-    await fetchUserInfos(true);
+async function accountInit(){
     fillNicknamePlaceholder();
 } 
 
-atStart();
+accountInit();

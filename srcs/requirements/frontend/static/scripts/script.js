@@ -25,6 +25,9 @@ function apiRequest(token, endpoint, method="GET", authType="Bearer",
             if (!response.ok && (response.status > 499 || response.status === 404)){
                 throw {code: response.status};
             }
+            if (response.status === 204){
+                return;
+            }
             let data = await response.json();
             console.log(data);
             if (data.code === 'token_not_valid') {
@@ -207,7 +210,8 @@ function handleRoute() {
     const routes = {
         '/login': '/authentication.html',
         '/': '/homePage.html',
-        '/profile' : 'profile.html'
+        '/profile' : 'profile.html',
+        '/lobby' : '/lobby.html',
     };
 
     const page = routes[path] || '/404.html';
@@ -246,8 +250,13 @@ function displayMainError(errorTitle, errorContent) {
 
     errorContentDiv.innerText = errorContent;
     errorTitleDiv.innerText = errorTitle;
+    document.getElementById('errorModal').addEventListener('shown.bs.modal', function() {
+        document.getElementById('errorModalClose').focus();
+    })
     errorModal.show();
 }
+
+window.displayMainError = displayMainError;
 
 // ========================== INDEX SCRIPT ==========================
 
@@ -268,9 +277,10 @@ async function loadUserProfile(){
     // document.getElementById('title').innerText = userInformations.title;
 }
 
-async function atStart() {
+async function indexInit() {
     loadCSS('/css/styles.css', false);
-    await fetchUserInfos();
+    await fetchUserInfos(true);
+    await loadUserProfile();
     if (userInformations.code === 'user_not_found'){
         console.log('user was deleted from database, switching to guest mode');
         displayMainError("Unable to retrieve your account/guest profile","We're sorry your account has been permanently deleted and cannot be recovered.");
@@ -280,6 +290,7 @@ async function atStart() {
     handleRoute();
 }
 
+window.indexInit = indexInit;
 window.loadUserProfile = loadUserProfile;
 
-atStart();
+indexInit();
