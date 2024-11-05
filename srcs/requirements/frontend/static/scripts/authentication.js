@@ -82,7 +82,7 @@ function removeDropdown() {
     document.querySelector('.dropdown').remove();
 }
 
-async function atStart(){
+async function authInit(){
     if (!userInformations.is_guest) {
         await navigateTo('/');
         return; //TODO replace with URI or maybe not
@@ -92,4 +92,4 @@ async function atStart(){
     loadGuest();
 }
 
-atStart();
+authInit();

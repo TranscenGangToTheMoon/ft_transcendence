@@ -6,14 +6,14 @@ async function loadTabs() {
 
     for (const key in tabFiles){
         loadContent(tabFiles[key], key);
-        console.log(`je load ${tabFiles[key]} dans la div ${key}`);
     }
 }
 
-async function atStart() {
+async function profileInit() {
     loadTabs();
-    await fetchUserInfos(true);
-    await loadUserProfile();
+    // await fetchUserInfos(true);
+    // if (document.getElementById('username').innerText !== userInformations)
+    // await loadUserProfile();
 }
 
-atStart();
+profileInit();
