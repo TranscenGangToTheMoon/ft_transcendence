@@ -9,10 +9,11 @@ async function loadTabs() {
     }
 }
 
-async function atStart() {
+async function profileInit() {
     loadTabs();
-    await fetchUserInfos(true);
-    await loadUserProfile();
+    // await fetchUserInfos(true);
+    // if (document.getElementById('username').innerText !== userInformations)
+    // await loadUserProfile();
 }
 
-atStart();
+profileInit();

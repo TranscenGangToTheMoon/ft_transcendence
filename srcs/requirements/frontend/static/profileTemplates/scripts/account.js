@@ -41,8 +41,10 @@ document.getElementById('pChangeNickname').addEventListener('submit', async even
         undefined, undefined, {'username' : newUsername});
         if (!data.id)
             document.getElementById('container').innerText = data.username;
-        else 
+        else {
+            indexInit();
             navigateTo('/profile');
+        }
     }
     catch (error){
         console.log('error on username change', error);
@@ -82,10 +84,8 @@ document.getElementById('pPasswordInput').addEventListener('focusout', function 
 function fillNicknamePlaceholder() {
     document.getElementById('pNicknameInput').placeholder = userInformations.username;
 }
-
-async function atStart(){
-    await fetchUserInfos(true);
+async function accountInit(){
     fillNicknamePlaceholder();
 } 
 
-atStart();
+accountInit();

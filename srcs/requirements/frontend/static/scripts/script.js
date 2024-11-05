@@ -210,7 +210,8 @@ function handleRoute() {
     const routes = {
         '/login': '/authentication.html',
         '/': '/homePage.html',
-        '/profile' : 'profile.html'
+        '/profile' : 'profile.html',
+        '/lobby' : 'lobby.html'
     };
 
     const page = routes[path] || '/404.html';
@@ -276,9 +277,10 @@ async function loadUserProfile(){
     // document.getElementById('title').innerText = userInformations.title;
 }
 
-async function atStart() {
+async function indexInit() {
     loadCSS('/css/styles.css', false);
-    await fetchUserInfos();
+    await fetchUserInfos(true);
+    await loadUserProfile();
     if (userInformations.code === 'user_not_found'){
         console.log('user was deleted from database, switching to guest mode');
         displayMainError("Unable to retrieve your account/guest profile","We're sorry your account has been permanently deleted and cannot be recovered.");
@@ -288,6 +290,7 @@ async function atStart() {
     handleRoute();
 }
 
+window.indexInit = indexInit;
 window.loadUserProfile = loadUserProfile;
 
-atStart();
+indexInit();
