@@ -30,8 +30,9 @@ document.getElementById('friends').addEventListener('click', event => {
         })
 })
 
-async function atStart() {
-    await fetchUserInfos();
+async function homePageInit() {
+    await fetchUserInfos(true);
+    await loadUserProfile();
 }
 
-atStart();
+homePageInit();

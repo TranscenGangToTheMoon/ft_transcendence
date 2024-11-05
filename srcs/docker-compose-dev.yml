@@ -3,16 +3,19 @@ services:
   auth:
     build:
       context: "requirements/auth"
-      target: production
+      target: development
     depends_on:
       auth-db:
         condition: service_healthy
     restart: on-failure
+    ports:
+      - "8001:8000"
     volumes:
+      - auth-volume:/code
       - shared-code-volume:/shared
     environment:
       TZ: Europe/Paris
-      DEBUG: False
+      DEBUG: ${DEBUG}
       POSTGRES_DB: ${POSTGRES_AUTH_DB_NAME}
       POSTGRES_USER: ${POSTGRES_AUTH_USER}
       POSTGRES_PASSWORD: ${POSTGRES_AUTH_PASSWORD}
@@ -24,16 +27,19 @@ services:
   chat:
     build:
       context: "requirements/chat"
-      target: production
+      target: development
     depends_on:
       chat-db:
         condition: service_healthy
     restart: on-failure
+    ports:
+      - "8002:8000"
     volumes:
+      - chat-volume:/code
       - shared-code-volume:/shared
     environment:
       TZ: Europe/Paris
-      DEBUG: False
+      DEBUG: ${DEBUG}
       POSTGRES_DB: ${POSTGRES_CHAT_DB_NAME}
       POSTGRES_USER: ${POSTGRES_CHAT_USER}
       POSTGRES_PASSWORD: ${POSTGRES_CHAT_PASSWORD}
@@ -45,39 +51,34 @@ services:
   frontend:
     build:
       context: "requirements/frontend"
-      target: production
-    depends_on:
-      auth:
-        condition: service_started
-      chat:
-        condition: service_started
-      game:
-        condition: service_started
-      matchmaking:
-        condition: service_started
-      users:
-        condition: service_started
+      target: development
     restart: on-failure
     ports:
       - "4443:443"
     networks:
       - transcendence-network
+    volumes:
+      - frontend-volume:/var/www/html #Do copy when project is finished HUGE SECURITY FAIL
+      - ./requirements/frontend/Caddyfile:/etc/caddy/Caddyfile #Do copy when project is finished HUGE SECURITY FAIL
     environment:
       TZ: Europe/Paris
 
   game:
     build:
       context: "requirements/game"
-      target: production
+      target: development
     depends_on:
       game-db:
         condition: service_healthy
     restart: on-failure
+    ports:
+      - "8003:8000"
     volumes:
+      - game-volume:/code
       - shared-code-volume:/shared
     environment:
       TZ: Europe/Paris
-      DEBUG: False
+      DEBUG: ${DEBUG}
       POSTGRES_DB: ${POSTGRES_GAME_DB_NAME}
       POSTGRES_USER: ${POSTGRES_GAME_USER}
       POSTGRES_PASSWORD: ${POSTGRES_GAME_PASSWORD}
@@ -89,16 +90,19 @@ services:
   matchmaking:
     build:
       context: "requirements/matchmaking"
-      target: production
+      target: development
     depends_on:
       matchmaking-db:
         condition: service_healthy
     restart: on-failure
+    ports:
+      - "8004:8000"
     volumes:
+      - matchmaking-volume:/code
       - shared-code-volume:/shared
     environment:
       TZ: Europe/Paris
-      DEBUG: False
+      DEBUG: ${DEBUG}
       POSTGRES_DB: ${POSTGRES_MATCHMAKING_DB_NAME}
       POSTGRES_USER: ${POSTGRES_MATCHMAKING_USER}
       POSTGRES_PASSWORD: ${POSTGRES_MATCHMAKING_PASSWORD}
@@ -110,16 +114,19 @@ services:
   users:
     build:
       context: "requirements/users"
-      target: production
+      target: development
     depends_on:
       users-db:
         condition: service_healthy
     restart: on-failure
+    ports:
+      - "8005:8000"
     volumes:
+      - users-volume:/code
       - shared-code-volume:/shared
     environment:
       TZ: Europe/Paris
-      DEBUG: False
+      DEBUG: ${DEBUG}
       POSTGRES_DB: ${POSTGRES_USERS_DB_NAME}
       POSTGRES_USER: ${POSTGRES_USERS_USER}
       POSTGRES_PASSWORD: ${POSTGRES_USERS_PASSWORD}
@@ -247,6 +254,55 @@ networks:
     driver: bridge
 
 volumes:
+##### ========== Django Volumes ========================================== #####
+  auth-volume:
+    name: auth-volume
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: "requirements/auth/django"
+
+  chat-volume:
+    name: chat-volume
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: "requirements/chat/django"
+
+  frontend-volume:
+    name: frontend-volume
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: "requirements/frontend/static"
+
+  game-volume:
+    name: game-volume
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: "requirements/game/django"
+
+  matchmaking-volume:
+    name: matchmaking-volume
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: "requirements/matchmaking/django"
+
+  users-volume:
+    name: users-volume
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: "requirements/users/django"
+
 #####Database Volumes
   auth-db-volume: {}
 

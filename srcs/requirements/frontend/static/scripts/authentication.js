@@ -35,8 +35,9 @@ document.getElementById('playDuel').addEventListener('click', async event => {
             undefined, undefined, {'username' : guestUsername});
             if (!data.id)
                 document.getElementById('container').innerText = data.username;
-            else
+            else{
                 navigateTo('/');
+            }
         }
         catch (error){
             console.log('error on guest change', error);
@@ -56,10 +57,7 @@ document.getElementById('playClash').addEventListener('click', async event => {
             if (!data.id)
                 document.getElementById('container').innerText = data.username;
             else {
-                await fetchUserInfos(true);
-                await loadUserProfile();
-                console.log('then changing')
-                // navigateTo('/');
+                navigateTo('/');
             }
         }
         catch (error){
@@ -84,10 +82,14 @@ function removeDropdown() {
     document.querySelector('.dropdown').remove();
 }
 
-async function atStart(){
-    removeDropdown();
+async function authInit(){
+    if (!userInformations.is_guest) {
+        await navigateTo('/');
+        return; //TODO replace with URI or maybe not
+    }
+    document.getElementById('username').innerText = userInformations.username;
     await loadContent('/authenticationForm.html', 'authentication');
     loadGuest();
 }
 
-atStart();
+authInit();
