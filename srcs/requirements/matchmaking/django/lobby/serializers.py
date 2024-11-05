@@ -83,7 +83,7 @@ class LobbySerializer(serializers.ModelSerializer):
             validated_data['match_type'] = MatchType.m1v1
             validated_data['max_participants'] = 6
         result = super().create(validated_data)
-        creator = LobbyParticipants.objects.create(lobby_id=result.id, lobby_code=validated_data['code'], user_id=user['id'], creator=True)
+        creator = LobbyParticipants.objects.create(lobby_id=result.id, user_id=user['id'], creator=True)
         if validated_data['game_mode'] == GameMode.custom_game:
             creator.team = Teams.a
             creator.save()
@@ -111,7 +111,6 @@ class LobbyParticipantsSerializer(serializers.ModelSerializer):
         model = LobbyParticipants
         fields = [
             'id',
-            'lobby_code',
             'team',
             'is_ready',
             'creator',
@@ -119,7 +118,6 @@ class LobbyParticipantsSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = [
             'id',
-            'lobby_code',
             'creator',
         ]
 
@@ -150,7 +148,6 @@ class LobbyParticipantsSerializer(serializers.ModelSerializer):
             raise PermissionDenied('Lobby is full.')
 
         validated_data['lobby'] = lobby
-        validated_data['lobby_code'] = lobby.code
         validated_data['user_id'] = user['id']
         validated_data['is_guest'] = user['is_guest']
         if lobby.game_mode == GameMode.custom_game:
