@@ -35,6 +35,7 @@ class TournamentSearchView(generics.ListAPIView):
 class TournamentParticipantsView(generics.ListCreateAPIView, generics.DestroyAPIView):
     queryset = TournamentParticipants.objects.all()
     serializer_class = TournamentParticipantsSerializer
+    pagination_class = None
     # todo return tournament instance when list
 
     def filter_queryset(self, queryset):
