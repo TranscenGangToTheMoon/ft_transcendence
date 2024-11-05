@@ -39,7 +39,7 @@ class ValidateBlockView(generics.RetrieveAPIView):
         except Blocks.DoesNotExist:
             pass
         try:
-            return user2.block.get(blocked=user2)
+            return user2.block.get(blocked=user1)
         except Blocks.DoesNotExist:
             pass
         raise NotFound()
