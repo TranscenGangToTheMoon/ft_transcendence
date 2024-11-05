@@ -22,6 +22,8 @@ class Lobby(models.Model):
         return self.participants.filter(team=team).count()
 
     def is_team_full(self, team):
+        if team == Teams.spectator:
+            return False
         return self.get_team_count(team) >= self.max_team_participants
 
     @property
