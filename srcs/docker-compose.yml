@@ -46,6 +46,17 @@ services:
     build:
       context: "requirements/frontend"
       target: production
+    depends_on:
+      auth:
+        condition: service_started
+      chat:
+        condition: service_started
+      game:
+        condition: service_started
+      matchmaking:
+        condition: service_started
+      users:
+        condition: service_started
     restart: on-failure
     ports:
       - "4443:443"
