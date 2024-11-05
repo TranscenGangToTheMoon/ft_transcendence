@@ -211,7 +211,7 @@ function handleRoute() {
         '/login': '/authentication.html',
         '/': '/homePage.html',
         '/profile' : 'profile.html',
-        '/lobby' : 'lobby.html'
+        '/lobby' : '/lobby.html',
     };
 
     const page = routes[path] || '/404.html';
