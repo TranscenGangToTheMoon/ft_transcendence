@@ -43,7 +43,7 @@ document.getElementById('pChangeNickname').addEventListener('submit', async even
             document.getElementById('container').innerText = data.username;
         else {
             indexInit();
-            navigateTo('/profile');
+            handleRoute();
         }
     }
     catch (error){

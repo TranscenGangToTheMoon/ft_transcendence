@@ -197,7 +197,9 @@ async function loadContent(url, container='content') {
 }
 
 function navigateTo(url, doNavigate=true){
-    history.pushState(null, null, url);
+    console.log(`j'ajoute ${url} a lhistory`);
+    history.pushState({}, '', url);
+    console.table(history)
     if (doNavigate)
         handleRoute();
 }
@@ -218,12 +220,24 @@ async function handleRoute() {
     await loadContent(page);
 }
 
-document.addEventListener('click', event => {
-    if (event.target.matches('[data-link]')) {
-        event.preventDefault();
-        navigateTo(event.target.href);
+// UNCOMMENT FOR LINKS TO WORK WITHOUT CUSTOM JS
+// document.addEventListener('click', event => {
+//     if (event.target.matches('[data-link]')) {
+//         event.preventDefault();
+//         navigateTo(event.target.href);
+//     }
+// });
+
+window.addEventListener('popstate', async event => {
+    event.preventDefault();
+    document.querySelectorAll('.modal.show').forEach(modal => {
+        bootstrap.Modal.getInstance(modal).hide();
+    })
+    if (userInformations.is_guest !== (document.getElementById('trophies') === '')){
+        await loadUserProfile();
     }
-});
+    handleRoute();
+})
 
 window.loadContent = loadContent;
 
