@@ -17,6 +17,7 @@ async function deleteAccount(password) {
                 deleteModal.hide();
                 removeTokens();
                 await generateToken();
+                await fetchUserInfos(true);
                 navigateTo('/');
                 displayMainError('Account deleted', 'Your account has been successfully deleted. You have been redirected to homepage.');
             }
@@ -43,7 +44,7 @@ document.getElementById('pChangeNickname').addEventListener('submit', async even
             document.getElementById('container').innerText = data.username;
         else {
             indexInit();
-            navigateTo('/profile');
+            handleRoute();
         }
     }
     catch (error){

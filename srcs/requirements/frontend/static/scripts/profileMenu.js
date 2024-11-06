@@ -3,7 +3,7 @@ document.getElementById('logOut').addEventListener('click', async event => {
     removeTokens();
     await generateToken();
     await fetchUserInfos(true);
-    navigateTo(window.location.pathname);
+    handleRoute();
 })
 
 document.getElementById('settings').addEventListener('click', event => {
