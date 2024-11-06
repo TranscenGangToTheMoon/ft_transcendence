@@ -57,11 +57,6 @@ class TournamentSerializer(serializers.ModelSerializer):
         TournamentParticipants.objects.create(user_id=user['id'], trophies=user['trophies'], tournament=result, creator=True)
         return result
 
-    def update(self, instance, validated_data):
-        if instance.is_started:
-            raise PermissionDenied('Tournament has already started.')
-        return super().update(instance, validated_data)
-
 
 class TournamentStageSerializer(serializers.ModelSerializer):
     class Meta:

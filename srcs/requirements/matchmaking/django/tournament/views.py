@@ -11,7 +11,7 @@ from tournament.models import Tournaments, TournamentParticipants
 from tournament.serializers import TournamentSerializer, TournamentParticipantsSerializer, TournamentStageSerializer
 
 
-class TournamentView(generics.CreateAPIView, generics.RetrieveUpdateDestroyAPIView):
+class TournamentView(generics.CreateAPIView, generics.RetrieveAPIView):
     queryset = Tournaments.objects.all()
     serializer_class = TournamentSerializer
 
