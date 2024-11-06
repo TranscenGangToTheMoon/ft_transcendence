@@ -148,7 +148,7 @@ function loadScript(scriptSrc) {
     script.src = scriptSrc;
     script.onload = () => {
         console.log(`Script ${scriptSrc} loaded.`);
-    };
+    };  
     script.onerror = () => {
         console.error(`Error while loading script ${scriptSrc}.`);
     };
@@ -204,7 +204,7 @@ function navigateTo(url, doNavigate=true){
 
 window.navigateTo = navigateTo;
 
-function handleRoute() {
+async function handleRoute() {
     const path = window.location.pathname;
 
     const routes = {
@@ -215,7 +215,7 @@ function handleRoute() {
     };
 
     const page = routes[path] || '/404.html';
-    loadContent(page);
+    await loadContent(page);
 }
 
 document.addEventListener('click', event => {
@@ -277,18 +277,27 @@ async function loadUserProfile(){
     // document.getElementById('title').innerText = userInformations.title;
 }
 
-async function indexInit() {
-    loadCSS('/css/styles.css', false);
-    await fetchUserInfos(true);
-    await loadUserProfile();
-    if (userInformations.code === 'user_not_found'){
-        console.log('user was deleted from database, switching to guest mode');
-        displayMainError("Unable to retrieve your account/guest profile","We're sorry your account has been permanently deleted and cannot be recovered.");
-        await generateToken();
-        await fetchUserInfos(true);
-        await loadUserProfile();
+async function  indexInit(auto=true) {
+    if (!auto){
+        await fetchUserInfos();
+        if (window.location.pathname === '/login'){
+            document.getElementById('profileMenu').innerHTML = "";
+        }
+        else{
+            await loadUserProfile();
+        }
+        if (userInformations.code === 'user_not_found'){
+            console.log('user was deleted from database, switching to guest mode');
+            displayMainError("Unable to retrieve your account/guest profile","We're sorry your account has been permanently deleted and cannot be recovered.");
+            await generateToken();
+            await fetchUserInfos(true);
+            await loadUserProfile();
+        }
     }
-    handleRoute();
+    else{
+        loadCSS('/css/styles.css', false);
+        handleRoute();
+    }
 }
 
 window.indexInit = indexInit;

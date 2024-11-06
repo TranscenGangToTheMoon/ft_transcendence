@@ -66,7 +66,3 @@ document.getElementById("loginButton").addEventListener('click', event => {
         })
         .catch(error => console.log('error a gerer1', error))
 })
-
-// document.querySelector('dropdown-menu').addEventListener('mousedown', event => {
-//     event.preventDefault();
-// })

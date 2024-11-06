@@ -1,10 +1,9 @@
 document.getElementById('logOut').addEventListener('click', async event => {
     event.preventDefault();
     removeTokens();
-    generateToken();
+    await generateToken();
     await fetchUserInfos(true);
-    await loadUserProfile();
-    await navigateTo(window.location.pathname);
+    navigateTo(window.location.pathname);
 })
 
 document.getElementById('settings').addEventListener('click', event => {
