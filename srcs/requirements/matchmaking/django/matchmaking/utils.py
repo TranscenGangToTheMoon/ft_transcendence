@@ -84,9 +84,9 @@ def create_match(tournament_id, stage_id, teams):
 def verify_user(user_id, join_tournament=True):
     try:
         participant = TournamentParticipants.objects.get(user_id=user_id, still_in=True)
+        if join_tournament and participant.tournament.is_started:
+            raise PermissionDenied('You are already in a tournament.')
         if participant.creator:
-            if join_tournament:
-                raise PermissionDenied('You are already in a tournament.')
             raise PermissionDenied('You cannot create more than one tournament at the same time.')
         participant.delete()
     except TournamentParticipants.DoesNotExist:
