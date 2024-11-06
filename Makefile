@@ -44,8 +44,6 @@ all			:	banner $(NAME)
 $(NAME)		:	secrets
 			$(COMPOSE) $(FLAGS) up --build $(SERVICE)
 
-volumes		:	$(VOLUMES)
-
 build		:
 			$(COMPOSE) $(FLAGS) $@ $(SERVICE)
 
@@ -83,12 +81,18 @@ clean		:
 #			rm -rf $(ENV_FILE)
 #			rm -rf $(SECRETS_D)
 
+vclean		:
+			$(COMPOSE) $(FLAGS) down -v --remove-orphans
+
 fclean		:
 			$(COMPOSE) $(FLAGS) down -v --rmi all --remove-orphans
 			docker image prune -af
 			rm -rf $(VOLS_PATH)
 			rm -rf $(ENV_FILE)
 #			rm -rf $(SECRETS_D)
+
+caddy-reload:
+			$(COMPOSE) $(FLAGS) exec -w /etc/caddy frontend caddy reload
 
 image-ls	:
 			docker image ls -a
@@ -113,10 +117,12 @@ network-rm	:
 prune		:
 			docker system prune -af
 
-re			:	fclean all
-
 sre			:	clean all
 
-.PHONY		:	all volumes build up down dettach banner secrets clean fclean \
-				image-ls image-rm container-ls container-rm volume-ls volume-rm \
-				network-ls network-rm prune re
+vre			:	vclean all
+
+re			:	fclean all
+
+.PHONY		:	all volumes build up down dettach banner secrets clean vclean \
+			fclean image-ls image-rm container-ls container-rm volume-ls \
+			volume-rm network-ls network-rm prune sre vre re
