@@ -197,7 +197,6 @@ async function loadContent(url, container='content') {
 }
 
 function navigateTo(url, doNavigate=true){
-    console.log(`j'ajoute ${url} a lhistory`);
     history.pushState({}, '', url);
     console.table(history)
     if (doNavigate)
