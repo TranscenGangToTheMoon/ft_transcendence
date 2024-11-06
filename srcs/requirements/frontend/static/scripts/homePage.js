@@ -23,6 +23,10 @@
 
 // NAVIGAtORS
 
+document.getElementById('ranked').addEventListener('click', event => {
+    navigateTo('/lobby');
+})
+
 document.getElementById('friends').addEventListener('click', event => {
     getDataFromApi(getAccessToken(), `${baseAPIUrl}/users/me/friends/`)
         .then(data => {
@@ -31,8 +35,7 @@ document.getElementById('friends').addEventListener('click', event => {
 })
 
 async function homePageInit() {
-    await fetchUserInfos(true);
-    await loadUserProfile();
+    await indexInit(false);
 }
 
 homePageInit();

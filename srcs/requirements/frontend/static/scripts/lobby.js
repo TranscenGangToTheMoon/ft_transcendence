@@ -4,8 +4,8 @@ document.getElementById('settingsButton').addEventListener('click', event => {
     settingsModal.show();
 })
 
-// async function lobbyInit() {
-//     await loadUserProfile(); 
-// }
+async function lobbyInit() {
+    await indexInit(false);
+}
 
-// lobbyInit();
+lobbyInit();
