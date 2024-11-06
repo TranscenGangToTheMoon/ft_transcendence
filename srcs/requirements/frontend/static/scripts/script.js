@@ -277,6 +277,11 @@ async function loadUserProfile(){
     // document.getElementById('title').innerText = userInformations.title;
 }
 
+document.getElementById('home').addEventListener('click', event => {
+    event.preventDefault();
+    navigateTo('/');
+})
+
 async function  indexInit(auto=true) {
     if (!auto){
         await fetchUserInfos();
