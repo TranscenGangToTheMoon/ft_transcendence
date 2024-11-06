@@ -73,7 +73,7 @@ class TournamentKickView(generics.DestroyAPIView):
         get_tournament_participant(tournament, self.request.user.id, True)
 
         if tournament.is_started:
-            raise PermissionDenied('You cannot kick participant after the tournament has started.')
+            raise PermissionDenied('You cannot kick participant after the tournament start.')
 
         return get_kick_participants('tournament', tournament, user_id)
 

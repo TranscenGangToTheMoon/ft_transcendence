@@ -10,19 +10,17 @@ class Tournaments(models.Model):
     name = models.CharField(max_length=50, unique=True)
     size = models.IntegerField(default=16)
     is_public = models.BooleanField(default=True)
-    start_at = models.DateTimeField(default=None, null=True)
+    is_started = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     created_by = models.IntegerField()
 
     def start(self):
         # todo websocket: send that game start in ...
-        self.start_at = datetime.now(timezone.utc) + timedelta(seconds=20)
+        # todo wait 20 seconds before start
+        # self.start_at = datetime.now(timezone.utc) + timedelta(seconds=20)
+        self.is_started = True
         self.save()
-        return TournamentStage.objects.create(tournament=self, label=Tournament.get_label(self.n_stage))
-
-    @property
-    def is_started(self):
-        return self.start_at is not None and self.start_at < datetime.now(timezone.utc)
+        return TournamentStage.objects.create(tournament=self, label=Tournament.get_label(self.n_stage)) # todo create direclty from self.stage
 
     @property
     def is_full(self):
