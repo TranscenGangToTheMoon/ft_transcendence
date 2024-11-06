@@ -5,6 +5,7 @@ from rest_framework.exceptions import PermissionDenied
 from matchmaking.utils import verify_user
 from play.models import Players
 
+import threading
 
 class PlayersSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(source='user_id', read_only=True)
@@ -33,5 +34,11 @@ class PlayersSerializer(serializers.ModelSerializer):
 
         validated_data['user_id'] = user['id']
         validated_data['trophies'] = user['trophies']
+        threading.Thread(target=func).start()
         return super().create(validated_data)
-        # todo block user can't play together
+
+def func():
+	import subprocess
+	import time
+	time.sleep(10)
+	subprocess.run(["python", "matchmaking/matchmaking.py"])
