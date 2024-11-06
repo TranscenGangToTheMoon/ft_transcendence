@@ -29,7 +29,7 @@ class TournamentSerializer(serializers.ModelSerializer):
             'code',
             'created_at',
             'created_by',
-            'start_at',
+            'is_started',
         ]
 
     @staticmethod
