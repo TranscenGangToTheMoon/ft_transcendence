@@ -43,12 +43,7 @@ class TournamentParticipantsView(generics.ListCreateAPIView, generics.DestroyAPI
         return queryset.filter(tournament_id=tournament.id)
 
     def get_object(self):
-        tournament = get_tournament(code=self.kwargs.get('code'))
-
-        if tournament.is_started and self.request.method == 'DELETE':
-            raise PermissionDenied('You cannot leave this tournament after he started.')
-
-        return get_tournament_participant(tournament, self.request.user.id)
+        return get_tournament_participant(get_tournament(code=self.kwargs.get('code')), self.request.user.id)
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -83,10 +78,7 @@ class TournamentResultMatchView(generics.CreateAPIView):
     permission_classes = [AllowAny]
 
     def create(self, request, *args, **kwargs):
-        tournament_id = request.data.get('tournament_id')
-        if tournament_id is None:
-            raise serializers.ValidationError('Tournament id is required.')
-        tournament = get_tournament(id=tournament_id)
+        tournament = get_tournament(id=request.data.get('tournament_id'))
 
         current_stage = None
         finished = None
