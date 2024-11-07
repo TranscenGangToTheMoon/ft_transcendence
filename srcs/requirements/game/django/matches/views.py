@@ -15,10 +15,7 @@ class MatchListView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
 
     def filter_queryset(self, queryset):
-        user_id = self.kwargs.get('user_id')
-
-        if user_id is None:
-            raise serializers.ValidationError({'user_id': ['User id is required.']})
+        return queryset.filter(players__user_id=self.kwargs['user_id'])
 
 
 class MatchRetrieveView(generics.RetrieveAPIView):
