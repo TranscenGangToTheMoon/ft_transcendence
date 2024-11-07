@@ -8,7 +8,8 @@ from rest_framework.exceptions import PermissionDenied, NotFound
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
-from matchmaking.utils import get_tournament_participant, get_tournament, create_match, get_kick_participants
+from matchmaking.utils import get_tournament_participant, get_tournament, create_match, get_kick_participants, \
+    kick_yourself
 from tournament.models import Tournaments, TournamentParticipants
 from tournament.serializers import TournamentSerializer, TournamentParticipantsSerializer, TournamentStageSerializer
 
@@ -18,10 +19,7 @@ class TournamentView(generics.CreateAPIView, generics.RetrieveAPIView):
     serializer_class = TournamentSerializer
 
     def get_object(self):
-        p = get_tournament_participant(None, self.request.user.id, True)
-        if self.request.method != 'GET' and not p.creator:
-            raise PermissionDenied()
-        return Tournaments.objects.get(id=p.tournament_id)
+        return Tournaments.objects.get(id=get_tournament_participant(None, self.request.user.id, True).tournament_id)
 
 
 class TournamentSearchView(generics.ListAPIView):
@@ -38,7 +36,7 @@ class TournamentParticipantsView(generics.ListCreateAPIView, generics.DestroyAPI
     queryset = TournamentParticipants.objects.all()
     serializer_class = TournamentParticipantsSerializer
     pagination_class = None
-    # todo return tournament instance when list
+    # todo return tournament instance when create
 
     def filter_queryset(self, queryset):
         tournament = get_tournament(code=self.kwargs.get('code'))
