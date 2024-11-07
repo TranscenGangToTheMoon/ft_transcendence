@@ -1,5 +1,6 @@
 from lib_transcendence.exceptions import MessagesException, ResourceExists
 from lib_transcendence.services import requests_chat, requests_matchmaking
+from lib_transcendence import endpoints
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied, NotFound
 
@@ -36,9 +37,10 @@ class BlockSerializer(serializers.ModelSerializer):
         if user.block.filter(blocked=block_user).exists():
             raise ResourceExists(MessagesException.ResourceExists.BLOCK)
 
+        endpoint = endpoints.UsersManagement.fblocked_user.format(user_id=user.id, block_user_id=block_user.id)
         try:
             requests_chat(
-                endpoint=f'block-user/{user.id}/{block_user.id}/',
+                endpoint=endpoint,
                 data={'blocked': True},
             )
         except NotFound:
@@ -46,12 +48,11 @@ class BlockSerializer(serializers.ModelSerializer):
 
         try:
             requests_matchmaking(
-                endpoint=f'block-user/{user.id}/{block_user.id}/',
+                endpoint=endpoint,
                 method='DELETE',
             )
         except NotFound:
             pass
-
 
         # todo remove chat
         # todo check remove from lobby

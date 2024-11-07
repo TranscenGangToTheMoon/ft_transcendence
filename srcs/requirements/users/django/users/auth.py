@@ -12,19 +12,19 @@ def requests_auth(token, endpoint: Literal['update/', 'verify/', 'delete/'], met
     if token is None:
         raise NotAuthenticated()
 
-    return request_service('auth', 'auth/' + endpoint, method, data, token)
+    return request_service('auth', endpoint, method, data, token)
 
 
 def auth_verify(token):
-    return requests_auth(token, 'verify/', method='GET')
+    return requests_auth(token, Auth.verify, method='GET')
 
 
 def auth_update(token, data):
-    return requests_auth(token, 'update/', method='PATCH', data=data)
+    return requests_auth(token, Auth.update, method='PATCH', data=data)
 
 
 def auth_delete(token, data):
-    requests_auth(token, 'delete/', method='DELETE', data=data)
+    requests_auth(token, Auth.delete, method='DELETE', data=data)
 
 
 class IsAuthenticated(permissions.BasePermission):

@@ -1,4 +1,5 @@
 from lib_transcendence.exceptions import MessagesException
+from lib_transcendence import endpoints
 from rest_framework import serializers, permissions
 from rest_framework.exceptions import PermissionDenied
 
@@ -8,7 +9,7 @@ from lib_transcendence.services import requests_users
 class IsAuthenticated(permissions.BasePermission):
 
     def has_permission(self, request, view):
-        json_data = requests_users(request, 'users/me/', 'GET')
+        json_data = requests_users(endpoints.Users.me, 'GET', request)
         request.data['auth_user'] = json_data
         request.user.id = json_data['id']
         return True

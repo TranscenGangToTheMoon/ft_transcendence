@@ -2,6 +2,7 @@ from datetime import datetime, timezone
 
 from lib_transcendence.exceptions import MessagesException
 from lib_transcendence.services import requests_game
+from lib_transcendence import endpoints
 from rest_framework import generics, serializers
 from rest_framework.exceptions import PermissionDenied, NotFound
 from rest_framework.permissions import AllowAny
@@ -97,7 +98,7 @@ class TournamentResultMatchView(generics.CreateAPIView):
             data = TournamentSerializer(tournament).data
             data['finish_at'] = datetime.now(timezone.utc)
             data['stages'] = TournamentStageSerializer(tournament.stages.all(), many=True).data
-            requests_game('tournaments/', data=data)
+            requests_game(endpoints.Game.tournaments, data=data)
             tournament.delete()
             # todo websocket: send to chat tournament that 'xxx' win the tournament
             return Response(f'The tournament is over, and player {finished} is the winner!', status=201)

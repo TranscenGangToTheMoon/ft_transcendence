@@ -1,5 +1,6 @@
 from typing import Literal
 
+from lib_transcendence import endpoints
 from lib_transcendence.exceptions import MessagesException, Conflict
 from lib_transcendence.services import requests_game, requests_users
 from rest_framework import serializers
@@ -110,7 +111,7 @@ def verify_user(user_id, join_tournament=True):
         pass
 
     try:
-        requests_game(f'playing/{user_id}/', method='GET')
+        requests_game(endpoints.Game.fmatch_user.format(user_id=user_id), method='GET')
         raise Conflict(MessagesException.Conflict.USER_ALREADY_IN_GAME)
     except NotFound:
         pass
@@ -124,7 +125,7 @@ def can_join(request, obj, new_user):
         raise NotFound(MessagesException.NotFound.CREATOR)
 
     try:
-        requests_users(request, f'block/{self_user}/{new_user}/', 'GET')
+        requests_users(request, endpoints.Users.fblocked.format(user_id=self_user, block_user_id=new_user), 'GET')
         return False
     except NotFound:
         return True
