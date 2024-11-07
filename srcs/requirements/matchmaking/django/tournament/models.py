@@ -55,7 +55,7 @@ class TournamentParticipants(models.Model):
     tournament = models.ForeignKey(Tournaments, on_delete=models.CASCADE, related_name='participants')
     stage = models.ForeignKey(TournamentStage, on_delete=models.CASCADE, default=None, null=True, related_name='participants')
     seeding = models.IntegerField(default=None, null=True)
-    index = models.IntegerField(default=None, null=True)
+    index = models.IntegerField(default=None, null=True) #todo make
     still_in = models.BooleanField(default=True)
     creator = models.BooleanField(default=False)
     join_at = models.DateTimeField(auto_now_add=True)
