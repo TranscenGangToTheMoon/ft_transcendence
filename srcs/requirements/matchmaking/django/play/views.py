@@ -1,3 +1,4 @@
+from lib_transcendence.game import GameMode
 from lib_transcendence.exceptions import MessagesException
 from rest_framework import generics
 from rest_framework.exceptions import NotFound
@@ -18,13 +19,13 @@ class PlayMixin(generics.CreateAPIView, generics.DestroyAPIView):
 
 class DuelView(PlayMixin):
     def create(self, request, *args, **kwargs):
-        request.data['game_mode'] = 'duel'
+        request.data['game_mode'] = GameMode.duel
         return super().create(request, *args, **kwargs)
 
 
 class RankedView(PlayMixin):
     def create(self, request, *args, **kwargs):
-        request.data['game_mode'] = 'ranked'
+        request.data['game_mode'] = GameMode.ranked
         return super().create(request, *args, **kwargs)
 
 
