@@ -20,20 +20,14 @@ class MatchListView(generics.ListAPIView):
         if user_id is None:
             raise serializers.ValidationError({'user_id': ['User id is required.']})
 
-        return queryset.filter(players__user_id=user_id)
 
-
-class PlayingView(generics.RetrieveAPIView):
+class MatchRetrieveView(generics.RetrieveAPIView):
     serializer_class = MatchSerializer
-    queryset = Matches.objects.all()
 
     def get_object(self):
-        player = validate_user_id(self.kwargs.get('user_id'), True)
-        if player is None:
-            raise NotFound()
-        return player.match
+        return validate_user_id(self.kwargs.get('user_id'), True)
 
 
 match_create_view = MatchCreateView.as_view()
 match_list_view = MatchListView.as_view()
-playing_view = PlayingView.as_view()
+match_retrieve_view = MatchRetrieveView.as_view()
