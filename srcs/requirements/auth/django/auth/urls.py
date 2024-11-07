@@ -1,4 +1,3 @@
-from django.contrib import admin
 from django.urls import path
 from rest_framework_simplejwt.views import token_obtain_pair, token_refresh
 
@@ -16,5 +15,4 @@ urlpatterns = [
     path('api/auth/login/', token_obtain_pair, name='api-auth-login'),
     path('api/auth/refresh/', token_refresh, name='api-auth-token-refresh'),
     path('api/auth/verify/', token_verify, name='api-auth-token-verify'), # todo change to verify
-    path('auth/admin/', admin.site.urls),
 ]
