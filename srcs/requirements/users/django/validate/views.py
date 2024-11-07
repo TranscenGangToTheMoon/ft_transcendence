@@ -6,7 +6,7 @@ from rest_framework.exceptions import PermissionDenied, NotFound
 from block.models import Blocks
 from block.serializers import BlockSerializer
 from friends.utils import is_friendship
-from users.auth import get_user, get_valide_user
+from users.auth import get_user, get_valid_user
 from users.models import Users
 from users.serializers import UsersSerializer
 
@@ -24,7 +24,7 @@ class ValidateChatView(generics.RetrieveAPIView):
         valide_user = validate_username(test_username, self_user)
             raise PermissionDenied(MessagesException.PermissionDenied.BLOCK_USER)
 
-        valide_user = get_valide_user(user1, username2)
+        valide_user = get_valid_user(user1, username2)
         if AcceptChat.is_accept(valide_user.accept_chat_from, is_friendship(valide_user.id, self.request.user.id)):
             return valide_user
         raise PermissionDenied(MessagesException.PermissionDenied.NOT_ACCEPT_CHAT)
