@@ -99,7 +99,7 @@ class TournamentResultMatchView(generics.CreateAPIView):
             requests_game(endpoints.Game.tournaments, data=data)
             tournament.delete()
             # todo websocket: send to chat tournament that 'xxx' win the tournament
-            return Response(f'The tournament is over, and player {finished} is the winner!', status=201)
+            return Response(f'The tournament is over, and player {finished} is the winner!', status=200) # todo remake
 
         if not current_stage.participants.filter(still_in=True).exists():
             participants = tournament.participants.filter(still_in=True).order_by('index')
@@ -115,7 +115,7 @@ class TournamentResultMatchView(generics.CreateAPIView):
                     ]
                 )
 
-        return Response('The match result has been successfully recorded.', status=201)
+        return Response('The match result has been successfully recorded.', status=201) # todo remake
 
 
 tournament_view = TournamentView.as_view()
