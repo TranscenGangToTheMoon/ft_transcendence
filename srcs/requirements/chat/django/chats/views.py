@@ -1,4 +1,5 @@
 from django.http import Http404
+from lib_transcendence.utils import get_host
 from rest_framework import generics
 from rest_framework.exceptions import MethodNotAllowed
 
@@ -35,7 +36,7 @@ class ChatView(generics.RetrieveUpdateDestroyAPIView, ChatsMixin):
         return obj
 
     def destroy(self, request, *args, **kwargs):
-        if self.request.get_host().split(':')[0] != 'game': #todo in librairy
+        if get_host(request) != 'game':
             raise MethodNotAllowed(request.method)
         return super().destroy(request, *args, **kwargs)
 

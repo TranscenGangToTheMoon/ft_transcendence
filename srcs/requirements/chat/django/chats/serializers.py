@@ -1,6 +1,7 @@
 from lib_transcendence.Chat import ChatType
 from lib_transcendence.auth import get_auth_user
 from lib_transcendence.services import requests_users
+from lib_transcendence.utils import get_host
 from rest_framework import serializers
 from rest_framework.exceptions import MethodNotAllowed, NotFound, PermissionDenied
 
@@ -74,7 +75,7 @@ class ChatsSerializer(serializers.ModelSerializer):
 
         user2 = requests_users(request, 'validate/chat/', 'GET', data={'username': username})
 
-        if request.get_host().split(':')[0] != 'chat':
+        if get_host(request) != 'chat':
             validated_data['type'] = 'private_message'
         result = super().create(validated_data)
         ChatParticipants.objects.create(user_id=user['id'], username=user['username'], chat_id=result.id)

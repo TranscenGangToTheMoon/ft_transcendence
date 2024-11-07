@@ -30,3 +30,7 @@ def validate_type(value, name, choices):
                 error_message += ', '
         raise serializers.ValidationError([f'{name} must be {error_message}.'])
     return value
+
+
+def get_host(request):
+    return request.get_host().split(':')[0]
