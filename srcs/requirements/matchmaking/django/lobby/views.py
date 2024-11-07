@@ -5,7 +5,7 @@ from rest_framework.exceptions import PermissionDenied
 
 from lobby.models import Lobby, LobbyParticipants
 from lobby.serializers import LobbySerializer, LobbyParticipantsSerializer
-from matchmaking.utils import get_lobby, get_lobby_participant, get_kick_participants
+from matchmaking.utils import get_lobby, get_lobby_participant, get_kick_participants, kick_yourself
 
 
 class LobbyView(generics.CreateAPIView, generics.RetrieveUpdateAPIView):
@@ -43,20 +43,12 @@ class LobbyParticipantsView(generics.ListCreateAPIView, generics.UpdateAPIView, 
 
 class LobbyKickView(generics.DestroyAPIView):
     serializer_class = LobbyParticipantsSerializer
-    lookup_field = 'user_id'
 
     def get_object(self):
-        user_id = self.kwargs.get('user_id')
-        if user_id is None:
-            raise serializers.ValidationError('User id is required.')
-
-        lobby = get_lobby(self.kwargs.get('code'))
-
-        if user_id == self.request.user.id:
-            raise PermissionDenied('You cannot kick yourself.')
+        kick_yourself(self.kwargs['user_id'], self.request.user.id)
+        lobby = get_lobby(self.kwargs['code'])
         get_lobby_participant(lobby, self.request.user.id, True)
-
-        return get_kick_participants('lobby', lobby, user_id)
+        return get_kick_participants('lobby', lobby, self.kwargs['user_id'])
 
 
 lobby_view = LobbyView.as_view()

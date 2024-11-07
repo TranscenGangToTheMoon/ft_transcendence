@@ -81,6 +81,12 @@ def create_match(tournament_id, stage_id, teams):
     requests_game('match/', data=data)
 
 
+# -------------------- GET PARTICIPANT ------------------------------------------------------------------------------- #
+def kick_yourself(user_id, kick_user_id):
+    if user_id == kick_user_id:
+        raise PermissionDenied(MessagesException.PermissionDenied.KICK_YOURSELF)
+
+
 # -------------------- VERIFY USER ----------------------------------------------------------------------------------- #
 def verify_user(user_id, join_tournament=True):
     try:

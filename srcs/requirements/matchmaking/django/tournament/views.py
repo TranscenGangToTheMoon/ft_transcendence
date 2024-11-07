@@ -58,20 +58,14 @@ class TournamentKickView(generics.DestroyAPIView):
     lookup_field = 'user_id'
 
     def get_object(self):
-        user_id = self.kwargs.get('user_id')
-        if user_id is None:
-            raise serializers.ValidationError('User id is required.')
-
-        if user_id == self.request.user.id:
-            raise PermissionDenied('You cannot kick yourself.')
-
+        kick_yourself(self.kwargs['user_id'], self.request.user.id)
         tournament = get_tournament(code=self.kwargs.get('code'))
         get_tournament_participant(tournament, self.request.user.id, True)
 
         if tournament.is_started:
             raise PermissionDenied(MessagesException.PermissionDenied.KICK_AFTER_START)
 
-        return get_kick_participants('tournament', tournament, user_id)
+        return get_kick_participants('tournament', tournament, self.kwargs['user_id'])
 
 
 class TournamentResultMatchView(generics.CreateAPIView):
