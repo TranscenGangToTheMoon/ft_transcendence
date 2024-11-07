@@ -35,8 +35,8 @@ class ValidateBlockView(generics.RetrieveAPIView):
     permission_classes = []
 
     def get_object(self):
-        user1 = get_user(id=self.kwargs['user1'])
-        user2 = get_user(id=self.kwargs['user2'])
+        user1 = get_user(id=self.kwargs['user1_id'])
+        user2 = get_user(id=self.kwargs['user2_id'])
         try:
             return user1.block.get(blocked=user2)
         except Blocks.DoesNotExist:
