@@ -5,9 +5,11 @@ from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
 
 
-def generate_code(model):
+def generate_code(model=None, k=4):
     for _ in range(100000):
-        code = ''.join(random.choices(string.digits, k=4))
+        code = ''.join(random.choices(string.digits, k=k))
+        if model is None:
+            return code
         if not model.objects.filter(code=code).exists():
             return code
     raise PermissionDenied('Code generation failed.')
