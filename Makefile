@@ -91,6 +91,12 @@ fclean		:
 			rm -rf $(ENV_FILE)
 #			rm -rf $(SECRETS_D)
 
+dusting		:
+			rm -rf `find . | grep migrations`
+			rm -rf `find . | grep __pycache__`
+#			rm -rf `find . | grep __init__.py`
+#			rm -rf `find . | grep db.sqlite3`
+
 caddy-reload:
 			$(COMPOSE) $(FLAGS) exec -w /etc/caddy frontend caddy reload
 
