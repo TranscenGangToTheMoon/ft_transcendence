@@ -6,7 +6,7 @@ from rest_framework.exceptions import PermissionDenied, NotFound
 
 from block.models import Blocks
 from friends.utils import get_friendship
-from users.auth import get_user, validate_username
+from users.auth import get_user, get_valide_user
 
 
 class BlockSerializer(serializers.ModelSerializer):
@@ -29,7 +29,7 @@ class BlockSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user = get_user(self.context.get('request'))
 
-        block_user = validate_username(validated_data.pop('username'), user)
+        block_user = get_valide_user(user, validated_data.pop('username'))
 
         if block_user.id == user.id:
             raise PermissionDenied(MessagesException.PermissionDenied.BLOCK_YOURSELF)

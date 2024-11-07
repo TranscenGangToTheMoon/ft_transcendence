@@ -4,7 +4,7 @@ from rest_framework.exceptions import PermissionDenied
 
 from friend_requests.models import FriendRequests
 from friends.utils import is_friendship
-from users.auth import get_user, validate_username
+from users.auth import get_user, get_valide_user
 
 
 class FriendRequestsSerializer(serializers.ModelSerializer):
@@ -28,7 +28,7 @@ class FriendRequestsSerializer(serializers.ModelSerializer):
         if sender.sent_friend_requests.count() > 20:
             raise PermissionDenied(MessagesException.PermissionDenied.SEND_MORE_THAN_20_FRIEND_REQUESTS)
 
-        receiver = validate_username(validated_data.pop('username'), sender)
+        receiver = get_valide_user(sender, validated_data.pop('username'))
 
         if receiver == sender:
             raise PermissionDenied(MessagesException.PermissionDenied.SEND_FRIEND_REQUEST_YOURSELF)
