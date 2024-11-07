@@ -4,7 +4,7 @@ from lib_transcendence import endpoints
 from lib_transcendence.exceptions import MessagesException, Conflict
 from lib_transcendence.services import requests_game, requests_users
 from rest_framework import serializers
-from rest_framework.exceptions import PermissionDenied, NotFound
+from rest_framework.exceptions import PermissionDenied, NotFound, APIException
 
 from lobby.models import Lobby, LobbyParticipants
 from play.models import Players
@@ -129,3 +129,5 @@ def can_join(request, obj, new_user):
         return False
     except NotFound:
         return True
+    except APIException: #todo handle
+        raise PermissionDenied('You cannot join this lobby.')
