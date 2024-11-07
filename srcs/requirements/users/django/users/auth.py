@@ -2,6 +2,7 @@ from typing import Literal
 
 from lib_transcendence.exceptions import MessagesException
 from lib_transcendence.request import request_service
+from lib_transcendence.endpoints import Auth
 from rest_framework import permissions, serializers
 from rest_framework.exceptions import NotAuthenticated, NotFound
 
@@ -62,12 +63,11 @@ def get_user(request=None, id=None):
         raise NotFound(MessagesException.NotFound.USER)
 
 
-def validate_username(username, self_user):
+def get_valide_user(self, username):
     try:
-        assert username is not None
-        valide_username = Users.objects.get(username=username)
-        assert valide_username.is_guest is False
-        assert not valide_username.block.filter(blocked=self_user).exists()
-    except (Users.DoesNotExist, AssertionError):
-    return valide_username
+        valide_user = Users.objects.get(username=username)
+        assert valide_user.is_guest is False
+        assert not valide_user.block.filter(blocked=self).exists()
+    except Users.DoesNotExist:
         raise NotFound(MessagesException.NotFound.USER)
+    return valide_user
