@@ -11,5 +11,6 @@ class VerrifyUserSerializer(serializers.ModelSerializer):
         model = User
         fields = ['id', 'username', 'is_guest']
 
-    def get_is_guest(self, obj):
+    @staticmethod
+    def get_is_guest(obj):
         return obj.groups.filter(name=group_guests).exists()
