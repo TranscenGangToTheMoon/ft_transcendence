@@ -2,3 +2,7 @@
     background-color: unset;
     color: unset;
 }
+
+ .toast-container {
+    right: 20px;
+}

@@ -1,7 +1,10 @@
 // ========================== GLOBAL VALUES ==========================
 
+const MAX_DISPLAYED_NOTIFICATIONS = 3;
 const baseAPIUrl = "https://localhost:4443/api"
 let userInformations = undefined;
+var notificationIdentifier = 0;
+var displayedNotifications = 0;
 window.baseAPIUrl = baseAPIUrl;
 window.userInformations = userInformations;
 
@@ -170,7 +173,7 @@ function loadCSS(cssHref, toUpdate=true) {
     console.log(`Style ${cssHref} loaded.`)
 }
 
-async function loadContent(url, container='content') {
+async function loadContent(url, container='content', append=false) {
     const contentDiv = document.getElementById(container);
     try {
         const response = await fetch(url);
@@ -178,8 +181,10 @@ async function loadContent(url, container='content') {
             throw new Error('Page non trouvée');
         }
         const html = await response.text();
-        contentDiv.innerHTML = html;
-
+        if(!append)
+            contentDiv.innerHTML = html;
+        else
+            contentDiv.innerHTML += html;
         const script = contentDiv.querySelector('[script]');
         if (script)
             loadScript(script.getAttribute('script'));
@@ -317,6 +322,31 @@ async function  indexInit(auto=true) {
         handleRoute();
     }
 }
+
+document.getElementById('notifTrigger').addEventListener('click', async event => {
+    event.preventDefault();
+    if (displayedNotifications >= MAX_DISPLAYED_NOTIFICATIONS) {
+        return ;
+    }
+    const toastContainer = document.getElementById('toastContainer');
+
+    if (document.querySelector('hide'))
+        console.log('la');
+    await loadContent('/notification.html', 'toastContainer', true);
+    const notification = document.getElementById('notification');
+    notification.id = `notification${notificationIdentifier}`;
+    const toastInstance = new bootstrap.Toast(notification);
+    toastInstance.show();
+    notificationIdentifier++;
+    displayedNotifications++;
+    setTimeout(() => {
+        toastInstance.hide();
+        setTimeout (() => {
+            displayedNotifications--;
+            toastContainer.removeChild(document.getElementById(notification.id));
+        }, 500);
+    }, 5000);
+})
 
 window.indexInit = indexInit;
 window.loadUserProfile = loadUserProfile;
