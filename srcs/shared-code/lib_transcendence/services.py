@@ -1,8 +1,6 @@
 from typing import Literal
 
-from rest_framework import serializers
 from rest_framework.exceptions import NotAuthenticated
-
 from lib_transcendence.request import request_service
 
 

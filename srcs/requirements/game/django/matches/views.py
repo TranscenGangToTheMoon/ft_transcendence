@@ -1,6 +1,5 @@
 from lib_transcendence.auth import IsAuthenticated
-from rest_framework import generics, serializers
-from rest_framework.exceptions import NotFound
+from rest_framework import generics
 
 from matches.models import Matches
 from matches.serializers import MatchSerializer, validate_user_id

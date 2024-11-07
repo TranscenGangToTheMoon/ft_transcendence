@@ -1,4 +1,4 @@
-from rest_framework import generics, serializers
+from rest_framework import generics
 from rest_framework.exceptions import PermissionDenied
 
 from chat_messages.models import Messages

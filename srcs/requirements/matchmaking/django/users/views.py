@@ -1,9 +1,9 @@
-from rest_framework import generics, serializers, status
+from rest_framework import generics, status
 from rest_framework.response import Response
 
 from lobby.models import LobbyParticipants
 from play.models import Players
-from tournament.models import TournamentParticipants, Tournaments
+from tournament.models import TournamentParticipants
 
 
 class BlockUserView(generics.DestroyAPIView):

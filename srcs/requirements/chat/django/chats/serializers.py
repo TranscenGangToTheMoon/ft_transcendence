@@ -3,7 +3,7 @@ from lib_transcendence.auth import get_auth_user
 from lib_transcendence.services import requests_users
 from lib_transcendence.utils import get_host
 from rest_framework import serializers
-from rest_framework.exceptions import MethodNotAllowed, NotFound, PermissionDenied
+from rest_framework.exceptions import MethodNotAllowed, PermissionDenied
 
 from chats.models import Chats, ChatParticipants
 from chats.utils import get_chat_together
