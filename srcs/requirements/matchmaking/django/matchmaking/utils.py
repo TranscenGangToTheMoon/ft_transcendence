@@ -69,7 +69,7 @@ def get_tournament(create=False, **kwargs):
     return get_place('tournament', Tournaments, create, **kwargs)
 
 
-# -------------------- GET PARTICIPANT ------------------------------------------------------------------------------- #
+# -------------------- CREATE MATCH ---------------------------------------------------------------------------------- #
 # todo move to library
 def create_match(tournament_id, stage_id, teams):
     data = {

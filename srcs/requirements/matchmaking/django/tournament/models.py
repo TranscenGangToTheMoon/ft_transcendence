@@ -99,28 +99,3 @@ class TournamentParticipants(models.Model):
             name += ' eliminate at'
         name += ' ' + self.stage.label
         return
-
-#
-# class UsersQuerySet(models.QuerySet):
-#     def is_not_guest(self):
-#         return self.filter(is_guest=False)
-#
-#     def search(self, query, user=None):
-#         lookup = Q(username__icontains=query) | Q(password__icontains=query)
-#         qs = self.is_not_guest().filter(lookup)
-#         print("query:", query)
-#         print("qs:", qs)
-#         if user is not None:
-#             qs_user = self.filter(django_user=user).filter(lookup)
-#             print("user qs:", qs_user)
-#             qs = (qs | qs_user).distinct()
-#         return qs
-#
-#
-# class UsersManager(models.Manager):
-#     def get_queryset(self): #overide functioj
-#         return UsersQuerySet(self.model, using=self._db)
-#
-#     def search(self, query, user=None):
-#         return self.get_queryset().search(query, user=user)
-#

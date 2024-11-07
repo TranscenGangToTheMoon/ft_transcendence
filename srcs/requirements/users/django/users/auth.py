@@ -36,6 +36,7 @@ class IsAuthenticated(permissions.BasePermission):
             return False
 
         try:
+            # todo remake
             user = Users.objects.get(id=json_data['id'])
             if user.is_guest != json_data['is_guest']:
                 user.is_guest = json_data['is_guest']
