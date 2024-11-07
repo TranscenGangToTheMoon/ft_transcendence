@@ -6,7 +6,7 @@ from profile_pictures.models import ProfilePictures
 
 class Users(models.Model):
     id = models.IntegerField(unique=True, primary_key=True)
-    username = models.CharField(unique=True, max_length=20)
+    username = models.CharField(unique=True, max_length=30)
     is_guest = models.BooleanField(default=False)
 
     created_at = models.DateTimeField(auto_now_add=True)
