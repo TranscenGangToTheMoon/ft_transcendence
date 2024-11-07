@@ -2,6 +2,7 @@ from lib_transcendence.GameMode import GameMode
 from lib_transcendence.utils import generate_code
 from lib_transcendence.exceptions import MessagesException, Conflict
 from rest_framework import serializers
+from rest_framework.exceptions import NotFound
 
 from matches.models import Matches, Teams, Players
 
@@ -13,10 +14,11 @@ def validate_user_id(value, return_user=False):
     try:
         player = Players.objects.get(user_id=value, match__finished=False)
         if return_user:
-            return player
-        raise serializers.ValidationError(['User is already in a match.'])
+            return player.match
+        raise Conflict(MessagesException.Conflict.USER_ALREADY_IN_GAME)
     except Players.DoesNotExist:
-        return None
+        if return_user:
+            raise NotFound(MessagesException.NotFound.USER_NOT_IN_GAME)
 
 
 def validate_team(value):
@@ -28,10 +30,7 @@ def validate_team(value):
         raise serializers.ValidationError(MessagesException.ValidationError.TEAMS_NOT_EQUAL)
     for team in value:
         for user in team:
-            if type(user) is not int:
-                raise serializers.ValidationError(['User id is required.'])
-            if Players.objects.filter(user_id=user).exists():
-                raise serializers.ValidationError(['User is already in a match.'])
+            validate_user_id(user)
     return value
 
 
