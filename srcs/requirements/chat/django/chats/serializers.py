@@ -1,9 +1,12 @@
+from lib_transcendence import endpoints
 from lib_transcendence.Chat import ChatType
 from lib_transcendence.auth import get_auth_user
 from lib_transcendence.services import requests_users
 from lib_transcendence.utils import get_host
 from rest_framework import serializers
 from rest_framework.exceptions import MethodNotAllowed, PermissionDenied
+from lib_transcendence.exceptions import MessagesException
+from lib_transcendence.exceptions import ResourceExists
 
 from chats.models import Chats, ChatParticipants
 from chats.utils import get_chat_together
@@ -24,7 +27,7 @@ class ChatPaticipantsSerializer(serializers.ModelSerializer):
 class ChatsSerializer(serializers.ModelSerializer):
     username = serializers.CharField(write_only=True)
     participants = ChatPaticipantsSerializer(many=True, read_only=True)
-    type = serializers.CharField(required=False)
+    type = serializers.CharField() # todo test if work
     view_chat = serializers.BooleanField(write_only=True, required=False)
 
     class Meta:
@@ -43,23 +46,15 @@ class ChatsSerializer(serializers.ModelSerializer):
             'created_at',
         ]
 
-    def validate(self, data):
-        request = self.context.get('request')
-        if request is None:
-            raise serializers.ValidationError('Request is required.') # todo move in library
-        if request.get_host().split(':')[0] == 'chat' and 'type' not in data:
-            raise serializers.ValidationError({'type': ['This field is required.']})
-        return data
-
     def validate_type(self, value):
         request = self.context.get('request')
         if request is None:
-            raise serializers.ValidationError('Request is required.')
+            raise serializers.ValidationError(MessagesException.ValidationError.REQUEST_REQUIRED)
+        ChatType.validate(value)
+        if get_host(request) != 'chat' and value != ChatType.private_message:
+            raise PermissionDenied(MessagesException.PermissionDenied.ONLY_CREATE_PRIVATE_MESSAGES)
         if request.method in ('PATCH', 'PUT'):
             raise MethodNotAllowed(request.method)
-        ChatType.validate(value)
-        if request.get_host().split(':')[0] != 'chat' and value != ChatType.private_message:
-            raise PermissionDenied('You can only create private messages')
         return value
 
     def create(self, validated_data):
@@ -73,7 +68,7 @@ class ChatsSerializer(serializers.ModelSerializer):
         if get_chat_together(user['username'], username):
             raise ResourceExists(MessagesException.ResourceExists.CHAT)
 
-        user2 = requests_users(request, 'validate/chat/', 'GET', data={'username': username})
+        user2 = requests_users(request, endpoints.Users.fchat.format(user1_id=user.id, username2=username), 'GET')
 
         if get_host(request) != 'chat':
             validated_data['type'] = 'private_message'
