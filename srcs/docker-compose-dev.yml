@@ -304,15 +304,20 @@ volumes:
       device: "requirements/users/django"
 
 #####Database Volumes
-  auth-db-volume: {}
+  auth-db-volume:
+    name: "auth-db-volume"
 
-  chat-db-volume: {}
+  chat-db-volume:
+    name: "chat-db-volume"
 
-  game-db-volume: {}
+  game-db-volume:
+    name: "game-db-volume"
 
-  matchmaking-db-volume: {}
+  matchmaking-db-volume:
+    name: "matchmaking-db-volume"
 
-  users-db-volume: {}
+  users-db-volume:
+    name: "users-db-volume"
 
 #####Shared Code Volume
   shared-code-volume:
