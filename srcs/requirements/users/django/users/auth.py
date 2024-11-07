@@ -63,7 +63,7 @@ def get_user(request=None, id=None):
         raise NotFound(MessagesException.NotFound.USER)
 
 
-def get_valide_user(self, username):
+def get_valid_user(self, username):
     try:
         valide_user = Users.objects.get(username=username)
         assert valide_user.is_guest is False
