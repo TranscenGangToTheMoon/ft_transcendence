@@ -17,12 +17,10 @@ class ValidateChatView(generics.RetrieveAPIView):
     permission_classes = []
 
     def get_object(self):
-        self_user = get_user(self.request)
-        test_username = self.request.data.get('username')
-        if not test_username:
-            raise serializers.ValidationError({'username': ['This field is required.']})
-        if self_user.block.filter(blocked__username=test_username).exists():
-        valide_user = validate_username(test_username, self_user)
+        user1 = get_user(id=self.kwargs['user1_id'])
+        username2 = get_user(id=self.kwargs['username2'])
+
+        if user1.block.filter(blocked__username=username2).exists():
             raise PermissionDenied(MessagesException.PermissionDenied.BLOCK_USER)
 
         valide_user = get_valid_user(user1, username2)
