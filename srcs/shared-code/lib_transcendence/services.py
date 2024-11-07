@@ -4,14 +4,14 @@ from rest_framework.exceptions import NotAuthenticated
 from lib_transcendence.request import request_service
 
 
-def requests_users(request, endpoint: Literal['users/me/', 'validate/chat/'], method: Literal['GET', 'PUT', 'PATCH', 'DELETE'], data=None):
-    if request is None:
-        raise serializers.ValidationError('Request is required.')
-    token = request.headers.get('Authorization')
-    if token is None:
-        raise NotAuthenticated()
+def requests_users(endpoint: Literal['users/me/', 'validate/chat/', 'blocked/<>/'], method: Literal['GET', 'PUT', 'PATCH', 'DELETE'], request=None):
+    kwargs = {}
+    if request is not None:
+        kwargs['authorization'] = request.headers.get('Authorization')
+        if kwargs['authorization'] is None:
+            raise NotAuthenticated()
 
-    return request_service('users', endpoint, method, data, token)
+    return request_service('users', endpoint, method, **kwargs)
 
 
 def requests_matchmaking(endpoint: str, method: Literal['POST', 'DELETE'], data=None):
