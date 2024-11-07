@@ -1,4 +1,5 @@
 from lib_transcendence.auth import get_auth_user
+from lib_transcendence.exceptions import MessagesException
 from lib_transcendence.utils import generate_code
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
@@ -35,11 +36,11 @@ class TournamentSerializer(serializers.ModelSerializer):
     @staticmethod
     def validate_size(value):
         if (value % 4) != 0:
-            raise serializers.ValidationError(['Size must be a multiple of 4.'])
-        if value > 32:
-            raise serializers.ValidationError(['Size must be less than 32.'])
+            raise serializers.ValidationError(MessagesException.ValidationError.TOURNAMENT_SIZE)
+        if value >= 32:
+            raise serializers.ValidationError(MessagesException.ValidationError.TOURNAMENT_MAX_SIZE)
         if value < 4:
-            raise serializers.ValidationError(['Size must be greater or equal than 4.'])
+            raise serializers.ValidationError(MessagesException.ValidationError.TOURNAMENT_MIN_SIZE)
         return value
 
     def create(self, validated_data):
@@ -47,7 +48,7 @@ class TournamentSerializer(serializers.ModelSerializer):
         user = get_auth_user(request)
 
         if user['is_guest']:
-            raise PermissionDenied('Guest cannot create tournament.')
+            raise PermissionDenied(MessagesException.PermissionDenied.GUEST_CANNOT_CREATE_TOURNAMENT)
 
         verify_user(user['id'], False)
 
@@ -93,10 +94,10 @@ class TournamentParticipantsSerializer(serializers.ModelSerializer):
         tournament = get_tournament(create=True, code=self.context.get('code'))
 
         if tournament.is_started:
-            raise PermissionDenied('Tournament has already started.')
+            raise PermissionDenied(MessagesException.PermissionDenied.TOURNAMENT_IS_FULL)
 
         if tournament.is_full:
-            raise PermissionDenied('Tournament is full.')
+            raise PermissionDenied(MessagesException.PermissionDenied.TOURNAMENT_IS_FULL)
 
         user = self.context['auth_user']
         verify_user(user['id'])

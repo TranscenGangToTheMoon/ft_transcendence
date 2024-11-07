@@ -1,3 +1,4 @@
+from lib_transcendence.exceptions import MessagesException, ResourceExists
 from lib_transcendence.services import requests_chat, requests_matchmaking
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied, NotFound
@@ -30,10 +31,10 @@ class BlockSerializer(serializers.ModelSerializer):
         block_user = validate_username(validated_data.pop('username'), user)
 
         if block_user.id == user.id:
-            raise PermissionDenied({'username': ['You cannot block yourself.']})
+            raise PermissionDenied(MessagesException.PermissionDenied.BLOCK_YOURSELF)
 
         if user.block.filter(blocked=block_user).exists():
-            raise PermissionDenied({'username': ['You have already blocked this user.']})
+            raise ResourceExists(MessagesException.ResourceExists.BLOCK)
 
         try:
             requests_chat(

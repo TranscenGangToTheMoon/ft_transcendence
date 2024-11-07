@@ -19,7 +19,7 @@ class MessagesView(generics.ListCreateAPIView):
             ChatParticipants.objects.get(chat_id=pk, user_id=self.request.user.id)
             return queryset.filter(chat_id=pk)
         except ChatParticipants.DoesNotExist:
-            raise PermissionDenied('You are not a participant of this chat.')
+            raise PermissionDenied(MessagesException.PermissionDenied.NOT_BELONG_TO_CHAT)
 
     def get_serializer_context(self):
         context = super().get_serializer_context()

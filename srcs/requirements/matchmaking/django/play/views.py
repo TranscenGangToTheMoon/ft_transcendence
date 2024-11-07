@@ -1,5 +1,6 @@
+from lib_transcendence.exceptions import MessagesException
 from rest_framework import generics
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import NotFound
 
 from play.models import Players
 from play.serializers import PlayersSerializer
@@ -12,7 +13,7 @@ class PlayMixin(generics.CreateAPIView, generics.DestroyAPIView):
         try:
             return Players.objects.get(user_id=self.request.user.id)
         except Players.DoesNotExist:
-            raise PermissionDenied("You're not currently playing.")
+            raise NotFound(MessagesException.NotFound.NOT_PLAYING)
 
 
 class DuelView(PlayMixin):

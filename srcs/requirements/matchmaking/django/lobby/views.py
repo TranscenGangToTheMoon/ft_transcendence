@@ -1,6 +1,7 @@
 from lib_transcendence.GameMode import GameMode
 from rest_framework import generics, serializers
 from rest_framework.exceptions import NotFound, PermissionDenied
+from lib_transcendence.exceptions import MessagesException
 
 from lobby.models import Lobby, LobbyParticipants
 from lobby.serializers import LobbySerializer, LobbyParticipantsSerializer
@@ -14,7 +15,7 @@ class LobbyView(generics.CreateAPIView, generics.RetrieveUpdateAPIView):
     def get_object(self):
         participant = get_lobby_participant(None, self.request.user.id, self.request.method != 'GET', True)
         if self.request.method in ('PUT', 'PATCH') and participant.lobby.game_mode == GameMode.clash:
-            raise PermissionDenied(f'You cannot update {GameMode.clash} lobby.')
+            raise PermissionDenied(MessagesException.PermissionDenied.UPDATE_CLASH_MODE)
         return participant.lobby
 
 
@@ -27,7 +28,7 @@ class LobbyParticipantsView(generics.ListCreateAPIView, generics.UpdateAPIView, 
         lobby = get_lobby(self.kwargs.get('code'))
         queryset = queryset.filter(lobby_id=lobby.id) # todo change for see Lobby serializer when list
         if self.request.user.id not in queryset.values_list('user_id', flat=True):
-            raise NotFound('You do not belong to this lobby.') # todo move to library
+            raise PermissionDenied(MessagesException.PermissionDenied.NOT_BELONG_LOBBY)
         return queryset
 
     def get_object(self):

@@ -1,5 +1,6 @@
 from datetime import datetime, timezone
 
+from lib_transcendence.exceptions import MessagesException
 from lib_transcendence.services import requests_game
 from rest_framework import generics, serializers
 from rest_framework.exceptions import PermissionDenied, NotFound
@@ -28,7 +29,7 @@ class TournamentSearchView(generics.ListAPIView):
     def get_queryset(self):
         query = self.request.data.pop('q', None)
         if query is None:
-            raise serializers.ValidationError({'q': ['Query is required.']})
+            raise serializers.ValidationError({'q': [MessagesException.ValidationError.FIELD_REQUIRED]})
         return Tournaments.objects.filter(name__icontains=query)
 
 
@@ -68,7 +69,7 @@ class TournamentKickView(generics.DestroyAPIView):
         get_tournament_participant(tournament, self.request.user.id, True)
 
         if tournament.is_started:
-            raise PermissionDenied('You cannot kick participant after the tournament start.')
+            raise PermissionDenied(MessagesException.PermissionDenied.KICK_AFTER_START)
 
         return get_kick_participants('tournament', tournament, user_id)
 
@@ -86,7 +87,7 @@ class TournamentResultMatchView(generics.CreateAPIView):
             # todo websocket: send to chat tournament that 'xxx' win the game
             user_id = request.data.get(player)
             if user_id is None:
-                raise serializers.ValidationError(f'{player.title()} is required.')
+                raise serializers.ValidationError(MessagesException.ValidationError.REQUIRED.format(player.title()))
             try:
                 participant = tournament.participants.get(user_id=user_id)
                 if current_stage is None:
@@ -96,7 +97,7 @@ class TournamentResultMatchView(generics.CreateAPIView):
                 else:
                     participant.eliminate()
             except TournamentParticipants.DoesNotExist:
-                raise NotFound('This participant does not exist.')
+                raise NotFound(MessagesException.NotFound.USER)
 
         if finished is not None:
             data = TournamentSerializer(tournament).data

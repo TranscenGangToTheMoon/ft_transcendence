@@ -67,10 +67,10 @@ class ChatsSerializer(serializers.ModelSerializer):
 
         username = validated_data.pop('username')
         if username == user['username']:
-            raise PermissionDenied({'username': ['You cannot chat with yourself.']})
+            raise PermissionDenied(MessagesException.PermissionDenied.CANNOT_CHAT_YOURSELF)
 
         if get_chat_together(user['username'], username):
-            raise PermissionDenied({'username': ['You are already chat with this user.']})
+            raise ResourceExists(MessagesException.ResourceExists.CHAT)
 
         user2 = requests_users(request, 'validate/chat/', 'GET', data={'username': username})
 
@@ -90,7 +90,7 @@ class ChatsSerializer(serializers.ModelSerializer):
                 p.view_chat = view_chat
                 p.save()
             except ChatParticipants.DoesNotExist:
-                raise NotFound('You are not in this chat.')
+                raise PermissionDenied(MessagesException.PermissionDenied.NOT_BELONG_TO_CHAT)
         return super().update(instance, validated_data)
 
 

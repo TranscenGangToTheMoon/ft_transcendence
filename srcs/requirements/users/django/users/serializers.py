@@ -1,4 +1,5 @@
 from lib_transcendence.Chat import AcceptChat
+from lib_transcendence.exceptions import MessagesException
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
 
@@ -64,7 +65,7 @@ class UsersSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         if instance.is_guest and any([k != 'username' for k in validated_data]):
-            raise PermissionDenied('Guest users can only update their username.')
+            raise PermissionDenied(MessagesException.PermissionDenied.GUEST_UPDATE_USERNAME)
         if 'username' in validated_data or 'password' in validated_data:
             auth_update(self.context['request'].headers.get('Authorization'), validated_data)
         return super().update(instance, validated_data)

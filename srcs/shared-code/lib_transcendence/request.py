@@ -1,19 +1,9 @@
 import json
 from typing import Literal
 
-from rest_framework import status
-from rest_framework.exceptions import APIException, AuthenticationFailed, PermissionDenied, MethodNotAllowed, NotFound, \
-    ParseError
+from lib_transcendence.exceptions import Conflict, ServiceUnavailable
+from rest_framework.exceptions import AuthenticationFailed, PermissionDenied, MethodNotAllowed, NotFound, ParseError
 import requests
-
-
-class ServiceUnavailable(APIException):
-    status_code = status.HTTP_503_SERVICE_UNAVAILABLE
-    default_detail = 'Failed to connect to {service} service.'
-    default_code = 'service_unavailable'
-
-    def __init__(self, service):
-        self.detail = ServiceUnavailable.default_detail.format(service=service)
 
 
 def request_service(service: Literal['auth', 'chat', 'game', 'matchmaking', 'users'], endpoint: str, method: Literal['GET', 'POST', 'PUT', 'PATCH', 'DELETE'], data=None, authorization=None):
@@ -48,6 +38,8 @@ def request_service(service: Literal['auth', 'chat', 'game', 'matchmaking', 'use
             raise NotFound(json_data)
         if response.status_code == 405:
             raise MethodNotAllowed(method)
+        if response.status_code == 409:
+            raise Conflict(json_data)
         if response.status_code == 503:
             raise ServiceUnavailable(service)
     except (requests.ConnectionError, requests.exceptions.JSONDecodeError):

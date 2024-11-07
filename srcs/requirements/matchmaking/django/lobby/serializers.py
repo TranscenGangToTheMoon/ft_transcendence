@@ -1,4 +1,5 @@
 from lib_transcendence.GameMode import GameMode
+from lib_transcendence.exceptions import MessagesException, ResourceExists
 from lib_transcendence.Lobby import MatchType, Teams
 from lib_transcendence.auth import get_auth_user
 from lib_transcendence.utils import generate_code
@@ -71,7 +72,7 @@ class LobbySerializer(serializers.ModelSerializer):
         user = get_auth_user(self.context.get('request'))
 
         if user['is_guest']:
-            raise PermissionDenied('Guest cannot create lobby.')
+            raise PermissionDenied(MessagesException.PermissionDenied.GUEST_CANNOT_CREATE_LOBBY)
 
         verify_user(user['id'])
 
@@ -90,8 +91,8 @@ class LobbySerializer(serializers.ModelSerializer):
         return result
 
     def update(self, instance, validated_data):
-        if 'game_mode' in validated_data:
-            raise PermissionDenied({'game_mode': ['You cannot update game mode.']})
+        if 'game_mode' in validated_data: # todo try with editable = False
+            raise PermissionDenied(MessagesException.PermissionDenied.CANNOT_UPDATE_GAME_MODE)
         if validated_data.get('match_type') == MatchType.m1v1 and instance.match_type == MatchType.m3v3:
             participants = instance.participants
 
@@ -137,15 +138,15 @@ class LobbyParticipantsSerializer(serializers.ModelSerializer):
         user = get_auth_user(self.context.get('request'))
 
         if lobby.participants.filter(user_id=user['id']).exists():
-            raise PermissionDenied('You already joined this lobby.')
+            raise ResourceExists(MessagesException.ResourceExists.LOBBY)
 
         if not can_join(self.context.get('request'), lobby, user['id']):
-            raise NotFound({'code': ['Lobby code does not exist.']}) # todo move to library
+            raise NotFound(MessagesException.NotFound.LOBBY)
 
         verify_user(user['id'])
 
         if lobby.is_full:
-            raise PermissionDenied('Lobby is full.')
+            raise PermissionDenied(MessagesException.PermissionDenied.LOBBY_IS_FULL)
 
         validated_data['lobby'] = lobby
         validated_data['user_id'] = user['id']
@@ -161,11 +162,11 @@ class LobbyParticipantsSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         if 'team' in validated_data:
             if instance.lobby.game_mode != GameMode.custom_game:
-                raise PermissionDenied(f'You cannot update team in {GameMode.clash} mode.')
+                raise PermissionDenied(MessagesException.PermissionDenied.UPDATE_TEAM_CLASH_MODE)
             elif instance.team == validated_data['team']:
-                raise PermissionDenied('You are already in this team.')
+                raise ResourceExists(MessagesException.ResourceExists.TEAM)
             elif self.instance.lobby.is_team_full(validated_data['team']):
-                raise PermissionDenied('Team is full.')
+                raise PermissionDenied(MessagesException.PermissionDenied.TEAM_IS_FULL)
         result = super().update(instance, validated_data)
         # todo websocket: send that lobby thas x change team
         if instance.lobby.is_ready:

@@ -1,3 +1,4 @@
+from lib_transcendence.exceptions import MessagesException
 from rest_framework import serializers, permissions
 from rest_framework.exceptions import PermissionDenied
 
@@ -27,5 +28,5 @@ class AllowedHostPermission(permissions.BasePermission):
 
 def get_auth_user(request=None):
     if request is None:
-        raise serializers.ValidationError('Request is required.')
+        raise serializers.ValidationError(MessagesException.ValidationError.REQUEST_REQUIRED)
     return request.data['auth_user']

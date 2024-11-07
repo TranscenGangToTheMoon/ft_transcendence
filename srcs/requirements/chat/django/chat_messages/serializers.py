@@ -1,4 +1,6 @@
 from rest_framework import serializers
+from rest_framework.exceptions import PermissionDenied
+from lib_transcendence.exceptions import MessagesException
 
 from chat_messages.models import Messages
 from chats.models import Chats, ChatParticipants
@@ -34,7 +36,7 @@ class MessagesSerializer(serializers.ModelSerializer):
         try:
             participant = chats.participants.get(user_id=user['id'])
         except ChatParticipants.DoesNotExist:
-            raise serializers.ValidationError('You are not participant of this chat')
+            raise PermissionDenied(MessagesException.PermissionDenied.NOT_BELONG_TO_CHAT)
 
         validated_data['chat_id'] = pk
         validated_data['author'] = participant

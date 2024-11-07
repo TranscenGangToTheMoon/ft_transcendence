@@ -1,4 +1,5 @@
 from django.db import models
+from lib_transcendence.exceptions import MessagesException
 
 
 class RangeLookup(models.Lookup):
@@ -6,7 +7,7 @@ class RangeLookup(models.Lookup):
 
     def get_prep_lookup(self):
         if not isinstance(self.rhs, tuple) or len(self.rhs) != 2 or not all(isinstance(i, int) for i in self.rhs):
-            raise ValueError("The 'range' lookup requires a tuple with exactly two elements.")
+            raise ValueError(MessagesException.ValueError.RANGE_VALUE)
         return self.rhs
 
     def as_sql(self, compiler, connection):

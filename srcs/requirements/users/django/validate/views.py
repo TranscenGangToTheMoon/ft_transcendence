@@ -1,5 +1,6 @@
 from lib_transcendence.Chat import AcceptChat
-from rest_framework import generics, serializers
+from lib_transcendence.exceptions import MessagesException
+from rest_framework import generics
 from rest_framework.exceptions import PermissionDenied, NotFound
 
 from block.models import Blocks
@@ -20,11 +21,11 @@ class ValidateChatView(generics.RetrieveAPIView):
         if not test_username:
             raise serializers.ValidationError({'username': ['This field is required.']})
         if self_user.block.filter(blocked__username=test_username).exists():
-            raise PermissionDenied({'username': ['You block this user.']})
         valide_user = validate_username(test_username, self_user)
+            raise PermissionDenied(MessagesException.PermissionDenied.BLOCK_USER)
         if AcceptChat.is_accept(valide_user.accept_chat_from, is_friendship(valide_user.id, self.request.user.id)):
             return valide_user
-        raise PermissionDenied({'username': ['This user does not accept new chat.']})
+        raise PermissionDenied(MessagesException.PermissionDenied.NOT_ACCEPT_CHAT)
 
 
 class ValidateBlockView(generics.RetrieveAPIView):

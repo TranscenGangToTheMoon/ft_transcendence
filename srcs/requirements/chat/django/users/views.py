@@ -1,3 +1,4 @@
+from lib_transcendence.exceptions import MessagesException
 from rest_framework import generics, status, serializers
 from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
@@ -12,7 +13,7 @@ class RenameUserView(generics.UpdateAPIView):
     def update(self, request, *args, **kwargs):
         new_username = request.data.get('username')
         if not new_username:
-            raise serializers.ValidationError({'username': ['This field is required.']})
+            raise serializers.ValidationError({'username': [MessagesException.ValidationError.FIELD_REQUIRED]})
         players_queryset = ChatParticipants.objects.filter(user_id=kwargs['user_id'])
         updated_count = players_queryset.update(username=new_username)
 

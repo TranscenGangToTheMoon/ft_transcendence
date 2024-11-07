@@ -1,5 +1,6 @@
+from lib_transcendence.exceptions import MessagesException, ResourceExists
 from rest_framework import serializers
-from rest_framework.exceptions import NotFound, PermissionDenied
+from rest_framework.exceptions import NotFound
 
 from friend_requests.models import FriendRequests
 from friends.utils import is_friendship
@@ -33,12 +34,12 @@ class FriendsSerializer(serializers.ModelSerializer):
         user_send_friend_request = validate_username(validated_data.pop('username'), user_accept)
 
         if is_friendship(user_accept, user_send_friend_request):
-            raise PermissionDenied({'username': ['You are already friends with this user.']})
+            raise ResourceExists(MessagesException.ResourceExists.FRIEND)
 
         try:
             user_accept.received_friend_requests.get(sender=user_send_friend_request).delete()
         except FriendRequests.DoesNotExist:
-            raise NotFound({'username': ['No friend request exists with this user.']})
+            raise NotFound(MessagesException.NotFound.FRIEND_REQUEST)
 
         result = super().create(validated_data)
         result.friends.add(user_accept, user_send_friend_request)

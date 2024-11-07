@@ -1,5 +1,6 @@
 from typing import Literal
 
+from lib_transcendence.exceptions import MessagesException
 from lib_transcendence.request import request_service
 from rest_framework import permissions, serializers
 from rest_framework.exceptions import NotAuthenticated, NotFound
@@ -52,12 +53,12 @@ class IsAuthenticated(permissions.BasePermission):
 def get_user(request=None, id=None):
     if id is None:
         if request is None:
-            raise serializers.ValidationError('Request is required.')
+            raise serializers.ValidationError(MessagesException.ValidationError.REQUEST_REQUIRED)
         id = request.user.id
     try:
         return Users.objects.get(pk=id)
     except Users.DoesNotExist:
-        raise NotFound('User does not exist.')
+        raise NotFound(MessagesException.NotFound.USER)
 
 
 def validate_username(username, self_user):
@@ -67,5 +68,5 @@ def validate_username(username, self_user):
         assert valide_username.is_guest is False
         assert not valide_username.block.filter(blocked=self_user).exists()
     except (Users.DoesNotExist, AssertionError):
-        raise NotFound({'username': ['This user does not exist.']})
     return valide_username
+        raise NotFound(MessagesException.NotFound.USER)
