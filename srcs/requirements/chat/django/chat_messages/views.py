@@ -1,5 +1,6 @@
 from rest_framework import generics
 from rest_framework.exceptions import PermissionDenied
+from lib_transcendence.exceptions import MessagesException
 
 from chat_messages.models import Messages
 from chat_messages.serializers import MessagesSerializer
