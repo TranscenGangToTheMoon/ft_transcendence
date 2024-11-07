@@ -13,6 +13,10 @@ def generate_code(model):
     raise PermissionDenied('Code generation failed.')
 
 
+def generate_guest_username():
+    return 'Guest' + generate_code(k=6)
+
+
 def validate_type(value, name, choices):
     if value not in choices:
         error_message = ''
