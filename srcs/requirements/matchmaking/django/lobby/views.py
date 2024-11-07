@@ -1,7 +1,7 @@
-from lib_transcendence.GameMode import GameMode
-from rest_framework import generics, serializers
-from rest_framework.exceptions import NotFound, PermissionDenied
+from lib_transcendence.game import GameMode
 from lib_transcendence.exceptions import MessagesException
+from rest_framework import generics
+from rest_framework.exceptions import PermissionDenied
 
 from lobby.models import Lobby, LobbyParticipants
 from lobby.serializers import LobbySerializer, LobbyParticipantsSerializer

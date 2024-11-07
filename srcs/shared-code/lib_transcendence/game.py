@@ -20,3 +20,18 @@ class GameMode:
 
     def __str__(self):
         return 'Game mode'
+
+
+class Bo:
+    bo1 = 1
+    bo3 = 3
+    bo5 = 5
+
+    all = [bo1, bo3, bo5]
+
+    @staticmethod
+    def validate(bo):
+        return validate_type(bo, Bo(), Bo.all)
+
+    def __str__(self):
+        return 'Best of'

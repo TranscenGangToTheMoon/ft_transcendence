@@ -1,5 +1,6 @@
-from lib_transcendence.GameMode import GameMode
 from lib_transcendence.exceptions import MessagesException, ResourceExists
+from lib_transcendence.game import GameMode
+from lib_transcendence.game import Bo
 from lib_transcendence.Lobby import MatchType, Teams
 from lib_transcendence.auth import get_auth_user
 from lib_transcendence.utils import generate_code
@@ -64,9 +65,7 @@ class LobbySerializer(serializers.ModelSerializer):
 
     @staticmethod
     def validate_bo(value):
-        if value not in (1, 3, 5):
-            raise serializers.ValidationError(['BO must be 1, 3 or 5.'])
-        return value
+        return Bo.validate(value)
 
     def create(self, validated_data):
         user = get_auth_user(self.context.get('request'))
