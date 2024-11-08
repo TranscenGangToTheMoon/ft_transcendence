@@ -83,6 +83,7 @@ clean		:
 
 vclean		:
 			$(COMPOSE) $(FLAGS) down -v --remove-orphans
+			rm -rf $(ENV_FILE)
 
 fclean		:
 			$(COMPOSE) $(FLAGS) down -v --rmi all --remove-orphans
@@ -93,7 +94,8 @@ fclean		:
 
 dusting		:
 			find . -path "*/migrations/*.py" -not -name "__init__.py" -delete
-			rm -rf `find . | grep __pycache__`
+			find . -path "*/__pycache__/*" -delete
+			find . -path "*/__pycache__" -delete
 #			rm -rf `find . | grep __init__.py`
 #			rm -rf `find . | grep db.sqlite3`
 
