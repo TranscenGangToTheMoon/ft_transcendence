@@ -92,7 +92,7 @@ fclean		:
 #			rm -rf $(SECRETS_D)
 
 dusting		:
-			rm -rf `find . | grep migrations`
+			find . -path "*/migrations/*.py" -not -name "__init__.py" -delete
 			rm -rf `find . | grep __pycache__`
 #			rm -rf `find . | grep __init__.py`
 #			rm -rf `find . | grep db.sqlite3`
