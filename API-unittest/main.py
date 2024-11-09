@@ -6,7 +6,7 @@ SERVICES = [
     # 'matchmaking',
     # 'users',
     'lobby',
-    # 'tournament',
+    'tournament',
     # 'auth',
     # 'friends',
     # 'block',
