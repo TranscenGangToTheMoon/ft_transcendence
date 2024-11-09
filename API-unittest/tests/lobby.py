@@ -1,20 +1,10 @@
-import unittest
-
 from services.block import block_user
 from services.lobby import create_lobby, join_lobby, kick_user
 from utils.credentials import new_user, guest_user
-from utils.request import make_request
+from utils.unittest import UnitTest
 
 
-class Lobby(unittest.TestCase):
-
-    def assertResponse(self, response, status_code, json=None):
-        self.assertEqual(status_code, response.status_code)
-        if json is not None:
-            self.assertEqual(json, response.json)
-
-
-class Test01_JoinLobby(Lobby):
+class Test01_JoinLobby(UnitTest):
 
     def test_001_create_lobby(self):
         self.assertResponse(create_lobby(), 201)
@@ -27,7 +17,7 @@ class Test01_JoinLobby(Lobby):
         self.assertResponse(join_lobby(code), 201)
 
 
-class Test02_ErrorJoinLobby(Lobby):
+class Test02_ErrorJoinLobby(UnitTest):
 
     def test_001_lobby_does_not_exist(self):
         self.assertResponse(join_lobby('123456'), 404, {'detail': 'Lobby not found.'})
@@ -108,7 +98,7 @@ class Test02_ErrorJoinLobby(Lobby):
         self.assertEqual(3, len(response.json))
 
 
-class Test03_KickLobby(Lobby):
+class Test03_KickLobby(UnitTest):
 
     def test_001_kick_lobby(self):
         user1 = new_user()
@@ -169,7 +159,7 @@ class Test03_KickLobby(Lobby):
         self.assertResponse(kick_user(user1, {'id': 123456789}, code), 404, {'detail': 'This user does not belong to this lobby.'})
 
 
-class Test04_UpdateLobby(Lobby):
+class Test04_UpdateLobby(UnitTest):
 
     def test_001_update_lobby(self):
         user1 = new_user()
@@ -253,7 +243,7 @@ class Test04_UpdateLobby(Lobby):
                     break
 
 
-class Test05_UpdateParticipantLobby(Lobby):
+class Test05_UpdateParticipantLobby(UnitTest):
 
     def test_001_set_ready_to_true(self):
         user1 = new_user()
@@ -311,7 +301,7 @@ class Test05_UpdateParticipantLobby(Lobby):
         self.assertResponse(join_lobby(code, user2, data={'team': 'Team A'}, method='PATCH'), 403, {'detail': 'Team is full.'})
 
 
-class Test06_LeaveLobby(Lobby):
+class Test06_LeaveLobby(UnitTest):
 
     def test_001_leave_lobby(self):
         user1 = new_user()
@@ -382,7 +372,7 @@ class Test06_LeaveLobby(Lobby):
         self.assertEqual(1, len(response.json))
 
 
-class Test07_GetLobby(Lobby):
+class Test07_GetLobby(UnitTest):
 
     def test_001_get_lobby(self):
         user1 = new_user()
