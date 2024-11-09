@@ -3,7 +3,7 @@ from services.chat import accept_chat, create_chat
 from services.friend import create_friend, send_friend_request
 from utils.credentials import new_user, guest_user
 from utils.generate_random import rnstr
-from utils.unittest import UnitTest
+from utils.my_unittest import UnitTest
 
 
 class Test01_CreateChat(UnitTest):

@@ -1,7 +1,7 @@
 from services.block import block_user
 from services.lobby import create_lobby, join_lobby, kick_user
 from utils.credentials import new_user, guest_user
-from utils.unittest import UnitTest
+from utils.my_unittest import UnitTest
 
 
 class Test01_JoinLobby(UnitTest):

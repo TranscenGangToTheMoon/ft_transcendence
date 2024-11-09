@@ -1,9 +1,7 @@
-import unittest
-
 from services.lobby import create_lobby, join_lobby
 from services.play import play
 from utils.credentials import new_user, guest_user
-from utils.unittest import UnitTest
+from utils.my_unittest import UnitTest
 
 
 class Test01_Play(UnitTest):
