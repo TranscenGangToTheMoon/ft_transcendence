@@ -10,6 +10,7 @@ SERVICES = [
     # 'auth',
     # 'friends',
     # 'block',
+    'play',
 ]
 
 
