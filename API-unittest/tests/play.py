@@ -35,7 +35,7 @@ class Test02_PlayError(UnitTest):
         self.assertResponse(play(user1), 201)
 
         response = create_lobby(user1, method='GET')
-        self.assertResponse(response, 200, {'detail': 'You are not in any lobby.'})
+        self.assertResponse(response, 200, {'detail': 'You do not belong to any lobby.'})
         code = response.json['code']
 
         self.assertResponse(join_lobby(code, user1, 'GET'), 404, {'detail': 'Lobby not found.'})
