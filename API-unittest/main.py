@@ -1,7 +1,7 @@
 import unittest
 
 SERVICES = [
-    # 'chat',
+    'chat',
     # 'game',
     # 'matchmaking',
     # 'users',
