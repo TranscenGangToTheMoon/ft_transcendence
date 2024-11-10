@@ -39,6 +39,8 @@ class Tournaments(models.Model):
             name += ' STARTED'
         return name
 
+    str_name = 'tournament'
+
 
 class TournamentStage(models.Model):
     tournament = models.ForeignKey(Tournaments, on_delete=models.CASCADE, related_name='stages')
@@ -99,3 +101,4 @@ class TournamentParticipants(models.Model):
             name += ' eliminate at'
         name += ' ' + self.stage.label
         return
+    str_name = 'tournament'

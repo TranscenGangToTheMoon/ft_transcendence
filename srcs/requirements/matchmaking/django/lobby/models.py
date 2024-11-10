@@ -45,6 +45,8 @@ class Lobby(models.Model):
             name += ' {bo' + str(self.bo) + ', ' + self.match_type + '}'
         return name
 
+    str_name = 'lobby'
+
 
 class LobbyParticipants(models.Model):
     lobby = models.ForeignKey(Lobby, on_delete=models.CASCADE, related_name='participants')
@@ -82,3 +84,5 @@ class LobbyParticipants(models.Model):
         if self.team is not None:
             name += f" '{self.team}'"
         return name
+
+    str_name = 'lobby'
