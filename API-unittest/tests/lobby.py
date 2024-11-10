@@ -404,13 +404,12 @@ class Test07_GetLobby(UnitTest):
 
     def test_003_get_lobby_participant_does_not_join(self):
         user1 = new_user()
-        user2 = new_user()
 
         response = create_lobby(user1)
         self.assertResponse(response, 201)
         code = response.json['code']
 
-        self.assertResponse(join_lobby(code, user2, 'GET'), 403, {'detail': 'You do not belong to this lobby.'})
+        self.assertResponse(join_lobby(code, new_user(), 'GET'), 403, {'detail': 'You do not belong to this lobby.'})
 
 
 if __name__ == '__main__':
