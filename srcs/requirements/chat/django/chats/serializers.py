@@ -27,7 +27,7 @@ class ChatPaticipantsSerializer(serializers.ModelSerializer):
 class ChatsSerializer(serializers.ModelSerializer):
     username = serializers.CharField(write_only=True)
     participants = ChatPaticipantsSerializer(many=True, read_only=True)
-    type = serializers.CharField() # todo test if work
+    type = serializers.CharField()
     view_chat = serializers.BooleanField(write_only=True, required=False)
 
     class Meta:
@@ -88,6 +88,7 @@ class ChatsSerializer(serializers.ModelSerializer):
             except ChatParticipants.DoesNotExist:
                 raise PermissionDenied(MessagesException.PermissionDenied.NOT_BELONG_TO_CHAT)
         return super().update(instance, validated_data)
+    # todo return last message
 
 
 class BlockChatSerializer(serializers.ModelSerializer):
