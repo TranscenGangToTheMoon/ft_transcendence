@@ -75,7 +75,7 @@ class Test02_ErrorJoinLobby(UnitTest):
         self.assertResponse(block_user(user1, user2['username']), 201)
 
         response = join_lobby(code, user1, 'GET')
-        self.assertEqual(200, response.status_code)
+        self.assertResponse(response, 200)
         self.assertEqual(1, len(response.json))
 
         self.assertResponse(create_lobby(user2, method='GET'), 404, {'detail': 'You do not belong to any lobby.'})
@@ -94,7 +94,7 @@ class Test02_ErrorJoinLobby(UnitTest):
         self.assertResponse(block_user(user2, user3['username']), 201)
 
         response = join_lobby(code, user1, 'GET')
-        self.assertEqual(200, response.status_code)
+        self.assertResponse(response, 200)
         self.assertEqual(3, len(response.json))
 
 
@@ -112,7 +112,7 @@ class Test03_KickLobby(UnitTest):
         self.assertResponse(kick_user(user1, user2, code), 204)
 
         response = join_lobby(code, user1, 'GET')
-        self.assertEqual(200, response.status_code)
+        self.assertResponse(response, 200)
         self.assertEqual(1, len(response.json))
 
     def test_002_user_kick_not_join_lobby(self):
@@ -169,7 +169,7 @@ class Test04_UpdateLobby(UnitTest):
         code = response.json['code']
 
         response = create_lobby(user1, {'bo': 1, 'match_type': '3v3'}, 'PATCH')
-        self.assertEqual(200, response.status_code)
+        self.assertResponse(response, 200)
         self.assertEqual(1, response.json['bo'])
         self.assertEqual('3v3', response.json['match_type'])
 
@@ -253,7 +253,7 @@ class Test05_UpdateParticipantLobby(UnitTest):
         code = response.json['code']
 
         response = join_lobby(code, user1, data={'is_ready': True})
-        self.assertEqual(200, response.status_code)
+        self.assertResponse(response, 200)
         self.assertEqual(True, response.json['is_ready'])
 
     def test_002_change_team(self):

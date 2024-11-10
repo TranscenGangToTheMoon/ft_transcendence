@@ -81,7 +81,7 @@ class Test02_ErrorJoinTournament(UnitTest):
         self.assertResponse(block_user(user1, user2['username']), 201)
 
         response = join_tournament(code, user1, 'GET')
-        self.assertEqual(200, response.status_code)
+        self.assertResponse(response, 200)
         self.assertEqual(1, len(response.json))
 
         self.assertResponse(create_tournament(user2, method='GET'), 404, {'detail': 'You do not belong to any tournament.'})
@@ -100,7 +100,7 @@ class Test02_ErrorJoinTournament(UnitTest):
         self.assertResponse(block_user(user2, user3['username']), 201)
 
         response = join_tournament(code, user1, 'GET')
-        self.assertEqual(200, response.status_code)
+        self.assertResponse(response, 200)
         self.assertEqual(3, len(response.json))
 
 
@@ -118,7 +118,7 @@ class Test03_KickTournament(UnitTest):
         self.assertResponse(kick_user(user1, user2, code), 204)
 
         response = join_tournament(code, user1, 'GET')
-        self.assertEqual(200, response.status_code)
+        self.assertResponse(response, 200)
         self.assertEqual(1, len(response.json))
 
     def test_002_user_kick_not_join_tournament(self):
