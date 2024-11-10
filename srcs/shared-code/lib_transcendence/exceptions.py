@@ -8,7 +8,6 @@ class MessagesException:
         USER_NOT_IN_GAME = 'This user is not in a game.'
 
         NOT_FOUND = '{obj} not found.'
-        LOBBY = NOT_FOUND.format(obj='Lobby')
         CREATOR = NOT_FOUND.format(obj='Creator')
         USER = NOT_FOUND.format(obj='User')
         FRIEND_REQUEST = NOT_FOUND.format(obj='Friend request')
@@ -22,6 +21,7 @@ class MessagesException:
         REQUIRED = '{obj} is required.'
         USER_ID_REQUIRED = REQUIRED.format(obj='User id')
         REQUEST_REQUIRED = REQUIRED.format(obj='Request')
+        REQUEST_DATA_REQUIRED = REQUIRED.format(obj='Request data')
         FIELD_REQUIRED = REQUIRED.format(obj='This field')
 
         _OBJS_REQUIRED = '{obj} are required.'
@@ -38,6 +38,7 @@ class MessagesException:
         ONLY_1V1_3V3_ALLOWED = 'Only 1v1 and 3v3 are allowed.'
         BO_MUST_BE = 'Best of must be 1, 3 or 5.'
 
+        TEAMS_LIST = 'Teams must be a list.'
         TEAMS_NOT_EQUAL = 'Both teams must have the same number of players.'
 
         GAME_MODE_PLAYERS = '{obj} mode must have {n} players in each teams.'
@@ -64,6 +65,7 @@ class MessagesException:
         NOT_BELONG = 'You do not belong to this {obj}.'
         NOT_BELONG_TO_CHAT = NOT_BELONG.format(obj='chat')
         NOT_BELONG_LOBBY = NOT_BELONG.format(obj='lobby')
+        NOT_BELONG_TOURNAMENT = NOT_BELONG.format(obj='tournament')
 
         ONLY_CREATE_PRIVATE_MESSAGES = 'You can only create private messages.'
 
@@ -74,10 +76,10 @@ class MessagesException:
 
         CANNOT_UPDATE_GAME_MODE = 'You cannot update game mode.'
 
-        _IS_FULL = '{obj} is full.'
-        LOBBY_IS_FULL = _IS_FULL.format(obj='Lobby')
-        TEAM_IS_FULL = _IS_FULL.format(obj='Team')
-        TOURNAMENT_IS_FULL = _IS_FULL.format(obj='Tournament')
+        IS_FULL = '{obj} is full.'
+        TEAM_IS_FULL = IS_FULL.format(obj='Team')
+
+        TOURNAMENT_ALREADY_STARTED = 'Tournament already started.'
 
         UPDATE_CLASH_MODE = f'You cannot update {GameMode.clash} lobby.'
         UPDATE_TEAM_CLASH_MODE = f'You cannot update team in {GameMode.clash} mode.'
@@ -98,17 +100,19 @@ class MessagesException:
 
     class Conflict:
         DEFAULT = 'Conflict.'
-        USER_ALREADY_IN_GAME = 'User is already in a game.'
-        ALREADY_IN_TOURNAMENT = 'You are already in a tournament.'
+        _ALREADY = 'You are already in a {obj}.'
+        ALREADY_IN_GAME = _ALREADY.format(obj='game')
+        ALREADY_IN_TOURNAMENT = _ALREADY.format(obj='tournament')
 
     class ResourceExists:
         DEFAULT = 'Resource already exists.'
         CHAT = 'You are already chat with this user.'
-        LOBBY = 'You already joined this lobby.'
         TEAM = 'You are already in this team.'
         BLOCK = 'You are already blocked this user.'
         FRIEND = 'You are already friends with this user.'
         FRIEND_REQUEST = 'You already send a friend requests to this user.'
+
+        JOIN = 'You already joined this {obj}.'
 
     class ServiceUnavailable:
         SERVICE_UNAVAILABLE = 'Failed to connect to {service} service.'
