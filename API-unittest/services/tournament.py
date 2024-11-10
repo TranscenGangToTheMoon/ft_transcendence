@@ -33,6 +33,19 @@ def join_tournament(code, user=None, method: Literal['GET', 'POST', 'PATCH', 'DE
     )
 
 
+def search_tournament(query=None, user=None, data=None):
+    if user is None:
+        user = new_user()
+    if data is None:
+        data = {'q': query}
+    return make_request(
+        endpoint='play/tournament/search/',
+        method='GET',
+        token=user['token'],
+        data=data,
+    )
+
+
 def kick_user(user, user_kick, code):
     return make_request(
         endpoint=f'play/tournament/{code}/kick/{user_kick["id"]}/',
