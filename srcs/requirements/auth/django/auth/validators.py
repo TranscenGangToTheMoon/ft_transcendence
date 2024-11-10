@@ -15,7 +15,7 @@ def validate_username(value):
         raise serializers.ValidationError(MessagesException.ValidationError.USERNAME_LONGER_THAN_3_CHAR)
     if len(value) > 30:
         raise serializers.ValidationError(MessagesException.ValidationError.USERNAME_SHORTER_THAN_30_CHAR)
-    if any(char in valid_charset for char in value):
+    if any(char not in valid_charset for char in value):
         raise serializers.ValidationError(MessagesException.ValidationError.INVALIDE_CHAR)
     if User.objects.filter(username__iexact=value).exists():
         raise serializers.ValidationError(MessagesException.ValidationError.USERNAME_ALREAY_EXISTS)
