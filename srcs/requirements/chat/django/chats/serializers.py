@@ -1,7 +1,7 @@
 from lib_transcendence import endpoints
 from lib_transcendence.Chat import ChatType
 from lib_transcendence.auth import get_auth_user
-from lib_transcendence.services import requests_users
+from lib_transcendence.services import request_users
 from lib_transcendence.utils import get_host
 from rest_framework import serializers
 from rest_framework.exceptions import MethodNotAllowed, PermissionDenied
@@ -68,7 +68,7 @@ class ChatsSerializer(serializers.ModelSerializer):
         if get_chat_together(user['username'], username):
             raise ResourceExists(MessagesException.ResourceExists.CHAT)
 
-        user2 = requests_users(request, endpoints.Users.fchat.format(user1_id=user.id, username2=username), 'GET')
+        user2 = request_users(endpoints.Users.fchat.format(user1_id=user['id'], username2=username), 'GET', request)
 
         if get_host(request) != 'chat':
             validated_data['type'] = 'private_message'
