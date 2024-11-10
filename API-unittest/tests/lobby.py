@@ -1,4 +1,4 @@
-from services.block import block_user
+from services.block import blocked_user
 from services.lobby import create_lobby, join_lobby, kick_user
 from utils.credentials import new_user, guest_user
 from utils.my_unittest import UnitTest
@@ -52,7 +52,7 @@ class Test02_ErrorJoinLobby(UnitTest):
     def test_006_no_game_mode(self):
         self.assertResponse(create_lobby(data={}), 400, {'game_mode': ['This field is required.']})
 
-    def test_007_block_user_cannot_join(self):
+    def test_007_blocked_user_cannot_join(self):
         user1 = new_user()
         user2 = new_user()
 
@@ -60,10 +60,10 @@ class Test02_ErrorJoinLobby(UnitTest):
         self.assertResponse(response, 201)
         code = response.json['code']
 
-        self.assertResponse(block_user(user1, user2['username']), 201)
+        self.assertResponse(blocked_user(user1, user2['username']), 201)
         self.assertResponse(join_lobby(code, user2), 404, {'detail': 'Lobby not found.'})
 
-    def test_008_block_user_kick_user(self):
+    def test_008_blocked_user_kick_user(self):
         user1 = new_user()
         user2 = new_user()
 
@@ -72,7 +72,7 @@ class Test02_ErrorJoinLobby(UnitTest):
         code = response.json['code']
 
         self.assertResponse(join_lobby(code, user2), 201)
-        self.assertResponse(block_user(user1, user2['username']), 201)
+        self.assertResponse(blocked_user(user1, user2['username']), 201)
 
         response = join_lobby(code, user1, 'GET')
         self.assertResponse(response, 200)
@@ -80,7 +80,7 @@ class Test02_ErrorJoinLobby(UnitTest):
 
         self.assertResponse(create_lobby(user2, method='GET'), 404, {'detail': 'You do not belong to any lobby.'})
 
-    def test_009_block_user_not_creator(self):
+    def test_009_blocked_user_not_creator(self):
         user1 = new_user()
         user2 = new_user()
         user3 = new_user()
@@ -91,7 +91,7 @@ class Test02_ErrorJoinLobby(UnitTest):
 
         self.assertResponse(join_lobby(code, user2), 201)
         self.assertResponse(join_lobby(code, user3), 201)
-        self.assertResponse(block_user(user2, user3['username']), 201)
+        self.assertResponse(blocked_user(user2, user3['username']), 201)
 
         response = join_lobby(code, user1, 'GET')
         self.assertResponse(response, 200)

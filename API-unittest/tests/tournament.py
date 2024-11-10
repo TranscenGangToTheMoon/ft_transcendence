@@ -1,5 +1,5 @@
-from services.block import block_user
 from services.tournament import create_tournament, join_tournament, kick_user
+from services.block import blocked_user
 from utils.credentials import new_user, guest_user
 from utils.my_unittest import UnitTest
 
@@ -59,7 +59,7 @@ class Test02_ErrorTournament(UnitTest):
     def test_006_no_name(self):
         self.assertResponse(create_tournament(data={}), 400, {'name': ['This field is required.']})
 
-    def test_007_block_user_cannot_join(self):
+    def test_007_blocked_user_cannot_join(self):
         user1 = new_user()
         user2 = new_user()
 
@@ -67,10 +67,10 @@ class Test02_ErrorTournament(UnitTest):
         self.assertResponse(response, 201)
         code = response.json['code']
 
-        self.assertResponse(block_user(user1, user2['username']), 201)
+        self.assertResponse(blocked_user(user1, user2['username']), 201)
         self.assertResponse(join_tournament(code, user2), 404, {'detail': 'Tournament not found.'})
 
-    def test_008_block_user_kick_user(self):
+    def test_008_blocked_user_kick_user(self):
         user1 = new_user()
         user2 = new_user()
 
@@ -79,7 +79,7 @@ class Test02_ErrorTournament(UnitTest):
         code = response.json['code']
 
         self.assertResponse(join_tournament(code, user2), 201)
-        self.assertResponse(block_user(user1, user2['username']), 201)
+        self.assertResponse(blocked_user(user1, user2['username']), 201)
 
         response = join_tournament(code, user1, 'GET')
         self.assertResponse(response, 200)
@@ -87,7 +87,7 @@ class Test02_ErrorTournament(UnitTest):
 
         self.assertResponse(create_tournament(user2, method='GET'), 404, {'detail': 'You do not belong to any tournament.'})
 
-    def test_009_block_user_not_creator(self):
+    def test_009_blocked_user_not_creator(self):
         user1 = new_user()
         user2 = new_user()
         user3 = new_user()
@@ -98,7 +98,7 @@ class Test02_ErrorTournament(UnitTest):
 
         self.assertResponse(join_tournament(code, user2), 201)
         self.assertResponse(join_tournament(code, user3), 201)
-        self.assertResponse(block_user(user2, user3['username']), 201)
+        self.assertResponse(blocked_user(user2, user3['username']), 201)
 
         response = join_tournament(code, user1, 'GET')
         self.assertResponse(response, 200)
