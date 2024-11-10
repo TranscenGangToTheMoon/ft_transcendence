@@ -49,7 +49,7 @@ class LobbyKickView(generics.DestroyAPIView):
         kick_yourself(self.kwargs['user_id'], self.request.user.id)
         lobby = get_lobby(self.kwargs['code'])
         get_lobby_participant(lobby, self.request.user.id, True)
-        return get_kick_participants('lobby', lobby, self.kwargs['user_id'])
+        return get_kick_participants(lobby, self.kwargs['user_id'])
 
 
 lobby_view = LobbyView.as_view()
