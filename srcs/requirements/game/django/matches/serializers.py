@@ -22,6 +22,8 @@ def validate_user_id(value, return_user=False):
 
 
 def validate_team(value):
+    if type(value) is not list:
+        raise serializers.ValidationError(MessagesException.ValidationError.TEAMS_LIST)
     if len(value) != 2:
         raise serializers.ValidationError(MessagesException.ValidationError.TEAM_REQUIRED)
     if len(value[0]) not in (1, 3):
