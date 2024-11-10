@@ -17,15 +17,15 @@ class Chat:
     base_chat = base_api + 'chat/'
 
     chats = base_chat
-    chat = base_chat + '<int:pk>/'
-    messages = base_chat + '<int:pk>/messages/'
+    chat = chats + '<int:pk>/'
+    messages = chat + 'messages/'
 
 
 class Game:
     base_game = base_api + 'game/'
 
     match = base_api + 'match/'
-    fmatch_user = base_api + 'match/{user_id}/'
+    fmatch_user = match + '{user_id}/'
     match_user = fmatch_user.format(user_id='<int:user_id>')
     tournaments = base_api + 'tournaments/'
 
@@ -40,13 +40,13 @@ class Matchmaking:
     ranked = base_matchmaking + 'ranked/'
 
     lobby = base_matchmaking + 'lobby/'
-    lobby_participant = base_matchmaking + 'lobby/<str:code>/'
-    lobby_kick = base_matchmaking + 'lobby/<str:code>/kick/<int:user_id>/'
+    lobby_participant = lobby + '<str:code>/'
+    lobby_kick = lobby_participant + 'kick/<int:user_id>/'
 
     tournament = base_matchmaking + 'tournament/'
-    tournament_search = base_matchmaking + 'tournament/search/'
-    tournament_participant = base_matchmaking + 'tournament/<str:code>/'
-    tournament_kick = base_matchmaking + 'tournament/<str:code>/kick/<int:user_id>/'
+    tournament_search = tournament + 'search/'
+    tournament_participant = tournament + '<str:code>/'
+    tournament_kick = tournament + '<str:code>/kick/<int:user_id>/'
 
     tournament_result_match = base_api + 'tournament/result-match/'
 
@@ -57,13 +57,13 @@ class Users:
     me = base_users + 'me/'
     user = base_users + '<int:pk>/'
 
-    friends = base_users + 'me/friends/'
-    friend = base_users + 'me/friends/<int:pk>/'
-    friend_requests = base_users + 'me/friend_requests/'
-    friend_request = base_users + 'me/friend_requests/<int:pk>/'
-    friend_requests_receive = base_users + 'me/friend_requests/receive/'
+    friends = me + 'friends/'
+    friend = friends + '<int:pk>/'
+    friend_requests = me + 'friend_requests/'
+    friend_request = friend_requests + '<int:pk>/'
+    friend_requests_receive = friend_requests + 'receive/'
 
-    blocked = base_users + 'me/blocked/'
+    blocked = me + 'blocked/'
     blocked_user = blocked + '<int:pk>/'
 
     fchat = base_api + 'chat/{user1_id}/{username2}/'
