@@ -9,6 +9,8 @@ from lib_transcendence.services import request_users
 class IsAuthenticated(permissions.BasePermission):
 
     def has_permission(self, request, view):
+        if type(request.data) is not dict:
+            raise ParseError(MessagesException.ValidationError.REQUEST_DATA_REQUIRED)
         json_data = request_users(endpoints.Users.me, 'GET', request)
         request.data['auth_user'] = json_data
         request.user.id = json_data['id']

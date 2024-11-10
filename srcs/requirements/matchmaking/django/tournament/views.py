@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
 
 from lib_transcendence.exceptions import MessagesException
+from lib_transcendence.serializer import SerializerContext
 from lib_transcendence.services import request_game
 from lib_transcendence import endpoints
 from rest_framework import generics, serializers
