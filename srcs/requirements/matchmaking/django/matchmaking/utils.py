@@ -68,18 +68,20 @@ def get_lobby(code, create=False):
 def get_tournament(create=False, **kwargs):
     return get_place('tournament', Tournaments, create, **kwargs)
 
+def verify_place(user, model, request):
+    if are_users_blocked(request, model, user['id']):
+        raise NotFound(MessagesException.NotFound.NOT_FOUND.format(obj=model.str_name.title()))
 
-# -------------------- CREATE MATCH ---------------------------------------------------------------------------------- #
-# todo move to library
-def create_match(tournament_id, stage_id, teams):
-    data = {
-        'tournament_id': tournament_id,
-        'tournament_stage_id': stage_id,
-        'game_mode': 'tournament',
-        'teams': teams
-    }
+    if model.participants.filter(user_id=user['id']).exists():
+        raise ResourceExists(MessagesException.ResourceExists.JOIN.format(obj=model.str_name))
 
-    requests_game('match/', data=data)
+    if model.str_name == GameMode.tournament and model.is_started:
+        raise PermissionDenied(MessagesException.PermissionDenied.TOURNAMENT_ALREADY_STARTED)
+
+    verify_user(user['id'])
+
+    if model.is_full:
+        raise PermissionDenied(MessagesException.PermissionDenied.IS_FULL.format(obj=model.str_name.title()))
 
 
 # -------------------- GET PARTICIPANT ------------------------------------------------------------------------------- #

@@ -8,7 +8,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied, NotFound
 
 from lobby.models import Lobby, LobbyParticipants
-from matchmaking.utils import verify_user, can_join, get_lobby
+from matchmaking.utils import verify_user, get_lobby, verify_place
 
 
 class LobbyGetParticipantsSerializer(serializers.ModelSerializer):
@@ -133,19 +133,10 @@ class LobbyParticipantsSerializer(serializers.ModelSerializer):
         return Teams.validate(value)
 
     def create(self, validated_data):
+        user = self.context['auth_user']
         lobby = get_lobby(self.context.get('code'), True)
-        user = get_auth_user(self.context.get('request'))
 
-        if lobby.participants.filter(user_id=user['id']).exists():
-            raise ResourceExists(MessagesException.ResourceExists.LOBBY)
-
-        if not can_join(self.context.get('request'), lobby, user['id']):
-            raise NotFound(MessagesException.NotFound.LOBBY)
-
-        verify_user(user['id'])
-
-        if lobby.is_full:
-            raise PermissionDenied(MessagesException.PermissionDenied.LOBBY_IS_FULL)
+        verify_place(user, lobby, self.context.get('request'))
 
         validated_data['lobby'] = lobby
         validated_data['user_id'] = user['id']
