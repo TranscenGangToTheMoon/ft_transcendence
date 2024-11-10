@@ -30,11 +30,8 @@ class BlockUserView(generics.DestroyAPIView):
         if blocked_user is None:
             return
 
-        if user.get_location_id() == block_user.get_location_id():
-            if user.creator:
-                block_user.delete()
-            else:
-                user.delete()
+        if user.get_location_id() == blocked_user.get_location_id() and user.creator:
+            blocked_user.delete()
 
 
 class DeleteUserView(generics.DestroyAPIView):
