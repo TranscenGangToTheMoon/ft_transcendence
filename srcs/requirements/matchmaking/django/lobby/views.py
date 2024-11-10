@@ -23,6 +23,7 @@ class LobbyParticipantsView(generics.ListCreateAPIView, generics.UpdateAPIView, 
     queryset = LobbyParticipants.objects.all()
     serializer_class = LobbyParticipantsSerializer
     pagination_class = None
+    # todo return tournament instance when create
 
     def filter_queryset(self, queryset):
         lobby = get_lobby(self.kwargs.get('code'))
