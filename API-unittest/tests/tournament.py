@@ -1,6 +1,7 @@
-from services.tournament import create_tournament, join_tournament, kick_user
 from services.block import blocked_user
+from services.tournament import create_tournament, join_tournament, kick_user, search_tournament
 from utils.credentials import new_user, guest_user
+from utils.generate_random import rnstr
 from utils.my_unittest import UnitTest
 
 
