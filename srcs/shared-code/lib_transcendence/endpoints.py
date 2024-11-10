@@ -63,19 +63,19 @@ class Users:
     friend_request = base_users + 'me/friend_requests/<int:pk>/'
     friend_requests_receive = base_users + 'me/friend_requests/receive/'
 
-    block = base_users + 'me/block/'
-    block_user = base_users + 'me/block/<int:pk>/'
+    blocked = base_users + 'me/blocked/'
+    blocked_user = blocked + '<int:pk>/'
 
     fchat = base_api + 'chat/{user1_id}/{username2}/'
     chat = fchat.format(user1_id='<int:user1_id>', username2='<str:username2>')
-    fblocked = base_api + 'blocked/{user1_id}/{user2_id}/'
-    blocked = fblocked.format(user1_id='<int:user1_id>', user2_id='<int:user2_id>')
+    fare_blocked = base_api + 'blocked/{user1_id}/{user2_id}/'
+    are_blocked = fare_blocked.format(user1_id='<int:user1_id>', user2_id='<int:user2_id>')
 
 
 class UsersManagement:
     rename_user = base_api + 'rename-user/<int:user_id>/'
-    fblocked_user = base_api + 'block-user/{user_id}/{block_user_id}/'
-    blocked_user = fblocked_user.format(user_id='<int:user_id>', block_user_id='<int:block_user_id>')
+    fblocked_user = base_api + 'blocked-user/{user_id}/{blocked_user_id}/'
+    blocked_user = fblocked_user.format(user_id='<int:user_id>', blocked_user_id='<int:blocked_user_id>')
     delete_user = base_api + 'delete-user/<int:user_id>/'
 
 

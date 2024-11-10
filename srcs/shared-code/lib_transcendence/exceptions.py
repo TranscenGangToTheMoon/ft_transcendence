@@ -90,6 +90,7 @@ class MessagesException:
         BLOCK_USER = 'You block this user.'
 
         SEND_MORE_THAN_20_FRIEND_REQUESTS = 'You cannot send more than 20 friend requests at the same time.'
+        BLOCK_MORE_THAN_50_USERS = 'You cannot block more than 50 users.'
 
         _NOT_ACCEPT = 'This user does not accept {obj}.'
         NOT_ACCEPT_CHAT = _NOT_ACCEPT.format(obj='new chat')

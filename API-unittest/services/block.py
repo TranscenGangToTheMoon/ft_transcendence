@@ -1,9 +1,9 @@
 from utils.request import make_request
 
 
-def block_user(user, username):
+def blocked_user(user, username):
     return make_request(
-        endpoint='users/me/block/',
+        endpoint='users/me/blocked/',
         method='POST',
         data={'username': username},
         token=user['token'],

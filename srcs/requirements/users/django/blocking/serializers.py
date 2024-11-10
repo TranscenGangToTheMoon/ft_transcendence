@@ -1,21 +1,21 @@
 from lib_transcendence.exceptions import MessagesException, ResourceExists
-from lib_transcendence.services import requests_chat, requests_matchmaking
+from lib_transcendence.services import request_chat, request_matchmaking
 from lib_transcendence import endpoints
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied, NotFound
 
-from block.models import Blocks
+from blocking.models import BlockedUsers
 from friends.utils import get_friendship
 from users.auth import get_user, get_valid_user
 
 
-class BlockSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(write_only=True)
+class BlockedSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(write_only=True) # todo change to user_id
     user = serializers.SerializerMethodField(read_only=True)
     blocked = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
-        model = Blocks
+        model = BlockedUsers
         fields = '__all__'
 
     @staticmethod
@@ -29,17 +29,20 @@ class BlockSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user = get_user(self.context.get('request'))
 
-        block_user = get_valid_user(user, validated_data.pop('username'))
+        if user.blocked.count() >= 50:
+            raise PermissionDenied(MessagesException.PermissionDenied.BLOCK_MORE_THAN_50_USERS)
 
-        if block_user.id == user.id:
+        blocked_user = get_valid_user(user, validated_data.pop('username'))
+
+        if blocked_user.id == user.id:
             raise PermissionDenied(MessagesException.PermissionDenied.BLOCK_YOURSELF)
 
-        if user.block.filter(blocked=block_user).exists():
+        if user.blocked.filter(blocked=blocked_user).exists():
             raise ResourceExists(MessagesException.ResourceExists.BLOCK)
 
-        endpoint = endpoints.UsersManagement.fblocked_user.format(user_id=user.id, block_user_id=block_user.id)
+        endpoint = endpoints.UsersManagement.fblocked_user.format(user_id=user.id, blocked_user_id=blocked_user.id)
         try:
-            requests_chat(
+            request_chat(
                 endpoint=endpoint,
                 data={'blocked': True},
             )
@@ -47,7 +50,7 @@ class BlockSerializer(serializers.ModelSerializer):
             pass
 
         try:
-            requests_matchmaking(
+            request_matchmaking(
                 endpoint=endpoint,
                 method='DELETE',
             )
@@ -57,11 +60,11 @@ class BlockSerializer(serializers.ModelSerializer):
         # todo remove chat
         # todo check remove from lobby
 
-        friendship = get_friendship(user, block_user)
+        friendship = get_friendship(user, blocked_user)
         if friendship:
             friendship.delete()
-        user.sent_friend_requests.filter(receiver=block_user).delete()
-        block_user.sent_friend_requests.filter(receiver=user).delete()
+        user.sent_friend_requests.filter(receiver=blocked_user).delete()
+        blocked_user.sent_friend_requests.filter(receiver=user).delete()
         validated_data['user'] = user
-        validated_data['blocked'] = block_user
+        validated_data['blocked'] = blocked_user
         return super().create(validated_data)

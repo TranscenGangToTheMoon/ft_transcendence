@@ -9,7 +9,7 @@ SERVICES = [
     'tournament',
     # 'auth',
     # 'friends',
-    # 'block',
+    # 'blocked',
     'play',
 ]
 

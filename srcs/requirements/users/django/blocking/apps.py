@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
 
-class BlockConfig(AppConfig):
+class BlockingConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'block'
+    name = 'blocking'
