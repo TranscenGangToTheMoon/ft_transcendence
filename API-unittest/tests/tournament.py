@@ -4,7 +4,7 @@ from utils.credentials import new_user, guest_user
 from utils.my_unittest import UnitTest
 
 
-class Test01_JoinTournament(UnitTest):
+class Test01_Tournament(UnitTest):
 
     def test_001_create_tournament(self):
         self.assertResponse(create_tournament(), 201)
@@ -17,7 +17,7 @@ class Test01_JoinTournament(UnitTest):
         self.assertResponse(join_tournament(code), 201)
 
 
-class Test02_ErrorJoinTournament(UnitTest):
+class Test02_ErrorTournament(UnitTest):
 
     def test_001_tournament_does_not_exist(self):
         self.assertResponse(join_tournament('123456'), 404, {'detail': 'Tournament not found.'})
@@ -39,7 +39,7 @@ class Test02_ErrorJoinTournament(UnitTest):
         self.assertResponse(response, 201)
 
         code = response.json['code']
-        for _ in range(2):
+        for _ in range(3):
             self.assertResponse(join_tournament(code), 201)
         self.assertResponse(join_tournament(code), 403, {'detail': 'Tournament is full.'})
 
@@ -48,9 +48,10 @@ class Test02_ErrorJoinTournament(UnitTest):
         self.assertResponse(response, 201)
 
         code = response.json['code']
-        for _ in range(2):
+        for _ in range(3):
             self.assertResponse(join_tournament(code), 201)
-        self.assertResponse(join_tournament(code), 403, {'detail': 'Tournament is full.'})
+
+        self.assertResponse(join_tournament(code), 403, {'detail': 'Tournament already started.'})
 
     def test_005_guest_create_tournament(self):
         self.assertResponse(create_tournament(guest_user()), 403, {'detail': 'Guest users cannot create tournament.'})
@@ -102,6 +103,23 @@ class Test02_ErrorJoinTournament(UnitTest):
         response = join_tournament(code, user1, 'GET')
         self.assertResponse(response, 200)
         self.assertEqual(3, len(response.json))
+
+    def test_010_create_two_tournament(self):
+        user1 = new_user()
+
+        self.assertResponse(create_tournament(user1), 201)
+        self.assertResponse(create_tournament(user1), 403, {'detail': 'You cannot create more than one tournament at the same time.'})
+
+    def test_011_create_two_tournament_leave_first(self):
+        user1 = new_user()
+
+        response = create_tournament(user1)
+        self.assertResponse(response, 201)
+        code = response.json['code']
+        self.assertResponse(join_tournament(code), 201)
+
+        self.assertResponse(join_tournament(code, user1, 'DELETE'), 204)
+        self.assertResponse(create_tournament(user1), 403, {'detail': 'You cannot create more than one tournament at the same time.'})
 
 
 class Test03_KickTournament(UnitTest):
@@ -170,157 +188,60 @@ class Test04_UpdateTournament(UnitTest):
     def test_001_update_tournament(self):
         user1 = new_user()
 
-        response = create_tournament(user1, data={'game_mode': 'custom_game'})
+        response = create_tournament(user1)
         self.assertResponse(response, 201)
         code = response.json['code']
 
-        response = create_tournament(user1, {'bo': 1, 'match_type': '3v3'}, 'PATCH')
-        self.assertEqual(200, response.status_code)
-        self.assertEqual(1, response.json['bo'])
-        self.assertEqual('3v3', response.json['match_type'])
-
-    def test_002_invalid_match_type(self):
-        user1 = new_user()
-
-        self.assertResponse(create_tournament(user1, data={'game_mode': 'custom_game'}), 201)
-        self.assertResponse(create_tournament(user1, data={'match_type': 42}, method='PATCH'), 400, {'match_type': ["Match type must be '1v1' or '3v3'."]})
-        self.assertResponse(create_tournament(user1, data={'match_type': 'cac'}, method='PATCH'), 400, {'match_type': ["Match type must be '1v1' or '3v3'."]})
-
-    def test_003_invalid_bo(self):
-        user1 = new_user()
-
-        self.assertResponse(create_tournament(user1, data={'game_mode': 'custom_game'}), 201)
-        self.assertResponse(create_tournament(user1, data={'bo': 42}, method='PATCH'), 400, {'bo': ['Best of must be 1, 3 or 5.']})
-        self.assertResponse(create_tournament(user1, data={'bo': 'caca'}, method='PATCH'), 400, {'bo': ['A valid integer is required.']})
-
-    def test_004_update_not_creator(self):
-        user1 = new_user()
-        user2 = new_user()
-
-        response = create_tournament(user1, data={'game_mode': 'custom_game'})
-        self.assertResponse(response, 201)
-        code = response.json['code']
-
-        self.assertResponse(join_tournament(code, user2), 201)
-        self.assertResponse(create_tournament(user2, data={'bo': 3}, method='PATCH'), 403, {'detail': 'Only creator can update this tournament.'})
-
-    def test_005_update_clash(self):
-        user1 = new_user()
-
-        self.assertResponse(create_tournament(user1), 201)
-        self.assertResponse(create_tournament(user1, data={'bo': 1}, method='PATCH'), 403, {'detail': 'You cannot update clash tournament.'})
-
-    def test_006_update_game_mode(self):
-        user1 = new_user()
-
-        self.assertResponse(create_tournament(user1, data={'game_mode': 'custom_game'}), 201)
-        self.assertResponse(create_tournament(user1, data={'game_mode': 'clash'}, method='PATCH'), 403, {'detail': 'You cannot update game mode.'})
-
-    def test_007_update_match_type_when_full(self):
-        user1 = new_user()
-        users = []
-
-        response = create_tournament(user1, data={'game_mode': 'custom_game'})
-        self.assertResponse(response, 201)
-        code = response.json['code']
-
-        response = create_tournament(user1, data={'match_type': '3v3'}, method='PATCH')
-        self.assertResponse(response, 200)
-        self.assertEqual('3v3', response.json['match_type'])
-
-        teams = ['Team A', 'Team A', 'Team B', 'Team B', 'Team B']
-        for i in range(5):
-            users.append(new_user())
-            response = join_tournament(code, users[i])
-            self.assertResponse(response, 201)
-            self.assertEqual(teams[i], response.json['team'])
-
-        response = create_tournament(user1, data={'match_type': '1v1'}, method='PATCH')
-        self.assertResponse(response, 200)
-        self.assertEqual('1v1', response.json['match_type'])
-
-        teams = ['Spectator', 'Spectator', 'Team B', 'Spectator', 'Spectator']
-        for i in range(5):
-            response = join_tournament(code, users[i], method='GET')
-            self.assertResponse(response, 200)
-            for user in response.json:
-                if user['id'] == users[i]['id']:
-                    self.assertEqual(teams[i], user['team'])
-                    break
+        self.assertResponse(create_tournament(user1, {'size': 12, 'name': 'coucou'}, 'PATCH'), 405, {'detail': 'Method "PATCH" not allowed.'})
 
 
 class Test05_UpdateParticipantTournament(UnitTest):
 
-    def test_001_set_ready_to_true(self):
+    def test_001_update_participant(self):
         user1 = new_user()
 
         response = create_tournament(user1)
         self.assertResponse(response, 201)
         code = response.json['code']
 
-        response = join_tournament(code, user1, data={'is_ready': True})
-        self.assertEqual(200, response.status_code)
-        self.assertEqual(True, response.json['is_ready'])
-
-    def test_002_change_team(self):
-        user1 = new_user()
-
-        response = create_tournament(user1, data={'game_mode': 'custom_game'})
-        self.assertResponse(response, 201)
-        code = response.json['code']
-
-        response = join_tournament(code, user1, data={'team': 'Team B'})
-        self.assertResponse(response, 200)
-        self.assertEqual('Team B', response.json['team'])
-
-        response = join_tournament(code, user1, data={'team': 'Spectator'})
-        self.assertResponse(response, 200)
-        self.assertEqual('Spectator', response.json['team'])
-
-    def test_003_change_invalid_team(self):
-        user1 = new_user()
-
-        response = create_tournament(user1, data={'game_mode': 'custom_game'})
-        self.assertResponse(response, 201)
-        code = response.json['code']
-
-        self.assertResponse(join_tournament(code, user1, data={'team': 'Team caca'}), 400, {'team': ["Match type must be 'Team A', 'Team B' or 'Spectator'."]})
-
-    def test_004_change_team_already_in(self):
-        user1 = new_user()
-
-        response = create_tournament(user1, data={'game_mode': 'custom_game'})
-        self.assertResponse(response, 201)
-        code = response.json['code']
-
-        self.assertResponse(join_tournament(code, user1, data={'team': 'Team A'}), 409, {'detail': 'You are already in this team.'})
-
-    def test_005_change_team_full(self):
-        user1 = new_user()
-        user2 = new_user()
-
-        response = create_tournament(user1, data={'game_mode': 'custom_game'})
-        self.assertResponse(response, 201)
-        code = response.json['code']
-
-        self.assertResponse(join_tournament(code, user2), 201)
-        self.assertResponse(join_tournament(code, user2, data={'team': 'Team A'}, method='PATCH'), 403, {'detail': 'Team is full.'})
+        self.assertResponse(join_tournament(code, user1, data={'index': 2}), 405, {'detail': 'Method "PATCH" not allowed.'})
 
 
 class Test06_LeaveTournament(UnitTest):
 
-    def test_001_leave_tournament(self):
+    def test_001_leave_tournament_then_destroy(self):
         user1 = new_user()
+        users = [new_user() for _ in range(2)]
 
         response = create_tournament(user1)
         self.assertResponse(response, 201)
         code = response.json['code']
+        name = response.json['name']
+
+        for u in users:
+            self.assertResponse(join_tournament(code, u), 201)
 
         self.assertResponse(join_tournament(code, user1, 'DELETE'), 204)
         self.assertResponse(join_tournament(code, user1, 'GET'), 403, {'detail': 'You do not belong to this tournament.'})
         self.assertResponse(create_tournament(user1, method='GET'), 404, {'detail': 'You do not belong to any tournament.'})
 
-    def test_002_leave_tournament_then_other_member_became_creator(self):
+        response = search_tournament(name, user1)
+        self.assertResponse(response, 200)
+        self.assertEqual(1,  len(response.json['results']))
+
+        for u in users:
+            self.assertResponse(join_tournament(code, u, 'GET'), 200)
+
+        for u in users:
+            self.assertResponse(join_tournament(code, u, 'DELETE'), 204)
+            self.assertResponse(join_tournament(code, u, 'GET'), 403, {'detail': 'You do not belong to this tournament.'})
+            self.assertResponse(create_tournament(u, method='GET'), 404, {'detail': 'You do not belong to any tournament.'})
+
+        response = search_tournament(name, user1)
+        self.assertResponse(response, 200)
+        self.assertEqual(0,  len(response.json['results']))
+
+    def test_002_leave_tournament(self):
         user1 = new_user()
         user2 = new_user()
 
@@ -334,20 +255,6 @@ class Test06_LeaveTournament(UnitTest):
         response = join_tournament(code, user2, 'GET')
         self.assertResponse(response, 200)
         self.assertEqual(1, len(response.json))
-        self.assertEqual(True, response.json[0]['creator'])
-
-    def test_003_guest_join_leave_tournament_then_destroy_tournament(self):
-        user1 = new_user()
-        user2 = guest_user()
-
-        response = create_tournament(user1)
-        self.assertResponse(response, 201)
-        code = response.json['code']
-
-        self.assertResponse(join_tournament(code, user2), 201)
-        self.assertResponse(join_tournament(code, user1, 'DELETE'), 204)
-        self.assertResponse(join_tournament(code, user2, 'GET'), 403, {'detail': 'You do not belong to this tournament.'})
-        self.assertResponse(create_tournament(user2, method='GET'), 404, {'detail': 'You do not belong to any tournament.'})
 
     def test_004_leave_tournament_does_not_exist(self):
         self.assertResponse(join_tournament('123456', method='DELETE'), 403, {'detail': 'You do not belong to this tournament.'})
@@ -376,6 +283,22 @@ class Test06_LeaveTournament(UnitTest):
         response = join_tournament(code, user1, 'GET')
         self.assertResponse(response, 200)
         self.assertEqual(1, len(response.json))
+
+    def test_007_leave_tournament_then_come_back_still_creator(self):
+        user1 = new_user()
+        user2 = new_user()
+
+        response = create_tournament(user1)
+        self.assertResponse(response, 201)
+        code = response.json['code']
+
+        self.assertResponse(join_tournament(code, user2), 201)
+
+        self.assertResponse(join_tournament(code, user1, 'DELETE'), 204)
+
+        response = join_tournament(code, user1)
+        self.assertResponse(response, 201)
+        self.assertEqual(True, response.json['creator'])
 
 
 class Test07_GetTournament(UnitTest):
@@ -410,14 +333,50 @@ class Test07_GetTournament(UnitTest):
 
     def test_003_get_tournament_participant_does_not_join(self):
         user1 = new_user()
-        user2 = new_user()
 
         response = create_tournament(user1)
         self.assertResponse(response, 201)
         code = response.json['code']
 
-        self.assertResponse(join_tournament(code, user2, 'GET'), 403, {'detail': 'You do not belong to this tournament.'})
+        self.assertResponse(join_tournament(code, new_user(), 'GET'), 403, {'detail': 'You do not belong to this tournament.'})
+
+    def test_004_search_tournaments(self):
+        user1 = new_user()
+        name = rnstr()
+
+        for i in range(5):
+            self.assertResponse(create_tournament(new_user(), data={'name': 'Tournoi ' + name + rnstr()}), 201)
+
+        self.assertResponse(create_tournament(new_user(), data={'name': 'coucou' + name}), 201)
+
+        response = search_tournament('coucou' + name, user1)
+        self.assertResponse(response, 200)
+        self.assertEqual(1, len(response.json['results']))
+
+        response = search_tournament('Tournoi ' + name, user1)
+        self.assertResponse(response, 200)
+        self.assertEqual(5, len(response.json['results']))
+
+    def test_005_search_private_tournament(self):
+        user1 = new_user()
+        user2 = new_user()
+
+        self.assertResponse(create_tournament(user1, data={'name': 'private' + rnstr(), 'private': True}), 201)
+
+        response = search_tournament('private', user2)
+        self.assertResponse(response, 200)
+        self.assertEqual(0, len(response.json['results']))
+
+        response = search_tournament('private', user1)
+        self.assertResponse(response, 200)
+        self.assertEqual(1, len(response.json['results']))
+
+    def test_006_search_tournament_none(self):
+        response = search_tournament('caca')
+        self.assertResponse(response, 200)
+        self.assertEqual(0, len(response.json['results']))
 
 
+# todo test start after make it
 if __name__ == '__main__':
     unittest.main()
