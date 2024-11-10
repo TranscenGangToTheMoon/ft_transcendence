@@ -23,7 +23,10 @@ def validate_type(value, name, choices):
     if value not in choices:
         error_message = ''
         for choice in choices:
-            error_message += f"'{choice}'"
+            if isinstance(choice, int):
+                error_message += f"{choice}"
+            else:
+                error_message += f"'{choice}'"
             if choice == choices[-2]:
                 error_message += ' or '
             elif choice != choices[-1]:
