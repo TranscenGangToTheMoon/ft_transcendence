@@ -4,7 +4,7 @@ from lib_transcendence.utils import generate_code
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
 
-from matchmaking.utils import verify_user, get_tournament, create_match
+from matchmaking.utils import verify_user, get_tournament, verify_place
 from tournament.models import Tournaments, TournamentStage, TournamentParticipants
 
 
@@ -50,7 +50,7 @@ class TournamentSerializer(serializers.ModelSerializer):
         if user['is_guest']:
             raise PermissionDenied(MessagesException.PermissionDenied.GUEST_CANNOT_CREATE_TOURNAMENT)
 
-        verify_user(user['id'], False)
+        verify_user(user['id'], True)
 
         validated_data['code'] = generate_code(Tournaments)
         validated_data['created_by'] = user['id']
@@ -91,40 +91,41 @@ class TournamentParticipantsSerializer(serializers.ModelSerializer):
         ]
 
     def create(self, validated_data):
+        user = self.context['auth_user']
         tournament = get_tournament(create=True, code=self.context.get('code'))
 
-        if tournament.is_started:
-            raise PermissionDenied(MessagesException.PermissionDenied.TOURNAMENT_IS_FULL)
+        verify_place(user, tournament, self.context.get('request'))
 
-        if tournament.is_full:
-            raise PermissionDenied(MessagesException.PermissionDenied.TOURNAMENT_IS_FULL)
-
-        user = self.context['auth_user']
-        verify_user(user['id'])
-
+        if tournament.created_by == user['id']:
+            validated_data['creator'] = True
         validated_data['user_id'] = user['id']
         validated_data['trophies'] = user['trophies']
         validated_data['tournament'] = tournament
         result = super().create(validated_data)
         # todo websocket: send to tournament chat that user 'xxx' join team
 
-        if int(tournament.size * (80 / 100)) < tournament.participants.count():
-            first_stage = tournament.start()
-            # todo make seeding
-            participants = tournament.participants.all().order_by('seeding')
-
-            for p in participants:
-                p.stage = first_stage
-                p.save()
-
-            index = 0
-            for i in range(int(tournament.size / 2)):
-                participants[i].index = index
-                participants[i].save()
-                if participants.count() > tournament.size - i - 1:
-                    create_match(tournament.id, first_stage.id, [[participants[i].user_id], [participants[tournament.size - i - 1].user_id]])
-                else:
-                    participants[i].win()
-                index += 1
+        if tournament.size == tournament.participants.count():
+            tournament.start()
+        # if tournament.start_at is None and int(tournament.size * (80 / 100)) < tournament.participants.count(): todo make
+        #     Thread(target=tournament.start_timer).start()
 
         return result
+
+
+class TournamentSearchSerializer(serializers.ModelSerializer):
+    n_participants = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Tournaments
+        fields = [
+            'name',
+            'code',
+            'private',
+            'n_participants',
+            'size',
+            'created_by', #todo send ??
+        ]
+
+    @staticmethod
+    def get_n_participants(obj):
+        return obj.participants.count()

@@ -1,25 +1,55 @@
+from datetime import datetime, timezone, timedelta
 from math import log2
+import time
 
 from django.db import models
 from lib_transcendence.Tournament import Tournament
+
+from matchmaking.create_match import create_tournament_match
 
 
 class Tournaments(models.Model):
     code = models.CharField(max_length=4, unique=True, editable=False)
     name = models.CharField(max_length=50, unique=True)
     size = models.IntegerField(default=16)
-    is_public = models.BooleanField(default=True)
+    private = models.BooleanField(default=False)
     is_started = models.BooleanField(default=False)
+    start_at = models.DateTimeField(default=None, null=True)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     created_by = models.IntegerField()
 
-    def start(self):
+    def start_timer(self):
+        self.start_at = datetime.now(timezone.utc) + timedelta(seconds=20)
+        self.save()
         # todo websocket: send that game start in ...
-        # todo wait 20 seconds before start
-        # self.start_at = datetime.now(timezone.utc) + timedelta(seconds=20)
+        # todo est ce que lon peut quiter ?
+        # todo si oui est ce qe ca cancel le timer
+        # todo 30 sec
+        # todo 3 when full (on peu plus quitter)
+
+        time.sleep(20)
+        self.start()
+
+    def start(self):
         self.is_started = True
         self.save()
-        return TournamentStage.objects.create(tournament=self, label=Tournament.get_label(self.n_stage)) # todo create direclty from self.stage
+        first_stage = TournamentStage.objects.create(tournament=self, label=Tournament.get_label(self.n_stage)) # todo create direclty from self.stage
+        # todo make seeding
+        participants = self.participants.all().order_by('seeding')
+
+        for p in participants:
+            p.stage = first_stage
+            p.save()
+
+        index = 0
+        for i in range(int(self.size / 2)):
+            participants[i].index = index
+            participants[i].save()
+            if participants.count() > self.size - i - 1:
+                create_tournament_match(self.id, first_stage.id, [[participants[i].user_id], [participants[self.size - i - 1].user_id]])
+            else:
+                participants[i].win()
+            index += 1
 
     @property
     def is_full(self):
@@ -30,7 +60,7 @@ class Tournaments(models.Model):
         return int(log2(self.size))
 
     def __str__(self):
-        if not self.is_public:
+        if self.private:
             name = '*'
         else:
             name = ''
@@ -99,6 +129,8 @@ class TournamentParticipants(models.Model):
             name += ' in'
         else:
             name += ' eliminate at'
-        name += ' ' + self.stage.label
-        return
+        if self.stage is not None:
+            name += ' ' + self.stage.label
+        return name
+
     str_name = 'tournament'

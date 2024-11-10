@@ -1,5 +1,6 @@
 from datetime import datetime, timezone
 
+from django.db.models import Q
 from lib_transcendence.exceptions import MessagesException
 from lib_transcendence.serializer import SerializerContext
 from lib_transcendence.services import request_game
@@ -9,10 +10,11 @@ from rest_framework.exceptions import PermissionDenied, NotFound
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
-from matchmaking.utils import get_tournament_participant, get_tournament, create_match, get_kick_participants, \
-    kick_yourself
+from matchmaking.create_match import create_tournament_match
+from matchmaking.utils import get_tournament_participant, get_tournament, get_kick_participants, kick_yourself
 from tournament.models import Tournaments, TournamentParticipants
-from tournament.serializers import TournamentSerializer, TournamentParticipantsSerializer, TournamentStageSerializer
+from tournament.serializers import TournamentSerializer, TournamentStageSerializer, TournamentParticipantsSerializer, \
+    TournamentSearchSerializer
 
 
 class TournamentView(generics.CreateAPIView, generics.RetrieveAPIView):
@@ -20,20 +22,20 @@ class TournamentView(generics.CreateAPIView, generics.RetrieveAPIView):
     serializer_class = TournamentSerializer
 
     def get_object(self):
-        return Tournaments.objects.get(id=get_tournament_participant(None, self.request.user.id, True).tournament_id)
+        return Tournaments.objects.get(id=get_tournament_participant(None, self.request.user.id, from_place=True).tournament_id)
 
 
 class TournamentSearchView(generics.ListAPIView):
-    serializer_class = TournamentSerializer
+    serializer_class = TournamentSearchSerializer
 
-    def get_queryset(self):
-        query = self.request.data.pop('q', None)
+    def get_queryset(self): # todo filter all blocked users
+        query = self.request.data.get('q')
         if query is None:
             raise serializers.ValidationError({'q': [MessagesException.ValidationError.FIELD_REQUIRED]})
-        return Tournaments.objects.filter(name__icontains=query)
+        return Tournaments.objects.filter(Q(private=False) | Q(created_by=self.request.user.id), name__icontains=query) # todo don't show particiapant, only number of join participants
 
 
-class TournamentParticipantsView(generics.ListCreateAPIView, generics.DestroyAPIView):
+class TournamentParticipantsView(SerializerContext, generics.ListCreateAPIView, generics.DestroyAPIView):
     queryset = TournamentParticipants.objects.all()
     serializer_class = TournamentParticipantsSerializer
     pagination_class = None
@@ -41,21 +43,17 @@ class TournamentParticipantsView(generics.ListCreateAPIView, generics.DestroyAPI
 
     def filter_queryset(self, queryset):
         tournament = get_tournament(code=self.kwargs.get('code'))
-        return queryset.filter(tournament_id=tournament.id)
+        queryset = queryset.filter(tournament_id=tournament.id)
+        if self.request.user.id not in queryset.values_list('user_id', flat=True):
+            raise PermissionDenied(MessagesException.PermissionDenied.NOT_BELONG_TOURNAMENT)
+        return queryset
 
     def get_object(self):
         return get_tournament_participant(get_tournament(code=self.kwargs.get('code')), self.request.user.id)
 
-    def get_serializer_context(self):
-        context = super().get_serializer_context()
-        context['code'] = self.kwargs.get('code')
-        context['auth_user'] = self.request.data['auth_user']
-        return context
-
 
 class TournamentKickView(generics.DestroyAPIView):
     serializer_class = TournamentParticipantsSerializer
-    lookup_field = 'user_id'
 
     def get_object(self):
         kick_yourself(self.kwargs['user_id'], self.request.user.id)
@@ -65,7 +63,7 @@ class TournamentKickView(generics.DestroyAPIView):
         if tournament.is_started:
             raise PermissionDenied(MessagesException.PermissionDenied.KICK_AFTER_START)
 
-        return get_kick_participants('tournament', tournament, self.kwargs['user_id'])
+        return get_kick_participants(tournament, self.kwargs['user_id'])
 
 
 class TournamentResultMatchView(generics.CreateAPIView):
@@ -107,7 +105,7 @@ class TournamentResultMatchView(generics.CreateAPIView):
             ct = participants.count()
 
             for i in range(0, ct, 2):
-                create_match(
+                create_tournament_match(
                     tournament.id,
                     participants[i].stage.id,
                     [
