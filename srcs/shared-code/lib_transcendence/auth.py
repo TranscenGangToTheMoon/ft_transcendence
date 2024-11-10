@@ -1,7 +1,7 @@
 from lib_transcendence.exceptions import MessagesException
 from lib_transcendence import endpoints
 from rest_framework import serializers, permissions
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import ParseError
 
 from lib_transcendence.services import request_users
 
