@@ -65,7 +65,6 @@ def make_match():
 	return "finished matchmaking"
 
 def launch_matchmaking(request):
-	sleep(20)
 	while (True):
 		sleep(1)
 		make_match()
