@@ -45,9 +45,9 @@ document.getElementById("loginButton").addEventListener('click', event => {
                 await fetchUserInfos(true);
                 loadUserProfile();
                 if (window.location.pathname.includes('login'))
-                    await navigateTo('/');
+                    navigateTo('/');
                 else
-                    await navigateTo(window.location.pathname);
+                    handleRoute();
                 return;//todo redirect to uri
             }
             if (data.username) {
@@ -66,7 +66,3 @@ document.getElementById("loginButton").addEventListener('click', event => {
         })
         .catch(error => console.log('error a gerer1', error))
 })
-
-// document.querySelector('dropdown-menu').addEventListener('mousedown', event => {
-//     event.preventDefault();
-// })

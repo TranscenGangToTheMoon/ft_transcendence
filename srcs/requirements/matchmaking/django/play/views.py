@@ -1,5 +1,7 @@
+from lib_transcendence.game import GameMode
+from lib_transcendence.exceptions import MessagesException
 from rest_framework import generics
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import NotFound
 
 from play.models import Players
 from play.serializers import PlayersSerializer
@@ -12,18 +14,18 @@ class PlayMixin(generics.CreateAPIView, generics.DestroyAPIView):
         try:
             return Players.objects.get(user_id=self.request.user.id)
         except Players.DoesNotExist:
-            raise PermissionDenied("You're not currently playing.")
+            raise NotFound(MessagesException.NotFound.NOT_PLAYING)
 
 
 class DuelView(PlayMixin):
     def create(self, request, *args, **kwargs):
-        request.data['game_mode'] = 'duel'
+        request.data['game_mode'] = GameMode.duel
         return super().create(request, *args, **kwargs)
 
 
 class RankedView(PlayMixin):
     def create(self, request, *args, **kwargs):
-        request.data['game_mode'] = 'ranked'
+        request.data['game_mode'] = GameMode.ranked
         return super().create(request, *args, **kwargs)
 
 

@@ -1,0 +1,334 @@
+services:
+##### ========== Django Projects ========================================= #####
+  auth:
+    build:
+      context: "requirements/auth"
+      target: development
+    depends_on:
+      auth-db:
+        condition: service_healthy
+    restart: on-failure
+    ports:
+      - "8001:8000"
+    volumes:
+      - auth-volume:/code
+      - shared-code-volume:/shared
+    environment:
+      TZ: Europe/Paris
+      DEBUG:
+      MIGRATION:
+      POSTGRES_DB: ${POSTGRES_AUTH_DB_NAME}
+      POSTGRES_USER: ${POSTGRES_AUTH_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_AUTH_PASSWORD}
+      POSTGRES_HOST: ${POSTGRES_AUTH_HOST}
+    networks:
+      - transcendence-network
+      - auth-network
+
+  chat:
+    build:
+      context: "requirements/chat"
+      target: development
+    depends_on:
+      chat-db:
+        condition: service_healthy
+    restart: on-failure
+    ports:
+      - "8002:8000"
+    volumes:
+      - chat-volume:/code
+      - shared-code-volume:/shared
+    environment:
+      TZ: Europe/Paris
+      DEBUG:
+      MIGRATION:
+      POSTGRES_DB: ${POSTGRES_CHAT_DB_NAME}
+      POSTGRES_USER: ${POSTGRES_CHAT_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_CHAT_PASSWORD}
+      POSTGRES_HOST: ${POSTGRES_CHAT_HOST}
+    networks:
+      - transcendence-network
+      - chat-network
+
+  frontend:
+    build:
+      context: "requirements/frontend"
+      target: development
+    restart: on-failure
+    ports:
+      - "4443:443"
+    networks:
+      - transcendence-network
+    volumes:
+      - frontend-volume:/var/www/html
+      - ./requirements/frontend/Caddyfile:/etc/caddy/Caddyfile
+    environment:
+      TZ: Europe/Paris
+
+  game:
+    build:
+      context: "requirements/game"
+      target: development
+    depends_on:
+      game-db:
+        condition: service_healthy
+    restart: on-failure
+    ports:
+      - "8003:8000"
+    volumes:
+      - game-volume:/code
+      - shared-code-volume:/shared
+    environment:
+      TZ: Europe/Paris
+      DEBUG:
+      MIGRATION:
+      POSTGRES_DB: ${POSTGRES_GAME_DB_NAME}
+      POSTGRES_USER: ${POSTGRES_GAME_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_GAME_PASSWORD}
+      POSTGRES_HOST: ${POSTGRES_GAME_HOST}
+    networks:
+      - transcendence-network
+      - game-network
+
+  matchmaking:
+    build:
+      context: "requirements/matchmaking"
+      target: development
+    depends_on:
+      matchmaking-db:
+        condition: service_healthy
+    restart: on-failure
+    ports:
+      - "8004:8000"
+    volumes:
+      - matchmaking-volume:/code
+      - shared-code-volume:/shared
+    environment:
+      TZ: Europe/Paris
+      DEBUG:
+      MIGRATION:
+      POSTGRES_DB: ${POSTGRES_MATCHMAKING_DB_NAME}
+      POSTGRES_USER: ${POSTGRES_MATCHMAKING_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_MATCHMAKING_PASSWORD}
+      POSTGRES_HOST: ${POSTGRES_MATCHMAKING_HOST}
+    networks:
+      - transcendence-network
+      - matchmaking-network
+
+  users:
+    build:
+      context: "requirements/users"
+      target: development
+    depends_on:
+      users-db:
+        condition: service_healthy
+    restart: on-failure
+    ports:
+      - "8005:8000"
+    volumes:
+      - users-volume:/code
+      - shared-code-volume:/shared
+    environment:
+      TZ: Europe/Paris
+      DEBUG:
+      MIGRATION:
+      POSTGRES_DB: ${POSTGRES_USERS_DB_NAME}
+      POSTGRES_USER: ${POSTGRES_USERS_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_USERS_PASSWORD}
+      POSTGRES_HOST: ${POSTGRES_USERS_HOST}
+    networks:
+      - transcendence-network
+      - users-network
+
+##### ========== Database ================================================ #####
+  auth-db:
+    image: postgres:14
+    restart: on-failure
+    volumes:
+      - auth-db-volume:/var/lib/postgresql/data
+    environment:
+      TZ: Europe/Paris
+      POSTGRES_DB: ${POSTGRES_AUTH_DB_NAME}
+      POSTGRES_USER: ${POSTGRES_AUTH_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_AUTH_PASSWORD}
+    networks:
+      - auth-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready --dbname=$$POSTGRES_DB --username=$$POSTGRES_USER"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  chat-db:
+    image: postgres:14
+    restart: on-failure
+    volumes:
+      - chat-db-volume:/var/lib/postgresql/data
+    environment:
+      TZ: Europe/Paris
+      POSTGRES_DB: ${POSTGRES_CHAT_DB_NAME}
+      POSTGRES_USER: ${POSTGRES_CHAT_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_CHAT_PASSWORD}
+    networks:
+      - chat-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready --dbname=$$POSTGRES_DB --username=$$POSTGRES_USER"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  game-db:
+    image: postgres:14
+    restart: on-failure
+    volumes:
+      - game-db-volume:/var/lib/postgresql/data
+    environment:
+      TZ: Europe/Paris
+      POSTGRES_DB: ${POSTGRES_GAME_DB_NAME}
+      POSTGRES_USER: ${POSTGRES_GAME_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_GAME_PASSWORD}
+    networks:
+      - game-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready --dbname=$$POSTGRES_DB --username=$$POSTGRES_USER"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  matchmaking-db:
+    image: postgres:14
+    restart: on-failure
+    volumes:
+      - matchmaking-db-volume:/var/lib/postgresql/data
+    environment:
+      TZ: Europe/Paris
+      POSTGRES_DB: ${POSTGRES_MATCHMAKING_DB_NAME}
+      POSTGRES_USER: ${POSTGRES_MATCHMAKING_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_MATCHMAKING_PASSWORD}
+    networks:
+      - matchmaking-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready --dbname=$$POSTGRES_DB --username=$$POSTGRES_USER"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  users-db:
+    image: postgres:14
+    restart: on-failure
+    volumes:
+      - users-db-volume:/var/lib/postgresql/data
+    environment:
+      TZ: Europe/Paris
+      POSTGRES_DB: ${POSTGRES_USERS_DB_NAME}
+      POSTGRES_USER: ${POSTGRES_USERS_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_USERS_PASSWORD}
+    networks:
+      - users-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready --dbname=$$POSTGRES_DB --username=$$POSTGRES_USER"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+##### ========== Global network ========================================== #####
+  transcendence-network:
+    name: transcendence-network
+    driver: bridge
+
+##### ========== DB to Django networks =================================== #####
+  auth-network:
+    name: auth-network
+    driver: bridge
+
+  chat-network:
+    name: chat-network
+    driver: bridge
+
+  game-network:
+    name: game-network
+    driver: bridge
+
+  matchmaking-network:
+    name: matchmaking-network
+    driver: bridge
+
+  users-network:
+    name: users-network
+    driver: bridge
+
+volumes:
+##### ========== Django Volumes ========================================== #####
+  auth-volume:
+    name: auth-volume
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: "requirements/auth/django"
+
+  chat-volume:
+    name: chat-volume
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: "requirements/chat/django"
+
+  frontend-volume:
+    name: frontend-volume
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: "requirements/frontend/static"
+
+  game-volume:
+    name: game-volume
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: "requirements/game/django"
+
+  matchmaking-volume:
+    name: matchmaking-volume
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: "requirements/matchmaking/django"
+
+  users-volume:
+    name: users-volume
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: "requirements/users/django"
+
+#####Database Volumes
+  auth-db-volume:
+    name: "auth-db-volume"
+
+  chat-db-volume:
+    name: "chat-db-volume"
+
+  game-db-volume:
+    name: "game-db-volume"
+
+  matchmaking-db-volume:
+    name: "matchmaking-db-volume"
+
+  users-db-volume:
+    name: "users-db-volume"
+
+#####Shared Code Volume
+  shared-code-volume:
+    name: shared-code-volume
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: "./shared-code"

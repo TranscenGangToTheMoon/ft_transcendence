@@ -3,11 +3,11 @@ from lib_transcendence.utils import validate_type
 
 class ChatType:
     private_message = 'private_message'
-    team = 'team'
+    lobby = 'lobby'
     tournament = 'tournament'
     custom_game = 'custom_game'
 
-    types = [private_message, team, tournament, custom_game]
+    types = [private_message, lobby, tournament, custom_game]
 
     @staticmethod
     def validate(chat_type):

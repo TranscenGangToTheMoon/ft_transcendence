@@ -1,12 +1,11 @@
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 
-from verify.serializers import VerrifyUserSerializer
+from verify.serializers import VerifyUserSerializer
 
 
-# Create your views here.
 class VerifyView(generics.RetrieveAPIView):
-    serializer_class = VerrifyUserSerializer
+    serializer_class = VerifyUserSerializer
     permission_classes = [IsAuthenticated]
 
     def get_object(self):

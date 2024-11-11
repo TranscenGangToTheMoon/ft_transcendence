@@ -1,28 +1,55 @@
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone, timedelta
 from math import log2
+import time
 
 from django.db import models
 from lib_transcendence.Tournament import Tournament
+
+from matchmaking.create_match import create_tournament_match
 
 
 class Tournaments(models.Model):
     code = models.CharField(max_length=4, unique=True, editable=False)
     name = models.CharField(max_length=50, unique=True)
     size = models.IntegerField(default=16)
-    is_public = models.BooleanField(default=True)
+    private = models.BooleanField(default=False)
+    is_started = models.BooleanField(default=False)
     start_at = models.DateTimeField(default=None, null=True)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     created_by = models.IntegerField()
 
-    def start(self):
-        # todo websocket: send that game start in ...
+    def start_timer(self):
         self.start_at = datetime.now(timezone.utc) + timedelta(seconds=20)
         self.save()
-        return TournamentStage.objects.create(tournament=self, label=Tournament.get_label(self.n_stage))
+        # todo websocket: send that game start in ...
+        # todo est ce que lon peut quiter ?
+        # todo si oui est ce qe ca cancel le timer
+        # todo 30 sec
+        # todo 3 when full (on peu plus quitter)
 
-    @property
-    def is_started(self):
-        return self.start_at is not None and self.start_at < datetime.now(timezone.utc)
+        time.sleep(20)
+        self.start()
+
+    def start(self):
+        self.is_started = True
+        self.save()
+        first_stage = TournamentStage.objects.create(tournament=self, label=Tournament.get_label(self.n_stage)) # todo create direclty from self.stage
+        # todo make seeding
+        participants = self.participants.all().order_by('seeding')
+
+        for p in participants:
+            p.stage = first_stage
+            p.save()
+
+        index = 0
+        for i in range(int(self.size / 2)):
+            participants[i].index = index
+            participants[i].save()
+            if participants.count() > self.size - i - 1:
+                create_tournament_match(self.id, first_stage.id, [[participants[i].user_id], [participants[self.size - i - 1].user_id]])
+            else:
+                participants[i].win()
+            index += 1
 
     @property
     def is_full(self):
@@ -32,11 +59,26 @@ class Tournaments(models.Model):
     def n_stage(self):
         return int(log2(self.size))
 
+    def __str__(self):
+        if self.private:
+            name = '*'
+        else:
+            name = ''
+        name += f'{self.code}/{self.name} ({self.participants.count()}/{self.size})'
+        if self.is_started:
+            name += ' STARTED'
+        return name
+
+    str_name = 'tournament'
+
 
 class TournamentStage(models.Model):
     tournament = models.ForeignKey(Tournaments, on_delete=models.CASCADE, related_name='stages')
     label = models.CharField(max_length=50)
     stage = models.IntegerField(default=1)
+
+    def __str__(self):
+        return f'{self.tournament.code}/{self.label} ({self.participants.count()})'
 
 
 class TournamentParticipants(models.Model):
@@ -45,12 +87,21 @@ class TournamentParticipants(models.Model):
     tournament = models.ForeignKey(Tournaments, on_delete=models.CASCADE, related_name='participants')
     stage = models.ForeignKey(TournamentStage, on_delete=models.CASCADE, default=None, null=True, related_name='participants')
     seeding = models.IntegerField(default=None, null=True)
-    index = models.IntegerField(default=None, null=True)
+    index = models.IntegerField(default=None, null=True) #todo make
     still_in = models.BooleanField(default=True)
     creator = models.BooleanField(default=False)
     join_at = models.DateTimeField(auto_now_add=True)
     # todo add delete method and inform players that xxx leave the tournament
     # todo cans leave the tournament if started
+
+    def delete(self, using=None, keep_parents=False):
+        tournament = self.tournament
+        if tournament.is_started:
+            self.eliminate()
+        else:
+            super().delete(using=using, keep_parents=keep_parents)
+            if tournament.participants.count() == 0:
+                tournament.delete()
 
     def get_location_id(self):
         return self.tournament.id
@@ -70,27 +121,16 @@ class TournamentParticipants(models.Model):
         self.save()
         return None
 
-#
-# class UsersQuerySet(models.QuerySet):
-#     def is_not_guest(self):
-#         return self.filter(is_guest=False)
-#
-#     def search(self, query, user=None):
-#         lookup = Q(username__icontains=query) | Q(password__icontains=query)
-#         qs = self.is_not_guest().filter(lookup)
-#         print("query:", query)
-#         print("qs:", qs)
-#         if user is not None:
-#             qs_user = self.filter(django_user=user).filter(lookup)
-#             print("user qs:", qs_user)
-#             qs = (qs | qs_user).distinct()
-#         return qs
-#
-#
-# class UsersManager(models.Manager):
-#     def get_queryset(self): #overide functioj
-#         return UsersQuerySet(self.model, using=self._db)
-#
-#     def search(self, query, user=None):
-#         return self.get_queryset().search(query, user=user)
-#
+    def __str__(self): # todo make __str__ for all models
+        name = f'{self.tournament.code}/ {self.user_id}'
+        if self.creator:
+            name += '*'
+        if self.still_in:
+            name += ' in'
+        else:
+            name += ' eliminate at'
+        if self.stage is not None:
+            name += ' ' + self.stage.label
+        return name
+
+    str_name = 'tournament'

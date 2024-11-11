@@ -1,22 +1,32 @@
-FROM python:3.12.6-slim
-LABEL authors="basil"
+##### Base build
+FROM python:3.13.0-slim AS base
 
 EXPOSE 8000
 
-RUN apt-get update
+RUN apt-get update -y
 RUN apt-get upgrade -y
-RUN apt-get install -y build-essential
-RUN apt-get install -y --no-install-recommends curl net-tools libpq-dev gcc
 
-COPY requirements.txt /
-RUN pip install -r requirements.txt
+COPY init.d /init.d
+
+RUN pip install -r /init.d/requirements.txt
+RUN chmod u+x /init.d/entrypoint.sh
 
 WORKDIR /code
 
-# RUN       daphne game.asgi:application
+##### Development build
+FROM base AS development
 
-COPY entrypoint.sh /
-RUN chmod u+x /entrypoint.sh
+RUN apt-get install -y --no-install-recommends curl net-tools
 
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["/init.d/entrypoint.sh"]
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+
+##### Production build
+FROM base AS production
+
+COPY django /code
+
+RUN pip install daphne
+
+ENTRYPOINT ["/init.d/entrypoint.sh"]
+CMD ["daphne", "-b", "0.0.0.0", "-p", "8000", "game.asgi:application"]

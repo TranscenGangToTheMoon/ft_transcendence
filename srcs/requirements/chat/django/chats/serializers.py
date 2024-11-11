@@ -1,8 +1,12 @@
+from lib_transcendence import endpoints
 from lib_transcendence.Chat import ChatType
 from lib_transcendence.auth import get_auth_user
-from lib_transcendence.services import requests_users
+from lib_transcendence.services import request_users
+from lib_transcendence.utils import get_host
 from rest_framework import serializers
-from rest_framework.exceptions import MethodNotAllowed, NotFound, PermissionDenied
+from rest_framework.exceptions import MethodNotAllowed, PermissionDenied
+from lib_transcendence.exceptions import MessagesException
+from lib_transcendence.exceptions import ResourceExists
 
 from chats.models import Chats, ChatParticipants
 from chats.utils import get_chat_together
@@ -23,7 +27,7 @@ class ChatPaticipantsSerializer(serializers.ModelSerializer):
 class ChatsSerializer(serializers.ModelSerializer):
     username = serializers.CharField(write_only=True)
     participants = ChatPaticipantsSerializer(many=True, read_only=True)
-    type = serializers.CharField(required=False)
+    type = serializers.CharField()
     view_chat = serializers.BooleanField(write_only=True, required=False)
 
     class Meta:
@@ -42,23 +46,15 @@ class ChatsSerializer(serializers.ModelSerializer):
             'created_at',
         ]
 
-    def validate(self, data):
-        request = self.context.get('request')
-        if request is None:
-            raise serializers.ValidationError('Request is required.') # todo move in library
-        if request.get_host().split(':')[0] == 'chat' and 'type' not in data:
-            raise serializers.ValidationError({'type': ['This field is required.']})
-        return data
-
     def validate_type(self, value):
         request = self.context.get('request')
         if request is None:
-            raise serializers.ValidationError('Request is required.')
+            raise serializers.ValidationError(MessagesException.ValidationError.REQUEST_REQUIRED)
+        ChatType.validate(value)
+        if get_host(request) != 'chat' and value != ChatType.private_message:
+            raise PermissionDenied(MessagesException.PermissionDenied.ONLY_CREATE_PRIVATE_MESSAGES)
         if request.method in ('PATCH', 'PUT'):
             raise MethodNotAllowed(request.method)
-        ChatType.validate(value)
-        if request.get_host().split(':')[0] != 'chat' and value != ChatType.private_message:
-            raise PermissionDenied('You can only create private messages')
         return value
 
     def create(self, validated_data):
@@ -67,14 +63,14 @@ class ChatsSerializer(serializers.ModelSerializer):
 
         username = validated_data.pop('username')
         if username == user['username']:
-            raise PermissionDenied({'username': ['You cannot chat with yourself.']})
+            raise PermissionDenied(MessagesException.PermissionDenied.CANNOT_CHAT_YOURSELF)
 
         if get_chat_together(user['username'], username):
-            raise PermissionDenied({'username': ['You are already chat with this user.']})
+            raise ResourceExists(MessagesException.ResourceExists.CHAT)
 
-        user2 = requests_users(request, 'validate/chat/', 'GET', data={'username': username})
+        user2 = request_users(endpoints.Users.fchat.format(user1_id=user['id'], username2=username), 'GET', request)
 
-        if request.get_host().split(':')[0] != 'chat':
+        if get_host(request) != 'chat':
             validated_data['type'] = 'private_message'
         result = super().create(validated_data)
         ChatParticipants.objects.create(user_id=user['id'], username=user['username'], chat_id=result.id)
@@ -90,8 +86,9 @@ class ChatsSerializer(serializers.ModelSerializer):
                 p.view_chat = view_chat
                 p.save()
             except ChatParticipants.DoesNotExist:
-                raise NotFound('You are not in this chat.')
+                raise PermissionDenied(MessagesException.PermissionDenied.NOT_BELONG_TO_CHAT)
         return super().update(instance, validated_data)
+    # todo return last message
 
 
 class BlockChatSerializer(serializers.ModelSerializer):

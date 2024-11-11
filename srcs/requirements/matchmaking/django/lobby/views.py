@@ -1,50 +1,39 @@
-from lib_transcendence.GameMode import GameMode
-from rest_framework import generics, serializers
-from rest_framework.exceptions import NotFound, PermissionDenied
+from lib_transcendence.game import GameMode
+from lib_transcendence.exceptions import MessagesException
+from rest_framework import generics
+from rest_framework.exceptions import PermissionDenied
 
 from lobby.models import Lobby, LobbyParticipants
 from lobby.serializers import LobbySerializer, LobbyParticipantsSerializer
-from matchmaking.utils import get_participants
+from matchmaking.utils import get_lobby, get_lobby_participant, get_kick_participants, kick_yourself
 
 
-def get_lobby_participants(lobby, user_id, creator_check=False):
-    return get_participants('lobby', LobbyParticipants, lobby, user_id, creator_check)
-
-
-def get_lobby(code):
-    if not code:
-        raise serializers.ValidationError({'code': ['Lobby code is required.']})
-    try:
-        return Lobby.objects.get(code=code)
-    except Lobby.DoesNotExist:
-        raise NotFound({'code': ['Lobby does not exist.']})
-
-
-class LobbyView(generics.CreateAPIView, generics.RetrieveUpdateDestroyAPIView):
+class LobbyView(generics.CreateAPIView, generics.RetrieveUpdateAPIView):
     queryset = Lobby.objects.all()
     serializer_class = LobbySerializer
 
     def get_object(self):
-        participant = get_lobby_participants(None, self.request.user.id, self.request.method != 'GET')
+        participant = get_lobby_participant(None, self.request.user.id, self.request.method != 'GET', True)
         if self.request.method in ('PUT', 'PATCH') and participant.lobby.game_mode == GameMode.clash:
-            raise PermissionDenied('You cannot update Clash lobby.')
+            raise PermissionDenied(MessagesException.PermissionDenied.UPDATE_CLASH_MODE)
         return participant.lobby
 
 
 class LobbyParticipantsView(generics.ListCreateAPIView, generics.UpdateAPIView, generics.DestroyAPIView):
     queryset = LobbyParticipants.objects.all()
     serializer_class = LobbyParticipantsSerializer
-    lookup_field = 'code'
+    pagination_class = None
+    # todo return tournament instance when create
 
     def filter_queryset(self, queryset):
         lobby = get_lobby(self.kwargs.get('code'))
-        queryset = queryset.filter(lobby_id=lobby.id) # todo change for see Lobby serializer when list
+        queryset = queryset.filter(lobby_id=lobby.id)
         if self.request.user.id not in queryset.values_list('user_id', flat=True):
-            raise NotFound('You are not a participant of this lobby.')
+            raise PermissionDenied(MessagesException.PermissionDenied.NOT_BELONG_LOBBY)
         return queryset
 
     def get_object(self):
-        return get_lobby_participants(get_lobby(self.kwargs.get('code')), self.request.user.id)
+        return get_lobby_participant(get_lobby(self.kwargs.get('code')), self.request.user.id)
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -54,23 +43,12 @@ class LobbyParticipantsView(generics.ListCreateAPIView, generics.UpdateAPIView, 
 
 class LobbyKickView(generics.DestroyAPIView):
     serializer_class = LobbyParticipantsSerializer
-    lookup_field = 'user_id'
 
     def get_object(self):
-        user_id = self.kwargs.get('user_id')
-        if user_id is None:
-            raise serializers.ValidationError('User id is required.')
-
-        lobby = get_lobby(self.kwargs.get('code'))
-
-        if user_id == self.request.user.id:
-            raise PermissionDenied('You cannot kick yourself.')
-        get_lobby_participants(lobby, self.request.user.id, True)
-
-        try:
-            return lobby.participants.get(user_id=user_id)
-        except LobbyParticipants.DoesNotExist:
-            raise NotFound('This user is not participant of this lobby.')
+        kick_yourself(self.kwargs['user_id'], self.request.user.id)
+        lobby = get_lobby(self.kwargs['code'])
+        get_lobby_participant(lobby, self.request.user.id, True)
+        return get_kick_participants(lobby, self.kwargs['user_id'])
 
 
 lobby_view = LobbyView.as_view()

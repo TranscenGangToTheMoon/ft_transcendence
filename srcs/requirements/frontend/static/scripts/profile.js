@@ -5,15 +5,13 @@ async function loadTabs() {
     }
 
     for (const key in tabFiles){
-        loadContent(tabFiles[key], key);
-        console.log(`je load ${tabFiles[key]} dans la div ${key}`);
+        await loadContent(tabFiles[key], key);
     }
 }
 
-async function atStart() {
+async function profileInit() {
+    await indexInit(false);
     loadTabs();
-    await fetchUserInfos(true);
-    await loadUserProfile();
 }
 
-atStart();
+profileInit();

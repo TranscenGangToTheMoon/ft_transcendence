@@ -1,21 +1,21 @@
-from rest_framework import generics, serializers, status
+from rest_framework import generics, status
 from rest_framework.response import Response
 
 from lobby.models import LobbyParticipants
 from play.models import Players
-from tournament.models import TournamentParticipants, Tournaments
+from tournament.models import TournamentParticipants
 
 
 class BlockUserView(generics.DestroyAPIView):
     permission_classes = []
 
     def destroy(self, request, *args, **kwargs):
-        self.kick_block_user_or_leave(LobbyParticipants)
-        self.kick_block_user_or_leave(TournamentParticipants)
+        self.kick_blocked_user_or_leave(LobbyParticipants)
+        self.kick_blocked_user_or_leave(TournamentParticipants)
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    def kick_block_user_or_leave(self, model):
+    def kick_blocked_user_or_leave(self, model):
         def get_user(user_id):
             try:
                 return model.objects.get(user_id=user_id)
@@ -26,15 +26,12 @@ class BlockUserView(generics.DestroyAPIView):
         if user is None:
             return
 
-        block_user = get_user(self.kwargs['user_block_id'])
-        if block_user is None:
+        blocked_user = get_user(self.kwargs['blocked_user_id'])
+        if blocked_user is None:
             return
 
-        if user.get_location_id() == block_user.get_location_id():
-            if user.creator:
-                block_user.delete()
-            else:
-                user.delete()
+        if user.get_location_id() == blocked_user.get_location_id() and user.creator:
+            blocked_user.delete()
 
 
 class DeleteUserView(generics.DestroyAPIView):
@@ -54,5 +51,5 @@ class DeleteUserView(generics.DestroyAPIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-block_user_view = BlockUserView.as_view()
+blocked_user_view = BlockUserView.as_view()
 delete_user_view = DeleteUserView.as_view()

@@ -1,6 +1,8 @@
 from typing import Literal
 
+from lib_transcendence.exceptions import MessagesException
 from lib_transcendence.request import request_service
+from lib_transcendence.endpoints import Auth
 from rest_framework import permissions, serializers
 from rest_framework.exceptions import NotAuthenticated, NotFound
 
@@ -11,19 +13,19 @@ def requests_auth(token, endpoint: Literal['update/', 'verify/', 'delete/'], met
     if token is None:
         raise NotAuthenticated()
 
-    return request_service('auth', 'auth/' + endpoint, method, data, token)
+    return request_service('auth', endpoint, method, data, token)
 
 
 def auth_verify(token):
-    return requests_auth(token, 'verify/', method='GET')
+    return requests_auth(token, Auth.verify, method='GET')
 
 
 def auth_update(token, data):
-    return requests_auth(token, 'update/', method='PATCH', data=data)
+    return requests_auth(token, Auth.update, method='PATCH', data=data)
 
 
 def auth_delete(token, data):
-    requests_auth(token, 'delete/', method='DELETE', data=data)
+    requests_auth(token, Auth.delete, method='DELETE', data=data)
 
 
 class IsAuthenticated(permissions.BasePermission):
@@ -35,6 +37,7 @@ class IsAuthenticated(permissions.BasePermission):
             return False
 
         try:
+            # todo remake
             user = Users.objects.get(id=json_data['id'])
             if user.is_guest != json_data['is_guest']:
                 user.is_guest = json_data['is_guest']
@@ -52,20 +55,19 @@ class IsAuthenticated(permissions.BasePermission):
 def get_user(request=None, id=None):
     if id is None:
         if request is None:
-            raise serializers.ValidationError('Request is required.')
+            raise serializers.ValidationError(MessagesException.ValidationError.REQUEST_REQUIRED)
         id = request.user.id
     try:
         return Users.objects.get(pk=id)
     except Users.DoesNotExist:
-        raise NotFound('User does not exist.')
+        raise NotFound(MessagesException.NotFound.USER)
 
 
-def validate_username(username, self_user):
+def get_valid_user(self, username):
     try:
-        assert username is not None
-        valide_username = Users.objects.get(username=username)
-        assert valide_username.is_guest is False
-        assert not valide_username.block.filter(blocked=self_user).exists()
+        valide_user = Users.objects.get(username=username)
+        assert valide_user.is_guest is False
+        assert not valide_user.blocked.filter(blocked=self).exists()
     except (Users.DoesNotExist, AssertionError):
-        raise NotFound({'username': ['This user does not exist.']})
-    return valide_username
+        raise NotFound(MessagesException.NotFound.USER)
+    return valide_user

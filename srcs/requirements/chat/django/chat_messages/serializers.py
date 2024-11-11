@@ -1,7 +1,9 @@
 from rest_framework import serializers
+from rest_framework.exceptions import PermissionDenied
+from lib_transcendence.exceptions import MessagesException
 
 from chat_messages.models import Messages
-from chats.models import Chats, ChatParticipants
+from chats.models import ChatParticipants
 
 
 class MessagesSerializer(serializers.ModelSerializer):
@@ -20,21 +22,14 @@ class MessagesSerializer(serializers.ModelSerializer):
             'chat_id'
         ]
 
-    def create(self, validated_data): # todo useless, delete ?
-        pk = self.context.get('pk')
-        if pk is None:
-            raise serializers.ValidationError('Chat id is required')
-
+    def create(self, validated_data):
+        pk = self.context['pk']
         user = self.context['auth_user']
-        try:
-            chats = Chats.objects.get(pk=pk)
-        except Chats.DoesNotExist:
-            raise serializers.ValidationError('Chat does not exist.')
 
         try:
-            participant = chats.participants.get(user_id=user['id'])
+            participant = ChatParticipants.objects.get(user_id=user['id'], chat_id=pk)
         except ChatParticipants.DoesNotExist:
-            raise serializers.ValidationError('You are not participant of this chat')
+            raise PermissionDenied(MessagesException.PermissionDenied.NOT_BELONG_TO_CHAT)
 
         validated_data['chat_id'] = pk
         validated_data['author'] = participant

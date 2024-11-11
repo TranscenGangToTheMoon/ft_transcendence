@@ -1,9 +1,10 @@
+from lib_transcendence.exceptions import MessagesException, ResourceExists
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
 
 from friend_requests.models import FriendRequests
 from friends.utils import is_friendship
-from users.auth import get_user, validate_username
+from users.auth import get_user, get_valid_user
 
 
 class FriendRequestsSerializer(serializers.ModelSerializer):
@@ -25,23 +26,23 @@ class FriendRequestsSerializer(serializers.ModelSerializer):
         sender = get_user(self.context.get('request'))
 
         if sender.sent_friend_requests.count() > 20:
-            raise PermissionDenied('You cannot send more than 20 friend requests at the same time.')
+            raise PermissionDenied(MessagesException.PermissionDenied.SEND_MORE_THAN_20_FRIEND_REQUESTS)
 
-        receiver = validate_username(validated_data.pop('username'), sender)
+        receiver = get_valid_user(sender, validated_data.pop('username'))
 
         if receiver == sender:
-            raise PermissionDenied({'username': ['You cannot send a friend request to yourself.']})
+            raise PermissionDenied(MessagesException.PermissionDenied.SEND_FRIEND_REQUEST_YOURSELF)
 
-        if sender.block.filter(blocked=receiver).exists():
-            raise PermissionDenied({'username': ['You block this user.']})
+        if sender.blocked.filter(blocked=receiver).exists():
+            raise PermissionDenied(MessagesException.PermissionDenied.BLOCKED_USER)
 
         if is_friendship(sender, receiver):
-            raise PermissionDenied({'username': ['You are already friends with this user.']})
+            raise ResourceExists(MessagesException.ResourceExists.FRIEND)
 
         if not receiver.accept_friend_request:
-            raise PermissionDenied({'username': ['This user does not accept friend requests.']})
+            raise PermissionDenied(MessagesException.PermissionDenied.NOT_ACCEPT_FRIEND_REQUEST)
 
         if sender.sent_friend_requests.filter(receiver=receiver).exists():
-            raise PermissionDenied({'username': ['You already send a friend requests to this user.']})
+            raise ResourceExists(MessagesException.ResourceExists.FRIEND_REQUEST)
 
         return super().create({'sender': sender, 'receiver': receiver})

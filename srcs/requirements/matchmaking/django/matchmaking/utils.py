@@ -1,39 +1,107 @@
-from typing import Literal
+from lib_transcendence.game import GameMode
+from lib_transcendence import endpoints
+from lib_transcendence.exceptions import MessagesException, Conflict, ResourceExists, ServiceUnavailable
+from lib_transcendence.services import request_game, request_users
+from rest_framework import serializers
+from rest_framework.exceptions import PermissionDenied, NotFound, APIException
 
-from lib_transcendence.services import requests_game, requests_users
-from rest_framework.exceptions import PermissionDenied, NotFound
-
-from lobby.models import LobbyParticipants
+from lobby.models import Lobby, LobbyParticipants
 from play.models import Players
-from tournament.models import TournamentParticipants
+from tournament.models import Tournaments, TournamentParticipants
 
 
-def get_participants(name: Literal['lobby', 'tournament'], model, obj, user_id, creator_check):
+# -------------------- GET PARTICIPANT ------------------------------------------------------------------------------- #
+def get_participant(model, obj, user_id, creator_check, from_place):
     kwargs = {'user_id': user_id}
     if obj is not None:
-        kwargs[name] = obj.id
+        kwargs[model.str_name] = obj.id
 
     try:
         p = model.objects.get(**kwargs)
         if creator_check and not p.creator:
-            raise PermissionDenied(f'You are not creator of this {name}.')
+            raise PermissionDenied(MessagesException.PermissionDenied.NOT_CREATOR.format(obj=model.str_name))
         return p
     except model.DoesNotExist:
-        if obj is None:
-            raise NotFound(f'You are not in any {name}.')
-        raise NotFound(f'You are not a participant of this {name}.')
+        if from_place:
+            raise NotFound(MessagesException.NotFound.NOT_BELONG.format(obj=model.str_name))
+        raise PermissionDenied(MessagesException.PermissionDenied.NOT_BELONG.format(obj=model.str_name))
 
 
-def verify_user(user_id, join_tournament=True):
+def get_lobby_participant(lobby, user_id, creator_check=False, from_place=False):
+    return get_participant(LobbyParticipants, lobby, user_id, creator_check, from_place)
+
+
+def get_tournament_participant(tournament, user_id, creator_check=False, from_place=False):
+    return get_participant(TournamentParticipants, tournament, user_id, creator_check, from_place)
+
+
+def get_kick_participants(model, user_id):
+    try:
+        return model.participants.get(user_id=user_id)
+    except (LobbyParticipants.DoesNotExist, TournamentParticipants.DoesNotExist):
+        raise NotFound(f'This user does not belong to this {model.str_name}.')
+
+
+# -------------------- GET PLACE ------------------------------------------------------------------------------------- #
+def get_place(model, create, **kwargs):
+    allowed_keys = ('id', 'code')
+
+    key = list(kwargs)[0]
+    assert len(kwargs) == 1 and key in allowed_keys
+
+    value = kwargs[key]
+    if value is None:
+        raise serializers.ValidationError({key: [MessagesException.ValidationError.REQUIRED.format(obj=f'{model.str_name.title()} {key}')]})
+    try:
+        return model.objects.get(**kwargs)
+    except model.DoesNotExist:
+        if create:
+            raise NotFound(MessagesException.NotFound.NOT_FOUND.format(obj=model.str_name.title()))
+        raise PermissionDenied(MessagesException.PermissionDenied.NOT_BELONG.format(obj=model.str_name))
+
+
+def get_lobby(code, create=False):
+    return get_place(Lobby, create, code=code)
+
+
+def get_tournament(create=False, **kwargs):
+    return get_place(Tournaments, create, **kwargs)
+
+
+def verify_place(user, model, request):
+    if are_users_blocked(request, model, user['id']):
+        raise NotFound(MessagesException.NotFound.NOT_FOUND.format(obj=model.str_name.title()))
+
+    if model.participants.filter(user_id=user['id']).exists():
+        raise ResourceExists(MessagesException.ResourceExists.JOIN.format(obj=model.str_name))
+
+    if model.str_name == GameMode.tournament and model.is_started:
+        raise PermissionDenied(MessagesException.PermissionDenied.TOURNAMENT_ALREADY_STARTED)
+
+    verify_user(user['id'])
+
+    if model.is_full:
+        raise PermissionDenied(MessagesException.PermissionDenied.IS_FULL.format(obj=model.str_name.title()))
+
+
+# -------------------- GET PARTICIPANT ------------------------------------------------------------------------------- #
+def kick_yourself(user_id, kick_user_id):
+    if user_id == kick_user_id:
+        raise PermissionDenied(MessagesException.PermissionDenied.KICK_YOURSELF)
+
+
+# -------------------- VERIFY USER ----------------------------------------------------------------------------------- #
+def verify_user(user_id, created_tournament=False):
     try:
         participant = TournamentParticipants.objects.get(user_id=user_id, still_in=True)
-        if participant.creator:
-            if join_tournament:
-                raise PermissionDenied('You already join a tournament.')
-            raise PermissionDenied('You cannot create more than one tournament at the same time.')
+        if participant.tournament.is_started:
+            raise Conflict(MessagesException.Conflict.ALREADY_IN_TOURNAMENT)
+        if created_tournament and participant.creator:
+            raise PermissionDenied(MessagesException.PermissionDenied.CAN_CREATE_MORE_THAN_ONE_TOURNAMENT)
         participant.delete()
     except TournamentParticipants.DoesNotExist:
-        pass
+        if created_tournament and Tournaments.objects.filter(created_by=user_id).exists():
+            raise PermissionDenied(MessagesException.PermissionDenied.CAN_CREATE_MORE_THAN_ONE_TOURNAMENT)
 
     try:
         Players.objects.get(user_id=user_id).delete()
@@ -46,20 +114,29 @@ def verify_user(user_id, join_tournament=True):
         pass
 
     try:
-        requests_game(f'playing/{user_id}/', method='GET')
-        raise PermissionDenied('You are already in a game.')
+        request_game(endpoints.Game.fmatch_user.format(user_id=user_id), method='GET')
     except NotFound:
-        pass
+        return
+    except APIException:
+        raise ServiceUnavailable('game')
+
+    raise Conflict(MessagesException.Conflict.ALREADY_IN_GAME)
 
 
-def can_join(request, obj, new_user):
+# -------------------- BLOCK CHECK ----------------------------------------------------------------------------------- #
+def are_users_blocked(request, obj, new_user):
+    if obj.str_name == GameMode.tournament:
+        self_user = obj.created_by
+    else:
+        try:
+            self_user = obj.participants.get(creator=True).user_id
+        except (LobbyParticipants.DoesNotExist, TournamentParticipants.DoesNotExist):
+            raise NotFound(MessagesException.NotFound.CREATOR)
+
     try:
-        self_user = obj.participants.get(creator=True).user_id
-    except obj.DoesNotExist:
-        raise NotFound('Creator not found.')
-
-    try:
-        requests_users(request, f'block/{self_user}/{new_user}/', 'GET')
-        return False
-    except NotFound:
+        request_users(endpoints.Users.fare_blocked.format(user1_id=self_user, user2_id=new_user), 'GET', request)
         return True
+    except NotFound:
+        return False
+    except APIException:
+        raise ServiceUnavailable('users')

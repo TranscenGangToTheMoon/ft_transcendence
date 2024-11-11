@@ -19,3 +19,6 @@ class Messages(models.Model):
     def mark_as_read(self):
         self.read_at = datetime.now()
         self.save()
+
+    def __str__(self):
+        return f'{self.author.username}: {self.content}'

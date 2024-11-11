@@ -1,3 +1,4 @@
+from lib_transcendence.exceptions import MessagesException
 from rest_framework import generics, status, serializers
 from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
@@ -12,7 +13,7 @@ class RenameUserView(generics.UpdateAPIView):
     def update(self, request, *args, **kwargs):
         new_username = request.data.get('username')
         if not new_username:
-            raise serializers.ValidationError({'username': ['This field is required.']})
+            raise serializers.ValidationError({'username': [MessagesException.ValidationError.FIELD_REQUIRED]})
         players_queryset = ChatParticipants.objects.filter(user_id=kwargs['user_id'])
         updated_count = players_queryset.update(username=new_username)
 
@@ -22,7 +23,7 @@ class RenameUserView(generics.UpdateAPIView):
         )
 
 
-class UpdateBlockUserView(generics.UpdateAPIView):
+class UpdateBlockedUserView(generics.UpdateAPIView):
     serializer_class = BlockChatSerializer
     permission_classes = []
 
@@ -32,7 +33,7 @@ class UpdateBlockUserView(generics.UpdateAPIView):
         return super().update(request, *args, **kwargs)
 
     def get_object(self):
-        return get_chat_together(self.kwargs['user_id'], self.kwargs['user_block'], field='user_id')
+        return get_chat_together(self.kwargs['user_id'], self.kwargs['blocked_user_id'], field='user_id')
 
 
 class DeleteUserView(generics.DestroyAPIView):
@@ -43,5 +44,5 @@ class DeleteUserView(generics.DestroyAPIView):
 
 
 rename_user_view = RenameUserView.as_view()
-block_user_view = UpdateBlockUserView.as_view()
+blocked_user_view = UpdateBlockedUserView.as_view()
 delete_user_view = DeleteUserView.as_view()

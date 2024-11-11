@@ -1,6 +1,7 @@
 from rest_framework import generics
 from rest_framework.exceptions import NotAuthenticated, AuthenticationFailed
 from rest_framework.permissions import IsAuthenticated
+from lib_transcendence.exceptions import MessagesException
 
 from delete.serializers import DeleteSerializer
 
@@ -16,9 +17,9 @@ class DeleteView(generics.DestroyAPIView):
         data = request.data
         password = data.get('password')
         if password is None:
-            raise NotAuthenticated({'password': ['Password confirmation is required to delete the account.']})
+            raise NotAuthenticated({'password': [MessagesException.NotAuthenticated.PASSWORD_CONFIRMATION_REQUIRED]})
         if not request.user.check_password(password):
-            raise AuthenticationFailed({'password': ['Incorrect password.']})
+            raise AuthenticationFailed({'password': [MessagesException.AuthentificationFailed.INCORRECT_PASSWORD]})
         return super().delete(request, *args, **kwargs)
 
 
