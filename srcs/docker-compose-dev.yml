@@ -1,7 +1,9 @@
 services:
 ##### ========== Django Projects ========================================= #####
   auth:
-    build: "requirements/auth"
+    build:
+      context: "requirements/auth"
+      target: development
     depends_on:
       auth-db:
         condition: service_healthy
@@ -13,7 +15,8 @@ services:
       - shared-code-volume:/shared
     environment:
       TZ: Europe/Paris
-      DEBUG: ${DEBUG}
+      DEBUG:
+      MIGRATION:
       POSTGRES_DB: ${POSTGRES_AUTH_DB_NAME}
       POSTGRES_USER: ${POSTGRES_AUTH_USER}
       POSTGRES_PASSWORD: ${POSTGRES_AUTH_PASSWORD}
@@ -23,7 +26,9 @@ services:
       - auth-network
 
   chat:
-    build: "requirements/chat"
+    build:
+      context: "requirements/chat"
+      target: development
     depends_on:
       chat-db:
         condition: service_healthy
@@ -35,7 +40,8 @@ services:
       - shared-code-volume:/shared
     environment:
       TZ: Europe/Paris
-      DEBUG: ${DEBUG}
+      DEBUG:
+      MIGRATION:
       POSTGRES_DB: ${POSTGRES_CHAT_DB_NAME}
       POSTGRES_USER: ${POSTGRES_CHAT_USER}
       POSTGRES_PASSWORD: ${POSTGRES_CHAT_PASSWORD}
@@ -45,20 +51,24 @@ services:
       - chat-network
 
   frontend:
-    build: "requirements/frontend"
+    build:
+      context: "requirements/frontend"
+      target: development
     restart: on-failure
     ports:
       - "4443:443"
     networks:
       - transcendence-network
     volumes:
-      - frontend-volume:/var/www/html #Do copy when project is finished HUGE SECURITY FAIL
-      - ./requirements/frontend/Caddyfile:/etc/caddy/Caddyfile #Do copy when project is finished HUGE SECURITY FAIL
+      - frontend-volume:/var/www/html
+      - ./requirements/frontend/Caddyfile:/etc/caddy/Caddyfile
     environment:
       TZ: Europe/Paris
 
   game:
-    build: "requirements/game"
+    build:
+      context: "requirements/game"
+      target: development
     depends_on:
       game-db:
         condition: service_healthy
@@ -70,7 +80,8 @@ services:
       - shared-code-volume:/shared
     environment:
       TZ: Europe/Paris
-      DEBUG: ${DEBUG}
+      DEBUG:
+      MIGRATION:
       POSTGRES_DB: ${POSTGRES_GAME_DB_NAME}
       POSTGRES_USER: ${POSTGRES_GAME_USER}
       POSTGRES_PASSWORD: ${POSTGRES_GAME_PASSWORD}
@@ -80,7 +91,9 @@ services:
       - game-network
 
   matchmaking:
-    build: "requirements/matchmaking"
+    build:
+      context: "requirements/matchmaking"
+      target: development
     depends_on:
       matchmaking-db:
         condition: service_healthy
@@ -92,7 +105,8 @@ services:
       - shared-code-volume:/shared
     environment:
       TZ: Europe/Paris
-      DEBUG: ${DEBUG}
+      DEBUG:
+      MIGRATION:
       POSTGRES_DB: ${POSTGRES_MATCHMAKING_DB_NAME}
       POSTGRES_USER: ${POSTGRES_MATCHMAKING_USER}
       POSTGRES_PASSWORD: ${POSTGRES_MATCHMAKING_PASSWORD}
@@ -102,7 +116,9 @@ services:
       - matchmaking-network
 
   users:
-    build: "requirements/users"
+    build:
+      context: "requirements/users"
+      target: development
     depends_on:
       users-db:
         condition: service_healthy
@@ -114,7 +130,8 @@ services:
       - shared-code-volume:/shared
     environment:
       TZ: Europe/Paris
-      DEBUG: ${DEBUG}
+      DEBUG:
+      MIGRATION:
       POSTGRES_DB: ${POSTGRES_USERS_DB_NAME}
       POSTGRES_USER: ${POSTGRES_USERS_USER}
       POSTGRES_PASSWORD: ${POSTGRES_USERS_PASSWORD}
@@ -292,15 +309,20 @@ volumes:
       device: "requirements/users/django"
 
 #####Database Volumes
-  auth-db-volume: {}
+  auth-db-volume:
+    name: "auth-db-volume"
 
-  chat-db-volume: {}
+  chat-db-volume:
+    name: "chat-db-volume"
 
-  game-db-volume: {}
+  game-db-volume:
+    name: "game-db-volume"
 
-  matchmaking-db-volume: {}
+  matchmaking-db-volume:
+    name: "matchmaking-db-volume"
 
-  users-db-volume: {}
+  users-db-volume:
+    name: "users-db-volume"
 
 #####Shared Code Volume
   shared-code-volume:

@@ -15,6 +15,7 @@ def generate_code(model=None, k=4):
     raise PermissionDenied('Code generation failed.')
 
 
+#todo secure guest unique
 def generate_guest_username():
     return 'Guest' + generate_code(k=6)
 

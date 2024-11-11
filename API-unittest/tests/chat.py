@@ -6,6 +6,7 @@ from utils.generate_random import rnstr
 from utils.my_unittest import UnitTest
 
 
+# todo test chat user endpoint
 class Test01_CreateChat(UnitTest):
 
     def test_001_accept_chat_from_anyone(self):

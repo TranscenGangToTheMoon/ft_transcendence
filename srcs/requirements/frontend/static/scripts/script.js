@@ -1,7 +1,10 @@
 // ========================== GLOBAL VALUES ==========================
 
+const MAX_DISPLAYED_NOTIFICATIONS = 3;
 const baseAPIUrl = "https://localhost:4443/api"
 let userInformations = undefined;
+var notificationIdentifier = 0;
+var displayedNotifications = 0;
 window.baseAPIUrl = baseAPIUrl;
 window.userInformations = userInformations;
 
@@ -22,8 +25,11 @@ function apiRequest(token, endpoint, method="GET", authType="Bearer",
     console.log(endpoint, options)
     return fetch(endpoint, options)
         .then(async response => {
-            if (!response.ok && response.status > 499){
+            if (!response.ok && (response.status > 499 || response.status === 404)){
                 throw {code: response.status};
+            }
+            if (response.status === 204){
+                return;
             }
             let data = await response.json();
             console.log(data);
@@ -145,7 +151,7 @@ function loadScript(scriptSrc) {
     script.src = scriptSrc;
     script.onload = () => {
         console.log(`Script ${scriptSrc} loaded.`);
-    };
+    };  
     script.onerror = () => {
         console.error(`Error while loading script ${scriptSrc}.`);
     };
@@ -157,6 +163,7 @@ function loadCSS(cssHref, toUpdate=true) {
     if (existingLink) {
         existingLink.remove();
     }
+    // console.log('will update =', toUpdate);
     const link = document.createElement('link');
     link.rel = 'stylesheet';
     link.href = cssHref;
@@ -166,7 +173,7 @@ function loadCSS(cssHref, toUpdate=true) {
     console.log(`Style ${cssHref} loaded.`)
 }
 
-async function loadContent(url, container='content') {
+async function loadContent(url, container='content', append=false) {
     const contentDiv = document.getElementById(container);
     try {
         const response = await fetch(url);
@@ -174,8 +181,10 @@ async function loadContent(url, container='content') {
             throw new Error('Page non trouvée');
         }
         const html = await response.text();
-        contentDiv.innerHTML = html;
-
+        if(!append)
+            contentDiv.innerHTML = html;
+        else
+            contentDiv.innerHTML += html;
         const script = contentDiv.querySelector('[script]');
         if (script)
             loadScript(script.getAttribute('script'));
@@ -186,39 +195,53 @@ async function loadContent(url, container='content') {
             style = 'guestStyle'
         css = contentDiv.querySelector(`[${style}]`);
         if (css)
-            loadCSS(css.getAttribute(style), !css.getAttribute(style).includes('rofileMenu'));
-        console.log('finished 1rst')
+            loadCSS(css.getAttribute(style), !css.getAttribute(style).includes('Guest'));
     } catch (error) {
         contentDiv.innerHTML = '<h1>Erreur 404 : Page non trouvée</h1>';
     }
 }
 
 function navigateTo(url, doNavigate=true){
-    history.pushState(null, null, url);
+    history.pushState({}, '', url);
+    console.table(history)
     if (doNavigate)
         handleRoute();
 }
 
 window.navigateTo = navigateTo;
 
-function handleRoute() {
+async function handleRoute() {
     const path = window.location.pathname;
 
     const routes = {
         '/login': '/authentication.html',
-        '/': '/homePage.html'
+        '/': '/homePage.html',
+        '/profile' : 'profile.html',
+        '/lobby' : '/lobby.html',
     };
 
     const page = routes[path] || '/404.html';
-    loadContent(page);
+    await loadContent(page);
 }
 
-document.addEventListener('click', event => {
-    if (event.target.matches('[data-link]')) {
-        event.preventDefault();
-        navigateTo(event.target.href);
+// UNCOMMENT FOR LINKS TO WORK WITHOUT CUSTOM JS
+// document.addEventListener('click', event => {
+//     if (event.target.matches('[data-link]')) {
+//         event.preventDefault();
+//         navigateTo(event.target.href);
+//     }
+// });
+
+window.addEventListener('popstate', async event => {
+    event.preventDefault();
+    document.querySelectorAll('.modal.show').forEach(modal => {
+        bootstrap.Modal.getInstance(modal).hide();
+    })
+    if (userInformations.is_guest !== (document.getElementById('trophies') === '')){
+        await loadUserProfile();
     }
-});
+    handleRoute();
+})
 
 window.loadContent = loadContent;
 
@@ -229,9 +252,8 @@ async function fetchUserInfos(forced=false) {
         await generateToken();
     if (!userInformations || forced) {
         try {
-            let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/users/me/`);
+            let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/users/me`);
             userInformations = data;
-            console.log('info fetch finished');
         }
         catch (error) {
             console.log(error);
@@ -246,8 +268,13 @@ function displayMainError(errorTitle, errorContent) {
 
     errorContentDiv.innerText = errorContent;
     errorTitleDiv.innerText = errorTitle;
+    document.getElementById('errorModal').addEventListener('shown.bs.modal', function() {
+        document.getElementById('errorModalClose').focus();
+    })
     errorModal.show();
 }
+
+window.displayMainError = displayMainError;
 
 // ========================== INDEX SCRIPT ==========================
 
@@ -261,25 +288,67 @@ async function loadUserProfile(){
         document.getElementById('balance').innerText = "";
     }
     else {
-        document.getElementById('trophies').innerText = userInformations.trophy;
+        document.getElementById('trophies').innerText = userInformations.trophies;
         document.getElementById('balance').innerText = userInformations.coins;
     }
     await loadContent(`/${profileMenu}`, 'profileMenu');
     // document.getElementById('title').innerText = userInformations.title;
 }
 
-async function atStart() {
-    await fetchUserInfos();
-    if (userInformations.code === 'user_not_found'){
-        console.log('user was deleted from database, switching to guest mode');
-        displayMainError("Unable to retrieve your account","We're sorry your account has been permanently deleted and cannot be recovered.");
-        await generateToken();
-        await fetchUserInfos(true);
+document.getElementById('home').addEventListener('click', event => {
+    event.preventDefault();
+    navigateTo('/');
+})
+
+async function  indexInit(auto=true) {
+    if (!auto){
+        await fetchUserInfos();
+        if (window.location.pathname === '/login'){
+            document.getElementById('profileMenu').innerHTML = "";
+        }
+        else{
+            await loadUserProfile();
+        }
+        if (userInformations.code === 'user_not_found'){
+            console.log('user was deleted from database, switching to guest mode');
+            displayMainError("Unable to retrieve your account/guest profile","We're sorry your account has been permanently deleted and cannot be recovered.");
+            await generateToken();
+            await fetchUserInfos(true);
+            await loadUserProfile();
+        }
     }
-    await loadUserProfile();
-    handleRoute();
+    else{
+        loadCSS('/css/styles.css', false);
+        handleRoute();
+    }
 }
 
+document.getElementById('notifTrigger').addEventListener('click', async event => {
+    event.preventDefault();
+    if (displayedNotifications >= MAX_DISPLAYED_NOTIFICATIONS) {
+        return ;
+    }
+    const toastContainer = document.getElementById('toastContainer');
+
+    if (document.querySelector('hide'))
+        console.log('la');
+    await loadContent('/notification.html', 'toastContainer', true);
+    const notification = document.getElementById('notification');
+    notification.id = `notification${notificationIdentifier}`;
+    const toastInstance = new bootstrap.Toast(notification);
+    toastInstance.show();
+    notificationIdentifier++;
+    displayedNotifications++;
+    setTimeout(() => {
+        toastInstance.hide();
+        setTimeout (() => {
+            displayedNotifications--;
+            toastContainer.removeChild(document.getElementById(notification.id));
+        }, 500);
+    }, 5000);
+})
+
+window.indexInit = indexInit;
 window.loadUserProfile = loadUserProfile;
 
-atStart();
+indexInit();

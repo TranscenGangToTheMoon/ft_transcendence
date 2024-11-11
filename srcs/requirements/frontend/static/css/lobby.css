@@ -1,0 +1,43 @@
+#lobbyHeader {
+    background-color: red;
+    padding: 10px;
+    display: flex;
+}
+
+#leaveGame {
+    background-color: green;
+}
+#gameType {
+    background-color: purple;
+}
+#gameId {
+    background-color: blue;
+}
+
+#lobbyInterface {
+    background-color: grey;
+    display: flex;
+    padding: 10px;
+}
+
+#joinGameField {
+    background-color: cornflowerblue;
+}
+
+#teamSelector {
+    background-color: brown;
+}
+
+#teamDisplay {
+    background-color: aqua;
+}
+
+#playButton {
+    background-color: chocolate;
+}
+
+#settingsButton {
+    background-color: crimson;
+    cursor: pointer;
+    user-select: none;
+}

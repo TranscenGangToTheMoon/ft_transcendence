@@ -11,12 +11,14 @@ ENV_EXEMPLE	:=	.env_exemple
 
 ENV_FILE	:=	./$(SRCS_D)/.env
 
+COMPOSE_F	:=	./$(SRCS_D)/docker-compose-dev.yml
+
 SERVICE		?=	#Leave blank
 
 ########################################################################################################################
 #                                                        FLAGS                                                         #
 ########################################################################################################################
-FLAGS		=	--project-directory $(SRCS_D)
+FLAGS		=	-f $(COMPOSE_F)
 
 COMPOSE		=	docker compose
 
@@ -41,8 +43,6 @@ all			:	banner $(NAME)
 
 $(NAME)		:	secrets
 			$(COMPOSE) $(FLAGS) up --build $(SERVICE)
-
-volumes		:	$(VOLUMES)
 
 build		:
 			$(COMPOSE) $(FLAGS) $@ $(SERVICE)
@@ -81,6 +81,10 @@ clean		:
 #			rm -rf $(ENV_FILE)
 #			rm -rf $(SECRETS_D)
 
+vclean		:
+			$(COMPOSE) $(FLAGS) down -v --remove-orphans
+			rm -rf $(ENV_FILE)
+
 fclean		:
 			$(COMPOSE) $(FLAGS) down -v --rmi all --remove-orphans
 			docker image prune -af
@@ -89,6 +93,16 @@ fclean		:
 			rm -rf ./srcs/shared-code/lib_transcendence.egg-info/ # todo remove in prod
 			rm -rf ./srcs/shared-code/build/ # todo remove in prod
 #			rm -rf $(SECRETS_D)
+
+dusting		:
+			find . -path "*/migrations/*.py" -not -name "__init__.py" -delete
+			find . -path "*/__pycache__/*" -delete
+			find . -path "*/__pycache__" -delete
+#			rm -rf `find . | grep __init__.py`
+#			rm -rf `find . | grep db.sqlite3`
+
+caddy-reload:
+			$(COMPOSE) $(FLAGS) exec -w /etc/caddy frontend caddy reload
 
 image-ls	:
 			docker image ls -a
@@ -113,10 +127,12 @@ network-rm	:
 prune		:
 			docker system prune -af
 
-re			:	fclean all
-
 sre			:	clean all
 
-.PHONY		:	all volumes build up down dettach banner secrets clean fclean \
-				image-ls image-rm container-ls container-rm volume-ls volume-rm \
-				network-ls network-rm prune re
+vre			:	vclean all
+
+re			:	fclean all
+
+.PHONY		:	all volumes build up down dettach banner secrets clean vclean \
+			fclean image-ls image-rm container-ls container-rm volume-ls \
+			volume-rm network-ls network-rm prune sre vre re
