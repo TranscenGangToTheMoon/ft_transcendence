@@ -9,5 +9,5 @@ __pycache__
 /srcs/.env
 build
 *.egg-info
-migrations/00*.py
+**/migrations/00*.py
 tests

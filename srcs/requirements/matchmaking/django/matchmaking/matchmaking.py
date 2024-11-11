@@ -1,19 +1,20 @@
+from .create_match import create_match
 from datetime import datetime, timezone, timedelta
 from django.http import response
-from lib_transcendence.GameMode import GameMode
-from lib_transcendence.request import ParseError
-from lib_transcendence.services import requests_game
+from lib_transcendence.game import GameMode
 from math import sqrt
 from play.models import Players
 from rest_framework import status
 from rest_framework.exceptions import APIException
 from threading import Thread
 from time import sleep
+from typing import Literal
 import os
 import sys
 
-def post_match(player1, player2, game_mode):
-	requests_game('match/', 'POST', {'game_mode': game_mode, 'teams': [[player1.user_id], [player2.user_id]]}) #TODO -> check for status code
+def post_match(player1, player2, game_mode: Literal['duel', 'ranked']):
+	create_match(game_mode, [[player1.user_id], [player2.user_id]])
+	# request_game('match/', 'POST', {'game_mode': game_mode, 'teams': [[player1.user_id], [player2.user_id]]}) #TODO -> check for status code
 	print('made request for: ', player1.user_id, ' ', player1.trophies, ' ', player2.user_id, ' ', player2.trophies, flush=True)
 	player1.delete()
 	player2.delete()

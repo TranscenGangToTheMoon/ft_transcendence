@@ -8,3 +8,4 @@ def wait_then_launch():
 	make_match()
 
 thread = Thread(target=wait_then_launch).start()
+print("Started matchmaking server")
