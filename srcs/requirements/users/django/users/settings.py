@@ -42,14 +42,14 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'blocking',
     'corsheaders',
+    'blocking',
     'friend_requests',
     'friends',
     'profile_pictures',
     'users',
 ]
-
+ #todo rename users in user
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
