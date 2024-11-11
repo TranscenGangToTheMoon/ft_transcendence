@@ -41,7 +41,6 @@ class LobbyParticipantsView(generics.ListCreateAPIView, generics.UpdateAPIView, 
         context['auth_user'] = self.request.data['auth_user']
         return context
 
-
 class LobbyKickView(generics.DestroyAPIView):
     serializer_class = LobbyParticipantsSerializer
 

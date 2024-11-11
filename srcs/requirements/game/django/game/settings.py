@@ -41,10 +41,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    # 'channels',
-    # 'daphne',
     'rest_framework',
-    # 'game_server',
+    'game_server',
     'matches',
     'tournaments'
 ]
