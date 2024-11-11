@@ -85,7 +85,7 @@ vclean		:
 			$(COMPOSE) $(FLAGS) down -v --remove-orphans
 			rm -rf $(ENV_FILE)
 
-fclean		:
+fclean		:	dusting
 			$(COMPOSE) $(FLAGS) down -v --rmi all --remove-orphans
 			docker image prune -af
 			rm -rf $(VOLS_PATH)
