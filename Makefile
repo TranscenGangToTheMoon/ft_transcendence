@@ -98,8 +98,6 @@ dusting		:
 			find . -path "*/migrations/*.py" -not -name "__init__.py" -delete
 			find . -path "*/__pycache__/*" -delete
 			find . -path "*/__pycache__" -delete
-#			rm -rf `find . | grep __init__.py`
-#			rm -rf `find . | grep db.sqlite3`
 
 caddy-reload:
 			$(COMPOSE) $(FLAGS) exec -w /etc/caddy frontend caddy reload
