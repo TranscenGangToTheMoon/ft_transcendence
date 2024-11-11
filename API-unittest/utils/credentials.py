@@ -1,8 +1,22 @@
 from typing import Literal
 
-from main import SERVICES
 from utils.request import make_request
 from utils.generate_random import rnstr
+
+
+# -------------------- SERVICES -------------------------------------------------------------------------------------- #
+TESTS = [
+    'test_chat',
+    # 'test_game',
+    # 'test_matchmaking',
+    # 'test_users',
+    'test_lobby',
+    'test_tournament',
+    # 'test_auth',
+    # 'test_friends',
+    # 'test_blocked',
+    'test_play',
+]
 
 
 # -------------------- REQUEST --------------------------------------------------------------------------------------- #
@@ -51,11 +65,11 @@ def get_service():
     origin_file = inspect.currentframe()
     while True:
         service_name = origin_file.f_code.co_filename.split('/')[-1].split('.')[0]
-        if origin_file.f_back is None or service_name in SERVICES:
+        if origin_file.f_back is None or service_name in TESTS:
             break
         origin_file = origin_file.f_back
 
-    return service_name
+    return service_name.replace('test_', '')
 
 
 def new_user(username=None, password=None):
