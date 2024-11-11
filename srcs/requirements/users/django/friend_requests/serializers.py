@@ -34,7 +34,7 @@ class FriendRequestsSerializer(serializers.ModelSerializer):
             raise PermissionDenied(MessagesException.PermissionDenied.SEND_FRIEND_REQUEST_YOURSELF)
 
         if sender.blocked.filter(blocked=receiver).exists():
-            raise PermissionDenied(MessagesException.PermissionDenied.BLOCK_USER)
+            raise PermissionDenied(MessagesException.PermissionDenied.BLOCKED_USER)
 
         if is_friendship(sender, receiver):
             raise ResourceExists(MessagesException.ResourceExists.FRIEND)

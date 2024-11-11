@@ -89,7 +89,7 @@ class MessagesException:
         CAN_CREATE_MORE_THAN_ONE_TOURNAMENT = 'You cannot create more than one tournament at the same time.'
         KICK_AFTER_START = 'You cannot kick user after the tournament start.'
 
-        BLOCK_USER = 'You block this user.'
+        BLOCKED_USER = 'You blocked this user.'
 
         SEND_MORE_THAN_20_FRIEND_REQUESTS = 'You cannot send more than 20 friend requests at the same time.'
         BLOCK_MORE_THAN_50_USERS = 'You cannot block more than 50 users.'

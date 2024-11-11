@@ -20,7 +20,7 @@ class ValidateChatView(generics.RetrieveAPIView):
         user1 = get_user(id=self.kwargs['user1_id'])
 
         if user1.blocked.filter(blocked__username=self.kwargs['username2']).exists():
-            raise PermissionDenied(MessagesException.PermissionDenied.BLOCK_USER)
+            raise PermissionDenied(MessagesException.PermissionDenied.BLOCKED_USER)
 
         valide_user = get_valid_user(user1, self.kwargs['username2'])
         if AcceptChat.is_accept(valide_user.accept_chat_from, is_friendship(valide_user.id, user1.id)):
