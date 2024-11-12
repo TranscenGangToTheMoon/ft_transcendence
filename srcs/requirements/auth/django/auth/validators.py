@@ -1,22 +1,22 @@
 from string import ascii_letters, digits
 
-from django.contrib.auth.models import User
 from rest_framework import serializers
+from lib_transcendence.exceptions import MessagesException
+from django.contrib.auth.models import User
 
 
 valid_charset = ascii_letters + digits + '_-'
 
 
 def validate_username(value):
-    if value in ('me', 'anonymous',):
-        raise serializers.ValidationError(f"Username can't be '{value}'")
+    if value in ('anonymous', 'admin', 'staff'):
+        raise serializers.ValidationError(MessagesException.ValidationError.USERNAME_NOT_ALLOWED)
     if len(value) < 3:
-        raise serializers.ValidationError('Username must be at least 3 characters long')
-    if len(value) > 20:
-        raise serializers.ValidationError('Username must be less than 20 characters long')
-    for char in value:
-        if char not in valid_charset:
-            raise serializers.ValidationError(f"Use invalid char '{char}'")
+        raise serializers.ValidationError(MessagesException.ValidationError.USERNAME_LONGER_THAN_3_CHAR)
+    if len(value) > 30:
+        raise serializers.ValidationError(MessagesException.ValidationError.USERNAME_SHORTER_THAN_30_CHAR)
+    if any(char not in valid_charset for char in value):
+        raise serializers.ValidationError(MessagesException.ValidationError.INVALIDE_CHAR)
     if User.objects.filter(username__iexact=value).exists():
-        raise serializers.ValidationError(f"Username '{value}' already exists")
+        raise serializers.ValidationError(MessagesException.ValidationError.USERNAME_ALREAY_EXISTS)
     return value

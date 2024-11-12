@@ -1,4 +1,5 @@
 .idea
+.DS_Store
 vscode
 .DS_Store
 *.pyc
@@ -6,3 +7,7 @@ vscode
 __pycache__
 .venv
 /srcs/.env
+build
+*.egg-info
+**/migrations/*.py
+tests/

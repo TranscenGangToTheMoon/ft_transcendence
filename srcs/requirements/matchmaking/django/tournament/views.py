@@ -1,60 +1,69 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
+from django.db.models import Q
+from lib_transcendence.exceptions import MessagesException
+from lib_transcendence.serializer import SerializerContext
+from lib_transcendence.services import request_game
+from lib_transcendence import endpoints
 from rest_framework import generics, serializers
+from rest_framework.exceptions import PermissionDenied, NotFound
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
-from matchmaking.request import requests_game
+from matchmaking.create_match import create_tournament_match
+from matchmaking.utils import get_tournament_participant, get_tournament, get_kick_participants, kick_yourself
 from tournament.models import Tournaments, TournamentParticipants
-from tournament.serializers import TournamentSerializer, TournamentParticipantsSerializer, TournamentStageSerializer
-from tournament.utils import get_tournament, get_user_participant, create_match
+from tournament.serializers import TournamentSerializer, TournamentStageSerializer, TournamentParticipantsSerializer, \
+    TournamentSearchSerializer
 
 
-class TournamentView(generics.CreateAPIView, generics.RetrieveUpdateDestroyAPIView):
+class TournamentView(generics.CreateAPIView, generics.RetrieveAPIView):
     queryset = Tournaments.objects.all()
     serializer_class = TournamentSerializer
 
     def get_object(self):
-        p = get_user_participant(None, self.request.user.id)
-        if self.request.method != 'GET' and not p.creator:
-            raise serializers.ValidationError({'detail': 'You do not have permission to update or delete this tournament.'})
-        return Tournaments.objects.get(id=p.tournament_id)
+        return Tournaments.objects.get(id=get_tournament_participant(None, self.request.user.id, from_place=True).tournament_id)
 
 
-class TournamentParticipantsView(generics.ListCreateAPIView, generics.DestroyAPIView):
+class TournamentSearchView(generics.ListAPIView):
+    serializer_class = TournamentSearchSerializer
+
+    def get_queryset(self): # todo filter all blocked users
+        query = self.request.data.get('q')
+        if query is None:
+            raise serializers.ValidationError({'q': [MessagesException.ValidationError.FIELD_REQUIRED]})
+        return Tournaments.objects.filter(Q(private=False) | Q(created_by=self.request.user.id), name__icontains=query) # todo don't show particiapant, only number of join participants
+
+
+class TournamentParticipantsView(SerializerContext, generics.ListCreateAPIView, generics.DestroyAPIView):
     queryset = TournamentParticipants.objects.all()
     serializer_class = TournamentParticipantsSerializer
+    pagination_class = None
+    # todo return tournament instance when create
 
     def filter_queryset(self, queryset):
         tournament = get_tournament(code=self.kwargs.get('code'))
-        return queryset.filter(tournament_id=tournament.id)
+        queryset = queryset.filter(tournament_id=tournament.id)
+        if self.request.user.id not in queryset.values_list('user_id', flat=True):
+            raise PermissionDenied(MessagesException.PermissionDenied.NOT_BELONG_TOURNAMENT)
+        return queryset
 
     def get_object(self):
-        return get_user_participant(get_tournament(code=self.kwargs.get('code')), self.request.user.id)
-
-    def get_serializer_context(self):
-        context = super().get_serializer_context()
-        context['code'] = self.kwargs.get('code')
-        context['auth_user'] = self.request.data['auth_user']
-        return context
+        return get_tournament_participant(get_tournament(code=self.kwargs.get('code')), self.request.user.id)
 
 
 class TournamentKickView(generics.DestroyAPIView):
     serializer_class = TournamentParticipantsSerializer
-    lookup_field = 'user_id'
 
     def get_object(self):
+        kick_yourself(self.kwargs['user_id'], self.request.user.id)
         tournament = get_tournament(code=self.kwargs.get('code'))
-        get_user_participant(tournament, self.request.user.id, True)
+        get_tournament_participant(tournament, self.request.user.id, True)
 
-        user_id = self.kwargs.get('user_id')
-        if user_id is None:
-            raise serializers.ValidationError({'detail': 'User id is required.'})
+        if tournament.is_started:
+            raise PermissionDenied(MessagesException.PermissionDenied.KICK_AFTER_START)
 
-        try:
-            return TournamentParticipants.objects.get(user_id=user_id, tournament=tournament)
-        except TournamentParticipants.DoesNotExist:
-            raise serializers.ValidationError({'detail': f"User id '{user_id}' is not participant of this tournament."})
+        return get_kick_participants(tournament, self.kwargs['user_id'])
 
 
 class TournamentResultMatchView(generics.CreateAPIView):
@@ -62,10 +71,7 @@ class TournamentResultMatchView(generics.CreateAPIView):
     permission_classes = [AllowAny]
 
     def create(self, request, *args, **kwargs):
-        tournament_id = request.data.get('tournament_id')
-        if tournament_id is None:
-            raise serializers.ValidationError({'tournament_id': ['Tournament id is required.']})
-        tournament = get_tournament(id=tournament_id)
+        tournament = get_tournament(id=request.data.get('tournament_id'))
 
         current_stage = None
         finished = None
@@ -73,7 +79,7 @@ class TournamentResultMatchView(generics.CreateAPIView):
             # todo websocket: send to chat tournament that 'xxx' win the game
             user_id = request.data.get(player)
             if user_id is None:
-                raise serializers.ValidationError({player: [f'{player} is required.']})
+                raise serializers.ValidationError(MessagesException.ValidationError.REQUIRED.format(player.title()))
             try:
                 participant = tournament.participants.get(user_id=user_id)
                 if current_stage is None:
@@ -83,23 +89,23 @@ class TournamentResultMatchView(generics.CreateAPIView):
                 else:
                     participant.eliminate()
             except TournamentParticipants.DoesNotExist:
-                raise serializers.ValidationError({'detail': f"Participant '{user_id}' does not exist."})
+                raise NotFound(MessagesException.NotFound.USER)
 
         if finished is not None:
             data = TournamentSerializer(tournament).data
-            data['finish_at'] = datetime.now() #todo probleme
-            data['stages'] = TournamentStageSerializer(tournament.stages.all(), many=True).data # todo erreur create two stages
-            requests_game('tournaments/', data)
+            data['finish_at'] = datetime.now(timezone.utc)
+            data['stages'] = TournamentStageSerializer(tournament.stages.all(), many=True).data
+            request_game(endpoints.Game.tournaments, data=data)
             tournament.delete()
             # todo websocket: send to chat tournament that 'xxx' win the tournament
-            return Response(f'The tournament is over, and player {finished} is the winner!', status=201)
+            return Response(f'The tournament is over, and player {finished} is the winner!', status=200) # todo remake
 
         if not current_stage.participants.filter(still_in=True).exists():
             participants = tournament.participants.filter(still_in=True).order_by('index')
             ct = participants.count()
 
             for i in range(0, ct, 2):
-                create_match(
+                create_tournament_match(
                     tournament.id,
                     participants[i].stage.id,
                     [
@@ -108,10 +114,11 @@ class TournamentResultMatchView(generics.CreateAPIView):
                     ]
                 )
 
-        return Response('The match result has been successfully recorded.', status=201)
+        return Response('The match result has been successfully recorded.', status=201) # todo remake
 
 
 tournament_view = TournamentView.as_view()
+tournament_search_view = TournamentSearchView.as_view()
 tournament_participants_view = TournamentParticipantsView.as_view()
 tournament_kick_view = TournamentKickView.as_view()
 tournament_result_match_view = TournamentResultMatchView.as_view()

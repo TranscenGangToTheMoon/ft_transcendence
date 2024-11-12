@@ -3,8 +3,8 @@ FROM python:3.13.0-slim AS base
 
 EXPOSE 8000
 
-RUN apt-get update
-RUN apt-get upgrade
+RUN apt-get update -y
+RUN apt-get upgrade -y
 
 COPY init.d /init.d
 
@@ -26,6 +26,7 @@ FROM base AS production
 
 COPY django /code
 
+RUN pip install daphne
+
 ENTRYPOINT ["/init.d/entrypoint.sh"]
-#Change this command to Daphne command to avoid live edition (security breach)
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+CMD ["daphne", "-b", "0.0.0.0", "-p", "8000", "users.asgi:application"]

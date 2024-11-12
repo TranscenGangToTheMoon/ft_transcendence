@@ -83,13 +83,21 @@ clean		:
 
 vclean		:
 			$(COMPOSE) $(FLAGS) down -v --remove-orphans
+			rm -rf $(ENV_FILE)
 
-fclean		:
+fclean		:	dusting
 			$(COMPOSE) $(FLAGS) down -v --rmi all --remove-orphans
 			docker image prune -af
 			rm -rf $(VOLS_PATH)
 			rm -rf $(ENV_FILE)
+			rm -rf ./srcs/shared-code/lib_transcendence.egg-info/ # todo remove in prod
+			rm -rf ./srcs/shared-code/build/ # todo remove in prod
 #			rm -rf $(SECRETS_D)
+
+dusting		:
+			find . -path "*/migrations/*.py" -not -name "__init__.py" -delete
+			find . -path "*/__pycache__/*" -delete
+			find . -path "*/__pycache__" -delete
 
 caddy-reload:
 			$(COMPOSE) $(FLAGS) exec -w /etc/caddy frontend caddy reload

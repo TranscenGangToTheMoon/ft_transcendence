@@ -1,47 +1,31 @@
-import json
 from typing import Literal
 
-import requests
+from lib_transcendence.exceptions import MessagesException
+from lib_transcendence.request import request_service
+from lib_transcendence.endpoints import Auth
 from rest_framework import permissions, serializers
-from rest_framework.exceptions import AuthenticationFailed
+from rest_framework.exceptions import NotAuthenticated, NotFound
 
 from users.models import Users
 
 
-def requests_auth(token, enpoint: Literal['update/', 'verify/', 'delete/'], method: Literal['GET', 'PUT', 'PATCH', 'DELETE'], data=None):
+def requests_auth(token, endpoint: Literal['update/', 'verify/', 'delete/'], method: Literal['GET', 'PUT', 'PATCH', 'DELETE'], data=None):
     if token is None:
-        raise AuthenticationFailed('Authentication credentials were not provided.')
+        raise NotAuthenticated()
 
-    try:
-        response = requests.request(
-            method=method,
-            url='http://auth:8000/api/auth/' + enpoint,
-            headers={
-                'Authorization': token,
-                'Content-Type': 'application/json'
-            },
-            data=data
-        )
-        if response.status_code == 204:
-            return
-        json_data = response.json()
-        if response.status_code not in (200, 201, 202, 203, 205, 206):
-            raise AuthenticationFailed(json_data)
-    except (requests.ConnectionError, requests.exceptions.JSONDecodeError):
-        raise AuthenticationFailed('Failed to connect to auth service')
-    return json_data
+    return request_service('auth', endpoint, method, data, token)
 
 
 def auth_verify(token):
-    return requests_auth(token, 'verify/', method='GET')
+    return requests_auth(token, Auth.verify, method='GET')
 
 
 def auth_update(token, data):
-    return requests_auth(token, 'update/', method='PATCH', data=json.dumps(data))
+    return requests_auth(token, Auth.update, method='PATCH', data=data)
 
 
 def auth_delete(token, data):
-    requests_auth(token, 'delete/', method='DELETE', data=json.dumps(data))
+    requests_auth(token, Auth.delete, method='DELETE', data=data)
 
 
 class IsAuthenticated(permissions.BasePermission):
@@ -49,8 +33,11 @@ class IsAuthenticated(permissions.BasePermission):
     def has_permission(self, request, view):
 
         json_data = auth_verify(request.headers.get('Authorization'))
+        if json_data is None:
+            return False
 
         try:
+            # todo remake
             user = Users.objects.get(id=json_data['id'])
             if user.is_guest != json_data['is_guest']:
                 user.is_guest = json_data['is_guest']
@@ -68,17 +55,19 @@ class IsAuthenticated(permissions.BasePermission):
 def get_user(request=None, id=None):
     if id is None:
         if request is None:
-            raise serializers.ValidationError({'detail': 'Request is required.'})
+            raise serializers.ValidationError(MessagesException.ValidationError.REQUEST_REQUIRED)
         id = request.user.id
-    return Users.objects.get(pk=id)
-
-
-def validate_username(username, user):
     try:
-        assert username is not None
-        valide_username = Users.objects.get(username=username)
-        assert valide_username.is_guest is False
-        assert not valide_username.block.filter(blocked=user).exists()
+        return Users.objects.get(pk=id)
+    except Users.DoesNotExist:
+        raise NotFound(MessagesException.NotFound.USER)
+
+
+def get_valid_user(self, username):
+    try:
+        valide_user = Users.objects.get(username=username)
+        assert valide_user.is_guest is False
+        assert not valide_user.blocked.filter(blocked=self).exists()
     except (Users.DoesNotExist, AssertionError):
-        raise serializers.ValidationError({'username': ['This user does not exist.']})
-    return valide_username
+        raise NotFound(MessagesException.NotFound.USER)
+    return valide_user

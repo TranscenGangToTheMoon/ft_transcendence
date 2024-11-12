@@ -1,58 +1,88 @@
 from django.db import models
-
-from lobby.static import team_a, team_b, team_spectator, match_type_1v1
+from lib_transcendence.game import GameMode
+from lib_transcendence.Lobby import MatchType, Teams
 
 
 class Lobby(models.Model):
     code = models.CharField(max_length=4, unique=True, editable=False)
-    max_participants = models.IntegerField(editable=False) # 3 or 6
+    max_participants = models.IntegerField(editable=False)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
-    game_mode = models.CharField(max_length=11) # clash, custom_game
+    game_mode = models.CharField(max_length=11)
 
-    match_type = models.CharField(max_length=3) # 1v1, 3v3
-    bo = models.IntegerField(default=1) # bo1 bo3 bo5
-    game_time = models.IntegerField(default=300) # in seconds
+    match_type = models.CharField(max_length=3)
+    bo = models.IntegerField(default=1)
 
     @property
     def max_team_participants(self):
-        if self.match_type == match_type_1v1:
+        if self.match_type == MatchType.m1v1:
             return 1
         return 3
 
-    @property
-    def teams_count(self):
-        result = {
-            team_a: self.participants.filter(team=team_a).count(),
-            team_b: self.participants.filter(team=team_b).count(),
-            team_spectator: self.participants.filter(team=team_a).count()
-        }
-        return result
+    def get_team_count(self, team):
+        return self.participants.filter(team=team).count()
+
+    def is_team_full(self, team):
+        if team == Teams.spectator:
+            return False
+        return self.get_team_count(team) >= self.max_team_participants
 
     @property
     def is_full(self):
         return self.participants.count() == self.max_participants
 
+    @property
+    def is_ready(self):
+        qs = self.participants
+        if self.game_mode == GameMode.custom_game:
+            qs.exclude(team=Teams.spectator)
+            if not self.is_team_full(Teams.a) or not self.is_team_full(Teams.b):
+                return False
+        return qs.filter(is_ready=False).count() == 0
+
+    def __str__(self):
+        name = f'{self.code}/{self.game_mode} ({self.participants.count()}/{self.max_participants})'
+        if self.game_mode == GameMode.custom_game:
+            name += ' {bo' + str(self.bo) + ', ' + self.match_type + '}'
+        return name
+
+    str_name = 'lobby'
+
 
 class LobbyParticipants(models.Model):
     lobby = models.ForeignKey(Lobby, on_delete=models.CASCADE, related_name='participants')
-    lobby_code = models.CharField(max_length=5, editable=False)
+    is_guest = models.BooleanField(default=False)
     user_id = models.IntegerField(unique=True)
-    username = models.CharField(max_length=20)
     creator = models.BooleanField(default=False)
     is_ready = models.BooleanField(default=False)
     join_at = models.DateTimeField(auto_now_add=True, editable=False)
 
-    # Custom settings
-    team = models.CharField(default=team_a)
+    team = models.CharField(default=None, null=True)
+
+    def get_location_id(self):
+        return self.lobby.id
 
     def delete(self, using=None, keep_parents=False):
+        # todo inform other players that xxx leave the lobby
         creator = self.creator
-        lobby = Lobby.objects.get(id=self.lobby.id)
+        lobby = self.lobby
         super().delete(using=using, keep_parents=keep_parents)
-        participants = lobby.participants.all()
+        participants = lobby.participants.filter(is_guest=False)
         if not participants.exists():
             lobby.delete()
+            # todo close websocket connection
         elif creator:
             first_join = participants.order_by('join_at').first()
             first_join.creator = True
             first_join.save()
+
+    def __str__(self):
+        name = f'{self.lobby.code}/{self.lobby.game_mode} {self.user_id}'
+        if self.creator:
+            name += '*'
+        if self.is_ready:
+            name += ' ready'
+        if self.team is not None:
+            name += f" '{self.team}'"
+        return name
+
+    str_name = 'lobby'

@@ -15,7 +15,8 @@ services:
       - shared-code-volume:/shared
     environment:
       TZ: Europe/Paris
-      DEBUG: ${DEBUG}
+      DEBUG:
+      MIGRATION:
       POSTGRES_DB: ${POSTGRES_AUTH_DB_NAME}
       POSTGRES_USER: ${POSTGRES_AUTH_USER}
       POSTGRES_PASSWORD: ${POSTGRES_AUTH_PASSWORD}
@@ -39,7 +40,8 @@ services:
       - shared-code-volume:/shared
     environment:
       TZ: Europe/Paris
-      DEBUG: ${DEBUG}
+      DEBUG:
+      MIGRATION:
       POSTGRES_DB: ${POSTGRES_CHAT_DB_NAME}
       POSTGRES_USER: ${POSTGRES_CHAT_USER}
       POSTGRES_PASSWORD: ${POSTGRES_CHAT_PASSWORD}
@@ -78,7 +80,8 @@ services:
       - shared-code-volume:/shared
     environment:
       TZ: Europe/Paris
-      DEBUG: ${DEBUG}
+      DEBUG:
+      MIGRATION:
       POSTGRES_DB: ${POSTGRES_GAME_DB_NAME}
       POSTGRES_USER: ${POSTGRES_GAME_USER}
       POSTGRES_PASSWORD: ${POSTGRES_GAME_PASSWORD}
@@ -102,7 +105,8 @@ services:
       - shared-code-volume:/shared
     environment:
       TZ: Europe/Paris
-      DEBUG: ${DEBUG}
+      DEBUG:
+      MIGRATION:
       POSTGRES_DB: ${POSTGRES_MATCHMAKING_DB_NAME}
       POSTGRES_USER: ${POSTGRES_MATCHMAKING_USER}
       POSTGRES_PASSWORD: ${POSTGRES_MATCHMAKING_PASSWORD}
@@ -126,7 +130,8 @@ services:
       - shared-code-volume:/shared
     environment:
       TZ: Europe/Paris
-      DEBUG: ${DEBUG}
+      DEBUG:
+      MIGRATION:
       POSTGRES_DB: ${POSTGRES_USERS_DB_NAME}
       POSTGRES_USER: ${POSTGRES_USERS_USER}
       POSTGRES_PASSWORD: ${POSTGRES_USERS_PASSWORD}
@@ -304,15 +309,20 @@ volumes:
       device: "requirements/users/django"
 
 #####Database Volumes
-  auth-db-volume: {}
+  auth-db-volume:
+    name: "auth-db-volume"
 
-  chat-db-volume: {}
+  chat-db-volume:
+    name: "chat-db-volume"
 
-  game-db-volume: {}
+  game-db-volume:
+    name: "game-db-volume"
 
-  matchmaking-db-volume: {}
+  matchmaking-db-volume:
+    name: "matchmaking-db-volume"
 
-  users-db-volume: {}
+  users-db-volume:
+    name: "users-db-volume"
 
 #####Shared Code Volume
   shared-code-volume:

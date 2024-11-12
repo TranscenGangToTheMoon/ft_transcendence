@@ -1,0 +1,23 @@
+from lib_transcendence.exceptions import MessagesException
+from lib_transcendence import endpoints
+from rest_framework import serializers, permissions
+from rest_framework.exceptions import ParseError
+
+from lib_transcendence.services import request_users
+
+
+class IsAuthenticated(permissions.BasePermission):
+
+    def has_permission(self, request, view):
+        if type(request.data) is not dict:
+            raise ParseError(MessagesException.ValidationError.REQUEST_DATA_REQUIRED)
+        json_data = request_users(endpoints.Users.me, 'GET', request)
+        request.data['auth_user'] = json_data
+        request.user.id = json_data['id']
+        return True
+
+
+def get_auth_user(request=None):
+    if request is None:
+        raise serializers.ValidationError(MessagesException.ValidationError.REQUEST_REQUIRED)
+    return request.data['auth_user']
