@@ -1,8 +1,8 @@
 ##### Base build
 FROM caddy:2.8.4 AS base
 
-RUN apk update
-RUN apk upgrade
+RUN apk update -y
+RUN apk upgrade -y
 RUN apk add --no-cache tzdata
 
 ##### Development build
