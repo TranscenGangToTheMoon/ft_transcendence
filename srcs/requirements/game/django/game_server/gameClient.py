@@ -1,27 +1,24 @@
-import json
-from channels.generic.websocket import WebsocketConsumer
+# socket_server.py
+import socketio
+import sys
 
+sio = socketio.AsyncServer(async_mode='eventlet')
 
-class GameClient(WebsocketConsumer):
-	pending_game_request = False
-	def connect(self):
-		self.accept()
-		self.send(text_data=json.dumps({
-			'type': 'connect',
-			'message': 'Connected to the game server.'
-		}))
+@sio.event
+async def connect(sid, environ):
+    print('Client connected:', sid)
+    await sio.emit('message', 'Bienvenue!', to=sid)
 
-	def disconnect(self, code=None):
-		self.send(text_data=json.dumps({
-			'type': 'disconnect',
-			'message': 'Disconnected from the game server.'
-		}))
+@sio.event
+async def message(sid, data):
+    print('received message from client:', data)
+    await sio.emit('message', f'Reçu: {data}', to=sid)
 
-	def receive(self, text_data=None, bytes_data=None):
-		if text_data is not None:
-			text_data_json = json.loads(text_data)
-			message = text_data_json['message']
-			self.send(text_data=json.dumps({
-				'type': 'message',
-				'message': message
-			}))
+@sio.event
+async def disconnect(sid):
+    print('Client disconnected:', sid)
+
+if __name__ == '__main__':
+	import eventlet
+	app = socketio.WSGIApp(sio)
+	eventlet.wsgi.server(eventlet.listen(('', sys.argv[1])), app)
