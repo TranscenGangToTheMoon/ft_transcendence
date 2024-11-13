@@ -1,3 +1,14 @@
+x-django-env: &django-env
+  TZ: Europe/Paris
+  DEBUG: "False" # True or False
+  MIGRATION: "true" # true or false
+
+x-pgsql-healtcheck: &healthcheck
+  test: ["CMD-SHELL", "pg_isready --dbname=$$POSTGRES_DB --username=$$POSTGRES_USER"]
+  interval: 10s
+  timeout: 5s
+  retries: 5
+
 services:
 ##### ========== Django Projects ========================================= #####
   auth:
@@ -11,9 +22,7 @@ services:
     volumes:
       - shared-code-volume:/shared
     environment:
-      TZ: Europe/Paris
-      DEBUG: False
-      MIGRATION:
+      <<: *django-env
       POSTGRES_DB: ${POSTGRES_AUTH_DB_NAME}
       POSTGRES_USER: ${POSTGRES_AUTH_USER}
       POSTGRES_PASSWORD: ${POSTGRES_AUTH_PASSWORD}
@@ -33,9 +42,7 @@ services:
     volumes:
       - shared-code-volume:/shared
     environment:
-      TZ: Europe/Paris
-      DEBUG: False
-      MIGRATION:
+      <<: *django-env
       POSTGRES_DB: ${POSTGRES_CHAT_DB_NAME}
       POSTGRES_USER: ${POSTGRES_CHAT_USER}
       POSTGRES_PASSWORD: ${POSTGRES_CHAT_PASSWORD}
@@ -67,9 +74,7 @@ services:
     volumes:
       - shared-code-volume:/shared
     environment:
-      TZ: Europe/Paris
-      DEBUG: False
-      MIGRATION:
+      <<: *django-env
       POSTGRES_DB: ${POSTGRES_GAME_DB_NAME}
       POSTGRES_USER: ${POSTGRES_GAME_USER}
       POSTGRES_PASSWORD: ${POSTGRES_GAME_PASSWORD}
@@ -89,9 +94,7 @@ services:
     volumes:
       - shared-code-volume:/shared
     environment:
-      TZ: Europe/Paris
-      DEBUG: False
-      MIGRATION:
+      <<: *django-env
       POSTGRES_DB: ${POSTGRES_MATCHMAKING_DB_NAME}
       POSTGRES_USER: ${POSTGRES_MATCHMAKING_USER}
       POSTGRES_PASSWORD: ${POSTGRES_MATCHMAKING_PASSWORD}
@@ -111,9 +114,7 @@ services:
     volumes:
       - shared-code-volume:/shared
     environment:
-      TZ: Europe/Paris
-      DEBUG: False
-      MIGRATION:
+      <<: *django-env
       POSTGRES_DB: ${POSTGRES_USERS_DB_NAME}
       POSTGRES_USER: ${POSTGRES_USERS_USER}
       POSTGRES_PASSWORD: ${POSTGRES_USERS_PASSWORD}
@@ -135,11 +136,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_AUTH_PASSWORD}
     networks:
       - auth-network
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready --dbname=$$POSTGRES_DB --username=$$POSTGRES_USER"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+    healthcheck: *healthcheck
 
   chat-db:
     image: postgres:14
@@ -153,11 +150,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_CHAT_PASSWORD}
     networks:
       - chat-network
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready --dbname=$$POSTGRES_DB --username=$$POSTGRES_USER"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+    healthcheck: *healthcheck
 
   game-db:
     image: postgres:14
@@ -171,11 +164,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_GAME_PASSWORD}
     networks:
       - game-network
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready --dbname=$$POSTGRES_DB --username=$$POSTGRES_USER"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+    healthcheck: *healthcheck
 
   matchmaking-db:
     image: postgres:14
@@ -189,11 +178,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_MATCHMAKING_PASSWORD}
     networks:
       - matchmaking-network
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready --dbname=$$POSTGRES_DB --username=$$POSTGRES_USER"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+    healthcheck: *healthcheck
 
   users-db:
     image: postgres:14
@@ -207,11 +192,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_USERS_PASSWORD}
     networks:
       - users-network
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready --dbname=$$POSTGRES_DB --username=$$POSTGRES_USER"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+    healthcheck: *healthcheck
 
 networks:
 ##### ========== Global network ========================================== #####
