@@ -8,7 +8,7 @@ from utils.generate_random import rnstr
 TESTS = [
     'test_chat',
     # 'test_game',
-    # 'test_matchmaking',
+    'test_matchmaking',
     # 'test_users',
     'test_lobby',
     'test_tournament',
