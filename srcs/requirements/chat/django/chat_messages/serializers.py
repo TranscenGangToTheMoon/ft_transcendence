@@ -22,14 +22,13 @@ class MessagesSerializer(serializers.ModelSerializer):
         ]
 
     def create(self, validated_data):
-        pk = self.context['pk']
-        user = self.context['auth_user']
+        # todo add check: only chat can creat chat
+        chat_id = self.context['chat_id']
 
-        try:
-            participant = ChatParticipants.objects.get(user_id=user['id'], chat_id=pk)
-        except ChatParticipants.DoesNotExist:
-            raise PermissionDenied(MessagesException.PermissionDenied.NOT_BELONG_TO_CHAT)
+        validated_data['chat_id'] = chat_id
         validated_data['author'] = get_chat_participants(chat_id, self.context['auth_user']['id'])
 
-        validated_data['chat_id'] = pk
+        for user in ChatParticipants.objects.filter(chat_id=chat_id, view_chat=False):
+            user.set_view_chat()
+
         return super().create(validated_data)
