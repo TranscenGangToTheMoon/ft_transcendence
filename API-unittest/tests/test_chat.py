@@ -216,7 +216,12 @@ class Test04_Messages(UnitTest):
         return chat_id
 
     def test_001_send_messages(self):
-        self.send_message()
+        user1 = new_user()
+
+        chat_id = self.send_message(user1)
+        response = request_chat_id(user1, chat_id)
+        self.assertResponse(response, 200)
+        self.assertEqual('and u ?', response.json['last_message']['content'])
 
     def test_002_get_messages(self):
         user1 = new_user()
