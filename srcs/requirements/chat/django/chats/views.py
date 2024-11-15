@@ -28,8 +28,9 @@ class ChatsView(generics.ListCreateAPIView, ChatsMixin):
 
 
 class ChatView(generics.RetrieveUpdateDestroyAPIView, ChatsMixin):
-    lookup_field = 'pk'
 
+    lookup_field = 'chat_id'
+giuiuh
     def get_object(self):
         user = get_chat_participants(self.kwargs['chat_id'], self.request.user.id, False)
         if user.view_chat is False:
