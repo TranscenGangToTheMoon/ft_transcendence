@@ -40,31 +40,16 @@ class BlockedSerializer(serializers.ModelSerializer):
         if user.blocked.filter(blocked=blocked_user).exists():
             raise ResourceExists(MessagesException.ResourceExists.BLOCK)
 
-        endpoint = endpoints.UsersManagement.fblocked_user.format(user_id=user.id, blocked_user_id=blocked_user.id)
-        try:
-            request_chat(
-                endpoint=endpoint,
-                data={'blocked': True},
-            )
-        except NotFound:
-            pass
-
-        try:
-            request_matchmaking(
-                endpoint=endpoint,
-                method='DELETE',
-            )
-        except NotFound:
-            pass
-
-        # todo remove chat
-        # todo check remove from lobby
-
         friendship = get_friendship(user, blocked_user)
         if friendship:
             friendship.delete()
+
         user.sent_friend_requests.filter(receiver=blocked_user).delete()
+
         blocked_user.sent_friend_requests.filter(receiver=user).delete()
+
         validated_data['user'] = user
         validated_data['blocked'] = blocked_user
-        return super().create(validated_data)
+        result = super().create(validated_data)
+        result.blocked_services()
+        return result
