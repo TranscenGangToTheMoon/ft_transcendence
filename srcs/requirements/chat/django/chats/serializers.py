@@ -8,6 +8,7 @@ from rest_framework.exceptions import MethodNotAllowed, PermissionDenied
 from lib_transcendence.exceptions import MessagesException
 from lib_transcendence.exceptions import ResourceExists
 
+from chat_messages.serializers import MessagesSerializer
 from chats.models import Chats, ChatParticipants
 from chats.utils import get_chat_together
 
@@ -27,6 +28,7 @@ class ChatPaticipantsSerializer(serializers.ModelSerializer):
 class ChatsSerializer(serializers.ModelSerializer):
     username = serializers.CharField(write_only=True)
     participants = ChatPaticipantsSerializer(many=True, read_only=True)
+    last_message = MessagesSerializer(source='messages.last', read_only=True)
     type = serializers.CharField()
     view_chat = serializers.BooleanField(write_only=True, required=False)
 
@@ -36,6 +38,7 @@ class ChatsSerializer(serializers.ModelSerializer):
             'id',
             'type',
             'participants',
+            'last_message',
             'created_at',
             'username',
             'view_chat',
@@ -43,6 +46,7 @@ class ChatsSerializer(serializers.ModelSerializer):
         read_only_fields = [
             'id',
             'participants',
+            'last_message',
             'created_at',
         ]
 
