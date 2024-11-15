@@ -1,7 +1,14 @@
+from typing import Literal
+
+from utils.credentials import new_user
 from utils.request import make_request
 
 
-def send_friend_request(sender, receiver):
+def send_friend_request(sender=None, receiver=None):
+    if sender is None:
+        sender = new_user()
+    if receiver is None:
+        receiver = new_user()
     return make_request(
         endpoint='users/me/friend_requests/',
         method='POST',
@@ -10,16 +17,29 @@ def send_friend_request(sender, receiver):
     )
 
 
-def accept_friend_request(receiver, sender):
+def accept_friend_request(receiver=None, sender=None, method: Literal['POST', 'GET', 'DELETE'] = 'POST', data=None):
+    if receiver is None:
+        receiver = new_user()
+    if method == 'POST':
+        if sender is None:
+            sender = new_user()
+        if data is None:
+            data = {'username': sender['username']}# todo remake this ?
+    elif data is None:
+        data = {}
     return make_request(
         endpoint='users/me/friends/',
-        method='POST',
+        method=method,
         token=receiver['token'],
-        data={'username': sender['username']}
+        data=data,
     )
 
 
-def create_friend(user1, user2):
+def create_friend(user1=None, user2=None):
+    if user1 is None:
+        user1 = new_user()
+    if user2 is None:
+        user2 = new_user()
     response_request = send_friend_request(user1, user2)
     response_accept = accept_friend_request(user2, user1)
     return [response_request, response_accept]
