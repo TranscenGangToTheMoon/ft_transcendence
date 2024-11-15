@@ -3,7 +3,7 @@ from lib_transcendence.serializer import SerializerContext
 
 from chat_messages.models import Messages
 from chat_messages.serializers import MessagesSerializer
-from chats.models import ChatParticipants
+from chat_messages.utils import get_chat_participants
 
 
 class MessagesView(SerializerContext, generics.ListCreateAPIView):
@@ -14,6 +14,8 @@ class MessagesView(SerializerContext, generics.ListCreateAPIView):
     def filter_queryset(self, queryset):
         chat_id = self.kwargs['chat_id']
 
+        get_chat_participants(chat_id, self.request.user.id)
+        return queryset.filter(chat_id=chat_id)
 
 
 messages_view = MessagesView.as_view()
