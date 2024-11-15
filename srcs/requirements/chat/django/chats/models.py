@@ -13,5 +13,9 @@ class ChatParticipants(models.Model):
     username = models.CharField(max_length=50)
     view_chat = models.BooleanField(default=True)
 
+    def set_view_chat(self, view_chat=True):
+        self.view_chat = view_chat
+        self.save()
+
     def __str__(self):
         return f'[{self.chat.id}] {self.user_id} {self.username}'
