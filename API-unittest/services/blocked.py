@@ -8,3 +8,11 @@ def blocked_user(user, username):
         data={'username': username},
         token=user['token'],
     )
+
+
+def unblocked_user(user, block_id):
+    return make_request(
+        endpoint=f'users/me/blocked/{block_id}/',
+        method='DELETE',
+        token=user['token'],
+    )
