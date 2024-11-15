@@ -17,7 +17,7 @@ class Chat:
     base_chat = base_api + 'chat/'
 
     chats = base_chat
-    chat = chats + '<int:pk>/'
+    chat = chats + '<int:chat_id>/'
     messages = chat + 'messages/'
 
 
