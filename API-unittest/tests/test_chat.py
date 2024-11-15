@@ -92,7 +92,7 @@ class Test03_GetChat(UnitTest):
 
         response = create_chat(user1, method='GET')
         self.assertResponse(response, 200)
-        self.assertEqual(0, len(response.json['results']))
+        self.assertEqual(0, response.json['count'])
 
         for i in range(5):
             tmp_user = new_user()
@@ -101,7 +101,7 @@ class Test03_GetChat(UnitTest):
 
         response = create_chat(user1, method='GET')
         self.assertResponse(response, 200)
-        self.assertEqual(5, len(response.json['results']))
+        self.assertEqual(5, response.json['count'])
 
     def test_002_search_chats(self):
         user1 = new_user()
@@ -117,16 +117,16 @@ class Test03_GetChat(UnitTest):
 
         response = create_chat(user1, method='GET', data={'q': 'caca'})
         self.assertResponse(response, 200)
-        self.assertEqual(1, len(response.json['results']))
+        self.assertEqual(1, response.json['count'])
 
         response = create_chat(user1, method='GET', data={'q': 'chat'})
         self.assertResponse(response, 200)
-        self.assertEqual(5, len(response.json['results']))
+        self.assertEqual(5, response.json['count'])
 
     def test_003_search_chats_none(self):
         response = create_chat(new_user(), method='GET', data={'q': 'chat'})
         self.assertResponse(response, 200)
-        self.assertEqual(0, len(response.json['results']))
+        self.assertEqual(0, response.json['count'])
 
     def test_004_blocked_chats(self):
         user1 = new_user()
