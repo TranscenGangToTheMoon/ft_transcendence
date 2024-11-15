@@ -6,16 +6,16 @@ from utils.generate_random import rnstr
 
 # -------------------- SERVICES -------------------------------------------------------------------------------------- #
 TESTS = [
+    'test_auth',
+    'test_blocked',
     'test_chat',
-    # 'test_game',
-    # 'test_matchmaking',
-    # 'test_users',
+    'test_friends',
+    'test_game',
     'test_lobby',
-    'test_tournament',
-    # 'test_auth',
-    # 'test_friends',
-    # 'test_blocked',
+    'test_matchmaking',
     'test_play',
+    'test_tournament',
+    'test_users',
 ]
 
 
