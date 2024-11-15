@@ -31,7 +31,11 @@ class FriendsSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         user_accept = get_user(self.context.get('request'))
-        user_send_friend_request = get_valid_user(user_accept, validated_data.pop('username'))
+
+        try:
+            user_send_friend_request = get_valid_user(user_accept, validated_data.pop('username'))
+        except NotFound:
+            raise NotFound(MessagesException.NotFound.FRIEND_REQUEST)
 
         if is_friendship(user_accept, user_send_friend_request):
             raise ResourceExists(MessagesException.ResourceExists.FRIEND)
