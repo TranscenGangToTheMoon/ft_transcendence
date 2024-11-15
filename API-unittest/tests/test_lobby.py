@@ -253,7 +253,7 @@ class Test05_UpdateParticipantLobby(UnitTest):
 
         response = join_lobby(code, user1, data={'is_ready': True})
         self.assertResponse(response, 200)
-        self.assertEqual(True, response.json['is_ready'])
+        self.assertTrue(response.json['is_ready'])
 
     def test_002_change_team(self):
         user1 = new_user()
@@ -327,7 +327,7 @@ class Test06_LeaveLobby(UnitTest):
         response = join_lobby(code, user2, 'GET')
         self.assertResponse(response, 200)
         self.assertEqual(1, len(response.json))
-        self.assertEqual(True, response.json[0]['creator'])
+        self.assertTrue(response.json[0]['creator'])
 
     def test_003_guest_join_leave_lobby_then_destroy_lobby(self):
         user1 = new_user()

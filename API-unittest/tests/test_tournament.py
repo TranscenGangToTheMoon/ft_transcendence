@@ -300,7 +300,7 @@ class Test06_LeaveTournament(UnitTest):
 
         response = join_tournament(code, user1)
         self.assertResponse(response, 201)
-        self.assertEqual(True, response.json['creator'])
+        self.assertTrue(response.json['creator'])
 
 
 class Test07_GetTournament(UnitTest):
