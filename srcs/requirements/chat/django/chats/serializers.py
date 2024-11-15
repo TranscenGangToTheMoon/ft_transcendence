@@ -79,6 +79,7 @@ class ChatsSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         view_chat = validated_data.pop('view_chat', None)
+        validated_data = {}
         if view_chat is not None:
             user = get_auth_user(self.context.get('request'))
             try:
