@@ -9,7 +9,6 @@ from chat_messages.utils import get_chat_participants
 class MessagesView(SerializerContext, generics.ListCreateAPIView):
     queryset = Messages.objects.all().order_by('-sent_at')
     serializer_class = MessagesSerializer
-    lookup_field = 'pk'
 
     def filter_queryset(self, queryset):
         chat_id = self.kwargs['chat_id']
