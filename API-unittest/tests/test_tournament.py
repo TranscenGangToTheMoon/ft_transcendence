@@ -229,7 +229,7 @@ class Test06_LeaveTournament(UnitTest):
 
         response = search_tournament(name, user1)
         self.assertResponse(response, 200)
-        self.assertEqual(1,  len(response.json['results']))
+        self.assertEqual(1,  response.json['count'])
 
         for u in users:
             self.assertResponse(join_tournament(code, u, 'GET'), 200)
@@ -241,7 +241,7 @@ class Test06_LeaveTournament(UnitTest):
 
         response = search_tournament(name, user1)
         self.assertResponse(response, 200)
-        self.assertEqual(0,  len(response.json['results']))
+        self.assertEqual(0,  response.json['count'])
 
     def test_002_leave_tournament(self):
         user1 = new_user()
@@ -353,11 +353,11 @@ class Test07_GetTournament(UnitTest):
 
         response = search_tournament('coucou' + name, user1)
         self.assertResponse(response, 200)
-        self.assertEqual(1, len(response.json['results']))
+        self.assertEqual(1, response.json['count'])
 
         response = search_tournament('Tournoi ' + name, user1)
         self.assertResponse(response, 200)
-        self.assertEqual(5, len(response.json['results']))
+        self.assertEqual(5, response.json['count'])
 
     def test_005_search_private_tournament(self):
         user1 = new_user()
@@ -367,16 +367,16 @@ class Test07_GetTournament(UnitTest):
 
         response = search_tournament('private', user2)
         self.assertResponse(response, 200)
-        self.assertEqual(0, len(response.json['results']))
+        self.assertEqual(0, response.json['count'])
 
         response = search_tournament('private', user1)
         self.assertResponse(response, 200)
-        self.assertEqual(1, len(response.json['results']))
+        self.assertEqual(1, response.json['count'])
 
     def test_006_search_tournament_none(self):
         response = search_tournament('caca')
         self.assertResponse(response, 200)
-        self.assertEqual(0, len(response.json['results']))
+        self.assertEqual(0, response.json['count'])
 
 
 # todo test start after make it
