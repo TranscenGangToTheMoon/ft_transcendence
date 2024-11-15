@@ -21,3 +21,26 @@ def create_chat(user1, username=None, data=None, method: Literal['GET', 'POST'] 
         token=user1['token'],
         data=data,
     )
+
+
+def request_chat_id(user1, chat_id, data=None, method: Literal['GET', 'PATCH', 'DELETE'] = 'GET'):
+    if data is None:
+        data = {}
+    return make_request(
+        endpoint=f'chat/{chat_id}/',
+        method=method,
+        token=user1['token'],
+        data=data,
+    )
+
+
+def create_message(user, chat_id, message=None, data=None, method: Literal['GET', 'POST'] = 'POST'):
+    if data is None and method == 'POST':
+        data = {'content': message}
+    return make_request(
+        endpoint=f'chat/{chat_id}/messages/',
+        method=method,
+        token=user['token'],
+        data=data,
+    )
+# todo add preview last chat
