@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from chat_messages.models import Messages
+from chat_messages.utils import get_chat_participants
 from chats.models import ChatParticipants
 
 
@@ -28,7 +29,7 @@ class MessagesSerializer(serializers.ModelSerializer):
             participant = ChatParticipants.objects.get(user_id=user['id'], chat_id=pk)
         except ChatParticipants.DoesNotExist:
             raise PermissionDenied(MessagesException.PermissionDenied.NOT_BELONG_TO_CHAT)
+        validated_data['author'] = get_chat_participants(chat_id, self.context['auth_user']['id'])
 
         validated_data['chat_id'] = pk
-        validated_data['author'] = participant
         return super().create(validated_data)
