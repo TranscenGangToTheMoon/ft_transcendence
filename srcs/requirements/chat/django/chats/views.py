@@ -1,4 +1,4 @@
-from django.http import Http404
+from lib_transcendence.serializer import SerializerContext
 from lib_transcendence.utils import get_host
 from rest_framework import generics
 from rest_framework.exceptions import MethodNotAllowed
@@ -27,10 +27,9 @@ class ChatsView(generics.ListCreateAPIView, ChatsMixin):
     pass
 
 
-class ChatView(generics.RetrieveUpdateDestroyAPIView, ChatsMixin):
-
+class ChatView(SerializerContext, generics.RetrieveUpdateDestroyAPIView, ChatsMixin):
     lookup_field = 'chat_id'
-giuiuh
+
     def get_object(self):
         user = get_chat_participants(self.kwargs['chat_id'], self.request.user.id, False)
         if user.view_chat is False:
