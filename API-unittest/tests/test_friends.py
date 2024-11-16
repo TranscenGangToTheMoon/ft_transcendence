@@ -67,6 +67,13 @@ class Test02_FriendRequest(UnitTest):
 
         self.assertResponse(send_friend_request(user1, {'username': 'caca'}), 404, {'detail': 'User not found.'})
 
+    def test_003_already_request(self):
+        user1 = new_user()
+        user2 = new_user()
+
+        self.assertResponse(send_friend_request(user1, user2), 201)
+        self.assertResponse(send_friend_request(user1, method='GET'), 409, {'detail': 'You already send a friend requests to this user.'})
+
 
 if __name__ == '__main__':
     unittest.main()
