@@ -22,9 +22,9 @@ def friend_requests(sender=None, receiver=None, method: Literal['POST', 'GET'] =
     )
 
 
-def receive_friend_requests(user):
+def get_friend_requests_received(user):
     return make_request(
-        endpoint='users/me/friend_requests/receive/',
+        endpoint='users/me/friend_requests/received/',
         token=user['token'],
     )
 
