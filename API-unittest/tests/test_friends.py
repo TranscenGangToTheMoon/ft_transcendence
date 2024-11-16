@@ -80,6 +80,13 @@ class Test02_FriendRequest(UnitTest):
         self.assertResponse(send_friend_request(user1, user2), 409, {'detail': 'You have already sent a friend request to this user.'})
         self.assertResponse(send_friend_request(user2, user1), 409, {'detail': 'You have already received a friend request from this user.'})
 
+    def test_004_already_friends(self):
+        user1 = new_user()
+        user2 = new_user()
+
+        self.assertFriendResponse(create_friend(user1, user2))
+        self.assertResponse(send_friend_request(user1, user2), 409, {'detail': 'You are already friends with this user.'})
+
 
 
 if __name__ == '__main__':
