@@ -12,6 +12,9 @@ class ChatsMixin(generics.GenericAPIView):
     queryset = Chats.objects.all()
     serializer_class = ChatsSerializer
 
+
+class ChatsView(generics.ListCreateAPIView, ChatsMixin):
+
     def filter_queryset(self, queryset):
         query = self.request.data.pop('q', None)
         kwars = {'user_id': self.request.user.id}
@@ -21,10 +24,6 @@ class ChatsMixin(generics.GenericAPIView):
         if query is not None:
             join_chats = ChatParticipants.objects.exclude(user_id=self.request.user.id).filter(chat_id__in=join_chats, username__icontains=query).values_list('chat_id', flat=True)
         return queryset.filter(id__in=join_chats, blocked=False).distinct()
-
-
-class ChatsView(generics.ListCreateAPIView, ChatsMixin):
-    pass
 
 
 class ChatView(SerializerAuthContext, generics.RetrieveUpdateDestroyAPIView, ChatsMixin):
