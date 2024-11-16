@@ -160,7 +160,7 @@ class Test02_FriendRequest(UnitTest):
         self.assertResponse(friend_request(friend_request_id, user1, 'GET'), 404, {'detail': 'Friend request not found.'})
         self.assertResponse(friend_request(friend_request_id, user2, 'GET'), 404, {'detail': 'Friend request not found.'})
 
-    def test_013_accept_own_sens_friend_request(self):
+    def test_013_accept_own_send_friend_request(self):
         user1 = new_user()
         user2 = new_user()
 
