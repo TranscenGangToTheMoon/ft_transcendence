@@ -30,6 +30,9 @@ class FriendsSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user_accept = get_user(self.context.get('request'))
 
+        if user_accept.friend_requests_sent.filter(id=self.context['friend_request_id']).exists():
+            raise PermissionDenied(MessagesException.PermissionDenied.ACCEPT_FRIEND_REQUEST_YOURSELF)
+
         try:
             friend_request = user_accept.friend_requests_received.get(id=self.context['friend_request_id'])
             friend_request.delete()
