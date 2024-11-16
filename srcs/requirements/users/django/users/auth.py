@@ -58,7 +58,7 @@ def get_user(request=None, id=None):
             raise serializers.ValidationError(MessagesException.ValidationError.REQUEST_REQUIRED)
         id = request.user.id
     try:
-        return Users.objects.get(pk=id)
+        return Users.objects.get(id=id)
     except Users.DoesNotExist:
         raise NotFound(MessagesException.NotFound.USER)
 

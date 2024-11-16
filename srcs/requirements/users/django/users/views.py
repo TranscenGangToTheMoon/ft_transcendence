@@ -10,7 +10,7 @@ class UsersMeView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = UsersSerializer
 
     def get_object(self):
-        return Users.objects.get(pk=self.request.user.id)
+        return Users.objects.get(id=self.request.user.id)
 
     def destroy(self, request, *args, **kwargs):
         password = self.request.data.get('password')
