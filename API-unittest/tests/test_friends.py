@@ -11,10 +11,7 @@ class Test01_Friend(UnitTest):
         self.assertFriendResponse(create_friendship())
 
     def test_002_friend_without_friend_request(self):
-        self.assertResponse(accept_friend_request(), 404, {'detail': 'Friend request not found.'})
-
-    def test_003_friend_does_not_exist(self):
-        self.assertResponse(accept_friend_request(sender={'username': 'caca'}), 404, {'detail': 'Friend request not found.'})
+        self.assertResponse(friend_request('123456'), 404, {'detail': 'Friend request not found.'})
 
     def test_004_friend_already_friends(self):
         user1 = new_user()
