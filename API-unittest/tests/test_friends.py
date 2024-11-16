@@ -48,6 +48,14 @@ class Test01_Friend(UnitTest):
             self.assertResponse(response, 200)
             self.assertEqual(0, response.json['count'])
 
+    def test_007_no_field_username(self):
+        user1 = new_user()
+        user2 = new_user()
+
+        self.assertResponse(send_friend_request(user1, user2), 201)
+
+        response = accept_friend_request(user1, data={})
+        self.assertResponse(response, 400, {'username': ['This field is required.']})
 
 if __name__ == '__main__':
     unittest.main()
