@@ -123,9 +123,7 @@ class Test03_GetChat(UnitTest):
         user2 = new_user()
 
         self.assertResponse(accept_chat(user2), 200)
-        response = create_chat(user1, user2['username'])
-        self.assertResponse(response, 201)
-        chat_id = response.json['id']
+        chat_id = self.assertResponse(create_chat(user1, user2['username']), 201, get_id=True)
 
         self.assertResponse(blocked_user(user1, user2['username']), 201)
 
@@ -137,9 +135,7 @@ class Test03_GetChat(UnitTest):
         user2 = new_user()
 
         self.assertResponse(accept_chat(user2), 200)
-        response = create_chat(user1, user2['username'])
-        self.assertResponse(response, 201)
-        chat_id = response.json['id']
+        chat_id = self.assertResponse(create_chat(user1, user2['username']), 201, get_id=True)
 
         self.assertResponse(request_chat_id(new_user(), chat_id), 403, {'detail': 'You do not belong to this chat.'})
 
@@ -148,9 +144,7 @@ class Test03_GetChat(UnitTest):
         user2 = new_user()
 
         self.assertResponse(accept_chat(user2), 200)
-        response = create_chat(user1, user2['username'])
-        self.assertResponse(response, 201)
-        chat_id = response.json['id']
+        chat_id = self.assertResponse(create_chat(user1, user2['username']), 201, get_id=True)
 
         response = request_chat_id(user1, chat_id, {'view_chat': False}, 'PATCH')
         self.assertResponse(response, 200)
@@ -171,9 +165,7 @@ class Test03_GetChat(UnitTest):
         user2 = new_user()
 
         self.assertResponse(accept_chat(user2), 200)
-        response = create_chat(user1, user2['username'])
-        self.assertResponse(response, 201)
-        chat_id = response.json['id']
+        chat_id = self.assertResponse(create_chat(user1, user2['username']), 201, get_id=True)
 
         self.assertResponse(request_chat_id(user1, chat_id, method='DELETE'), 405, {'detail': 'Method "DELETE" not allowed.'})
 
@@ -188,9 +180,7 @@ class Test04_Messages(UnitTest):
 
         self.assertResponse(accept_chat(user2), 200)
 
-        response = create_chat(user1, user2['username'])
-        self.assertResponse(response, 201)
-        chat_id = response.json['id']
+        chat_id = self.assertResponse(create_chat(user1, user2['username']), 201, get_id=True)
         self.assertResponse(create_message(user1, chat_id, 'Hey'), 201)
         self.assertResponse(create_message(user2, chat_id, 'Hi'), 201)
         self.assertResponse(create_message(user1, chat_id, 'How are you ?'), 201)
@@ -222,9 +212,7 @@ class Test04_Messages(UnitTest):
 
         self.assertResponse(accept_chat(user1), 200)
 
-        response = create_chat(new_user(), user1['username'])
-        self.assertResponse(response, 201)
-        chat_id = response.json['id']
+        chat_id = self.assertResponse(create_chat(new_user(), user1['username']), 201, get_id=True)
 
         self.assertResponse(create_message(new_user(), chat_id, 'test'), 403, {'detail': 'You do not belong to this chat.'})
 
@@ -234,9 +222,7 @@ class Test04_Messages(UnitTest):
 
         chat_id = self.send_message(user1, user2)
 
-        response = blocked_user(user1, user2['username'])
-        self.assertResponse(response, 201)
-        block_id = response.json['id']
+        block_id = self.assertResponse(blocked_user(user1, user2['username']), 201, get_id=True)
 
         self.assertResponse(request_chat_id(user1, chat_id), 403, {'detail': 'You do not belong to this chat.'})
         self.assertResponse(create_message(user1, chat_id, method='GET'), 403, {'detail': 'You do not belong to this chat.'})
@@ -251,9 +237,7 @@ class Test04_Messages(UnitTest):
         user2 = new_user()
 
         self.assertResponse(accept_chat(user2), 200)
-        response = create_chat(user1, user2['username'])
-        self.assertResponse(response, 201)
-        chat_id = response.json['id']
+        chat_id = self.assertResponse(create_chat(user1, user2['username']), 201, get_id=True)
 
         response = request_chat_id(user1, chat_id, {'view_chat': False}, 'PATCH')
         self.assertResponse(response, 200)
