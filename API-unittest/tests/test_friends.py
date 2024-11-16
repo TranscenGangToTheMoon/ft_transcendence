@@ -62,6 +62,11 @@ class Test02_FriendRequest(UnitTest):
         self.assertResponse(receive_friend_requests(user2), 200, count=1)
         self.assertResponse(send_friend_request(user1, method='GET'), 200, count=1)
 
+    def test_002_user_does_not_exist(self):
+        user1 = new_user()
+
+        self.assertResponse(send_friend_request(user1, {'username': 'caca'}), 404, {'detail': 'User not found.'})
+
 
 if __name__ == '__main__':
     unittest.main()
