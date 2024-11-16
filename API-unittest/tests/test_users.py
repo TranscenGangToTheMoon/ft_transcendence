@@ -5,3 +5,4 @@
 # todo test me
 # todo test user
 # todo test update user
+# todo test get user friend field
