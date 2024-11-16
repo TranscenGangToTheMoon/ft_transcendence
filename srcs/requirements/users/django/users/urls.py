@@ -33,7 +33,6 @@ urlpatterns = [
 # todo make endpoint for user trophies
 # todo make endpoint for coins
 # todo rename all view for more comprehensive name
-# todo secure all get_object with filter_queryset
 # todo make endpoint for online status
 # todo make endpoint for user rank
 # todo remake user auth update value (is_guest and username)
