@@ -1,4 +1,6 @@
+from lib_transcendence.exceptions import MessagesException
 from rest_framework import generics
+from rest_framework.exceptions import NotFound
 
 from friends.models import Friends
 from friends.serializers import FriendsSerializer
@@ -12,9 +14,13 @@ class FriendsMixin(generics.GenericAPIView):
         return queryset.filter(friends=self.request.user.id)
 
 
-class FriendsListCreateView(generics.ListCreateAPIView, FriendsMixin):
-    pass
+class FriendsDeleteView(generics.RetrieveDestroyAPIView, FriendsMixin):
 
+    def get_object(self):
+        try:
+            return self.queryset.get(id=self.kwargs['friendship_id'], friends=self.request.user.id)
+        except Friends.DoesNotExist:
+            raise NotFound(MessagesException.NotFound.FRIENDSHIP)
 
 class FriendsDeleteView(generics.DestroyAPIView, FriendsMixin):
     lookup_field = 'friendship_id'
