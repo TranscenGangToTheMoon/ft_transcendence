@@ -29,21 +29,16 @@ def get_friend_requests_received(user):
     )
 
 
-def accept_friend_request(receiver=None, sender=None, method: Literal['POST', 'GET', 'DELETE'] = 'POST', data=None):
-    if receiver is None:
-        receiver = new_user()
-    if method == 'POST':
-        if sender is None:
-            sender = new_user()
-        if data is None:
-            data = {'username': sender['username']}# todo remake this ?
-    elif data is None:
-        data = {}
     return make_request(
         endpoint='users/me/friends/',
+
+def friend(user, friendship_id, method: Literal['GET', 'DELETE'] = 'GET'):
+    return make_request(
+        endpoint=f'users/me/friends/{friendship_id}/',
         method=method,
-        token=receiver['token'],
-        data=data,
+        token=user['token'],
+    )
+
 
 def friend_request(friend_request_id, user=None, method: Literal['POST', 'GET', 'DELETE'] = 'POST'):
     if user is None:
