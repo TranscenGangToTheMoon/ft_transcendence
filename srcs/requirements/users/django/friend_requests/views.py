@@ -8,15 +8,11 @@ class FriendRequestsMixin(generics.GenericAPIView):
     queryset = FriendRequests.objects.all()
     serializer_class = FriendRequestsSerializer
 
-    def filter_queryset(self, queryset):
-        qs = queryset.filter(sender=self.request.user.id)
-        if self.request.method == 'DELETE':
-            qs = qs | queryset.filter(receiver=self.request.user.id)
-        return qs
-
 
 class FriendRequestsListCreateView(generics.ListCreateAPIView, FriendRequestsMixin):
-    pass
+
+    def filter_queryset(self, queryset):
+        return queryset.filter(sender=self.request.user.id)
 
 
 class FriendRequestsReceiveListView(generics.ListAPIView, FriendRequestsMixin):
