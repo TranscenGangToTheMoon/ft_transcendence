@@ -12,6 +12,9 @@ class Test01_Friend(UnitTest):
     def test_002_friend_without_friend_request(self):
         self.assertResponse(accept_friend_request(), 404, {'detail': 'Friend request not found.'})
 
+    def test_003_friend_does_not_exist(self):
+        self.assertResponse(accept_friend_request(sender={'username': 'caca'}), 404, {'detail': 'Friend request not found.'})
+
 
 if __name__ == '__main__':
     unittest.main()
