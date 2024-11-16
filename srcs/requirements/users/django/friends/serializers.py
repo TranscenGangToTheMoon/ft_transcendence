@@ -41,7 +41,7 @@ class FriendsSerializer(serializers.ModelSerializer):
             raise ResourceExists(MessagesException.ResourceExists.FRIEND)
 
         try:
-            user_accept.received_friend_requests.get(sender=user_send_friend_request).delete()
+            user_accept.friend_requests_received.get(sender=user_send_friend_request).delete()
         except FriendRequests.DoesNotExist:
             raise NotFound(MessagesException.NotFound.FRIEND_REQUEST)
 
