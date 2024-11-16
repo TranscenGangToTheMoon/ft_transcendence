@@ -90,18 +90,14 @@ class Test03_GetChat(UnitTest):
     def test_001_get_chats(self):
         user1 = new_user()
 
-        response = create_chat(user1, method='GET')
-        self.assertResponse(response, 200)
-        self.assertEqual(0, response.json['count'])
+        self.assertResponse(create_chat(user1, method='GET'), 200, count=0)
 
         for i in range(5):
             tmp_user = new_user()
             self.assertResponse(accept_chat(tmp_user), 200)
             self.assertResponse(create_chat(user1, tmp_user['username']), 201)
 
-        response = create_chat(user1, method='GET')
-        self.assertResponse(response, 200)
-        self.assertEqual(5, response.json['count'])
+        self.assertResponse(create_chat(user1, method='GET'), 200, count=5)
 
     def test_002_search_chats(self):
         user1 = new_user()
@@ -115,18 +111,12 @@ class Test03_GetChat(UnitTest):
         self.assertResponse(accept_chat(tmp_user), 200)
         self.assertResponse(create_chat(user1, tmp_user['username']), 201)
 
-        response = create_chat(user1, method='GET', data={'q': 'caca'})
-        self.assertResponse(response, 200)
-        self.assertEqual(1, response.json['count'])
+        self.assertResponse(create_chat(user1, method='GET', data={'q': 'caca'}), 200, count=1)
 
-        response = create_chat(user1, method='GET', data={'q': 'chat'})
-        self.assertResponse(response, 200)
-        self.assertEqual(5, response.json['count'])
+        self.assertResponse(create_chat(user1, method='GET', data={'q': 'chat'}), 200, count=5)
 
     def test_003_search_chats_none(self):
-        response = create_chat(new_user(), method='GET', data={'q': 'chat'})
-        self.assertResponse(response, 200)
-        self.assertEqual(0, response.json['count'])
+        self.assertResponse(create_chat(new_user(), method='GET', data={'q': 'chat'}), 200, count=0)
 
     def test_004_blocked_chat(self):
         user1 = new_user()
@@ -169,18 +159,12 @@ class Test03_GetChat(UnitTest):
                 self.assertFalse(k['view_chat'])
                 break
 
-        response = create_chat(user1, method='GET')
-        self.assertResponse(response, 200)
-        self.assertEqual(0, response.json['count'])
+        self.assertResponse(create_chat(user1, method='GET'), 200, count=0)
 
-        response = create_chat(user2, method='GET')
-        self.assertResponse(response, 200)
-        self.assertEqual(1, response.json['count'])
+        self.assertResponse(create_chat(user2, method='GET'), 200, count=1)
 
         self.assertResponse(request_chat_id(user1, chat_id), 200)
-        response = create_chat(user1, method='GET')
-        self.assertResponse(response, 200)
-        self.assertEqual(1, response.json['count'])
+        self.assertResponse(create_chat(user1, method='GET'), 200, count=1)
 
     def test_007_delete_chat(self):
         user1 = new_user()
@@ -228,9 +212,7 @@ class Test04_Messages(UnitTest):
 
         chat_id = self.send_message(user1)
 
-        response = create_message(user1, chat_id, method='GET')
-        self.assertResponse(response, 200)
-        self.assertEqual(5, response.json['count'])
+        self.assertResponse(create_message(user1, chat_id, method='GET'), 200, count=5)
 
     def test_003_send_chat_does_not_exist(self):
         self.assertResponse(create_message(new_user(), '123456', 'test'), 403, {'detail': 'You do not belong to this chat.'})
@@ -282,15 +264,11 @@ class Test04_Messages(UnitTest):
 
         self.assertResponse(create_message(user1, chat_id, 'do not view chat'), 403, {'detail': 'You do not belong to this chat.'})
 
-        response = create_chat(user1, method='GET')
-        self.assertResponse(response, 200)
-        self.assertEqual(0, response.json['count'])
+        self.assertResponse(create_chat(user1, method='GET'), 200, count=0)
 
         self.assertResponse(create_message(user2, chat_id, 'Hey how are you ?'), 201)
 
-        response = create_chat(user1, method='GET')
-        self.assertResponse(response, 200)
-        self.assertEqual(1, response.json['count'])
+        self.assertResponse(create_chat(user1, method='GET'), 200, count=1)
         self.assertResponse(create_message(user1, chat_id, 'Fine and u?'), 201)
 
 

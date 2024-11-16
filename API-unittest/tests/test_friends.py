@@ -28,25 +28,19 @@ class Test01_Friend(UnitTest):
         for i in range(7):
             self.assertFriendResponse(create_friend(user1))
 
-        response = accept_friend_request(user1, method='GET')
-        self.assertResponse(response, 200)
-        self.assertEqual(7, response.json['count'])
+        self.assertResponse(accept_friend_request(user1, method='GET'), 200, count=7)
 
     def test_006_friends_then_block(self):
         user1 = new_user()
         user2 = new_user()
 
         self.assertFriendResponse(create_friend(user1, user2))
-        response = accept_friend_request(user2, method='GET')
-        self.assertResponse(response, 200)
-        self.assertEqual(1, response.json['count'])
+        self.assertResponse(accept_friend_request(user2, method='GET'), 200, count=1)
 
         self.assertResponse(blocked_user(user1, user2['username']), 201)
 
         for u in (user1, user2):
-            response = accept_friend_request(u, method='GET')
-            self.assertResponse(response, 200)
-            self.assertEqual(0, response.json['count'])
+            self.assertResponse(accept_friend_request(u, method='GET'), 200, count=0)
 
     def test_007_no_field_username(self):
         user1 = new_user()

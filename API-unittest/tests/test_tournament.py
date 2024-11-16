@@ -227,9 +227,7 @@ class Test06_LeaveTournament(UnitTest):
         self.assertResponse(join_tournament(code, user1, 'GET'), 403, {'detail': 'You do not belong to this tournament.'})
         self.assertResponse(create_tournament(user1, method='GET'), 404, {'detail': 'You do not belong to any tournament.'})
 
-        response = search_tournament(name, user1)
-        self.assertResponse(response, 200)
-        self.assertEqual(1,  response.json['count'])
+        self.assertResponse(search_tournament(name, user1), 200, count=1)
 
         for u in users:
             self.assertResponse(join_tournament(code, u, 'GET'), 200)
@@ -239,9 +237,7 @@ class Test06_LeaveTournament(UnitTest):
             self.assertResponse(join_tournament(code, u, 'GET'), 403, {'detail': 'You do not belong to this tournament.'})
             self.assertResponse(create_tournament(u, method='GET'), 404, {'detail': 'You do not belong to any tournament.'})
 
-        response = search_tournament(name, user1)
-        self.assertResponse(response, 200)
-        self.assertEqual(0,  response.json['count'])
+        self.assertResponse(search_tournament(name, user1), 200, count=0)
 
     def test_002_leave_tournament(self):
         user1 = new_user()
@@ -351,13 +347,9 @@ class Test07_GetTournament(UnitTest):
 
         self.assertResponse(create_tournament(new_user(), data={'name': 'coucou' + name}), 201)
 
-        response = search_tournament('coucou' + name, user1)
-        self.assertResponse(response, 200)
-        self.assertEqual(1, response.json['count'])
+        self.assertResponse(search_tournament('coucou' + name, user1), 200, count=1)
 
-        response = search_tournament('Tournoi ' + name, user1)
-        self.assertResponse(response, 200)
-        self.assertEqual(5, response.json['count'])
+        self.assertResponse(search_tournament('Tournoi ' + name, user1), 200, count=5)
 
     def test_005_search_private_tournament(self):
         user1 = new_user()
@@ -365,18 +357,12 @@ class Test07_GetTournament(UnitTest):
 
         self.assertResponse(create_tournament(user1, data={'name': 'private' + rnstr(), 'private': True}), 201)
 
-        response = search_tournament('private', user2)
-        self.assertResponse(response, 200)
-        self.assertEqual(0, response.json['count'])
+        self.assertResponse(search_tournament('private', user2), 200, count=0)
 
-        response = search_tournament('private', user1)
-        self.assertResponse(response, 200)
-        self.assertEqual(1, response.json['count'])
+        self.assertResponse(search_tournament('private', user1), 200, count=1)
 
     def test_006_search_tournament_none(self):
-        response = search_tournament('caca')
-        self.assertResponse(response, 200)
-        self.assertEqual(0, response.json['count'])
+        self.assertResponse(search_tournament('caca'), 200, count=0)
 
 
 # todo test start after make it
