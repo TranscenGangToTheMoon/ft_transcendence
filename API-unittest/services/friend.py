@@ -29,8 +29,12 @@ def get_friend_requests_received(user):
     )
 
 
+def get_friends(user):
     return make_request(
         endpoint='users/me/friends/',
+        token=user['token'],
+    )
+
 
 def friend(user, friendship_id, method: Literal['GET', 'DELETE'] = 'GET'):
     return make_request(
