@@ -32,6 +32,22 @@ class Test01_Friend(UnitTest):
         self.assertResponse(response, 200)
         self.assertEqual(7, response.json['count'])
 
+    def test_006_friends_then_block(self):
+        user1 = new_user()
+        user2 = new_user()
+
+        self.assertFriendResponse(create_friend(user1, user2))
+        response = accept_friend_request(user2, method='GET')
+        self.assertResponse(response, 200)
+        self.assertEqual(1, response.json['count'])
+
+        self.assertResponse(blocked_user(user1, user2['username']), 201)
+
+        for u in (user1, user2):
+            response = accept_friend_request(u, method='GET')
+            self.assertResponse(response, 200)
+            self.assertEqual(0, response.json['count'])
+
 
 if __name__ == '__main__':
     unittest.main()
