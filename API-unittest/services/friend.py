@@ -14,6 +14,11 @@ def send_friend_request(sender=None, receiver=None):
         method='POST',
         token=sender['token'],
         data={'username': receiver['username']}
+
+def receive_friend_requests(user):
+    return make_request(
+        endpoint='users/me/friend_requests/receive/',
+        token=user['token'],
     )
 
 
