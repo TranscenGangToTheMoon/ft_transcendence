@@ -44,6 +44,15 @@ def accept_friend_request(receiver=None, sender=None, method: Literal['POST', 'G
         method=method,
         token=receiver['token'],
         data=data,
+
+def friend_request(friend_request_id, user=None, method: Literal['POST', 'GET', 'DELETE'] = 'POST'):
+    if user is None:
+        user = new_user()
+
+    return make_request(
+        endpoint=f'users/me/friend_requests/{friend_request_id}/',
+        method=method,
+        token=user['token'],
     )
 
 
