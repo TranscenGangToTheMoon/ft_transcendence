@@ -17,7 +17,7 @@ class FriendsListCreateView(generics.ListCreateAPIView, FriendsMixin):
 
 
 class FriendsDeleteView(generics.DestroyAPIView, FriendsMixin):
-    lookup_field = 'pk'
+    lookup_field = 'friendship_id'
 
 
 friends_list_create_view = FriendsListCreateView.as_view()

@@ -26,7 +26,7 @@ class FriendRequestsReceiveListView(generics.ListAPIView, FriendRequestsMixin):
 
 
 class FriendRequestsDeleteView(generics.RetrieveDestroyAPIView, FriendRequestsMixin):
-    lookup_field = 'pk'
+    lookup_field = 'friend_request_id'
 
 
 friend_requests_list_create_view = FriendRequestsListCreateView.as_view()

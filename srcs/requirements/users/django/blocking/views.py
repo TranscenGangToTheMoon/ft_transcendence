@@ -18,7 +18,7 @@ class BlockedListCreateView(generics.ListCreateAPIView, BlockedMixin):
 class BlockedDeleteView(generics.DestroyAPIView, BlockedMixin):
     def get_object(self):
         try:
-            return self.get_queryset().get(id=self.kwargs['pk'], user_id=self.request.user.id)
+            return self.get_queryset().get(id=self.kwargs['blocking_id'], user_id=self.request.user.id)
         except BlockedUsers.DoesNotExist:
             raise PermissionDenied(MessagesException.PermissionDenied.NOT_BELONG_BLOCKED)
 
