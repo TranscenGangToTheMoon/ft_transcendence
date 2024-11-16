@@ -109,6 +109,8 @@ class Test02_FriendRequest(UnitTest):
 
         self.assertResponse(send_friend_request(user1, user1), 403, {'detail': 'You cannot send a friend request to yourself.'})
 
+    def test_008_forget_username_field(self):
+        self.assertResponse(send_friend_request(data={}), 400, {'username': ['This field is required.']})
 
 
 if __name__ == '__main__':
