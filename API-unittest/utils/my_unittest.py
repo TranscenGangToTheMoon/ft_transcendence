@@ -19,3 +19,4 @@ class UnitTest(unittest.TestCase):
         self.assertEqual(status_code, responses[1].status_code)
         if json is not None:
             self.assertEqual(json, responses[1].json)
+        return responses[1].json['id']
