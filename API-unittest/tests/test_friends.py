@@ -54,9 +54,12 @@ class Test02_FriendRequest(UnitTest):
         user1 = new_user()
         user2 = new_user()
 
-        self.assertResponse(send_friend_request(user1, user2), 201)
-        self.assertResponse(receive_friend_requests(user2), 200, count=1)
-        self.assertResponse(send_friend_request(user1, method='GET'), 200, count=1)
+        friend_request_id = self.assertResponse(friend_requests(user1, user2), 201, get_id=True)
+
+        self.assertResponse(get_friend_requests_received(user2), 200, count=1)
+        self.assertResponse(friend_requests(user1, method='GET'), 200, count=1)
+        self.assertResponse(friend_request(friend_request_id, user1, method='GET'), 200)
+        self.assertResponse(friend_request(friend_request_id, user2, method='GET'), 200)
 
     def test_002_user_does_not_exist(self):
         user1 = new_user()
