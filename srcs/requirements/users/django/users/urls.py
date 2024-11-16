@@ -15,8 +15,8 @@ urlpatterns = [
     path(Users.friends, friends_list_create_view),
     path(Users.friend, friends_delete_view),
     path(Users.friend_requests, friend_requests_list_create_view),
-    path(Users.friend_requests_receive, friend_requests_receive_list_view),
     path(Users.friend_request, friend_request_view),
+    path(Users.friend_requests_received, friend_requests_receive_list_view),
 
     path(Users.blocked, blocked_list_create_view),
     path(Users.blocked_user, blocked_delete_view),
