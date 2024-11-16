@@ -11,6 +11,7 @@ class MessagesException:
         CREATOR = NOT_FOUND.format(obj='Creator')
         USER = NOT_FOUND.format(obj='User')
         FRIEND_REQUEST = NOT_FOUND.format(obj='Friend request')
+        FRIENDSHIP = NOT_FOUND.format(obj='Friendship')
 
         NOT_BELONG = 'You do not belong to any {obj}.'
         NOT_BELONG_TOURNAMENT = NOT_BELONG.format(obj='tournament')
