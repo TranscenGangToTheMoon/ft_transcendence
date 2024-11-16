@@ -51,6 +51,11 @@ class Test01_Friend(UnitTest):
         response = accept_friend_request(user1, data={})
         self.assertResponse(response, 400, {'username': ['This field is required.']})
 
+    def test_008_friend_with_yourself(self):
+        user1 = new_user()
+
+        self.assertResponse(accept_friend_request(user1, user1), 403, {'detail': 'You cannot be friends with yourself.'})
+
 
 class Test02_FriendRequest(UnitTest):
 
