@@ -74,6 +74,7 @@ class MessagesException:
         KICK_YOURSELF = 'You cannot kick yourself.'
         BLOCK_YOURSELF = 'You cannot block yourself.'
         SEND_FRIEND_REQUEST_YOURSELF = 'You cannot send a friend request to yourself.'
+        FRIEND_YOURSELF = 'You cannot be friends with yourself.'
 
         CANNOT_UPDATE_GAME_MODE = 'You cannot update game mode.'
 
