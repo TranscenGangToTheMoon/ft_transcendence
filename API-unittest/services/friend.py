@@ -47,11 +47,11 @@ def accept_friend_request(receiver=None, sender=None, method: Literal['POST', 'G
     )
 
 
-def create_friend(user1=None, user2=None):
+def create_friendship(user1=None, user2=None):
     if user1 is None:
         user1 = new_user()
     if user2 is None:
         user2 = new_user()
-    response_request = send_friend_request(user1, user2)
-    response_accept = accept_friend_request(user2, user1)
+    response_request = friend_requests(user1, user2)
+    response_accept = friend_request(response_request.json['id'], user2)
     return [response_request, response_accept]
