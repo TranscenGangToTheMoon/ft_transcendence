@@ -61,7 +61,7 @@ class Users:
     friend = friends + '<int:friendship_id>/'
     friend_requests = me + 'friend_requests/'
     friend_request = friend_requests + '<int:friend_request_id>/'
-    friend_requests_receive = friend_requests + 'receive/'
+    friend_requests_received = friend_requests + 'received/'
 
     blocked = me + 'blocked/'
     blocked_user = blocked + '<int:blocking_id>/'
