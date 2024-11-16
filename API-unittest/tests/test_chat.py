@@ -1,6 +1,6 @@
 from services.blocked import blocked_user, unblocked_user
 from services.chat import accept_chat, create_chat, create_message, request_chat_id
-from services.friend import create_friend, send_friend_request
+from services.friend import create_friendship, friend_requests
 from utils.credentials import new_user, guest_user
 from utils.generate_random import rnstr
 from utils.my_unittest import UnitTest
@@ -21,7 +21,7 @@ class Test01_CreateChat(UnitTest):
         user1 = new_user()
         user2 = new_user()
 
-        self.assertFriendResponse(create_friend(user1, user2))
+        self.assertFriendResponse(create_friendship(user1, user2))
         self.assertResponse(create_chat(user1, user2['username']), 201)
 
 
@@ -62,14 +62,14 @@ class Test02_CreateChatError(UnitTest):
         user2 = new_user()
 
         self.assertResponse(accept_chat(user2, 'none'), 200)
-        self.assertFriendResponse(create_friend(user1, user2))
+        self.assertFriendResponse(create_friendship(user1, user2))
         self.assertResponse(create_chat(user1, user2['username']), 403, {'detail': 'This user does not accept new chat.'})
 
     def test_008_already_chat_with(self):
         user1 = new_user()
         user2 = new_user()
 
-        self.assertFriendResponse(create_friend(user1, user2))
+        self.assertFriendResponse(create_friendship(user1, user2))
         self.assertResponse(create_chat(user1, user2['username']), 201)
         self.assertResponse(create_chat(user1, user2['username']), 409, {'detail': 'You are already chat with this user.'})
 
@@ -78,7 +78,7 @@ class Test02_CreateChatError(UnitTest):
         user2 = new_user()
 
         self.assertResponse(blocked_user(user1, user2['username']), 201)
-        self.assertResponse(send_friend_request(user1, user2), 403, {'detail': 'You blocked this user.'})
+        self.assertResponse(friend_requests(user1, user2), 403, {'detail': 'You blocked this user.'})
 
     def test_010_chat_with_guest(self):
         self.assertResponse(create_chat(new_user(), guest_user()['username']), 404, {'detail': 'User not found.'})
