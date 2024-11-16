@@ -9,6 +9,9 @@ class Test01_Friend(UnitTest):
     def test_001_friend(self):
         self.assertFriendResponse(create_friend())
 
+    def test_002_friend_without_friend_request(self):
+        self.assertResponse(accept_friend_request(), 404, {'detail': 'Friend request not found.'})
+
 
 if __name__ == '__main__':
     unittest.main()
