@@ -87,6 +87,15 @@ class Test02_FriendRequest(UnitTest):
         self.assertFriendResponse(create_friend(user1, user2))
         self.assertResponse(send_friend_request(user1, user2), 409, {'detail': 'You are already friends with this user.'})
 
+    def test_005_send_friend_request_then_blocked(self):
+        user1 = new_user()
+        user2 = new_user()
+
+        self.assertResponse(send_friend_request(user1, user2), 201)
+        self.assertResponse(blocked_user(user2, user1['username']), 201)
+        self.assertResponse(receive_friend_requests(user2), 200, count=0)
+        self.assertResponse(send_friend_request(user1, method='GET'), 200, count=0)
+
 
 
 if __name__ == '__main__':
