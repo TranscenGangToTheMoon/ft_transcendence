@@ -51,5 +51,10 @@ class Test01_Friend(UnitTest):
         response = accept_friend_request(user1, data={})
         self.assertResponse(response, 400, {'username': ['This field is required.']})
 
+
+class Test02_FriendRequest(UnitTest):
+    pass
+
+
 if __name__ == '__main__':
     unittest.main()
