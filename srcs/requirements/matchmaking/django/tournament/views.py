@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 
 from django.db.models import Q
 from lib_transcendence.exceptions import MessagesException
-from lib_transcendence.serializer import SerializerContext
+from lib_transcendence.serializer import SerializerAuthContext
 from lib_transcendence.services import request_game
 from lib_transcendence import endpoints
 from rest_framework import generics, serializers
@@ -35,7 +35,7 @@ class TournamentSearchView(generics.ListAPIView):
         return Tournaments.objects.filter(Q(private=False) | Q(created_by=self.request.user.id), name__icontains=query) # todo don't show particiapant, only number of join participants
 
 
-class TournamentParticipantsView(SerializerContext, generics.ListCreateAPIView, generics.DestroyAPIView):
+class TournamentParticipantsView(SerializerAuthContext, generics.ListCreateAPIView, generics.DestroyAPIView):
     queryset = TournamentParticipants.objects.all()
     serializer_class = TournamentParticipantsSerializer
     pagination_class = None

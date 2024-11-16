@@ -1,6 +1,6 @@
 from lib_transcendence.game import GameMode
 from lib_transcendence.exceptions import MessagesException
-from lib_transcendence.serializer import SerializerContext
+from lib_transcendence.serializer import SerializerAuthContext
 from rest_framework import generics
 from rest_framework.exceptions import PermissionDenied
 
@@ -20,7 +20,7 @@ class LobbyView(generics.CreateAPIView, generics.RetrieveUpdateAPIView):
         return participant.lobby
 
 
-class LobbyParticipantsView(SerializerContext, generics.ListCreateAPIView, generics.UpdateAPIView, generics.DestroyAPIView):
+class LobbyParticipantsView(SerializerAuthContext, generics.ListCreateAPIView, generics.UpdateAPIView, generics.DestroyAPIView):
     queryset = LobbyParticipants.objects.all()
     serializer_class = LobbyParticipantsSerializer
     pagination_class = None

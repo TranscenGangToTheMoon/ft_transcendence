@@ -1,12 +1,12 @@
 from rest_framework import generics
-from lib_transcendence.serializer import SerializerContext
+from lib_transcendence.serializer import SerializerAuthContext
 
 from chat_messages.models import Messages
 from chat_messages.serializers import MessagesSerializer
 from chat_messages.utils import get_chat_participants
 
 
-class MessagesView(SerializerContext, generics.ListCreateAPIView):
+class MessagesView(SerializerAuthContext, generics.ListCreateAPIView):
     queryset = Messages.objects.all().order_by('-sent_at')
     serializer_class = MessagesSerializer
 

@@ -1,4 +1,4 @@
-from lib_transcendence.serializer import SerializerContext
+from lib_transcendence.serializer import SerializerAuthContext
 from lib_transcendence.utils import get_host
 from rest_framework import generics
 from rest_framework.exceptions import MethodNotAllowed
@@ -27,7 +27,7 @@ class ChatsView(generics.ListCreateAPIView, ChatsMixin):
     pass
 
 
-class ChatView(SerializerContext, generics.RetrieveUpdateDestroyAPIView, ChatsMixin):
+class ChatView(SerializerAuthContext, generics.RetrieveUpdateDestroyAPIView, ChatsMixin):
     lookup_field = 'chat_id'
 
     def get_object(self):
