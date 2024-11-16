@@ -15,6 +15,13 @@ class Test01_Friend(UnitTest):
     def test_003_friend_does_not_exist(self):
         self.assertResponse(accept_friend_request(sender={'username': 'caca'}), 404, {'detail': 'Friend request not found.'})
 
+    def test_004_friend_already_friends(self):
+        user1 = new_user()
+        user2 = new_user()
+
+        self.assertFriendResponse(create_friend(user1, user2))
+        self.assertResponse(accept_friend_request(user2, user1), 409, {'detail': 'You are already friends with this user.'})
+
 
 if __name__ == '__main__':
     unittest.main()
