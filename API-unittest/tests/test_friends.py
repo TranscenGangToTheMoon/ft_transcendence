@@ -6,6 +6,9 @@ from utils.my_unittest import UnitTest
 # 1. todo make test
 class Test01_Friend(UnitTest):
 
+    def test_001_friend(self):
+        self.assertFriendResponse(create_friend())
+
 
 if __name__ == '__main__':
     unittest.main()
