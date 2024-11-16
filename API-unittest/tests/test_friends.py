@@ -60,6 +60,7 @@ class Test02_FriendRequest(UnitTest):
 
         self.assertResponse(send_friend_request(user1, user2), 201)
         self.assertResponse(receive_friend_requests(user2), 200, count=1)
+        self.assertResponse(send_friend_request(user1, method='GET'), 200, count=1)
 
 
 if __name__ == '__main__':
