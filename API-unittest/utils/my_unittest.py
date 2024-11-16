@@ -3,10 +3,12 @@ import unittest
 
 class UnitTest(unittest.TestCase):
 
-    def assertResponse(self, response, status_code, json=None):
+    def assertResponse(self, response, status_code, json=None, count=None):
         self.assertEqual(status_code, response.status_code)
         if json is not None:
             self.assertEqual(json, response.json)
+        if count is not None:
+            self.assertEqual(count, response.json['count'])
 
     def assertFriendResponse(self, responses, status_code=201, json=None):
         self.assertEqual(201, responses[0].status_code)
