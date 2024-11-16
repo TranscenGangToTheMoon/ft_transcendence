@@ -77,7 +77,6 @@ class Test02_FriendRequest(UnitTest):
         user2 = new_user()
 
         self.assertResponse(send_friend_request(user1, user2), 201)
-        self.assertResponse(send_friend_request(user1, method='GET'), 409, {'detail': 'You already send a friend requests to this user.'})
         self.assertResponse(send_friend_request(user1, user2), 409, {'detail': 'You have already sent a friend request to this user.'})
         self.assertResponse(send_friend_request(user2, user1), 409, {'detail': 'You have already received a friend request from this user.'})
 
