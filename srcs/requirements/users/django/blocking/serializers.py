@@ -44,9 +44,9 @@ class BlockedSerializer(serializers.ModelSerializer):
         if friendship:
             friendship.delete()
 
-        user.sent_friend_requests.filter(receiver=blocked_user).delete()
+        user.friend_requests_sent.filter(receiver=blocked_user).delete()
 
-        blocked_user.sent_friend_requests.filter(receiver=user).delete()
+        blocked_user.friend_requests_sent.filter(receiver=user).delete()
 
         validated_data['user'] = user
         validated_data['blocked'] = blocked_user
