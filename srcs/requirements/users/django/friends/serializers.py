@@ -9,13 +9,11 @@ from users.auth import get_user, get_valid_user
 
 
 class FriendsSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(write_only=True)
     friends = serializers.SerializerMethodField()
 
     class Meta:
         model = Friends
         fields = [
-            'username',
             'id',
             'friends',
             'friends_since',
@@ -31,24 +29,13 @@ class FriendsSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         user_accept = get_user(self.context.get('request'))
-        username = validated_data.pop('username')
-
-        if username == user_accept.username:
-            raise PermissionDenied(MessagesException.PermissionDenied.FRIEND_YOURSELF)
 
         try:
-            user_send_friend_request = get_valid_user(user_accept, username)
-        except NotFound:
-            raise NotFound(MessagesException.NotFound.FRIEND_REQUEST)
-
-        if is_friendship(user_accept, user_send_friend_request):
-            raise ResourceExists(MessagesException.ResourceExists.FRIEND)
-
-        try:
-            user_accept.friend_requests_received.get(sender=user_send_friend_request).delete()
+            friend_request = user_accept.friend_requests_received.get(id=self.context['friend_request_id'])
+            friend_request.delete()
         except FriendRequests.DoesNotExist:
             raise NotFound(MessagesException.NotFound.FRIEND_REQUEST)
 
         result = super().create(validated_data)
-        result.friends.add(user_accept, user_send_friend_request)
+        result.friends.add(user_accept, friend_request.sender)
         return result
