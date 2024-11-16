@@ -4,7 +4,7 @@ from utils.credentials import new_user
 from utils.request import make_request
 
 
-def send_friend_request(sender=None, receiver=None, method: Literal['POST', 'GET'] = 'POST', data=None):
+def friend_requests(sender=None, receiver=None, method: Literal['POST', 'GET'] = 'POST', data=None):
     if sender is None:
         sender = new_user()
     if method == 'POST':
