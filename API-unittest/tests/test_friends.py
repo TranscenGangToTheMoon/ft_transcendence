@@ -53,7 +53,13 @@ class Test01_Friend(UnitTest):
 
 
 class Test02_FriendRequest(UnitTest):
-    pass
+
+    def test_001_friend_request(self):
+        user1 = new_user()
+        user2 = new_user()
+
+        self.assertResponse(send_friend_request(user1, user2), 201)
+        self.assertResponse(receive_friend_requests(user2), 200, count=1)
 
 
 if __name__ == '__main__':
