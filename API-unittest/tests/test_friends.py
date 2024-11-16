@@ -96,6 +96,14 @@ class Test02_FriendRequest(UnitTest):
         self.assertResponse(receive_friend_requests(user2), 200, count=0)
         self.assertResponse(send_friend_request(user1, method='GET'), 200, count=0)
 
+    def test_006_blocked_then_send_friend_request(self):
+        user1 = new_user()
+        user2 = new_user()
+
+        self.assertResponse(blocked_user(user1, user2['username']), 201)
+        self.assertResponse(send_friend_request(user1, user2), 403, {'detail': 'You blocked this user.'})
+        self.assertResponse(send_friend_request(user2, user1), 404, {'detail': 'User not found.'})
+
 
 
 if __name__ == '__main__':
