@@ -31,21 +31,39 @@ class Test01_Friend(UnitTest):
         self.assertResponse(blocked_user(user1, user2['username']), 201)
 
         for u in (user1, user2):
-            self.assertResponse(accept_friend_request(u, method='GET'), 200, count=0)
+            self.assertResponse(get_friends(u), 200, count=0)
 
-    def test_007_no_field_username(self):
+    def test_005_delete_friend_user1(self):
         user1 = new_user()
         user2 = new_user()
 
-        self.assertResponse(send_friend_request(user1, user2), 201)
+        friendship_id = self.assertFriendResponse(create_friendship(user1, user2))
+        self.assertResponse(friend(user1, friendship_id), 200)
+        self.assertResponse(friend(user1, friendship_id, 'DELETE'), 204)
 
-        response = accept_friend_request(user1, data={})
-        self.assertResponse(response, 400, {'username': ['This field is required.']})
+        self.assertResponse(friend(user1, friendship_id), 404, {'detail': 'Friendship not found.'})
+        self.assertResponse(get_friends(user2), 200, count=0)
 
-    def test_008_friend_with_yourself(self):
+    def test_006_delete_friend_user2(self):
         user1 = new_user()
+        user2 = new_user()
 
-        self.assertResponse(accept_friend_request(user1, user1), 403, {'detail': 'You cannot be friends with yourself.'})
+        friendship_id = self.assertFriendResponse(create_friendship(user1, user2))
+        self.assertResponse(friend(user1, friendship_id), 200)
+        self.assertResponse(friend(user2, friendship_id, 'DELETE'), 204)
+
+        self.assertResponse(friend(user2, friendship_id), 404, {'detail': 'Friendship not found.'})
+        self.assertResponse(get_friends(user1), 200, count=0)
+
+    def test_007_delete_friend_not_belon_user(self):
+        user1 = new_user()
+        user2 = new_user()
+
+        friendship_id = self.assertFriendResponse(create_friendship(user1, user2))
+        self.assertResponse(friend(user1, friendship_id), 200)
+
+        self.assertResponse(friend(new_user(), friendship_id, 'DELETE'), 404, {'detail': 'Friendship not found.'})
+        self.assertResponse(friend(user1, friendship_id), 200)
 
 
 class Test02_FriendRequest(UnitTest):
