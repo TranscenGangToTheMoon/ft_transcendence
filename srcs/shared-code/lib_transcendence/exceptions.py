@@ -112,7 +112,7 @@ class MessagesException:
         TEAM = 'You are already in this team.'
         BLOCK = 'You are already blocked this user.'
         FRIEND = 'You are already friends with this user.'
-        FRIEND_REQUEST = 'You already send a friend requests to this user.'
+        FRIEND_REQUEST_SENT = 'You have already sent a friend request to this user.'
         FRIEND_REQUEST_RECEIVED = 'You have already received a friend request from this user.'
 
         JOIN = 'You already joined this {obj}.'
