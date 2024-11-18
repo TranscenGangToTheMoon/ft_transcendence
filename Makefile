@@ -39,26 +39,33 @@ RESET		:=	\001\033[0m\002
 ########################################################################################################################
 .DEFAULT_GOAL = all
 
+.PHONY: all
 all			:	banner $(NAME)
 
 $(NAME)		:	secrets
 			$(COMPOSE) $(FLAGS) up --build $(SERVICE)
 
+.PHONY: build
 build		:
 			$(COMPOSE) $(FLAGS) $@ $(SERVICE)
 
+.PHONY: up
 up			:	build
 			$(COMPOSE) $(FLAGS) $@ $(SERVICE)
 
+.PHONY: down
 down		:
 			$(COMPOSE) $(FLAGS) $@ $(SERVICE)
 
+.PHONY: dettach
 dettach		:	build
 			$(COMPOSE) $(FLAGS) up -d $(SERVICE)
 
+.PHONY: exec
 exec		:
 			$(COMPOSE) $(FLAGS) $@ $(SERVICE) $(DSHELL)
 
+.PHONY: banner
 banner		:
 			@echo -e '$(BLUE)'
 			@echo -e '    ______      __                                            __                   '
@@ -70,21 +77,26 @@ banner		:
 			@echo -e '                                          bajeanno fguirama jcoquard nfaust xcharra'
 			@echo -e '$(RESET)'
 
-secrets		:	$(ENV_FILE) #if secrets directory are needed delete phony secrets
+.PHONY: secrets #if secrets directory are needed delete phony secrets and uncomment the following lines
+secrets		:	$(ENV_FILE) 
 #			mkdir $@
 
 $(ENV_FILE)	:	$(ENV_EXEMPLE)
 			./launch.d/01passwords.sh $(ENV_EXEMPLE) $(ENV_FILE)
 
+.PHONY: clean
 clean		:
 			$(COMPOSE) $(FLAGS) down --rmi local --remove-orphans
 #			rm -rf $(ENV_FILE)
 #			rm -rf $(SECRETS_D)
 
+.PHONY: vclean
 vclean		:
 			$(COMPOSE) $(FLAGS) down -v --remove-orphans
 			rm -rf $(ENV_FILE)
+#			rm -rf $(SECRETS_D)
 
+.PHONY: fclean
 fclean		:	dusting
 			$(COMPOSE) $(FLAGS) down -v --rmi all --remove-orphans
 			docker image prune -af
@@ -94,43 +106,49 @@ fclean		:	dusting
 			rm -rf ./srcs/shared-code/build/ # todo remove in prod
 #			rm -rf $(SECRETS_D)
 
+.PHONY: dusting
 dusting		:
 			find . -path "*/migrations/*.py" -not -name "__init__.py" -delete
 			find . -path "*/__pycache__/*" -delete
 			find . -path "*/__pycache__" -delete
 
+.PHONY: caddy-reload
 caddy-reload:
 			$(COMPOSE) $(FLAGS) exec -w /etc/caddy frontend caddy reload
 
+.PHONY: image-ls image-rm
 image-ls	:
 			docker image ls -a
 image-rm	:
 			docker image rm `docker image ls -qa`
 
+.PHONY: container-ls container-rm
 container-ls:
 			docker container ls -a
 container-rm:
 			echo docker container rm `docker container ls -qa`
 
+.PHONY: volume-ls volume-rm
 volume-ls	:
 			docker volume ls
 volume-rm	:
 			docker volume rm `docker volume ls -qa`
 
+.PHONY: network-ls network-rm
 network-ls	:
 			docker network ls
 network-rm	:
 			docker network rm `docker network ls -qa`
 
+.PHONY: prune
 prune		:
 			docker system prune -af
 
+.PHONY: sre
 sre			:	clean all
 
+.PHONY: vre
 vre			:	vclean all
 
+.PHONY: re
 re			:	fclean all
-
-.PHONY		:	all volumes build up down dettach banner secrets clean vclean \
-			fclean image-ls image-rm container-ls container-rm volume-ls \
-			volume-rm network-ls network-rm prune sre vre re
