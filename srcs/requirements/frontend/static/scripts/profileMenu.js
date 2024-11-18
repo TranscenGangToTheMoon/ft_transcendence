@@ -6,7 +6,13 @@ document.getElementById('logOut').addEventListener('click', async event => {
     handleRoute();
 })
 
-document.getElementById('settings').addEventListener('click', event => {
+document.getElementById('chats').addEventListener('click', async event => {
     event.preventDefault();
-    navigateTo('/profile');
+    console.log('zizi')
+    await navigateTo('/chat');
+})
+
+document.getElementById('settings').addEventListener('click', async event => {
+    event.preventDefault();
+    await navigateTo('/profile');
 })

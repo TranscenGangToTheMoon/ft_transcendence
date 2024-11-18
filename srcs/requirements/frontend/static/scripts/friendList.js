@@ -1,3 +1,9 @@
+document.getElementById('searchButton').addEventListener('click', event => {
+    event.preventDefault();
+    document.getElementById('searchResults').innerText = "euh je sais pas comment ca marche l'API";
+    document.getElementById('searchResults').style = 'color:red';
+})
+
 function friendListInit(){
     getDataFromApi(getAccessToken(), `${baseAPIUrl}/users/me/friends/`)
         .then(data => {

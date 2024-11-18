@@ -23,14 +23,8 @@
 
 // NAVIGAtORS
 
-document.getElementById('searchButton').addEventListener('click', event => {
-    event.preventDefault();
-    document.getElementById('searchResults').innerText = "euh je sais pas comment ca marche l'API";
-    document.getElementById('searchResults').style = 'color:red';
-})
-
-document.getElementById('ranked').addEventListener('click', event => {
-    navigateTo('/lobby');
+document.getElementById('ranked').addEventListener('click', async event => {
+    await navigateTo('/lobby');
 })
 
 async function homePageInit() {

@@ -18,7 +18,7 @@ async function deleteAccount(password) {
                 removeTokens();
                 await generateToken();
                 await fetchUserInfos(true);
-                navigateTo('/');
+                await navigateTo('/');
                 displayMainError('Account deleted', 'Your account has been successfully deleted. You have been redirected to homepage.');
             }
         })
@@ -65,7 +65,7 @@ document.getElementById('pChangePassword').addEventListener('submit', async even
         if (!data.id)
             document.getElementById('container').innerText = data.username;
         else 
-            navigateTo('/profile');
+            await navigateTo('/profile');
     }
     catch (error){
         console.log('error on password change', error);

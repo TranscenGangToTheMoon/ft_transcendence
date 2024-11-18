@@ -134,9 +134,9 @@ function removeTokens() {
     localStorage.removeItem('refresh');
 }
 
-function relog() {
+async function relog() {
     removeTokens();
-    navigateTo('/login');   
+    await navigateTo('/login');   
 }
 window.removeTokens = removeTokens;
 window.refreshToken = refreshToken;
@@ -201,11 +201,11 @@ async function loadContent(url, container='content', append=false) {
     }
 }
 
-function navigateTo(url, doNavigate=true){
+async function navigateTo(url, doNavigate=true){
     history.pushState({}, '', url);
     console.table(history)
     if (doNavigate)
-        handleRoute();
+        await handleRoute();
 }
 
 window.navigateTo = navigateTo;
@@ -229,7 +229,7 @@ async function handleRoute() {
 // document.addEventListener('click', event => {
 //     if (event.target.matches('[data-link]')) {
 //         event.preventDefault();
-//         navigateTo(event.target.href);
+//         await navigateTo(event.target.href);
 //     }
 // });
 
@@ -300,9 +300,9 @@ async function loadUserProfile(){
     // document.getElementById('title').innerText = userInformations.title;
 }
 
-document.getElementById('home').addEventListener('click', event => {
+document.getElementById('home').addEventListener('click', async event => {
     event.preventDefault();
-    navigateTo('/');
+    await navigateTo('/');
 })
 
 function initSSE(){
