@@ -85,6 +85,7 @@ document.getElementById('pPasswordInput').addEventListener('focusout', function 
 function fillNicknamePlaceholder() {
     document.getElementById('pNicknameInput').placeholder = userInformations.username;
 }
+
 async function accountInit(){
     fillNicknamePlaceholder();
 } 

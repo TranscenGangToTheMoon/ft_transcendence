@@ -10,7 +10,7 @@ window.userInformations = userInformations;
 
 // ========================== API REQUESTS ==========================
 
-function apiRequest(token, endpoint, method="GET", authType="Bearer",
+async function apiRequest(token, endpoint, method="GET", authType="Bearer",
     contentType="application/json", body=undefined, currentlyRefreshing=false){ 
     let options = {
         method: method,
@@ -22,7 +22,7 @@ function apiRequest(token, endpoint, method="GET", authType="Bearer",
         options.headers["Authorization"] = `${authType} ${token}`;
     if (body)
         options.body = JSON.stringify(body);
-    console.log(endpoint, options)
+    console.log(endpoint, options);
     return fetch(endpoint, options)
         .then(async response => {
             if (!response.ok && (response.status > 499 || response.status === 404)){
@@ -218,6 +218,7 @@ async function handleRoute() {
         '/': '/homePage.html',
         '/profile' : 'profile.html',
         '/lobby' : '/lobby.html',
+        '/chat' : '/testChat.html'
     };
 
     const page = routes[path] || '/404.html';
@@ -278,6 +279,10 @@ window.displayMainError = displayMainError;
 
 // ========================== INDEX SCRIPT ==========================
 
+async function loadFriendListModal() {
+    await loadContent('/friendList.html', 'modals', true);
+}
+
 async function loadUserProfile(){
     let profileMenu = 'profileMenu.html';
 
@@ -300,6 +305,10 @@ document.getElementById('home').addEventListener('click', event => {
     navigateTo('/');
 })
 
+function initSSE(){
+    console.log('SERVER SENT EVENT INITIALIZATION HERE');
+}
+
 async function  indexInit(auto=true) {
     if (!auto){
         await fetchUserInfos();
@@ -319,6 +328,8 @@ async function  indexInit(auto=true) {
     }
     else{
         loadCSS('/css/styles.css', false);
+        await loadFriendListModal();
+        initSSE();
         handleRoute();
     }
 }
