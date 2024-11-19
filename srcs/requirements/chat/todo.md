@@ -1,25 +1,28 @@
 # TODO Chat service
 
-## process:
+##
 
-### 1) Chat menu opened
+### 1) Socket
 
 * Socket Created when the client start at least one conversation.
-* While the socket is open, need to regulary check the connection (use ping/pong process).
 
-### 2) Selecting the person to chat with
+### 2) Selecting Menu
 
-* Check people and list the ones he's able to chat with. (use api request)
-* When a person is selected, create a groupe with the two client id.
-* Save the group in the client.
-* Create a box chat on the front page.
-* Load the 5 last messages and save the last message id. 
+* Check and list the people he's able to chat with.
+* When a person is selected, join the room with the chat id (if inexistent generate it).
+
+### 3) SSE
+
+* When the client is not in the room each message is received by sse event.
+* The notifaction must contained the chat id.
+* The client can join the room by clicking on the notification.
 
 ### 3) Join Discussion
 
-* When the client click on the notfication connect him if needed and add him to the group.
-* Save the group in the client
-* Create a box chat on the front page.
+* Need to check if he's allowed to join this conversation.
+	1. if yes allow him in the room.
+	2. if not block him.
+* Display the chat page
 * Load all the messages not readed + 5 and save the last message id.
 
 
@@ -30,11 +33,10 @@
 * Check regulary if the clients are connected.
 	1. if not send side event for each message.
 	2. if connected just send the message normaly.
-* If the connection is lost recreate the socket and re add the groups he was in.
 
 ### 4) Leave discussion
 
-* Remove him from the group localy and on the server.
+* Remove him from the group.
 * Destroy the socket when all discussion leaved.
 
 
