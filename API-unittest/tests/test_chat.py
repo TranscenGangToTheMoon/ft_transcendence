@@ -89,15 +89,16 @@ class Test03_GetChat(UnitTest):
 
     def test_001_get_chats(self):
         user1 = new_user()
+        ct = 5
 
         self.assertResponse(create_chat(user1, method='GET'), 200, count=0)
 
-        for i in range(5):
+        for i in range(ct):
             tmp_user = new_user()
             self.assertResponse(accept_chat(tmp_user), 200)
             self.assertResponse(create_chat(user1, tmp_user['username']), 201)
 
-        self.assertResponse(create_chat(user1, method='GET'), 200, count=5)
+        self.assertResponse(create_chat(user1, method='GET'), 200, count=ct)
 
     def test_002_search_chats(self):
         user1 = new_user()
