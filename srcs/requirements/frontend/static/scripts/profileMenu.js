@@ -8,8 +8,13 @@ document.getElementById('logOut').addEventListener('click', async event => {
 
 document.getElementById('chats').addEventListener('click', async event => {
     event.preventDefault();
-    console.log('zizi')
     await navigateTo('/chat');
+})
+
+document.getElementById('menuLeaderBoard').addEventListener('click', async event => {
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    event.stopPropagation();
 })
 
 document.getElementById('settings').addEventListener('click', async event => {

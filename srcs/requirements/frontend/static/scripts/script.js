@@ -147,15 +147,19 @@ window.generateToken = generateToken;
 // ========================== SPA SCRIPTS ==========================
 
 function loadScript(scriptSrc) {
-    const script = document.createElement('script');
-    script.src = scriptSrc;
-    script.onload = () => {
-        console.log(`Script ${scriptSrc} loaded.`);
-    };  
-    script.onerror = () => {
-        console.error(`Error while loading script ${scriptSrc}.`);
-    };
-    document.body.appendChild(script);
+    return new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = scriptSrc;
+        script.onload = () => {
+            console.log(`Script ${scriptSrc} loaded.`);
+            resolve();
+        };
+        script.onerror = () => {
+            console.error(`Error while loading script ${scriptSrc}.`);
+            reject(new Error(`Failed to load script ${scriptSrc}`));
+        };
+        document.body.appendChild(script);
+    });
 }
 
 function loadCSS(cssHref, toUpdate=true) {
@@ -185,9 +189,11 @@ async function loadContent(url, container='content', append=false) {
             contentDiv.innerHTML = html;
         else
             contentDiv.innerHTML += html;
-        const script = contentDiv.querySelector('[script]');
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = html;
+        const script = tempDiv.querySelector('[script]');
         if (script)
-            loadScript(script.getAttribute('script'));
+            await loadScript(script.getAttribute('script'));
         let style;
         if (!userInformations || !userInformations.is_guest)
             style = '_style'
@@ -203,7 +209,6 @@ async function loadContent(url, container='content', append=false) {
 
 async function navigateTo(url, doNavigate=true){
     history.pushState({}, '', url);
-    console.table(history)
     if (doNavigate)
         await handleRoute();
 }
