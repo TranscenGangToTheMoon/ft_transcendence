@@ -1,7 +1,7 @@
 let socket;
 
 function connect() {
-	socket = io("wss://localhost:8000/chat");
+	socket = io("wss://localhost:4443/wss/chat");
 	console.log("Connecting to the server...");
 	setupSocketListeners();
 }
@@ -18,6 +18,10 @@ function setupSocketListeners()
 
 	socket.on("message", (data) => {
 		console.log("Message received: ", data);
+	});
+
+	socket.on("ping", (data) => {
+		console.log("Ping received: ", data);
 	});
 
 	socket.on("error", (error) => {

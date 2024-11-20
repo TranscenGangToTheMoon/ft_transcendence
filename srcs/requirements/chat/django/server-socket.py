@@ -10,7 +10,7 @@ sio.attach(app)
 @sio.event
 async def connect(sid, environ):
     print(f"Client connected : {sid}")
-    sio.emit('message', {'data': 'Welcome!'}, to=sid)
+    await sio.emit('message', {'data': 'Welcome!'}, to=sid)
 
 
 @sio.event
@@ -20,9 +20,18 @@ async def disconnect(sid):
 
 @sio.event
 async def message(sid, data):
+    message = data.get('message')
     print(f"New message from {sid}: {data}")
-    sio.emit('message', {'data': 'Message received!'})
+    await sio.emit('message', {'data': message})
+
+@sio.event
+async def ping():
+    while True:
+        await sio.emit('ping', {'message': 'ping'})
+        await asyncio.sleep(10)
 
 
 if __name__ == '__main__':
-    web.run_app(app, port=8002)
+    loop = asyncio.get_event_loop()
+    loop.create_task(ping())
+    web.run_app(app, port=8001)
