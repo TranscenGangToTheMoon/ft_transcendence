@@ -11,17 +11,18 @@ function loadGuest() {
         generateToken();
     fillGuestPlaceHolder();
 }
-
+    
 function fillGuestPlaceHolder(){
     const guestLoginField = document.getElementById('playLoginField');
-    getDataFromApi(getAccessToken(), `${baseAPIUrl}/users/me/`)
-        .then (data => {
-            if (data.username)
-                guestLoginField.placeholder = data.username;
-            else if (data.detail)
-                console.log('Error: ', data.detail);
-        })
-    .catch(error => console.log('error a gerer', error))
+    guestLoginField.placeholder = userInformations.username;
+    // getDataFromApi(getAccessToken(), `${baseAPIUrl}/users/me/`)
+    //     .then (data => {
+    //         if (data.username)
+    //             guestLoginField.placeholder = data.username;
+    //         else if (data.detail)
+    //             console.log('Error: ', data.detail);
+    //     })
+    // .catch(error => console.log('error a gerer', error))
 }
 
 document.getElementById('playDuel').addEventListener('click', async event => {
@@ -82,10 +83,15 @@ function removeDropdown() {
     document.querySelector('.dropdown').remove();
 }
 
-async function atStart(){
+async function authInit(){
+    await indexInit(false);
+    if (!userInformations.is_guest) {
+        navigateTo('/');
+        return; //TODO replace with URI or maybe not
+    }
     document.getElementById('username').innerText = userInformations.username;
     await loadContent('/authenticationForm.html', 'authentication');
     loadGuest();
 }
 
-atStart();
+authInit();

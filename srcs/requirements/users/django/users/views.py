@@ -1,5 +1,5 @@
 from rest_framework import generics
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import NotAuthenticated
 
 from users.auth import auth_delete
 from users.models import Users
@@ -15,7 +15,7 @@ class UsersMeView(generics.RetrieveUpdateDestroyAPIView):
     def destroy(self, request, *args, **kwargs):
         password = self.request.data.get('password')
         if password is None:
-            raise ValidationError({'password': 'Password confirmation is required to delete the account.'})
+            raise NotAuthenticated({'password': 'Password confirmation is required to delete the account.'})
         auth_delete(self.request.headers.get('Authorization'), {'password': password})
         return super().destroy(request, *args, **kwargs)
 

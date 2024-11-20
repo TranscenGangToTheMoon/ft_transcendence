@@ -2,3 +2,11 @@
     background-color: unset;
     color: unset;
 }
+
+.dropdown-item {
+    cursor: pointer;
+}
+
+.toast-container {
+    right: 20px;
+}

@@ -1,31 +1,27 @@
-"""
-URL configuration for matchmaking project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/5.1/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from django.urls import path
+from lib_transcendence.endpoints import Matchmaking, UsersManagement
 
-from lobby.views import lobby_create_update_view, lobby_create_list_delete_view
-from tournament.views import tournament_view, tournament_participants_view, tournament_kick_view, \
+from lobby.views import lobby_view, lobby_participants_view, lobby_kick_view
+from play.views import duel_view, ranked_view
+from tournament.views import tournament_view, tournament_search_view, tournament_participants_view, tournament_kick_view, \
     tournament_result_match_view
+from users.views import blocked_user_view, delete_user_view
 
 urlpatterns = [
-    path('api/play/lobby/', lobby_create_update_view),
-    path('api/play/lobby/<str:code>/', lobby_create_list_delete_view),
+    path(Matchmaking.duel, duel_view),
+    path(Matchmaking.ranked, ranked_view),
 
-    path('api/play/tournament/', tournament_view),
-    path('api/play/tournament/<str:code>/', tournament_participants_view),
-    path('api/play/tournament/<str:code>/kick/<int:user_id>/', tournament_kick_view),
-    path('api/tournament/result-match/', tournament_result_match_view),
+    path(Matchmaking.lobby, lobby_view),
+    path(Matchmaking.lobby_participant, lobby_participants_view),
+    path(Matchmaking.lobby_kick, lobby_kick_view),
+
+    path(Matchmaking.tournament, tournament_view),
+    path(Matchmaking.tournament_search, tournament_search_view),
+    path(Matchmaking.tournament_participant, tournament_participants_view),
+    path(Matchmaking.tournament_kick, tournament_kick_view),
+
+    path(Matchmaking.tournament_result_match, tournament_result_match_view),
+
+    path(UsersManagement.blocked_user, blocked_user_view),
+    path(UsersManagement.delete_user, delete_user_view),
 ]

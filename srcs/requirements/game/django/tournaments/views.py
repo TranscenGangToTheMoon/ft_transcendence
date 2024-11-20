@@ -1,6 +1,6 @@
+from lib_transcendence.auth import IsAuthenticated
 from rest_framework import generics
 
-from game.auth import IsAuthenticated
 from tournaments.models import Tournaments
 from tournaments.serializers import TournamentSerializer
 

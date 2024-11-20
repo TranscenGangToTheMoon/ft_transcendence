@@ -1,13 +1,16 @@
 // ========================== GLOBAL VALUES ==========================
 
+const MAX_DISPLAYED_NOTIFICATIONS = 3;
 const baseAPIUrl = "https://localhost:4443/api"
 let userInformations = undefined;
+var notificationIdentifier = 0;
+var displayedNotifications = 0;
 window.baseAPIUrl = baseAPIUrl;
 window.userInformations = userInformations;
 
 // ========================== API REQUESTS ==========================
 
-function apiRequest(token, endpoint, method="GET", authType="Bearer",
+async function apiRequest(token, endpoint, method="GET", authType="Bearer",
     contentType="application/json", body=undefined, currentlyRefreshing=false){ 
     let options = {
         method: method,
@@ -19,11 +22,14 @@ function apiRequest(token, endpoint, method="GET", authType="Bearer",
         options.headers["Authorization"] = `${authType} ${token}`;
     if (body)
         options.body = JSON.stringify(body);
-    console.log(endpoint, options)
+    console.log(endpoint, options);
     return fetch(endpoint, options)
         .then(async response => {
             if (!response.ok && (response.status > 499 || response.status === 404)){
                 throw {code: response.status};
+            }
+            if (response.status === 204){
+                return;
             }
             let data = await response.json();
             console.log(data);
@@ -145,7 +151,7 @@ function loadScript(scriptSrc) {
     script.src = scriptSrc;
     script.onload = () => {
         console.log(`Script ${scriptSrc} loaded.`);
-    };
+    };  
     script.onerror = () => {
         console.error(`Error while loading script ${scriptSrc}.`);
     };
@@ -167,16 +173,19 @@ function loadCSS(cssHref, toUpdate=true) {
     console.log(`Style ${cssHref} loaded.`)
 }
 
-async function loadContent(url, container='content') {
+async function loadContent(url, container='content', append=false) {
     const contentDiv = document.getElementById(container);
+    console.log(url, container)
     try {
         const response = await fetch(url);
         if (!response.ok) {
             throw new Error('Page non trouvée');
         }
         const html = await response.text();
-        contentDiv.innerHTML = html;
-
+        if(!append)
+            contentDiv.innerHTML = html;
+        else
+            contentDiv.innerHTML += html;
         const script = contentDiv.querySelector('[script]');
         if (script)
             loadScript(script.getAttribute('script'));
@@ -194,31 +203,48 @@ async function loadContent(url, container='content') {
 }
 
 function navigateTo(url, doNavigate=true){
-    history.pushState(null, null, url);
+    history.pushState({}, '', url);
+    console.table(history)
     if (doNavigate)
         handleRoute();
 }
 
 window.navigateTo = navigateTo;
 
-function handleRoute() {
+async function handleRoute() {
     const path = window.location.pathname;
 
     const routes = {
         '/login': '/authentication.html',
-        '/': '/homePage.html'
+        '/': '/homePage.html',
+        '/profile' : 'profile.html',
+        '/lobby' : '/lobby.html',
+        '/chat' : '/testChat.html',
+        '/chatTest' : '/chatTemplates/chat.html'
     };
 
     const page = routes[path] || '/404.html';
-    loadContent(page);
+    await loadContent(page);
 }
 
-document.addEventListener('click', event => {
-    if (event.target.matches('[data-link]')) {
-        event.preventDefault();
-        navigateTo(event.target.href);
+// UNCOMMENT FOR LINKS TO WORK WITHOUT CUSTOM JS
+// document.addEventListener('click', event => {
+//     if (event.target.matches('[data-link]')) {
+//         event.preventDefault();
+//         navigateTo(event.target.href);
+//     }
+// });
+
+window.addEventListener('popstate', async event => {
+    event.preventDefault();
+    document.querySelectorAll('.modal.show').forEach(modal => {
+        bootstrap.Modal.getInstance(modal).hide();
+    })
+    if (userInformations.is_guest !== (document.getElementById('trophies') === '')){
+        await loadUserProfile();
     }
-});
+    handleRoute();
+})
 
 window.loadContent = loadContent;
 
@@ -245,10 +271,19 @@ function displayMainError(errorTitle, errorContent) {
 
     errorContentDiv.innerText = errorContent;
     errorTitleDiv.innerText = errorTitle;
+    document.getElementById('errorModal').addEventListener('shown.bs.modal', function() {
+        document.getElementById('errorModalClose').focus();
+    })
     errorModal.show();
 }
 
+window.displayMainError = displayMainError;
+
 // ========================== INDEX SCRIPT ==========================
+
+async function loadFriendListModal() {
+    await loadContent('/friendList.html', 'modals', true);
+}
 
 async function loadUserProfile(){
     let profileMenu = 'profileMenu.html';
@@ -267,17 +302,66 @@ async function loadUserProfile(){
     // document.getElementById('title').innerText = userInformations.title;
 }
 
-async function atStart() {
-    await fetchUserInfos();
-    if (userInformations.code === 'user_not_found'){
-        console.log('user was deleted from database, switching to guest mode');
-        displayMainError("Unable to retrieve your account/guest profile","We're sorry your account has been permanently deleted and cannot be recovered.");
-        await generateToken();
-        await fetchUserInfos(true);
-    }
-    handleRoute();
+document.getElementById('home').addEventListener('click', event => {
+    event.preventDefault();
+    navigateTo('/');
+})
+
+function initSSE(){
+    console.log('SERVER SENT EVENT INITIALIZATION HERE');
 }
 
+async function  indexInit(auto=true) {
+    if (!auto){
+        await fetchUserInfos();
+        if (window.location.pathname === '/login'){
+            document.getElementById('profileMenu').innerHTML = "";
+        }
+        else{
+            await loadUserProfile();
+        }
+        if (userInformations.code === 'user_not_found'){
+            console.log('user was deleted from database, switching to guest mode');
+            displayMainError("Unable to retrieve your account/guest profile","We're sorry your account has been permanently deleted and cannot be recovered.");
+            await generateToken();
+            await fetchUserInfos(true);
+            await loadUserProfile();
+        }
+    }
+    else{
+        loadCSS('/css/styles.css', false);
+        await loadFriendListModal();
+        initSSE();
+        handleRoute();
+    }
+}
+
+document.getElementById('notifTrigger').addEventListener('click', async event => {
+    event.preventDefault();
+    if (displayedNotifications >= MAX_DISPLAYED_NOTIFICATIONS) {
+        return ;
+    }
+    const toastContainer = document.getElementById('toastContainer');
+
+    if (document.querySelector('hide'))
+        console.log('la');
+    await loadContent('/notification.html', 'toastContainer', true);
+    const notification = document.getElementById('notification');
+    notification.id = `notification${notificationIdentifier}`;
+    const toastInstance = new bootstrap.Toast(notification);
+    toastInstance.show();
+    notificationIdentifier++;
+    displayedNotifications++;
+    setTimeout(() => {
+        toastInstance.hide();
+        setTimeout (() => {
+            displayedNotifications--;
+            toastContainer.removeChild(document.getElementById(notification.id));
+        }, 500);
+    }, 5000);
+})
+
+window.indexInit = indexInit;
 window.loadUserProfile = loadUserProfile;
 
-atStart();
+indexInit();

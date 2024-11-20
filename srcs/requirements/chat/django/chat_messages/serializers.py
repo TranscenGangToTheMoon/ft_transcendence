@@ -1,30 +1,36 @@
 from rest_framework import serializers
+from rest_framework.exceptions import PermissionDenied
+from lib_transcendence.exceptions import MessagesException
 
 from chat_messages.models import Messages
-from chats.models import Chats, ChatParticipants
+from chats.models import ChatParticipants
 
 
 class MessagesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Messages
-        fields = ('id', 'chat_id', 'author', 'content', 'sent_at')
-        read_only_fields = ('id', 'author', 'chat_id')
+        fields = [
+            'id',
+            'chat_id',
+            'author',
+            'content',
+            'sent_at'
+        ]
+        read_only_fields = [
+            'id',
+            'author',
+            'chat_id'
+        ]
 
     def create(self, validated_data):
-        pk = self.context.get('pk')
-        if pk is None:
-            raise serializers.ValidationError({'detail': 'Chat id is required'})
-
+        pk = self.context['pk']
         user = self.context['auth_user']
-        try:
-            chats = Chats.objects.get(pk=pk)
 
-            try:
-                participant = chats.participants.get(user_id=user['id'])
-                validated_data['chat_id'] = pk
-                validated_data['author'] = participant
-                return super().create(validated_data)
-            except ChatParticipants.DoesNotExist:
-                raise serializers.ValidationError({'detail': 'You are not participant of this chat'})
-        except Chats.DoesNotExist:
-            raise serializers.ValidationError({'detail': 'Chat does not exist.'})
+        try:
+            participant = ChatParticipants.objects.get(user_id=user['id'], chat_id=pk)
+        except ChatParticipants.DoesNotExist:
+            raise PermissionDenied(MessagesException.PermissionDenied.NOT_BELONG_TO_CHAT)
+
+        validated_data['chat_id'] = pk
+        validated_data['author'] = participant
+        return super().create(validated_data)

@@ -1,5 +1,5 @@
-async function atStart() {
+async function guestProfileInit() {
     await loadContent('/authenticationForm.html', 'authenticate');
 }
 
-atStart();
+guestProfileInit();

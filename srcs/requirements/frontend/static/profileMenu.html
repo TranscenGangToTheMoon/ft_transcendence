@@ -3,11 +3,11 @@
         menu
     </button>
     <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-        <li><a class="dropdown-item" href="#">Settings</a></li>
-        <li><a class="dropdown-item" href="#">Friends</a></li>
-        <li><a class="dropdown-item" href="#">Chats</a></li>
-        <li><a class="dropdown-item" href="#">Leaderboard</a></li>
-        <li><a class="dropdown-item" id="logOut" href="#">Log out</a></li>
+        <li><a class="dropdown-item" id="settings">Settings</a></li>
+        <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#friendListModal">Friends</a></li>
+        <li><a class="dropdown-item" style="cursor: not-allowed; background-color: lightgray;">Chats</a></li>
+        <li><a class="dropdown-item" style="cursor: not-allowed; background-color: lightgray;">Leaderboard</a></li>
+        <li><a class="dropdown-item" id="logOut">Log out</a></li>
     </ul>
 </div>
 <div script="/scripts/profileMenu.js"></div>

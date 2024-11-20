@@ -7,7 +7,7 @@ from chats.models import Chats, ChatParticipants
 
 class Messages(models.Model):
     chat = models.ForeignKey(Chats, on_delete=models.CASCADE, related_name='messages')
-    author = models.ForeignKey(ChatParticipants, on_delete=models.CASCADE)
+    author = models.ForeignKey(ChatParticipants, on_delete=models.CASCADE, related_name='messages')
     content = models.TextField()
     sent_at = models.DateTimeField(auto_now_add=True)
     read_at = models.DateTimeField(blank=True, null=True)
@@ -19,3 +19,6 @@ class Messages(models.Model):
     def mark_as_read(self):
         self.read_at = datetime.now()
         self.save()
+
+    def __str__(self):
+        return f'{self.author.username}: {self.content}'

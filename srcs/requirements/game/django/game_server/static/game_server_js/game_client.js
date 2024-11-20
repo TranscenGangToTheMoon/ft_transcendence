@@ -1,24 +1,26 @@
+import { io } from "https://cdn.socket.io/4.8.0/socket.io.esm.min.js";
 import {Position} from './position.js';
 import {Ball} from './ball.js';
 import {Racket} from './racket.js';
 import {Player} from './player.js';
 
-let url = `ws://${window.location.host}/game_server/`
-let socket = new WebSocket(url);
+let socket = io('http://localhost:8003');
 
-let start
+socket.on('connect', () => {
+	console.log('Connected to server');
+});
 
-socket.onopen = function() {
-  console.log('WebSocket connection established.');
-  const message = {
-    'message': 'Hello, world!'
-  };
-  socket.send(JSON.stringify(message));
-};
-socket.onmessage = function(event) {
-  const message = JSON.parse(event.data);
-  console.log('Received message:', message);
-};
+// socket.onopen = function() {
+//   console.log('WebSocket connection established.');
+//   const message = {
+//     'message': 'Hello, world!'
+//   };
+//   socket.send(JSON.stringify(message));
+// };
+// socket.onmessage = function(event) {
+//   const message = JSON.parse(event.data);
+//   console.log('Received message:', message);
+// };
 
 function draw(ball, player, opponent) {
 	let ctx = canvas.getContext("2d");
@@ -168,8 +170,16 @@ function game_loop(ball, player, opponent) {
 	}
 }
 
+let begin = false;
+
 
 window.onload = function () {
+	document.getElementById('form').addEventListener('submit', function (event) {
+		event.preventDefault();
+		player.name = document.getElementById('playerName').value;
+		io.send();
+		begin = true;
+	});
 	reset_ball_direction(ball, player, opponent);
 	console.log("start countdown");
 	drawCountdown(new Date().getTime() + 3000);

@@ -1,6 +1,6 @@
 from django.urls import re_path
-from . import client_handling
+from . import gameClient
 
 websocket_urlpatterns = [
-	re_path('game_server/', client_handling.GameClient.as_asgi()),
+	re_path('game_server/', gameClient.GameClient.as_asgi()),
 ]

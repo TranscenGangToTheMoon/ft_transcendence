@@ -1,8 +1,12 @@
 document.getElementById('logOut').addEventListener('click', async event => {
     event.preventDefault();
     removeTokens();
-    generateToken();
+    await generateToken();
     await fetchUserInfos(true);
-    await loadUserProfile();
-    await loadContent('/homePage.html');
+    handleRoute();
+})
+
+document.getElementById('settings').addEventListener('click', event => {
+    event.preventDefault();
+    navigateTo('/profile');
 })

@@ -25,7 +25,8 @@ elif [ $# -eq 2 ]; then
 fi
 
 generate_password() {
-    echo $(LC_CTYPE=C; LC_ALL=C; tr -dc 'A-Za-z0-9!?%' < /dev/urandom | head -c 32)
+	export LC_ALL=C
+    echo $(LC_CTYPE=C; tr -dc 'A-Za-z0-9!?%' < /dev/urandom | head -c 32)
 }
 
 while IFS= read -r line; do

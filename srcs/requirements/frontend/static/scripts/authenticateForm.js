@@ -44,7 +44,11 @@ document.getElementById("loginButton").addEventListener('click', event => {
                 localStorage.setItem('refresh', data.refresh);
                 await fetchUserInfos(true);
                 loadUserProfile();
-                return navigateTo('/'); //todo redirect to uri
+                if (window.location.pathname.includes('login'))
+                    navigateTo('/');
+                else
+                    handleRoute();
+                return;//todo redirect to uri
             }
             if (data.username) {
                 document.getElementById('container').innerText = data.username[0];
@@ -62,7 +66,3 @@ document.getElementById("loginButton").addEventListener('click', event => {
         })
         .catch(error => console.log('error a gerer1', error))
 })
-
-// document.querySelector('dropdown-menu').addEventListener('mousedown', event => {
-//     event.preventDefault();
-// })

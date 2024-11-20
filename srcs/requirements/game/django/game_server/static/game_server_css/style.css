@@ -24,7 +24,7 @@ canvas {
     border-radius: 10px; /* Coins arrondis */
 }
 
-@media (max-width: 600px) {
+@media (max-width: 800px) {
     .title {
         font-size: 2rem; /* Réduction de la taille du titre sur mobile */
     }
