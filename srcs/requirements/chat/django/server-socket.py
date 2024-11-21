@@ -14,7 +14,7 @@ sio.attach(app, socketio_path='/ws/chat/')
 @sio.event
 async def connect(sid, environ):
     print(f"Client connected : {sid}")
-    await sio.emit('message', {'data': 'Welcome!'}, to=sid)
+    await sio.emit('message', {'message': '<em>Welcome!</em>',}, to=sid)
 
 
 @sio.event
@@ -26,11 +26,8 @@ async def disconnect(sid):
 async def message(sid, data):
     message = data.get('message')
     print(f"New message from {sid}: {data}")
-    await sio.emit('message', {'data': message})
+    await sio.emit('message', {'message': message})
 
 
 if __name__ == '__main__':
-    # loop = asyncio.get_event_loop()
-    # loop.create_task(ping())
-
     web.run_app(app, port=8010)

@@ -1,4 +1,6 @@
+const chatBox = document.getElementById('chats-box');
 let socket;
+
 
 function connect() {
 	socket = io("wss://localhost:4443", {
@@ -19,15 +21,18 @@ function setupSocketListeners()
 
 	socket.on("message", (data) => {
 		console.log("Message received: ", data);
+		chatBox.insertAdjacentHTML('beforeend', `<div><p>: ${data.message}</p></div>`);
 	});
 
-	socket.on("ping", (data) => {
-		console.log("Ping received: ", data);
+	let chatForm = document.getElementById('chat-form');
+	chatForm.addEventListener('submit', (e) => {
+		e.preventDefault();
+		const message = e.target.message.value;
+		socket.emit('message', { 'message': message });
+		console.log('Message sent: ', message);
+		chatForm.reset();
 	});
 
-	socket.on("error", (error) => {
-		console.log("Error: ", error);
-	});
 }
 
 async function chatClientInit() {
