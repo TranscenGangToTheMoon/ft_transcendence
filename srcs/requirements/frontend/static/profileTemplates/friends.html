@@ -1,8 +1,9 @@
 <div id="isAcceptingFriendRequests">
     Allow friend requests
-    <div class="on-off">
-        <div class="on">on</div>
-        <div class="off">off</div>
+    <div class="form-check form-switch">
+        <input class="form-check-input" type="checkbox" id="switchAcceptFriendRequests">
+        <label class="form-check-label" for="switchAcceptFriendRequests">On/off</label>
+        <div id="tempError"></div>
     </div>
 </div>
 <div id="seeBlockedUsers">
@@ -17,4 +18,4 @@
         [insert friend list]
     </div>
 </div>
-<!-- <div script="/scripts/friends.js"></div> -->
+<div script="/profileTemplates/scripts/friends.js"></div>
