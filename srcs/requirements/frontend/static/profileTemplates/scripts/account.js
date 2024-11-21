@@ -19,7 +19,7 @@ async function deleteAccount(password) {
                 await generateToken();
                 await fetchUserInfos(true);
                 await navigateTo('/');
-                displayMainError('Account deleted', 'Your account has been successfully deleted. You have been redirected to homepage.');
+                displayMainAlert('Account deleted', 'Your account has been successfully deleted. You have been redirected to homepage.');
             }
         })
         .catch(error => {
@@ -34,6 +34,7 @@ document.getElementById('test').addEventListener('submit', event => {
 
 document.getElementById('pChangeNickname').addEventListener('submit', async event => {
     event.preventDefault();
+    console.log('submit')
     const newUsername = document.getElementById('pNicknameInput').value;
     if (!newUsername)
         return; 
@@ -41,9 +42,10 @@ document.getElementById('pChangeNickname').addEventListener('submit', async even
         let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/users/me/`, "PATCH",
         undefined, undefined, {'username' : newUsername});
         if (!data.id)
-            document.getElementById('container').innerText = data.username;
+            document.getElementById('pChangeNicknameError').innerText = data.username;
         else {
-            indexInit();
+            indexInit(false);
+            displayMainAlert("Nickname updated", `Successfully updated your nickname to '${newUsername}'`)
             handleRoute();
         }
     }
@@ -54,32 +56,23 @@ document.getElementById('pChangeNickname').addEventListener('submit', async even
 
 document.getElementById('pChangePassword').addEventListener('submit', async event => {
     event.preventDefault();
-    const newPassword = document.getElementById('pPasswordInput').value;
+    const newPasswordInputDiv = document.getElementById('pPasswordInput');
+    const newPassword = newPasswordInputDiv.value;
     if (!newPassword)
         return;
-    if (newPassword === 'Password123')
-        return document.getElementById('container').innerText = 'Please enter a new password';
     try {
         let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/users/me/`, "PATCH",
         undefined, undefined, {'password' : newPassword});
         if (!data.id)
-            document.getElementById('container').innerText = data.username;
-        else 
-            await navigateTo('/profile');
+            document.getElementById('pChangePasswordError').innerText = data.username;
+        else{
+            displayMainAlert("password updated", "successfully updated your password.");
+            newPasswordInputDiv.value = "";
+        }
     }
     catch (error){
         console.log('error on password change', error);
     }
-})
-
-document.getElementById('pPasswordInput').addEventListener('focus', function clearInput(event) {
-    event.preventDefault();
-    this.value = "";
-})
-
-document.getElementById('pPasswordInput').addEventListener('focusout', function fillInput(event) {
-    event.preventDefault();
-    this.value = "Password123";
 })
 
 function fillNicknamePlaceholder() {

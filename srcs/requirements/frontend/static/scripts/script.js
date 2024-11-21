@@ -267,20 +267,20 @@ async function fetchUserInfos(forced=false) {
     }
 }
 
-function displayMainError(errorTitle, errorContent) {
-    const errorContentDiv = document.getElementById('errorContent');
-    const errorTitleDiv = document.getElementById('errorModalLabel');
-    const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+function displayMainAlert(alertTitle, alertContent) {
+    const alertContentDiv = document.getElementById('alertContent');
+    const alertTitleDiv = document.getElementById('alertModalLabel');
+    const alertModal = new bootstrap.Modal(document.getElementById('alertModal'));
 
-    errorContentDiv.innerText = errorContent;
-    errorTitleDiv.innerText = errorTitle;
-    document.getElementById('errorModal').addEventListener('shown.bs.modal', function() {
-        document.getElementById('errorModalClose').focus();
+    alertContentDiv.innerText = alertContent;
+    alertTitleDiv.innerText = alertTitle;
+    document.getElementById('alertModal').addEventListener('shown.bs.modal', function() {
+        document.getElementById('alertModalClose').focus();
     })
-    errorModal.show();
+    alertModal.show();
 }
 
-window.displayMainError = displayMainError;
+window.displayMainAlert = displayMainAlert;
 
 // ========================== INDEX SCRIPT ==========================
 
@@ -316,7 +316,7 @@ function initSSE(){
 
 async function  indexInit(auto=true) {
     if (!auto){
-        await fetchUserInfos();
+        await fetchUserInfos(true);
         if (window.location.pathname === '/login'){
             document.getElementById('profileMenu').innerHTML = "";
         }
@@ -325,7 +325,7 @@ async function  indexInit(auto=true) {
         }
         if (userInformations.code === 'user_not_found'){
             console.log('user was deleted from database, switching to guest mode');
-            displayMainError("Unable to retrieve your account/guest profile","We're sorry your account has been permanently deleted and cannot be recovered.");
+            displayMainAlert("Unable to retrieve your account/guest profile","We're sorry your account has been permanently deleted and cannot be recovered.");
             await generateToken();
             await fetchUserInfos(true);
             await loadUserProfile();
