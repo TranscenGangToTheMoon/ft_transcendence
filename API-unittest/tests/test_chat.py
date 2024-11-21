@@ -4,6 +4,7 @@ from services.friend import create_friend, send_friend_request
 from utils.credentials import new_user, guest_user
 from utils.generate_random import rnstr
 from utils.my_unittest import UnitTest
+import unittest
 
 
 # todo test chat user endpoint
