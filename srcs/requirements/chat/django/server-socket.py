@@ -7,7 +7,7 @@ from aiohttp import web
 # app = web.Application()
 # sio.attach(app)
 
-sio = socketio.AsyncServer(cors_allowed_origins='*', async_mode='aiohttp', logger=True, namespace='/ws/chat/')
+sio = socketio.AsyncServer(cors_allowed_origins='*', async_mode='aiohttp', logger=True)
 app = web.Application()
 sio.attach(app, socketio_path='/ws/chat/')
 

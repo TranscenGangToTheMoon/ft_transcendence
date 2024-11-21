@@ -44,7 +44,6 @@ services:
     restart: on-failure
     ports:
       - "8002:8000"
-      - "8010:8010"
     volumes:
       - chat-volume:/code
       - shared-code-volume:/shared

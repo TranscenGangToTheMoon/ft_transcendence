@@ -1,14 +1,10 @@
 let socket;
 
 function connect() {
-	socket = io("ws://localhost:8010");
-	// socket = io("wss://localhost:8010");
-	// socket = io("wss://localhost:4443/wss/chat");
-	console.log("======");
-	console.log(socket);
-	console.log("Connecting to the server...");
+	socket = io("wss://localhost:4443", {
+		path: "/ws/chat/"
+	});
 	setupSocketListeners();
-	console.log("Prout...");
 }
 
 function setupSocketListeners()

@@ -10,10 +10,8 @@ localhost:443 {
 	}
 
 	handle /ws/* {
-		rewrite /ws/chat /ws/chat/
-		handle_path /ws/chat/* {
-			rewrite * /socket.io{path}
-			reverse_proxy chat:8010
+		handle /ws/chat/* {
+			reverse_proxy http://chat:8010
 		}
 	}
 
