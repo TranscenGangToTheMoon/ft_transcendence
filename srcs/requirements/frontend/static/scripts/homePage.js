@@ -23,15 +23,8 @@
 
 // NAVIGAtORS
 
-document.getElementById('ranked').addEventListener('click', event => {
-    navigateTo('/lobby');
-})
-
-document.getElementById('friends').addEventListener('click', event => {
-    getDataFromApi(getAccessToken(), `${baseAPIUrl}/users/me/friends/`)
-        .then(data => {
-            console.log(data);
-        })
+document.getElementById('ranked').addEventListener('click', async event => {
+    await navigateTo('/lobby');
 })
 
 async function homePageInit() {

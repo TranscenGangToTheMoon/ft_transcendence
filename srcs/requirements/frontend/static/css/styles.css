@@ -3,6 +3,11 @@
     color: unset;
 }
 
- .toast-container {
+.dropdown-item {
+    cursor: pointer;
+    user-select: none;
+}
+
+.toast-container {
     right: 20px;
 }
