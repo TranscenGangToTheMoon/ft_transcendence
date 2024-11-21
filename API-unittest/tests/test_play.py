@@ -14,6 +14,9 @@ class Test01_Play(UnitTest):
     def test_002_play_ranked(self):
         self.assertResponse(play(game_mode='ranked'), 201)
 
+    def test_003_create_game(self):
+        self.assertResponse(create_game(new_user(), new_user()), 201)
+
 
 class Test02_PlayError(UnitTest):
 
