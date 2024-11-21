@@ -76,7 +76,7 @@ services:
     ports:
       - "8003:8000"
       # binding multiple ports for sockets
-      - "5000-5200:5000-5200"
+      - "5500-5700:5500-5700"
     volumes:
       - game-volume:/code
       - shared-code-volume:/shared
