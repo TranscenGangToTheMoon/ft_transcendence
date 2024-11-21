@@ -1,11 +1,15 @@
 
 import socketio
+import asyncio
 from aiohttp import web
 
-sio = socketio.AsyncServer(cors_allowed_origins='*')
-app = web.Application()
-sio.attach(app)
+# sio = socketio.AsyncServer(cors_allowed_origins='*')
+# app = web.Application()
+# sio.attach(app)
 
+sio = socketio.AsyncServer(cors_allowed_origins='*', async_mode='aiohttp', logger=True)
+app = web.Application()
+sio.attach(app, socketio_path='/ws/chat/')
 
 @sio.event
 async def connect(sid, environ):
@@ -32,6 +36,7 @@ async def ping():
 
 
 if __name__ == '__main__':
-    loop = asyncio.get_event_loop()
-    loop.create_task(ping())
-    web.run_app(app, port=8001)
+    # loop = asyncio.get_event_loop()
+    # loop.create_task(ping())
+
+    web.run_app(app, port=8010)

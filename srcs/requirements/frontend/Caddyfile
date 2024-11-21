@@ -1,10 +1,18 @@
 localhost:443 {
+	log
+
 	root * /var/www/html
 	handle {
 		@trailing path_regexp trailing ^(/.+)/$
 		redir @trailing {re.trailing.1} permanent
 		try_files {path} /index.html
 		file_server
+	}
+
+	handle /ws/* {
+		handle /ws/chat/* {
+			reverse_proxy http://chat:8010
+		}
 	}
 
 	handle /api/* {
@@ -37,16 +45,7 @@ localhost:443 {
 			respond @notJSON "Unsupported Media Type" 415
 			reverse_proxy http://users:8000
 		}
-		# route /* {
+
 		respond "ft_transcendence : api not found" 404 #must serv a 404.html
-		# }
 	}
-	# route /* {
-	# 	respond "ft_transcendence : page not found" 404
-	# }
-	# tls self_signed
-	# @http { # doesn't work
-	# 	protocol http
-	# }
-	# redir @http https://{host}{uri}
 }

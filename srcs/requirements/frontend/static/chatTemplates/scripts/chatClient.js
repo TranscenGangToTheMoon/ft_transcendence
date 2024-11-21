@@ -1,8 +1,9 @@
 let socket;
 
 function connect() {
-	socket = io("wss://localhost:4443/wss/chat");
-	console.log("Connecting to the server...");
+	socket = io("wss://localhost:4443", {
+		path: "/ws/chat/"
+	});
 	setupSocketListeners();
 }
 
