@@ -1,9 +1,14 @@
 let socket;
 
 function connect() {
-	socket = io("wss://localhost:4443/wss/chat");
+	socket = io("ws://localhost:8010");
+	// socket = io("wss://localhost:8010");
+	// socket = io("wss://localhost:4443/wss/chat");
+	console.log("======");
+	console.log(socket);
 	console.log("Connecting to the server...");
 	setupSocketListeners();
+	console.log("Prout...");
 }
 
 function setupSocketListeners()
