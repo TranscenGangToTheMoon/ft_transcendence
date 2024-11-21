@@ -1,6 +1,7 @@
 from lib_transcendence.game import GameMode
 from lib_transcendence.utils import generate_code
 from lib_transcendence.exceptions import MessagesException, Conflict
+from lib_transcendence.request import request_service
 from rest_framework import serializers
 from rest_framework.exceptions import NotFound
 
@@ -75,4 +76,10 @@ class MatchSerializer(serializers.ModelSerializer):
             new_team = Teams.objects.create(match=match)
             for user in team:
                 Players.objects.create(user_id=user, match=match, team=new_team)
+        from .match_launcher import launch_server
+        print("launching server", flush=True)
+        port = launch_server(match)
+        print(f'the port is : {port}', flush=True)
+        #TODO -> push server port to the users service for SSE
+        # request_service('users', 'api/')
         return match
