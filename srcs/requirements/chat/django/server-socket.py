@@ -28,12 +28,6 @@ async def message(sid, data):
     print(f"New message from {sid}: {data}")
     await sio.emit('message', {'data': message})
 
-@sio.event
-async def ping():
-    while True:
-        await sio.emit('ping', {'message': 'ping'})
-        await asyncio.sleep(10)
-
 
 if __name__ == '__main__':
     # loop = asyncio.get_event_loop()
