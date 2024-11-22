@@ -117,10 +117,6 @@ services:
     networks:
       - transcendence-network
       - matchmaking-network
-  pong-cli:
-    build:
-      context: "requirements/pong-cli"
-      target: development
 
   users:
     build:

@@ -24,30 +24,27 @@ NAME		:=	pong-cli
 ########################################################################################################################
 #                                                         LIB                                                          #
 ########################################################################################################################
-# MLX			:=	libmlx42.a
+FTXUI			:=	\
+					libftxui-component.a\
+					libftxui-dom.a\
+					libftxui-screen.a
 
-# MLX_D		:=	MLX42
+FTXUI_D			:=	ftxui/
 
-# MLX_I		:=	$(MLX_D)/include/
+FTXUI_I			:=	ftxui/include/
 
-# # MLX_H		:=	$(MLX_I)mlx.h
+FTXUI_A			:=	$(FTXUI:%=$(FTXUI_D)/build/%)
 
-# MLX_A		:=	$(MLX_D)/build/$(MLX)
-
-# ##### MLX installed locally
-# MLX_F		:=	$(MLX_A) -ldl -lglfw -pthread -lm
-
-##### MLX on the system
-#MLX_F		:=	-ldl -lmlx42 -lglfw -pthread -lm
+FTXUI_F			:=	-L$(FTXUI_D)build/ -lftxui-component -lftxui-dom -lftxui-screen
 
 ########################################################################################################################
 #                                                        FLAGS                                                         #
 ########################################################################################################################
-CC			:=	c++
+CC			:=	c++ -std=c++17
 
 RM			:=	rm -rf
 
-IFLAGS		:=	-I$(INCS_D) # -I$(MLX_I)
+IFLAGS		:=	-I$(INCS_D) -I$(FTXUI_I)
 
 DFLAGS		=	-MMD -MP -MT $@ -MF $(DEPS_D)$*.d
 
@@ -92,8 +89,8 @@ RESET		:=	\001\033[0m\002
 
 all			:	$(NAME) banner #mlx
 
-$(NAME)		:	$(OBJS) $(MLX_A)
-			$(CC) $(CFLAGS) $(OFLAGS) -o $(NAME) $(OBJS) $(MLX_F)
+$(NAME)		:	$(OBJS) $(FTXUI_A)
+			$(CC) $(CFLAGS) $(OFLAGS) -o $(NAME) $(OBJS) $(FTXUI_F)
 
 $(OBJS)		:	$(OBJS_D)%.o: $(SRCS_D)%.cpp | $(OBJS_D) $(DEPS_D)
 			$(CC) $(CFLAGS) $(OFLAGS) $(DFLAGS) -c $< -o $@
@@ -104,6 +101,11 @@ $(OBJS_D)	:
 $(DEPS_D)	:
 			mkdir -p $(DEPS_D)
 
+ftxui		:
+			cmake $(FTXUI_D) -B $(FTXUI_D)build . && make -C $(FTXUI_D)build
+
+$(FTXUI_A)	:	FORCE
+			cmake $(FTXUI_D) -B $(FTXUI_D)build . && make -C $(FTXUI_D)build
 # mlx			:
 # 			cmake $(MLX_D) -B $(MLX_D)/build && make -C $(MLX_D)/build -j4
 #$(MLX_A)	:	FORCE
@@ -140,6 +142,7 @@ clean		:
 
 fclean		:	clean
 			$(RM) $(NAME) $(NAME_B)
+			rm -rf ftxui/build/
 #			$(MAKE) fclean -C $(LIB_D)
 #			$(MAKE) clean -C $(MLX_D)
 
