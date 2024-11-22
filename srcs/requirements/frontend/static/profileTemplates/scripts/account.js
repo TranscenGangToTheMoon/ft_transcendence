@@ -63,8 +63,11 @@ document.getElementById('pChangePassword').addEventListener('submit', async even
     try {
         let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/users/me/`, "PATCH",
         undefined, undefined, {'password' : newPassword});
-        if (!data.id)
+        if (!data.id){
             document.getElementById('pChangePasswordError').innerText = data.username;
+            if (data.detail)
+                document.getElementById('pChangePasswordError').innerText = data.detail;
+        }
         else{
             displayMainAlert("password updated", "successfully updated your password.");
             newPasswordInputDiv.value = "";
@@ -80,6 +83,9 @@ function fillNicknamePlaceholder() {
 }
 
 async function accountInit(){
+    if (userInformations.is_guest){
+        document.getElementById('pDeleteAccount').classList.add('disabled');
+    }
     fillNicknamePlaceholder();
 } 
 
