@@ -12,3 +12,4 @@ build
 **/migrations/*.py
 .ropeproject/
 .mypy_cache/
+pyproject.toml
