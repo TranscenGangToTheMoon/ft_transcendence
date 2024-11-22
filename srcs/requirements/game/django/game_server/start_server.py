@@ -1,62 +1,44 @@
 from aiohttp import web
+from asgiref.sync import sync_to_async
 from pong_player import Player, Team
 from server import Server
 from typing import List
 import asyncio
+import django
+# import json
 import os
 import socketio
+from socket_init import init_socketIO
 import sys
 import time
-import django
-from asgiref.sync import sync_to_async
 
-
-sio = socketio.AsyncServer(async_mode='aiohttp')
-app = web.Application()
-sio.attach(app)
-players: List[Player]
-
+# Django ORM setup
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'game.settings')
 django.setup()
 from matches.models import Matches
 
+# SocketIO setup
+sio = socketio.AsyncServer(async_mode='aiohttp')
+app = web.Application()
+sio.attach(app)
+init_socketIO(sio)
 
-@sio.event
-def connect(sid, environ, auth):
-    pass
-
-
-@sio.event
-async def chat_message(sid, data):
-    print("message ", data)
-
-
-@sio.event
-def disconnect(sid):
-    print('disconnect ', sid)
-
-
-def get_ports():
-    try:
-        port = int(os.environ['GAME_SERVER_MIN_PORT'])
-        max_port = int(os.environ['GAME_SERVER_MAX_PORT'])
-    except KeyError:
-        port = 5500
-        max_port = 5700
-    return (port, max_port)
-
+# Init of global list of players
+players: List[Player] = []
 
 def make_teams(match_code):
+    global players
     teams = []
-    players_list = []
+    team_players = []
     match = Matches.objects.get(code=match_code)
     raw_teams = match.teams.all()
     for team in raw_teams:
         raw_players = team.players.all()
         for player in raw_players:
-            players_list.append(Player(player.user_id))
-        teams.append(Team(team.id, players_list))
+            players.append(Player(player.user_id))
+            team_players.append(Player(player.user_id))
+        teams.append(Team(team.id, team_players))
     return teams, match.game_mode
 
 
@@ -65,7 +47,6 @@ async def main():
         match_id = int(sys.argv[1])
     except Exception:
         return 1
-    port, max_port = get_ports()
     server = Server()
     try:
         await server.serve(app)
@@ -81,8 +62,10 @@ async def main():
             i += 1
     if not got_request:
         return (1)
+    server.init_game()
     while True:
-        time.sleep(1)
+       time.sleep(1)
+    # server.launch_game()
     # TODO -> make server.launch_game()
 
 if __name__ == '__main__':

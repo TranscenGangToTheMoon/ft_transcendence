@@ -16,7 +16,8 @@ class Game:
         direction = get_random_direction()
         self.ball = Ball(Position(int(canvas_size.x / 2), int(canvas_size.y / 2)), direction)
         self.rackets: List[Racket] = []
-        for player in players:
+
+        for player in team_a.players:
             self.rackets.append(Racket(player.id, player.sid, Position))
 
     def move_racket(self, socket_id):

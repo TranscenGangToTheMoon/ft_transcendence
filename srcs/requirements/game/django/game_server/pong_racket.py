@@ -1,5 +1,3 @@
-import socketio
-from typing_extensions import Literal
 from pong_position import Position
 
 
