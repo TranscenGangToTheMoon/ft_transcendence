@@ -3,6 +3,7 @@
 ########################################################################################################################
 INCS		:=	\
 				colors.h\
+				pong-cli.h\
 
 SRCS		:=	\
 				main.cpp\
@@ -24,23 +25,38 @@ NAME		:=	pong-cli
 ########################################################################################################################
 #                                                         LIB                                                          #
 ########################################################################################################################
-FTXUI			:=	\
-					libftxui-component.a\
-					libftxui-dom.a\
-					libftxui-screen.a
+LIB_D		:=	lib
 
-FTXUI_D			:=	ftxui/
+CURL		:=	\
+				.a\
 
-FTXUI_I			:=	ftxui/include/
+CURL_D		:=	$(LIB_D)/curl
 
-FTXUI_A			:=	$(FTXUI:%=$(FTXUI_D)/build/%)
+CURL_I		:=	$(LIB_D)/curl/include/
 
-FTXUI_F			:=	-L$(FTXUI_D)build/ -lftxui-component -lftxui-dom -lftxui-screen
+#CURL_A		:=	$(CURL:%=$(CURL_D)/build/%)
 
+CURL_F		:=	-L$(CURL_D)/build/ -lftxui-component -lftxui-dom -lftxui-screen
+
+#####FTXUI LIB
+FTXUI		:=	\
+				libftxui-component.a\
+				libftxui-dom.a\
+				libftxui-screen.a
+
+FTXUI_D		:=	$(LIB_D)/ftxui
+
+FTXUI_I		:=	$(LIB_D)/ftxui/include/
+
+FTXUI_A		:=	$(FTXUI:%=$(FTXUI_D)/build/%)
+
+FTXUI_F		:=	-L$(FTXUI_D)/build/ -lftxui-component -lftxui-dom -lftxui-screen
+
+#LIBS		:=	$(FTXUI_A) #$(CURL_A)
 ########################################################################################################################
 #                                                        FLAGS                                                         #
 ########################################################################################################################
-CC			:=	c++ -std=c++17
+CXX			:=	c++ -std=c++17
 
 RM			:=	rm -rf
 
@@ -48,9 +64,11 @@ IFLAGS		:=	-I$(INCS_D) -I$(FTXUI_I)
 
 DFLAGS		=	-MMD -MP -MT $@ -MF $(DEPS_D)$*.d
 
-CFLAGS		=	-Wall -Wextra -Werror -g3 $(IFLAGS)
-
 OFLAGS		:=	-O3 #-Ofast -march=native -fomit-frame-pointer -funroll-loops
+
+CXXFLAGS	=	-Wall -Wextra -Werror -g $(IFLAGS) $(OFLAGS) $(DFLAGS)
+
+LFLAGS		= 	$(FTXUI_F) #-lssl -lcrypto
 
 ARGS		?=	#
 
@@ -60,7 +78,7 @@ ARGS		?=	#
 DEBUG		=	no
 
 ifeq ($(DEBUG), yes)
-	CFLAGS	+=	-fsanitize=address
+	CXXFLAGS	+=	-fsanitize=address
 endif
 
 IGN_LEAK	:=	valgrind_ignore_leaks.txt
@@ -87,13 +105,13 @@ RESET		:=	\001\033[0m\002
 
 .DEFAULT_GOAL = all
 
-all			:	$(NAME) banner #mlx
+all			:	$(NAME) banner
 
-$(NAME)		:	$(OBJS) $(FTXUI_A)
-			$(CC) $(CFLAGS) $(OFLAGS) -o $(NAME) $(OBJS) $(FTXUI_F)
+$(NAME)		:	ftxui curl $(OBJS)
+			$(CXX) $(CXXFLAGS) -o $(NAME) $(OBJS) $(LFLAGS)
 
 $(OBJS)		:	$(OBJS_D)%.o: $(SRCS_D)%.cpp | $(OBJS_D) $(DEPS_D)
-			$(CC) $(CFLAGS) $(OFLAGS) $(DFLAGS) -c $< -o $@
+			$(CXX) $(CXXFLAGS) -c $< -o $@
 
 $(OBJS_D)	:
 			mkdir -p $(OBJS_D)
@@ -101,15 +119,25 @@ $(OBJS_D)	:
 $(DEPS_D)	:
 			mkdir -p $(DEPS_D)
 
-ftxui		:
-			cmake $(FTXUI_D) -B $(FTXUI_D)build . && make -C $(FTXUI_D)build
+$(LIBS)		:	ftxui
 
-$(FTXUI_A)	:	FORCE
-			cmake $(FTXUI_D) -B $(FTXUI_D)build . && make -C $(FTXUI_D)build
-# mlx			:
-# 			cmake $(MLX_D) -B $(MLX_D)/build && make -C $(MLX_D)/build -j4
-#$(MLX_A)	:	FORCE
-#			$(MAKE) -C $(MLX_D) 2>/dev/null
+.PHONY		:	ftxui
+ftxui		:	$(FTXUI_D) FORCE
+			cmake $(FTXUI_D) -B $(FTXUI_D)/build .
+			make -C $(FTXUI_D)/build
+
+$(FTXUI_D)	:
+			git clone --depth 1 --branch v5.0.0 https://github.com/ArthurSonzogni/FTXUI.git $@
+
+curl		:	$(CURL_D) FORCE
+			./$(CURL_D)/configure --with-openssl --without-libpsl
+			#cd $(CURL_D) && make
+
+$(CURL_D)	:
+			curl -o	$@.tar.gz https://curl.se/download/curl-8.11.0.tar.gz
+			mkdir	$@
+			tar -xf	$@.tar.gz	-C $@ --strip-components=1
+			rm -rf	$@.tar.gz
 
 leaks		:	$(NAME)
 			$(VALGRIND) ./$(NAME) $(ARGS)
@@ -134,8 +162,6 @@ banner		:
 			@echo -en '$(BOLD)''$(ITALIC)'
 			@echo -e '                           🍦   xcharra'
 			@echo -e '$(RESET)'
-
-
 
 clean		:
 			$(RM) $(OBJS) $(OBJS_D) $(DEPS_D) $(OBJS_B_D) $(DEPS_B_D)
