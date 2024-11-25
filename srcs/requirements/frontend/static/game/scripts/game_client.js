@@ -4,25 +4,30 @@ import {Ball} from './ball.js';
 import {Racket} from './racket.js';
 import {Player} from './player.js';
 
-// port = 5500
+let port = 5500
 
-// let socket = io('http://localhost:' + port);
+let socket = io('http://localhost:' + port);
 
-// socket.on('connect', () => {
-// 	console.log('Connected to server');
-// });
+socket.on('connect', () => {
+	console.log('Connected to server');
+});
 
-// socket.onopen = function() {
-//   console.log('WebSocket connection established.');
-//   const message = {
-//     'message': 'Hello, world!'
-//   };
-//   socket.send(JSON.stringify(message));
-// };
-// socket.onmessage = function(event) {
-//   const message = JSON.parse(event.data);
-//   console.log('Received message:', message);
-// };
+socket.on('user_id', () => {
+    socket.send('2')
+    console.log('sent user_id')
+})
+
+socket.onopen = function() {
+  console.log('WebSocket connection established.');
+  const message = {
+    'message': 'Hello, world!'
+  };
+  socket.send(JSON.stringify(message));
+};
+socket.onmessage = function(event) {
+  const message = JSON.parse(event.data);
+  console.log('Received message:', message);
+};
 
 function draw(ball, player, opponent) {
 	let ctx = canvas.getContext("2d");
@@ -70,7 +75,7 @@ function random_direction() {
 }
 
 export let canvas = document.getElementById("gameCanvas");
-let player = new Player(new Racket(new Position(0, 0), 10, canvas.height), 0);
+let player = new Player(new Racket(new Position(0, (canvas.height/2) - 5), 10, 100), 0);
 let opponent = new Player(new Racket(new Position(canvas.width - 10, 0), 10, canvas.height), 0);
 let ball = new Ball(new Position(canvas.width / 2, canvas.height / 2), 10, 5);
 let isGameActive = false;
@@ -144,6 +149,7 @@ function drawCountdown(end_time) {
 function reset_game(ball, player, opponent) {
 	console.log("reset game");
 	ball.position = new Position(canvas.width / 2, canvas.height / 2);
+	ball.velocity = 5
 	reset_ball_direction(ball, player, opponent);
 	player.racket.position = new Position(0, 0);
 	opponent.racket.position = new Position(canvas.width - 10, 0);
