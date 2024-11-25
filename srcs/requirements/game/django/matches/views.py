@@ -3,10 +3,19 @@ from rest_framework import generics
 
 from matches.models import Matches
 from matches.serializers import MatchSerializer, validate_user_id
+from .match_launcher import launch_server
 
 
 class MatchCreateView(generics.CreateAPIView):
     serializer_class = MatchSerializer
+
+    def perform_create(self, serializer):
+        super().perform_create(serializer)
+        match = serializer.data
+        port = launch_server(match)
+        match.set_port(port)
+        #TODO -> make request to SSE service
+
 
 
 class MatchListView(generics.ListAPIView):

@@ -46,6 +46,7 @@ class MatchSerializer(serializers.ModelSerializer):
         read_only_fields = [
             'id',
             'created_at',
+            'port',
         ]
 
     @staticmethod
@@ -76,10 +77,4 @@ class MatchSerializer(serializers.ModelSerializer):
             new_team = Teams.objects.create(match=match)
             for user in team:
                 Players.objects.create(user_id=user, match=match, team=new_team)
-        from .match_launcher import launch_server
-        print("launching server", flush=True)
-        port = launch_server(match)
-        print(f'the port is : {port}', flush=True)
-        #TODO -> push server port to the users service for SSE
-        # request_service('users', 'api/')
         return match
