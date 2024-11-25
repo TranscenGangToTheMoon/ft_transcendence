@@ -17,6 +17,5 @@ def get_port(server):
 def launch_server(match):
     user_ids = [str(player.user_id) for player in match.players.all()]
     print(user_ids)
-    server = subprocess.Popen(["python", "game_server/start_server.py", match.code], stdout=subprocess.PIPE)
-    # note that output matches the port that is returned from the socketio server
+    server = subprocess.Popen(["python", "game_server/main.py", match.code], stdout=subprocess.PIPE)
     return get_port(server)

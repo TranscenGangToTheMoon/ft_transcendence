@@ -1,15 +1,14 @@
 from pong_position import Position
+from pong_player import Player
 
 
 class Racket:
     def __init__(self,
-        player_id: int,
-        socket_id: int,
-        position: Position,
-        width: int,
-        height: int) -> None:
-        self.player = player_id
-        self.socket_id = socket_id
+                 player: Player,
+                 position: Position,
+                 width: int = 800,
+                 height: int = 600) -> None:
+        self.player = player
         self.height = height
         self.width = width
         self.position = position
@@ -20,3 +19,6 @@ class Racket:
 
     def move_down(self):
         self.velocity = -1
+
+    def update(self):
+        self.position.y += self.velocity

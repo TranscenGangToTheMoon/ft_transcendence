@@ -2,7 +2,7 @@ from typing import List
 
 
 class Player:
-    socket_id = 0
+    socket_id = -1
     def __init__(self, player_id):
         self.id = player_id
 
