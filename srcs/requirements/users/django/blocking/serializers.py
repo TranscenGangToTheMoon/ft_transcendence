@@ -10,7 +10,7 @@ from users.auth import get_user, get_valid_user
 
 
 class BlockedSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(write_only=True) # todo change to user_id
+    user_id = serializers.IntegerField(write_only=True)
     user = serializers.SerializerMethodField(read_only=True)
     blocked = serializers.SerializerMethodField(read_only=True)
 
@@ -20,7 +20,7 @@ class BlockedSerializer(serializers.ModelSerializer):
 
     @staticmethod
     def get_user(obj):
-        return {'id': obj.user.id, 'username': obj.user.username}
+        return {'id': obj.user.id, 'username': obj.user.username} # todo remake
 
     @staticmethod
     def get_blocked(obj):
@@ -32,7 +32,7 @@ class BlockedSerializer(serializers.ModelSerializer):
         if user.blocked.count() >= 50:
             raise PermissionDenied(MessagesException.PermissionDenied.BLOCK_MORE_THAN_50_USERS)
 
-        blocked_user = get_valid_user(user, validated_data.pop('username'))
+        blocked_user = get_valid_user(user, id=validated_data.pop('user_id'))
 
         if blocked_user.id == user.id:
             raise PermissionDenied(MessagesException.PermissionDenied.BLOCK_YOURSELF)
