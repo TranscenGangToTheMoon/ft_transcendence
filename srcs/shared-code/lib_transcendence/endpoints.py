@@ -29,7 +29,7 @@ class Game:
     match_user = fmatch_user.format(user_id='<int:user_id>')
     tournaments = base_api + 'tournaments/'
 
-    matches_user = base_game + 'match/<int:user_id>/'
+    matches_user = base_game + 'matches/<int:user_id>/'
     tournament = base_game + 'tournaments/<int:tournament_id>/'
 
 
