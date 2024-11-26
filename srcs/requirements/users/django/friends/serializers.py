@@ -18,7 +18,7 @@ class FriendsSerializer(serializers.ModelSerializer):
             'friends',
             'friends_since',
             'matches_play_against',
-            'user1_win',
+            'user1_win', # todo remake
             'matches_play_together',
             'matches_win_together',
         ]
