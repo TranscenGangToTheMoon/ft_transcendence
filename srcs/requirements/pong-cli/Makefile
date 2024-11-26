@@ -128,7 +128,7 @@ $(DEPS_D)	:
 
 .PHONY: ftxui
 ftxui		:	$(FTXUI_D)
-			cmake $(FTXUI_D) -B $(FTXUI_D)/build .
+			cmake $(FTXUI_D) -B $(FTXUI_D)/build
 			$(MAKE) $(MFLAGS) -C $(FTXUI_D)/build
 
 $(FTXUI_D)	:
@@ -153,10 +153,6 @@ $(CERT)		:
 			openssl s_client -connect localhost:4443 -servername localhost </dev/null \
 				| sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > $(CERT)
 
-.PHONY: leaks
-leaks		:	$(NAME)
-			$(VALGRIND) ./$(NAME) $(ARGS)
-
 .PHONY: run
 run			:	$(NAME)
 			./$(NAME) $(ARGS)
@@ -168,6 +164,14 @@ fast		:	$(OBJS)
 .PHONY: run/fast
 run/fast	:	fast
 			./$(NAME) $(ARGS)
+
+.PHONY: leaks/fast
+leaks/fast	:	fast
+			$(VALGRIND) ./$(NAME) $(ARGS)
+
+.PHONY: leaks
+leaks		:	$(NAME)
+			$(VALGRIND) ./$(NAME) $(ARGS)
 
 .PHONY: fsan
 fsan		:
