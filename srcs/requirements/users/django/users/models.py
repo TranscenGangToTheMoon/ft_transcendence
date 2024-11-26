@@ -16,7 +16,7 @@ class Users(models.Model):
     own_profile_pictures = models.ManyToManyField(ProfilePictures, default=None, symmetrical=False, related_name='own_profile_pictures', blank=True)
 
     accept_friend_request = models.BooleanField(default=True)
-    accept_chat_from = models.CharField(max_length=30, default=AcceptChat.only_friends)
+    accept_chat_from = models.CharField(max_length=30, default=AcceptChat.friends_only)
 
     is_online = models.BooleanField(default=False)
     game_playing = models.CharField(max_length=5, default=None, null=True)
