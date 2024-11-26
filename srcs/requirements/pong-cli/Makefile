@@ -28,15 +28,17 @@ NAME		:=	pong-cli
 LIB_D		:=	lib
 
 CURL		:=	\
-				.a\
+				libcurl.a\
 
 CURL_D		:=	$(LIB_D)/curl
 
-CURL_I		:=	$(LIB_D)/curl/include/
+CURL_I		:=	$(CURL_D)/include
 
-#CURL_A		:=	$(CURL:%=$(CURL_D)/build/%)
+CURL_M		:=	$(CURL_D)/Makefile
 
-CURL_F		:=	-L$(CURL_D)/build/ -lftxui-component -lftxui-dom -lftxui-screen
+CURL_A		:=	$(CURL:%=$(CURL_D)/build/%)
+
+CURL_F		:=	-L$(CURL_D)/lib/.libs -lcurl
 
 #####FTXUI LIB
 FTXUI		:=	\
@@ -60,7 +62,7 @@ CXX			:=	c++ -std=c++17
 
 RM			:=	rm -rf
 
-IFLAGS		:=	-I$(INCS_D) -I$(FTXUI_I)
+IFLAGS		:=	-I$(INCS_D) -I$(FTXUI_I) -I$(CURL_I)
 
 DFLAGS		=	-MMD -MP -MT $@ -MF $(DEPS_D)$*.d
 
@@ -68,7 +70,7 @@ OFLAGS		:=	-O3 #-Ofast -march=native -fomit-frame-pointer -funroll-loops
 
 CXXFLAGS	=	-Wall -Wextra -Werror -g $(IFLAGS) $(OFLAGS) $(DFLAGS)
 
-LFLAGS		= 	$(FTXUI_F) #-lssl -lcrypto
+LFLAGS		= 	$(FTXUI_F) $(CURL_F) #-lssl -lcrypto
 
 ARGS		?=	#
 
@@ -105,6 +107,7 @@ RESET		:=	\001\033[0m\002
 
 .DEFAULT_GOAL = all
 
+.PHONY: all
 all			:	$(NAME) banner
 
 $(NAME)		:	ftxui curl $(OBJS)
@@ -121,7 +124,7 @@ $(DEPS_D)	:
 
 $(LIBS)		:	ftxui
 
-.PHONY		:	ftxui
+.PHONY: ftxui
 ftxui		:	$(FTXUI_D) FORCE
 			cmake $(FTXUI_D) -B $(FTXUI_D)/build .
 			make -C $(FTXUI_D)/build
@@ -129,9 +132,12 @@ ftxui		:	$(FTXUI_D) FORCE
 $(FTXUI_D)	:
 			git clone --depth 1 --branch v5.0.0 https://github.com/ArthurSonzogni/FTXUI.git $@
 
-curl		:	$(CURL_D) FORCE
-			./$(CURL_D)/configure --with-openssl --without-libpsl
-			#cd $(CURL_D) && make
+.PHONY: curl
+curl		:	$(CURL_D) $(CURL_M) FORCE
+			make -C $(CURL_D)
+
+$(CURL_M)	:
+			cd $(CURL_D) ; ./configure --with-openssl --without-libpsl
 
 $(CURL_D)	:
 			curl -o	$@.tar.gz https://curl.se/download/curl-8.11.0.tar.gz
@@ -139,18 +145,22 @@ $(CURL_D)	:
 			tar -xf	$@.tar.gz	-C $@ --strip-components=1
 			rm -rf	$@.tar.gz
 
+.PHONY: leaks
 leaks		:	$(NAME)
 			$(VALGRIND) ./$(NAME) $(ARGS)
 
+.PHONY: run
 run			:	$(NAME)
 			./$(NAME) $(ARGS)
 
+.PHONY: fsan
 fsan		:
 			$(MAKE) fclean $(NAME) DEBUG=yes
 
 ########################################################################################################################
 #                                                    MISCELLANEOUS                                                     #
 ########################################################################################################################
+.PHONY: banner
 banner		:
 			@echo -en '$(BLUE)'
 			@echo -e '                                        ___ '
@@ -163,17 +173,17 @@ banner		:
 			@echo -e '                           🍦   xcharra'
 			@echo -e '$(RESET)'
 
+.PHONY: clean
 clean		:
 			$(RM) $(OBJS) $(OBJS_D) $(DEPS_D) $(OBJS_B_D) $(DEPS_B_D)
 
+.PHONY: fclean
 fclean		:	clean
 			$(RM) $(NAME) $(NAME_B)
-			rm -rf ftxui/build/
-#			$(MAKE) fclean -C $(LIB_D)
-#			$(MAKE) clean -C $(MLX_D)
+			rm -rf $(LIB_D)/ftxui $(LIB_D)/curl
 
+.PHONY: re
 re			:	fclean all
 
+.PHONY: FORCE
 FORCE		:
-
-.PHONY		:	all debug leaks re clean fclean FORCE
