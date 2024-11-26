@@ -45,7 +45,6 @@ class MessagesException:
         GAME_MODE_PLAYERS = '{obj} mode must have {n} players in each teams.'
         CLASH_3_PLAYERS = GAME_MODE_PLAYERS.format(obj='Clash', n=3)
 
-        TOURNAMENT_SIZE = 'Tournament size must be a multiple of 4.'
         TOURNAMENT_MAX_SIZE = 'Tournament size must be less than or equal than 32.'
         TOURNAMENT_MIN_SIZE = 'Tournament size must be greater or equal than 4.'
 
