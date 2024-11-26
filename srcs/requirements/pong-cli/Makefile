@@ -167,7 +167,7 @@ fast		:	$(OBJS)
 
 .PHONY: run/fast
 run/fast	:	fast
-			./$(NAME/FAST) $(ARGS)
+			./$(NAME) $(ARGS)
 
 .PHONY: fsan
 fsan		:
