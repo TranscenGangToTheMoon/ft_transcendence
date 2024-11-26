@@ -84,7 +84,7 @@ class ChatsSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         view_chat = validated_data.pop('view_chat', None)
         validated_data = {}
-        if view_chat is bool:
+        if type(view_chat) is bool:
             try:
                 instance.participants.get(user_id=self.context['auth_user']['id']).set_view_chat(view_chat)
             except ChatParticipants.DoesNotExist:
