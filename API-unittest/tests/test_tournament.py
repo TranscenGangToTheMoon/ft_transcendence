@@ -59,7 +59,7 @@ class Test02_ErrorTournament(UnitTest):
 
         code = self.assertResponse(create_tournament(user1), 201, get_id='code')
 
-        self.assertResponse(blocked_user(user1, user2['username']), 201)
+        self.assertResponse(blocked_user(user1, user2['id']), 201)
         self.assertResponse(join_tournament(code, user2), 404, {'detail': 'Tournament not found.'})
 
     def test_008_blocked_user_kick_user(self):
@@ -69,7 +69,7 @@ class Test02_ErrorTournament(UnitTest):
         code = self.assertResponse(create_tournament(user1), 201, get_id='code')
 
         self.assertResponse(join_tournament(code, user2), 201)
-        self.assertResponse(blocked_user(user1, user2['username']), 201)
+        self.assertResponse(blocked_user(user1, user2['id']), 201)
 
         response = join_tournament(code, user1, 'GET')
         self.assertResponse(response, 200)
@@ -86,7 +86,7 @@ class Test02_ErrorTournament(UnitTest):
 
         self.assertResponse(join_tournament(code, user2), 201)
         self.assertResponse(join_tournament(code, user3), 201)
-        self.assertResponse(blocked_user(user2, user3['username']), 201)
+        self.assertResponse(blocked_user(user2, user3['id']), 201)
 
         response = join_tournament(code, user1, 'GET')
         self.assertResponse(response, 200)
@@ -186,7 +186,7 @@ class Test06_LeaveTournament(UnitTest):
         users = [new_user() for _ in range(2)]
 
         response = create_tournament(user1)
-        code = self.assertResponse(response, 201)
+        code = self.assertResponse(response, 201, get_id='code')
         name = response.json['name']
 
         for u in users:

@@ -49,7 +49,7 @@ class Test02_CreateChatError(UnitTest):
         user1 = new_user()
         user2 = new_user()
 
-        self.assertResponse(blocked_user(user1, user2['username']), 201)
+        self.assertResponse(blocked_user(user1, user2['id']), 201)
         self.assertResponse(create_chat(user2, user1['username']), 404, {'detail': 'User not found.'})
 
     def test_006_chat_with_myself(self):
@@ -77,7 +77,7 @@ class Test02_CreateChatError(UnitTest):
         user1 = new_user()
         user2 = new_user()
 
-        self.assertResponse(blocked_user(user1, user2['username']), 201)
+        self.assertResponse(blocked_user(user1, user2['id']), 201)
         self.assertResponse(friend_requests(user1, user2), 403, {'detail': 'You blocked this user.'})
 
     def test_010_chat_with_guest(self):
@@ -125,7 +125,7 @@ class Test03_GetChat(UnitTest):
         self.assertResponse(accept_chat(user2), 200)
         chat_id = self.assertResponse(create_chat(user1, user2['username']), 201, get_id=True)
 
-        self.assertResponse(blocked_user(user1, user2['username']), 201)
+        self.assertResponse(blocked_user(user1, user2['id']), 201)
 
         self.assertResponse(request_chat_id(user1, chat_id), 403, {'detail': 'You do not belong to this chat.'})
         self.assertResponse(request_chat_id(user2, chat_id), 403, {'detail': 'You do not belong to this chat.'})
@@ -222,7 +222,7 @@ class Test04_Messages(UnitTest):
 
         chat_id = self.send_message(user1, user2)
 
-        block_id = self.assertResponse(blocked_user(user1, user2['username']), 201, get_id=True)
+        block_id = self.assertResponse(blocked_user(user1, user2['id']), 201, get_id=True)
 
         self.assertResponse(request_chat_id(user1, chat_id), 403, {'detail': 'You do not belong to this chat.'})
         self.assertResponse(create_message(user1, chat_id, method='GET'), 403, {'detail': 'You do not belong to this chat.'})

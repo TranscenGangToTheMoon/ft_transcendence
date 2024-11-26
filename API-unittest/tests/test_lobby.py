@@ -51,7 +51,7 @@ class Test02_ErrorJoinLobby(UnitTest):
 
         code = self.assertResponse(create_lobby(user1), 201, get_id='code')
 
-        self.assertResponse(blocked_user(user1, user2['username']), 201)
+        self.assertResponse(blocked_user(user1, user2['id']), 201)
         self.assertResponse(join_lobby(code, user2), 404, {'detail': 'Lobby not found.'})
 
     def test_008_blocked_user_kick_user(self):
@@ -61,7 +61,7 @@ class Test02_ErrorJoinLobby(UnitTest):
         code = self.assertResponse(create_lobby(user1), 201, get_id='code')
 
         self.assertResponse(join_lobby(code, user2), 201)
-        self.assertResponse(blocked_user(user1, user2['username']), 201)
+        self.assertResponse(blocked_user(user1, user2['id']), 201)
 
         response = join_lobby(code, user1, 'GET')
         self.assertResponse(response, 200)
@@ -78,7 +78,7 @@ class Test02_ErrorJoinLobby(UnitTest):
 
         self.assertResponse(join_lobby(code, user2), 201)
         self.assertResponse(join_lobby(code, user3), 201)
-        self.assertResponse(blocked_user(user2, user3['username']), 201)
+        self.assertResponse(blocked_user(user2, user3['id']), 201)
 
         response = join_lobby(code, user1, 'GET')
         self.assertResponse(response, 200)
