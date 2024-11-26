@@ -119,6 +119,7 @@ class LobbyParticipantsSerializer(serializers.ModelSerializer):
         read_only_fields = [
             'id',
             'creator',
+            'join_at',
         ]
 
     def to_representation(self, instance):
