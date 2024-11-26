@@ -27,6 +27,7 @@ NAME		:=	pong-cli
 ########################################################################################################################
 LIB_D		:=	lib
 
+###############cURL###############
 CURL		:=	\
 				libcurl.a\
 
@@ -36,11 +37,11 @@ CURL_I		:=	$(CURL_D)/include
 
 CURL_M		:=	$(CURL_D)/Makefile
 
-CURL_A		:=	$(CURL:%=$(CURL_D)/build/%)
+CURL_A		:=	$(CURL:%=$(CURL_D)/%)
 
 CURL_F		:=	-L$(CURL_D)/lib/.libs -lcurl
 
-#####FTXUI LIB
+###############FTXUI###############
 FTXUI		:=	\
 				libftxui-component.a\
 				libftxui-dom.a\
@@ -54,11 +55,12 @@ FTXUI_A		:=	$(FTXUI:%=$(FTXUI_D)/build/%)
 
 FTXUI_F		:=	-L$(FTXUI_D)/build/ -lftxui-component -lftxui-dom -lftxui-screen
 
-#LIBS		:=	$(FTXUI_A) #$(CURL_A)
 ########################################################################################################################
 #                                                        FLAGS                                                         #
 ########################################################################################################################
 CXX			:=	c++ -std=c++17
+
+MFLAGS		:= --jobs=$(shell nproc)
 
 RM			:=	rm -rf
 
@@ -113,7 +115,7 @@ all			:	$(NAME) banner
 $(NAME)		:	ftxui curl $(OBJS)
 			$(CXX) $(CXXFLAGS) -o $(NAME) $(OBJS) $(LFLAGS)
 
-$(OBJS)		:	$(OBJS_D)%.o: $(SRCS_D)%.cpp | $(OBJS_D) $(DEPS_D)
+$(OBJS)		:	$(OBJS_D)%.o: $(SRCS_D)%.cpp $(FTXUI_D) $(CURL_D) | $(OBJS_D) $(DEPS_D)
 			$(CXX) $(CXXFLAGS) -c $< -o $@
 
 $(OBJS_D)	:
@@ -122,22 +124,22 @@ $(OBJS_D)	:
 $(DEPS_D)	:
 			mkdir -p $(DEPS_D)
 
-$(LIBS)		:	ftxui
-
 .PHONY: ftxui
-ftxui		:	$(FTXUI_D) FORCE
+ftxui		:	$(FTXUI_D)
 			cmake $(FTXUI_D) -B $(FTXUI_D)/build .
-			make -C $(FTXUI_D)/build
+			$(MAKE) $(MFLAGS) -C $(FTXUI_D)/build
 
 $(FTXUI_D)	:
 			git clone --depth 1 --branch v5.0.0 https://github.com/ArthurSonzogni/FTXUI.git $@
 
 .PHONY: curl
-curl		:	$(CURL_D) $(CURL_M) FORCE
-			make -C $(CURL_D)
+curl		:	$(CURL_M)
+			$(MAKE) $(MFLAGS) -C $(CURL_D)
 
-$(CURL_M)	:
-			cd $(CURL_D) ; ./configure --with-openssl --without-libpsl
+$(CURL_M)	:	$(CURL_D)
+			@if [ ! -f $@ ]; then \
+				cd $< ; ./configure --with-openssl --without-libpsl; \
+			fi
 
 $(CURL_D)	:
 			curl -o	$@.tar.gz https://curl.se/download/curl-8.11.0.tar.gz
@@ -180,7 +182,8 @@ clean		:
 .PHONY: fclean
 fclean		:	clean
 			$(RM) $(NAME) $(NAME_B)
-			rm -rf $(LIB_D)/ftxui $(LIB_D)/curl
+			$(RM) $(LIB_D)
+#			rm -rf $(LIB_D)/ftxui $(LIB_D)/curl
 
 .PHONY: re
 re			:	fclean all
