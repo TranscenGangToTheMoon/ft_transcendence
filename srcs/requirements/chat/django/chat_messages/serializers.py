@@ -1,7 +1,6 @@
 from rest_framework import serializers
 
 from chat_messages.models import Messages
-from chat_messages.utils import get_chat_participants
 from chats.models import ChatParticipants
 
 
@@ -26,7 +25,7 @@ class MessagesSerializer(serializers.ModelSerializer):
         chat_id = self.context['chat_id']
 
         validated_data['chat_id'] = chat_id
-        validated_data['author'] = get_chat_participants(chat_id, self.context['auth_user']['id'])
+        validated_data['author'] = self.context['auth_user']['id']
 
         for user in ChatParticipants.objects.filter(chat_id=chat_id, view_chat=False):
             user.set_view_chat()
