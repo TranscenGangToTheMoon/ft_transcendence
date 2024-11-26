@@ -63,9 +63,9 @@ def get_user(request=None, id=None):
         raise NotFound(MessagesException.NotFound.USER)
 
 
-def get_valid_user(self, username):
+def get_valid_user(self, **kwargs):
     try:
-        valide_user = Users.objects.get(username=username)
+        valide_user = Users.objects.get(**kwargs)
         assert valide_user.is_guest is False
         assert not valide_user.blocked.filter(blocked=self).exists()
     except (Users.DoesNotExist, AssertionError):

@@ -25,7 +25,7 @@ class FriendRequestsSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         sender = get_user(self.context.get('request'))
-        receiver = get_valid_user(sender, validated_data.pop('username'))
+        receiver = get_valid_user(sender, username=validated_data.pop('username'))
 
         if receiver == sender:
             raise PermissionDenied(MessagesException.PermissionDenied.SEND_FRIEND_REQUEST_YOURSELF)
