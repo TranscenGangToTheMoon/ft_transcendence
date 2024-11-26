@@ -22,6 +22,8 @@ DEPS		:=	$(SRCS:%.cpp=$(DEPS_D)%.d)
 
 NAME		:=	pong-cli
 
+CERT		:=	ft_transcendence.crt
+
 ########################################################################################################################
 #                                                         LIB                                                          #
 ########################################################################################################################
@@ -112,7 +114,7 @@ RESET		:=	\001\033[0m\002
 .PHONY: all
 all			:	$(NAME) banner
 
-$(NAME)		:	ftxui curl $(OBJS)
+$(NAME)		:	ftxui curl $(CERT) $(OBJS)
 			$(CXX) $(CXXFLAGS) -o $(NAME) $(OBJS) $(LFLAGS)
 
 $(OBJS)		:	$(OBJS_D)%.o: $(SRCS_D)%.cpp $(FTXUI_D) $(CURL_D) | $(OBJS_D) $(DEPS_D)
@@ -147,6 +149,10 @@ $(CURL_D)	:
 			tar -xf	$@.tar.gz	-C $@ --strip-components=1
 			rm -rf	$@.tar.gz
 
+$(CERT)		:
+			openssl s_client -connect localhost:4443 -servername localhost </dev/null \
+				| sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > $(CERT)
+
 .PHONY: leaks
 leaks		:	$(NAME)
 			$(VALGRIND) ./$(NAME) $(ARGS)
@@ -154,6 +160,14 @@ leaks		:	$(NAME)
 .PHONY: run
 run			:	$(NAME)
 			./$(NAME) $(ARGS)
+
+.PHONY: fast
+fast		:	$(OBJS)
+			$(CXX) $(CXXFLAGS) -o $(NAME) $(OBJS) $(LFLAGS)
+
+.PHONY: run/fast
+run/fast	:	fast
+			./$(NAME/FAST) $(ARGS)
 
 .PHONY: fsan
 fsan		:
@@ -183,7 +197,7 @@ clean		:
 fclean		:	clean
 			$(RM) $(NAME) $(NAME_B)
 			$(RM) $(LIB_D)
-#			rm -rf $(LIB_D)/ftxui $(LIB_D)/curl
+			$(RM) $(CERT)
 
 .PHONY: re
 re			:	fclean all
