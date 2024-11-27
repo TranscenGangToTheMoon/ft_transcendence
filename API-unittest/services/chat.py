@@ -23,7 +23,7 @@ def create_chat(user1, username=None, data=None, method: Literal['GET', 'POST'] 
     )
 
 
-def request_chat_id(user1, chat_id, data=None, method: Literal['GET', 'PATCH', 'DELETE'] = 'GET'):
+def request_chat_id(user1, chat_id, data=None, method: Literal['GET', 'DELETE'] = 'GET'):
     if data is None:
         data = {}
     return make_request(

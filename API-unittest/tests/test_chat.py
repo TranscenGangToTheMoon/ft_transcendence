@@ -147,17 +147,9 @@ class Test03_GetChat(UnitTest):
         self.assertResponse(accept_chat(user2), 200)
         chat_id = self.assertResponse(create_chat(user1, user2['username']), 201, get_id=True)
 
-        response = request_chat_id(user1, chat_id, {'view_chat': False}, 'PATCH')
-        self.assertResponse(response, 200)
-        for k in response.json['participants']:
-            if k['id'] == user1['id']:
-                self.assertFalse(k['view_chat'])
-                break
-
+        self.assertResponse(request_chat_id(user1, chat_id, {'view_chat': False}, 'DELETE'), 204)
         self.assertResponse(create_chat(user1, method='GET'), 200, count=0)
-
         self.assertResponse(create_chat(user2, method='GET'), 200, count=1)
-
         self.assertResponse(request_chat_id(user1, chat_id), 200)
         self.assertResponse(create_chat(user1, method='GET'), 200, count=1)
 
@@ -168,7 +160,8 @@ class Test03_GetChat(UnitTest):
         self.assertResponse(accept_chat(user2), 200)
         chat_id = self.assertResponse(create_chat(user1, user2['username']), 201, get_id=True)
 
-        self.assertResponse(request_chat_id(user1, chat_id, method='DELETE'), 405, {'detail': 'Method "DELETE" not allowed.'})
+        self.assertResponse(request_chat_id(user1, chat_id, method='DELETE'), 204)
+        self.assertResponse(request_chat_id(user2, chat_id), 200)
 
 
 class Test04_Messages(UnitTest):
@@ -240,12 +233,7 @@ class Test04_Messages(UnitTest):
         self.assertResponse(accept_chat(user2), 200)
         chat_id = self.assertResponse(create_chat(user1, user2['username']), 201, get_id=True)
 
-        response = request_chat_id(user1, chat_id, {'view_chat': False}, 'PATCH')
-        self.assertResponse(response, 200)
-        for k in response.json['participants']:
-            if k['id'] == user1['id']:
-                self.assertFalse(k['view_chat'])
-                break
+        self.assertResponse(request_chat_id(user1, chat_id, method='DELETE'), 204)
 
         self.assertResponse(create_message(user1, chat_id, 'do not view chat'), 403, {'detail': 'You do not belong to this chat.'})
 

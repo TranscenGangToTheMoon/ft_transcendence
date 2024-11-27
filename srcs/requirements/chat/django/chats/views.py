@@ -1,7 +1,8 @@
 from lib_transcendence.serializer import SerializerAuthContext
 from lib_transcendence.utils import get_host
-from rest_framework import generics
+from rest_framework import generics, status
 from rest_framework.exceptions import MethodNotAllowed
+from rest_framework.response import Response
 
 from chat_messages.utils import get_chat_participants
 from chats.models import Chats, ChatParticipants
@@ -26,7 +27,7 @@ class ChatsView(generics.ListCreateAPIView, ChatsMixin):
         return queryset.filter(id__in=join_chats, blocked=False).distinct()
 
 
-class ChatView(SerializerAuthContext, generics.RetrieveUpdateDestroyAPIView, ChatsMixin):
+class ChatView(SerializerAuthContext, generics.RetrieveDestroyAPIView, ChatsMixin):
     lookup_field = 'chat_id'
 
     def get_object(self):
@@ -37,7 +38,9 @@ class ChatView(SerializerAuthContext, generics.RetrieveUpdateDestroyAPIView, Cha
 
     def destroy(self, request, *args, **kwargs):
         if get_host(request) not in ('game', 'users'):
-            raise MethodNotAllowed(request.method)
+            user = get_chat_participants(kwargs['chat_id'], request.user.id, False)
+            user.set_view_chat(False)
+            return Response(status=status.HTTP_204_NO_CONTENT)
         return super().destroy(request, *args, **kwargs)
 
 

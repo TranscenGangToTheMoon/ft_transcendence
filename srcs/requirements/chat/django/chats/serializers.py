@@ -80,16 +80,6 @@ class ChatsSerializer(serializers.ModelSerializer):
         ChatParticipants.objects.create(user_id=user['id'], username=user['username'], chat_id=result.id)
         ChatParticipants.objects.create(user_id=user2['id'], username=user2['username'], chat_id=result.id)
         return result
-
-    def update(self, instance, validated_data):
-        view_chat = validated_data.pop('view_chat', None)
-        validated_data = {}
-        if type(view_chat) is bool:
-            try:
-                instance.participants.get(user_id=self.context['auth_user']['id']).set_view_chat(view_chat)
-            except ChatParticipants.DoesNotExist:
-                raise PermissionDenied(MessagesException.PermissionDenied.NOT_BELONG_TO_CHAT)
-        return super().update(instance, validated_data)
     # todo return last message
 
 
