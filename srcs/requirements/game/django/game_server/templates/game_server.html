@@ -8,8 +8,11 @@
 		<link rel="stylesheet", type="text/css" href="{% static 'game_server_css/style.css' %}"></link>
 	</head>
 	<body>
-		<!-- <style href="{% static 'game_server_css/style.css' %}"></style> -->
 	    <h1 class="title">Le Pong</h1>
+		<form id="form">
+			<input type="text" value="username">
+			<input type="submit" value="begin">
+		</form>
 	    <canvas id="gameCanvas" width="800" height="600"></canvas>
 	    <script type="module" src="{% static 'game_server_js/game_client.js' %}"></script>
 	</body>

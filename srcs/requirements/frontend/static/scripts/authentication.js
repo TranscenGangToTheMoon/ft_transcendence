@@ -29,7 +29,7 @@ document.getElementById('playDuel').addEventListener('click', async event => {
     event.preventDefault();
     guestUsername = document.getElementById('playLoginField').value;
     if (!guestUsername && getAccessToken())
-        return navigateTo('/');
+        return await navigateTo('/');
     if (guestUsername) {
         try {
             let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/users/me/`, "PATCH",
@@ -37,7 +37,7 @@ document.getElementById('playDuel').addEventListener('click', async event => {
             if (!data.id)
                 document.getElementById('container').innerText = data.username;
             else{
-                navigateTo('/');
+                await navigateTo('/');
             }
         }
         catch (error){
@@ -50,7 +50,7 @@ document.getElementById('playClash').addEventListener('click', async event => {
     event.preventDefault();
     guestUsername = document.getElementById('playLoginField').value;
     if (!guestUsername && getAccessToken())
-        return navigateTo('/');
+        return await navigateTo('/');
     if (guestUsername) {
         try {
             let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/users/me/`, "PATCH",
@@ -58,7 +58,7 @@ document.getElementById('playClash').addEventListener('click', async event => {
             if (!data.id)
                 document.getElementById('container').innerText = data.username;
             else {
-                navigateTo('/');
+                await navigateTo('/');
             }
         }
         catch (error){
@@ -86,7 +86,7 @@ function removeDropdown() {
 async function authInit(){
     await indexInit(false);
     if (!userInformations.is_guest) {
-        navigateTo('/');
+        await navigateTo('/');
         return; //TODO replace with URI or maybe not
     }
     document.getElementById('username').innerText = userInformations.username;
