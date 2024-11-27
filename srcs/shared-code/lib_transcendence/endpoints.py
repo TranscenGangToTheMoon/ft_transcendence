@@ -5,12 +5,13 @@ class Auth:
     base_auth = base_api + 'auth/'
 
     guest = base_auth + 'guest/'
-    update = base_auth + 'update/'
-    delete = base_auth + 'delete/'
     register = base_auth + 'register/'
     login = base_auth + 'login/'
     refresh = base_auth + 'refresh/'
+
     verify = base_api + 'verify/'
+    update = base_api + 'update/'
+    delete = base_api + 'delete/'
 
 
 class Chat:
