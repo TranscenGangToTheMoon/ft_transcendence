@@ -35,8 +35,6 @@ class TournamentSerializer(serializers.ModelSerializer):
 
     @staticmethod
     def validate_size(value):
-        if (value % 4) != 0:
-            raise serializers.ValidationError(MessagesException.ValidationError.TOURNAMENT_SIZE)
         if value >= 32:
             raise serializers.ValidationError(MessagesException.ValidationError.TOURNAMENT_MAX_SIZE)
         if value < 4:

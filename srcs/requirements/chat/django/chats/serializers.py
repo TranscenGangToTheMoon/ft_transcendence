@@ -4,7 +4,7 @@ from lib_transcendence.auth import get_auth_user
 from lib_transcendence.services import request_users
 from lib_transcendence.utils import get_host
 from rest_framework import serializers
-from rest_framework.exceptions import MethodNotAllowed, PermissionDenied
+from rest_framework.exceptions import MethodNotAllowed, PermissionDenied, ValidationError
 from lib_transcendence.exceptions import MessagesException
 from lib_transcendence.exceptions import ResourceExists
 
@@ -84,7 +84,7 @@ class ChatsSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         view_chat = validated_data.pop('view_chat', None)
         validated_data = {}
-        if view_chat is not None:
+        if type(view_chat) is bool:
             try:
                 instance.participants.get(user_id=self.context['auth_user']['id']).set_view_chat(view_chat)
             except ChatParticipants.DoesNotExist:

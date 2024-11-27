@@ -26,10 +26,11 @@ class UsersSerializer(serializers.ModelSerializer):
             'coins',
             'trophies',
             'current_rank',
-            'friends',
+            'friends', # todo not show in me but only if get
             'password',
-            'accept_friend_request',
-            'accept_chat_from',
+            'accept_friend_request', # todo show
+            'accept_chat_from', # todo show
+            # todo can't get user that blocke us
         ]
         read_only_fields = [
             'id',

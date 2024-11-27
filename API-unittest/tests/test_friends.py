@@ -28,7 +28,7 @@ class Test01_Friend(UnitTest):
         self.assertFriendResponse(create_friendship(user1, user2))
         self.assertResponse(get_friends(user2), 200, count=1)
 
-        self.assertResponse(blocked_user(user1, user2['username']), 201)
+        self.assertResponse(blocked_user(user1, user2['id']), 201)
 
         for u in (user1, user2):
             self.assertResponse(get_friends(u), 200, count=0)
@@ -104,7 +104,7 @@ class Test02_FriendRequest(UnitTest):
         user2 = new_user()
 
         self.assertResponse(friend_requests(user1, user2), 201)
-        self.assertResponse(blocked_user(user2, user1['username']), 201)
+        self.assertResponse(blocked_user(user2, user1['id']), 201)
         self.assertResponse(get_friend_requests_received(user2), 200, count=0)
         self.assertResponse(friend_requests(user1, method='GET'), 200, count=0)
 
@@ -112,7 +112,7 @@ class Test02_FriendRequest(UnitTest):
         user1 = new_user()
         user2 = new_user()
 
-        self.assertResponse(blocked_user(user1, user2['username']), 201)
+        self.assertResponse(blocked_user(user1, user2['id']), 201)
         self.assertResponse(friend_requests(user1, user2), 403, {'detail': 'You blocked this user.'})
         self.assertResponse(friend_requests(user2, user1), 404, {'detail': 'User not found.'})
 

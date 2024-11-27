@@ -11,7 +11,7 @@ class FriendsMixin(generics.GenericAPIView):
     serializer_class = FriendsSerializer
 
 
-class FriendshipsView(generics.ListCreateAPIView, FriendsMixin):
+class FriendshipsView(generics.ListAPIView, FriendsMixin):
     def filter_queryset(self, queryset):
         return queryset.filter(friends=self.request.user.id)
 
