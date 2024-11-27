@@ -1,8 +1,6 @@
 from lib_transcendence.exceptions import MessagesException, ResourceExists
-from lib_transcendence.services import request_chat, request_matchmaking
-from lib_transcendence import endpoints
 from rest_framework import serializers
-from rest_framework.exceptions import PermissionDenied, NotFound
+from rest_framework.exceptions import PermissionDenied
 
 from blocking.models import BlockedUsers
 from friends.utils import get_friendship
