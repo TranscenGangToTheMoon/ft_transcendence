@@ -22,7 +22,6 @@ class MessagesSerializer(serializers.ModelSerializer):
         ]
 
     def create(self, validated_data):
-        # todo add check: only chat can creat chat
         chat_id = self.context['chat_id']
         user_id = self.context['auth_user']['id']
 
