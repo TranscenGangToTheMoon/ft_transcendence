@@ -29,6 +29,5 @@
 #include "ftxui/component/component_base.hpp"      // for ComponentBase
 #include "ftxui/component/screen_interactive.hpp"  // for ScreenInteractive
 
-#include "curl/curl.h"
 #include "../incs/colors.h"
 #endif //PONG_CLI_H
