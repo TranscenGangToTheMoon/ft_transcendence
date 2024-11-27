@@ -43,4 +43,3 @@ def create_message(user, chat_id, message=None, data=None, method: Literal['GET'
         token=user['token'],
         data=data,
     )
-# todo add preview last chat
