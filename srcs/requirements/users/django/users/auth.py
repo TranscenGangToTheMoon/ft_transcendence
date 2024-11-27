@@ -1,23 +1,10 @@
-from typing import Literal
-
 from lib_transcendence.exceptions import MessagesException
-from lib_transcendence.request import request_service
+from lib_transcendence.services import requests_auth
 from lib_transcendence.endpoints import Auth
 from rest_framework import permissions, serializers
-from rest_framework.exceptions import NotAuthenticated, NotFound
+from rest_framework.exceptions import NotFound
 
 from users.models import Users
-
-
-def requests_auth(token, endpoint: Literal['update/', 'verify/', 'delete/'], method: Literal['GET', 'PUT', 'PATCH', 'DELETE'], data=None):
-    if token is None:
-        raise NotAuthenticated()
-
-    return request_service('auth', endpoint, method, data, token)
-
-
-def auth_verify(token):
-    return requests_auth(token, Auth.verify, method='GET')
 
 
 def auth_update(token, data):
