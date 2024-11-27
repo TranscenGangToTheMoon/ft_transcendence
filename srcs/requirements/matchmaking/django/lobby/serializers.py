@@ -130,7 +130,7 @@ class LobbyParticipantsSerializer(serializers.ModelSerializer):
         return representation
 
     @staticmethod
-    def validate_teams(value):
+    def validate_team(value):
         return Teams.validate(value)
 
     def create(self, validated_data):
