@@ -1,5 +1,6 @@
 from lib_transcendence.exceptions import MessagesException
 from lib_transcendence.services import requests_auth
+from lib_transcendence.auth import auth_verify
 from lib_transcendence.endpoints import Auth
 from rest_framework import permissions, serializers
 from rest_framework.exceptions import NotFound
