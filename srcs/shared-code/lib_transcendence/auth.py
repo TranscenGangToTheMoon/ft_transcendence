@@ -1,3 +1,4 @@
+from lib_transcendence.endpoints import Auth
 from lib_transcendence.exceptions import MessagesException
 from lib_transcendence import endpoints
 from rest_framework import serializers, permissions
