@@ -1,11 +1,9 @@
 #!/bin/bash
 
-if [ -d "tests" ]; then
-    BASE=.
-else
-    BASE=./API-unittest
+if [ ! -d "tests" ]; then
+    cd ./API-unittest
 fi
 
-TESTS_FOLDER=$BASE/tests/
-echo "Running tests in $TESTS_FOLDER"
+TESTS_FOLDER=./tests/
+echo "Running API unittest "
 python -m unittest discover -s $TESTS_FOLDER -p "test_*.py"
