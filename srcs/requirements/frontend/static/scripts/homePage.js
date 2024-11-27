@@ -24,9 +24,9 @@
 // NAVIGAtORS
 
 document.getElementById('ranked').addEventListener('click', async event => {
-    await navigateTo('/lobby');
+    await navigateTo('/game');
 })
-
+    
 async function homePageInit() {
     await indexInit(false);
 }

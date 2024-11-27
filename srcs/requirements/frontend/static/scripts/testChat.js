@@ -43,9 +43,7 @@ async function loadExistingChats() {
         let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/chat/`, 'GET');
         if (data.count !== 0){
             data.results.forEach(async chat => {
-                console.log(JSON.stringify(chat.participants))
                 messagesDiv.innerHTML += `<button class="chatConversation btn btn-dark" onclick='summonChat(${chat.id}, ${JSON.stringify(chat.participants)})'>${chat.type} (id : ${chat.id})</button>\n`
-                console.log(messagesDiv.innerHTML);
             });
         }
         else

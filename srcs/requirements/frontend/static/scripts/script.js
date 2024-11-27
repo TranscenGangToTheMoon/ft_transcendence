@@ -7,6 +7,9 @@ var notificationIdentifier = 0;
 var displayedNotifications = 0;
 window.baseAPIUrl = baseAPIUrl;
 window.userInformations = userInformations;
+var pathName = window.location.pathname;
+
+window.pathName = pathName;
 
 // ========================== API REQUESTS ==========================
 
@@ -207,42 +210,111 @@ async function loadContent(url, container='content', append=false) {
     }
 }
 
-async function navigateTo(url, doNavigate=true){
-    history.pushState({}, '', url);
-    if (doNavigate)
-        await handleRoute();
-}
-
-window.navigateTo = navigateTo;
-
 async function handleRoute() {
     const path = window.location.pathname;
-
+    if (window.location.pathname !== 'game')
+        window.PongGame?.stopGame();
     const routes = {
         '/login': '/authentication.html',
         '/': '/homePage.html',
         '/profile' : 'profile.html',
         '/lobby' : '/lobby.html',
-        '/chat' : '/testChat.html'
+        '/chat' : '/testChat.html',
+        '/game' : '/game/game.html'
     };
-
+    
     const page = routes[path] || '/404.html';
     await loadContent(page);
 }
 
 // UNCOMMENT FOR LINKS TO WORK WITHOUT CUSTOM JS
 // document.addEventListener('click', event => {
-//     if (event.target.matches('[data-link]')) {
-//         event.preventDefault();
-//         await navigateTo(event.target.href);
-//     }
-// });
+    //     if (event.target.matches('[data-link]')) {
+        //         event.preventDefault();
+        //         await navigateTo(event.target.href);
+        //     }
+        // });
+        
 
+let lastState = 0;
+if (!localStorage.getItem('currentState'))
+    localStorage.setItem('currentState', 0);
+
+function incrementCurrentState(){
+    let currentState = localStorage.getItem('currentState');
+    currentState++;
+    localStorage.setItem('currentState', currentState);
+}
+
+function getCurrentState(){
+    return localStorage.getItem('currentState');
+}
+
+async function navigateTo(url, doNavigate=true){
+    let currentState = getCurrentState();
+    lastState = currentState;
+    history.pushState({state: currentState}, '', url);
+    console.log(`added ${url} to history with state : ${currentState}`);
+    pathName = window.location.pathname;
+    console.log(pathName);
+    incrementCurrentState();
+    if (doNavigate)
+        await handleRoute();
+}
+
+window.navigateTo = navigateTo;
+        
+function confirmPopstate() {
+    // const confirmModal = document.getElementById('confirmModal');
+    // confirmModal.removeAttribute('style');
+    pathName = "";
+    if (direction > 0){
+        history.forward();
+    }
+    else{
+        history.go(direction);
+    }
+}
+
+let isUserGoBack = true;
+let direction = 0;
+
+function cancelNavigation(event, url, callback=undefined){
+    if (!document.querySelectorAll('#confirmModal.show').length)
+        displayConfirmModal('Warning', 'You are about to leave this page. This will result in abandoning your current game. Do you want to proceed anyway?')
+    if (event){
+        if (event.state.state < lastState){
+            history.forward();
+            direction = -1;
+        }
+        else{
+            history.go(-1);
+            direction = 1;
+        }
+        isUserGoBack = false;
+    }
+    if (url){
+        let currentState = getCurrentState();
+        lastState = currentState;
+        history.pushState({state: currentState}, '', url);
+        console.log(`added ${url} to history with state : ${currentState}`);
+        direction = 1;
+        history.go(-1);
+        incrementCurrentState();
+        isUserGoBack = false;
+    }
+}
+        
 window.addEventListener('popstate', async event => {
-    event.preventDefault();
-    document.querySelectorAll('.modal.show').forEach(modal => {
-        bootstrap.Modal.getInstance(modal).hide();
-    })
+    console.log(event.state, 'last state:', lastState);
+    if (!isUserGoBack)
+        return isUserGoBack = true;
+    console.log(pathName, window.location.pathname);
+    if (pathName === '/game')
+        return cancelNavigation(event, undefined);
+    pathName = window.location.pathname;
+    if (event.state && event.state.state)
+        lastState = event.state.state;
     if (userInformations.is_guest !== (document.getElementById('trophies') === '')){
         await loadUserProfile();
     }
@@ -250,6 +322,7 @@ window.addEventListener('popstate', async event => {
 })
 
 window.loadContent = loadContent;
+window.cancelNavigation = cancelNavigation;
 
 // ========================== OTHER UTILS ==========================
 
@@ -280,6 +353,19 @@ function displayMainAlert(alertTitle, alertContent) {
     alertModal.show();
 }
 
+function displayConfirmModal(confirmTitle, confirmContent) {
+    const confirmContentDiv = document.getElementById('confirmContent');
+    const confirmTitleDiv = document.getElementById('confirmModalLabel');
+    const confirmModal = new bootstrap.Modal(document.getElementById('confirmModal'));
+
+    confirmContentDiv.innerText = confirmContent;
+    confirmTitleDiv.innerText = confirmTitle;
+    document.getElementById('confirmModal').addEventListener('shown.bs.modal', function() {
+        document.getElementById('confirmModalClose').focus();
+    })
+    confirmModal.show();
+}
+
 window.displayMainAlert = displayMainAlert;
 
 // ========================== INDEX SCRIPT ==========================
@@ -307,7 +393,11 @@ async function loadUserProfile(){
 
 document.getElementById('home').addEventListener('click', async event => {
     event.preventDefault();
-    await navigateTo('/');
+    if (pathName === '/game'){
+        cancelNavigation(undefined, '/');
+    }
+    else
+        await navigateTo('/');
 })
 
 function initSSE(){
@@ -316,6 +406,13 @@ function initSSE(){
 
 async function  indexInit(auto=true) {
     if (!auto){
+        setTimeout(()=> {
+            const backdrops = document.querySelectorAll('.modal-backdrop');
+            for (let backdrop of backdrops){
+                console.log(backdrop, 'removed');
+                backdrop.remove;
+            }
+        }, 500);
         await fetchUserInfos(true);
         if (window.location.pathname === '/login'){
             document.getElementById('profileMenu').innerHTML = "";
@@ -332,6 +429,10 @@ async function  indexInit(auto=true) {
         }
     }
     else{
+        let currentState = getCurrentState();
+        console.log(`added ${window.location.pathname} to history with state ${currentState}`)
+        history.replaceState({state: currentState}, '', window.location.pathname);
+        incrementCurrentState();
         loadCSS('/css/styles.css', false);
         await loadFriendListModal();
         initSSE();
@@ -346,8 +447,6 @@ document.getElementById('notifTrigger').addEventListener('click', async event =>
     }
     const toastContainer = document.getElementById('toastContainer');
 
-    if (document.querySelector('hide'))
-        console.log('la');
     await loadContent('/notification.html', 'toastContainer', true);
     const notification = document.getElementById('notification');
     notification.id = `notification${notificationIdentifier}`;

@@ -34,7 +34,6 @@ document.getElementById('test').addEventListener('submit', event => {
 
 document.getElementById('pChangeNickname').addEventListener('submit', async event => {
     event.preventDefault();
-    console.log('submit')
     const newUsername = document.getElementById('pNicknameInput').value;
     if (!newUsername)
         return; 
