@@ -19,10 +19,10 @@ class ChatType:
 
 class AcceptChat:
     none = 'none'
-    only_friends = 'only_friends'
+    friends_only = 'friends_only'
     everyone = 'everyone'
 
-    accept = [none, only_friends, everyone]
+    accept = [none, friends_only, everyone]
 
     @staticmethod
     def validate(chat_status):
@@ -30,7 +30,7 @@ class AcceptChat:
 
     @staticmethod
     def is_accept(accept_chat, is_friend):
-        return accept_chat == AcceptChat.everyone or (accept_chat == AcceptChat.only_friends and is_friend)
+        return accept_chat == AcceptChat.everyone or (accept_chat == AcceptChat.friends_only and is_friend)
 
     def __str__(self):
         return 'Chat status'

@@ -1,10 +1,18 @@
 from utils.request import make_request
 
 
-def blocked_user(user, username):
+def blocked_user(user, user_id):
     return make_request(
         endpoint='users/me/blocked/',
         method='POST',
-        data={'username': username},
+        data={'user_id': user_id},
+        token=user['token'],
+    )
+
+
+def unblocked_user(user, block_id):
+    return make_request(
+        endpoint=f'users/me/blocked/{block_id}/',
+        method='DELETE',
         token=user['token'],
     )

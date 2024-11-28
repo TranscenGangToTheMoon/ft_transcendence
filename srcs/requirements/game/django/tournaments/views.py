@@ -12,7 +12,7 @@ class SaveTournamentView(generics.CreateAPIView):
 class RetrieveTournamentView(generics.RetrieveAPIView):
     queryset = Tournaments.objects.all()
     serializer_class = TournamentSerializer
-    lookup_field = 'pk'
+    lookup_field = 'tournament_id'
     permission_classes = [IsAuthenticated]
 
 

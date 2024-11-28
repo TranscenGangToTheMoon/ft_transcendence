@@ -2,7 +2,7 @@ from django.urls import path
 from lib_transcendence.endpoints import Users
 
 from blocking.views import blocked_list_create_view, blocked_delete_view
-from friend_requests.views import friend_requests_list_create_view, friend_requests_delete_view, \
+from friend_requests.views import friend_requests_list_create_view, friend_request_view, \
     friend_requests_receive_list_view
 from friends.views import friends_list_create_view, friends_delete_view
 from users.views import users_me_view, user_retrieve_view
@@ -15,8 +15,8 @@ urlpatterns = [
     path(Users.friends, friends_list_create_view),
     path(Users.friend, friends_delete_view),
     path(Users.friend_requests, friend_requests_list_create_view),
-    path(Users.friend_request, friend_requests_delete_view),
-    path(Users.friend_requests_receive, friend_requests_receive_list_view),
+    path(Users.friend_request, friend_request_view),
+    path(Users.friend_requests_received, friend_requests_receive_list_view),
 
     path(Users.blocked, blocked_list_create_view),
     path(Users.blocked_user, blocked_delete_view),
@@ -33,7 +33,6 @@ urlpatterns = [
 # todo make endpoint for user trophies
 # todo make endpoint for coins
 # todo rename all view for more comprehensive name
-# todo secure all get_object with filter_queryset
 # todo make endpoint for online status
 # todo make endpoint for user rank
 # todo remake user auth update value (is_guest and username)
