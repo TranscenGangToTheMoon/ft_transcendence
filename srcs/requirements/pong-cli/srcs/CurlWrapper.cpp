@@ -6,7 +6,7 @@
 /*   By: xcharra <xcharra@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/27 13:57:24 by xcharra           #+#    #+#             */
-/*   Updated: 2024/11/27 18:52:04 by xcharra          ###   ########.fr       */
+/*   Updated: 2024/11/28 12:16:08 by xcharra          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,7 +48,7 @@ void CurlWrapper::clearHeaders() {
 		curl_slist_free_all(_headers);
 }
 
-std::string CurlWrapper::GET(const std::string &path, const std::string data) {
+std::string CurlWrapper::GET(const std::string &path, const std::string &data) {
 	std::string	response;
 	std::string	url = _host + path;
 	CURL		*curl = curl_easy_init();
@@ -83,7 +83,7 @@ std::string CurlWrapper::GET(const std::string &path, const std::string data) {
 	return (response);
 }
 
-std::string CurlWrapper::POST(const std::string &path, const std::string data) {
+std::string CurlWrapper::POST(const std::string &path, const std::string &data) {
 	std::string	response;
 	std::string	url = _host + path;
 	CURL		*curl = curl_easy_init();
@@ -118,7 +118,7 @@ std::string CurlWrapper::POST(const std::string &path, const std::string data) {
 	return (response);
 }
 
-std::string CurlWrapper::PUT(const std::string &path, const std::string data) {
+std::string CurlWrapper::PUT(const std::string &path, const std::string &data) {
 	std::string	response;
 	std::string	url = _host + path;
 	CURL		*curl = curl_easy_init();
@@ -141,6 +141,8 @@ std::string CurlWrapper::PUT(const std::string &path, const std::string data) {
 
 	curl_easy_setopt(curl, CURLOPT_READFUNCTION, readCallback);
 	curl_easy_setopt(curl, CURLOPT_READDATA, &data);
+	std::cout << "data size: " << sizeof(data) * 8 * data.length() << std::endl;
+	std::cout << "string size: " << sizeof(std::string) << std::endl;
 	curl_easy_setopt(curl, CURLOPT_INFILESIZE, data.length());
 
 	curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
@@ -155,37 +157,26 @@ std::string CurlWrapper::PUT(const std::string &path, const std::string data) {
 	return (response);
 }
 
-size_t CurlWrapper::writeCallback(void *contents, size_t size, size_t nmemb, std::string &response) {
+size_t CurlWrapper::writeCallback(void *buffer, size_t size, size_t nmemb, std::string &response) {
 	size_t	newLength = size * nmemb;
 
 //	std::cout << "size: " << size << " nmemb: " << nmemb << std::endl;
-
-	if (newLength) {
-		try {
-			response.append(static_cast<char *>(contents), newLength);
-		}
-		catch (std::bad_alloc &e) {
-			return (0);
-		}
-	}
-	else
-		throw (std::runtime_error("writeCallback failed /!\\ Warning maybe some request get 0"));
+	if (newLength)
+		response.append(static_cast<char *>(buffer), newLength);
 	return (newLength);
 }
 
 size_t CurlWrapper::readCallback(void *buffer, size_t size, size_t nmemb, std::string &data) {
-	size_t totalSize = size * nmemb;
-	size_t remainingSize = data.length();
+	size_t	totalSize = size * nmemb;
 
-//	std::cout << "size: " << size << " nmemb: " << nmemb << std::endl;
-	if (remainingSize == 0)
+	std::cout << "size: " << size << " nmemb: " << nmemb << std::endl;
+	if (data.empty())
 		return (0);
-//	std::cout << "data: " << data << std::endl;
-	size_t copySize = std::min(totalSize, remainingSize);
-	memcpy((char *)buffer, data.c_str(), copySize);
-//	data.erase(0, copySize);
-//	std::cout << "buffer: " << (char *)buffer << std::endl;
-	return copySize;
+
+	size_t	copySize = std::min(totalSize, data.length());
+	memcpy(buffer, data.c_str(), copySize);
+	data.erase(0, copySize);
+	return (copySize);
 }
 
 long CurlWrapper::getHTTPCode() const {

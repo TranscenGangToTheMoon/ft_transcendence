@@ -6,79 +6,52 @@
 /*   By: xcharra <xcharra@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/25 16:32:19 by xcharra           #+#    #+#             */
-/*   Updated: 2024/11/27 18:57:05 by xcharra          ###   ########.fr       */
+/*   Updated: 2024/11/28 15:46:16 by xcharra          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <cstring>
 #include "pong-cli.h"
 #include "CurlWrapper.hpp"
+#include "User.hpp"
 
-std::string	jsonParser(const std::string &json, const std::string &key) {
-	std::string value;
-	std::string formatedKey = "\"" + key + "\":";
+#include <random>
+std::string generateCustomID(size_t length) {
+	const char charset[] = "0123456789abcdef";
+	const size_t charsetSize = sizeof(charset) - 1;
 
-	size_t pos = json.find(formatedKey);
-	if (pos == std::string::npos) {
-		throw (std::invalid_argument("Key not found in json"));
+	std::random_device				rd;
+	std::mt19937					gen(rd());
+	std::uniform_int_distribution<>	dist(0, charsetSize - 1);
+
+	std::string id;
+	id.reserve(length);
+	for (size_t i = 0; i < length; ++i) {
+		id += charset[dist(gen)];
 	}
-	pos += formatedKey.length();
-	pos = json.find("\"", pos);
-	pos++;
-	size_t end = json.find("\"", pos);
-	value = json.substr(pos, end - pos);
-	return (value);
+
+	return (id);
 }
+
+
 
 int main() {
 	std::cout << G_MSG("Welcome in pong-cli! |.  |") << std::endl;
 
-	const std::string contentType = "Content-Type: application/json";
 	CurlWrapper	curl("https://localhost:4443");
-	try {
-		curl.addHeader(contentType);
-		curl.test();
-		std::cout << "Test connection succeed !" << std::endl;
-	}
-	catch (std::exception &e) {
-		std::cerr << E_MSG(e.what()) << std::endl;
-		return (1);
-	}
+	User		user;
 
-	std::cout << "Get authorization token" << std::endl;
-	const std::string	key = "access";
-	try {
-		std::string json = curl.POST("/api/auth/guest/", "");
-		std::string accessToken = "Authorization: Bearer ";
-		accessToken += jsonParser(json, key);
-		curl.addHeader(accessToken);
-		std::cout << "Access token obtained !" << std::endl;
-	}
-	catch (std::exception &e) {
-		std::cout << "HTTP code: " << curl.getHTTPCode()<< std::endl;
-		std::cerr << E_MSG(e.what()) << std::endl;
-		return (1);
-	}
+	user.setUsername("xavier" + generateCustomID(4));
+	user.setPassword("pass");
 
-	std::string	username = "jules";
-	std::string	password = "zgege";
-	std::string data = R"({"username": ")" +username +
-		R"(", "password": ")" + password + R"("})";
+	try { user.initializeConnection(curl); }
+	catch (std::exception &e) { return (std::cerr << E_MSG(e.what()) << std::endl, 1); }
 
-	std::cout << "Try to register: " << data << std::endl;
-	try {
-		std::string res = curl.PUT("/api/auth/register/", data);
-		if (curl.getHTTPCode() >=300) {
-			std::cout << "Failed to register\n" << res << std::endl;
-			return (1);
-		}
-		std::cout << "Register succeed !\n" << res << std::endl;
-	}
-	catch (std::exception &e) {
-		std::cerr << E_MSG(e.what()) << std::endl;
-		return (1);
-	}
+	try { user.signUpUser(curl); }
+	catch (std::exception &e) { return (std::cerr << E_MSG(e.what()) << std::endl, 1); }
 
+	std::string data = R"({"username": ")" + user.getUsername() +
+		R"(", "password": ")" + user.getPassword() + R"("})";
 	std::cout << "Try to login: " << data << std::endl;
 	try {
 		std::string res = curl.POST("/api/auth/login/", data);
