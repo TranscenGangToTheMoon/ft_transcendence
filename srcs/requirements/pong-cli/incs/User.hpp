@@ -28,6 +28,8 @@ public:
 	void	signUpUser(CurlWrapper &curl);
 	void	signInUser(CurlWrapper &curl);
 
+	void	tokenRefresh(CurlWrapper &curl);
+
 	void	setAccessToken(const std::string &accessToken);
 	void	setPassword(const std::string &password);
 	void	setRefreshToken(const std::string &refreshToken);

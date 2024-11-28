@@ -169,7 +169,7 @@ size_t CurlWrapper::writeCallback(void *buffer, size_t size, size_t nmemb, std::
 size_t CurlWrapper::readCallback(void *buffer, size_t size, size_t nmemb, std::string &data) {
 	size_t	totalSize = size * nmemb;
 
-	std::cout << "size: " << size << " nmemb: " << nmemb << std::endl;
+//	std::cout << "size: " << size << " nmemb: " << nmemb << std::endl;
 	if (data.empty())
 		return (0);
 

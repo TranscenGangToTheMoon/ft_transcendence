@@ -6,7 +6,7 @@
 /*   By: xcharra <xcharra@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/25 16:32:19 by xcharra           #+#    #+#             */
-/*   Updated: 2024/11/28 15:46:16 by xcharra          ###   ########.fr       */
+/*   Updated: 2024/11/28 16:12:52 by xcharra          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,8 +33,6 @@ std::string generateCustomID(size_t length) {
 	return (id);
 }
 
-
-
 int main() {
 	std::cout << G_MSG("Welcome in pong-cli! |.  |") << std::endl;
 
@@ -45,26 +43,19 @@ int main() {
 	user.setPassword("pass");
 
 	try { user.initializeConnection(curl); }
-	catch (std::exception &e) { return (std::cerr << E_MSG(e.what()) << std::endl, 1); }
+	catch (std::exception &e) { return (std::cerr << E_MSG( "(" << curl.getHTTPCode() << ") " << e.what()) << std::endl, 1); }
+
+	std::cout << T_MSG("=======") << std::endl;
 
 	try { user.signUpUser(curl); }
-	catch (std::exception &e) { return (std::cerr << E_MSG(e.what()) << std::endl, 1); }
+	catch (std::exception &e) { return (std::cerr << E_MSG( "(" << curl.getHTTPCode() << ") " << e.what()) << std::endl, 1); }
 
-	std::string data = R"({"username": ")" + user.getUsername() +
-		R"(", "password": ")" + user.getPassword() + R"("})";
-	std::cout << "Try to login: " << data << std::endl;
-	try {
-		std::string res = curl.POST("/api/auth/login/", data);
-		if (curl.getHTTPCode() >=300) {
-			std::cout << "Failed to login\n" << res << std::endl;
-			return (1);
-		}
-		std::cout << "Login succeed !\n" << res << std::endl;
-	}
-	catch (std::exception &e) {
-		std::cerr << E_MSG(e.what()) << std::endl;
-		return (1);
-	}
+	std::cout << T_MSG("=======") << std::endl;
+
+	try { user.signInUser(curl); }
+	catch (std::exception &e) { return (std::cerr << E_MSG( "(" << curl.getHTTPCode() << ") " << e.what()) << std::endl, 1); }
+
+
 	return 0;
 }
 

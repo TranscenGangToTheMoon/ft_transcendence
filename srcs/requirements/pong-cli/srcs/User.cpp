@@ -6,7 +6,7 @@
 /*   By: xcharra <xcharra@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/28 13:59:31 by xcharra           #+#    #+#             */
-/*   Updated: 2024/11/28 15:48:49 by xcharra          ###   ########.fr       */
+/*   Updated: 2024/11/28 16:44:57 by xcharra          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,14 +61,40 @@ void User::signUpUser(CurlWrapper &curl) {
 	std::cout << "Try to register: " << data << std::endl;
 
 	std::string res = curl.PUT("/api/auth/register/", data);
-	if (curl.getHTTPCode() >=300) {
-		std::cout << "Failed to register\n" << res << std::endl;
-		throw (std::runtime_error("Failed to register"));
+	if (curl.getHTTPCode() >= 300) {
+		std::cout << "Failed to sign up !\n" << res << std::endl;
+		throw (std::runtime_error("Failed to sign up !"));
 	}
 }
 
 void User::signInUser(CurlWrapper &curl) {
-	(void)curl;
+	std::string data = R"({"username": ")" + getUsername() +
+		R"(", "password": ")" + getPassword() + R"("})";
+
+	std::cout << "Try to login: " << data << std::endl;
+
+	std::string res = curl.POST("/api/auth/login/", data);
+	if (curl.getHTTPCode() >= 300) {
+		std::cout << "Failed to sign in !\n" << res << std::endl;
+		throw (std::runtime_error("Failed to sign in !"));
+	}
+}
+
+void User::tokenRefresh(CurlWrapper &curl) {
+	std::string data = R"({"refresh": ")" + getRefreshToken() + R"("})";
+
+	std::string res = curl.POST("/api/auth/refresh/", data);
+	if (curl.getHTTPCode() >= 300) {
+		std::cout << "Failed to refresh token !\n" << res << std::endl;
+		throw (std::runtime_error("Failed to refresh token !"));
+	}
+
+	setAccessToken(jsonParser(res, "access"));
+	setRefreshToken(jsonParser(res, "refresh"));
+
+	curl.clearHeaders();
+	curl.addHeader("Content-Type: application/json");
+	curl.addHeader("Authorization: Bearer " + getAccessToken());
 }
 
 void User::setAccessToken(const std::string &accessToken) {
