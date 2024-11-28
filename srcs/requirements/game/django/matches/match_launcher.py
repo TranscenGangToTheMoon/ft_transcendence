@@ -10,6 +10,7 @@ def get_port(server):
         line = line.decode('utf-8')
         result = find_regex_port.findall(line)
         if result and result[0].isdigit():
+            server.stdout.close()
             return int(result[0])
     return 0
 
