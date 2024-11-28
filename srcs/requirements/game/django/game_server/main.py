@@ -1,11 +1,10 @@
-import time
 from aiohttp import web
 from server import Server
 import asyncio
 import socketio
 from socket_init import init_socketIO
+from match import request_match, Match
 import sys
-from get_match import get_match
 
 # SocketIO setup
 sio = socketio.AsyncServer(async_mode='aiohttp')
@@ -20,10 +19,10 @@ async def main():
         await server.serve(app, sio)
     except Exception:
         return 1
-    await get_match(match_id)
-    server.init_game()
+    match: Match = await request_match(match_id)
+    await server.init_game(match)
     while True:
-        time.sleep(1)
+        await asyncio.sleep(1)
     # server.launch_game()
     # TODO -> make server.launch_game()
 
