@@ -5,6 +5,7 @@ from pong_game import Game
 from match import Match, Player
 from aiohttp import web
 import time
+import sys
 import os
 
 
@@ -27,6 +28,7 @@ class Server:
             try:
                 await site.start()
                 print(f"Port: {port}", flush=True)
+                sys.stdout.close()
                 return
             except OSError:
                 continue
