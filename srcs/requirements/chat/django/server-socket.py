@@ -3,10 +3,6 @@ import socketio
 import asyncio
 from aiohttp import web
 
-# sio = socketio.AsyncServer(cors_allowed_origins='*')
-# app = web.Application()
-# sio.attach(app)
-
 sio = socketio.AsyncServer(cors_allowed_origins='*', async_mode='aiohttp', logger=True)
 app = web.Application()
 sio.attach(app, socketio_path='/ws/chat/')
@@ -21,6 +17,20 @@ async def connect(sid, environ):
 async def disconnect(sid):
     print(f"Client disconnected : {sid}")
 
+@sio.event
+async def auth(sid, data):
+    token = data.get('token')
+    chatID = data.get('chatID')
+    print(chatID, token)
+    await sio.emit('debug', {'chatID': chatID, 'token':token}, to=sid)
+    if chatID and token:
+        print(f"New auth from {sid}: {data}")
+        await sio.emit('message', {'message': "<em>Authentification validated!</em>"}, to=sid)
+        request_auth()
+    else:
+        await sio.emit('error', {'message': "<em>Euuuuh who are you ?!!! Acces DENIED !</em>"}, to=sid)
+        await asyncio.sleep(0.1);
+        await sio.disconnect(sid)
 
 @sio.event
 async def message(sid, data):

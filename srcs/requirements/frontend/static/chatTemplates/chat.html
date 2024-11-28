@@ -10,11 +10,23 @@
 </style>
 
 <div id="chat-section">
-	<div id="chats-box"></div>
-	<form id="chat-form">
-		<input id="message" placeholder="Enter message" type="text">
-		<button type="submit">Send</button>
+	<form id="chat-start-form">
+		<button type="submit">Start Chat</button>
 	</form>
+	<div id="chat-view" style="display:none;">
+		<form id="chat-end-form">
+			<button type="submit">End Chat</button>
+		</form>
+		<form id="auth-form">
+			<input id="chatID" placeholder="Enter chat ID" type="text">
+			<button type="submit">Auth</button>
+		</form>
+		<div id="chats-box"></div>
+		<form id="chat-form">
+			<input id="message" placeholder="Enter message" type="text">
+			<button type="submit">Send</button>
+		</form>
+	</div>
 </div>
 
 <div script="/chatTemplates/scripts/chatClient.js"></div>
