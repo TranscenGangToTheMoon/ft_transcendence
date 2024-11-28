@@ -21,7 +21,7 @@ def validate_user_id(value, return_user=False):
             raise NotFound(MessagesException.NotFound.USER_NOT_IN_GAME)
 
 
-def validate_team(value):
+def validate_teams(value):
     if type(value) is not list:
         raise serializers.ValidationError(MessagesException.ValidationError.TEAMS_LIST)
     if len(value) != 2:
@@ -37,7 +37,7 @@ def validate_team(value):
 
 
 class MatchSerializer(serializers.ModelSerializer):
-    teams = serializers.JSONField(write_only=True, validators=[validate_team])
+    teams = serializers.JSONField(write_only=True, validators=[validate_teams])
 
     class Meta:
         model = Matches

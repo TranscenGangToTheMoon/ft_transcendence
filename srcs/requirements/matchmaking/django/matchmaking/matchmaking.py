@@ -12,12 +12,15 @@ from typing import Literal
 import os
 import sys
 
-def post_match(player1, player2, game_mode: Literal['duel', 'ranked']):
-	create_match(game_mode, [[player1.user_id], [player2.user_id]])
-	# request_game('match/', 'POST', {'game_mode': game_mode, 'teams': [[player1.user_id], [player2.user_id]]}) #TODO -> check for status code
+def launch_dual_game(players):
+	player1 = players[0]
+	player2 = players[1]
+
+	create_match(GameMode.duel, [[player1.user_id], [player2.user_id]])
 	print('made request for: ', player1.user_id, ' ', player1.trophies, ' ', player2.user_id, ' ', player2.trophies, flush=True)
 	player1.delete()
 	player2.delete()
+	print('Normal Game created=============')
 
 def get_optimal_rank_range(player):
 	waiting_time = datetime.now(timezone.utc) - player.join_at
@@ -29,7 +32,7 @@ def get_optimal_rank_range(player):
 def order_by_rank_difference(players_query_set, base_rank):
 	return sorted(players_query_set, key=lambda x: abs(x.trophies - base_rank))
 
-def find_ranked_match(ranked_players):
+def search_ranked_players(ranked_players):
 	for player in ranked_players:
 		optimal_range = get_optimal_rank_range(player) * 1000
 
@@ -48,25 +51,8 @@ def find_ranked_match(ranked_players):
 				pass
 	return False
 
-def make_match():
-	players = Players.objects.all().order_by('join_at')
-	count = players.count()
-	while (players.count() >= 2):
-		duel_players = players.filter(game_mode=GameMode.duel)
-		if (duel_players.exists() and duel_players.count() >= 2):
-			try:
-				post_match(duel_players[0], duel_players[1], GameMode.duel)
-			except(APIException):
-				pass
-				#TODO -> inform client
-		ranked_players = players.filter(game_mode=GameMode.ranked)
-		find_ranked_match(ranked_players)
-					#TODO -> inform client
-					#TODO -> blocked user can't play together
-	return "finished matchmaking"
-
-def launch_matchmaking(request):
-	while (True):
-		sleep(1)
-		make_match()
-	return response.HttpResponse('<h1>Matchmaking started<h1/>', status=status.HTTP_200_OK)
+# def launch_matchmaking(request):
+# 	while (True):
+# 		sleep(1)
+# 		make_match()
+# 	return response.HttpResponse('<h1>Matchmaking started<h1/>', status=status.HTTP_200_OK)
