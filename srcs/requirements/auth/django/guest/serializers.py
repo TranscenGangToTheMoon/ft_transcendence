@@ -15,7 +15,7 @@ class GuestTokenSerializer(serializers.ModelSerializer):
         fields = ['access', 'refresh']
 
     def create(self, validated_data):
-        guest_username = generate_guest_username()
+        guest_username = generate_guest_username(User)
         user = User.objects.create_user(username=guest_username)
         guest_group = get_group_guest()
         user.groups.add(guest_group)

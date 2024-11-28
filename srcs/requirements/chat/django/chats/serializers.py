@@ -4,10 +4,11 @@ from lib_transcendence.auth import get_auth_user
 from lib_transcendence.services import request_users
 from lib_transcendence.utils import get_host
 from rest_framework import serializers
-from rest_framework.exceptions import MethodNotAllowed, PermissionDenied
+from rest_framework.exceptions import MethodNotAllowed, PermissionDenied, ValidationError
 from lib_transcendence.exceptions import MessagesException
 from lib_transcendence.exceptions import ResourceExists
 
+from chat_messages.serializers import MessagesSerializer
 from chats.models import Chats, ChatParticipants
 from chats.utils import get_chat_together
 
@@ -27,6 +28,7 @@ class ChatPaticipantsSerializer(serializers.ModelSerializer):
 class ChatsSerializer(serializers.ModelSerializer):
     username = serializers.CharField(write_only=True)
     participants = ChatPaticipantsSerializer(many=True, read_only=True)
+    last_message = MessagesSerializer(source='messages.last', read_only=True)
     type = serializers.CharField()
     view_chat = serializers.BooleanField(write_only=True, required=False)
 
@@ -36,6 +38,7 @@ class ChatsSerializer(serializers.ModelSerializer):
             'id',
             'type',
             'participants',
+            'last_message',
             'created_at',
             'username',
             'view_chat',
@@ -43,6 +46,7 @@ class ChatsSerializer(serializers.ModelSerializer):
         read_only_fields = [
             'id',
             'participants',
+            'last_message',
             'created_at',
         ]
 
@@ -76,18 +80,6 @@ class ChatsSerializer(serializers.ModelSerializer):
         ChatParticipants.objects.create(user_id=user['id'], username=user['username'], chat_id=result.id)
         ChatParticipants.objects.create(user_id=user2['id'], username=user2['username'], chat_id=result.id)
         return result
-
-    def update(self, instance, validated_data):
-        view_chat = validated_data.pop('view_chat', None)
-        if view_chat is not None:
-            user = get_auth_user(self.context.get('request'))
-            try:
-                p = instance.participants.get(user_id=user['id'])
-                p.view_chat = view_chat
-                p.save()
-            except ChatParticipants.DoesNotExist:
-                raise PermissionDenied(MessagesException.PermissionDenied.NOT_BELONG_TO_CHAT)
-        return super().update(instance, validated_data)
     # todo return last message
 
 

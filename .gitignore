@@ -1,5 +1,4 @@
 .idea
-.DS_Store
 vscode
 .DS_Store
 *.pyc
@@ -9,5 +8,4 @@ __pycache__
 /srcs/.env
 build
 *.egg-info
-**/migrations/*.py
-tests/
+**/migrations/00*.py

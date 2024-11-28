@@ -5,19 +5,20 @@ class Auth:
     base_auth = base_api + 'auth/'
 
     guest = base_auth + 'guest/'
-    update = base_auth + 'update/'
-    delete = base_auth + 'delete/'
     register = base_auth + 'register/'
     login = base_auth + 'login/'
     refresh = base_auth + 'refresh/'
+
     verify = base_api + 'verify/'
+    update = base_api + 'update/'
+    delete = base_api + 'delete/'
 
 
 class Chat:
     base_chat = base_api + 'chat/'
 
     chats = base_chat
-    chat = chats + '<int:pk>/'
+    chat = chats + '<int:chat_id>/'
     messages = chat + 'messages/'
 
 
@@ -29,8 +30,8 @@ class Game:
     match_user = fmatch_user.format(user_id='<int:user_id>')
     tournaments = base_api + 'tournaments/'
 
-    matches_user = base_game + 'match/<int:user_id>/'
-    tournament = base_game + 'tournaments/<int:pk>/'
+    matches_user = base_game + 'matches/<int:user_id>/'
+    tournament = base_game + 'tournaments/<int:tournament_id>/'
 
 
 class Matchmaking:
@@ -55,16 +56,16 @@ class Users:
     base_users = base_api + 'users/'
 
     me = base_users + 'me/'
-    user = base_users + '<int:pk>/'
+    user = base_users + '<int:user_id>/'
 
     friends = me + 'friends/'
-    friend = friends + '<int:pk>/'
+    friend = friends + '<int:friendship_id>/'
     friend_requests = me + 'friend_requests/'
-    friend_request = friend_requests + '<int:pk>/'
-    friend_requests_receive = friend_requests + 'receive/'
+    friend_request = friend_requests + '<int:friend_request_id>/'
+    friend_requests_received = friend_requests + 'received/'
 
     blocked = me + 'blocked/'
-    blocked_user = blocked + '<int:pk>/'
+    blocked_user = blocked + '<int:blocking_id>/'
 
     fchat = base_api + 'chat/{user1_id}/{username2}/'
     chat = fchat.format(user1_id='<int:user1_id>', username2='<str:username2>')

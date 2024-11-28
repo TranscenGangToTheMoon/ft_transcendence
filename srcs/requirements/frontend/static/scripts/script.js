@@ -10,7 +10,7 @@ window.userInformations = userInformations;
 
 // ========================== API REQUESTS ==========================
 
-function apiRequest(token, endpoint, method="GET", authType="Bearer",
+async function apiRequest(token, endpoint, method="GET", authType="Bearer",
     contentType="application/json", body=undefined, currentlyRefreshing=false){ 
     let options = {
         method: method,
@@ -22,7 +22,7 @@ function apiRequest(token, endpoint, method="GET", authType="Bearer",
         options.headers["Authorization"] = `${authType} ${token}`;
     if (body)
         options.body = JSON.stringify(body);
-    console.log(endpoint, options)
+    console.log(endpoint, options);
     return fetch(endpoint, options)
         .then(async response => {
             if (!response.ok && (response.status > 499 || response.status === 404)){
@@ -134,9 +134,9 @@ function removeTokens() {
     localStorage.removeItem('refresh');
 }
 
-function relog() {
+async function relog() {
     removeTokens();
-    navigateTo('/login');   
+    await navigateTo('/login');   
 }
 window.removeTokens = removeTokens;
 window.refreshToken = refreshToken;
@@ -147,15 +147,19 @@ window.generateToken = generateToken;
 // ========================== SPA SCRIPTS ==========================
 
 function loadScript(scriptSrc) {
-    const script = document.createElement('script');
-    script.src = scriptSrc;
-    script.onload = () => {
-        console.log(`Script ${scriptSrc} loaded.`);
-    };  
-    script.onerror = () => {
-        console.error(`Error while loading script ${scriptSrc}.`);
-    };
-    document.body.appendChild(script);
+    return new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = scriptSrc;
+        script.onload = () => {
+            console.log(`Script ${scriptSrc} loaded.`);
+            resolve();
+        };
+        script.onerror = () => {
+            console.error(`Error while loading script ${scriptSrc}.`);
+            reject(new Error(`Failed to load script ${scriptSrc}`));
+        };
+        document.body.appendChild(script);
+    });
 }
 
 function loadCSS(cssHref, toUpdate=true) {
@@ -185,9 +189,11 @@ async function loadContent(url, container='content', append=false) {
             contentDiv.innerHTML = html;
         else
             contentDiv.innerHTML += html;
-        const script = contentDiv.querySelector('[script]');
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = html;
+        const script = tempDiv.querySelector('[script]');
         if (script)
-            loadScript(script.getAttribute('script'));
+            await loadScript(script.getAttribute('script'));
         let style;
         if (!userInformations || !userInformations.is_guest)
             style = '_style'
@@ -201,11 +207,10 @@ async function loadContent(url, container='content', append=false) {
     }
 }
 
-function navigateTo(url, doNavigate=true){
+async function navigateTo(url, doNavigate=true){
     history.pushState({}, '', url);
-    console.table(history)
     if (doNavigate)
-        handleRoute();
+        await handleRoute();
 }
 
 window.navigateTo = navigateTo;
@@ -218,6 +223,7 @@ async function handleRoute() {
         '/': '/homePage.html',
         '/profile' : 'profile.html',
         '/lobby' : '/lobby.html',
+        '/chat' : '/testChat.html'
     };
 
     const page = routes[path] || '/404.html';
@@ -228,7 +234,7 @@ async function handleRoute() {
 // document.addEventListener('click', event => {
 //     if (event.target.matches('[data-link]')) {
 //         event.preventDefault();
-//         navigateTo(event.target.href);
+//         await navigateTo(event.target.href);
 //     }
 // });
 
@@ -278,6 +284,10 @@ window.displayMainError = displayMainError;
 
 // ========================== INDEX SCRIPT ==========================
 
+async function loadFriendListModal() {
+    await loadContent('/friendList.html', 'modals', true);
+}
+
 async function loadUserProfile(){
     let profileMenu = 'profileMenu.html';
 
@@ -295,10 +305,14 @@ async function loadUserProfile(){
     // document.getElementById('title').innerText = userInformations.title;
 }
 
-document.getElementById('home').addEventListener('click', event => {
+document.getElementById('home').addEventListener('click', async event => {
     event.preventDefault();
-    navigateTo('/');
+    await navigateTo('/');
 })
+
+function initSSE(){
+    console.log('SERVER SENT EVENT INITIALIZATION HERE');
+}
 
 async function  indexInit(auto=true) {
     if (!auto){
@@ -319,6 +333,8 @@ async function  indexInit(auto=true) {
     }
     else{
         loadCSS('/css/styles.css', false);
+        await loadFriendListModal();
+        initSSE();
         handleRoute();
     }
 }

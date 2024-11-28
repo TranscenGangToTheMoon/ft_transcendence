@@ -1,22 +1,23 @@
+from django.db.models import Q
+from lib_transcendence.exceptions import MessagesException
+from lib_transcendence.serializer import SerializerContext
 from rest_framework import generics
+from rest_framework.exceptions import NotFound
 
 from friend_requests.models import FriendRequests
 from friend_requests.serializers import FriendRequestsSerializer
+from friends.serializers import FriendsSerializer
 
 
 class FriendRequestsMixin(generics.GenericAPIView):
     queryset = FriendRequests.objects.all()
     serializer_class = FriendRequestsSerializer
 
-    def filter_queryset(self, queryset):
-        qs = queryset.filter(sender=self.request.user.id)
-        if self.request.method == 'DELETE':
-            qs = qs | queryset.filter(receiver=self.request.user.id)
-        return qs
-
 
 class FriendRequestsListCreateView(generics.ListCreateAPIView, FriendRequestsMixin):
-    pass
+
+    def filter_queryset(self, queryset):
+        return queryset.filter(sender=self.request.user.id)
 
 
 class FriendRequestsReceiveListView(generics.ListAPIView, FriendRequestsMixin):
@@ -25,10 +26,20 @@ class FriendRequestsReceiveListView(generics.ListAPIView, FriendRequestsMixin):
         return queryset.filter(receiver=self.request.user.id)
 
 
-class FriendRequestsDeleteView(generics.RetrieveDestroyAPIView, FriendRequestsMixin):
-    lookup_field = 'pk'
+class FriendRequestView(SerializerContext, generics.CreateAPIView, generics.RetrieveDestroyAPIView, FriendRequestsMixin):
+
+    def get_object(self):
+        try:
+            return self.queryset.get(Q(sender=self.request.user.id) | Q(receiver=self.request.user.id), id=self.kwargs['friend_request_id'])
+        except FriendRequests.DoesNotExist:
+            raise NotFound(MessagesException.NotFound.FRIEND_REQUEST)
+
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return FriendsSerializer
+        return super().get_serializer_class()
 
 
 friend_requests_list_create_view = FriendRequestsListCreateView.as_view()
 friend_requests_receive_list_view = FriendRequestsReceiveListView.as_view()
-friend_requests_delete_view = FriendRequestsDeleteView.as_view()
+friend_request_view = FriendRequestView.as_view()
