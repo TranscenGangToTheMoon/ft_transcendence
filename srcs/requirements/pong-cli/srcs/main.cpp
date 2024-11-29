@@ -6,7 +6,7 @@
 /*   By: xcharra <xcharra@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/25 16:32:19 by xcharra           #+#    #+#             */
-/*   Updated: 2024/11/29 13:37:18 by xcharra          ###   ########.fr       */
+/*   Updated: 2024/11/29 19:08:59 by xcharra          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,55 +28,80 @@ int main(void) {
 
 	std::string	username;
 	std::string	password;
+	InputOption	password_option;
 
-	InputOption password_option;
 	password_option.password = true;
-	Component	username_input = Input(&username, "Username");
-	Component	password_input = Input(&password, "Password", password_option);
+	Component	username_input = Input(&username);
+	Component	password_input = Input(&password, password_option);
 
-	username_input |= CatchEvent([&](Event event) {
-		bool ret = (ftxui::Event::Character('\n') == event);
-		return ret;
-	});
-	password_input |= CatchEvent([&](Event event) {
-		bool ret = (ftxui::Event::Character('\n') == event);
-		return ret;
-	});
+	std::string	warning = "Login";
+	auto	signInAction = [&] {
+		if (!username.empty() && !password.empty()) {
+			screen.ExitLoopClosure()();
+			std::cout << "Sign In" << std::endl;
+		}
+		else
+			warning = "Empty fields";
+	};
+	auto	signUpAction = [&] {
+		if (!username.empty() && !password.empty()) {
+			screen.ExitLoopClosure()();
+			std::cout << "Sign Up" << std::endl;
+		}
+		else
+			warning  = "Empty fields";
+	};
+	Component	signInButton = Button("Sign In", signInAction);
+	Component	signUpButton = Button("Sign Un", signUpAction);
 
-	auto	component = Container::Vertical({
+	auto	userFields = Container::Vertical({
 		username_input,
 		password_input,
+		signInButton,
+		signUpButton,
 	});
 
-	auto	renderer = Renderer(component, [&] {
-		return vbox({
-			hbox(username_input->Render()),
-			hbox(password_input->Render())
-		}) | border;
+//	auto	buttons = Container::Horizontal({
+//	});
+
+	auto	renderer = Renderer(userFields, [&] {
+		return (
+			vbox({
+				text("Welcome in pong-cli") | hcenter | border,
+				vbox({
+					vbox({
+						vbox(
+							text("Username: "),
+							username_input->Render() | border
+						),
+						vbox(
+							text("Password: "),
+							password_input->Render() | border
+						),
+						hbox({
+								 signInButton->Render(),
+								 signUpButton->Render()
+						}),
+					}) | border | hcenter | size(WIDTH, EQUAL, 30),
+					text(warning) | color(Color::Red) | center,
+				}) | border | hcenter
+			}) | border
+		);
+	});
+	auto	event = CatchEvent(renderer, [&](Event event) {
+		if (event == Event::Character('q')) {
+			//replace by escape key
+			screen.ExitLoopClosure()();
+			return true;
+		}
+		return false;
 	});
 
-	screen.Loop(renderer);
+	screen.Loop(event);
+	std::cout << "username: " << username << std::endl;
+	std::cout << "password: " << password << std::endl;
 	return (0);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
