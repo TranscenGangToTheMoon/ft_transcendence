@@ -6,7 +6,7 @@
 /*   By: xcharra <xcharra@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/28 13:58:57 by xcharra           #+#    #+#             */
-/*   Updated: 2024/11/28 15:42:52 by xcharra          ###   ########.fr       */
+/*   Updated: 2024/11/29 11:45:04 by xcharra          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,6 +46,5 @@ private:
 	std::string	_refreshToken;
 	std::string	_username;
 };
-
 
 #endif //USER_HPP

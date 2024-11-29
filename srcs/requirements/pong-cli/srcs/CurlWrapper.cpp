@@ -6,7 +6,7 @@
 /*   By: xcharra <xcharra@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/27 13:57:24 by xcharra           #+#    #+#             */
-/*   Updated: 2024/11/28 12:16:08 by xcharra          ###   ########.fr       */
+/*   Updated: 2024/11/29 11:26:44 by xcharra          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,6 +46,7 @@ void CurlWrapper::addHeader(const std::string &header) {
 void CurlWrapper::clearHeaders() {
 	if (_headers)
 		curl_slist_free_all(_headers);
+	_headers = nullptr;
 }
 
 std::string CurlWrapper::GET(const std::string &path, const std::string &data) {
@@ -141,8 +142,6 @@ std::string CurlWrapper::PUT(const std::string &path, const std::string &data) {
 
 	curl_easy_setopt(curl, CURLOPT_READFUNCTION, readCallback);
 	curl_easy_setopt(curl, CURLOPT_READDATA, &data);
-	std::cout << "data size: " << sizeof(data) * 8 * data.length() << std::endl;
-	std::cout << "string size: " << sizeof(std::string) << std::endl;
 	curl_easy_setopt(curl, CURLOPT_INFILESIZE, data.length());
 
 	curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);

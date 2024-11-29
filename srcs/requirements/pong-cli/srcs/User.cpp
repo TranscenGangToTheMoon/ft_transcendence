@@ -6,7 +6,7 @@
 /*   By: xcharra <xcharra@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/28 13:59:31 by xcharra           #+#    #+#             */
-/*   Updated: 2024/11/28 16:44:57 by xcharra          ###   ########.fr       */
+/*   Updated: 2024/11/29 11:26:27 by xcharra          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,6 @@ void User::initializeConnection(CurlWrapper &curl) {
 
 	curl.addHeader("Authorization: Bearer " + getAccessToken());
 
-
 	if (curl.getHTTPCode() < 300)
 		std::cout << I_MSG("(" << curl.getHTTPCode() << ") Tokens obtained !") << std::endl;
 }
@@ -65,6 +64,9 @@ void User::signUpUser(CurlWrapper &curl) {
 		std::cout << "Failed to sign up !\n" << res << std::endl;
 		throw (std::runtime_error("Failed to sign up !"));
 	}
+	else
+		std::cout << I_MSG("(" << curl.getHTTPCode() << ") User sign up !") << std::endl;
+
 }
 
 void User::signInUser(CurlWrapper &curl) {
@@ -78,6 +80,9 @@ void User::signInUser(CurlWrapper &curl) {
 		std::cout << "Failed to sign in !\n" << res << std::endl;
 		throw (std::runtime_error("Failed to sign in !"));
 	}
+	else
+		std::cout << I_MSG("(" << curl.getHTTPCode() << ") User sign in !") << std::endl;
+
 }
 
 void User::tokenRefresh(CurlWrapper &curl) {
@@ -88,6 +93,8 @@ void User::tokenRefresh(CurlWrapper &curl) {
 		std::cout << "Failed to refresh token !\n" << res << std::endl;
 		throw (std::runtime_error("Failed to refresh token !"));
 	}
+	if (curl.getHTTPCode() < 300)
+		std::cout << I_MSG("(" << curl.getHTTPCode() << ") New tokens obtained !") << std::endl;
 
 	setAccessToken(jsonParser(res, "access"));
 	setRefreshToken(jsonParser(res, "refresh"));
