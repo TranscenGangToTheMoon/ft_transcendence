@@ -6,7 +6,7 @@
 /*   By: xcharra <xcharra@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/25 16:32:19 by xcharra           #+#    #+#             */
-/*   Updated: 2024/11/29 22:05:29 by xcharra          ###   ########.fr       */
+/*   Updated: 2024/11/30 00:33:04 by xcharra          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@
 #include "ftxui/screen/screen.hpp"
 #include "ftxui/component/component.hpp"
 #include <iostream>
-	using namespace ftxui;
+using namespace ftxui;
 
 int main(void) {
 	auto screen = ScreenInteractive::Fullscreen();
@@ -65,7 +65,8 @@ int main(void) {
 		return (
 			vbox({
 				text("Welcome in pong-cli") | hcenter | border,
-				vbox({
+				vbox({ // this vbox must be vertically centered
+					filler(),
 					vbox({
 						vbox(
 							text("Username: "),
@@ -76,22 +77,29 @@ int main(void) {
 							password_input->Render() | border
 						),
 						hbox({
-								 signInButton->Render(),
-								 signUpButton->Render()
-						}),
-					}) | border | hcenter | size(WIDTH, EQUAL, 30),
-					text(warning) | color(Color::Red) | center,
-				}) | border | hcenter
+							signInButton->Render() | flex,
+							signUpButton->Render() | flex
+						}) | size(WIDTH, EQUAL, 30), /// move this ???
+					}) | border | hcenter,
+					text(warning) | color(Color::Red) | hcenter,
+					filler()
+				}) | flex,
 			}) | border
 		);
 	});
+
 	auto	event = CatchEvent(renderer, [&](Event event) {
 		if (event == Event::Escape) {
 			screen.ExitLoopClosure()();
 			return (true);
 		}
 		else if (event == Event::Character('\n')) {
-			//add validation form here
+			if (username.empty() || password.empty())
+				warning = "Empty fields";
+			else {
+				// try connection
+				screen.ExitLoopClosure()();
+			}
 			return (true);
 		}
 		return (false);
