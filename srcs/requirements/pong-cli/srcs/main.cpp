@@ -6,7 +6,7 @@
 /*   By: xcharra <xcharra@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/25 16:32:19 by xcharra           #+#    #+#             */
-/*   Updated: 2024/11/29 19:08:59 by xcharra          ###   ########.fr       */
+/*   Updated: 2024/11/29 22:05:29 by xcharra          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,8 +51,8 @@ int main(void) {
 		else
 			warning  = "Empty fields";
 	};
-	Component	signInButton = Button("Sign In", signInAction);
-	Component	signUpButton = Button("Sign Un", signUpAction);
+	Component	signInButton = Button("Sign In", signInAction, ButtonOption::Animated(Color::Blue));
+	Component	signUpButton = Button("Sign Up", signUpAction, ButtonOption::Animated(Color::Red));
 
 	auto	userFields = Container::Vertical({
 		username_input,
@@ -60,9 +60,6 @@ int main(void) {
 		signInButton,
 		signUpButton,
 	});
-
-//	auto	buttons = Container::Horizontal({
-//	});
 
 	auto	renderer = Renderer(userFields, [&] {
 		return (
@@ -89,12 +86,15 @@ int main(void) {
 		);
 	});
 	auto	event = CatchEvent(renderer, [&](Event event) {
-		if (event == Event::Character('q')) {
-			//replace by escape key
+		if (event == Event::Escape) {
 			screen.ExitLoopClosure()();
-			return true;
+			return (true);
 		}
-		return false;
+		else if (event == Event::Character('\n')) {
+			//add validation form here
+			return (true);
+		}
+		return (false);
 	});
 
 	screen.Loop(event);
