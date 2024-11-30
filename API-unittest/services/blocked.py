@@ -34,4 +34,3 @@ def are_blocked(user1_id, user2_id):
         endpoint=f'blocked/{user1_id}/{user2_id}/',
         port=8005,
     )
-
