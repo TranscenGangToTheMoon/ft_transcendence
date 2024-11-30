@@ -121,7 +121,7 @@ class TournamentSearchSerializer(serializers.ModelSerializer):
             'private',
             'n_participants',
             'size',
-            'created_by', #todo send ??
+            'created_by',
         ]
 
     @staticmethod
