@@ -63,6 +63,7 @@ class TournamentSerializer(serializers.ModelSerializer):
 
         validated_data['code'] = generate_code(Tournaments)
         validated_data['created_by'] = user['id']
+        validated_data['created_by_username'] = user['username']
         result = super().create(validated_data)
         TournamentParticipants.objects.create(user_id=user['id'], trophies=user['trophies'], tournament=result, creator=True)
         return result
