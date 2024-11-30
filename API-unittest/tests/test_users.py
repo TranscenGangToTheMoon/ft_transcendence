@@ -9,3 +9,6 @@
 
 
 class Test01_GetUsers(UnitTest):
+
+    def test_001_get_user(self):
+        self.assertResponse(get_user(), 200)
