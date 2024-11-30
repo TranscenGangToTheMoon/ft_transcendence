@@ -22,7 +22,10 @@ class TournamentView(generics.CreateAPIView, generics.RetrieveAPIView):
     serializer_class = TournamentSerializer
 
     def get_object(self):
-        return Tournaments.objects.get(id=get_tournament_participant(None, self.request.user.id, from_place=True).tournament_id)
+        try:
+            return Tournaments.objects.get(id=get_tournament_participant(None, self.request.user.id, from_place=True).tournament_id)
+        except TournamentParticipants.DoesNotExist:
+            return NotFound(MessagesException.NotFound.TOURNAMENT)
 
 
 class TournamentSearchView(generics.ListAPIView):
