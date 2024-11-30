@@ -35,7 +35,7 @@ class TournamentSearchView(generics.ListAPIView):
         query = self.request.data.get('q')
         if query is None:
             raise serializers.ValidationError({'q': [MessagesException.ValidationError.FIELD_REQUIRED]})
-        return Tournaments.objects.filter(Q(private=False) | Q(created_by=self.request.user.id), name__icontains=query) # todo don't show particiapant, only number of join participants
+        return Tournaments.objects.filter(Q(private=False) | Q(created_by=self.request.user.id), name__icontains=query)
 
 
 class TournamentParticipantsView(SerializerAuthContext, generics.ListCreateAPIView, generics.DestroyAPIView):
