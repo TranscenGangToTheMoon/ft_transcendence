@@ -1,16 +1,20 @@
 from rest_framework import generics
-from rest_framework.exceptions import NotAuthenticated
+from rest_framework.exceptions import NotAuthenticated, NotFound
+from lib_transcendence.exceptions import MessagesException
 
 from users.auth import auth_delete, get_valid_user, get_user
 from users.models import Users
-from users.serializers import UsersSerializer
+from users.serializers import UsersSerializer, UsersMeSerializer
 
 
 class UsersMeView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = UsersMeSerializer
 
     def get_object(self):
-        return Users.objects.get(id=self.request.user.id)
+        try:
+            return Users.objects.get(id=self.request.user.id)
+        except Users.DoesNotExist:
+            raise NotFound(MessagesException.NotFound.USER)
 
     def destroy(self, request, *args, **kwargs):
         password = self.request.data.get('password')
