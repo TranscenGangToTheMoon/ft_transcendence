@@ -7,7 +7,6 @@ from utils.my_unittest import UnitTest
 # todo test rename
 # todo test rename invalid name
 # todo test rename invalid name already exist
-# todo test me
 
 # todo test update user
 # todo test get user friend field
@@ -34,6 +33,16 @@ class Test01_GetUsers(UnitTest):
 
     def test_004_get_user_doest_not_exist(self):
         self.assertResponse(get_user(user2_id=123456), 404, {'detail': 'User not found'})
+
+
+class Test02_UserMe(UnitTest):
+
+    def test_001_get_me(self):
+        user1 = new_user()
+
+        response = get_me(user1)
+        self.assertResponse(response, 200)
+        self.assertDictEqual(response.json, {'id': user1['id'], 'username': user1['username'], 'is_guest': False, 'created_at': response.json['created_at'], 'profile_picture': None, 'accept_friend_request': True, 'accept_chat_from': 'friends_only', 'coins': 100, 'trophies': 0, 'current_rank': None})
 
 
 if __name__ == '__main__':
