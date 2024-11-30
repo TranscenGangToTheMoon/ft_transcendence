@@ -1,7 +1,7 @@
 from rest_framework import generics
 from rest_framework.exceptions import NotAuthenticated
 
-from users.auth import auth_delete
+from users.auth import auth_delete, get_valid_user, get_user
 from users.models import Users
 from users.serializers import UsersSerializer
 
@@ -23,7 +23,9 @@ class UsersMeView(generics.RetrieveUpdateDestroyAPIView):
 class UserRetrieveView(generics.RetrieveAPIView):
     queryset = Users.objects.all()
     serializer_class = UsersSerializer
-    lookup_field = 'user_id'
+
+    def get_object(self):
+        return get_valid_user(get_user(self.request), False, id=self.kwargs['user_id'])
 
 
 users_me_view = UsersMeView.as_view()
