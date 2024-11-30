@@ -10,6 +10,7 @@ from utils.my_unittest import UnitTest
 
 # todo test update user
 # todo test get user friend field
+# todo test get status field
 
 
 class Test01_GetUsers(UnitTest):
