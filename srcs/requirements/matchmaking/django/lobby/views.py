@@ -37,12 +37,12 @@ class LobbyParticipantsView(SerializerAuthContext, generics.ListCreateAPIView, g
         return get_lobby_participant(get_lobby(self.kwargs.get('code')), self.request.user.id)
 
     def create(self, request, *args, **kwargs):
-        serializer_a = LobbyParticipantsSerializer(data=request.data, context=self.get_serializer_context())
-        if serializer_a.is_valid():
-            instance = serializer_a.save()
-            serializer_b = LobbySerializer(instance.lobby, context=self.get_serializer_context())
-            return Response(serializer_b.data, status=status.HTTP_201_CREATED)
-        return Response(serializer_a.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer_participant = LobbyParticipantsSerializer(data=request.data, context=self.get_serializer_context())
+        if serializer_participant.is_valid():
+            instance = serializer_participant.save()
+            serializer_lobby = LobbySerializer(instance.lobby, context=self.get_serializer_context())
+            return Response(serializer_lobby.data, status=status.HTTP_201_CREATED)
+        return Response(serializer_participant.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class LobbyKickView(generics.DestroyAPIView):
