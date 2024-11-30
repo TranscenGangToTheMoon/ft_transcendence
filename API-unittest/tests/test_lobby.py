@@ -197,7 +197,10 @@ class Test04_UpdateLobby(UnitTest):
         for i in range(5):
             response = join_lobby(code, users[i])
             self.assertResponse(response, 201)
-            self.assertEqual(teams[i], response.json['team'])
+            for user in response.json['participants']:
+                if user['id'] == users[i]['id']:
+                    self.assertEqual(teams[i], user['team'])
+                    break
 
         response = create_lobby(user1, data={'match_type': '1v1'}, method='PATCH')
         self.assertResponse(response, 200)
