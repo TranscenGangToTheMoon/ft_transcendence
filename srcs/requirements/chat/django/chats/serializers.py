@@ -80,7 +80,6 @@ class ChatsSerializer(serializers.ModelSerializer):
         ChatParticipants.objects.create(user_id=user['id'], username=user['username'], chat_id=result.id)
         ChatParticipants.objects.create(user_id=user2['id'], username=user2['username'], chat_id=result.id)
         return result
-    # todo return last message
 
 
 class BlockChatSerializer(serializers.ModelSerializer):
