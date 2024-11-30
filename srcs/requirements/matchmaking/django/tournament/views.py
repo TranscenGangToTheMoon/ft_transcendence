@@ -57,7 +57,7 @@ class TournamentParticipantsView(SerializerAuthContext, generics.ListCreateAPIVi
         serializer_participant = TournamentParticipantsSerializer(data=request.data, context=self.get_serializer_context())
         if serializer_participant.is_valid():
             instance = serializer_participant.save()
-            serializer_tournament = TournamentSerializer(instance.lobby, context=self.get_serializer_context())
+            serializer_tournament = TournamentSerializer(instance.tournament, context=self.get_serializer_context())
             return Response(serializer_tournament.data, status=status.HTTP_201_CREATED)
         return Response(serializer_participant.errors, status=status.HTTP_400_BAD_REQUEST)
 
