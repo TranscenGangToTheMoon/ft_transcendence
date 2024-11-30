@@ -8,7 +8,6 @@ from chats.serializers import BlockChatSerializer
 from chats.utils import get_chat_together
 
 
-#todo try to make with generics view
 class RenameUserView(generics.UpdateAPIView):
     def update(self, request, *args, **kwargs):
         new_username = request.data.get('username')
