@@ -257,7 +257,10 @@ class Test06_LeaveTournament(UnitTest):
 
         response = join_tournament(code, user1)
         self.assertResponse(response, 201)
-        self.assertTrue(response.json['creator'])
+        for u in response.json['participants']:
+            if u['id'] == user1['id']:
+                self.assertTrue(u['creator'])
+                break
 
 
 class Test07_GetTournament(UnitTest):
