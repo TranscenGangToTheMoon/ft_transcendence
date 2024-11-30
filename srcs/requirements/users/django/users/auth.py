@@ -3,7 +3,7 @@ from lib_transcendence.services import requests_auth
 from lib_transcendence.auth import auth_verify
 from lib_transcendence.endpoints import Auth
 from rest_framework import permissions, serializers
-from rest_framework.exceptions import NotFound
+from rest_framework.exceptions import NotFound, PermissionDenied
 
 from users.models import Users
 
@@ -51,10 +51,13 @@ def get_user(request=None, id=None):
         raise NotFound(MessagesException.NotFound.USER)
 
 
-def get_valid_user(self, **kwargs):
+def get_valid_user(self, assert_guest=True, self_blocked=False, **kwargs):
     try:
         valide_user = Users.objects.get(**kwargs)
         assert valide_user.is_guest is False
+        if self_blocked:
+            if self.blocked.filter(blocked=valide_user).exists():
+                raise PermissionDenied(MessagesException.PermissionDenied.BLOCKED_USER)
         assert not valide_user.blocked.filter(blocked=self).exists()
     except (Users.DoesNotExist, AssertionError):
         raise NotFound(MessagesException.NotFound.USER)
