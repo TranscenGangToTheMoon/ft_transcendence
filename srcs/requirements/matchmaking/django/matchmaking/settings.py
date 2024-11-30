@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-njs%e3niu%k(6!0tjqnwe(eg64no%lt#l*-_&rh$m_&3kr+!ou
 DEBUG = environ["DEBUG"]
 
 ALLOWED_HOSTS = [
-    'localhost', # todo remove
+    'localhost',
     'matchmaking',
 ]
 
