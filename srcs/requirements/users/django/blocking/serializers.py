@@ -5,20 +5,17 @@ from rest_framework.exceptions import PermissionDenied
 from blocking.models import BlockedUsers
 from friends.utils import get_friendship
 from users.auth import get_user, get_valid_user
+from users.serializers import UsersSerializer
 
 
 class BlockedSerializer(serializers.ModelSerializer):
     user_id = serializers.IntegerField(write_only=True)
-    user = serializers.SerializerMethodField(read_only=True)
-    blocked = serializers.SerializerMethodField(read_only=True)
+    user = UsersSerializer(read_only=True)
+    blocked = UsersSerializer(read_only=True) # todo user small serializer
 
     class Meta:
         model = BlockedUsers
         fields = '__all__'
-
-    @staticmethod
-    def get_user(obj):
-        return {'id': obj.user.id, 'username': obj.user.username} # todo remake
 
     @staticmethod
     def get_blocked(obj):
