@@ -5,13 +5,13 @@ from rest_framework.exceptions import PermissionDenied
 from blocking.models import BlockedUsers
 from friends.utils import get_friendship
 from users.auth import get_user, get_valid_user
-from users.serializers import UsersSerializer
+from users.serializers_utils import SmallUsersSerializer
 
 
 class BlockedSerializer(serializers.ModelSerializer):
     user_id = serializers.IntegerField(write_only=True)
-    user = UsersSerializer(read_only=True)
-    blocked = UsersSerializer(read_only=True) # todo user small serializer
+    user = SmallUsersSerializer(read_only=True)
+    blocked = SmallUsersSerializer(read_only=True)
 
     class Meta:
         model = BlockedUsers
