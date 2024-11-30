@@ -54,7 +54,8 @@ def get_user(request=None, id=None):
 def get_valid_user(self, assert_guest=True, self_blocked=False, **kwargs):
     try:
         valide_user = Users.objects.get(**kwargs)
-        assert valide_user.is_guest is False
+        if assert_guest:
+            assert valide_user.is_guest is False
         if self_blocked:
             if self.blocked.filter(blocked=valide_user).exists():
                 raise PermissionDenied(MessagesException.PermissionDenied.BLOCKED_USER)
