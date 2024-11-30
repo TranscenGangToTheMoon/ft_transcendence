@@ -90,7 +90,7 @@ class LobbySerializer(serializers.ModelSerializer):
         return result
 # todo add all venv var in .venv
     def update(self, instance, validated_data):
-        if 'game_mode' in validated_data: # todo try with editable = False
+        if 'game_mode' in validated_data:
             raise PermissionDenied(MessagesException.PermissionDenied.CANNOT_UPDATE_GAME_MODE)
         if validated_data.get('match_type') == MatchType.m1v1 and instance.match_type == MatchType.m3v3:
             participants = instance.participants
