@@ -5,7 +5,7 @@ from lib_transcendence.exceptions import MessagesException
 from lib_transcendence.serializer import SerializerAuthContext
 from lib_transcendence.services import request_game
 from lib_transcendence import endpoints
-from rest_framework import generics, serializers
+from rest_framework import generics, serializers, status
 from rest_framework.exceptions import PermissionDenied, NotFound
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -42,7 +42,6 @@ class TournamentParticipantsView(SerializerAuthContext, generics.ListCreateAPIVi
     queryset = TournamentParticipants.objects.all()
     serializer_class = TournamentParticipantsSerializer
     pagination_class = None
-    # todo return tournament instance when create
 
     def filter_queryset(self, queryset):
         tournament = get_tournament(code=self.kwargs.get('code'))
@@ -53,6 +52,14 @@ class TournamentParticipantsView(SerializerAuthContext, generics.ListCreateAPIVi
 
     def get_object(self):
         return get_tournament_participant(get_tournament(code=self.kwargs.get('code')), self.request.user.id)
+
+    def create(self, request, *args, **kwargs):
+        serializer_participant = TournamentParticipantsSerializer(data=request.data, context=self.get_serializer_context())
+        if serializer_participant.is_valid():
+            instance = serializer_participant.save()
+            serializer_tournament = TournamentSerializer(instance.lobby, context=self.get_serializer_context())
+            return Response(serializer_tournament.data, status=status.HTTP_201_CREATED)
+        return Response(serializer_participant.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class TournamentKickView(generics.DestroyAPIView):
