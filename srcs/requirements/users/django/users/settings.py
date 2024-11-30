@@ -49,7 +49,7 @@ INSTALLED_APPS = [
     'profile_pictures',
     'users',
 ]
- #todo rename users in user
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
