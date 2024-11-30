@@ -123,7 +123,7 @@ class TournamentParticipantsSerializer(serializers.ModelSerializer):
 
 
 class TournamentSearchSerializer(serializers.ModelSerializer):
-    n_participants = serializers.SerializerMethodField(source='participants.count')
+    n_participants = serializers.SerializerMethodField()
     created_by = serializers.CharField(source='created_by_username')
 
     class Meta:
