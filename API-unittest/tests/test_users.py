@@ -19,3 +19,10 @@ class Test01_GetUsers(UnitTest):
 
         self.assertResponse(blocked_user(user2, user1['id']), 201)
         self.assertResponse(get_user(user1, user2['id']), 404, {'detail': 'User not found.'})
+
+    def test_003_get_blocked_user(self):
+        user1 = new_user()
+        user2 = new_user()
+
+        self.assertResponse(blocked_user(user1, user2['id']), 201)
+        self.assertResponse(get_user(user1, user2['id']), 403, {'detail': 'You block this user.'})
