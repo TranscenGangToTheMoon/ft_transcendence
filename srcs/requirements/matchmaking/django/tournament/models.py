@@ -17,6 +17,7 @@ class Tournaments(models.Model):
     start_at = models.DateTimeField(default=None, null=True)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     created_by = models.IntegerField()
+    created_by_username = models.CharField(max_length=30)
 
     def start_timer(self):
         self.start_at = datetime.now(timezone.utc) + timedelta(seconds=20)
