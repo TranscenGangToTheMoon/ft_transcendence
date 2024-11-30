@@ -29,3 +29,7 @@ class Test01_GetUsers(UnitTest):
 
     def test_004_get_user_doest_not_exist(self):
         self.assertResponse(get_user(user2_id=123456), 404, {'detail': 'User not found'})
+
+
+if __name__ == '__main__':
+    unittest.main()
