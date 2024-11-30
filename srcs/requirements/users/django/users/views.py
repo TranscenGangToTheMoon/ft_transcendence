@@ -7,7 +7,7 @@ from users.serializers import UsersSerializer
 
 
 class UsersMeView(generics.RetrieveUpdateDestroyAPIView):
-    serializer_class = UsersSerializer
+    serializer_class = UsersMeSerializer
 
     def get_object(self):
         return Users.objects.get(id=self.request.user.id)
