@@ -12,7 +12,8 @@ class BlockedMixin(generics.GenericAPIView):
 
 
 class BlockedListCreateView(generics.ListCreateAPIView, BlockedMixin):
-    pass
+    def filter_queryset(self, queryset):
+        return queryset.filter(user_id=self.request.user.id)
 
 
 class BlockedDeleteView(generics.DestroyAPIView, BlockedMixin):
