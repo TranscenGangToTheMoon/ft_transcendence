@@ -41,6 +41,27 @@ class UsersSerializer(serializers.ModelSerializer):
             'trophies',
             'current_rank',
             'friends'
+class UsersSerializer(serializers.ModelSerializer):
+    status = serializers.SerializerMethodField(read_only=True)
+    friends = FriendsSerializer(read_only=True)
+
+    class Meta:
+        model = Users
+        fields = [
+            'id',
+            'username',
+            'is_guest',
+            'profile_picture',
+            'status',
+            'trophies',
+            'friends',
+        ]
+        read_only_fields = [
+            'id',
+            'username',
+            'is_guest',
+            'profile_picture',
+            'current_rank',
         ]
 
     @staticmethod
