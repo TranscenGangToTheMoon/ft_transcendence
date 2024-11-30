@@ -5,13 +5,13 @@ from rest_framework.exceptions import PermissionDenied
 from friend_requests.models import FriendRequests
 from friends.utils import is_friendship
 from users.auth import get_user, get_valid_user
-from users.serializers import UsersSerializer
+from users.serializers_utils import SmallUsersSerializer
 
 
 class FriendRequestsSerializer(serializers.ModelSerializer):
     username = serializers.CharField(write_only=True)
-    sender = UsersSerializer(read_only=True)
-    receiver = UsersSerializer(read_only=True)
+    sender = SmallUsersSerializer(read_only=True)
+    receiver = SmallUsersSerializer(read_only=True)
 
     class Meta:
         model = FriendRequests
