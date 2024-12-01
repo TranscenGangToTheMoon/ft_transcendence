@@ -4,6 +4,7 @@ from lib_transcendence.utils import generate_code
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
 
+from blocking.utils import create_player_instance
 from matchmaking.utils import verify_user, get_tournament, verify_place
 from tournament.models import Tournaments, TournamentStage, TournamentParticipants
 
@@ -65,7 +66,7 @@ class TournamentSerializer(serializers.ModelSerializer):
         validated_data['created_by'] = user['id']
         validated_data['created_by_username'] = user['username']
         result = super().create(validated_data)
-        TournamentParticipants.objects.create(user_id=user['id'], trophies=user['trophies'], tournament=result, creator=True)
+        create_player_instance(TournamentParticipants, request, user_id=user['id'], trophies=user['trophies'], tournament=result, creator=True)
         return result
 
 
