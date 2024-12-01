@@ -81,5 +81,4 @@ class UsersManagement:
 
 
 #todo check all internal request urls
-#todo raname all _view
 #todo in litteral use urls
