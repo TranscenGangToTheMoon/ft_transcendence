@@ -99,7 +99,7 @@ class Test02_ErrorJoinLobby(UnitTest):
         self.assertEqual(1, len(response.json))
 
         self.assertResponse(join_lobby(code, user2), 404, {'detail': 'Lobby not found.'})
-        self.assertResponse(unblocked_user(user1, blocked_id), 201)
+        self.assertResponse(unblocked_user(user1, blocked_id), 204)
         self.assertResponse(join_lobby(code, user2), 201)
 
 
