@@ -5,7 +5,7 @@ from auth.permissions import IsGuest
 from register.serializers import RegisterSerializer
 
 
-class RegisterView(generics.UpdateAPIView):
+class RegisterGuestView(generics.UpdateAPIView):
     serializer_class = RegisterSerializer
     permission_classes = [IsAuthenticated, IsGuest]
 
@@ -13,4 +13,4 @@ class RegisterView(generics.UpdateAPIView):
         return self.request.user
 
 
-register_view = RegisterView.as_view()
+register_guest_view = RegisterGuestView.as_view()

@@ -6,7 +6,7 @@ from lib_transcendence.exceptions import MessagesException
 from delete.serializers import DeleteSerializer
 
 
-class DeleteView(generics.DestroyAPIView):
+class DeleteUserView(generics.DestroyAPIView):
     serializer_class = DeleteSerializer
     permission_classes = [IsAuthenticated]
 
@@ -23,4 +23,4 @@ class DeleteView(generics.DestroyAPIView):
         return super().delete(request, *args, **kwargs)
 
 
-delete_view = DeleteView.as_view()
+delete_user_view = DeleteUserView.as_view()

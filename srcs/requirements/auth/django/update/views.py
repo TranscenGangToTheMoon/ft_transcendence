@@ -7,7 +7,7 @@ from guest.group import group_guests
 from update.serializers import UpdateSerializer
 
 
-class UpdateView(generics.UpdateAPIView):
+class UpdateUserView(generics.UpdateAPIView):
     serializer_class = UpdateSerializer
     permission_classes = [IsAuthenticated]
 
@@ -22,4 +22,4 @@ class UpdateView(generics.UpdateAPIView):
         return super().update(request, *args, **kwargs)
 
 
-update_view = UpdateView.as_view()
+update_user_view = UpdateUserView.as_view()
