@@ -39,3 +39,8 @@ urlpatterns = [
 # todo make doc for all endpoint
 # todo make season
 # todo change block handling in matchmaking
+
+# before push
+# todo type all python code
+# todo check norm
+# todo check problem
