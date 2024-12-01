@@ -1,3 +1,5 @@
+from typing import Literal
+
 from lib_transcendence.game import GameMode
 from rest_framework import status
 from rest_framework.exceptions import APIException
@@ -131,7 +133,7 @@ class ServiceUnavailable(APIException):
     default_detail = MessagesException.ServiceUnavailable.SERVICE_UNAVAILABLE
     default_code = 'service_unavailable'
 
-    def __init__(self, service):
+    def __init__(self, service: Literal['auth', 'chat', 'game', 'matchmaking', 'users']):
         self.detail = ServiceUnavailable.default_detail.format(service=service)
 
 
