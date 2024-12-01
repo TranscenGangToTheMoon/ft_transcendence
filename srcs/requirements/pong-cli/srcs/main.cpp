@@ -6,7 +6,7 @@
 /*   By: xcharra <xcharra@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/25 16:32:19 by xcharra           #+#    #+#             */
-/*   Updated: 2024/11/30 00:33:04 by xcharra          ###   ########.fr       */
+/*   Updated: 2024/12/01 01:18:33 by xcharra          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,15 +26,17 @@ using namespace ftxui;
 int main(void) {
 	auto screen = ScreenInteractive::Fullscreen();
 
+	std::string	server;
 	std::string	username;
 	std::string	password;
 	InputOption	password_option;
 
 	password_option.password = true;
+	Component	server_input = Input(&server);
 	Component	username_input = Input(&username);
 	Component	password_input = Input(&password, password_option);
 
-	std::string	warning = "Login";
+	std::string	warning = "";
 	auto	signInAction = [&] {
 		if (!username.empty() && !password.empty()) {
 			screen.ExitLoopClosure()();
@@ -55,32 +57,49 @@ int main(void) {
 	Component	signUpButton = Button("Sign Up", signUpAction, ButtonOption::Animated(Color::Red));
 
 	auto	userFields = Container::Vertical({
+		server_input,
 		username_input,
 		password_input,
 		signInButton,
 		signUpButton,
 	});
 
+	auto banner = 				vbox(
+					text(BANNER1),
+					text(BANNER2),
+					text(BANNER3),
+					text(BANNER4),
+					text(BANNER5),
+					text(BANNER6),
+					text("")
+				);
+	auto config = FlexboxConfig().Set(FlexboxConfig::AlignContent::Center);;
 	auto	renderer = Renderer(userFields, [&] {
 		return (
 			vbox({
-				text("Welcome in pong-cli") | hcenter | border,
+				banner | hcenter | border,
 				vbox({ // this vbox must be vertically centered
 					filler(),
-					vbox({
-						vbox(
-							text("Username: "),
-							username_input->Render() | border
-						),
-						vbox(
-							text("Password: "),
-							password_input->Render() | border
-						),
-						hbox({
-							signInButton->Render() | flex,
-							signUpButton->Render() | flex
-						}) | size(WIDTH, EQUAL, 30), /// move this ???
-					}) | border | hcenter,
+					window(
+						text("Login"),
+						vbox({
+							window(
+								text("Server: "),
+								server_input->Render()
+							),
+							window(
+								text("Username: "),
+								username_input->Render()
+							),
+							window(
+								text("Password: "),
+								password_input->Render()
+							),
+							flexbox({
+								signInButton->Render(),
+								signUpButton->Render(), //maybe add a test server button
+							}, config) | flex,
+						})) | size(WIDTH, EQUAL, 30)| hcenter,
 					text(warning) | color(Color::Red) | hcenter,
 					filler()
 				}) | flex,
@@ -106,11 +125,12 @@ int main(void) {
 	});
 
 	screen.Loop(event);
+
+	std::cout << "server: " << server << std::endl;
 	std::cout << "username: " << username << std::endl;
 	std::cout << "password: " << password << std::endl;
 	return (0);
 }
-
 
 
 
