@@ -43,8 +43,9 @@ urlpatterns = [
 #   - when send block info, update matchmakeing blocked db
 #   - not use are_blocked anymore
 #   - handle block in tournament search result
+# 2. rename all users by use management
 
 # --- before push ---
-# todo type all python code
+# todo type all python code (make variable)
 # todo check norm
 # todo check problem
