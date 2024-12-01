@@ -78,7 +78,3 @@ class UsersManagement:
     fblocked_user = base_api + 'blocked-user/{user_id}/{blocked_user_id}/'
     blocked_user = fblocked_user.format(user_id='<int:user_id>', blocked_user_id='<int:blocked_user_id>')
     delete_user = base_api + 'delete-user/<int:user_id>/'
-
-
-#todo check all internal request urls
-#todo in litteral use urls
