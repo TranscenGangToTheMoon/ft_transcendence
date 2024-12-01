@@ -9,6 +9,7 @@ from play.models import Players
 
 import threading
 
+
 class PlayersSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(source='user_id', read_only=True)
 
@@ -39,8 +40,9 @@ class PlayersSerializer(serializers.ModelSerializer):
         threading.Thread(target=func).start()
         return super().create(validated_data)
 
+
 def func():
-	import subprocess
-	import time
-	time.sleep(10)
-	subprocess.run(["python", "matchmaking/matchmaking.py"])
+    import subprocess
+    import time
+    time.sleep(10)
+    subprocess.run(["python", "matchmaking/matchmaking.py"])
