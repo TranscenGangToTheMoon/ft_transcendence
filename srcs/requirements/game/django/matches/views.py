@@ -12,10 +12,7 @@ class MatchCreateView(generics.CreateAPIView):
     def perform_create(self, serializer):
         super().perform_create(serializer)
         match = serializer.instance
-        port = launch_server(match)
-        print("Port is : ", port, flush=True)
-        match.set_port(port)
-        #TODO -> make request to SSE service
+        launch_server(match)
 
 
 class MatchListView(generics.ListAPIView):

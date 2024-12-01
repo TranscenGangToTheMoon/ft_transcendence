@@ -1,5 +1,5 @@
-from pong_position import Position
-from match import Player
+from game_server.pong_position import Position
+from game_server.match import Player
 
 
 class Racket:

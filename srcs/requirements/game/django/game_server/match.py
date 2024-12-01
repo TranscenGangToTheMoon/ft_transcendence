@@ -22,8 +22,8 @@ class Player():
 
 class Team():
     model: Teams
-    players: List[Player] = []
     def __init__(self, model):
+        self.players: List[Player] = []
         self.model = model
         raw_players = model.players.all()
         for player in raw_players:
@@ -32,15 +32,20 @@ class Team():
 class Match():
     model: Matches
     game_mode: str = 'duel'
-    teams: List[Team] = []
     viewers = List[Player]
 
     def __init__(self, match_code):
         self.model = Matches.objects.get(code=match_code)
+        self.teams: List[Team] = []
         self.game_mode = self.model.game_mode
         raw_teams = self.model.teams.all()
         for team in raw_teams:
             self.teams.append(Team(team))
 
-async def request_match(match_code):
-    return await sync_to_async(Match)(match_code)
+    def __str__(self):
+        return self.model.code + ' ' + str(self.teams[0].model) + ' ' + str(self.teams[0].model.players.all())
+
+def fetch_match(match_code):
+    match = Match(match_code)
+    print(str(match))
+    return match

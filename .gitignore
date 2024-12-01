@@ -13,3 +13,4 @@ build
 .ropeproject/
 .mypy_cache/
 pyproject.toml
+**/socket_client.py
