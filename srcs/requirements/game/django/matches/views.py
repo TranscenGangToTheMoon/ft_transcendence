@@ -5,11 +5,11 @@ from matches.models import Matches
 from matches.serializers import MatchSerializer, validate_user_id
 
 
-class MatchCreateView(generics.CreateAPIView):
+class CreateMatchView(generics.CreateAPIView):
     serializer_class = MatchSerializer
 
 
-class MatchListView(generics.ListAPIView):
+class ListMatchesView(generics.ListAPIView):
     serializer_class = MatchSerializer
     queryset = Matches.objects.all()
     permission_classes = [IsAuthenticated]
@@ -25,6 +25,6 @@ class MatchRetrieveView(generics.RetrieveAPIView):
         return validate_user_id(self.kwargs.get('user_id'), True)
 
 
-match_create_view = MatchCreateView.as_view()
-match_list_view = MatchListView.as_view()
-match_retrieve_view = MatchRetrieveView.as_view()
+create_match_view = CreateMatchView.as_view()
+list_matches_view = ListMatchesView.as_view()
+retrieve_match_view = MatchRetrieveView.as_view()
