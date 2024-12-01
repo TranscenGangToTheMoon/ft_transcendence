@@ -25,4 +25,3 @@ class MessagesView(SerializerAuthContext, generics.ListCreateAPIView):
 
 
 messages_view = MessagesView.as_view()
-# todo make endpoint for read messages
