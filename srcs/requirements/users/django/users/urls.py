@@ -38,9 +38,13 @@ urlpatterns = [
 # todo make test for that
 # todo make doc for all endpoint
 # todo make season
-# todo change block handling in matchmaking
+# 1. todo change block handling in matchmaking
+#   - add blocked db in matchmaking
+#   - when send block info, update matchmakeing blocked db
+#   - not use are_blocked anymore
+#   - handle block in tournament search result
 
-# before push
+# --- before push ---
 # todo type all python code
 # todo check norm
 # todo check problem
