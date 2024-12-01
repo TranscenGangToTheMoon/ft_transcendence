@@ -37,3 +37,4 @@ urlpatterns = [
 # todo make test for that
 # todo make doc for all endpoint
 # todo make season
+# todo change block handling in matchmaking
