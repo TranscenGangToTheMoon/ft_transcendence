@@ -5,7 +5,7 @@ from lib_transcendence.Lobby import MatchType, Teams
 from lib_transcendence.auth import get_auth_user
 from lib_transcendence.utils import generate_code
 from rest_framework import serializers
-from rest_framework.exceptions import PermissionDenied, NotFound
+from rest_framework.exceptions import PermissionDenied
 
 from lobby.models import Lobby, LobbyParticipants
 from matchmaking.utils import verify_user, get_lobby, verify_place
