@@ -1,37 +1,25 @@
+from lib_transcendence.exceptions import MessagesException
+from lib_transcendence.serializer import SerializerContext
 from rest_framework import generics, status
+from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 
+from blocking.models import Blocked
+from blocking.serializer import BlockedSerializer
 from lobby.models import LobbyParticipants
 from play.models import Players
 from tournament.models import TournamentParticipants
 
 
-class BlockUserView(generics.DestroyAPIView):
+class BlockedUserView(SerializerContext, generics.CreateAPIView, generics.DestroyAPIView):
+    serializer_class = BlockedSerializer
     permission_classes = []
 
-    def destroy(self, request, *args, **kwargs):
-        self.kick_blocked_user_or_leave(LobbyParticipants)
-        self.kick_blocked_user_or_leave(TournamentParticipants)
-
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-    def kick_blocked_user_or_leave(self, model):
-        def get_user(user_id):
-            try:
-                return model.objects.get(user_id=user_id)
-            except model.DoesNotExist:
-                return None
-
-        user = get_user(self.kwargs['user_id'])
-        if user is None:
-            return
-
-        blocked_user = get_user(self.kwargs['blocked_user_id'])
-        if blocked_user is None:
-            return
-
-        if user.get_location_id() == blocked_user.get_location_id() and user.creator:
-            blocked_user.delete()
+    def get_object(self):
+        try:
+            return Blocked.objects.get(user_id=self.kwargs['user_id'], blocked_user_id=self.kwargs['blocked_user_id'])
+        except Blocked.DoesNotExist:
+            raise NotFound(MessagesException.NotFound.BLOCKED_INSTANCE)
 
 
 class DeleteUserView(generics.DestroyAPIView):
@@ -51,5 +39,5 @@ class DeleteUserView(generics.DestroyAPIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-blocked_user_view = BlockUserView.as_view()
+blocked_user_view = BlockedUserView.as_view()
 delete_user_view = DeleteUserView.as_view()
