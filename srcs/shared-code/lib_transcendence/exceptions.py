@@ -15,6 +15,7 @@ class MessagesException:
         FRIEND_REQUEST = NOT_FOUND.format(obj='Friend request')
         FRIENDSHIP = NOT_FOUND.format(obj='Friendship')
         TOURNAMENT = NOT_FOUND.format(obj='Tournament')
+        BLOCKED_INSTANCE = NOT_FOUND.format(obj='Blocked instance')
 
         NOT_BELONG = 'You do not belong to any {obj}.'
         NOT_BELONG_TOURNAMENT = NOT_BELONG.format(obj='tournament')
