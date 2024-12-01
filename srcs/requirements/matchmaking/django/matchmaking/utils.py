@@ -1,10 +1,11 @@
 from lib_transcendence.game import GameMode
 from lib_transcendence import endpoints
 from lib_transcendence.exceptions import MessagesException, Conflict, ResourceExists, ServiceUnavailable
-from lib_transcendence.services import request_game, request_users
+from lib_transcendence.services import request_game
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied, NotFound, APIException
 
+from blocking.utils import are_users_blocked
 from lobby.models import Lobby, LobbyParticipants
 from play.models import Players
 from tournament.models import Tournaments, TournamentParticipants
@@ -69,11 +70,20 @@ def get_tournament(create=False, **kwargs):
 
 
 def verify_place(user, model, request):
-    if are_users_blocked(request, model, user['id']):
-        raise NotFound(MessagesException.NotFound.NOT_FOUND.format(obj=model.str_name.title()))
+    def get_place_creator():
+        if model.str_name == GameMode.tournament:
+            return model.created_by
+        else:
+            try:
+                return model.participants.get(creator=True).user_id
+            except (LobbyParticipants.DoesNotExist, TournamentParticipants.DoesNotExist):
+                raise NotFound(MessagesException.NotFound.CREATOR)
 
     if model.participants.filter(user_id=user['id']).exists():
         raise ResourceExists(MessagesException.ResourceExists.JOIN.format(obj=model.str_name))
+
+    if are_users_blocked(user['id'], get_place_creator()):
+        raise NotFound(MessagesException.NotFound.NOT_FOUND.format(obj=model.str_name.title())) # todo rename -> default
 
     if model.str_name == GameMode.tournament and model.is_started:
         raise PermissionDenied(MessagesException.PermissionDenied.TOURNAMENT_ALREADY_STARTED)
@@ -121,22 +131,3 @@ def verify_user(user_id, created_tournament=False):
         raise ServiceUnavailable('game')
 
     raise Conflict(MessagesException.Conflict.ALREADY_IN_GAME)
-
-
-# -------------------- BLOCK CHECK ----------------------------------------------------------------------------------- #
-def are_users_blocked(request, obj, new_user):
-    if obj.str_name == GameMode.tournament:
-        self_user = obj.created_by
-    else:
-        try:
-            self_user = obj.participants.get(creator=True).user_id
-        except (LobbyParticipants.DoesNotExist, TournamentParticipants.DoesNotExist):
-            raise NotFound(MessagesException.NotFound.CREATOR)
-
-    try:
-        request_users(endpoints.Users.fare_blocked.format(user1_id=self_user, user2_id=new_user), 'GET', request)
-        return True
-    except NotFound:
-        return False
-    except APIException:
-        raise ServiceUnavailable('users')
