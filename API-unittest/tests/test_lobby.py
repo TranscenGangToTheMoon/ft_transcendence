@@ -68,6 +68,7 @@ class Test02_ErrorJoinLobby(UnitTest):
         self.assertEqual(1, len(response.json))
 
         self.assertResponse(create_lobby(user2, method='GET'), 404, {'detail': 'You do not belong to any lobby.'})
+        self.assertResponse(join_lobby(code, user2), 404, {'detail': 'Lobby not found.'})
 
     def test_009_blocked_user_not_creator(self):
         user1 = new_user()
