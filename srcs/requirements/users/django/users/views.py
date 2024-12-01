@@ -24,7 +24,7 @@ class UsersMeView(generics.RetrieveUpdateDestroyAPIView):
         return super().destroy(request, *args, **kwargs)
 
 
-class UserRetrieveView(generics.RetrieveAPIView):
+class RetrieveUserView(generics.RetrieveAPIView):
     queryset = Users.objects.all()
     serializer_class = UsersSerializer
 
@@ -33,4 +33,4 @@ class UserRetrieveView(generics.RetrieveAPIView):
 
 
 users_me_view = UsersMeView.as_view()
-user_retrieve_view = UserRetrieveView.as_view()
+retrieve_user_view = RetrieveUserView.as_view()

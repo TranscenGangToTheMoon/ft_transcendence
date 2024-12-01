@@ -11,12 +11,12 @@ class BlockedMixin(generics.GenericAPIView):
     serializer_class = BlockedSerializer
 
 
-class BlockedListCreateView(generics.ListCreateAPIView, BlockedMixin):
+class BlockedView(generics.ListCreateAPIView, BlockedMixin):
     def filter_queryset(self, queryset):
         return queryset.filter(user_id=self.request.user.id)
 
 
-class BlockedDeleteView(generics.DestroyAPIView, BlockedMixin):
+class DeleteBlockedView(generics.DestroyAPIView, BlockedMixin):
     def get_object(self):
         try:
             return self.get_queryset().get(id=self.kwargs['blocking_id'], user_id=self.request.user.id)
@@ -28,5 +28,5 @@ class BlockedDeleteView(generics.DestroyAPIView, BlockedMixin):
         return super().perform_destroy(instance)
 
 
-blocked_list_create_view = BlockedListCreateView.as_view()
-blocked_delete_view = BlockedDeleteView.as_view()
+blocked_view = BlockedView.as_view()
+delete_blocked_view = DeleteBlockedView.as_view()
