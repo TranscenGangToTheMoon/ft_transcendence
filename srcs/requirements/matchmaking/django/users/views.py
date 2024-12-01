@@ -1,5 +1,5 @@
 from lib_transcendence.exceptions import MessagesException
-from lib_transcendence.serializer import SerializerContext
+from lib_transcendence.serializer import SerializerKwargsContext
 from rest_framework import generics, status
 from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
@@ -11,7 +11,7 @@ from play.models import Players
 from tournament.models import TournamentParticipants
 
 
-class BlockedUserView(SerializerContext, generics.CreateAPIView, generics.DestroyAPIView):
+class BlockedUserView(SerializerKwargsContext, generics.CreateAPIView, generics.DestroyAPIView):
     serializer_class = BlockedSerializer
     permission_classes = []
 
