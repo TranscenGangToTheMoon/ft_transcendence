@@ -35,3 +35,10 @@ def request_game(endpoint: Literal['match/', 'tournaments/', 'playing/{user_id}/
 
 def request_chat(endpoint: str, method: Literal['PATCH', 'DELETE'] = 'PATCH', data=None):
     return request_service('chat', endpoint, method, data)
+
+
+def requests_auth(token, endpoint: Literal['update/', 'verify/', 'delete/'], method: Literal['GET', 'PUT', 'PATCH', 'DELETE'], data=None):
+    if token is None:
+        raise NotAuthenticated()
+
+    return request_service('auth', endpoint, method, data, token)

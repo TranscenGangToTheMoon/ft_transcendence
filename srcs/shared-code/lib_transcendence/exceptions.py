@@ -11,6 +11,7 @@ class MessagesException:
         CREATOR = NOT_FOUND.format(obj='Creator')
         USER = NOT_FOUND.format(obj='User')
         FRIEND_REQUEST = NOT_FOUND.format(obj='Friend request')
+        FRIENDSHIP = NOT_FOUND.format(obj='Friendship')
 
         NOT_BELONG = 'You do not belong to any {obj}.'
         NOT_BELONG_TOURNAMENT = NOT_BELONG.format(obj='tournament')
@@ -44,7 +45,6 @@ class MessagesException:
         GAME_MODE_PLAYERS = '{obj} mode must have {n} players in each teams.'
         CLASH_3_PLAYERS = GAME_MODE_PLAYERS.format(obj='Clash', n=3)
 
-        TOURNAMENT_SIZE = 'Tournament size must be a multiple of 4.'
         TOURNAMENT_MAX_SIZE = 'Tournament size must be less than or equal than 32.'
         TOURNAMENT_MIN_SIZE = 'Tournament size must be greater or equal than 4.'
 
@@ -66,6 +66,7 @@ class MessagesException:
         NOT_BELONG_TO_CHAT = NOT_BELONG.format(obj='chat')
         NOT_BELONG_LOBBY = NOT_BELONG.format(obj='lobby')
         NOT_BELONG_TOURNAMENT = NOT_BELONG.format(obj='tournament')
+        NOT_BELONG_BLOCKED = 'This blocked user entry does not belong to you.'
 
         ONLY_CREATE_PRIVATE_MESSAGES = 'You can only create private messages.'
 
@@ -73,6 +74,8 @@ class MessagesException:
         KICK_YOURSELF = 'You cannot kick yourself.'
         BLOCK_YOURSELF = 'You cannot block yourself.'
         SEND_FRIEND_REQUEST_YOURSELF = 'You cannot send a friend request to yourself.'
+        FRIEND_YOURSELF = 'You cannot be friends with yourself.'
+        ACCEPT_FRIEND_REQUEST_YOURSELF = {'detail': 'you cannot accept your own friend request.'}
 
         CANNOT_UPDATE_GAME_MODE = 'You cannot update game mode.'
 
@@ -110,7 +113,8 @@ class MessagesException:
         TEAM = 'You are already in this team.'
         BLOCK = 'You are already blocked this user.'
         FRIEND = 'You are already friends with this user.'
-        FRIEND_REQUEST = 'You already send a friend requests to this user.'
+        FRIEND_REQUEST_SENT = 'You have already sent a friend request to this user.'
+        FRIEND_REQUEST_RECEIVED = 'You have already received a friend request from this user.'
 
         JOIN = 'You already joined this {obj}.'
 

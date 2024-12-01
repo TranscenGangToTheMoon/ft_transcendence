@@ -29,9 +29,7 @@ class Test02_PlayError(UnitTest):
     def test_002_already_in_tournament(self):
         user1 = new_user()
 
-        response = create_tournament(user1)
-        self.assertResponse(response, 201)
-        code = response.json['code']
+        code = self.assertResponse(create_tournament(user1), 201, get_id='code')
 
         for i in range(3):
             self.assertResponse(join_tournament(code), 201)
@@ -44,9 +42,7 @@ class Test02_PlayError(UnitTest):
     def test_004_user_in_lobby(self):
         user1 = new_user()
 
-        response = create_lobby(user1)
-        self.assertResponse(response, 201)
-        code = response.json['code']
+        code = self.assertResponse(create_lobby(user1), 201, get_id='code')
 
         self.assertResponse(play(user1), 201)
         self.assertResponse(create_lobby(user1, method='GET'), 404, {'detail': 'You do not belong to any lobby.'})
@@ -55,9 +51,7 @@ class Test02_PlayError(UnitTest):
     def test_005_user_in_tournament(self):
         user1 = new_user()
 
-        response = create_tournament(user1)
-        self.assertResponse(response, 201)
-        code = response.json['code']
+        code = self.assertResponse(create_tournament(user1), 201, get_id='code')
 
         self.assertResponse(play(user1), 201)
         self.assertResponse(create_tournament(user1, method='GET'), 404, {'detail': 'You do not belong to any tournament.'})

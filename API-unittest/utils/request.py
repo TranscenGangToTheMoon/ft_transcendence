@@ -44,4 +44,4 @@ def make_request(endpoint, method: Literal['GET', 'POST', 'DELETE', 'PATCH', 'PU
             print('JSON =>', result)
         return RequestResult(r.status_code, result)
     except json.decoder.JSONDecodeError:
-        open('response.html', 'w').write(r.text)
+        pass

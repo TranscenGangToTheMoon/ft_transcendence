@@ -1,8 +1,10 @@
-from django.http import Http404
+from lib_transcendence.serializer import SerializerAuthContext
 from lib_transcendence.utils import get_host
-from rest_framework import generics
+from rest_framework import generics, status
 from rest_framework.exceptions import MethodNotAllowed
+from rest_framework.response import Response
 
+from chat_messages.utils import get_chat_participants
 from chats.models import Chats, ChatParticipants
 from chats.serializers import ChatsSerializer
 
@@ -10,6 +12,9 @@ from chats.serializers import ChatsSerializer
 class ChatsMixin(generics.GenericAPIView):
     queryset = Chats.objects.all()
     serializer_class = ChatsSerializer
+
+
+class ChatsView(generics.ListCreateAPIView, ChatsMixin):
 
     def filter_queryset(self, queryset):
         query = self.request.data.pop('q', None)
@@ -22,22 +27,20 @@ class ChatsMixin(generics.GenericAPIView):
         return queryset.filter(id__in=join_chats, blocked=False).distinct()
 
 
-class ChatsView(generics.ListCreateAPIView, ChatsMixin):
-    pass
-
-
-class ChatView(generics.RetrieveUpdateDestroyAPIView, ChatsMixin):
-    lookup_field = 'pk'
+class ChatView(SerializerAuthContext, generics.RetrieveDestroyAPIView, ChatsMixin):
+    lookup_field = 'chat_id'
 
     def get_object(self):
-        obj = super().get_object()
-        if obj.blocked:
-            raise Http404
-        return obj
+        user = get_chat_participants(self.kwargs['chat_id'], self.request.user.id, False)
+        if user.view_chat is False:
+            user.set_view_chat()
+        return user.chat
 
     def destroy(self, request, *args, **kwargs):
-        if get_host(request) != 'game':
-            raise MethodNotAllowed(request.method)
+        if get_host(request) not in ('game', 'users'):
+            user = get_chat_participants(kwargs['chat_id'], request.user.id, False)
+            user.set_view_chat(False)
+            return Response(status=status.HTTP_204_NO_CONTENT)
         return super().destroy(request, *args, **kwargs)
 
 

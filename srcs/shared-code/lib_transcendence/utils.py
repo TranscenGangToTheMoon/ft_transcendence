@@ -1,23 +1,24 @@
 import random
 import string
+from typing import Literal
 
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
 
 
-def generate_code(model=None, k=4):
+def generate_code(model=None, k=4, filter_field: Literal['code', 'username'] = 'code'):
     for _ in range(100000):
         code = ''.join(random.choices(string.digits, k=k))
         if model is None:
             return code
-        if not model.objects.filter(code=code).exists():
+        kwargs = {filter_field: code}
+        if not model.objects.filter(**kwargs).exists():
             return code
     raise PermissionDenied('Code generation failed.')
 
 
-#todo secure guest unique
-def generate_guest_username():
-    return 'Guest' + generate_code(k=6)
+def generate_guest_username(users_model):
+    return 'Guest' + generate_code(users_model, 6, 'username')
 
 
 def validate_type(value, name, choices):

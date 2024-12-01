@@ -1,9 +1,10 @@
+from lib_transcendence.endpoints import Auth
 from lib_transcendence.exceptions import MessagesException
 from lib_transcendence import endpoints
 from rest_framework import serializers, permissions
 from rest_framework.exceptions import ParseError
 
-from lib_transcendence.services import request_users
+from lib_transcendence.services import request_users, requests_auth
 
 
 class IsAuthenticated(permissions.BasePermission):
@@ -21,3 +22,7 @@ def get_auth_user(request=None):
     if request is None:
         raise serializers.ValidationError(MessagesException.ValidationError.REQUEST_REQUIRED)
     return request.data['auth_user']
+
+
+def auth_verify(token):
+    return requests_auth(token, Auth.verify, method='GET')
