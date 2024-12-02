@@ -6,7 +6,7 @@
 /*   By: xcharra <xcharra@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/27 13:57:24 by xcharra           #+#    #+#             */
-/*   Updated: 2024/11/29 11:26:44 by xcharra          ###   ########.fr       */
+/*   Updated: 2024/12/02 17:00:27 by xcharra          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,15 @@
 #include "CurlWrapper.hpp"
 #include "colors.h"
 
-CurlWrapper::CurlWrapper(const std::string &host) : _host(host), _SSLCertificate("./ft_transcendence.crt"),
+CurlWrapper::CurlWrapper(const std::string &server) : _serverSet(true), _server(server), _SSLCertificate("./ft_transcendence.crt"),
+	_headers(nullptr), _HTTPCode(0) {
+	std::cout << C_MSG("CurlWrapper default constructor called") << std::endl;
+
+	if (curl_global_init(CURL_GLOBAL_DEFAULT))
+		throw (std::runtime_error("Failed to init curl"));
+}
+
+CurlWrapper::CurlWrapper() : _serverSet(false), _server(), _SSLCertificate("./ft_transcendence.crt"),
 	_headers(nullptr), _HTTPCode(0) {
 	std::cout << C_MSG("CurlWrapper default constructor called") << std::endl;
 
@@ -38,7 +46,7 @@ void CurlWrapper::test() {
 }
 
 void CurlWrapper::addHeader(const std::string &header) {
-	_headers = curl_slist_append(_headers, header.c_str());
+_headers = curl_slist_append(_headers, header.c_str());
 	if (!_headers)
 		throw (std::runtime_error("Failed to add headers"));
 }
@@ -50,8 +58,11 @@ void CurlWrapper::clearHeaders() {
 }
 
 std::string CurlWrapper::GET(const std::string &path, const std::string &data) {
+	if (!isServerSet())
+		throw (std::invalid_argument("Server not set"));
+
 	std::string	response;
-	std::string	url = _host + path;
+	std::string	url = _server + path;
 	CURL		*curl = curl_easy_init();
 
 	if (!curl) {
@@ -85,8 +96,11 @@ std::string CurlWrapper::GET(const std::string &path, const std::string &data) {
 }
 
 std::string CurlWrapper::POST(const std::string &path, const std::string &data) {
+	if (!isServerSet())
+		throw (std::invalid_argument("Server not set"));
+
 	std::string	response;
-	std::string	url = _host + path;
+	std::string	url = _server + path;
 	CURL		*curl = curl_easy_init();
 
 	if (!curl) {
@@ -120,8 +134,11 @@ std::string CurlWrapper::POST(const std::string &path, const std::string &data) 
 }
 
 std::string CurlWrapper::PUT(const std::string &path, const std::string &data) {
+	if (!isServerSet())
+		throw (std::invalid_argument("Server not set"));
+
 	std::string	response;
-	std::string	url = _host + path;
+	std::string	url = _server + path;
 	CURL		*curl = curl_easy_init();
 
 	if (!curl) {
@@ -178,6 +195,15 @@ size_t CurlWrapper::readCallback(void *buffer, size_t size, size_t nmemb, std::s
 	return (copySize);
 }
 
+void CurlWrapper::setServer(const std::string &server) {
+	_server = server;
+	_serverSet = true;
+}
+
 long CurlWrapper::getHTTPCode() const {
 	return (_HTTPCode);
+}
+
+bool CurlWrapper::isServerSet() const {
+	return (_serverSet);
 }
