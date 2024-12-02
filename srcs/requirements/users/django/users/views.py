@@ -29,7 +29,7 @@ class RetrieveUserView(generics.RetrieveAPIView):
     serializer_class = UsersSerializer
 
     def get_object(self):
-        return get_valid_user(get_user(self.request), False, id=self.kwargs['user_id'])
+        return get_valid_user(get_user(self.request), False, True, id=self.kwargs['user_id'])
 
 
 users_me_view = UsersMeView.as_view()
