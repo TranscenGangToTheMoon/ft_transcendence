@@ -77,8 +77,7 @@ TEMPLATES = [
     },
 ]
 
-# WSGI_APPLICATION = 'matchmaking.wsgi.application'
-ASGI_APPLICATION = 'matchmaking.asgi.application'
+WSGI_APPLICATION = 'matchmaking.wsgi.application'
 
 
 # Database
