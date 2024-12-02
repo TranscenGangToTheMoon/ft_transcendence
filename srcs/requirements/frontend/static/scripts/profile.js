@@ -11,7 +11,10 @@ async function loadTabs() {
 
 async function profileInit() {
     await indexInit(false);
-    loadTabs();
+    const buggyModals = document.querySelectorAll('.modal[style]');
+    for (let buggyModal of buggyModals)
+        buggyModal.removeAttribute('style');
+    await loadTabs();
 }
 
 profileInit();

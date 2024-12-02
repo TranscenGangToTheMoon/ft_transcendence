@@ -12,23 +12,25 @@
             <input type="text" id="pNicknameInput">
             <button type="submit">[insert change username icon]</button>
         </form>
+        <div id="pChangeNicknameError"></div>
     </div>
     <div id="pPassword"></div>
         Password
         <form id="pChangePassword">
-            <input type="password" id="pPasswordInput" value="Password123">
+            <input type="password" id="pPasswordInput" placeholder="new password">
             <button type="submit">[insert change password icon]</button>
         </form>
+        <div id="pChangePasswordError"></div>
     </div>
     <div id="pDownload"></div>
         Download Account data
-        <div id="pDownloadData">
+        <div id="pDownloadData" class="btn btn-outline-secondary">
             [insert download icon]
         </div>
     </div>
     <div id="pDelete"></div>
         Delete Account
-        <div id="pDeleteAccount">[insert delete icon]</div>
+        <div class="btn btn-danger" id="pDeleteAccount">[insert delete icon]</div>
     </div>
 </div>
 
