@@ -6,7 +6,7 @@
 /*   By: xcharra <xcharra@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/25 16:32:19 by xcharra           #+#    #+#             */
-/*   Updated: 2024/12/01 01:18:33 by xcharra          ###   ########.fr       */
+/*   Updated: 2024/12/02 18:20:32 by xcharra          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,8 +24,9 @@
 using namespace ftxui;
 
 int main(void) {
-	auto screen = ScreenInteractive::Fullscreen();
 
+	CurlWrapper	curl("https://localhost:4443");
+	auto		screen = ScreenInteractive::Fullscreen();
 	std::string	server;
 	std::string	username;
 	std::string	password;
@@ -35,15 +36,17 @@ int main(void) {
 	Component	server_input = Input(&server);
 	Component	username_input = Input(&username);
 	Component	password_input = Input(&password, password_option);
+	//maybe creat checkbox to reveal password
 
-	std::string	warning = "";
+	auto	warning = text("");
+
 	auto	signInAction = [&] {
 		if (!username.empty() && !password.empty()) {
 			screen.ExitLoopClosure()();
 			std::cout << "Sign In" << std::endl;
 		}
 		else
-			warning = "Empty fields";
+			warning = text("Empty fields") | color(Color::Red);
 	};
 	auto	signUpAction = [&] {
 		if (!username.empty() && !password.empty()) {
@@ -51,29 +54,45 @@ int main(void) {
 			std::cout << "Sign Up" << std::endl;
 		}
 		else
-			warning  = "Empty fields";
+			warning = text("Empty fields !") | color(Color::Red);
 	};
-	Component	signInButton = Button("Sign In", signInAction, ButtonOption::Animated(Color::Blue));
-	Component	signUpButton = Button("Sign Up", signUpAction, ButtonOption::Animated(Color::Red));
+	auto	testAction = [&] {
+		if (!server.empty()) {
+			try {
+				curl.setServer(server);
+				curl.test();
+				warning = text("Connexion test success !") | color(Color::Green);
+			}
+			catch (std::exception &error) {
+				text(error.what()) | color(Color::Red);
+			}
+		}
+		else
+			warning = text("Empty server field !") | color(Color::Red);
+	};
+	Component	signInButton = Button("Sign In", signInAction, ButtonOption::Animated(Color::Red));
+	Component	signUpButton = Button("Sign Up", signUpAction, ButtonOption::Animated(Color::Green));
+	Component	testButton = Button("Test", testAction, ButtonOption::Animated(Color::Blue));
 
 	auto	userFields = Container::Vertical({
 		server_input,
 		username_input,
 		password_input,
+		testButton,
 		signInButton,
 		signUpButton,
 	});
 
-	auto banner = 				vbox(
-					text(BANNER1),
-					text(BANNER2),
-					text(BANNER3),
-					text(BANNER4),
-					text(BANNER5),
-					text(BANNER6),
-					text("")
-				);
-	auto config = FlexboxConfig().Set(FlexboxConfig::AlignContent::Center);;
+	auto banner = vbox(
+		text(BANNER1),
+		text(BANNER2),
+		text(BANNER3),
+		text(BANNER4),
+		text(BANNER5),
+		text(BANNER6),
+		text("")
+	);
+
 	auto	renderer = Renderer(userFields, [&] {
 		return (
 			vbox({
@@ -95,15 +114,18 @@ int main(void) {
 								text("Password: "),
 								password_input->Render()
 							),
-							flexbox({
-								signInButton->Render(),
-								signUpButton->Render(), //maybe add a test server button
-							}, config) | flex,
+							vbox({
+								testButton->Render() | flex,
+								hbox({
+									signInButton->Render() | flex,
+									signUpButton->Render() | flex,
+								}),
+							})
 						})) | size(WIDTH, EQUAL, 30)| hcenter,
-					text(warning) | color(Color::Red) | hcenter,
+					warning | hcenter,
 					filler()
 				}) | flex,
-			}) | border
+			}) | border | size(WIDTH, GREATER_THAN, 150) | size(HEIGHT, GREATER_THAN, 40) | vscroll_indicator
 		);
 	});
 
@@ -113,8 +135,12 @@ int main(void) {
 			return (true);
 		}
 		else if (event == Event::Character('\n')) {
+			if (!server.empty()) {
+				warning = text("Testing !") | color(Color::Blue);
+				testAction(); //dont' work
+			}
 			if (username.empty() || password.empty())
-				warning = "Empty fields";
+				warning = text("Empty fields !") | color(Color::Red);
 			else {
 				// try connection
 				screen.ExitLoopClosure()();
