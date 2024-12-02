@@ -30,10 +30,10 @@ class Test01_GetUsers(UnitTest):
         user2 = new_user()
 
         self.assertResponse(blocked_user(user1, user2['id']), 201)
-        self.assertResponse(get_user(user1, user2['id']), 403, {'detail': 'You block this user.'})
+        self.assertResponse(get_user(user1, user2['id']), 403, {'detail': 'You blocked this user.'})
 
     def test_004_get_user_doest_not_exist(self):
-        self.assertResponse(get_user(user2_id=123456), 404, {'detail': 'User not found'})
+        self.assertResponse(get_user(user2_id=123456), 404, {'detail': 'User not found.'})
 
 
 class Test02_UserMe(UnitTest):
