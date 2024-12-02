@@ -1,4 +1,4 @@
-from services.blocked import blocked_user
+from services.blocked import blocked_user, unblocked_user
 from services.tournament import create_tournament, join_tournament, kick_user, search_tournament
 from utils.credentials import new_user, guest_user
 from utils.generate_random import rnstr
@@ -106,6 +106,23 @@ class Test02_ErrorTournament(UnitTest):
 
         self.assertResponse(join_tournament(code, user1, 'DELETE'), 204)
         self.assertResponse(create_tournament(user1), 403, {'detail': 'You cannot create more than one tournament at the same time.'})
+
+    def test_012_blocked_then_unblock(self):
+        user1 = new_user()
+        user2 = new_user()
+
+        code = self.assertResponse(create_tournament(user1), 201, get_id='code')
+
+        self.assertResponse(join_tournament(code, user2), 201)
+        blocked_id = self.assertResponse(blocked_user(user1, user2['id']), 201, get_id=True)
+
+        response = join_tournament(code, user1, 'GET')
+        self.assertResponse(response, 200)
+        self.assertEqual(1, len(response.json))
+
+        self.assertResponse(join_tournament(code, user2), 404, {'detail': 'Tournament not found.'})
+        self.assertResponse(unblocked_user(user1, blocked_id), 204)
+        self.assertResponse(join_tournament(code, user2), 201)
 
 
 class Test03_KickTournament(UnitTest):
