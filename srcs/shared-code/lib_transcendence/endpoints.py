@@ -2,12 +2,12 @@ base_api = 'api/'
 
 
 class Auth:
-    base_auth = base_api + 'auth/'
+    _base_auth = base_api + 'auth/'
 
-    guest = base_auth + 'guest/'
-    register = base_auth + 'register/'
-    login = base_auth + 'login/'
-    refresh = base_auth + 'refresh/'
+    guest = _base_auth + 'guest/'
+    register = _base_auth + 'register/'
+    login = _base_auth + 'login/'
+    refresh = _base_auth + 'refresh/'
 
     verify = base_api + 'verify/'
     update = base_api + 'update/'
@@ -25,28 +25,28 @@ class Chat:
 
 
 class Game:
-    base_game = base_api + 'game/'
+    _base_game = base_api + 'game/'
 
     match = base_api + 'match/'
     fmatch_user = match + '{user_id}/'
     match_user = fmatch_user.format(user_id='<int:user_id>')
     tournaments = base_api + 'tournaments/'
 
-    matches_user = base_game + 'matches/<int:user_id>/'
-    tournament = base_game + 'tournaments/<int:tournament_id>/'
+    matches_user = _base_game + 'matches/<int:user_id>/'
+    tournament = _base_game + 'tournaments/<int:tournament_id>/'
 
 
 class Matchmaking:
-    base_matchmaking = base_api + 'play/'
+    _base_matchmaking = base_api + 'play/'
 
-    duel = base_matchmaking + 'duel/'
-    ranked = base_matchmaking + 'ranked/'
+    duel = _base_matchmaking + 'duel/'
+    ranked = _base_matchmaking + 'ranked/'
 
-    lobby = base_matchmaking + 'lobby/'
+    lobby = _base_matchmaking + 'lobby/'
     lobby_participant = lobby + '<str:code>/'
     lobby_kick = lobby_participant + 'kick/<int:user_id>/'
 
-    tournament = base_matchmaking + 'tournament/'
+    tournament = _base_matchmaking + 'tournament/'
     tournament_search = tournament + 'search/'
     tournament_participant = tournament + '<str:code>/'
     tournament_kick = tournament + '<str:code>/kick/<int:user_id>/'
@@ -55,10 +55,10 @@ class Matchmaking:
 
 
 class Users:
-    base_users = base_api + 'users/'
+    _base_users = base_api + 'users/'
 
-    me = base_users + 'me/'
-    user = base_users + '<int:user_id>/'
+    me = _base_users + 'me/'
+    user = _base_users + '<int:user_id>/'
 
     friends = me + 'friends/'
     friend = friends + '<int:friendship_id>/'
