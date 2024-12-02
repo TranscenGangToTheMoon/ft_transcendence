@@ -7,6 +7,10 @@ localhost:443 {
 		file_server
 	}
 
+	handle /ws/* {
+		reverse_proxy http://game:5500
+	}
+
 	handle /api/* {
 		# API route to micro-services
 		@notJSON {

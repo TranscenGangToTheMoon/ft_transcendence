@@ -14,7 +14,7 @@ window.pathName = pathName;
 // ========================== API REQUESTS ==========================
 
 async function apiRequest(token, endpoint, method="GET", authType="Bearer",
-    contentType="application/json", body=undefined, currentlyRefreshing=false){ 
+    contentType="application/json", body=undefined, currentlyRefreshing=false){
     let options = {
         method: method,
         headers: {
@@ -67,7 +67,7 @@ async function getDataFromApi(token, endpoint, method="GET", authType="Bearer",
 
 window.apiRequest = apiRequest;
 window.getDataFromApi = getDataFromApi;
-    
+
 // ========================== TOKEN UTILS ==========================
 async function forceReloadGuestToken() {
     try {
@@ -139,7 +139,7 @@ function removeTokens() {
 
 async function relog() {
     removeTokens();
-    await navigateTo('/login');   
+    await navigateTo('/login');
 }
 window.removeTokens = removeTokens;
 window.refreshToken = refreshToken;
@@ -149,10 +149,12 @@ window.generateToken = generateToken;
 
 // ========================== SPA SCRIPTS ==========================
 
-function loadScript(scriptSrc) {
+function loadScript(scriptSrc, type) {
     return new Promise((resolve, reject) => {
         const script = document.createElement('script');
         script.src = scriptSrc;
+        if (type)
+            script.type = type;
         script.onload = () => {
             console.log(`Script ${scriptSrc} loaded.`);
             resolve();
@@ -196,7 +198,7 @@ async function loadContent(url, container='content', append=false) {
         tempDiv.innerHTML = html;
         const script = tempDiv.querySelector('[script]');
         if (script)
-            await loadScript(script.getAttribute('script'));
+            await loadScript(script.getAttribute('script'), script.getAttribute('type'));
         let style;
         if (!userInformations || !userInformations.is_guest)
             style = '_style'
@@ -354,6 +356,7 @@ function displayMainAlert(alertTitle, alertContent) {
 }
 
 function displayConfirmModal(confirmTitle, confirmContent) {
+    window.PongGame.pauseGame();
     const confirmContentDiv = document.getElementById('confirmContent');
     const confirmTitleDiv = document.getElementById('confirmModalLabel');
     const confirmModal = new bootstrap.Modal(document.getElementById('confirmModal'));
