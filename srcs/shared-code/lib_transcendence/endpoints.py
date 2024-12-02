@@ -19,7 +19,7 @@ class Chat:
 
     chats = base_chat
     chat = chats + '<int:chat_id>/'
-    messages = chat + 'messages/'
+    messages = base_api + 'messages/'
 
 
 class Game:
