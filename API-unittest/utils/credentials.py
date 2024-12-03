@@ -72,7 +72,7 @@ def get_service():
     return service_name.replace('test_', '')
 
 
-def new_user(username=None, password=None):
+def new_user(username=None, password=None, get_me=True):
     if username is None:
         username = f'{get_service()}-user-' + rnstr()
     if password is None:
@@ -81,12 +81,13 @@ def new_user(username=None, password=None):
     token = get_token('register', _new_user['username'], password)
     _new_user['token'] = token['access']
     _new_user['refresh'] = token['refresh']
-    response = make_request(
-        endpoint='users/me/',
-        token=_new_user['token'],
-    )
-    assert response.status_code == 200
-    _new_user['id'] = response.json['id']
+    if get_me:
+        response = make_request(
+            endpoint='users/me/',
+            token=_new_user['token'],
+        )
+        assert response.status_code == 200
+        _new_user['id'] = response.json['id']
     return _new_user
 
 
