@@ -65,7 +65,7 @@ class Tournaments(models.Model):
             name = '*'
         else:
             name = ''
-        name += f'{self.code}/{self.name} ({self.participants.count()}/{self.size})'
+        name += f'{self.code}/{self.name} {self.created_by} ({self.participants.count()}/{self.size})'
         if self.is_started:
             name += ' STARTED'
         return name
