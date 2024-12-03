@@ -30,14 +30,47 @@ urlpatterns = [
 # 2. todo handle rename user
 # 3. todo handle create user
 
-# todo make endpoint for user stats, xp, trophies (when match ended, or when tournament ended) WAIT REUNION
+# todo make endpoint for user stats, xp, trophies (when match ended, or when tournament ended)
+# - pas de stat (custom_game)
+# - stat tournoi gagne
+# - stat tournoi point marque en tournoi
+# - stat tournoi nombre de game gagne
+# - stat tournoi nombre de game joue
+
+# - stat ranked evolution du ranked au file du temps
+# - stat ranked nb de point
+# - stat ranked win
+# - stat ranked play
+
+# - stat 1v1 nb de point
+# - stat 1v1 win
+# - stat 1v1 play
+
+# - stat 3v3 nb de point
+# - stat 3v3 win
+# - stat 3v3 play
+# - stat 3v3 csc
+
+# - stat total partie faite
+# - stat total point marque
+# - stat total win
+
+# - stat ranked max elo
+
+# - delete season
+# - delete coin
+# - delete xp
 
 # todo make endpoint for online status
 # todo fix github issue
 # todo create chat when lobby or tournament is created
 # todo delete chat after finish tournament
 # todo delete chat after finish lobby
-# todo make season WAIT REUNION
+
+# custom game
+# - bo et 1v1 | 3v3 (rien a changer)
+
+# - Tournoi pas de seeding
 
 # --- before push ---
 # todo type all python code (make variable)
