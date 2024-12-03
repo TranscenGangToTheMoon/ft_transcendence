@@ -3,11 +3,8 @@ from rest_framework.exceptions import NotAuthenticated, AuthenticationFailed
 from rest_framework.permissions import IsAuthenticated
 from lib_transcendence.exceptions import MessagesException
 
-from delete.serializers import DeleteSerializer
-
 
 class DeleteUserView(generics.DestroyAPIView):
-    serializer_class = DeleteSerializer
     permission_classes = [IsAuthenticated]
 
     def get_object(self):
