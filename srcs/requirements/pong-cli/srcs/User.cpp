@@ -42,7 +42,7 @@ User::~User() {
 void User::initializeConnection(CurlWrapper &curl) {
 	curl.addHeader("Content-Type: application/json");
 
-	std::string json = curl.POST("/api/auth/guest/", "");
+	std::string	json = curl.POST("/api/auth/guest/", "");
 
 	setAccessToken(jsonParser(json, "access"));
 	setRefreshToken(jsonParser(json, "refresh"));

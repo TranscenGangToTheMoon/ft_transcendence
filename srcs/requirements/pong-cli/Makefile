@@ -4,11 +4,13 @@
 INCS		:=	\
 				colors.h\
 				pong-cli.h\
-				CurlWrapper.hpp\
+				PongCLI.hpp\
+				Renderer.hpp\
 				User.hpp
 
 SRCS		:=	\
 				CurlWrapper.cpp\
+				PongCLI.cpp\
 				User.cpp\
 				main.cpp\
 

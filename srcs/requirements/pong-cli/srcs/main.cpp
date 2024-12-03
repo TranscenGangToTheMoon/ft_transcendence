@@ -6,39 +6,74 @@
 /*   By: xcharra <xcharra@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/25 16:32:19 by xcharra           #+#    #+#             */
-/*   Updated: 2024/12/02 18:20:32 by xcharra          ###   ########.fr       */
+/*   Updated: 2024/12/03 19:12:22 by xcharra          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <cstring>
+#include <iostream>
 #include <random>
-#include "pong-cli.h"
-#include "CurlWrapper.hpp"
-#include "User.hpp"
-#include "ftxui/component/screen_interactive.hpp"
 
+#include "ftxui/component/screen_interactive.hpp"
 #include "ftxui/dom/elements.hpp"
 #include "ftxui/screen/screen.hpp"
 #include "ftxui/component/component.hpp"
-#include <iostream>
-using namespace ftxui;
 
+#include "pong-cli.h"
+#include "CurlWrapper.hpp"
+#include "PongCLI.hpp"
+#include "User.hpp"
+
+using namespace ftxui;
+//
 int main(void) {
+	{
+		CurlWrapper curl("https://localhost:4443");
+		User user;
+		user.setUsername("test");
+		user.setPassword("pass");
+
+
+		PongCLI app(curl, user);
+		app.test();
+	}
 
 	CurlWrapper	curl("https://localhost:4443");
-	auto		screen = ScreenInteractive::Fullscreen();
-	std::string	server;
-	std::string	username;
-	std::string	password;
-	InputOption	password_option;
+	User		user;
 
-	password_option.password = true;
-	Component	server_input = Input(&server);
-	Component	username_input = Input(&username);
-	Component	password_input = Input(&password, password_option);
+	auto		screen = ScreenInteractive::Fullscreen();
+
+	std::string	server;
+	InputOption	serverOption;
+	std::string	username;
+	InputOption	usernameOption;
+	std::string	password;
+	InputOption	passwordOption;
+
+//	serverOption.multiline = false;
+	usernameOption.multiline = false;
+	passwordOption.multiline = false;
+	passwordOption.password = true;
 	//maybe creat checkbox to reveal password
 
+	auto stateTransformer = [](InputState state) {
+		if (state.hovered)
+			state.element |= bgcolor(Color::GrayLight);
+		else if (state.focused) {
+			state.element |= bgcolor(Color::GrayDark);
+		}
+		return (state.element);
+	};
+
+	serverOption.transform = stateTransformer;
+	usernameOption.transform = stateTransformer;
+	passwordOption.transform = stateTransformer;
+
 	auto	warning = text("");
+
+	Component	serverInput = Input(&server, serverOption);
+	Component	usernameInput = Input(&username, usernameOption);
+	Component	passwordInput = Input(&password, passwordOption);
 
 	auto	signInAction = [&] {
 		if (!username.empty() && !password.empty()) {
@@ -60,11 +95,11 @@ int main(void) {
 		if (!server.empty()) {
 			try {
 				curl.setServer(server);
-				curl.test();
+				user.initializeConnection(curl);
 				warning = text("Connexion test success !") | color(Color::Green);
 			}
 			catch (std::exception &error) {
-				text(error.what()) | color(Color::Red);
+				warning = text(error.what()) | color(Color::Red);
 			}
 		}
 		else
@@ -75,9 +110,9 @@ int main(void) {
 	Component	testButton = Button("Test", testAction, ButtonOption::Animated(Color::Blue));
 
 	auto	userFields = Container::Vertical({
-		server_input,
-		username_input,
-		password_input,
+		serverInput,
+		usernameInput,
+		passwordInput,
 		testButton,
 		signInButton,
 		signUpButton,
@@ -104,15 +139,15 @@ int main(void) {
 						vbox({
 							window(
 								text("Server: "),
-								server_input->Render()
+								serverInput->Render()
 							),
 							window(
 								text("Username: "),
-								username_input->Render()
+								usernameInput->Render()
 							),
 							window(
 								text("Password: "),
-								password_input->Render()
+								passwordInput->Render()
 							),
 							vbox({
 								testButton->Render() | flex,
@@ -121,11 +156,12 @@ int main(void) {
 									signUpButton->Render() | flex,
 								}),
 							})
-						})) | size(WIDTH, EQUAL, 30)| hcenter,
+						})) | size(WIDTH, GREATER_THAN, 30)| hcenter,
 					warning | hcenter,
 					filler()
 				}) | flex,
-			}) | border | size(WIDTH, GREATER_THAN, 150) | size(HEIGHT, GREATER_THAN, 40) | vscroll_indicator
+			}) | border | size(WIDTH, GREATER_THAN, 150) | size(HEIGHT, GREATER_THAN, 40)
+//			| yframe | vscroll_indicator // use that for add scroll bar
 		);
 	});
 
@@ -134,19 +170,19 @@ int main(void) {
 			screen.ExitLoopClosure()();
 			return (true);
 		}
-		else if (event == Event::Character('\n')) {
-			if (!server.empty()) {
-				warning = text("Testing !") | color(Color::Blue);
-				testAction(); //dont' work
-			}
-			if (username.empty() || password.empty())
-				warning = text("Empty fields !") | color(Color::Red);
-			else {
-				// try connection
-				screen.ExitLoopClosure()();
-			}
-			return (true);
-		}
+//		else if (event == Event::Character('\n')) {
+//			if (!server.empty()) {
+//				warning = text("Testing !") | color(Color::Blue);
+//				testAction(); //dont' work
+//			}
+//			if (username.empty() || pass.empty())
+//				warning = text("Empty fields !") | color(Color::Red);
+//			else {
+//				// try connection
+//				screen.ExitLoopClosure()();
+//			}
+//			return (true);
+//		}
 		return (false);
 	});
 
@@ -157,11 +193,6 @@ int main(void) {
 	std::cout << "password: " << password << std::endl;
 	return (0);
 }
-
-
-
-
-
 
 
 
