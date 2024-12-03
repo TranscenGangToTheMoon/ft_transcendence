@@ -46,7 +46,7 @@ INSTALLED_APPS = [
     'lobby',
     'play',
     'tournament',
-    'users',
+    'user_management',
 ]
 
 MIDDLEWARE = [
