@@ -367,6 +367,6 @@ class Test07_GetTournament(UnitTest):
 # todo test stage
 # todo test index after make it
 # todo test when tournament ended
-# todo test search user block does not appear
+
 if __name__ == '__main__':
     unittest.main()
