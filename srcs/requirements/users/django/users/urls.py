@@ -74,6 +74,7 @@ urlpatterns = [
 
 # - get message, mark as read
 # - faire inbox notif
+# - stocker tous le temps passe sur le site (when SSE)
 
 # --- before push ---
 # todo type all python code (make variable)
