@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from typing import Literal
 
 from django.db.models import Q
 from lib_transcendence.exceptions import MessagesException
@@ -10,6 +11,8 @@ from rest_framework.exceptions import PermissionDenied, NotFound
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
+from blocking.models import Blocked
+from blocking.utils import create_player_instance, delete_player_instance
 from matchmaking.create_match import create_tournament_match
 from matchmaking.utils import get_tournament_participant, get_tournament, get_kick_participants, kick_yourself
 from tournament.models import Tournaments, TournamentParticipants
@@ -31,11 +34,24 @@ class TournamentView(generics.CreateAPIView, generics.RetrieveAPIView):
 class TournamentSearchView(generics.ListAPIView):
     serializer_class = TournamentSearchSerializer
 
-    def get_queryset(self): # todo filter all blocked users
+    def get_queryset(self):
+        def get_blocked_users(kwargs: Literal['user_id', 'blocked_user_id']):
+            if kwargs == 'user_id':
+                create_player_instance(self.request)
+                values_list = 'blocked_user_id'
+            else:
+                values_list = 'user_id'
+            blocked_results = list(Blocked.objects.filter(**{kwargs: self.request.user.id}).values_list(values_list, flat=True))
+            if kwargs == 'user_id':
+                delete_player_instance(user_id=self.request.user.id)
+            return blocked_results
+
         query = self.request.data.get('q')
         if query is None:
             raise serializers.ValidationError({'q': [MessagesException.ValidationError.FIELD_REQUIRED]})
-        return Tournaments.objects.filter(Q(private=False) | Q(created_by=self.request.user.id), name__icontains=query)
+        results = Tournaments.objects.filter(Q(private=False) | Q(created_by=self.request.user.id), name__icontains=query)
+        exclude_blocked = get_blocked_users('user_id') + get_blocked_users('blocked_user_id')
+        return results.exclude(created_by__in=exclude_blocked)
 
 
 class TournamentParticipantsView(SerializerAuthContext, generics.ListCreateAPIView, generics.DestroyAPIView):
