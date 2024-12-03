@@ -5,7 +5,7 @@ from lobby.views import lobby_view, lobby_participants_view, lobby_kick_view
 from play.views import duel_view, ranked_view
 from tournament.views import tournament_view, tournament_search_view, tournament_participants_view, tournament_kick_view, \
     tournament_result_match_view
-from users.views import blocked_user_view, delete_user_view
+from users_management.views import blocked_user_view, delete_user_view
 
 urlpatterns = [
     path(Matchmaking.duel, duel_view),
