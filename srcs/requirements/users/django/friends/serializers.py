@@ -1,26 +1,23 @@
-from lib_transcendence.exceptions import MessagesException, ResourceExists
+from lib_transcendence.exceptions import MessagesException
 from rest_framework import serializers
-from rest_framework.exceptions import NotFound
+from rest_framework.exceptions import NotFound, PermissionDenied
 
 from friend_requests.models import FriendRequests
-from friends.utils import is_friendship
 from friends.models import Friends
-from users.auth import get_user, get_valid_user
+from users.auth import get_user
 
 
 class FriendsSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(write_only=True)
     friends = serializers.SerializerMethodField()
 
     class Meta:
         model = Friends
         fields = [
-            'username',
             'id',
             'friends',
             'friends_since',
             'matches_play_against',
-            'user1_win',
+            'user1_win', # todo remake
             'matches_play_together',
             'matches_win_together',
         ]
@@ -31,16 +28,16 @@ class FriendsSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         user_accept = get_user(self.context.get('request'))
-        user_send_friend_request = get_valid_user(user_accept, validated_data.pop('username'))
 
-        if is_friendship(user_accept, user_send_friend_request):
-            raise ResourceExists(MessagesException.ResourceExists.FRIEND)
+        if user_accept.friend_requests_sent.filter(id=self.context['friend_request_id']).exists():
+            raise PermissionDenied(MessagesException.PermissionDenied.ACCEPT_FRIEND_REQUEST_YOURSELF)
 
         try:
-            user_accept.received_friend_requests.get(sender=user_send_friend_request).delete()
+            friend_request = user_accept.friend_requests_received.get(id=self.context['friend_request_id'])
+            friend_request.delete()
         except FriendRequests.DoesNotExist:
             raise NotFound(MessagesException.NotFound.FRIEND_REQUEST)
 
         result = super().create(validated_data)
-        result.friends.add(user_accept, user_send_friend_request)
+        result.friends.add(user_accept, friend_request.sender)
         return result

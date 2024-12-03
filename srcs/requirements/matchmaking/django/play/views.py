@@ -15,6 +15,9 @@ class PlayMixin(generics.CreateAPIView, generics.DestroyAPIView):
             return Players.objects.get(user_id=self.request.user.id)
         except Players.DoesNotExist:
             raise NotFound(MessagesException.NotFound.NOT_PLAYING)
+    def perform_create(self, serializer):
+        new_player = super().perform_create(serializer)
+        Players.tag(new_player)
 
 
 class DuelView(PlayMixin):

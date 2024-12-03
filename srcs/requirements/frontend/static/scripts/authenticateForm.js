@@ -45,7 +45,7 @@ document.getElementById("loginButton").addEventListener('click', event => {
                 await fetchUserInfos(true);
                 loadUserProfile();
                 if (window.location.pathname.includes('login'))
-                    navigateTo('/');
+                    await navigateTo('/');
                 else
                     handleRoute();
                 return;//todo redirect to uri

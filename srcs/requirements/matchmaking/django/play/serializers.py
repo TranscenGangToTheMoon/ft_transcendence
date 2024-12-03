@@ -36,11 +36,11 @@ class PlayersSerializer(serializers.ModelSerializer):
 
         validated_data['user_id'] = user['id']
         validated_data['trophies'] = user['trophies']
-        threading.Thread(target=func).start()
+        # threading.Thread(target=func).start()
         return super().create(validated_data)
 
-def func():
-	import subprocess
-	import time
-	time.sleep(10)
-	subprocess.run(["python", "matchmaking/matchmaking.py"])
+# def func():
+# 	import subprocess
+# 	import time
+# 	time.sleep(10)
+# 	subprocess.run(["python", "matchmaking/matchmaking.py"])

@@ -18,8 +18,8 @@ async function deleteAccount(password) {
                 removeTokens();
                 await generateToken();
                 await fetchUserInfos(true);
-                navigateTo('/');
-                displayMainError('Account deleted', 'Your account has been successfully deleted. You have been redirected to homepage.');
+                await navigateTo('/');
+                displayMainAlert('Account deleted', 'Your account has been successfully deleted. You have been redirected to homepage.');
             }
         })
         .catch(error => {
@@ -41,9 +41,10 @@ document.getElementById('pChangeNickname').addEventListener('submit', async even
         let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/users/me/`, "PATCH",
         undefined, undefined, {'username' : newUsername});
         if (!data.id)
-            document.getElementById('container').innerText = data.username;
+            document.getElementById('pChangeNicknameError').innerText = data.username;
         else {
-            indexInit();
+            indexInit(false);
+            displayMainAlert("Nickname updated", `Successfully updated your nickname to '${newUsername}'`)
             handleRoute();
         }
     }
@@ -54,32 +55,26 @@ document.getElementById('pChangeNickname').addEventListener('submit', async even
 
 document.getElementById('pChangePassword').addEventListener('submit', async event => {
     event.preventDefault();
-    const newPassword = document.getElementById('pPasswordInput').value;
+    const newPasswordInputDiv = document.getElementById('pPasswordInput');
+    const newPassword = newPasswordInputDiv.value;
     if (!newPassword)
         return;
-    if (newPassword === 'Password123')
-        return document.getElementById('container').innerText = 'Please enter a new password';
     try {
         let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/users/me/`, "PATCH",
         undefined, undefined, {'password' : newPassword});
-        if (!data.id)
-            document.getElementById('container').innerText = data.username;
-        else 
-            navigateTo('/profile');
+        if (!data.id){
+            document.getElementById('pChangePasswordError').innerText = data.username;
+            if (data.detail)
+                document.getElementById('pChangePasswordError').innerText = data.detail;
+        }
+        else{
+            displayMainAlert("password updated", "successfully updated your password.");
+            newPasswordInputDiv.value = "";
+        }
     }
     catch (error){
         console.log('error on password change', error);
     }
-})
-
-document.getElementById('pPasswordInput').addEventListener('focus', function clearInput(event) {
-    event.preventDefault();
-    this.value = "";
-})
-
-document.getElementById('pPasswordInput').addEventListener('focusout', function fillInput(event) {
-    event.preventDefault();
-    this.value = "Password123";
 })
 
 function fillNicknamePlaceholder() {
@@ -87,6 +82,9 @@ function fillNicknamePlaceholder() {
 }
 
 async function accountInit(){
+    if (userInformations.is_guest){
+        document.getElementById('pDeleteAccount').classList.add('disabled');
+    }
     fillNicknamePlaceholder();
 } 
 

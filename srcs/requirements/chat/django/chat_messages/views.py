@@ -1,29 +1,27 @@
 from rest_framework import generics
-from rest_framework.exceptions import PermissionDenied
-from lib_transcendence.exceptions import MessagesException
+from rest_framework.exceptions import MethodNotAllowed
+from lib_transcendence.serializer import SerializerAuthContext
+from lib_transcendence.utils import get_host
 
 from chat_messages.models import Messages
 from chat_messages.serializers import MessagesSerializer
-from chats.models import ChatParticipants
+from chat_messages.utils import get_chat_participants
 
 
-class MessagesView(generics.ListCreateAPIView):
+class MessagesView(SerializerAuthContext, generics.ListCreateAPIView):
     queryset = Messages.objects.all().order_by('-sent_at')
     serializer_class = MessagesSerializer
-    lookup_field = 'pk'
 
     def filter_queryset(self, queryset):
-        try:
-            ChatParticipants.objects.get(chat_id=self.kwargs['pk'], user_id=self.request.user.id)
-            return queryset.filter(chat_id=self.kwargs['pk'])
-        except ChatParticipants.DoesNotExist:
-            raise PermissionDenied(MessagesException.PermissionDenied.NOT_BELONG_TO_CHAT)
+        chat_id = self.kwargs['chat_id']
 
-    def get_serializer_context(self):
-        context = super().get_serializer_context()
-        context['pk'] = self.kwargs['pk']
-        context['auth_user'] = self.request.data['auth_user']
-        return context
+        get_chat_participants(chat_id, self.request.user.id)
+        return queryset.filter(chat_id=chat_id)
+
+    def create(self, request, *args, **kwargs):
+        if get_host(request) != 'chat':
+            raise MethodNotAllowed('POST')
+        return super().create(request, *args, **kwargs)
 
 
 messages_view = MessagesView.as_view()

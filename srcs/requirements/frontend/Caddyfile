@@ -13,6 +13,7 @@ localhost:443 {
 		handle /ws/chat/* {
 			reverse_proxy http://chat:8010
 		}
+		reverse_proxy http://game:5500
 	}
 
 	handle /api/* {

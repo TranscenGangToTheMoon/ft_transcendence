@@ -5,6 +5,7 @@
 
 .dropdown-item {
     cursor: pointer;
+    user-select: none;
 }
 
 .toast-container {

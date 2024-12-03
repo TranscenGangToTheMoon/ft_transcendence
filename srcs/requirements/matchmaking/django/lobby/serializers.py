@@ -88,7 +88,7 @@ class LobbySerializer(serializers.ModelSerializer):
             creator.team = Teams.a
             creator.save()
         return result
-
+# todo add all venv var in .venv
     def update(self, instance, validated_data):
         if 'game_mode' in validated_data: # todo try with editable = False
             raise PermissionDenied(MessagesException.PermissionDenied.CANNOT_UPDATE_GAME_MODE)
@@ -119,6 +119,7 @@ class LobbyParticipantsSerializer(serializers.ModelSerializer):
         read_only_fields = [
             'id',
             'creator',
+            'join_at',
         ]
 
     def to_representation(self, instance):

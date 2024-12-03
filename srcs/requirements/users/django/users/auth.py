@@ -1,23 +1,11 @@
-from typing import Literal
-
 from lib_transcendence.exceptions import MessagesException
-from lib_transcendence.request import request_service
+from lib_transcendence.services import requests_auth
+from lib_transcendence.auth import auth_verify
 from lib_transcendence.endpoints import Auth
 from rest_framework import permissions, serializers
-from rest_framework.exceptions import NotAuthenticated, NotFound
+from rest_framework.exceptions import NotFound
 
 from users.models import Users
-
-
-def requests_auth(token, endpoint: Literal['update/', 'verify/', 'delete/'], method: Literal['GET', 'PUT', 'PATCH', 'DELETE'], data=None):
-    if token is None:
-        raise NotAuthenticated()
-
-    return request_service('auth', endpoint, method, data, token)
-
-
-def auth_verify(token):
-    return requests_auth(token, Auth.verify, method='GET')
 
 
 def auth_update(token, data):
@@ -58,14 +46,14 @@ def get_user(request=None, id=None):
             raise serializers.ValidationError(MessagesException.ValidationError.REQUEST_REQUIRED)
         id = request.user.id
     try:
-        return Users.objects.get(pk=id)
+        return Users.objects.get(id=id)
     except Users.DoesNotExist:
         raise NotFound(MessagesException.NotFound.USER)
 
 
-def get_valid_user(self, username):
+def get_valid_user(self, **kwargs):
     try:
-        valide_user = Users.objects.get(username=username)
+        valide_user = Users.objects.get(**kwargs)
         assert valide_user.is_guest is False
         assert not valide_user.blocked.filter(blocked=self).exists()
     except (Users.DoesNotExist, AssertionError):
