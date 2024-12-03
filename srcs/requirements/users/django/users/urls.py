@@ -26,24 +26,19 @@ urlpatterns = [
     path(Users.are_blocked, are_blocked_view),
 ]
 
-# todo handle delete user
-# todo handle rename user
-# todo make endpoint for user stats, xp, trophies (when match ended, or when tournament ended)
+# 1. todo handle delete user
+# 2. todo handle rename user
+# 3. todo handle create user
+
+# todo make endpoint for user stats, xp, trophies (when match ended, or when tournament ended) WAIT REUNION
+
 # todo rename all view for more comprehensive name
 # todo make endpoint for online status
 # todo fix github issue
 # todo create chat when lobby or tournament is created
 # todo delete chat after finish tournament
 # todo delete chat after finish lobby
-# todo make test for that
-# todo make doc for all endpoint
-# todo make season
-# 1. todo change block handling in matchmaking
-#   - add blocked db in matchmaking
-#   - when send block info, update matchmakeing blocked db
-#   - not use are_blocked anymore
-#   - handle block in tournament search result
-# 2. rename all users by use management
+# todo make season WAIT REUNION
 
 # --- before push ---
 # todo type all python code (make variable)
