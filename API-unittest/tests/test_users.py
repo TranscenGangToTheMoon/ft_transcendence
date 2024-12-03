@@ -46,5 +46,7 @@ class Test02_UserMe(UnitTest):
         self.assertDictEqual(response.json, {'id': user1['id'], 'username': user1['username'], 'is_guest': False, 'created_at': response.json['created_at'], 'profile_picture': None, 'accept_friend_request': True, 'accept_chat_from': 'friends_only', 'coins': 100, 'trophies': 0, 'current_rank': None})
 
 
+class Test03_DeleteUser(UnitTest):
+
 if __name__ == '__main__':
     unittest.main()
