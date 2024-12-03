@@ -16,9 +16,14 @@ def get_user(user=None, user2_id=None):
     )
 
 
-def me(user, method: Literal['GET', 'DELETE', 'PATCH'] = 'GET'):
+def me(user, method: Literal['GET', 'DELETE', 'PATCH'] = 'GET', data=None, password=False):
+    if method in ('PATCH', 'DELETE') and password:
+        data = {'password': user['password']}
+    elif data is None:
+        data = {}
     return make_request(
         endpoint=f'users/me/',
         token=user['token'],
         method=method,
+        data=data,
     )
