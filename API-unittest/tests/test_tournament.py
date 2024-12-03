@@ -344,22 +344,24 @@ class Test07_GetTournament(UnitTest):
         user2 = new_user()
         name = rnstr()
 
+        self.assertResponse(create_tournament(new_user(), data={'name': 'Blocked ' + name + rnstr()}), 201)
         self.assertResponse(create_tournament(user1, data={'name': 'Blocked ' + name + rnstr()}), 201)
-        blocked_id = self.assertResponse(blocked_user(user1, user2['id']), 201)
-        self.assertResponse(search_tournament('Blocked ' + name, user2), 200, count=0)
+        blocked_id = self.assertResponse(blocked_user(user1, user2['id']), 201, get_id=True)
+        self.assertResponse(search_tournament('Blocked ' + name, user2), 200, count=1)
         self.assertResponse(unblocked_user(user1, blocked_id), 204)
-        self.assertResponse(search_tournament('Blocked ' + name, user2), 200, count=5)
+        self.assertResponse(search_tournament('Blocked ' + name, user2), 200, count=2)
 
     def test_008_search_tournaments_blocked_by_user_tournament(self):
         user1 = new_user()
         user2 = new_user()
         name = rnstr()
 
+        self.assertResponse(create_tournament(new_user(), data={'name': 'Blocked ' + name + rnstr()}), 201)
         self.assertResponse(create_tournament(user1, data={'name': 'Blocked ' + name + rnstr()}), 201)
-        blocked_id = self.assertResponse(blocked_user(user2, user1['id']), 201)
-        self.assertResponse(search_tournament('Blocked ' + name, user2), 200, count=0)
+        blocked_id = self.assertResponse(blocked_user(user2, user1['id']), 201, get_id=True)
+        self.assertResponse(search_tournament('Blocked ' + name, user2), 200, count=1)
         self.assertResponse(unblocked_user(user2, blocked_id), 204)
-        self.assertResponse(search_tournament('Blocked ' + name, user2), 200, count=5)
+        self.assertResponse(search_tournament('Blocked ' + name, user2), 200, count=2)
 
 
 # todo test start after make it
