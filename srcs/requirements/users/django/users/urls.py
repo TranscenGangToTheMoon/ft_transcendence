@@ -72,6 +72,9 @@ urlpatterns = [
 
 # - Tournoi pas de seeding
 
+# - get message, mark as read
+# - faire inbox notif
+
 # --- before push ---
 # todo type all python code (make variable)
 # todo check norm
