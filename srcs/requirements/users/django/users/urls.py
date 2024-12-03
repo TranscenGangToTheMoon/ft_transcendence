@@ -76,6 +76,8 @@ urlpatterns = [
 # - faire inbox notif
 # - stocker tous le temps passe sur le site (when SSE)
 
+# - ajouter password field pour change password
+
 # --- before push ---
 # todo type all python code (make variable)
 # todo check norm
