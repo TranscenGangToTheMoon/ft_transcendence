@@ -7,20 +7,19 @@
 		height: 50vh;
 		overflow-y: auto;
 	}
+
+	#co-failed{
+		color: red;
+	}
 </style>
 
 <div id="chat-section">
-	<form id="chat-start-form">
+	<form id="startChat">
 		<button type="submit">Start Chat</button>
+		<input id="chatId" placeholder="Enter chat ID" type="text">
 	</form>
 	<div id="chat-view" style="display:none;">
-		<form id="chat-end-form">
-			<button type="submit">End Chat</button>
-		</form>
-		<form id="auth-form">
-			<input id="chatID" placeholder="Enter chat ID" type="text">
-			<button type="submit">Auth</button>
-		</form>
+		<button id="endChat">End Chat</button>
 		<div id="chats-box"></div>
 		<form id="chat-form">
 			<input id="message" placeholder="Enter message" type="text">
