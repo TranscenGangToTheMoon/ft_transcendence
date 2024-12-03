@@ -53,5 +53,13 @@ class Test03_DeleteUser(UnitTest):
 
         self.assertResponse(me(user1, method='DELETE'), 204)
         self.assertResponse(me(user1), 404)
+# todo delete user does not exist
+# todo delete user already deleted
+# todo test lobby
+# todo test chat
+# todo test tournament
+# todo test ranked
+# todo user - not get me - then delete
+
 if __name__ == '__main__':
     unittest.main()
