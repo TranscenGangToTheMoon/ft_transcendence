@@ -85,7 +85,7 @@ class LobbySerializer(serializers.ModelSerializer):
             validated_data['match_type'] = MatchType.m1v1
             validated_data['max_participants'] = 6
         result = super().create(validated_data)
-        creator = create_player_instance(LobbyParticipants, request, lobby_id=result.id, user_id=user['id'], creator=True)
+        creator = create_player_instance(request, LobbyParticipants, lobby_id=result.id, user_id=user['id'], creator=True)
         if validated_data['game_mode'] == GameMode.custom_game:
             creator.team = Teams.a
             creator.save()

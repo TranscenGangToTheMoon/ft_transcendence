@@ -40,7 +40,7 @@ class PlayersSerializer(serializers.ModelSerializer):
         validated_data['user_id'] = user['id']
         validated_data['trophies'] = user['trophies']
         threading.Thread(target=func).start()
-        return create_player_instance(Players, request, **validated_data)
+        return create_player_instance(request, Players, **validated_data)
 
 
 def func():
