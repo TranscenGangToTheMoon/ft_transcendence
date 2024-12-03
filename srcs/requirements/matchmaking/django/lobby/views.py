@@ -29,7 +29,7 @@ class LobbyParticipantsView(SerializerAuthContext, generics.ListCreateAPIView, g
     def filter_queryset(self, queryset):
         lobby = get_lobby(self.kwargs.get('code'))
         queryset = queryset.filter(lobby_id=lobby.id)
-        if self.request.user.id not in queryset.values_list('user_id', flat=True):
+        if not queryset.filter(user_id=self.request.user.id).exists():
             raise PermissionDenied(MessagesException.PermissionDenied.NOT_BELONG_LOBBY)
         return queryset
 

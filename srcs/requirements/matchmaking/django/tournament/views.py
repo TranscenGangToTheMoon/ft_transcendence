@@ -62,7 +62,7 @@ class TournamentParticipantsView(SerializerAuthContext, generics.ListCreateAPIVi
     def filter_queryset(self, queryset):
         tournament = get_tournament(code=self.kwargs.get('code'))
         queryset = queryset.filter(tournament_id=tournament.id)
-        if self.request.user.id not in queryset.values_list('user_id', flat=True):
+        if not queryset.filter(user_id=self.request.user.id).exists():
             raise PermissionDenied(MessagesException.PermissionDenied.NOT_BELONG_TOURNAMENT)
         return queryset
 
