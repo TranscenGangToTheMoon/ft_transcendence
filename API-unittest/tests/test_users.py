@@ -48,5 +48,10 @@ class Test02_UserMe(UnitTest):
 
 class Test03_DeleteUser(UnitTest):
 
+    def test_001_delete(self):
+        user1 = new_user()
+
+        self.assertResponse(me(user1, method='DELETE'), 204)
+        self.assertResponse(me(user1), 404)
 if __name__ == '__main__':
     unittest.main()
