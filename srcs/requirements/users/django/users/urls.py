@@ -32,7 +32,6 @@ urlpatterns = [
 
 # todo make endpoint for user stats, xp, trophies (when match ended, or when tournament ended) WAIT REUNION
 
-# todo rename all view for more comprehensive name
 # todo make endpoint for online status
 # todo fix github issue
 # todo create chat when lobby or tournament is created
