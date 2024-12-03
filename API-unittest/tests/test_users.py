@@ -1,5 +1,5 @@
 from services.blocked import blocked_user
-from services.user import get_user, get_me
+from services.user import get_user, me
 from utils.credentials import new_user
 from utils.my_unittest import UnitTest
 
@@ -41,7 +41,7 @@ class Test02_UserMe(UnitTest):
     def test_001_get_me(self):
         user1 = new_user()
 
-        response = get_me(user1)
+        response = me(user1)
         self.assertResponse(response, 200)
         self.assertDictEqual(response.json, {'id': user1['id'], 'username': user1['username'], 'is_guest': False, 'created_at': response.json['created_at'], 'profile_picture': None, 'accept_friend_request': True, 'accept_chat_from': 'friends_only', 'coins': 100, 'trophies': 0, 'current_rank': None})
 
