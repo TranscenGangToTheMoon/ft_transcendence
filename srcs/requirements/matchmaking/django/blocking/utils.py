@@ -7,26 +7,27 @@ from rest_framework.exceptions import APIException
 from blocking.models import Blocked
 
 
-def create_player_instance(instance, request, *args, **kwargs):
+def create_player_instance(request, instance=None, *args, **kwargs):
     while True:
         try:
-            print('MAKE BLOCKED REQUEST -> users', flush=True)
             result = request_users(endpoints.Users.blocked, method='GET', request=request)
-            print('result: ', result, flush=True)
             for blocked_instance in result['results']:
                 Blocked.objects.create(user_id=blocked_instance['user']['id'], blocked_user_id=blocked_instance['blocked']['id'])
             if result['next'] is None:
                 break
         except APIException:
-            print('error"', APIException.status_code, flush=True)
             raise ServiceUnavailable('users')
 
-    return instance.objects.create(*args, **kwargs)
+    if instance is not None:
+        return instance.objects.create(*args, **kwargs)
 
 
-def delete_player_instance(player_instance):
-    Blocked.objects.filter(user_id=player_instance.user_id).delete()
-    player_instance.delete()
+def delete_player_instance(player_instance=None, user_id=None): # todo use
+    if player_instance is not None:
+        user_id = player_instance.user_id
+    Blocked.objects.filter(user_id=user_id).delete()
+    if player_instance is not None:
+        player_instance.delete()
 
 
 def are_users_blocked(user1, user2):
