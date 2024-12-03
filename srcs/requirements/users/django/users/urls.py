@@ -67,6 +67,8 @@ urlpatterns = [
 # todo delete chat after finish tournament
 # todo delete chat after finish lobby
 
+# todo handle local user
+
 # custom game
 # - bo et 1v1 | 3v3 (rien a changer)
 
