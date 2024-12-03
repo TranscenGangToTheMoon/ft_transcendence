@@ -12,3 +12,10 @@ def create_game(user1, user2, game_mode: Literal['ranked', 'duel'] = 'duel', dat
         data=data,
         port=8003,
     )
+
+
+def is_in_game(user1):
+    return make_request(
+        endpoint=f'match/{user1["id"]}/',
+        port=8003,
+    )
