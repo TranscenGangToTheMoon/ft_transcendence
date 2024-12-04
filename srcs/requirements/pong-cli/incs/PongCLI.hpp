@@ -6,7 +6,7 @@
 /*   By: xcharra <xcharra@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/03 17:34:55 by xcharra           #+#    #+#             */
-/*   Updated: 2024/12/04 00:27:10 by xcharra          ###   ########.fr       */
+/*   Updated: 2024/12/04 14:41:22 by xcharra          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,7 @@ public:
 	void test() {
 		std::cout << "PongCLI test on: " << _currentPage << std::endl;
 		std::cout << "PongCLI test on: " << _curl.isServerSet() << std::endl;
-		try { _user.initializeConnection(_curl); }
+		try { _user.setGuestTokens(_curl); }
 			catch (std::exception &e) { return ((void)(std::cerr << E_MSG( "(" << _curl.getHTTPCode() << ") " << e.what()) << std::endl)); }
 	}
 
@@ -56,10 +56,14 @@ public:
 	PongCLI &operator=(PongCLI const &rhs) = delete;
 
 private:
-	Page				_currentPage = LoginPage;
-	CurlWrapper			&_curl;
-	User				&_user;
-	ScreenInteractive	_screen;
+	Page							_currentPage = LoginPage;
+	CurlWrapper						&_curl;
+	User							&_user;
+	ScreenInteractive				_screen;
+	std::string						_username;
+	std::string						_passsword;
+	std::shared_ptr<Node>			_info;
+	std::shared_ptr<ComponentBase>	_pageComponents;
 };
 
 

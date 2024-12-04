@@ -6,7 +6,7 @@
 /*   By: xcharra <xcharra@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/03 17:35:02 by xcharra           #+#    #+#             */
-/*   Updated: 2024/12/04 00:27:10 by xcharra          ###   ########.fr       */
+/*   Updated: 2024/12/04 12:37:11 by xcharra          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,7 @@ Component PongCLI::renderLoginPage() {
 	// std::cout << C_MSG("LoginPage called") << std::endl;
 
 	return (Renderer([this] {
+		(void)this;
 		return (vbox(text("Login page load !")));
 	}));
 }
@@ -37,6 +38,7 @@ Component PongCLI::renderMainMenuPage() {
 	// std::cout << C_MSG("MainMenu called") << std::endl;
 
 	return (Renderer([this] {
+		(void)this;
 		return (vbox(text("Main menu page load !")));
 	}));
 }
@@ -45,6 +47,7 @@ Component PongCLI::renderSettingsPage() {
 	// std::cout << C_MSG("SettingsPage called") << std::endl;
 
 	return (Renderer([this] {
+		(void)this;
 		return (vbox(text("Settings page load !")));
 	}));
 }
@@ -53,6 +56,7 @@ Component PongCLI::renderGamePage() {
 	// std::cout << C_MSG("GamePage called") << std::endl;
 
 	return (Renderer([this] {
+		(void)this;
 		return (vbox(text("Game page load !")));
 	}));
 }
@@ -61,6 +65,7 @@ Component PongCLI::renderDefaultPage() {
 	std::cout << C_MSG("LoginPage called") << std::endl;
 
 	return (Renderer([this] {
+		(void)this;
 		return (vbox(text("Default page !")));
 	}));
 }
