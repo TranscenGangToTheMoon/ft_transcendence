@@ -12,6 +12,18 @@ port = 5500
 @sio.event
 async def connect(sid, environ):
     print(f"Client connecté : {sid}", flush=True)
+@sio.event
+async def move_up(sid, data):
+    print(f"move up recu: {sid}", flush=True)
+    match_code=data['match_code']
+    racket = server.games[match_code].get_racket(sid)
+    racket.move_up()
+@sio.event
+async def move_down(sid, data):
+    print(f"move up recu: {sid}", flush=True)
+    match_code=data['match_code']
+    racket = server.games[match_code].get_racket(sid)
+    racket.move_down()
 
 
 @sio.event
@@ -31,11 +43,6 @@ sio.on('get_games', handler=send_games)
 @sio.event
 def disconnect(sid):
     print('disconnected', sid, flush=True)
-
-
-# def run_server():
-#     global app, sio, port
-#     server.serve(app, sio, port) # runs web.run_app(...)
 
 
 async def create_game(request: web.Request):
