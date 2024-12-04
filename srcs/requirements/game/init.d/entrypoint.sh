@@ -15,4 +15,6 @@ fi
 echo -e $BOLD$RED"- Migrating"$RESET
 python manage.py migrate
 
+python socket_server.py &
+
 exec "$@"

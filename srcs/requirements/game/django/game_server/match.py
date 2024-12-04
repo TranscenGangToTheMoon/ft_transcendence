@@ -30,12 +30,9 @@ class Team():
             self.players.append(Player(player))
 
 class Match():
-    model: Matches
-    game_mode: str = 'duel'
-    viewers = List[Player]
-
     def __init__(self, match_code):
         self.model = Matches.objects.get(code=match_code)
+        self.code = self.model.code
         self.teams: List[Team] = []
         self.game_mode = self.model.game_mode
         raw_teams = self.model.teams.all()
@@ -45,7 +42,11 @@ class Match():
     def __str__(self):
         return self.model.code + ' ' + str(self.teams[0].model) + ' ' + str(self.teams[0].model.players.all())
 
-def fetch_match(match_code):
+def fetch_match_sync(match_code):
+    print(f'fetchng match {match_code}', flush=True)
     match = Match(match_code)
     print(str(match))
     return match
+
+async def fetch_match_async(match_code):
+    return await sync_to_async(fetch_match_sync)(match_code)
