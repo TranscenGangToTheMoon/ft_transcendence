@@ -6,6 +6,7 @@ import socketio
 import asyncio
 from aiohttp import web
 from lib_transcendence.auth import auth_verify
+from socketio.exceptions import ConnectionRefusedError
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_DIR)
@@ -20,22 +21,27 @@ sio = socketio.AsyncServer(cors_allowed_origins='*', async_mode='aiohttp', logge
 app = web.Application()
 sio.attach(app, socketio_path='/ws/chat/')
 
+usersConnected = {}
+
 @sio.event
 async def connect(sid, environ):
     print(f"Client attempting to connect : {sid}")
     token = environ.get('HTTP_TOKEN')
     chat_id = environ.get('HTTP_CHATID')
-    await sio.emit('debug', {'token': token, 'chat_id': chat_id}, to=sid)
     if token and chat_id:
+        await sio.emit('debug', {'token': token, 'chat_id': chat_id}, to=sid)
         try:
             print("trying to auth")
             res = auth_verify(token)
             await sio.emit('message', {'message': "<em>Authentification validated!</em>"}, to=sid)
+            await sio.emit('debug', res, to=sid)
+            # userConnected[sid] = ChatParticipants.objects.get(id=chat_id, user_id=res['user_id'], blocked=False)
+            # if user.chat.blocked:
+            print(f"Connection successeeded{sid}")
         except Exception as e:
-            print("token error")
+            print("failed to auth")
             await sio.emit('message', {'message': '<em>Invalid token!</em>',}, to=sid)
-            # await sio.disconnect(sid)
-        print(f"Connection successeeded{sid}")
+            raise ConnectionRefusedError({"error": 401, "message": "Invalid token", "chat_id": chat_id})
         try:
             test = Chats.objects.get(id=chat_id)
             print(test)
@@ -46,11 +52,13 @@ async def connect(sid, environ):
     else:
         print(f"Connection failed{sid}")
         await sio.emit('message', {'message': '<em>missing args!</em>',}, to=sid)
-        # await sio.disconnect(sid)
+        raise ConnectionRefusedError({"error": 400, "message": "missing args"})
+
 
 
 @sio.event
 async def disconnect(sid):
+    # usersConnected.pop(sid, None)
     print(f"Client disconnected : {sid}")
 
 @sio.event

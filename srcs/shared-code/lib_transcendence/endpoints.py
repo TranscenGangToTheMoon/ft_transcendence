@@ -15,11 +15,14 @@ class Auth:
 
 
 class Chat:
-    base_chat = base_api + 'chat/'
+    _base_chat = base_api + 'chat/'
 
-    chats = base_chat
-    chat = chats + '<int:chat_id>/'
-    messages = chat + 'messages/'
+    _chat_id = '<int:chat_id>/'
+    _fchat_id = '{chat_id}/'
+    chats = _base_chat
+    chat = chats + _chat_id
+    fmessages = chats + _fchat_id + 'messages/'
+    messages = fmessages.format(chat_id='<int:chat_id>')
 
 
 class Game:

@@ -1,15 +1,26 @@
-function connect(chatId) {
+function connect(token, chatId) {
 	let socket = io("wss://localhost:4443", {
 		path: "/ws/chat/",
 		extraHeaders: {
-			"token": getAccessToken(),
+			"token": 'Bearer ' + token,
 			"chatId": chatId
 		}
 	});
 	window.socket = socket;
+	console.log(socket);
 	console.log("Connecting to the server...");
 	setupSocketListeners();
 	return true;
+}
+
+function closeChat()
+{
+	console.log("Closing the connection to the server...");
+	socket.disconnect();
+	socket = null;
+	document.getElementById('startChat').style.display = 'block';
+	document.getElementById('chat-view').style.display = 'none';
+	chatBox.innerHTML = "";
 }
 
 
@@ -28,10 +39,10 @@ function send() {
 function setupSocketListeners()
 {
 	document.getElementById('endChat').addEventListener('click', () => {
-		socket.disconnect();
+		closeChat();
 	});
 	document.getElementById('logOut').addEventListener('click', () => {
-		socket.disconnect();
+		closeChat();
 	});
 
 	const chatBox = document.getElementById('chats-box');
@@ -44,17 +55,22 @@ function setupSocketListeners()
 	
 	socket.on("connect", () => {
 		console.log("Connected to the server");
+		console.log(socket);
 		document.getElementById('startChat').style.display = 'none';
 		document.getElementById('chat-view').style.display = 'block';
+	});
+
+	socket.on("connect_error", async (data) => {
+		console.log("Connection error: ", data);
+		// if (data.error === 401){
+		// 	token = await refreshToken();
+		// 	console.log('suite');
+		// }
 	});
 	
 	socket.on("disconnect", () => {
 		console.log("Disconnected from the server");
-		console.log("Closing the connection to the server...");
-		document.getElementById('startChat').style.display = 'block';
-		document.getElementById('chat-view').style.display = 'none';
-		chatBox.innerHTML = "";
-		socket = null;
+
 	});
 	
 	socket.on("message", (data) => {

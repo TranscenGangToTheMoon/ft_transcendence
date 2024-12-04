@@ -1,5 +1,5 @@
 from lib_transcendence.exceptions import MessagesException
-from lib_transcendence.services import requests_auth
+from lib_transcendence.services import request_auth
 from lib_transcendence.auth import auth_verify
 from lib_transcendence.endpoints import Auth
 from rest_framework import permissions, serializers
@@ -9,11 +9,11 @@ from users.models import Users
 
 
 def auth_update(token, data):
-    return requests_auth(token, Auth.update, method='PATCH', data=data)
+    return request_auth(token, Auth.update, method='PATCH', data=data)
 
 
 def auth_delete(token, data):
-    requests_auth(token, Auth.delete, method='DELETE', data=data)
+    request_auth(token, Auth.delete, method='DELETE', data=data)
 
 
 class IsAuthenticated(permissions.BasePermission):

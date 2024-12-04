@@ -32,12 +32,12 @@ def request_tournament_matchmaking(tournament_id, stage_id, winner, looser):
 def request_game(endpoint: Literal['match/', 'tournaments/', 'playing/{user_id}/'], method: Literal['GET', 'POST'] = 'POST', data=None):
     return request_service('game', endpoint, method, data)
 
-
-def request_chat(endpoint: str, method: Literal['PATCH', 'DELETE'] = 'PATCH', data=None):
+# endpoints.Chat.fmessages.format(chat_id=15), {'content': 'Hello, World!'}
+def request_chat(endpoint: str, method: Literal['POST', 'PATCH', 'DELETE'] = 'PATCH', data=None):
     return request_service('chat', endpoint, method, data)
 
 
-def requests_auth(token, endpoint: Literal['update/', 'verify/', 'delete/'], method: Literal['GET', 'PUT', 'PATCH', 'DELETE'], data=None):
+def request_auth(token, endpoint: Literal['update/', 'verify/', 'delete/'], method: Literal['GET', 'PUT', 'PATCH', 'DELETE'], data=None):
     if token is None:
         raise NotAuthenticated()
 
