@@ -6,19 +6,20 @@
         paddleWidth: 30,
         paddleHeight: 200,
         ballSize: 30,
-        ballSpeedIncrement: 1,
+        ballSpeedIncrement: 0,
         maxBallSpeed: 70,
         animationDuration: 800,
         font: "48px Arial",
         fontColor: "white",
-        defaultBallSpeed : 2,
+        defaultBallSpeed : 4,
         winningScore: 3,
         enemyScore : {},
         playerScore : {},
         countDown : {
             steps : 3,
             delay : 2000,
-        }
+        },
+        maxBounceAngle : 2 * (Math.PI / 5)
     };
 
     config.enemyScore = {
@@ -42,16 +43,22 @@
             y: config.canvasHeight / 2 - config.ballSize / 2,
             speedX: config.defaultBallSpeed,
             speedY: config.defaultBallSpeed,
+            speed: config.defaultBallSpeed,
         },
         paddles: {
             left: {
+                x: 10,
                 y: (config.canvasHeight - config.paddleHeight) / 2,
                 blockGlide: false,
             },
             right: {
+                x: config.canvasWidth - config.paddleWidth - 10,
                 y: (config.canvasHeight - config.paddleHeight) / 2,
                 blockGlide: false,
             },
+        },
+        countDown: {
+            currentStep: config.countDown.steps,
         },
         keys: {},
         cancelAnimation: false,
@@ -84,6 +91,7 @@
     document.getElementById("replayFront").addEventListener("click", event => {
         event.target.blur();
         resumeGame();
+        state.ball.speed = config.defaultBallSpeed;
         stopGame(true);
         setTimeout(()=>{
             resetGame();
@@ -117,14 +125,15 @@
             y: config.canvasHeight / 2 - config.ballSize / 2,
             speedX: config.defaultBallSpeed,
             speedY: config.defaultBallSpeed,
+            speed: config.defaultBallSpeed, 
         },
         state.paddles.left.y = (config.canvasHeight - config.paddleHeight) / 2;
         state.paddles.right.y = state.paddles.left.y;
     }
 
     function pauseGame(onlyPause=true) {
-        if (state.isCountDownActive || onlyPause) return;
-        if (state.isGamePaused) return resumeGame(true);
+        if (state.isCountDownActive || !state.isGameActive) return;
+        if (state.isGamePaused && !onlyPause) return resumeGame(true);
         console.log('game paused')
         state.keys[' '] = false;
         state.isGamePaused = true;
@@ -159,34 +168,32 @@
         }
     }
 
+    function drawCountdown() {
+        ctx.font = '96px Arial';
+        console.log('je suis cense afficher: ', state.countDown.currentStep + 1);
+        ctx.fillText(
+            state.countDown.currentStep + 1,
+            config.canvasWidth / 2,
+            config.canvasHeight / 2
+        );
+        ctx.font = config.font;
+    }
+
     function startCountdown() {
-        let currentStep = config.countDown.steps;
         state.isCountDownActive = true;
     
-        function drawCountdown() {
-            ctx.clearRect(0, 0, config.canvasWidth, config.canvasHeight);
-            ctx.font = '96px Arial';
-            ctx.fillText(
-                currentStep,
-                config.canvasWidth / 2,
-                config.canvasHeight / 2
-            );
-            ctx.font = config.font;
-        }
-    
         function step() {
+            state.countDown.currentStep--;
             if (!state.isGameActive){
                 state.isCountDownActive = false;
                 return;
             }
-            if (currentStep > 0) {
-                drawCountdown();
-                currentStep--;
-
-                setTimeout(step, config.countDown.delay / config.countDown.steps);
+            if (state.countDown.currentStep >= 0) {
+                drawCountdown();    
+                setTimeout(step, config.countDown.delay / (config.countDown.steps + 1));
             }
             else 
-                state.isCountDownActive = false;
+            state.isCountDownActive = false;
         }
     
         step();
@@ -223,13 +230,13 @@
     function drawPaddleReturn(){
         ctx.clearRect(0, 0, config.canvasWidth, config.canvasHeight);
         ctx.drawImage(
-            paddleImage, 0, state.paddles.left.y,
+            paddleImage, state.paddles.left.x, state.paddles.left.y,
             config.paddleWidth, config.paddleHeight
         );
 
         ctx.drawImage(
             paddleImage,
-            config.canvasWidth - config.paddleWidth,
+            state.paddles.right.x,
             state.paddles.right.y,
             config.paddleWidth,
             config.paddleHeight
@@ -279,17 +286,41 @@
     function resetBall() {
         state.ball.x = (config.canvasWidth - config.ballSize) / 2;
         state.ball.y = (config.canvasHeight - config.ballSize) / 2;
+        state.ball.speed = config.defaultBallSpeed;
         state.ball.speedX = (Math.random()) < 0.5 ? config.defaultBallSpeed : -config.defaultBallSpeed;
         state.ball.speedY = (Math.random()) < 0.5 ? config.defaultBallSpeed : -config.defaultBallSpeed;
     }
 
     function incrementBallSpeed(){
-        (state.ball.speedX > 0) ? state.ball.speedX += config.ballSpeedIncrement : state.ball.speedX -= config.ballSpeedIncrement;
-        (state.ball.speedY > 0) ? state.ball.speedY += config.ballSpeedIncrement : state.ball.speedY -= config.ballSpeedIncrement;
+        state.ball.speed += 1;
     }
 
-    function handlePaddleSides(paddle){
-        console.log(paddle.blockGlide);
+    function calculateImpactPosition(ballY, paddleY, paddleHeight) {
+        const relativeY = (paddleY + paddleHeight / 2) - ballY;
+    
+        // normalize to [1;-1]
+        console.log('relative:', relativeY);
+        return relativeY / (paddleHeight / 2);
+    }
+
+    function calculateNewBallDirection(paddleY, paddleSpeed=0) {
+        const impactPosition = calculateImpactPosition(state.ball.y + config.ballSize/2, paddleY, config.paddleHeight);
+        console.log(impactPosition);
+        const bounceAngle = impactPosition * config.maxBounceAngle;
+    
+        //ADD SPEED INFLUENCE HERE
+    
+        const speed = state.ball.speed;
+        console.log('speed', speed);
+        const xNewSpeed = speed * Math.cos(bounceAngle);
+        const yNewSpeed = speed * -Math.sin(bounceAngle);
+        console.log(xNewSpeed);
+        console.log(yNewSpeed);
+        state.ball.speedX = state.ball.speedX < 0 ? xNewSpeed * -1 : xNewSpeed;
+        state.ball.speedY = yNewSpeed;
+    }
+
+    function handlePaddleBounce(paddle){
         if (paddle.blockGlide){
             state.ball.speedY = -state.ball.speedY;
             if (Math.abs(state.ball.y - (paddle.y + config.paddleHeight)) <
@@ -302,28 +333,33 @@
             state.ball.speedX = -state.ball.speedX;
             if (Math.abs(state.ball.speedX) < config.maxBallSpeed)
                 incrementBallSpeed();
+            calculateNewBallDirection(paddle.y);
         }
     }
 
     function handlePaddleCollision(){
         //left paddle
-        if (state.ball.x < config.paddleWidth &&
+        if (state.ball.x < state.paddles.left.x + config.paddleWidth &&
 			state.ball.y + config.ballSize > state.paddles.left.y &&
 			state.ball.y < state.paddles.left.y + config.paddleHeight){
-            handlePaddleSides(state.paddles.left);
+            handlePaddleBounce(state.paddles.left);
+            if (!state.paddles.left.blockGlide)
+                state.ball.x = state.paddles.left.x + config.ballSize;
         }
-        else if (state.ball.x < config.paddleWidth)
+        else if (state.ball.x < state.paddles.left.x + config.paddleWidth)
             state.paddles.left.blockGlide = true;
         else
             state.paddles.left.blockGlide = false;
 
         //right paddle
-        if (state.ball.x + config.ballSize > config.canvasWidth - config.paddleWidth &&
+        if (state.ball.x + config.ballSize > state.paddles.right.x &&
             state.ball.y + config.ballSize > state.paddles.right.y &&
             state.ball.y < state.paddles.right.y + config.paddleHeight){
-            handlePaddleSides(state.paddles.right);
+            handlePaddleBounce(state.paddles.right);
+            if (!state.paddles.right.blockGlide)
+                state.ball.x = state.paddles.right.x - config.ballSize;
         }
-        else if (state.ball.x + config.ballSize > config.canvasWidth - config.paddleWidth)
+        else if (state.ball.x + config.ballSize > state.paddles.right.x)
             state.paddles.right.blockGlide = true;
         else
             state.paddles.right.blockGlide = false;
@@ -344,31 +380,29 @@
             state.ball.y += state.ball.speedY;
         }
 
-        if (state.ball.y <= 0 || state.ball.y + config.ballSize >= config.canvasHeight)
+        if (state.ball.y < 0 || state.ball.y + config.ballSize >= config.canvasHeight){
+            if (state.ball.y < 0)
+                state.ball.y = 0;
+            else
+                state.ball.y = config.canvasHeight - config.ballSize;
             state.ball.speedY = -state.ball.speedY;
+        }
 
         handleGoal();
         handlePaddleCollision();
 		handleGameOver();
     }
 
-    function clearCanvas(){
-        if (!state.isCountDownActive)
-            ctx.clearRect(0, 0, config.canvasWidth, config.canvasHeight);
-        else {
-            ctx.clearRect(0, 0, config.paddleWidth, config.canvasHeight);
-            ctx.clearRect(config.canvasWidth - config.paddleWidth, 0, config.paddleWidth, config.canvasHeight);
-        }
-    }
-
     function drawGame() {
 
-        clearCanvas();
-        ctx.drawImage(paddleImage, 0, state.paddles.left.y, config.paddleWidth, config.paddleHeight);
+        ctx.clearRect(0, 0, config.canvasWidth, config.canvasHeight);
+        if (state.isCountDownActive)
+            drawCountdown();
+        ctx.drawImage(paddleImage, state.paddles.left.x, state.paddles.left.y, config.paddleWidth, config.paddleHeight);
         
         ctx.drawImage(
             paddleImage,
-            config.canvasWidth - config.paddleWidth,
+            state.paddles.right.x,
             state.paddles.right.y,
             config.paddleWidth,
             config.paddleHeight

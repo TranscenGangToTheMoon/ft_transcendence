@@ -21,7 +21,7 @@ async function apiRequest(token, endpoint, method="GET", authType="Bearer",
             "content-type": contentType
         }
     }
-    if (token)
+    if (token && endpoint != `${baseAPIUrl}/auth/login/`)
         options.headers["Authorization"] = `${authType} ${token}`;
     if (body)
         options.body = JSON.stringify(body);
@@ -222,7 +222,10 @@ async function handleRoute() {
         '/profile' : 'profile.html',
         '/lobby' : '/lobby.html',
         '/chat' : '/testChat.html',
-        '/game' : '/game/game.html'
+        '/game/ranked' : '/game/game.html',
+        '/game/duel' : '/game/game.html',
+        '/game/custom' : '/game/game.html',
+        '/tournament' : '/workInProgress.html'
     };
     
     const page = routes[path] || '/404.html';
@@ -409,13 +412,13 @@ function initSSE(){
 
 async function  indexInit(auto=true) {
     if (!auto){
-        setTimeout(()=> {
-            const backdrops = document.querySelectorAll('.modal-backdrop');
-            for (let backdrop of backdrops){
-                console.log(backdrop, 'removed');
-                backdrop.remove;
-            }
-        }, 500);
+        // setTimeout(()=> {
+        //     const backdrops = document.querySelectorAll('.modal-backdrop');
+        //     for (let backdrop of backdrops){
+        //         console.log(backdrop, 'removed');
+        //         backdrop.remove;
+        //     }
+        // }, 500);
         await fetchUserInfos(true);
         if (window.location.pathname === '/login'){
             document.getElementById('profileMenu').innerHTML = "";
