@@ -6,12 +6,12 @@
         paddleWidth: 30,
         paddleHeight: 200,
         ballSize: 30,
-        ballSpeedIncrement: 0,
         maxBallSpeed: 70,
         animationDuration: 800,
         font: "48px Arial",
         fontColor: "white",
         defaultBallSpeed : 4,
+        ballSpeedIncrement: 0,
         winningScore: 3,
         enemyScore : {},
         playerScore : {},
@@ -47,13 +47,18 @@
         },
         paddles: {
             left: {
-                x: 10,
+                x: 100,
                 y: (config.canvasHeight - config.paddleHeight) / 2,
                 blockGlide: false,
             },
             right: {
-                x: config.canvasWidth - config.paddleWidth - 10,
+                x: config.canvasWidth - config.paddleWidth - 100,
                 y: (config.canvasHeight - config.paddleHeight) / 2,
+                blockGlide: false,
+            },
+            leftRight :{
+                x : 100 + 100,
+                y : (config.canvasHeight - config.paddleHeight) / 2,
                 blockGlide: false,
             },
         },
@@ -170,7 +175,6 @@
 
     function drawCountdown() {
         ctx.font = '96px Arial';
-        console.log('je suis cense afficher: ', state.countDown.currentStep + 1);
         ctx.fillText(
             state.countDown.currentStep + 1,
             config.canvasWidth / 2,
@@ -186,14 +190,17 @@
             state.countDown.currentStep--;
             if (!state.isGameActive){
                 state.isCountDownActive = false;
+                state.countDown.currentStep = config.countDown.steps;
                 return;
             }
             if (state.countDown.currentStep >= 0) {
                 drawCountdown();    
                 setTimeout(step, config.countDown.delay / (config.countDown.steps + 1));
             }
-            else 
-            state.isCountDownActive = false;
+            else{
+                state.countDown.currentStep = config.countDown.steps;
+                state.isCountDownActive = false;
+            }
         }
     
         step();
@@ -273,13 +280,26 @@
             else if (state.paddles.left.y + config.paddleHeight + 10 >= config.canvasHeight - config.ballSize)
                 state.paddles.left.y = config.canvasHeight - config.ballSize - config.paddleHeight;
         }
+        if (state.keys["o"] && state.paddles.leftRight.y > 0){
+            if (!state.paddles.leftRight.blockGlide || state.paddles.leftRight.y - 10 > config.ballSize)
+                state.paddles.leftRight.y -= 10;
+            else if (state.paddles.leftRight.y - 10 <= config.ballSize)
+                state.paddles.leftRight.y = config.ballSize;
+        }
+        if (state.keys["l"] && state.paddles.leftRight.y < config.canvasHeight - config.paddleHeight){
+            if (!state.paddles.leftRight.blockGlide || state.paddles.leftRight.y + config.paddleHeight + 10 < config.canvasHeight - config.ballSize)
+                state.paddles.leftRight.y += 10;
+            else if (state.paddles.leftRight.y + config.paddleHeight + 10 >= config.canvasHeight - config.ballSize)
+                state.paddles.leftRight.y = config.canvasHeight - config.ballSize - config.paddleHeight;
+        }
     }
 
     function handleGoal(){
         if (state.ball.x + config.ballSize <= 0 || state.ball.x >= canvas.width){
-			if (state.ball.x + config.ballSize <= 0) state.playerScore++;
-			else state.enemyScore++;
-			resetBall();
+			// if (state.ball.x + config.ballSize <= 0) state.playerScore++;
+			// else state.enemyScore++;
+			// resetBall();
+            state.ball.speedX = -state.ball.speedX;
         }
     }
 
@@ -292,30 +312,24 @@
     }
 
     function incrementBallSpeed(){
-        state.ball.speed += 1;
+        state.ball.speed += config.ballSpeedIncrement;
     }
 
     function calculateImpactPosition(ballY, paddleY, paddleHeight) {
         const relativeY = (paddleY + paddleHeight / 2) - ballY;
-    
-        // normalize to [1;-1]
-        console.log('relative:', relativeY);
         return relativeY / (paddleHeight / 2);
     }
 
     function calculateNewBallDirection(paddleY, paddleSpeed=0) {
         const impactPosition = calculateImpactPosition(state.ball.y + config.ballSize/2, paddleY, config.paddleHeight);
-        console.log(impactPosition);
         const bounceAngle = impactPosition * config.maxBounceAngle;
     
         //ADD SPEED INFLUENCE HERE
-    
+
         const speed = state.ball.speed;
         console.log('speed', speed);
         const xNewSpeed = speed * Math.cos(bounceAngle);
         const yNewSpeed = speed * -Math.sin(bounceAngle);
-        console.log(xNewSpeed);
-        console.log(yNewSpeed);
         state.ball.speedX = state.ball.speedX < 0 ? xNewSpeed * -1 : xNewSpeed;
         state.ball.speedY = yNewSpeed;
     }
@@ -331,38 +345,55 @@
         }
         else{
             state.ball.speedX = -state.ball.speedX;
-            if (Math.abs(state.ball.speedX) < config.maxBallSpeed)
+            if (state.ball.speed >= 70)
                 incrementBallSpeed();
             calculateNewBallDirection(paddle.y);
         }
     }
 
-    function handlePaddleCollision(){
+    function handlePaddleCollision(paddle){
         //left paddle
-        if (state.ball.x < state.paddles.left.x + config.paddleWidth &&
-			state.ball.y + config.ballSize > state.paddles.left.y &&
-			state.ball.y < state.paddles.left.y + config.paddleHeight){
-            handlePaddleBounce(state.paddles.left);
-            if (!state.paddles.left.blockGlide)
-                state.ball.x = state.paddles.left.x + config.ballSize;
+        if (((state.ball.x < paddle.x + config.paddleWidth &&
+            state.ball.x > paddle.x ) ||
+            (state.ball.x + config.ballSize > paddle.x && 
+            state.ball.x + config.ballSize < paddle.x + config.paddleWidth))&&
+			state.ball.y + config.ballSize > paddle.y &&
+			state.ball.y < paddle.y + config.paddleHeight){
+            handlePaddleBounce(paddle);
+            if (!paddle.blockGlide){
+                if (state.ball.x + config.ballSize > paddle.x &&
+                    state.ball.x + config.ballSize < paddle.x + config.paddleWidth
+                ){
+                    console.log('derriere');
+                    state.ball.x = paddle.x - config.ballSize;
+                }
+                else{
+                    console.log('devant')
+                    state.ball.x = paddle.x + config.paddleWidth;
+                }
+            }
         }
-        else if (state.ball.x < state.paddles.left.x + config.paddleWidth)
-            state.paddles.left.blockGlide = true;
+        else if (state.ball.x < paddle.x + config.paddleWidth &&
+                 state.ball.x + config.ballSize > paddle.x
+        )
+            paddle.blockGlide = true;
         else
-            state.paddles.left.blockGlide = false;
-
-        //right paddle
-        if (state.ball.x + config.ballSize > state.paddles.right.x &&
-            state.ball.y + config.ballSize > state.paddles.right.y &&
-            state.ball.y < state.paddles.right.y + config.paddleHeight){
-            handlePaddleBounce(state.paddles.right);
-            if (!state.paddles.right.blockGlide)
-                state.ball.x = state.paddles.right.x - config.ballSize;
-        }
-        else if (state.ball.x + config.ballSize > state.paddles.right.x)
-            state.paddles.right.blockGlide = true;
-        else
-            state.paddles.right.blockGlide = false;
+            paddle.blockGlide = false;
+    //     //right paddle
+    //     if (state.ball.x + config.ballSize > state.paddles.right.x &&
+    //         state.ball.x < state.paddles.right.x + config.paddleWidth && 
+    //         state.ball.y + config.ballSize > state.paddles.right.y &&
+    //         state.ball.y < state.paddles.right.y + config.paddleHeight){
+    //         handlePaddleBounce(state.paddles.right);
+    //         if (!state.paddles.right.blockGlide)
+    //             state.ball.x = state.paddles.right.x - config.ballSize;
+    //     }
+    //     else if (state.ball.x + config.ballSize > state.paddles.right.x && 
+    //              state.ball.x < state.paddles.right.x + config.paddleWidth 
+    //     )
+    //         state.paddles.right.blockGlide = true;
+    //     else
+    //         state.paddles.right.blockGlide = false;
     }
 
     function handleGameOver(){
@@ -389,8 +420,17 @@
         }
 
         handleGoal();
-        handlePaddleCollision();
+        for (let paddle in state.paddles){
+            handlePaddleCollision(state.paddles[paddle]);
+        }
 		handleGameOver();
+    }
+
+    function drawPaddles(){
+        for (let paddle in state.paddles){
+            paddle = state.paddles[paddle];
+            ctx.drawImage(paddleImage, paddle.x, paddle.y, config.paddleWidth, config.paddleHeight);
+        }
     }
 
     function drawGame() {
@@ -398,15 +438,16 @@
         ctx.clearRect(0, 0, config.canvasWidth, config.canvasHeight);
         if (state.isCountDownActive)
             drawCountdown();
-        ctx.drawImage(paddleImage, state.paddles.left.x, state.paddles.left.y, config.paddleWidth, config.paddleHeight);
+        drawPaddles();
+        // ctx.drawImage(paddleImage, state.paddles.left.x, state.paddles.left.y, config.paddleWidth, config.paddleHeight);
         
-        ctx.drawImage(
-            paddleImage,
-            state.paddles.right.x,
-            state.paddles.right.y,
-            config.paddleWidth,
-            config.paddleHeight
-        );
+        // ctx.drawImage(
+        //     paddleImage,
+        //     state.paddles.right.x,
+        //     state.paddles.right.y,
+        //     config.paddleWidth,
+        //     config.paddleHeight
+        // );
         
         if (!state.isCountDownActive) {
             ctx.fillText(`${state.playerScore}`, config.playerScore.x, config.playerScore.y);
