@@ -6,7 +6,7 @@
 /*   By: xcharra <xcharra@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/28 13:58:57 by xcharra           #+#    #+#             */
-/*   Updated: 2024/11/29 11:45:04 by xcharra          ###   ########.fr       */
+/*   Updated: 2024/12/04 15:18:36 by xcharra          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ public:
 	User(User const &src) = delete;
 	User	&operator=(User const &rhs) = delete;
 
-	void	initializeConnection(CurlWrapper &curl);
+	void	setGuestTokens(CurlWrapper &curl);
 
 	void	signUpUser(CurlWrapper &curl);
 	void	signInUser(CurlWrapper &curl);
@@ -46,5 +46,5 @@ private:
 	std::string	_refreshToken;
 	std::string	_username;
 };
-
+std::string	jsonParser(const std::string &json, const std::string &key);
 #endif //USER_HPP

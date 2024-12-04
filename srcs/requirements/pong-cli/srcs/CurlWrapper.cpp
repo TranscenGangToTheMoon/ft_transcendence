@@ -6,7 +6,7 @@
 /*   By: xcharra <xcharra@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/27 13:57:24 by xcharra           #+#    #+#             */
-/*   Updated: 2024/12/02 17:00:27 by xcharra          ###   ########.fr       */
+/*   Updated: 2024/12/04 15:24:43 by xcharra          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,21 +57,18 @@ void CurlWrapper::clearHeaders() {
 	_headers = nullptr;
 }
 
-std::string CurlWrapper::GET(const std::string &path, const std::string &data) {
+void CurlWrapper::GET(const std::string &path, const std::string &data) {
 	if (!isServerSet())
 		throw (std::invalid_argument("Server not set"));
 
-	std::string	response;
 	std::string	url = _server + path;
 	CURL		*curl = curl_easy_init();
 
-	if (!curl) {
-		std::cerr << "Failed to init curl" << std::endl;
+	if (!curl)
 		throw (std::runtime_error("Failed to init curl"));
-	}
 
 	curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-	std::cout << "GET Request to: " << url << std::endl;
+//	std::cout << "GET Request to: " << url << std::endl;
 
 	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
 	curl_easy_setopt(curl, CURLOPT_CAINFO, _SSLCertificate.c_str());
@@ -81,7 +78,7 @@ std::string CurlWrapper::GET(const std::string &path, const std::string &data) {
 	curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L);
 
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeCallback);
-	curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
+	curl_easy_setopt(curl, CURLOPT_WRITEDATA, &_response);
 
 	CURLcode res = curl_easy_perform(curl);
 
@@ -92,24 +89,20 @@ std::string CurlWrapper::GET(const std::string &path, const std::string &data) {
 	curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &_HTTPCode);
 	curl_easy_cleanup(curl);
 	(void)data;
-	return (response);
 }
 
-std::string CurlWrapper::POST(const std::string &path, const std::string &data) {
+void CurlWrapper::POST(const std::string &path, const std::string &data) {
 	if (!isServerSet())
 		throw (std::invalid_argument("Server not set"));
 
-	std::string	response;
 	std::string	url = _server + path;
 	CURL		*curl = curl_easy_init();
 
-	if (!curl) {
-		std::cerr << "Failed to init curl" << std::endl;
+	if (!curl)
 		throw (std::runtime_error("Failed to init curl"));
-	}
 
 	curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-	std::cout << "POST Request to: " << url << std::endl;
+//	std::cout << "POST Request to: " << url << std::endl;
 
 	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
 	curl_easy_setopt(curl, CURLOPT_CAINFO, _SSLCertificate.c_str());
@@ -117,7 +110,7 @@ std::string CurlWrapper::POST(const std::string &path, const std::string &data) 
 	curl_easy_setopt(curl, CURLOPT_HTTPHEADER, _headers);
 
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeCallback);
-	curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
+	curl_easy_setopt(curl, CURLOPT_WRITEDATA, &_response);
 
 	curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data.c_str());
 
@@ -130,24 +123,20 @@ std::string CurlWrapper::POST(const std::string &path, const std::string &data) 
 	}
 	curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &_HTTPCode);
 	curl_easy_cleanup(curl);
-	return (response);
 }
 
-std::string CurlWrapper::PUT(const std::string &path, const std::string &data) {
+void CurlWrapper::PUT(const std::string &path, const std::string &data) {
 	if (!isServerSet())
 		throw (std::invalid_argument("Server not set"));
 
-	std::string	response;
 	std::string	url = _server + path;
 	CURL		*curl = curl_easy_init();
 
-	if (!curl) {
-		std::cerr << "Failed to init curl" << std::endl;
+	if (!curl)
 		throw (std::runtime_error("Failed to init curl"));
-	}
 
 	curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-	std::cout << "PUT Request to: " << url << std::endl;
+//	std::cout << "PUT Request to: " << url << std::endl;
 
 	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
 	curl_easy_setopt(curl, CURLOPT_CAINFO, _SSLCertificate.c_str());
@@ -155,7 +144,7 @@ std::string CurlWrapper::PUT(const std::string &path, const std::string &data) {
 	curl_easy_setopt(curl, CURLOPT_HTTPHEADER, _headers);
 
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeCallback);
-	curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
+	curl_easy_setopt(curl, CURLOPT_WRITEDATA, &_response);
 
 	curl_easy_setopt(curl, CURLOPT_READFUNCTION, readCallback);
 	curl_easy_setopt(curl, CURLOPT_READDATA, &data);
@@ -170,7 +159,6 @@ std::string CurlWrapper::PUT(const std::string &path, const std::string &data) {
 	}
 	curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &_HTTPCode);
 	curl_easy_cleanup(curl);
-	return (response);
 }
 
 size_t CurlWrapper::writeCallback(void *buffer, size_t size, size_t nmemb, std::string &response) {
@@ -200,10 +188,8 @@ void CurlWrapper::setServer(const std::string &server) {
 	_serverSet = true;
 }
 
-long CurlWrapper::getHTTPCode() const {
-	return (_HTTPCode);
-}
+long CurlWrapper::getHTTPCode() const { return (_HTTPCode); }
 
-bool CurlWrapper::isServerSet() const {
-	return (_serverSet);
-}
+bool CurlWrapper::isServerSet() const { return (_serverSet); }
+
+std::string CurlWrapper::getResponse() const { return (_response); }
