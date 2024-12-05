@@ -352,9 +352,9 @@ function displayMainAlert(alertTitle, alertContent) {
 
     alertContentDiv.innerText = alertContent;
     alertTitleDiv.innerText = alertTitle;
-    document.getElementById('alertModal').addEventListener('shown.bs.modal', function() {
-        document.getElementById('alertModalClose').focus();
-    })
+    // document.getElementById('alertModal').addEventListener('shown.bs.modal', function() {
+    //     document.getElementById('alertModalClose').focus();
+    // })
     alertModal.show();
 }
 
@@ -366,9 +366,9 @@ function displayConfirmModal(confirmTitle, confirmContent) {
 
     confirmContentDiv.innerText = confirmContent;
     confirmTitleDiv.innerText = confirmTitle;
-    document.getElementById('confirmModal').addEventListener('shown.bs.modal', function() {
-        document.getElementById('confirmModalClose').focus();
-    })
+    // document.getElementById('confirmModal').addEventListener('shown.bs.modal', function() {
+    //     document.getElementById('confirmModalClose').focus();
+    // })
     confirmModal.show();
 }
 
@@ -377,6 +377,9 @@ window.displayMainAlert = displayMainAlert;
 // ========================== INDEX SCRIPT ==========================
 
 async function loadFriendListModal() {
+    const friendModal = document.getElementById('friendListModal');
+    if (friendModal)
+        friendModal.remove();
     await loadContent('/friendList.html', 'modals', true);
 }
 
@@ -394,6 +397,7 @@ async function loadUserProfile(){
         document.getElementById('balance').innerText = userInformations.coins;
     }
     await loadContent(`/${profileMenu}`, 'profileMenu');
+    await loadFriendListModal();
     // document.getElementById('title').innerText = userInformations.title;
 }
 
@@ -440,7 +444,6 @@ async function  indexInit(auto=true) {
         history.replaceState({state: currentState}, '', window.location.pathname);
         incrementCurrentState();
         loadCSS('/css/styles.css', false);
-        await loadFriendListModal();
         initSSE();
         handleRoute();
     }
