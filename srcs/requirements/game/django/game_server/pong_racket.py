@@ -1,14 +1,13 @@
 from game_server.pong_position import Position
-from game_server.match import Player
 
 
 class Racket:
     def __init__(self,
-                 player: Player,
+                 player: int,
                  position: Position,
                  width: int = 10,
                  height: int = 100) -> None:
-        self.player = player
+        self.player_id = player
         self.height = height
         self.width = width
         self.position = position

@@ -7,6 +7,7 @@ RUN apt-get update -y
 RUN apt-get upgrade -y
 
 COPY init.d /init.d
+COPY shared-code /shared
 
 RUN pip install -r /init.d/requirements.txt
 RUN chmod u+x /init.d/entrypoint.sh
@@ -21,12 +22,12 @@ RUN apt-get install -y --no-install-recommends curl net-tools
 ENTRYPOINT ["/init.d/entrypoint.sh"]
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
 
-##### Production build
-FROM base AS production
+# ##### Production build
+# FROM base AS production
 
-COPY django /code
+# COPY django /code
 
-RUN pip install daphne
+# RUN pip install daphne
 
-ENTRYPOINT ["/init.d/entrypoint.sh"]
-CMD ["daphne", "-b", "0.0.0.0", "-p", "8000", "game.asgi:application"]
+# ENTRYPOINT ["/init.d/entrypoint.sh"]
+# CMD ["daphne", "-b", "0.0.0.0", "-p", "8000", "game.asgi:application"]

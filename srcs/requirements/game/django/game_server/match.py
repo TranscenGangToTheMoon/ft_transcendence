@@ -1,5 +1,6 @@
 from asgiref.sync import sync_to_async
 from typing import List
+from game_server.pong_racket import Racket
 
 # Django ORM setup
 import os
@@ -12,16 +13,13 @@ django.setup()
 from matches.models import Matches, Teams, Players
 
 class Player():
-    model: Players
-    socket_id: int
-    user_id: int
     def __init__(self, model):
+        self.racket: Racket
         self.model = model
         self.user_id = model.id
-        self.socket_id = -1
+        self.socket_id = ''
 
 class Team():
-    model: Teams
     def __init__(self, model):
         self.players: List[Player] = []
         self.model = model
@@ -43,7 +41,7 @@ class Match():
         return self.model.code + ' ' + str(self.teams[0].model) + ' ' + str(self.teams[0].model.players.all())
 
 def fetch_match_sync(match_code):
-    print(f'fetchng match {match_code}', flush=True)
+    print(f'fetching match {match_code}', flush=True)
     match = Match(match_code)
     print(str(match))
     return match

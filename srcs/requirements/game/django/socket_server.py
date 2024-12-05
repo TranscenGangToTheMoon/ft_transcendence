@@ -10,25 +10,35 @@ port = 5500
 
 
 @sio.event
-async def connect(sid, environ):
-    print(f"Client connecté : {sid}", flush=True)
+async def connect(sid, environ, auth):
+    if auth['token'] == 'kk':
+        print(f"Client connecté : {sid}", flush=True)
+    else:
+        raise ConnectionRefusedError('Authentication failed')
+    id = auth['id']
+    try:
+        player = server.get_player(id)
+        player.socket_id = sid
+        server.players[sid] = player
+    except Exception as e:
+        print(e, flush=True)
+        raise ConnectionRefusedError('Player does not belong to any game')
+    print('registered a new racket')
+
+
 @sio.event
 async def move_up(sid, data):
-    print(f"move up recu: {sid}", flush=True)
-    match_code=data['match_code']
-    racket = server.games[match_code].get_racket(sid)
+    racket = server.players[sid].racket
     racket.move_up()
 @sio.event
 async def move_down(sid, data):
-    print(f"move up recu: {sid}", flush=True)
-    match_code=data['match_code']
-    racket = server.games[match_code].get_racket(sid)
+    racket = server.players[sid].racket
     racket.move_down()
-
-
 @sio.event
-async def chat_message(sid, data):
-    print("message ", data)
+async def stop_moving(sid, data):
+    racket = server.players[sid].racket
+    racket.stop_moving()
+
 
 async def send_games(sid):
     # games = {server.games.match_code: match.code}
@@ -61,3 +71,39 @@ app.add_routes([web.post('/create-game', create_game)])
 
 if __name__ == '__main__':
     server.serve(app, sio, port) # runs web.run_app(...)
+
+'''
+to send : position, direction et vitesse de la balle à 20fps
+Position des joueurs
+event -> move_up
+event -> move_down
+event -> stop_moving
+event <- move_up {player_id: 1234}
+event <- move_down {player_id: 1234}
+event <- stop_moving {player_id: 1234}
+event <- server_update
+{
+    ball: {
+        x: 3,
+        y: 4,
+        direction: 91823750987
+    },
+    players: [
+        {
+            playerid: 1234,
+            x: 3,
+            y: 4
+        },
+        {
+            playerid: 1234,
+            x: 3,
+            y: 4
+        },
+        {
+            playerid: 1234,
+            x: 3,
+            y: 4
+        }
+    ]
+}
+'''

@@ -33,22 +33,17 @@ class Game:
         self.rackets: List[Racket] = []
         # create rackets for left players
         for player in self.match.teams[0].players:
-            self.rackets.append(Racket(player, Position(0, int(self.canvas.y / 2 - racket_size.y / 2)), racket_size.x, racket_size.y))
+            self.rackets.append(Racket(player.user_id, Position(0, int(self.canvas.y / 2 - racket_size.y / 2)), racket_size.x, racket_size.y))
         # create rackets for right players
         for player in self.match.teams[1].players:
-            self.rackets.append(Racket(player, Position(self.canvas.x - racket_size.x, int(self.canvas.y / 2 - racket_size.y / 2)), racket_size.x, racket_size.y))
+            self.rackets.append(Racket(player.user_id, Position(self.canvas.x - racket_size.x, int(self.canvas.y / 2 - racket_size.y / 2)), racket_size.x, racket_size.y))
 
-        # to send : position, direction et vitesse de la balle à 20fps
-        # Position des joueurs
 
-        # event-> player_move {player_id: 1231, moving: ['stop', 'up', 'down']}
-        # event-> server_update {ball: {x: 3, y: 4, direction: 91823750987}}
-
-    def get_racket(self, socket_id) -> Racket:
+    def get_racket(self, player_id) -> Racket:
         for racket in self.rackets:
-            if racket.player.socket_id == socket_id:
+            if racket.player_id == player_id:
                 return racket
-        raise Exception(f'no racket matching socket id {socket_id}')
+        raise Exception(f'no racket matching socket id {player_id}')
 
     def update(self):
         pass
@@ -62,13 +57,14 @@ class Game:
 
     def wait_for_players(self, timeout: int):
         start_waiting = time.time()
-        for team in self.match.teams:
-            print(team.model, flush=True)
-            for player in team.players:
-                while player.socket_id == -1:
-                    if time.time() - start_waiting > timeout:
-                        raise Exception(f'player socketio connection timed out : player_id: {player.user_id}')
-                    time.sleep(1)
+        # for team in self.match.teams:
+        print(self.match.teams[0].model, flush=True)
+        # for player in self.match.teams[0].players:
+        while self.match.teams[0].players[0].socket_id == '':
+            if time.time() - start_waiting > timeout:
+                raise Exception(f'player socketio connection timed out : player_id: {self.match.teams[0].players[0].user_id}')
+            time.sleep(1)
+        print(f'player {self.match.teams[0].players[0].user_id} has join in!', flush=True)
 
     def launch(self):
         # try:
@@ -82,5 +78,6 @@ class Game:
             return
         print('game launched', flush=True)
         start_time = time.time()
-        while (time.time() - start_time < 10):
-            time.sleep(1)
+        while (time.time() - start_time < 120):
+            time.sleep(0.02)
+            print(self.rackets[0].velocity, flush=True)
