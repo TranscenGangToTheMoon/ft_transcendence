@@ -6,7 +6,7 @@
 /*   By: xcharra <xcharra@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/03 17:34:55 by xcharra           #+#    #+#             */
-/*   Updated: 2024/12/04 14:41:22 by xcharra          ###   ########.fr       */
+/*   Updated: 2024/12/05 17:48:24 by xcharra          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,43 +27,56 @@ using namespace ftxui;
 
 class PongCLI {
 public:
+	PongCLI(CurlWrapper &curl, User &user);
+	~PongCLI();
+
 	enum Page {
 		LoginPage,
 		MainMenuPage,
 		SettingsPage,
 		GamePage,
 	};
+//make them private at the end
+	void	renderLoginPage();
+	void	renderMainMenuPage();
+	void	renderSettingsPage();
+	void	renderGamePage();
+	void	renderDefaultPage();
 
-	void test() {
-		std::cout << "PongCLI test on: " << _currentPage << std::endl;
-		std::cout << "PongCLI test on: " << _curl.isServerSet() << std::endl;
-		try { _user.setGuestTokens(_curl); }
-			catch (std::exception &e) { return ((void)(std::cerr << E_MSG( "(" << _curl.getHTTPCode() << ") " << e.what()) << std::endl)); }
-	}
+	void	run();
 
-	Component	renderLoginPage();
-	Component	renderMainMenuPage();
-	Component	renderSettingsPage();
-	Component	renderGamePage();
-	Component	renderDefaultPage();
+//make them private at the end
+	void	changePage(Page newPage);
 
-	void	appRenderer();
+	void	setPassword(const std::string &password);
+	void	setServer(const std::string &server);
+	void	setUsername(const std::string &username);
 
-	PongCLI(CurlWrapper &curl, User &user);
+	[[ nodiscard ]] const std::string	&getPassword() const;
+	[[ nodiscard ]] const std::string	&getServer() const;
+	[[ nodiscard ]] const std::string	&getUsername() const;
+
 	PongCLI() = delete;
 	PongCLI(PongCLI const &src) = delete;
-	~PongCLI();
 	PongCLI &operator=(PongCLI const &rhs) = delete;
 
 private:
-	Page							_currentPage = LoginPage;
-	CurlWrapper						&_curl;
-	User							&_user;
-	ScreenInteractive				_screen;
-	std::string						_username;
-	std::string						_passsword;
-	std::shared_ptr<Node>			_info;
-	std::shared_ptr<ComponentBase>	_pageComponents;
+	void	signInAction(std::string &server, std::string &username, std::string &password);
+	void	signUpAction(std::string &server, std::string &username, std::string &password);
+	void	guestUpAction(std::string &server);
+
+	Element	getBanner();
+
+	void	pageRenderer();
+
+	CurlWrapper			&_curl;
+	Element				_info;
+	Page				_currentPage;
+	ScreenInteractive	_screen = ScreenInteractive::Fullscreen();
+	User				&_user;
+	std::string			_password;
+	std::string			_server;
+	std::string			_username;
 };
 
 
