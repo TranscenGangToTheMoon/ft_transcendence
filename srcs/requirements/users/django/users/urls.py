@@ -30,6 +30,9 @@ urlpatterns = [
 # 2. todo handle rename user
 # 3. todo handle create user
 
+# 4. todo truc nino
+# 4. todo truc xav
+
 # todo make endpoint for user stats, xp, trophies (when match ended, or when tournament ended)
 # - pas de stat (custom_game)
 # - stat tournoi gagne

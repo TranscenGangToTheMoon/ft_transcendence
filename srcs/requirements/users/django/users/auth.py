@@ -26,6 +26,9 @@ class IsAuthenticated(permissions.BasePermission):
 
         try:
             # todo remake
+            # 1. todo REMAKE not permision but authenticaed error
+            # 2. USE authenticatd classes not permision // change all
+            print('CACA json_data', json_data, flush=True)
             user = Users.objects.get(id=json_data['id'])
             if user.is_guest != json_data['is_guest']:
                 user.is_guest = json_data['is_guest']
