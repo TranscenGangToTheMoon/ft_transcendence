@@ -1,10 +1,10 @@
 from lib_transcendence.exceptions import MessagesException
 from lib_transcendence.services import requests_auth
-from lib_transcendence.auth import auth_verify
+from lib_transcendence.auth import auth_verify, get_user_from_auth
 from lib_transcendence.endpoints import Auth
 from rest_framework import serializers
 from rest_framework.authentication import BaseAuthentication
-from rest_framework.exceptions import NotFound, PermissionDenied
+from rest_framework.exceptions import NotFound, PermissionDenied, AuthenticationFailed, NotAuthenticated
 
 from users.models import Users
 
@@ -22,17 +22,16 @@ class Authentication(BaseAuthentication):
         token = request.headers.get('Authorization')
 
         if not token:
-            return None
-
-        json_data = auth_verify(token)
-        if json_data is None:
-            return None
+            raise NotAuthenticated()
 
         try:
-            # todo remake
-            # 1. todo REMAKE not permision but authenticaed error
-            # 2. USE authenticatd classes not permision // change all
-            print('CACA json_data', json_data, flush=True)
+            json_data = auth_verify(token)
+        except AuthenticationFailed:
+            raise AuthenticationFailed()
+        if json_data is None:
+            raise AuthenticationFailed()
+
+        try:
             user = Users.objects.get(id=json_data['id'])
             if user.is_guest != json_data['is_guest']:
                 user.is_guest = json_data['is_guest']
@@ -43,7 +42,11 @@ class Authentication(BaseAuthentication):
         except Users.DoesNotExist:
             user = Users.objects.create(**json_data) # todo remake
 
-        return user, token
+        auth_user = get_user_from_auth(json_data)
+        return auth_user, token
+
+    def authenticate_header(self, request):
+        return 'Bearer realm="api"'
 
 
 def get_user(request=None, id=None):
