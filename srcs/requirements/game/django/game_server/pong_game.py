@@ -75,6 +75,8 @@ class Game:
             self.wait_for_players(timeout)
         except Exception as e:
             print(e, flush=True)
+            self.match.model.finished = True
+            self.match.model.save()
             return
         print('game launched', flush=True)
         start_time = time.time()

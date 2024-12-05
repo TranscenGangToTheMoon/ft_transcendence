@@ -38,7 +38,7 @@ class Match():
             self.teams.append(Team(team))
 
     def __str__(self):
-        return self.model.code + ' ' + str(self.teams[0].model.players.all() + ' ' + str(self.teams[0].model.players.all()))
+        return self.model.code + ' ' + str(self.teams[0].model.players.all()) + ' ' + str(self.teams[0].model.players.all())
 
 def fetch_match_sync(match_code):
     print(f'fetching match {match_code}', flush=True)
