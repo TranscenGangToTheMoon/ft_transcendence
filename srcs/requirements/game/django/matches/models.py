@@ -10,7 +10,7 @@ class Matches(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     game_duration = models.DurationField(default=timedelta(minutes=3))
     finished = models.BooleanField(default=False)
-
+    port = models.IntegerField(null=True, default=None)
     tournament_id = models.IntegerField(null=True)
     tournament_stage_id = models.IntegerField(null=True)
 
@@ -34,6 +34,10 @@ class Matches(models.Model):
         if self.tournament_id is not None:
             winner, looser = self.players.order_by('-score')
             request_tournament_matchmaking(self.tournament_id, self.tournament_stage_id, winner.user_id, looser.user_id)
+        self.save()
+
+    def set_port(self, port: int):
+        self.port = port
         self.save()
 
     def __str__(self):

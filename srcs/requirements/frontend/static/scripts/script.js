@@ -222,12 +222,13 @@ async function handleRoute() {
         '/profile' : 'profile.html',
         '/lobby' : '/lobby.html',
         '/chat' : '/testChat.html',
+
         '/game/ranked' : '/game/game.html',
         '/game/duel' : '/game/game.html',
         '/game/custom' : '/game/game.html',
         '/tournament' : '/workInProgress.html'
     };
-    
+
     const page = routes[path] || '/404.html';
     await loadContent(page);
 }
@@ -239,7 +240,7 @@ async function handleRoute() {
         //         await navigateTo(event.target.href);
         //     }
         // });
-        
+
 
 let lastState = 0;
 if (!localStorage.getItem('currentState'))
@@ -268,7 +269,7 @@ async function navigateTo(url, doNavigate=true){
 }
 
 window.navigateTo = navigateTo;
-        
+
 function confirmPopstate() {
     // const confirmModal = document.getElementById('confirmModal');
     // confirmModal.removeAttribute('style');
@@ -309,7 +310,7 @@ function cancelNavigation(event, url, callback=undefined){
         isUserGoBack = false;
     }
 }
-        
+
 window.addEventListener('popstate', async event => {
     console.log(event.state, 'last state:', lastState);
     if (!isUserGoBack)
