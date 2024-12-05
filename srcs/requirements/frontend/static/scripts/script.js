@@ -353,9 +353,6 @@ function displayMainAlert(alertTitle, alertContent) {
 
     alertContentDiv.innerText = alertContent;
     alertTitleDiv.innerText = alertTitle;
-    document.getElementById('alertModal').addEventListener('shown.bs.modal', function() {
-        document.getElementById('alertModalClose').focus();
-    })
     alertModal.show();
 }
 

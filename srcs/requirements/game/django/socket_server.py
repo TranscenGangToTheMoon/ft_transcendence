@@ -2,15 +2,16 @@ from aiohttp import web
 from game_server.server import Server
 import socketio
 
-sio = socketio.AsyncServer(async_mode='aiohttp', cors_allowed_origins='*')
+sio = socketio.AsyncServer(async_mode='aiohttp', cors_allowed_origins='*', logger=True)
 app = web.Application()
-sio.attach(app)
+sio.attach(app, socketio_path='/ws/')
 server = Server()
 port = 5500
 
 
 @sio.event
 async def connect(sid, environ, auth):
+    print('trying to connect', flush=True)
     if auth['token'] == 'kk':
         print(f"Client connecté : {sid}", flush=True)
     else:
