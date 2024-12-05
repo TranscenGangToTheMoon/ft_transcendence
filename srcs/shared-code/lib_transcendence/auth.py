@@ -22,16 +22,12 @@ class Authentication(BaseAuthentication):
             raise ParseError(MessagesException.ValidationError.REQUEST_DATA_REQUIRED)
         json_data = request_users(endpoints.Users.me, 'GET', request)
         request.data['auth_user'] = json_data
-        user = self.get_user_from_auth(json_data)
+        user = get_user_from_auth(json_data)
 
         return user, None
 
-    @staticmethod
-    def get_user_from_auth(user_data):
-        from django.contrib.auth.models import User
-
-        user, created = User.objects.get_or_create(id=user_data['id'], username=user_data['username'])
-        return user
+    def authenticate_header(self, request):
+        return 'Bearer realm="api"'
 
 
 def get_auth_user(request=None):
