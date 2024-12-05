@@ -33,9 +33,9 @@ class Server:
         await self.app.shutdown()
 
     def get_player(self, id: int):
-        for game in Server.games:
-            for team in game.teams:
+        for match_code in Server.games:
+            for team in Server.games[match_code].match.teams:
                 for player in team.players:
-                    if player.id == id:
+                    if player.user_id == id:
                         return player
         raise Exception(f'No player with id {id} is awaited on this server')
