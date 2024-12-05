@@ -2,7 +2,8 @@ from lib_transcendence.exceptions import MessagesException
 from lib_transcendence.services import requests_auth
 from lib_transcendence.auth import auth_verify
 from lib_transcendence.endpoints import Auth
-from rest_framework import permissions, serializers
+from rest_framework import serializers
+from rest_framework.authentication import BaseAuthentication
 from rest_framework.exceptions import NotFound, PermissionDenied
 
 from users.models import Users
@@ -16,13 +17,16 @@ def auth_delete(token, data):
     requests_auth(token, Auth.delete, method='DELETE', data=data)
 
 
-class IsAuthenticated(permissions.BasePermission):
+class Authentication(BaseAuthentication):
+    def authenticate(self, request):
+        token = request.headers.get('Authorization')
 
-    def has_permission(self, request, view):
+        if not token:
+            return None
 
-        json_data = auth_verify(request.headers.get('Authorization'))
+        json_data = auth_verify(token)
         if json_data is None:
-            return False
+            return None
 
         try:
             # todo remake
@@ -37,10 +41,9 @@ class IsAuthenticated(permissions.BasePermission):
                 user.username = json_data['username']
                 user.save()
         except Users.DoesNotExist:
-            user = Users.objects.create(**json_data)
-        request.user.id = user.id
-        request.user.username = user.username
-        return True
+            user = Users.objects.create(**json_data) # todo remake
+
+        return user, token
 
 
 def get_user(request=None, id=None):

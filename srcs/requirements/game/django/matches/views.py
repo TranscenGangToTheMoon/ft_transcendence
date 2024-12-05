@@ -1,4 +1,4 @@
-from lib_transcendence.auth import IsAuthenticated
+from lib_transcendence.auth import Authentication
 from rest_framework import generics
 
 from matches.models import Matches
@@ -12,7 +12,7 @@ class CreateMatchView(generics.CreateAPIView):
 class ListMatchesView(generics.ListAPIView):
     serializer_class = MatchSerializer
     queryset = Matches.objects.all()
-    permission_classes = [IsAuthenticated]
+    authentication_classes = [Authentication]
 
     def filter_queryset(self, queryset):
         return queryset.filter(players__user_id=self.kwargs['user_id'])
