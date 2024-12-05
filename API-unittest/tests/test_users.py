@@ -60,25 +60,25 @@ class Test03_DeleteUser(UnitTest):
         user1 = new_user()
 
         self.assertResponse(me(user1, method='DELETE', password=True), 204)
-        self.assertResponse(me(user1), 404, {'detail': 'User not found'})
+        self.assertResponse(me(user1), 404, {'detail': 'User not found.'})
 
     def test_002_delete_not_get_me(self):
         user1 = new_user(get_me=False)
 
         self.assertResponse(me(user1, method='DELETE', password=True), 204)
-        self.assertResponse(me(user1), 404, {'detail': 'User not found'})
+        self.assertResponse(me(user1), 404, {'detail': 'User not found.'})
 
     def test_003_already_delete(self):
         user1 = new_user()
 
         self.assertResponse(me(user1, method='DELETE', password=True), 204)
-        self.assertResponse(me(user1, method='DELETE', password=True), 404, {'detail': 'User not found'})
+        self.assertResponse(me(user1, method='DELETE', password=True), 404, {'detail': 'User not found.'})
 
     def test_004_request_after_delete(self):
         user1 = new_user()
 
         self.assertResponse(me(user1, method='DELETE', password=True), 204)
-        self.assertResponse(create_lobby(user1), 404, {'detail': 'User not found'})
+        self.assertResponse(create_lobby(user1), 404, {'detail': 'User not found.'})
 
     def test_005_user_in_lobby(self):
         user1 = new_user()
@@ -86,7 +86,7 @@ class Test03_DeleteUser(UnitTest):
         code = self.assertResponse(create_lobby(user1), 201, get_id='code')
         self.assertResponse(me(user1, method='DELETE', password=True), 204)
         self.assertResponse(create_lobby(user1, method='GET'), 401, {'detail': 'Invalid token.'})
-        self.assertResponse(join_lobby(code), 404, {'detail': 'User not found'})
+        self.assertResponse(join_lobby(code), 404, {'detail': 'User not found.'})
 
     def test_006_user_in_game(self):
         user1 = new_user()
