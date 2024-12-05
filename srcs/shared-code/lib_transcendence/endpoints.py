@@ -20,7 +20,7 @@ class Chat:
     _fchat_id_message = '{chat_id}/messages/'
 
     chats = _base_chat
-    chat = chats + _chat_id +'/'
+    chat = chats + _chat_id + '/'
     fmessages = chats + _fchat_id_message
     messages = fmessages.format(chat_id=_chat_id)
     fmessage = base_api + _fchat_id_message
