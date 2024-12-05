@@ -5,13 +5,13 @@
         canvasHeight: 600,
         paddleWidth: 30,
         paddleHeight: 200,
-        ballSize: 30,
-        maxBallSpeed: 70,
+        ballSize: 20,
+        maxBallSpeed: 15,
         animationDuration: 800,
         font: "48px Arial",
         fontColor: "white",
         defaultBallSpeed : 4,
-        ballSpeedIncrement: 0,
+        ballSpeedIncrement: 1,
         winningScore: 3,
         enemyScore : {},
         playerScore : {},
@@ -19,7 +19,8 @@
             steps : 3,
             delay : 2000,
         },
-        maxBounceAngle : 2 * (Math.PI / 5)
+        maxBounceAngle : 2 * (Math.PI / 5),
+        displayDemo: true
     };
 
     config.enemyScore = {
@@ -56,11 +57,11 @@
                 y: (config.canvasHeight - config.paddleHeight) / 2,
                 blockGlide: false,
             },
-            leftRight :{
-                x : 100 + 100,
-                y : (config.canvasHeight - config.paddleHeight) / 2,
-                blockGlide: false,
-            },
+            // leftRight :{
+            //     x : 100 + 100,
+            //     y : (config.canvasHeight - config.paddleHeight) / 2,
+            //     blockGlide: false,
+            // },
         },
         countDown: {
             currentStep: config.countDown.steps,
@@ -253,6 +254,7 @@
     }
 
     function handleUserInput(){
+        if (state.keys['d']) config.displayDemo ? config.displayDemo = false : config.displayDemo = true;
         if (state.keys[' '])
             pauseGame(false);
         if (state.isGamePaused) return;
@@ -296,10 +298,10 @@
 
     function handleGoal(){
         if (state.ball.x + config.ballSize <= 0 || state.ball.x >= canvas.width){
-			// if (state.ball.x + config.ballSize <= 0) state.playerScore++;
-			// else state.enemyScore++;
-			// resetBall();
-            state.ball.speedX = -state.ball.speedX;
+			if (state.ball.x + config.ballSize <= 0) state.playerScore++;
+			else state.enemyScore++;
+			resetBall();
+            // state.ball.speedX = -state.ball.speedX;
         }
     }
 
@@ -345,14 +347,13 @@
         }
         else{
             state.ball.speedX = -state.ball.speedX;
-            if (state.ball.speed >= 70)
+            if (state.ball.speed < config.maxBallSpeed)
                 incrementBallSpeed();
             calculateNewBallDirection(paddle.y);
         }
     }
 
     function handlePaddleCollision(paddle){
-        //left paddle
         if (((state.ball.x < paddle.x + config.paddleWidth &&
             state.ball.x > paddle.x ) ||
             (state.ball.x + config.ballSize > paddle.x && 
@@ -379,26 +380,47 @@
             paddle.blockGlide = true;
         else
             paddle.blockGlide = false;
-    //     //right paddle
-    //     if (state.ball.x + config.ballSize > state.paddles.right.x &&
-    //         state.ball.x < state.paddles.right.x + config.paddleWidth && 
-    //         state.ball.y + config.ballSize > state.paddles.right.y &&
-    //         state.ball.y < state.paddles.right.y + config.paddleHeight){
-    //         handlePaddleBounce(state.paddles.right);
-    //         if (!state.paddles.right.blockGlide)
-    //             state.ball.x = state.paddles.right.x - config.ballSize;
-    //     }
-    //     else if (state.ball.x + config.ballSize > state.paddles.right.x && 
-    //              state.ball.x < state.paddles.right.x + config.paddleWidth 
-    //     )
-    //         state.paddles.right.blockGlide = true;
-    //     else
-    //         state.paddles.right.blockGlide = false;
+    }
+
+    function displayDemo() {
+        if (state.ball.x < config.canvasWidth/2){
+            let newPaddleLeftY = (state.ball.y + config.ballSize / 2) - config.paddleHeight / 2;
+            if (newPaddleLeftY > state.paddles.left.y && newPaddleLeftY - state.paddles.left.y < 5)
+                return;
+            if (newPaddleLeftY < state.paddles.left.y && state.paddles.left.y - newPaddleLeftY < 5)
+                return;
+            let yIncr = (newPaddleLeftY > state.paddles.left.y) ? 10 : -10;
+            state.paddles.left.y += yIncr;
+            if (state.paddles.left.y < 0) state.paddles.left.y = 0;
+            if (state.paddles.left.y > config.canvasHeight - config.paddleHeight) state.paddles.left.y = config.canvasHeight - config.paddleHeight;
+        }
+        else{
+            let newPaddleRight = (state.ball.y + config.ballSize / 2) - config.paddleHeight / 2;
+            if (newPaddleRight > state.paddles.right.y && newPaddleRight - state.paddles.right.y < 5)
+                return;
+            if (newPaddleRight < state.paddles.right.y && state.paddles.right.y - newPaddleRight < 5)
+                return;
+            let yIncr = (newPaddleRight > state.paddles.right.y) ? 10 : -10;
+            state.paddles.right.y += yIncr;
+            if (state.paddles.right.y < 0) state.paddles.right.y = 0;
+            if (state.paddles.right.y > config.canvasHeight - config.paddleHeight) state.paddles.right.y = config.canvasHeight - config.paddleHeight;            
+        }
     }
 
     function handleGameOver(){
-        if (state.playerScore >= config.winningScore || state.enemyScore >= config.winningScore)
+        if (state.playerScore >= config.winningScore || state.enemyScore >= config.winningScore){
+            if (config.displayDemo){
+                resumeGame();
+                state.ball.speed = config.defaultBallSpeed;
+                stopGame(true);
+                setTimeout(()=>{
+                    resetGame();
+                    startGame();
+                }, config.animationDuration + 100);
+                return;
+            }
             stopGame(true);
+        }
     }
 
     function updateGameState() {
@@ -423,6 +445,10 @@
         for (let paddle in state.paddles){
             handlePaddleCollision(state.paddles[paddle]);
         }
+
+        if (config.displayDemo)
+            displayDemo();
+
 		handleGameOver();
     }
 
