@@ -485,22 +485,34 @@
     window.PongGame = {startGame, stopGame, pauseGame, resumeGame};
 })();
 
-// let socket;
 
-// function initSocket(){
-// 	socket = io('wss://localhost:4443/', {
-// 		auth : {
-// 			'token' : getAccessToken()
-// 		},
-// 		path: "ws"
-// 	});
+function initSocket(){
+    let socket = io("wss://localhost:4443/", {
+        path: "/ws/",
+        auth : {
+            
+            "id": userInformations.id,
+            "token": 'kk',
+        },
+		// extraHeaders: {
+		// }
+	});
+    console.log(socket)
+	socket.on('connect', () => {
+        console.log('Connecté au serveur Socket.IO !');
+      
+        // Envoie un message au serveur
+        socket.emit('message', 'Bonjour depuis le frontend !');
+    });
+    socket.on('connect_error', (error)=> {
+        console.log('error', error);
+    })
+}
 
-// 	console.log(socket);
-
-// 	// socket.on("my message", ...args => {
-// 	// 	console.log(args);
-// 	// })
-// }
+document.getElementById('zizi').addEventListener('click', event => {
+    event.preventDefault();
+    initSocket();
+})
 
 document.getElementById('playGame').addEventListener('click', async event => {
 	try {
@@ -509,7 +521,7 @@ document.getElementById('playGame').addEventListener('click', async event => {
 	catch(error) {
 		console.log(error);
 	}
-	initSocket();
+	// initSocket();
 })
 
 document.getElementById('confirmModal').addEventListener('hidden.bs.modal', () => {
@@ -524,7 +536,7 @@ document.getElementById('testA').addEventListener('click', event => {
 
 async function initGame(){
     await indexInit(false);
-    window.PongGame.startGame();
+    // window.PongGame.startGame();
 }
 
 initGame();

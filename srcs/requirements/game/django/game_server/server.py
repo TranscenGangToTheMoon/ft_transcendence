@@ -34,7 +34,7 @@ class Server:
 
     def get_player(self, id: int):
         for game in Server.games:
-            for team in game.teams:
+            for team in game.match.teams:
                 for player in team.players:
                     if player.id == id:
                         return player
