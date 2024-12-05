@@ -25,15 +25,15 @@ class BlockedUserView(SerializerKwargsContext, generics.CreateAPIView, generics.
 class DeleteUserView(generics.DestroyAPIView):
     def delete(self, request, *args, **kwargs):
         try:
-            TournamentParticipants.objects.get(kwargs['user_id']).delete()
+            TournamentParticipants.objects.get(user_id=kwargs['user_id']).delete()
         except TournamentParticipants.DoesNotExist:
             pass
         try:
-            LobbyParticipants.objects.get(kwargs['user_id']).delete()
+            LobbyParticipants.objects.get(user_id=kwargs['user_id']).delete()
         except LobbyParticipants.DoesNotExist:
             pass
         try:
-            Players.objects.get(kwargs['user_id']).delete()
+            Players.objects.get(user_id=kwargs['user_id']).delete()
         except Players.DoesNotExist:
             pass
         return Response(status=status.HTTP_204_NO_CONTENT)
