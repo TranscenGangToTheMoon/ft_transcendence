@@ -8,6 +8,14 @@ from rest_framework.exceptions import ParseError
 from lib_transcendence.services import request_users, requests_auth
 
 
+def get_user_from_auth(user_data):
+    from django.contrib.auth.models import User
+
+    user, created = User.objects.get_or_create(id=user_data['id'], username=user_data['username'])
+    print('created:', created, flush=True)
+    return user
+
+
 class Authentication(BaseAuthentication):
     def authenticate(self, request):
         if type(request.data) is not dict:
