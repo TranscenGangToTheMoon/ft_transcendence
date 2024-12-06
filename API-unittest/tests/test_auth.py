@@ -1,5 +1,6 @@
-from services.auth import register
-from utils.credentials import guest_user
+from services.auth import register, register_guest
+from services.user import me
+from utils.credentials import guest_user, new_user
 from utils.generate_random import rnstr
 from utils.my_unittest import UnitTest
 
@@ -24,6 +25,11 @@ class Test01_Register(UnitTest):
         user = {'token': response.json['access']}
         self.assertResponse(response, 201)
         self.assertResponse(me(user), 200)
+
+    def test_002_register_already_exist(self):
+        user1 = new_user()
+
+        self.assertResponse(register(user1['username'], user1['password']), 400)
 
 
 class Test02_RegisterGuest(UnitTest):
