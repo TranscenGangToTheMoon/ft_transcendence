@@ -129,7 +129,7 @@ class Test03_DeleteUser(UnitTest):
         chat_id = self.assertResponse(create_chat(user1, user2['username']), 201, get_id=True)
         self.assertResponse(request_chat_id(user2, chat_id), 200)
         self.assertResponse(me(user1, method='DELETE', password=True), 204)
-        self.assertResponse(request_chat_id(user2, chat_id), 404, {'detail': 'You do not belong to this chat.'})
+        self.assertResponse(request_chat_id(user2, chat_id), 403, {'detail': 'You do not belong to this chat.'})
 
     def test_010_play_duel(self):
         user2 = new_user()
