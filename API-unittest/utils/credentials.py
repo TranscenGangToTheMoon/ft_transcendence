@@ -21,23 +21,23 @@ TESTS = [
 
 # -------------------- REQUEST --------------------------------------------------------------------------------------- #
 def auth_guest():
-    return make_request('auth/guest/', 'POST')
+    return make_request('auth/guest/', 'POST').json
 
 
 def register(data):
-    return make_request('auth/register/', 'PUT', token=auth_guest()['access'], data=data)
+    return make_request('auth/register/', 'PUT', token=auth_guest()['access'], data=data).json
 
 
 def login(data):
-    return make_request('auth/login/', 'POST', data=data)
+    return make_request('auth/login/', 'POST', data=data).json
 
 
 def refresh_token(access_token, _refresh_token):
-    return make_request('auth/refresh/', 'POST', access_token, {'refresh': _refresh_token})
+    return make_request('auth/refresh/', 'POST', access_token, {'refresh': _refresh_token}).json
 
 
 def verify_token(access_token):
-    return make_request('auth/verify/', token=access_token)
+    return make_request('auth/verify/', token=access_token).json
 
 
 # -------------------- GET TOKEN ------------------------------------------------------------------------------------- #
