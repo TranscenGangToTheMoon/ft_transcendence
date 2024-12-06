@@ -27,3 +27,5 @@ class Test01_Register(UnitTest):
         print(guest, flush=True)
 
         self.assertResponse(register(guest=guest, method='PATCH'), 200)
+
+# todo try to register without tokent, without guest, alredy connected, etc...
