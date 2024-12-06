@@ -1,4 +1,5 @@
 base_api = 'api/'
+_user_id = '<int:user_id>'
 
 
 class Auth:
@@ -32,10 +33,10 @@ class Game:
 
     match = base_api + 'match/'
     fmatch_user = match + '{user_id}/'
-    match_user = fmatch_user.format(user_id='<int:user_id>')
+    match_user = fmatch_user.format(user_id=_user_id)
     tournaments = base_api + 'tournaments/'
 
-    matches_user = _base_game + 'matches/<int:user_id>/'
+    matches_user = _base_game + f'matches/{_user_id}/'
     tournament = _base_game + 'tournaments/<int:tournament_id>/'
 
 
@@ -47,12 +48,12 @@ class Matchmaking:
 
     lobby = _base_matchmaking + 'lobby/'
     lobby_participant = lobby + '<str:code>/'
-    lobby_kick = lobby_participant + 'kick/<int:user_id>/'
+    lobby_kick = lobby_participant + f'kick/{_user_id}/'
 
     tournament = _base_matchmaking + 'tournament/'
     tournament_search = tournament + 'search/'
     tournament_participant = tournament + '<str:code>/'
-    tournament_kick = tournament + '<str:code>/kick/<int:user_id>/'
+    tournament_kick = tournament + f'<str:code>/kick/{_user_id}/'
 
     tournament_result_match = base_api + 'tournament/result-match/'
 
@@ -61,7 +62,7 @@ class Users:
     _base_users = base_api + 'users/'
 
     me = _base_users + 'me/'
-    user = _base_users + '<int:user_id>/'
+    user = _base_users + f'{_user_id}/'
 
     friends = me + 'friends/'
     friend = friends + '<int:friendship_id>/'
@@ -79,7 +80,7 @@ class Users:
 
 
 class UsersManagement:
-    rename_user = base_api + 'rename-user/<int:user_id>/'
+    rename_user = base_api + f'rename-user/{_user_id}/'
     fblocked_user = base_api + 'blocked-user/{user_id}/{blocked_user_id}/'
     blocked_user = fblocked_user.format(user_id='<int:user_id>', blocked_user_id='<int:blocked_user_id>')
     delete_user = base_api + 'delete-user/<int:user_id>/'
