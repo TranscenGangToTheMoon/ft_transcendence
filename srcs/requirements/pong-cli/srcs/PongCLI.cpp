@@ -6,7 +6,7 @@
 /*   By: xcharra <xcharra@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/03 17:35:02 by xcharra           #+#    #+#             */
-/*   Updated: 2024/12/05 17:31:52 by xcharra          ###   ########.fr       */
+/*   Updated: 2024/12/06 17:46:27 by xcharra          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,10 +88,11 @@ void	PongCLI::signUpAction(std::string &server, std::string &username, std::stri
 		_password = password;
 		try {
 			_curl.setServer(_server);
-			_user.setGuestTokens(_curl); // delete when flo allow register without token
 			_user.setUsername(_username);
 			_user.setPassword(_password);
-			_user.signUpUser(_curl);
+//			_user.setGuestTokens(_curl); // delete when flo allow register without token
+//			_user.signUpUser(_curl);
+			_user.signUpUserWithoutToken(_curl);
 			_user.setAccessToken(jsonParser(_curl.getResponse(), "access"));
 			_user.setRefreshToken(jsonParser(_curl.getResponse(), "refresh"));
 			_info = text("(" + std::to_string(_curl.getHTTPCode()) + ") Connexion success !") | color(Color::Green);
@@ -175,7 +176,7 @@ void PongCLI::renderLoginPage() {
 		signUpButton
 	});
 
-	auto render =  Renderer(pageComponents, [&] {
+	Component render =  Renderer(pageComponents, [&] {
 		return (
 			vbox({
 				getBanner() | hcenter | border,
@@ -224,21 +225,30 @@ void PongCLI::renderLoginPage() {
 }
 
 void PongCLI::renderMainMenuPage() {
-	auto pageComponent = Container::Vertical({});
 
-	auto render = Renderer(pageComponent, [&] {
+	Component settingsButton = Button("Settings", [this] { changePage(Page::SettingsPage); });
+	Component gameButton = Button("Settings", [this] { changePage(Page::SettingsPage); });
+
+	Component	pageComponents = Container::Vertical({
+		settingsButton,
+		gameButton
+	});
+
+	auto render = Renderer(pageComponents, [&] {
 		return (
 			vbox({
 				getBanner() | hcenter | border,
 				vbox({
-					window(
-						text("Main Menu"),
-						vbox({
-							text("Main menu page load !"),
-							filler(),
-						})
-					) | xflex_grow | yflex_grow
-				}) | flex,
+					vbox({
+						gridbox({{
+							text("Settings") | center | border | flex,
+							gridbox({
+								{ text("Normal Game") | center | border | flex },
+								{ text("Ranked Game") | center | border | flex }
+							}) | flex
+						}}) | flex,
+					})| xflex_grow | yflex_grow | flex
+				}) | xflex_grow | yflex_grow | flex,
 			}) | border | size(WIDTH, GREATER_THAN, 150) | size(HEIGHT, GREATER_THAN, 40)
 		);
 	});
