@@ -1,19 +1,19 @@
-function acceptFriendRequest(id){
+async function acceptFriendRequest(id){
     try {
-        let data = apiRequest(getAccessToken(), `${baseAPIUrl}/users/me/friend_requests/${id}/`, 'POST');
+        let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/users/me/friend_requests/${id}/`, 'POST');
     }
     catch (error){
         console.log(error);
     }
 }
 
-(function friendRequests(){
+(async function friendRequests(){
     const declineButtons = document.querySelectorAll('.declineFriendRequest');
 
     for (let declineButton of declineButtons){
         if (!declineButton.listened){
-            declineButton.addEventListener('click', event => {
-                declineFriendRequest(declineButton.parentElement.parentElement.id);
+            declineButton.addEventListener('click', async event => {
+                await declineFriendRequest(declineButton.parentElement.parentElement.id);
                 console.log('declined friend request: ', declineButton.parentElement.parentElement.id);
             })
         }
@@ -24,8 +24,8 @@ function acceptFriendRequest(id){
 
     for (let acceptButton of acceptButtons){
         if (!acceptButton.listened){
-            acceptButton.addEventListener('click', event => {
-                acceptFriendRequest(acceptButton.parentElement.parentElement.id);
+            acceptButton.addEventListener('click', async event => {
+                await acceptFriendRequest(acceptButton.parentElement.parentElement.id);
                 console.log('accepted friend request: ', acceptButton.parentElement.parentElement.id);
             })
         }

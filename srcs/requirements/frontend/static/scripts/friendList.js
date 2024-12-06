@@ -37,11 +37,12 @@ async function friendListInit(){
     console.log('je load')
     getDataFromApi(getAccessToken(), `${baseAPIUrl}/users/me/friends/`)
         .then(data => {
-            console.log(data);
             if (!data.count)
                 document.getElementById('knownFriends').innerText = "you don't have any friends";
-            else
+            else{
+                
                 document.getElementById('knownFriends').innerText = "unable to fetch friend list";
+            }
         })
         .catch(error => {
             console.log(error);
@@ -55,7 +56,7 @@ async function friendListInit(){
         else if (data.count){
             for (result of data.results){
                 const requestDiv = document.createElement('div');
-                requestDiv.id = result.sender.id;
+                requestDiv.id = result.id;
                 requestDiv.style.backgroundColor = 'red';
                 requestDiv.style.margin = '2px';
                 console.log(requestDiv.id);
