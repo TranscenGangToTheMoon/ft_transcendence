@@ -15,6 +15,7 @@ class Test01_Play(UnitTest):
         self.assertResponse(play(game_mode='ranked'), 201)
 
 
+# todo remake if user find a match
 class Test02_PlayError(UnitTest):
 
     def test_001_already_in_game(self):
