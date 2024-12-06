@@ -1,0 +1,5 @@
+/lib/*
+*.o
+*.d
+ft_transcendence.crt
+pong-cli
