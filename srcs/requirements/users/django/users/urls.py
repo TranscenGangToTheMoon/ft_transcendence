@@ -26,8 +26,11 @@ urlpatterns = [
     path(Users.are_blocked, are_blocked_view),
 ]
 
-# 2. todo handle rename user
-# 3. todo handle create user
+# 1. todo remake user_management system: use users/me/
+    # 2. todo handle rename user
+    # 3. todo handle create user
+
+# 4. todo make sse
 
 # todo make endpoint for user stats, xp, trophies (when match ended, or when tournament ended)
 # - pas de stat (custom_game)
