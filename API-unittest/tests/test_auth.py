@@ -26,7 +26,10 @@ class Test02_RegisterGuest(UnitTest):
 
     def test_001_register_guest(self):
         guest = guest_user()
-        print(guest, flush=True)
+
+        # todo make get response
+        user = {'token': self.assertResponse(register_guest(guest=guest), 200, get_id='access')}
+        self.assertResponse(me(user), 200)
 
         self.assertResponse(register(guest=guest, method='PATCH'), 200)
 
