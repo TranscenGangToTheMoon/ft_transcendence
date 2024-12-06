@@ -1,3 +1,8 @@
+from services.auth import register
+from utils.credentials import guest_user
+from utils.generate_random import rnstr
+from utils.my_unittest import UnitTest
+
 
 # todo test login
 # todo test login user does not exist
@@ -8,3 +13,5 @@
 # todo test refresh
 # todo test get token
 # todo test guest
+
+class Test01_Register(UnitTest):
