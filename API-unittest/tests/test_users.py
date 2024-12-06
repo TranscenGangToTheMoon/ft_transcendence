@@ -85,8 +85,8 @@ class Test03_DeleteUser(UnitTest):
 
         code = self.assertResponse(create_lobby(user1), 201, get_id='code')
         self.assertResponse(me(user1, method='DELETE', password=True), 204)
-        self.assertResponse(create_lobby(user1, method='GET'), 401, {'detail': 'Invalid token.'})
-        self.assertResponse(join_lobby(code), 401, {'detail': 'Incorrect authentication credentials.'})
+        self.assertResponse(create_lobby(user1, method='GET'), 401, {'detail': 'Incorrect authentication credentials.'})
+        self.assertResponse(join_lobby(code), 404, {'detail': 'Lobby not found.'})
 
     def test_006_user_in_game(self):
         user1 = new_user()
@@ -101,10 +101,9 @@ class Test03_DeleteUser(UnitTest):
         name = rnstr()
 
         code = self.assertResponse(create_tournament(user1, {'name': 'Delete User ' + name}), 201, get_id='code')
-        self.assertResponse(join_tournament(code), 201)
         self.assertResponse(search_tournament(name), 200, count=1)
         self.assertResponse(me(user1, method='DELETE', password=True), 204)
-        self.assertResponse(create_tournament(user1, method='GET'), 401, {'detail': 'Invalid token.'})
+        self.assertResponse(create_tournament(user1, method='GET'), 401, {'detail': 'Incorrect authentication credentials.'})
         self.assertResponse(search_tournament(name), 200, count=0)
 
     def test_008_user_in_start_tournament(self):
@@ -113,20 +112,23 @@ class Test03_DeleteUser(UnitTest):
 
         code = self.assertResponse(create_tournament(user1, {'name': 'Delete User ' + name}), 201, get_id='code')
         self.assertResponse(join_tournament(code), 201)
-        self.assertResponse(search_tournament(name), 200, count=1)
+        response = search_tournament(name)
+        self.assertResponse(response, 200, count=1)
+        self.assertEqual(2, response.json['results'][0]['n_participants'])
         self.assertResponse(me(user1, method='DELETE', password=True), 204)
-        self.assertResponse(create_tournament(user1, method='GET'), 401, {'detail': 'Invalid token.'})
-        self.assertResponse(search_tournament(name), 200, count=0)
+        response = search_tournament(name)
+        self.assertResponse(response, 200, count=1)
+        self.assertEqual(1, response.json['results'][0]['n_participants'])
         # todo make when tournament work
 
     def test_009_chat_with(self):
         user1 = new_user()
         user2 = new_user()
 
-        self.assertResponse(accept_chat(user2), 201)
-        chat_id = self.assertResponse(create_chat(user1, user2), 201, get_id=True)
-        self.assertResponse(request_chat_id(user2, chat_id), 201)
-        self.assertResponse(me(user1, method='DELETE', data={'password': user2['password']}), 201)
+        self.assertResponse(accept_chat(user2), 200)
+        chat_id = self.assertResponse(create_chat(user1, user2['username']), 201, get_id=True)
+        self.assertResponse(request_chat_id(user2, chat_id), 200)
+        self.assertResponse(me(user1, method='DELETE', password=True), 204)
         self.assertResponse(request_chat_id(user2, chat_id), 404, {'detail': 'You do not belong to this chat.'})
 
     def test_010_play_duel(self):
@@ -140,9 +142,10 @@ class Test03_DeleteUser(UnitTest):
             response = is_in_game(user1)
             if response.status_code == 404:
                 break
-        self.assertResponse(me(user1, method='DELETE', data={'password': user2['password']}), 201)
+        self.assertResponse(me(user1, method='DELETE', password=True), 204)
         self.assertResponse(play(user2), 201)
-        self.assertResponse(is_in_game(user2), 401, {'detail': 'Incorrect authentication credentials.'})
+        time.sleep(1)
+        self.assertResponse(is_in_game(user2), 404, {'detail': 'This user is not in a game.'})
 
     def test_012_play_ranked(self):
         user2 = new_user()
@@ -155,10 +158,10 @@ class Test03_DeleteUser(UnitTest):
             response = is_in_game(user1)
             if response.status_code == 404:
                 break
-        self.assertResponse(me(user1, method='DELETE', data={'password': user2['password']}), 201)
+        self.assertResponse(me(user1, method='DELETE', password=True), 204)
         self.assertResponse(play(user2, 'ranked'), 201)
         time.sleep(1)
-        self.assertResponse(is_in_game(user2), 401, {'detail': 'Incorrect authentication credentials.'})
+        self.assertResponse(is_in_game(user2), 404, {'detail': 'This user is not in a game.'})
 
 
 if __name__ == '__main__':
