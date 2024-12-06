@@ -22,12 +22,16 @@ class Test01_Register(UnitTest):
 
         self.assertResponse(register(username, password), 201)
 
-    def test_002_register_guest(self):
 class Test02_RegisterGuest(UnitTest):
 
+    def test_001_register_guest(self):
         guest = guest_user()
         print(guest, flush=True)
 
         self.assertResponse(register(guest=guest, method='PATCH'), 200)
 
 # todo try to register without tokent, without guest, alredy connected, etc...
+
+
+if __name__ == '__main__':
+    unittest.main()
