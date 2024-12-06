@@ -1,6 +1,8 @@
 from rest_framework import generics
 from rest_framework.exceptions import NotAuthenticated, NotFound
 from lib_transcendence.exceptions import MessagesException
+from lib_transcendence import endpoints
+from lib_transcendence.services import request_matchmaking, request_chat
 
 from users.auth import auth_delete, get_valid_user, get_user
 from users.models import Users
@@ -20,7 +22,12 @@ class UsersMeView(generics.RetrieveUpdateDestroyAPIView):
         password = self.request.data.get('password')
         if password is None:
             raise NotAuthenticated({'password': 'Password confirmation is required to delete the account.'})
+
         auth_delete(self.request.headers.get('Authorization'), {'password': password})
+
+        request_matchmaking(endpoints.UsersManagement.fdelete_user.format(user_id=self.request.user.id), 'DELETE') # todo remake
+        request_chat(endpoints.UsersManagement.fdelete_user.format(user_id=self.request.user.id), 'DELETE') # todo remake
+
         return super().destroy(request, *args, **kwargs)
 
 
