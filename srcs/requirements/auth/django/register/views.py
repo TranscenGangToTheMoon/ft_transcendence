@@ -1,15 +1,8 @@
-from lib_transcendence.exceptions import MessagesException
 from rest_framework import generics
-from rest_framework import permissions
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.permissions import IsAuthenticated
 
-from guest.group import is_guest
+from auth.permissions import IsGuest
 from register.serializers import RegisterSerializer
-
-
-class GuestRequiredPermission(permissions.BasePermission):
-    def has_permission(self, request, view):
-        return request.user.is_authenticated and is_guest(request)
 
 
 class RegisterView(generics.CreateAPIView):
@@ -19,7 +12,7 @@ class RegisterView(generics.CreateAPIView):
 
 class RegisterGuestView(generics.UpdateAPIView):
     serializer_class = RegisterSerializer
-    permission_classes = [GuestRequiredPermission]
+    permission_classes = [IsAuthenticated, IsGuest]
 
     def get_object(self):
         return self.request.user
