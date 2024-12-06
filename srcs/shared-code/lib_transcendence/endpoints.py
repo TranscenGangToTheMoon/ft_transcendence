@@ -7,6 +7,7 @@ class Auth:
 
     guest = _base_auth + 'guest/'
     register = _base_auth + 'register/'
+    register_guest = register + 'guest/'
     login = _base_auth + 'login/'
     refresh = _base_auth + 'refresh/'
 
