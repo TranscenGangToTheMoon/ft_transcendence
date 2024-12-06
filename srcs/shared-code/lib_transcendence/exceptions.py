@@ -65,6 +65,7 @@ class MessagesException:
         GUEST_USERS_NOT_ALLOWED = 'Guest users are not allowed to change their password.'
         GUEST_CANNOT_PLAY_RANKED = 'Guest users cannot play ranked games.'
         GUEST_UPDATE_USERNAME = 'Guest users can only update their username.'
+        GUEST_REQUIRED = 'You must be a guest user.'
 
         NOT_BELONG = 'You do not belong to this {obj}.'
         NOT_BELONG_TO_CHAT = NOT_BELONG.format(obj='chat')
