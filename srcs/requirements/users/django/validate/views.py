@@ -14,7 +14,7 @@ from users.serializers import UsersSerializer
 class ValidateChatView(generics.RetrieveAPIView):
     queryset = Users.objects.all()
     serializer_class = UsersSerializer
-    permission_classes = []
+    authentication_classes = []
 
     def get_object(self):
         user1 = get_user(id=self.kwargs['user1_id'])
@@ -28,7 +28,7 @@ class ValidateChatView(generics.RetrieveAPIView):
 class AreBlockedView(generics.RetrieveAPIView):
     queryset = BlockedUsers.objects.all()
     serializer_class = BlockedSerializer
-    permission_classes = []
+    authentication_classes = []
 
     def get_object(self):
         user1 = get_user(id=self.kwargs['user1_id'])
