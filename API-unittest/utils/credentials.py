@@ -28,7 +28,7 @@ def auth_guest():
 
 
 def register(data):
-    return make_request('auth/register/', 'PUT', token=auth_guest()['access'], data=data).json
+    return make_request('auth/register/', 'POST', data=data).json
 
 
 def login(data):
