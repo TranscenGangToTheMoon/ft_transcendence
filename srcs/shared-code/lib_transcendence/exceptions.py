@@ -1,3 +1,5 @@
+from typing import Literal
+
 from lib_transcendence.game import GameMode
 from rest_framework import status
 from rest_framework.exceptions import APIException
@@ -12,6 +14,8 @@ class MessagesException:
         USER = NOT_FOUND.format(obj='User')
         FRIEND_REQUEST = NOT_FOUND.format(obj='Friend request')
         FRIENDSHIP = NOT_FOUND.format(obj='Friendship')
+        TOURNAMENT = NOT_FOUND.format(obj='Tournament')
+        BLOCKED_INSTANCE = NOT_FOUND.format(obj='Blocked instance')
 
         NOT_BELONG = 'You do not belong to any {obj}.'
         NOT_BELONG_TOURNAMENT = NOT_BELONG.format(obj='tournament')
@@ -61,6 +65,7 @@ class MessagesException:
         GUEST_USERS_NOT_ALLOWED = 'Guest users are not allowed to change their password.'
         GUEST_CANNOT_PLAY_RANKED = 'Guest users cannot play ranked games.'
         GUEST_UPDATE_USERNAME = 'Guest users can only update their username.'
+        GUEST_REQUIRED = 'You must be a guest user.'
 
         NOT_BELONG = 'You do not belong to this {obj}.'
         NOT_BELONG_TO_CHAT = NOT_BELONG.format(obj='chat')
@@ -130,7 +135,7 @@ class ServiceUnavailable(APIException):
     default_detail = MessagesException.ServiceUnavailable.SERVICE_UNAVAILABLE
     default_code = 'service_unavailable'
 
-    def __init__(self, service):
+    def __init__(self, service: Literal['auth', 'chat', 'game', 'matchmaking', 'users']):
         self.detail = ServiceUnavailable.default_detail.format(service=service)
 
 

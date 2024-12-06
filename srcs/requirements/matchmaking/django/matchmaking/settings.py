@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-njs%e3niu%k(6!0tjqnwe(eg64no%lt#l*-_&rh$m_&3kr+!ou
 DEBUG = environ["DEBUG"]
 
 ALLOWED_HOSTS = [
-    'localhost', # todo remove
+    'localhost',
     'matchmaking',
 ]
 
@@ -35,8 +35,6 @@ ALLOWED_HOSTS = [
 # Application definition
 
 INSTALLED_APPS = [
-	# 'daphne',
-	# 'channels',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -44,10 +42,11 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'blocking',
     'lobby',
     'play',
     'tournament',
-    'users',
+    'user_management',
 ]
 
 MIDDLEWARE = [
@@ -78,8 +77,7 @@ TEMPLATES = [
     },
 ]
 
-# WSGI_APPLICATION = 'matchmaking.wsgi.application'
-ASGI_APPLICATION = 'matchmaking.asgi.application'
+WSGI_APPLICATION = 'matchmaking.wsgi.application'
 
 
 # Database
@@ -137,17 +135,14 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 # Commenting those lines to silence the warning
 # STATIC_ROOT = BASE_DIR / "staticfiles"
 
-
-
-
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': [
-        'lib_transcendence.auth.IsAuthenticated',
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'lib_transcendence.auth.Authentication',
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     'PAGE_SIZE': 20,

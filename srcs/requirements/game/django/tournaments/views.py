@@ -1,4 +1,4 @@
-from lib_transcendence.auth import IsAuthenticated
+from lib_transcendence.auth import Authentication
 from rest_framework import generics
 
 from tournaments.models import Tournaments
@@ -13,7 +13,7 @@ class RetrieveTournamentView(generics.RetrieveAPIView):
     queryset = Tournaments.objects.all()
     serializer_class = TournamentSerializer
     lookup_field = 'tournament_id'
-    permission_classes = [IsAuthenticated]
+    authentication_classes = [Authentication]
 
 
 save_tournament_view = SaveTournamentView.as_view()

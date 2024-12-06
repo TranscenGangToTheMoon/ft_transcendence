@@ -1,4 +1,4 @@
-from services.blocked import blocked_user
+from services.blocked import blocked_user, unblocked_user
 from services.lobby import create_lobby, join_lobby, kick_user
 from utils.credentials import new_user, guest_user
 from utils.my_unittest import UnitTest
@@ -68,6 +68,7 @@ class Test02_ErrorJoinLobby(UnitTest):
         self.assertEqual(1, len(response.json))
 
         self.assertResponse(create_lobby(user2, method='GET'), 404, {'detail': 'You do not belong to any lobby.'})
+        self.assertResponse(join_lobby(code, user2), 404, {'detail': 'Lobby not found.'})
 
     def test_009_blocked_user_not_creator(self):
         user1 = new_user()
@@ -83,6 +84,23 @@ class Test02_ErrorJoinLobby(UnitTest):
         response = join_lobby(code, user1, 'GET')
         self.assertResponse(response, 200)
         self.assertEqual(3, len(response.json))
+
+    def test_010_blocked_then_unblock(self):
+        user1 = new_user()
+        user2 = new_user()
+
+        code = self.assertResponse(create_lobby(user1), 201, get_id='code')
+
+        self.assertResponse(join_lobby(code, user2), 201)
+        blocked_id = self.assertResponse(blocked_user(user1, user2['id']), 201, get_id=True)
+
+        response = join_lobby(code, user1, 'GET')
+        self.assertResponse(response, 200)
+        self.assertEqual(1, len(response.json))
+
+        self.assertResponse(join_lobby(code, user2), 404, {'detail': 'Lobby not found.'})
+        self.assertResponse(unblocked_user(user1, blocked_id), 204)
+        self.assertResponse(join_lobby(code, user2), 201)
 
 
 class Test03_KickLobby(UnitTest):
@@ -197,7 +215,10 @@ class Test04_UpdateLobby(UnitTest):
         for i in range(5):
             response = join_lobby(code, users[i])
             self.assertResponse(response, 201)
-            self.assertEqual(teams[i], response.json['team'])
+            for user in response.json['participants']:
+                if user['id'] == users[i]['id']:
+                    self.assertEqual(teams[i], user['team'])
+                    break
 
         response = create_lobby(user1, data={'match_type': '1v1'}, method='PATCH')
         self.assertResponse(response, 200)

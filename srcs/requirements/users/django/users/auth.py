@@ -1,9 +1,10 @@
 from lib_transcendence.exceptions import MessagesException
 from lib_transcendence.services import requests_auth
-from lib_transcendence.auth import auth_verify
+from lib_transcendence.auth import auth_verify, get_user_from_auth
 from lib_transcendence.endpoints import Auth
-from rest_framework import permissions, serializers
-from rest_framework.exceptions import NotFound
+from rest_framework import serializers
+from rest_framework.authentication import BaseAuthentication
+from rest_framework.exceptions import NotFound, PermissionDenied, AuthenticationFailed, NotAuthenticated
 
 from users.models import Users
 
@@ -16,16 +17,21 @@ def auth_delete(token, data):
     requests_auth(token, Auth.delete, method='DELETE', data=data)
 
 
-class IsAuthenticated(permissions.BasePermission):
+class Authentication(BaseAuthentication):
+    def authenticate(self, request):
+        token = request.headers.get('Authorization')
 
-    def has_permission(self, request, view):
-
-        json_data = auth_verify(request.headers.get('Authorization'))
-        if json_data is None:
-            return False
+        if not token:
+            raise NotAuthenticated()
 
         try:
-            # todo remake
+            json_data = auth_verify(token)
+        except AuthenticationFailed:
+            raise AuthenticationFailed()
+        if json_data is None:
+            raise AuthenticationFailed()
+
+        try:
             user = Users.objects.get(id=json_data['id'])
             if user.is_guest != json_data['is_guest']:
                 user.is_guest = json_data['is_guest']
@@ -34,10 +40,13 @@ class IsAuthenticated(permissions.BasePermission):
                 user.username = json_data['username']
                 user.save()
         except Users.DoesNotExist:
-            user = Users.objects.create(**json_data)
-        request.user.id = user.id
-        request.user.username = user.username
-        return True
+            user = Users.objects.create(**json_data) # todo remake
+
+        auth_user = get_user_from_auth(json_data)
+        return auth_user, token
+
+    def authenticate_header(self, request):
+        return 'Bearer realm="api"'
 
 
 def get_user(request=None, id=None):
@@ -51,10 +60,14 @@ def get_user(request=None, id=None):
         raise NotFound(MessagesException.NotFound.USER)
 
 
-def get_valid_user(self, **kwargs):
+def get_valid_user(self, assert_guest=True, self_blocked=False, **kwargs):
     try:
         valide_user = Users.objects.get(**kwargs)
-        assert valide_user.is_guest is False
+        if assert_guest:
+            assert valide_user.is_guest is False
+        if self_blocked:
+            if self.blocked.filter(blocked=valide_user).exists():
+                raise PermissionDenied(MessagesException.PermissionDenied.BLOCKED_USER)
         assert not valide_user.blocked.filter(blocked=self).exists()
     except (Users.DoesNotExist, AssertionError):
         raise NotFound(MessagesException.NotFound.USER)

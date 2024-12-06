@@ -1,4 +1,6 @@
-from services.game import create_game
+import time
+
+from services.game import create_game, is_in_game
 from services.lobby import create_lobby, join_lobby
 from services.play import play
 from services.tournament import join_tournament, create_tournament
@@ -15,6 +17,7 @@ class Test01_Play(UnitTest):
         self.assertResponse(play(game_mode='ranked'), 201)
 
 
+# todo remake if user find a match
 class Test02_PlayError(UnitTest):
 
     def test_001_already_in_game(self):
@@ -55,9 +58,15 @@ class Test02_PlayError(UnitTest):
         self.assertResponse(join_tournament(code, user1, 'GET'), 403, {'detail': 'You do not belong to this tournament.'})
 
     def test_006_delete(self):
-        user1 = new_user()
+        while True:
+            user1 = new_user()
 
-        self.assertResponse(play(user1), 201)
+            self.assertResponse(play(user1), 201)
+            time.sleep(1)
+            response = is_in_game(user1)
+            if response.status_code == 404:
+                break
+
         self.assertResponse(play(user1, method='DELETE'), 204)
 
     def test_006_delete_not_play(self):

@@ -4,6 +4,7 @@ from lib_transcendence.utils import generate_code
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
 
+from blocking.utils import create_player_instance
 from matchmaking.utils import verify_user, get_tournament, verify_place
 from tournament.models import Tournaments, TournamentStage, TournamentParticipants
 
@@ -25,7 +26,18 @@ class TournamentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Tournaments
-        fields = '__all__'
+        fields = [
+            'id',
+            'code',
+            'name',
+            'participants',
+            'size',
+            'private',
+            'is_started',
+            'start_at',
+            'created_at',
+            'created_by',
+        ]
         read_only_fields = [
             'code',
             'created_at',
@@ -52,8 +64,9 @@ class TournamentSerializer(serializers.ModelSerializer):
 
         validated_data['code'] = generate_code(Tournaments)
         validated_data['created_by'] = user['id']
+        validated_data['created_by_username'] = user['username']
         result = super().create(validated_data)
-        TournamentParticipants.objects.create(user_id=user['id'], trophies=user['trophies'], tournament=result, creator=True)
+        create_player_instance(request, TournamentParticipants, user_id=user['id'], trophies=user['trophies'], tournament=result, creator=True)
         return result
 
 
@@ -112,6 +125,7 @@ class TournamentParticipantsSerializer(serializers.ModelSerializer):
 
 class TournamentSearchSerializer(serializers.ModelSerializer):
     n_participants = serializers.SerializerMethodField()
+    created_by = serializers.CharField(source='created_by_username')
 
     class Meta:
         model = Tournaments
@@ -121,7 +135,7 @@ class TournamentSearchSerializer(serializers.ModelSerializer):
             'private',
             'n_participants',
             'size',
-            'created_by', #todo send ??
+            'created_by',
         ]
 
     @staticmethod

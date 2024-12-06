@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
 
-from guest.group import group_guests
+from guest.group import is_guest
 
 
 class VerifyUserSerializer(serializers.ModelSerializer):
@@ -13,4 +13,4 @@ class VerifyUserSerializer(serializers.ModelSerializer):
 
     @staticmethod
     def get_is_guest(obj):
-        return obj.groups.filter(name=group_guests).exists()
+        return is_guest(user=obj)
