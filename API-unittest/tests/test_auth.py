@@ -46,6 +46,9 @@ class Test02_RegisterGuest(UnitTest):
 
         self.assertResponse(register_guest(username='username_' + random_name, password='password_,' + random_name), 401)
 
+    def test_003_register_user_since_guest(self):
+        self.assertResponse(register_guest(guest=new_user()), 403)  # todo add json response test
+
 # todo try to register without tokent, without guest, alredy connected, etc...
 
 
