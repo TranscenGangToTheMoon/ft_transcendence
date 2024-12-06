@@ -41,8 +41,7 @@ class DeleteUserView(generics.DestroyAPIView):
     authentication_classes = []
 
     def delete(self, request, *args, **kwargs):
-        chats = ChatParticipants.objects.filter(user_id=kwargs['user_id']).values_list('chat', flat=True)
-        Chats.objects.filter(id__in=chats).delete()
+        Chats.objects.filter(participants__user_id=kwargs['user_id']).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
