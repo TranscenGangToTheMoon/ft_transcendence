@@ -15,3 +15,15 @@ from utils.my_unittest import UnitTest
 # todo test guest
 
 class Test01_Register(UnitTest):
+
+    def test_001_register(self):
+        username = 'register_test' + rnstr()
+        password = 'password_' + username
+
+        self.assertResponse(register(username, password), 201)
+
+    def test_002_register_guest(self):
+        guest = guest_user()
+        print(guest, flush=True)
+
+        self.assertResponse(register(guest=guest, method='PATCH'), 200)
