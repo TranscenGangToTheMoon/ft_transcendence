@@ -193,7 +193,7 @@ async function loadContent(url, container='content', append=false) {
         if(!append)
             contentDiv.innerHTML = html;
         else
-            contentDiv.innerHTML += html;
+            contentDiv.innerHTML += `\n${html}`;
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = html;
         const script = tempDiv.querySelector('[script]');
@@ -397,6 +397,7 @@ async function loadUserProfile(){
         document.getElementById('balance').innerText = userInformations.coins;
     }
     await loadContent(`/${profileMenu}`, 'profileMenu');
+    // await loadContent('/blockedUsers.html', 'modals', true);
     await loadFriendListModal();
     // document.getElementById('title').innerText = userInformations.title;
 }

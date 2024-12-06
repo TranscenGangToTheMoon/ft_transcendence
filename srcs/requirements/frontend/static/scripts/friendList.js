@@ -1,22 +1,40 @@
-document.getElementById('searchButton').addEventListener('click', async event => {
-    event.preventDefault();
-    const userInput = document.getElementById('friendSearched').value;
-    // console.log(userInformations);
-    // document.getElementById('searchResults').innerText = "euh pas possible dans l'API?";
-    // document.getElementById('searchResults').style = 'color:red';
-    try {
-        let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/users/me/friend_requests/`, 'POST', undefined, undefined, {
-            'username' : userInput,
-        })
-    }
-    catch (error) {
-        console.log(error);
-        if (error.code === 404)
-            document.getElementById('searchResults').innerText = 'user not found';
+document.getElementById('modals').addEventListener('click', async event => {
+    if (event.target.matches('#sendFriendRequest') && !event.target.listened){
+        event.preventDefault();
+        event.target.listened = true;
+        const userInput = document.getElementById('friendSearched').value;
+        try {
+            let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/users/me/friend_requests/`, 'POST', undefined, undefined, {
+                'username' : userInput,
+            })
+        }
+        catch (error) {
+            console.log(error);
+            if (error.code === 404)
+                document.getElementById('searchResults').innerText = 'user not found';
+        }
     }
 })
 
+
+// document.getElementById('sendFriendRequest').addEventListener('click', async event => {
+//     console.log('salut')
+//     event.preventDefault();
+//     const userInput = document.getElementById('friendSearched').value;
+//     try {
+//         let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/users/me/friend_requests/`, 'POST', undefined, undefined, {
+//             'username' : userInput,
+//         })
+//     }
+//     catch (error) {
+//         console.log(error);
+//         if (error.code === 404)
+//             document.getElementById('searchResults').innerText = 'user not found';
+//     }
+// })
+
 async function friendListInit(){
+    console.log('je load')
     getDataFromApi(getAccessToken(), `${baseAPIUrl}/users/me/friends/`)
         .then(data => {
             console.log(data);
