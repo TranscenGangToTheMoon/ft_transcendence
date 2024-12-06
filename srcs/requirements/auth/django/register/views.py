@@ -1,5 +1,6 @@
 from lib_transcendence.exceptions import MessagesException
 from rest_framework import generics
+from rest_framework import permissions
 from rest_framework.exceptions import PermissionDenied
 
 from guest.group import is_guest
