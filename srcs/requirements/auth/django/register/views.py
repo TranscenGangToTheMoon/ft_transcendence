@@ -6,9 +6,8 @@ from guest.group import is_guest
 from register.serializers import RegisterSerializer
 
 
-class RegisterGuestView(generics.UpdateAPIView):
+class RegisterView(generics.UpdateAPIView, generics.CreateAPIView):
     serializer_class = RegisterSerializer
-    permission_classes = [IsAuthenticated, IsGuest]
 
     def get_object(self):
         return self.request.user
