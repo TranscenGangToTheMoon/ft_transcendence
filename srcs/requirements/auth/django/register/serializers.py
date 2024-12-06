@@ -41,8 +41,10 @@ class RegisterSerializer(serializers.ModelSerializer):
         password = validated_data.pop('password', None)
         if password is not None:
             instance.set_password(password)
+        if validated_data['username'] == instance.username:
+            validated_data.pop('username')
+        else:
+            validate_username(validated_data['username'], only_check_exists=True)
         super().update(instance, validated_data)
-
         refresh_token = RefreshToken.for_user(instance)
         return {'access': str(refresh_token.access_token), 'refresh': str(refresh_token)}
-
