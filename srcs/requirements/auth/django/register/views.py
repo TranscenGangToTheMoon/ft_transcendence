@@ -10,6 +10,8 @@ class RegisterView(generics.UpdateAPIView, generics.CreateAPIView):
     serializer_class = RegisterSerializer
 
     def get_object(self):
+        if self.request.user.is_authenticated and not is_guest(self.request):
+            raise PermissionDenied(MessagesException.PermissionDenied.GUEST_REQUIRED)
         return self.request.user
 
 
