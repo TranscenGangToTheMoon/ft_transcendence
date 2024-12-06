@@ -22,9 +22,8 @@ class RegisterSerializer(serializers.ModelSerializer):
             'refresh',
         ]
 
-    def validated_username(self, value):
+    def validate_username(self, value):
         request = self.context.get('request')
-
         if request is None:
             raise serializers.ValidationError(MessagesException.ValidationError.REQUEST_REQUIRED)
 
