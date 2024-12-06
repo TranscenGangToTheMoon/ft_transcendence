@@ -23,6 +23,8 @@ class Test01_Register(UnitTest):
         self.assertResponse(register(username, password), 201)
 
     def test_002_register_guest(self):
+class Test02_RegisterGuest(UnitTest):
+
         guest = guest_user()
         print(guest, flush=True)
 
