@@ -31,7 +31,10 @@ class Test02_RegisterGuest(UnitTest):
         user = {'token': self.assertResponse(register_guest(guest=guest), 200, get_id='access')}
         self.assertResponse(me(user), 200)
 
-        self.assertResponse(register(guest=guest, method='PATCH'), 200)
+    def test_002_register_guest_without_tokent(self):
+        random_name = rnstr()
+
+        self.assertResponse(register_guest(username='username_' + random_name, password='password_,' + random_name), 401)
 
 # todo try to register without tokent, without guest, alredy connected, etc...
 
