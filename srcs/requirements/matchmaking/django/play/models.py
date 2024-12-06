@@ -20,7 +20,8 @@ class Players(models.Model):
             launch_dual_game(players.filter(game_mode=GameMode.duel))
             print('normal taged')
         if players.filter(game_mode=GameMode.ranked).count() == 1:
-            Thread(target=search_ranked_players()).start()
+            pass
+            # Thread(target=search_ranked_players()).start()
             #subprocess ??
 
     def __str__(self):
