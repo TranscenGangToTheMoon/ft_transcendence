@@ -1,4 +1,4 @@
-from services.blocked import blocked_user
+from services.blocked import blocked_user, unblocked_user
 from services.tournament import create_tournament, join_tournament, kick_user, search_tournament
 from utils.credentials import new_user, guest_user
 from utils.generate_random import rnstr
@@ -106,6 +106,23 @@ class Test02_ErrorTournament(UnitTest):
 
         self.assertResponse(join_tournament(code, user1, 'DELETE'), 204)
         self.assertResponse(create_tournament(user1), 403, {'detail': 'You cannot create more than one tournament at the same time.'})
+
+    def test_012_blocked_then_unblock(self):
+        user1 = new_user()
+        user2 = new_user()
+
+        code = self.assertResponse(create_tournament(user1), 201, get_id='code')
+
+        self.assertResponse(join_tournament(code, user2), 201)
+        blocked_id = self.assertResponse(blocked_user(user1, user2['id']), 201, get_id=True)
+
+        response = join_tournament(code, user1, 'GET')
+        self.assertResponse(response, 200)
+        self.assertEqual(1, len(response.json))
+
+        self.assertResponse(join_tournament(code, user2), 404, {'detail': 'Tournament not found.'})
+        self.assertResponse(unblocked_user(user1, blocked_id), 204)
+        self.assertResponse(join_tournament(code, user2), 201)
 
 
 class Test03_KickTournament(UnitTest):
@@ -257,7 +274,10 @@ class Test06_LeaveTournament(UnitTest):
 
         response = join_tournament(code, user1)
         self.assertResponse(response, 201)
-        self.assertTrue(response.json['creator'])
+        for u in response.json['participants']:
+            if u['id'] == user1['id']:
+                self.assertTrue(u['creator'])
+                break
 
 
 class Test07_GetTournament(UnitTest):
@@ -319,12 +339,36 @@ class Test07_GetTournament(UnitTest):
     def test_006_search_tournament_none(self):
         self.assertResponse(search_tournament('caca'), 200, count=0)
 
+    def test_007_search_tournaments_blocked_by_creator_tournament(self):
+        user1 = new_user()
+        user2 = new_user()
+        name = rnstr()
+
+        self.assertResponse(create_tournament(new_user(), data={'name': 'Blocked ' + name + rnstr()}), 201)
+        self.assertResponse(create_tournament(user1, data={'name': 'Blocked ' + name + rnstr()}), 201)
+        blocked_id = self.assertResponse(blocked_user(user1, user2['id']), 201, get_id=True)
+        self.assertResponse(search_tournament('Blocked ' + name, user2), 200, count=1)
+        self.assertResponse(unblocked_user(user1, blocked_id), 204)
+        self.assertResponse(search_tournament('Blocked ' + name, user2), 200, count=2)
+
+    def test_008_search_tournaments_blocked_by_user_tournament(self):
+        user1 = new_user()
+        user2 = new_user()
+        name = rnstr()
+
+        self.assertResponse(create_tournament(new_user(), data={'name': 'Blocked ' + name + rnstr()}), 201)
+        self.assertResponse(create_tournament(user1, data={'name': 'Blocked ' + name + rnstr()}), 201)
+        blocked_id = self.assertResponse(blocked_user(user2, user1['id']), 201, get_id=True)
+        self.assertResponse(search_tournament('Blocked ' + name, user2), 200, count=1)
+        self.assertResponse(unblocked_user(user2, blocked_id), 204)
+        self.assertResponse(search_tournament('Blocked ' + name, user2), 200, count=2)
+
 
 # todo test start after make it
 # todo test leave tournament after start
 # todo test stage
 # todo test index after make it
 # todo test when tournament ended
-# todo test search user block does not appear
+
 if __name__ == '__main__':
     unittest.main()

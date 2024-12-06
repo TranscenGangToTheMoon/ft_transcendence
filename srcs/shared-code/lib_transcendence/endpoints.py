@@ -1,13 +1,14 @@
 base_api = 'api/'
+_user_id = '<int:user_id>'
 
 
 class Auth:
-    base_auth = base_api + 'auth/'
+    _base_auth = base_api + 'auth/'
 
-    guest = base_auth + 'guest/'
-    register = base_auth + 'register/'
-    login = base_auth + 'login/'
-    refresh = base_auth + 'refresh/'
+    guest = _base_auth + 'guest/'
+    register = _base_auth + 'register/'
+    login = _base_auth + 'login/'
+    refresh = _base_auth + 'refresh/'
 
     verify = base_api + 'verify/'
     update = base_api + 'update/'
@@ -15,48 +16,53 @@ class Auth:
 
 
 class Chat:
-    base_chat = base_api + 'chat/'
+    _base_chat = base_api + 'chat/'
+    _chat_id = '<int:chat_id>'
+    _fchat_id_message = '{chat_id}/messages/'
 
-    chats = base_chat
-    chat = chats + '<int:chat_id>/'
-    messages = chat + 'messages/'
+    chats = _base_chat
+    chat = chats + _chat_id + '/'
+    fmessages = chats + _fchat_id_message
+    messages = fmessages.format(chat_id=_chat_id)
+    fmessage = base_api + _fchat_id_message
+    message = fmessage.format(chat_id=_chat_id)
 
 
 class Game:
-    base_game = base_api + 'game/'
+    _base_game = base_api + 'game/'
 
     match = base_api + 'match/'
     fmatch_user = match + '{user_id}/'
-    match_user = fmatch_user.format(user_id='<int:user_id>')
+    match_user = fmatch_user.format(user_id=_user_id)
     tournaments = base_api + 'tournaments/'
 
-    matches_user = base_game + 'matches/<int:user_id>/'
-    tournament = base_game + 'tournaments/<int:tournament_id>/'
+    matches_user = _base_game + f'matches/{_user_id}/'
+    tournament = _base_game + 'tournaments/<int:tournament_id>/'
 
 
 class Matchmaking:
-    base_matchmaking = base_api + 'play/'
+    _base_matchmaking = base_api + 'play/'
 
-    duel = base_matchmaking + 'duel/'
-    ranked = base_matchmaking + 'ranked/'
+    duel = _base_matchmaking + 'duel/'
+    ranked = _base_matchmaking + 'ranked/'
 
-    lobby = base_matchmaking + 'lobby/'
+    lobby = _base_matchmaking + 'lobby/'
     lobby_participant = lobby + '<str:code>/'
-    lobby_kick = lobby_participant + 'kick/<int:user_id>/'
+    lobby_kick = lobby_participant + f'kick/{_user_id}/'
 
-    tournament = base_matchmaking + 'tournament/'
+    tournament = _base_matchmaking + 'tournament/'
     tournament_search = tournament + 'search/'
     tournament_participant = tournament + '<str:code>/'
-    tournament_kick = tournament + '<str:code>/kick/<int:user_id>/'
+    tournament_kick = tournament + f'<str:code>/kick/{_user_id}/'
 
     tournament_result_match = base_api + 'tournament/result-match/'
 
 
 class Users:
-    base_users = base_api + 'users/'
+    _base_users = base_api + 'users/'
 
-    me = base_users + 'me/'
-    user = base_users + '<int:user_id>/'
+    me = _base_users + 'me/'
+    user = _base_users + f'{_user_id}/'
 
     friends = me + 'friends/'
     friend = friends + '<int:friendship_id>/'
@@ -74,12 +80,8 @@ class Users:
 
 
 class UsersManagement:
-    rename_user = base_api + 'rename-user/<int:user_id>/'
+    rename_user = base_api + f'rename-user/{_user_id}/' # todo remake (/delete/me, etc...)
     fblocked_user = base_api + 'blocked-user/{user_id}/{blocked_user_id}/'
-    blocked_user = fblocked_user.format(user_id='<int:user_id>', blocked_user_id='<int:blocked_user_id>')
-    delete_user = base_api + 'delete-user/<int:user_id>/'
-
-
-#todo check all internal request urls
-#todo raname all _view
-#todo in litteral use urls
+    blocked_user = fblocked_user.format(user_id=_user_id, blocked_user_id='<int:blocked_user_id>')
+    fdelete_user = base_api + 'delete-user/{user_id}/'
+    delete_user = fdelete_user.format(user_id=_user_id)

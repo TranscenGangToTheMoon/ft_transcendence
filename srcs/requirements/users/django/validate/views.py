@@ -14,15 +14,12 @@ from users.serializers import UsersSerializer
 class ValidateChatView(generics.RetrieveAPIView):
     queryset = Users.objects.all()
     serializer_class = UsersSerializer
-    permission_classes = []
+    authentication_classes = []
 
     def get_object(self):
         user1 = get_user(id=self.kwargs['user1_id'])
 
-        if user1.blocked.filter(blocked__username=self.kwargs['username2']).exists():
-            raise PermissionDenied(MessagesException.PermissionDenied.BLOCKED_USER)
-
-        valide_user = get_valid_user(user1, username=self.kwargs['username2'])
+        valide_user = get_valid_user(user1, self_blocked=True, username=self.kwargs['username2'])
         if AcceptChat.is_accept(valide_user.accept_chat_from, is_friendship(valide_user.id, user1.id)):
             return valide_user
         raise PermissionDenied(MessagesException.PermissionDenied.NOT_ACCEPT_CHAT)
@@ -31,7 +28,7 @@ class ValidateChatView(generics.RetrieveAPIView):
 class AreBlockedView(generics.RetrieveAPIView):
     queryset = BlockedUsers.objects.all()
     serializer_class = BlockedSerializer
-    permission_classes = []
+    authentication_classes = []
 
     def get_object(self):
         user1 = get_user(id=self.kwargs['user1_id'])

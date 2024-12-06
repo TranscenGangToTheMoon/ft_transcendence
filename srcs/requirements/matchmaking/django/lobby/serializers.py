@@ -5,8 +5,9 @@ from lib_transcendence.Lobby import MatchType, Teams
 from lib_transcendence.auth import get_auth_user
 from lib_transcendence.utils import generate_code
 from rest_framework import serializers
-from rest_framework.exceptions import PermissionDenied, NotFound
+from rest_framework.exceptions import PermissionDenied
 
+from blocking.utils import create_player_instance
 from lobby.models import Lobby, LobbyParticipants
 from matchmaking.utils import verify_user, get_lobby, verify_place
 
@@ -68,7 +69,8 @@ class LobbySerializer(serializers.ModelSerializer):
         return Bo.validate(value)
 
     def create(self, validated_data):
-        user = get_auth_user(self.context.get('request'))
+        request = self.context.get('request')
+        user = get_auth_user(request)
 
         if user['is_guest']:
             raise PermissionDenied(MessagesException.PermissionDenied.GUEST_CANNOT_CREATE_LOBBY)
@@ -83,14 +85,14 @@ class LobbySerializer(serializers.ModelSerializer):
             validated_data['match_type'] = MatchType.m1v1
             validated_data['max_participants'] = 6
         result = super().create(validated_data)
-        creator = LobbyParticipants.objects.create(lobby_id=result.id, user_id=user['id'], creator=True)
+        creator = create_player_instance(request, LobbyParticipants, lobby_id=result.id, user_id=user['id'], creator=True)
         if validated_data['game_mode'] == GameMode.custom_game:
             creator.team = Teams.a
             creator.save()
         return result
 # todo add all venv var in .venv
     def update(self, instance, validated_data):
-        if 'game_mode' in validated_data: # todo try with editable = False
+        if 'game_mode' in validated_data:
             raise PermissionDenied(MessagesException.PermissionDenied.CANNOT_UPDATE_GAME_MODE)
         if validated_data.get('match_type') == MatchType.m1v1 and instance.match_type == MatchType.m3v3:
             participants = instance.participants

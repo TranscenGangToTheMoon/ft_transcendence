@@ -167,91 +167,83 @@ class Test03_GetChat(UnitTest):
 
 class Test04_Messages(UnitTest):
 
+    def send_message(self, user1=None, user2=None):
+        if user1 is None:
+            user1 = new_user()
+        if user2 is None:
+            user2 = new_user()
+
+        self.assertResponse(accept_chat(user2), 200)
+
+        chat_id = self.assertResponse(create_chat(user1, user2['username']), 201, get_id=True)
+        self.assertResponse(create_message(user1, chat_id, 'Hey'), 201)
+        self.assertResponse(create_message(user2, chat_id, 'Hi'), 201)
+        self.assertResponse(create_message(user1, chat_id, 'How are you ?'), 201)
+        self.assertResponse(create_message(user2, chat_id, 'goood !'), 201)
+        self.assertResponse(create_message(user2, chat_id, 'and u ?'), 201)
+
+        return chat_id
+
     def test_001_send_messages(self):
+        user1 = new_user()
+
+        chat_id = self.send_message(user1)
+        response = request_chat_id(user1, chat_id)
+        self.assertResponse(response, 200)
+        self.assertEqual('and u ?', response.json['last_message']['content'])
+
+    def test_002_get_messages(self):
+        user1 = new_user()
+
+        chat_id = self.send_message(user1)
+
+        self.assertResponse(create_message(user1, chat_id, method='GET'), 200, count=5)
+
+    def test_003_send_chat_does_not_exist(self):
+        self.assertResponse(create_message(new_user(), '123456', 'test'), 403, {'detail': 'You do not belong to this chat.'})
+
+    def test_004_send_chat_does_not_belong(self):
+        user1 = new_user()
+
+        self.assertResponse(accept_chat(user1), 200)
+
+        chat_id = self.assertResponse(create_chat(new_user(), user1['username']), 201, get_id=True)
+
+        self.assertResponse(create_message(new_user(), chat_id, 'test'), 403, {'detail': 'You do not belong to this chat.'})
+
+    def test_005_chat_blocked(self):
+        user1 = new_user()
+        user2 = new_user()
+
+        chat_id = self.send_message(user1, user2)
+
+        block_id = self.assertResponse(blocked_user(user1, user2['id']), 201, get_id=True)
+
+        self.assertResponse(request_chat_id(user1, chat_id), 403, {'detail': 'You do not belong to this chat.'})
+        self.assertResponse(create_message(user1, chat_id, method='GET'), 403, {'detail': 'You do not belong to this chat.'})
+        self.assertResponse(create_message(user1, chat_id, 'block'), 403, {'detail': 'You do not belong to this chat.'})
+
+        self.assertResponse(unblocked_user(user1, block_id), 204)
+        self.assertResponse(create_message(user1, chat_id, 'thank for unblocking me ;))'), 201)
+        self.assertResponse(request_chat_id(user1, chat_id), 200)
+
+    def test_006_do_not_view_chat(self):
         user1 = new_user()
         user2 = new_user()
 
         self.assertResponse(accept_chat(user2), 200)
         chat_id = self.assertResponse(create_chat(user1, user2['username']), 201, get_id=True)
-        self.assertResponse(create_message(user1, chat_id, 'Hey'), 405, {'detail': 'Method "POST" not allowed.'})
 
-    # def send_message(self, user1=None, user2=None):
-    #     if user1 is None:
-    #         user1 = new_user()
-    #     if user2 is None:
-    #         user2 = new_user()
-    #
-    #     self.assertResponse(accept_chat(user2), 200)
-    #
-    #     chat_id = self.assertResponse(create_chat(user1, user2['username']), 201, get_id=True)
-    #     self.assertResponse(create_message(user1, chat_id, 'Hey'), 201)
-    #     self.assertResponse(create_message(user2, chat_id, 'Hi'), 201)
-    #     self.assertResponse(create_message(user1, chat_id, 'How are you ?'), 201)
-    #     self.assertResponse(create_message(user2, chat_id, 'goood !'), 201)
-    #     self.assertResponse(create_message(user2, chat_id, 'and u ?'), 201)
-    #
-    #     return chat_id
-    #
-    # def test_001_send_messages(self):
-    #     user1 = new_user()
-    #
-    #     chat_id = self.send_message(user1)
-    #     response = request_chat_id(user1, chat_id)
-    #     self.assertResponse(response, 200)
-    #     self.assertEqual('and u ?', response.json['last_message']['content'])
-    #
-    # def test_002_get_messages(self):
-    #     user1 = new_user()
-    #
-    #     chat_id = self.send_message(user1)
-    #
-    #     self.assertResponse(create_message(user1, chat_id, method='GET'), 200, count=5)
-    #
-    # def test_003_send_chat_does_not_exist(self):
-    #     self.assertResponse(create_message(new_user(), '123456', 'test'), 403, {'detail': 'You do not belong to this chat.'})
-    #
-    # def test_004_send_chat_does_not_belong(self):
-    #     user1 = new_user()
-    #
-    #     self.assertResponse(accept_chat(user1), 200)
-    #
-    #     chat_id = self.assertResponse(create_chat(new_user(), user1['username']), 201, get_id=True)
-    #
-    #     self.assertResponse(create_message(new_user(), chat_id, 'test'), 403, {'detail': 'You do not belong to this chat.'})
-    #
-    # def test_005_chat_blocked(self):
-    #     user1 = new_user()
-    #     user2 = new_user()
-    #
-    #     chat_id = self.send_message(user1, user2)
-    #
-    #     block_id = self.assertResponse(blocked_user(user1, user2['id']), 201, get_id=True)
-    #
-    #     self.assertResponse(request_chat_id(user1, chat_id), 403, {'detail': 'You do not belong to this chat.'})
-    #     self.assertResponse(create_message(user1, chat_id, method='GET'), 403, {'detail': 'You do not belong to this chat.'})
-    #     self.assertResponse(create_message(user1, chat_id, 'block'), 403, {'detail': 'You do not belong to this chat.'})
-    #
-    #     self.assertResponse(unblocked_user(user1, block_id), 204)
-    #     self.assertResponse(create_message(user1, chat_id, 'thank for unblocking me ;))'), 201)
-    #     self.assertResponse(request_chat_id(user1, chat_id), 200)
-    #
-    # def test_006_do_not_view_chat(self):
-    #     user1 = new_user()
-    #     user2 = new_user()
-    #
-    #     self.assertResponse(accept_chat(user2), 200)
-    #     chat_id = self.assertResponse(create_chat(user1, user2['username']), 201, get_id=True)
-    #
-    #     self.assertResponse(request_chat_id(user1, chat_id, method='DELETE'), 204)
-    #
-    #     self.assertResponse(create_message(user1, chat_id, 'do not view chat'), 403, {'detail': 'You do not belong to this chat.'})
-    #
-    #     self.assertResponse(create_chat(user1, method='GET'), 200, count=0)
-    #
-    #     self.assertResponse(create_message(user2, chat_id, 'Hey how are you ?'), 201)
-    #
-    #     self.assertResponse(create_chat(user1, method='GET'), 200, count=1)
-    #     self.assertResponse(create_message(user1, chat_id, 'Fine and u?'), 201)
+        self.assertResponse(request_chat_id(user1, chat_id, method='DELETE'), 204)
+
+        self.assertResponse(create_message(user1, chat_id, 'do not view chat'), 403, {'detail': 'You do not belong to this chat.'})
+
+        self.assertResponse(create_chat(user1, method='GET'), 200, count=0)
+
+        self.assertResponse(create_message(user2, chat_id, 'Hey how are you ?'), 201)
+
+        self.assertResponse(create_chat(user1, method='GET'), 200, count=1)
+        self.assertResponse(create_message(user1, chat_id, 'Fine and u?'), 201)
 
 
 if __name__ == '__main__':
