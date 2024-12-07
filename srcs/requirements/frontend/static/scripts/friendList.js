@@ -4,15 +4,19 @@ if (document.getElementById('modals').friendListened !== true){
         console.log('click')
         event.preventDefault();
         if (event.target.matches('#sendFriendRequest')){
+            document.getElementById('searchResults').innerText = "";
             event.preventDefault();
             const userInput = document.getElementById('friendSearched').value;
             try {
                 let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/users/me/friend_requests/`, 'POST', undefined, undefined, {
                     'username' : userInput,
                 })
-                if (data.detail){
-                    document.getElementById('searchResults').innerText = data.detail;
+                const detail = data.detail ? data.detail : data.username;
+                if (detail){
+                    document.getElementById('searchResults').innerText = detail;
                 }
+                else
+                    friendListInit();
             }
             catch (error) {
                 console.log(error);
@@ -41,7 +45,6 @@ if (document.getElementById('modals').friendListened !== true){
 // })
 
 async function friendListInit(){
-    console.log('je load')
     getDataFromApi(getAccessToken(), `${baseAPIUrl}/users/me/friends/`)
         .then(data => {
             const resultDiv = document.getElementById('knownFriends');
@@ -75,6 +78,21 @@ async function friendListInit(){
                 friendRequestsDiv.appendChild(requestDiv);
                 await loadContent('/friends/friendRequestBlock.html', `${requestDiv.id}`);
                 requestDiv.querySelector('.senderUsername').innerText = result.sender.username;
+            }
+        }
+        data = await apiRequest(getAccessToken(), `${baseAPIUrl}/users/me/friend_requests/`, 'GET');
+        const sentFriendRequestsDiv = document.getElementById('sentFriendRequests');
+        if (data.count === 0){
+            sentFriendRequestsDiv.innerText = 'no sent friend requests';
+        }
+        else if (data.count){
+            sentFriendRequestsDiv.innerHTML = "sent friend requests:";
+            for (result of data.results){
+                const requestDiv = document.createElement('div');
+                requestDiv.id = result.id;
+                sentFriendRequestsDiv.appendChild(requestDiv);
+                await loadContent('/friends/sentFriendRequestBlock.html', `${requestDiv.id}`);
+                requestDiv.querySelector('.receiverUsername').innerText = result.receiver.username;
             }
         }
     }
