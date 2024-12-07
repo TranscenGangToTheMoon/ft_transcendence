@@ -172,5 +172,11 @@ class Test03_DeleteUser(UnitTest):
         self.assertResponse(is_in_game(user2), 404, {'detail': 'This user is not in a game.'})
 
 
+class Test04_UpdateUserMe(UnitTest):
+
+    def test_001_update_password(self):
+        user1 = new_user()
+
+
 if __name__ == '__main__':
     unittest.main()
