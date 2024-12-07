@@ -66,6 +66,7 @@ class MessagesException:
         GUEST_USERS_NOT_ALLOWED = 'Guest users are not allowed to change their password.'
         GUEST_CANNOT_PLAY_RANKED = 'Guest users cannot play ranked games.'
         GUEST_UPDATE_USERNAME = 'Guest users can only update their username.'
+        GUEST_CANNOT_FRIEND_REQUEST = 'Guest users cannot make friend request.'
         GUEST_REQUIRED = 'You must be a guest user.' # todo useless
 
         NOT_BELONG = 'You do not belong to this {obj}.'
