@@ -72,8 +72,6 @@ async function friendListInit(){
             for (result of data.results){
                 const requestDiv = document.createElement('div');
                 requestDiv.id = result.id;
-                requestDiv.style.backgroundColor = 'red';
-                requestDiv.style.margin = '2px';
                 console.log(requestDiv.id);
                 friendRequestsDiv.appendChild(requestDiv);
                 await loadContent('/friends/friendRequestBlock.html', `${requestDiv.id}`);
