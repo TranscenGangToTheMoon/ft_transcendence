@@ -169,6 +169,18 @@ class Test02_FriendRequest(UnitTest):
         friend_request_id = self.assertResponse(friend_requests(user1, user2), 201, get_id=True)
         self.assertResponse(friend_request(friend_request_id, user1), 403, {'detail': 'you cannot accept your own friend request.'})
 
+    def test_014_guest_user_make_friend_request(self):
+        user1 = guest_user()
+        user2 = new_user()
+
+        self.assertResponse(friend_requests(user1, user2), 403, {'detail': 'Guest users cannot make friend request.'})
+
+    def test_015_guest_user_receive_friend_request(self):
+        user1 = new_user()
+        user2 = guest_user()
+
+        self.assertResponse(friend_requests(user1, user2), 404, {'detail': 'User not found.'})
+
 
 if __name__ == '__main__':
     unittest.main()
