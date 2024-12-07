@@ -39,6 +39,7 @@ class MessagesException:
         USERNAME_SHORTER_THAN_30_CHAR = 'Username must be less than 30 characters long.'
         INVALIDE_CHAR = 'Use of an invlid character.'
         USERNAME_ALREAY_EXISTS = 'This username already exists.'
+        SAME_PASSWORD = 'Password is the same as the old one.'
 
         ONLY_1V1_3V3_ALLOWED = 'Only 1v1 and 3v3 are allowed.'
         BO_MUST_BE = 'Best of must be 1, 3 or 5.'
