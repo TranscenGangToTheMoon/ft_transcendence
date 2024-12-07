@@ -32,22 +32,29 @@ class Test01_Register(UnitTest):
         self.assertResponse(register(user1['username'], user1['password']), 400)
 
 
-class Test02_RegisterGuest(UnitTest):
+class Test02_Guest(UnitTest):
 
-    def test_001_register_guest(self):
+    def test_001_create_guest(self):
+        self.assertResponse(auth_guest(), 201)
+
+    def test_002_register_guest(self):
         guest = guest_user()
 
         # todo make get response
         user = {'token': self.assertResponse(register_guest(guest=guest), 200, get_id='access')}
         self.assertResponse(me(user), 200)
 
-    def test_002_register_guest_without_tokent(self):
+    def test_003_register_guest_without_tokent(self):
         random_name = rnstr()
 
         self.assertResponse(register_guest(username='username_' + random_name, password='password_,' + random_name), 401)
 
-    def test_003_register_user_since_guest(self):
+    def test_004_register_user_since_guest(self):
         self.assertResponse(register_guest(guest=new_user()), 403)  # todo add json response test
+
+    def test_005_login_guest(self):
+        self.assertResponse(login(guest_user()['username'], rnstr()), 401, {'detail': 'No active account found with the given credentials'})
+
 
 class Test03_Login(UnitTest):
 
@@ -58,6 +65,16 @@ class Test03_Login(UnitTest):
 
     def test_002_login_bad_password(self):
         self.assertResponse(login('caca', 'pipi'), 401, {'detail': 'No active account found with the given credentials'})
+
+    def test_003_invalid_password(self):
+        user1 = new_user()
+
+        self.assertResponse(login(user1['username'], 'zizi'), 401, {'detail': 'No active account found with the given credentials'})
+
+    def test_004_missing_field(self):
+        user1 = new_user()
+
+        self.assertResponse(login(data={}), 400, {'username': ['This field is required.'], 'password': ['This field is required.']})
 
 
 if __name__ == '__main__':
