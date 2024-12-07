@@ -126,7 +126,7 @@ class Test02_FriendRequest(UnitTest):
     def test_008_forget_username_field(self):
         self.assertResponse(friend_requests(data={}), 400, {'username': ['This field is required.']})
 
-    def test_09_get_friend_request_not_belong(self):
+    def test_009_get_friend_request_not_belong(self):
         user1 = new_user()
         user2 = new_user()
 
@@ -134,7 +134,7 @@ class Test02_FriendRequest(UnitTest):
 
         self.assertResponse(friend_request(friend_request_id), 404, {'detail': 'Friend request not found.'})
 
-    def test_10_reject_friend_request(self):
+    def test_010_reject_friend_request(self):
         user1 = new_user()
         user2 = new_user()
 
@@ -143,7 +143,7 @@ class Test02_FriendRequest(UnitTest):
         self.assertResponse(friend_request(friend_request_id, user2, 'DELETE'), 204)
         self.assertResponse(friend_request(friend_request_id, user1, 'GET'), 404, {'detail': 'Friend request not found.'})
 
-    def test_11_cancel_friend_request(self):
+    def test_011_cancel_friend_request(self):
         user1 = new_user()
         user2 = new_user()
 
@@ -153,7 +153,7 @@ class Test02_FriendRequest(UnitTest):
         self.assertResponse(friend_request(friend_request_id, user1, 'GET'), 404, {'detail': 'Friend request not found.'})
         self.assertResponse(friend_request(friend_request_id, user2, 'GET'), 404, {'detail': 'Friend request not found.'})
 
-    def test_12_delete_friend_request_after_became_friend(self):
+    def test_012_delete_friend_request_after_became_friend(self):
         user1 = new_user()
         user2 = new_user()
 
