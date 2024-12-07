@@ -8,7 +8,7 @@ from services.lobby import create_lobby, join_lobby
 from services.play import play
 from services.tournament import create_tournament, search_tournament, join_tournament
 from services.user import get_user, me
-from utils.credentials import new_user, guest_user
+from utils.credentials import new_user, guest_user, login
 from utils.generate_random import rnstr
 from utils.my_unittest import UnitTest
 
@@ -176,6 +176,10 @@ class Test04_UpdateUserMe(UnitTest):
 
     def test_001_update_password(self):
         user1 = new_user()
+        old_password = user1['password']
+
+        self.assertResponse(me(user1, method='PATCH', data={'password': 'new_password'}), 200)
+        self.assertResponse(login({'username': user1['username'], 'password': old_password}), 201)
 
 
 if __name__ == '__main__':
