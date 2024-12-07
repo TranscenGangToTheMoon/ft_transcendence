@@ -48,7 +48,7 @@ async function apiRequest(token, endpoint, method="GET", authType="Bearer",
             return data;
         })
         .catch(error =>{
-            if (error.code || error.message === 'Failed to fetch')
+            if (error.code === 500 || error.message === 'Failed to fetch')
                 document.getElementById('container').innerText = `alala pas bien ${error.code? `: ${error.code}` : ''} (jcrois c'est pas bon)`;
             throw error;
         })
@@ -193,7 +193,7 @@ async function loadContent(url, container='content', append=false) {
         if(!append)
             contentDiv.innerHTML = html;
         else
-            contentDiv.innerHTML += html;
+            contentDiv.innerHTML += `\n${html}`;
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = html;
         const script = tempDiv.querySelector('[script]');
@@ -364,9 +364,9 @@ function displayConfirmModal(confirmTitle, confirmContent) {
 
     confirmContentDiv.innerText = confirmContent;
     confirmTitleDiv.innerText = confirmTitle;
-    document.getElementById('confirmModal').addEventListener('shown.bs.modal', function() {
-        document.getElementById('confirmModalClose').focus();
-    })
+    // document.getElementById('confirmModal').addEventListener('shown.bs.modal', function() {
+    //     document.getElementById('confirmModalClose').focus();
+    // })
     confirmModal.show();
 }
 
@@ -375,6 +375,9 @@ window.displayMainAlert = displayMainAlert;
 // ========================== INDEX SCRIPT ==========================
 
 async function loadFriendListModal() {
+    const friendModal = document.getElementById('friendListModal');
+    if (friendModal)
+        friendModal.remove();
     await loadContent('/friendList.html', 'modals', true);
 }
 
@@ -392,6 +395,8 @@ async function loadUserProfile(){
         document.getElementById('balance').innerText = userInformations.coins;
     }
     await loadContent(`/${profileMenu}`, 'profileMenu');
+    // await loadContent('/blockedUsers.html', 'modals', true);
+    await loadFriendListModal();
     // document.getElementById('title').innerText = userInformations.title;
 }
 
@@ -438,7 +443,6 @@ async function  indexInit(auto=true) {
         history.replaceState({state: currentState}, '', window.location.pathname);
         incrementCurrentState();
         loadCSS('/css/styles.css', false);
-        await loadFriendListModal();
         initSSE();
         handleRoute();
     }
