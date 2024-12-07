@@ -1,7 +1,9 @@
+import unittest
+
 from services.blocked import blocked_user
 from services.friend import create_friendship, friend_request, friend_requests, get_friend_requests_received, \
     get_friends, friend
-from utils.credentials import new_user
+from utils.credentials import new_user, guest_user
 from utils.my_unittest import UnitTest
 
 
@@ -124,7 +126,7 @@ class Test02_FriendRequest(UnitTest):
     def test_008_forget_username_field(self):
         self.assertResponse(friend_requests(data={}), 400, {'username': ['This field is required.']})
 
-    def test_09_get_friend_request_not_belong(self):
+    def test_009_get_friend_request_not_belong(self):
         user1 = new_user()
         user2 = new_user()
 
@@ -132,7 +134,7 @@ class Test02_FriendRequest(UnitTest):
 
         self.assertResponse(friend_request(friend_request_id), 404, {'detail': 'Friend request not found.'})
 
-    def test_10_reject_friend_request(self):
+    def test_010_reject_friend_request(self):
         user1 = new_user()
         user2 = new_user()
 
@@ -141,7 +143,7 @@ class Test02_FriendRequest(UnitTest):
         self.assertResponse(friend_request(friend_request_id, user2, 'DELETE'), 204)
         self.assertResponse(friend_request(friend_request_id, user1, 'GET'), 404, {'detail': 'Friend request not found.'})
 
-    def test_11_cancel_friend_request(self):
+    def test_011_cancel_friend_request(self):
         user1 = new_user()
         user2 = new_user()
 
@@ -151,7 +153,7 @@ class Test02_FriendRequest(UnitTest):
         self.assertResponse(friend_request(friend_request_id, user1, 'GET'), 404, {'detail': 'Friend request not found.'})
         self.assertResponse(friend_request(friend_request_id, user2, 'GET'), 404, {'detail': 'Friend request not found.'})
 
-    def test_12_delete_friend_request_after_became_friend(self):
+    def test_012_delete_friend_request_after_became_friend(self):
         user1 = new_user()
         user2 = new_user()
 
@@ -166,6 +168,18 @@ class Test02_FriendRequest(UnitTest):
 
         friend_request_id = self.assertResponse(friend_requests(user1, user2), 201, get_id=True)
         self.assertResponse(friend_request(friend_request_id, user1), 403, {'detail': 'you cannot accept your own friend request.'})
+
+    def test_014_guest_user_make_friend_request(self):
+        user1 = guest_user()
+        user2 = new_user()
+
+        self.assertResponse(friend_requests(user1, user2), 403, {'detail': 'Guest users cannot make friend request.'})
+
+    def test_015_guest_user_receive_friend_request(self):
+        user1 = new_user()
+        user2 = guest_user()
+
+        self.assertResponse(friend_requests(user1, user2), 404, {'detail': 'User not found.'})
 
 
 if __name__ == '__main__':

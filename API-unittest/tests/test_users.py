@@ -1,4 +1,5 @@
 import time
+import unittest
 
 from services.blocked import blocked_user
 from services.chat import create_chat, accept_chat, request_chat_id
@@ -7,7 +8,7 @@ from services.lobby import create_lobby, join_lobby
 from services.play import play
 from services.tournament import create_tournament, search_tournament, join_tournament
 from services.user import get_user, me
-from utils.credentials import new_user, get_token
+from utils.credentials import new_user, guest_user, login
 from utils.generate_random import rnstr
 from utils.my_unittest import UnitTest
 
@@ -52,6 +53,13 @@ class Test02_UserMe(UnitTest):
         response = me(user1)
         self.assertResponse(response, 200)
         self.assertDictEqual(response.json, {'id': user1['id'], 'username': user1['username'], 'is_guest': False, 'created_at': response.json['created_at'], 'profile_picture': None, 'accept_friend_request': True, 'accept_chat_from': 'friends_only', 'coins': 100, 'trophies': 0, 'current_rank': None})
+
+    def test_002_get_me_guest(self):
+        user1 = guest_user()
+
+        response = me(user1)
+        self.assertResponse(response, 200)
+        self.assertDictEqual(response.json, {'id': user1['id'], 'username': user1['username'], 'is_guest': True, 'created_at': response.json['created_at'], 'profile_picture': None, 'accept_friend_request': True, 'accept_chat_from': 'friends_only', 'coins': 100, 'trophies': 0, 'current_rank': None})
 
 
 class Test03_DeleteUser(UnitTest):
@@ -162,6 +170,23 @@ class Test03_DeleteUser(UnitTest):
         self.assertResponse(play(user2, 'ranked'), 201)
         time.sleep(1)
         self.assertResponse(is_in_game(user2), 404, {'detail': 'This user is not in a game.'})
+
+
+class Test04_UpdateUserMe(UnitTest):
+
+    def test_001_update_password(self):
+        user1 = new_user()
+        old_password = user1['password']
+
+        self.assertResponse(me(user1, method='PATCH', data={'password': 'new_password'}), 200)
+        self.assertResponse(login(user1['username'], 'new_password'), 200)
+        self.assertResponse(login(user1['username'], old_password), 401, {'detail': 'No active account found with the given credentials'}) # todo no . at the end
+
+    def test_002_update_password_same_as_before(self):
+        user1 = new_user()
+
+        self.assertResponse(me(user1, method='PATCH', data={'password': user1['password']}), 400, {'password': ['Password is the same as the old one.']})
+        self.assertResponse(login(data=user1), 200)
 
 
 if __name__ == '__main__':

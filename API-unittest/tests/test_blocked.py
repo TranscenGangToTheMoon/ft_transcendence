@@ -1,3 +1,4 @@
+import unittest
 from random import randint
 
 from services.blocked import are_blocked, blocked_user, unblocked_user

@@ -22,16 +22,18 @@ class RegisterSerializer(serializers.ModelSerializer):
             'refresh',
         ]
 
-    def validated_username(self, value):
+    def validate_username(self, value):
         request = self.context.get('request')
-
         if request is None:
             raise serializers.ValidationError(MessagesException.ValidationError.REQUEST_REQUIRED)
 
         return validate_username(value, request.method == 'POST')
 
     def create(self, validated_data):
+        password = validated_data.pop('password')
         instance = super().create(validated_data)
+        instance.set_password(password)
+        instance.save()
         refresh_token = RefreshToken.for_user(instance)
         return {'access': str(refresh_token.access_token), 'refresh': str(refresh_token)}
 

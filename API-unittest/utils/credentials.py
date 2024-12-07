@@ -9,9 +9,9 @@ TESTS = [
     'test_auth',
     'test_blocked',
     'test_chat',
-    # 'test_game',
+    'test_game',
     'test_matchmaking',
-    # 'test_users',
+    'test_users',
     'test_friends',
     'test_game',
     'test_lobby',
@@ -24,29 +24,31 @@ TESTS = [
 
 # -------------------- REQUEST --------------------------------------------------------------------------------------- #
 def auth_guest():
-    return make_request('auth/guest/', 'POST').json
+    return make_request('auth/guest/', 'POST')
 
 
 def register(data):
-    return make_request('auth/register/', 'PUT', token=auth_guest()['access'], data=data).json
+    return make_request('auth/register/', 'POST', data=data)
 
 
-def login(data):
-    return make_request('auth/login/', 'POST', data=data).json
+def login(username=None, password=None, data=None):
+    if data is None:
+        data = {'username': username, 'password': password}
+    return make_request('auth/login/', 'POST', data=data)
 
 
 def refresh_token(access_token, _refresh_token):
-    return make_request('auth/refresh/', 'POST', access_token, {'refresh': _refresh_token}).json
+    return make_request('auth/refresh/', 'POST', access_token, {'refresh': _refresh_token})
 
 
 def verify_token(access_token):
-    return make_request('auth/verify/', token=access_token).json
+    return make_request('auth/verify/', token=access_token)
 
 
 # -------------------- GET TOKEN ------------------------------------------------------------------------------------- #
 def get_token(type: Literal['login', 'register', 'guest'], username=None, password=None):
     if type == 'guest':
-        token = auth_guest()
+        token = auth_guest().json
     else:
         if username is None:
             username = ''.join(rnstr(20))
@@ -55,9 +57,9 @@ def get_token(type: Literal['login', 'register', 'guest'], username=None, passwo
         data = {'username': username, 'password': password}
 
         if type == 'login':
-            token = login(data)
+            token = login(data=data).json
         else:
-            token = register(data)
+            token = register(data).json
     return token
 
 
