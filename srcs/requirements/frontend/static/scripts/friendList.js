@@ -1,20 +1,26 @@
-document.getElementById('modals').addEventListener('click', async event => {
-    if (event.target.matches('#sendFriendRequest') && !event.target.listened){
+if (!document.getElementById('modals').friendListened){
+    this.friendListened = true;
+    document.getElementById('modals').addEventListener('click', async function(event){
         event.preventDefault();
-        event.target.listened = true;
-        const userInput = document.getElementById('friendSearched').value;
-        try {
-            let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/users/me/friend_requests/`, 'POST', undefined, undefined, {
-                'username' : userInput,
-            })
+        if (event.target.matches('#sendFriendRequest')){
+            event.preventDefault();
+            const userInput = document.getElementById('friendSearched').value;
+            try {
+                let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/users/me/friend_requests/`, 'POST', undefined, undefined, {
+                    'username' : userInput,
+                })
+                if (data.detail){
+                    document.getElementById('searchResults').innerText = data.detail;
+                }
+            }
+            catch (error) {
+                console.log(error);
+                if (error.code === 404)
+                    document.getElementById('searchResults').innerText = 'user not found';
+            }
         }
-        catch (error) {
-            console.log(error);
-            if (error.code === 404)
-                document.getElementById('searchResults').innerText = 'user not found';
-        }
-    }
-})
+    })
+}
 
 
 // document.getElementById('sendFriendRequest').addEventListener('click', async event => {
@@ -37,11 +43,17 @@ async function friendListInit(){
     console.log('je load')
     getDataFromApi(getAccessToken(), `${baseAPIUrl}/users/me/friends/`)
         .then(data => {
+            const resultDiv = document.getElementById('knownFriends');
             if (!data.count)
-                document.getElementById('knownFriends').innerText = "you don't have any friends";
+                resultDiv.innerText = "you don't have any friends";
             else{
-                
-                document.getElementById('knownFriends').innerText = "unable to fetch friend list";
+                resultDiv.innerText = "";
+                for (let friend of data.results){
+                    const friend1 = friend.friends[0];
+                    const friend2 = friend.friends[1];
+                    resultDiv.innerHTML += `<div>${friend1 === userInformations.username ? friend2 : friend1}</div>\n`;
+                }
+                // document.getElementById('knownFriends').innerText = "unable to fetch friend list";
             }
         })
         .catch(error => {

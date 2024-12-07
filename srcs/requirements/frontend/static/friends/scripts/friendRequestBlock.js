@@ -1,8 +1,20 @@
 async function acceptFriendRequest(id){
     try {
         let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/users/me/friend_requests/${id}/`, 'POST');
+        document.getElementById(`${id}`).remove();
+        friendListInit();
     }
     catch (error){
+        console.log(error);
+    }
+}
+
+async function declineFriendRequest(id){
+    try {
+        let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/users/me/friend_requests/${id + 1}/`, 'DELETE');
+        document.getElementById(`${id}`).remove();
+    }
+    catch (error) {
         console.log(error);
     }
 }
