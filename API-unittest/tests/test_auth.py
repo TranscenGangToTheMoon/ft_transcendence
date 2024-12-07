@@ -7,7 +7,6 @@ from utils.generate_random import rnstr
 from utils.my_unittest import UnitTest
 
 
-# todo test login user bad password
 # todo test register
 # todo test register invalid name
 # todo test register invalid password
@@ -56,6 +55,9 @@ class Test03_Login(UnitTest):
         user1 = new_user()
 
         self.assertResponse(login(user1['username'], user1['password']), 200)
+
+    def test_002_login_bad_password(self):
+        self.assertResponse(login('caca', 'pipi'), 401, {'detail': 'No active account found with the given credentials'})
 
 
 if __name__ == '__main__':
