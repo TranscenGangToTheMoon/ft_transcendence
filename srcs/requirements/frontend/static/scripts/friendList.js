@@ -72,7 +72,6 @@ async function friendListInit(){
             for (result of data.results){
                 const requestDiv = document.createElement('div');
                 requestDiv.id = result.id;
-                console.log(requestDiv.id);
                 friendRequestsDiv.appendChild(requestDiv);
                 await loadContent('/friends/friendRequestBlock.html', `${requestDiv.id}`);
                 requestDiv.querySelector('.senderUsername').innerText = result.sender.username;
