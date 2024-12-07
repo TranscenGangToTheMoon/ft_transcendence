@@ -7,7 +7,6 @@ from utils.generate_random import rnstr
 from utils.my_unittest import UnitTest
 
 
-# todo test login user does not exist
 # todo test login user bad password
 # todo test register
 # todo test register invalid name
@@ -52,6 +51,11 @@ class Test02_RegisterGuest(UnitTest):
         self.assertResponse(register_guest(guest=new_user()), 403)  # todo add json response test
 
 class Test03_Login(UnitTest):
+
+    def test_001_login_user_doest_not_exist(self):
+        user1 = new_user()
+
+        self.assertResponse(login(user1['username'], user1['password']), 200)
 
 
 if __name__ == '__main__':
