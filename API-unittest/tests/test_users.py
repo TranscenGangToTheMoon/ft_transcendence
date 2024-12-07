@@ -179,7 +179,14 @@ class Test04_UpdateUserMe(UnitTest):
         old_password = user1['password']
 
         self.assertResponse(me(user1, method='PATCH', data={'password': 'new_password'}), 200)
-        self.assertResponse(login({'username': user1['username'], 'password': old_password}), 201)
+        self.assertResponse(login(user1['username'], 'new_password'), 200)
+        self.assertResponse(login(user1['username'], old_password), 401, {'detail': 'No active account found with the given credentials'}) # todo no . at the end
+
+    def test_002_update_password_same_as_before(self):
+        user1 = new_user()
+
+        self.assertResponse(me(user1, method='PATCH', data={'password': user1['password']}), 400, {'password': ['Password is the same as the old one.']})
+        self.assertResponse(login(data=user1), 200)
 
 
 if __name__ == '__main__':
