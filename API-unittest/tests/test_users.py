@@ -8,7 +8,7 @@ from services.lobby import create_lobby, join_lobby
 from services.play import play
 from services.tournament import create_tournament, search_tournament, join_tournament
 from services.user import get_user, me
-from utils.credentials import new_user, get_token
+from utils.credentials import new_user, guest_user
 from utils.generate_random import rnstr
 from utils.my_unittest import UnitTest
 
@@ -53,6 +53,13 @@ class Test02_UserMe(UnitTest):
         response = me(user1)
         self.assertResponse(response, 200)
         self.assertDictEqual(response.json, {'id': user1['id'], 'username': user1['username'], 'is_guest': False, 'created_at': response.json['created_at'], 'profile_picture': None, 'accept_friend_request': True, 'accept_chat_from': 'friends_only', 'coins': 100, 'trophies': 0, 'current_rank': None})
+
+    def test_002_get_me_guest(self):
+        user1 = guest_user()
+
+        response = me(user1)
+        self.assertResponse(response, 200)
+        self.assertDictEqual(response.json, {'id': user1['id'], 'username': user1['username'], 'is_guest': True, 'created_at': response.json['created_at'], 'profile_picture': None, 'accept_friend_request': True, 'accept_chat_from': 'friends_only', 'coins': 100, 'trophies': 0, 'current_rank': None})
 
 
 class Test03_DeleteUser(UnitTest):
