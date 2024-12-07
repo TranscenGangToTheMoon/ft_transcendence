@@ -1,3 +1,5 @@
+import unittest
+
 from services.blocked import blocked_user, unblocked_user
 from services.lobby import create_lobby, join_lobby, kick_user
 from utils.credentials import new_user, guest_user

@@ -1,3 +1,5 @@
+import unittest
+
 from services.blocked import blocked_user
 from services.friend import create_friendship, friend_request, friend_requests, get_friend_requests_received, \
     get_friends, friend

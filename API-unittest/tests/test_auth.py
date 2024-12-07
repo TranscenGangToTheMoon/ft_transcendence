@@ -1,3 +1,5 @@
+import unittest
+
 from services.auth import register, register_guest
 from services.user import me
 from utils.credentials import guest_user, new_user
