@@ -1,23 +1,37 @@
+
+
+
 <div class="modal fade" id="friendListModal" tabindex="-1" aria-labelledby="friendListModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="friendListModalLabel">Friend List</h5>
+                <ul class="nav nav-tabs" id="tab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link active" id="innerFriendList-tab" data-bs-toggle="tab" href="#innerFriendList" role="tab" aria-controls="innerFriendList" aria-selected="true">Friend list</a>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link" id="innerFriendRequests-tab" data-bs-toggle="tab" href="#innerFriendRequests" role="tab" aria-controls="innerFriendRequests" aria-selected="false"> Friend requests</a>
+                    </li>
+                </ul>
+                <!-- <h5 class="modal-title" id="friendListModalLabel">Friend List</h5> -->
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="requestFriendship">
-                    <input type="text" placeholder="username" id="friendSearched">
-                    <button id="sendFriendRequest" class="btn btn-dark">send friend request</button>
-                </form>
-
-                <div id="onlineFriends"></div>
-                <div id="friendList">
-                    <div id="searchResults">
-
+                
+                <div class="tab-content mt-3" id="tabContent">
+                    <div class="tab-pane fade show active" id="innerFriendList" role="tabpanel" aria-labelledby="innerFriendList-tab">
+                        <div id="onlineFriends"></div>
+                        <div id="knownFriends"></div>
                     </div>
-                    <div id="knownFriends"></div>
-                    <div id="friendRequests" style="background-color: rebeccapurple;">friend requests :</div>
+                    <div class="tab-pane fade" id="innerFriendRequests" role="tabpanel" aria-labelledby="innerFriendRequests-tab">
+                        <form id="requestFriendship">
+                            <input type="text" placeholder="username" id="friendSearched">
+                            <button id="sendFriendRequest" class="btn btn-dark">send friend request</button>
+                        </form>
+                        
+                        <div id="searchResults"></div>
+                        <div id="friendRequests" style="background-color: rebeccapurple;">friend requests :</div>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">

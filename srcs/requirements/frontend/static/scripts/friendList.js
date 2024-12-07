@@ -1,6 +1,7 @@
-if (!document.getElementById('modals').friendListened){
-    this.friendListened = true;
+if (document.getElementById('modals').friendListened !== true){
+    document.getElementById('modals').friendListened = true;
     document.getElementById('modals').addEventListener('click', async function(event){
+        console.log('click')
         event.preventDefault();
         if (event.target.matches('#sendFriendRequest')){
             event.preventDefault();
@@ -64,8 +65,10 @@ async function friendListInit(){
         const friendRequestsDiv = document.getElementById('friendRequests');
         if (data.count === 0){
             friendRequestsDiv.innerText = 'no pending friend requests';
+            document.getElementById('innerFriendRequests-tab').innerText = 'Friend Requests';
         }
         else if (data.count){
+            document.getElementById('innerFriendRequests-tab').innerText = `Friend Requests (${data.count})`;
             for (result of data.results){
                 const requestDiv = document.createElement('div');
                 requestDiv.id = result.id;
