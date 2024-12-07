@@ -2,7 +2,7 @@ import unittest
 
 from services.auth import register, register_guest
 from services.user import me
-from utils.credentials import guest_user, new_user
+from utils.credentials import guest_user, new_user, login, auth_guest
 from utils.generate_random import rnstr
 from utils.my_unittest import UnitTest
 
