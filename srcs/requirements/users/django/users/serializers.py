@@ -55,6 +55,7 @@ class UsersMeSerializer(serializers.ModelSerializer):
                     request_chat(endpoints.UsersManagement.frename_user.format(user_id=instance.id), data={'username': validated_data['username']})
                 except APIException:
                     pass
+        validated_data.pop('password', None)
         return super().update(instance, validated_data)
 
 
