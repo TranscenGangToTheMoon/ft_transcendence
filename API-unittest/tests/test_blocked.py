@@ -65,7 +65,6 @@ class Test03_BlockedError(UnitTest):
         self.assertResponse(blocked_user(user1, user2['id']), 201)
         self.assertResponse(blocked_user(user2, user1['id']), 404, {'detail': 'User not found.'})
 
-    def test_004_unblock_doest_not_exist(self):
     def test_004_blocked_guest(self):
         user1 = new_user()
         user2 = guest_user()
@@ -78,9 +77,10 @@ class Test03_BlockedError(UnitTest):
 
         self.assertResponse(blocked_user(user1, user2['id']), 403, {'detail': 'Guest users cannot blocked users.'})
 
+    def test_006_unblock_doest_not_exist(self):
         self.assertResponse(unblocked_user(new_user(), 123456), 403, {'detail': 'This blocked user entry does not belong to you.'})
 
-    def test_004_unblock_not_self_instance(self):
+    def test_007_unblock_not_self_instance(self):
         block_id = self.assertResponse(blocked_user(new_user()), 201, get_id=True)
         self.assertResponse(unblocked_user(new_user(), block_id), 403, {'detail': 'This blocked user entry does not belong to you.'})
 
