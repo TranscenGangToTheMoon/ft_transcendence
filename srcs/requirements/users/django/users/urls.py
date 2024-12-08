@@ -5,7 +5,7 @@ from blocking.views import blocked_view, delete_blocked_view
 from friend_requests.views import friend_requests_list_create_view, friend_request_view, \
     friend_requests_receive_list_view
 from friends.views import friends_view, friend_view
-from users.views import users_me_view, retrieve_user_view, create_user_view
+from users.views import users_me_view, retrieve_user_view, manage_user_view
 from validate.views import validate_chat_view, are_blocked_view
 
 urlpatterns = [
