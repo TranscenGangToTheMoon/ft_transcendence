@@ -181,6 +181,15 @@ class Test03_DeleteUser(UnitTest):
         self.assertResponse(me(user1, method='DELETE', password=True), 204)
         self.assertResponse(get_friend_requests_received(user2), 200, count=0)
 
+    def test_014_friend(self):
+        user1 = new_user()
+        user2 = new_user()
+
+        id = self.assertFriendResponse(create_friendship(user1, user2))
+        self.assertResponse(friend(user2, id), 200, count=1)
+        self.assertResponse(me(user1, method='DELETE', password=True), 204)
+        self.assertResponse(friend(user2, id), 200, count=0)
+
 
 class Test04_UpdateUserMe(UnitTest):
 
