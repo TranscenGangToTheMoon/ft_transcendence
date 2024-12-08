@@ -4,6 +4,7 @@ from lib_transcendence.exceptions import MessagesException
 from lib_transcendence import endpoints
 from lib_transcendence.services import request_matchmaking, request_chat
 
+from friends.models import Friends
 from users.auth import auth_delete, get_valid_user, get_user
 from users.models import Users
 from users.serializers import UsersSerializer, UsersMeSerializer
@@ -25,6 +26,7 @@ class UsersMeView(generics.RetrieveUpdateDestroyAPIView):
 
         auth_delete(self.request.headers.get('Authorization'), {'password': password})
 
+        Friends.objects.filter(friends__id=self.request.user.id).delete()
         request_matchmaking(endpoints.UsersManagement.fdelete_user.format(user_id=self.request.user.id), 'DELETE') # todo remake
         request_chat(endpoints.UsersManagement.fdelete_user.format(user_id=self.request.user.id), 'DELETE') # todo remake
 
