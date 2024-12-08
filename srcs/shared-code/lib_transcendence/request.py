@@ -6,13 +6,13 @@ from rest_framework.exceptions import AuthenticationFailed, PermissionDenied, Me
 import requests
 
 
-def request_service(service: Literal['auth', 'chat', 'game', 'matchmaking', 'users'], endpoint: str, method: Literal['GET', 'POST', 'PUT', 'PATCH', 'DELETE'], data=None, authorization=None):
+def request_service(service: Literal['auth', 'chat', 'game', 'matchmaking', 'users'], endpoint: str, method: Literal['GET', 'POST', 'PUT', 'PATCH', 'DELETE'], data=None, token=None):
     if data is not None:
         data = json.dumps(data)
 
     headers = {'Content-Type': 'application/json'}
-    if authorization is not None:
-        headers['Authorization'] = authorization
+    if token is not None:
+        headers['Authorization'] = token
 
     try:
         print(method, f'[{service}] => /{endpoint}', flush=True)
