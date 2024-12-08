@@ -186,9 +186,9 @@ class Test03_DeleteUser(UnitTest):
         user2 = new_user()
 
         id = self.assertFriendResponse(create_friendship(user1, user2))
-        self.assertResponse(friend(user2, id), 200, count=1)
+        self.assertResponse(friend(user2, id), 200)
         self.assertResponse(me(user1, method='DELETE', password=True), 204)
-        self.assertResponse(friend(user2, id), 200, count=0)
+        self.assertResponse(friend(user2, id), 404, {'detail': 'Friendship not found.'})
 
     def test_015_blocked(self):
         user1 = new_user()
