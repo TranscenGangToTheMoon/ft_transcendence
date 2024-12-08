@@ -31,7 +31,12 @@ urlpatterns = [
     path(UsersManagement.manage_user, manage_user_view),
 ]
 
-# 4. todo make sse
+# todo 1. make sse
+# todo 2. update user status (connected, disconnected, ...)
+# todo 3. if disconnected, send to matchmaking (to leave lobby, tournament, ...)
+# todo 4. create endpoint for send notification (message, demande d'amis, demande de join lobby,, demande de join tournament, ...)
+# todo 5. create endpoint for send lobby status
+# todo 6. create endpoint for send tournament status
 
 # todo make endpoint for user stats, xp, trophies (when match ended, or when tournament ended)
 # - pas de stat (custom_game)
