@@ -43,7 +43,12 @@ class SSEView(APIView):
         print(self.request.user)
         response = StreamingHttpResponse(event_stream(), content_type='text/event-stream')
         response['Cache-Control'] = 'no-cache'
-        return response
+        response['Connection'] = 'keep-alive'
+        SSEManager.add_client(response)
+        try:
+            return response
+        finally:
+            SSEManager.remove_client(response)
 
 
 class NotificationView(APIView):
