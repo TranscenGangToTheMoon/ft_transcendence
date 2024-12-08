@@ -127,6 +127,9 @@ class MessagesException:
 
         JOIN = 'You already joined this {obj}.'
 
+    class InternalServerError:
+        CODE_GENERATION = 'Code generation failed.'
+
     class ServiceUnavailable:
         SERVICE_UNAVAILABLE = 'Failed to connect to {service} service.'
 
