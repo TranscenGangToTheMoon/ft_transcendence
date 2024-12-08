@@ -7,8 +7,8 @@ from lib_transcendence.request import request_service
 def request_users(endpoint: Literal['users/me/', 'validate/chat/', 'blocked/<>/'], method: Literal['GET', 'PUT', 'PATCH', 'DELETE'], request=None):
     kwargs = {}
     if request is not None:
-        kwargs['authorization'] = request.headers.get('Authorization')
-        if kwargs['authorization'] is None:
+        kwargs['token'] = request.headers.get('Authorization')
+        if kwargs['token'] is None:
             raise NotAuthenticated()
 
     return request_service('users', endpoint, method, **kwargs)
