@@ -81,7 +81,7 @@ class Users:
 
 
 class UsersManagement:
-    rename_user = base_api + f'rename-user/{_user_id}/' # todo remake (/delete/me, etc...)
+    rename_user = base_api + f'rename-user/{_user_id}/'
     fblocked_user = base_api + 'blocked-user/{user_id}/{blocked_user_id}/'
     blocked_user = fblocked_user.format(user_id=_user_id, blocked_user_id='<int:blocked_user_id>')
     fdelete_user = base_api + 'delete-user/{user_id}/'

@@ -26,7 +26,6 @@ urlpatterns = [
     path(Users.are_blocked, are_blocked_view),
 ]
 
-# 1. todo remake user_management system: use users/me/
     # 2. todo handle rename user
     # 3. todo handle create user
 
