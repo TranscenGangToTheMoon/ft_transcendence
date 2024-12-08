@@ -81,7 +81,7 @@ class Users:
 
 
 class UsersManagement:
-    create_user = base_api + 'create-user/'
+    manage_user = base_api + 'manage-user/'
     frename_user = base_api + 'rename-user/{user_id}/'
     rename_user = frename_user.format(user_id=_user_id)
     fblocked_user = base_api + 'blocked-user/{user_id}/{blocked_user_id}/'

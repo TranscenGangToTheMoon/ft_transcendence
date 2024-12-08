@@ -11,7 +11,7 @@ def create_user_get_token(user):
     token = {'access': str(refresh_token.access_token), 'refresh': str(refresh_token)}
 
     try:
-        request_users(endpoints.UsersManagement.create_user, method='POST', data={'id': user.id, 'username': user.username, 'is_guest': is_guest(user=user)})
+        request_users(endpoints.UsersManagement.manage_user, method='POST', data={'id': user.id, 'username': user.username, 'is_guest': is_guest(user=user)})
     except APIException:
         user.delete()
         raise APIException

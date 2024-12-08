@@ -7,12 +7,7 @@ from lib_transcendence.services import request_matchmaking, request_chat
 from friends.models import Friends
 from users.auth import auth_delete, get_valid_user, get_user
 from users.models import Users
-from users.serializers import UsersSerializer, UsersMeSerializer, CreateUserSerializer
-
-
-class CreateUserView(generics.CreateAPIView):
-    serializer_class = CreateUserSerializer
-    authentication_classes = []
+from users.serializers import UsersSerializer, UsersMeSerializer, ManageUserSerializer
 
 
 class UsersMeView(generics.RetrieveUpdateDestroyAPIView):
@@ -55,6 +50,14 @@ class RetrieveUserView(generics.RetrieveAPIView):
         return get_valid_user(get_user(self.request), False, True, id=self.kwargs['user_id'])
 
 
-create_user_view = CreateUserView.as_view()
+class ManageUserView(generics.CreateAPIView, generics.UpdateAPIView):
+    serializer_class = ManageUserSerializer
+    authentication_classes = []
+
+    def get_object(self):
+        return get_user(id=self.request.data.get('id'))
+
+
 users_me_view = UsersMeView.as_view()
 retrieve_user_view = RetrieveUserView.as_view()
+manage_user_view = ManageUserView.as_view()

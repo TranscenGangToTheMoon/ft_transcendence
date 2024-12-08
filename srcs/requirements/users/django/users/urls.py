@@ -25,7 +25,7 @@ urlpatterns = [
     path(Users.chat, validate_chat_view),
     path(Users.are_blocked, are_blocked_view),
 
-    path(UsersManagement.create_user, create_user_view),
+    path(UsersManagement.manage_user, manage_user_view),
 ]
 
 # 3. todo handle create user

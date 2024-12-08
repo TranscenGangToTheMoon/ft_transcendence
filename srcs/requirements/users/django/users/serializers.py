@@ -100,7 +100,7 @@ class UsersSerializer(serializers.ModelSerializer):
         return friendship
 
 
-class CreateUserSerializer(serializers.ModelSerializer):
+class ManageUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Users
