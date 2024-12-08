@@ -224,5 +224,17 @@ class Test04_UpdateUserMe(UnitTest):
         self.assertResponse(login(data=user1), 200)
 
 
+class Test05_RenameUser(UnitTest):
+
+    def test_001_rename_user(self):
+        user1 = new_user()
+        old_username = user1['username']
+        new_username = old_username + '_new'
+
+        self.assertResponse(me(user1, method='PATCH', data={'username': new_username}), 200)
+        self.assertResponse(login(new_username, user1['password']), 200)
+        self.assertResponse(login(old_username, user1['password']), 401, {'detail': 'No active account found with the given credentials'}) # todo no . at the end
+
+
 if __name__ == '__main__':
     unittest.main()
