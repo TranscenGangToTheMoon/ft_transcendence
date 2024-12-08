@@ -13,7 +13,10 @@ from lib_transcendence.generate import generate_code
 def get_user_from_auth(user_data):
     from django.contrib.auth.models import User
 
-    user, created = User.objects.get_or_create(id=user_data['id'], username=generate_code(k=20))
+    user, created = User.objects.get_or_create(id=user_data['id'])
+    if user.username != user_data['username']:
+        user.username = user_data['username']
+        user.save()
     return user
 
 
