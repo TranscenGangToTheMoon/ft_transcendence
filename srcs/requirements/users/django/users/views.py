@@ -1,5 +1,5 @@
 from rest_framework import generics
-from rest_framework.exceptions import NotAuthenticated, NotFound
+from rest_framework.exceptions import NotAuthenticated, NotFound, APIException
 from lib_transcendence.exceptions import MessagesException
 from lib_transcendence import endpoints
 from lib_transcendence.services import request_matchmaking, request_chat
@@ -27,8 +27,17 @@ class UsersMeView(generics.RetrieveUpdateDestroyAPIView):
         auth_delete(self.request.headers.get('Authorization'), {'password': password})
 
         Friends.objects.filter(friends__id=self.request.user.id).delete()
-        request_matchmaking(endpoints.UsersManagement.fdelete_user.format(user_id=self.request.user.id), 'DELETE') # todo remake
-        request_chat(endpoints.UsersManagement.fdelete_user.format(user_id=self.request.user.id), 'DELETE') # todo remake
+
+        endpoint = endpoints.UsersManagement.fdelete_user.format(user_id=self.request.user.id)
+        try:
+            request_matchmaking(endpoint, 'DELETE')
+        except APIException:
+            pass
+
+        try:
+            request_chat(endpoint, 'DELETE')
+        except APIException:
+            pass
 
         return super().destroy(request, *args, **kwargs)
 
