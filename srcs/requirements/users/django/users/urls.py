@@ -1,11 +1,11 @@
 from django.urls import path
-from lib_transcendence.endpoints import Users
+from lib_transcendence.endpoints import Users, UsersManagement
 
 from blocking.views import blocked_view, delete_blocked_view
 from friend_requests.views import friend_requests_list_create_view, friend_request_view, \
     friend_requests_receive_list_view
 from friends.views import friends_view, friend_view
-from users.views import users_me_view, retrieve_user_view
+from users.views import users_me_view, retrieve_user_view, create_user_view
 from validate.views import validate_chat_view, are_blocked_view
 
 urlpatterns = [
@@ -24,6 +24,8 @@ urlpatterns = [
 
     path(Users.chat, validate_chat_view),
     path(Users.are_blocked, are_blocked_view),
+
+    path(UsersManagement.create_user, create_user_view),
 ]
 
 # 3. todo handle create user

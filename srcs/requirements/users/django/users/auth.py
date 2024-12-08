@@ -40,7 +40,7 @@ class Authentication(BaseAuthentication):
                 user.username = json_data['username']
                 user.save()
         except Users.DoesNotExist:
-            user = Users.objects.create(**json_data) # todo remake
+            raise AuthenticationFailed()
 
         auth_user = get_user_from_auth(json_data)
         return auth_user, token

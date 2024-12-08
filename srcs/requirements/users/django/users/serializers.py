@@ -98,3 +98,14 @@ class UsersSerializer(serializers.ModelSerializer):
         if friendship is None:
             return None
         return friendship
+
+
+class CreateUserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Users
+        fields = [
+            'id',
+            'username',
+            'is_guest',
+        ]
