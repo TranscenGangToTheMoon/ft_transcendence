@@ -22,7 +22,7 @@ class UsersMeView(generics.RetrieveUpdateDestroyAPIView):
     def destroy(self, request, *args, **kwargs):
         password = self.request.data.get('password')
         if password is None:
-            raise NotAuthenticated({'password': 'Password confirmation is required to delete the account.'})
+            raise NotAuthenticated({'password': MessagesException.NotAuthenticated.PASSWORD_CONFIRMATION_REQUIRED})
 
         auth_delete(self.request.headers.get('Authorization'), {'password': password})
 
