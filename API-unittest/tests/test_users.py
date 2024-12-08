@@ -246,7 +246,7 @@ class Test05_RenameUser(UnitTest):
         self.assertResponse(response, 200)
         for f in response.json['friends']:
             if f['id'] == user1['id']:
-                self.assertEqual(f['username'], new_username)
+                self.assertEqual(new_username, f['username'])
                 break
 
     def test_003_rename_blocked_user(self):
@@ -259,6 +259,21 @@ class Test05_RenameUser(UnitTest):
         response = blocked_user(user2, method='GET')
         self.assertResponse(response, 200, count=1)
         self.assertEqual(response.json['results'][0]['blocked']['username'], new_username)
+
+    def test_004_rename_chat(self):
+        user1 = new_user()
+        user2 = new_user()
+        new_username = user1['username'] + '_new'
+
+        self.assertResponse(accept_chat(user2), 200)
+        chat_id = self.assertResponse(create_chat(user1, user2['username']), 201, get_id=True)
+        self.assertResponse(me(user1, method='PATCH', data={'username': new_username}), 200)
+        response = request_chat_id(user2, chat_id)
+        self.assertResponse(response, 200)
+        for f in response.json['participants']:
+            if f['id'] == user1['id']:
+                self.assertEqual(new_username, f['username'])
+                break
 
 
 
