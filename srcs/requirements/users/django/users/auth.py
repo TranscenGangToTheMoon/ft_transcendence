@@ -31,17 +31,6 @@ class Authentication(BaseAuthentication):
         if json_data is None:
             raise AuthenticationFailed()
 
-        try:
-            user = Users.objects.get(id=json_data['id'])
-            if user.is_guest != json_data['is_guest']:
-                user.is_guest = json_data['is_guest']
-                user.save()
-            if user.username != json_data['username']:
-                user.username = json_data['username']
-                user.save()
-        except Users.DoesNotExist:
-            raise AuthenticationFailed()
-
         auth_user = get_user_from_auth(json_data)
         return auth_user, token
 
