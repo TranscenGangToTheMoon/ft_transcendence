@@ -8,6 +8,7 @@ from rest_framework.exceptions import ParseError
 from lib_transcendence.services import request_users, requests_auth
 
 
+#todo delete user after request
 def get_user_from_auth(user_data):
     from django.contrib.auth.models import User
 
