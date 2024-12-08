@@ -3,6 +3,7 @@ import unittest
 
 from services.blocked import blocked_user
 from services.chat import create_chat, accept_chat, request_chat_id
+from services.friend import friend_requests, get_friend_requests_received, create_friendship, friend
 from services.game import create_game, is_in_game
 from services.lobby import create_lobby, join_lobby
 from services.play import play
@@ -170,6 +171,15 @@ class Test03_DeleteUser(UnitTest):
         self.assertResponse(play(user2, 'ranked'), 201)
         time.sleep(1)
         self.assertResponse(is_in_game(user2), 404, {'detail': 'This user is not in a game.'})
+
+    def test_013_friend_request(self):
+        user1 = new_user()
+        user2 = new_user()
+
+        friend_request_id = self.assertResponse(friend_requests(user1, user2), 201, get_id=True)
+        self.assertResponse(get_friend_requests_received(user2), 200, count=1)
+        self.assertResponse(me(user1, method='DELETE', password=True), 204)
+        self.assertResponse(get_friend_requests_received(user2), 200, count=0)
 
 
 class Test04_UpdateUserMe(UnitTest):
