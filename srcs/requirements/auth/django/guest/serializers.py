@@ -1,8 +1,8 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
 from lib_transcendence.utils import generate_guest_username
-from rest_framework_simplejwt.tokens import RefreshToken
 
+from auth.utils import create_user_token
 from guest.group import get_group_guest
 
 
@@ -19,5 +19,4 @@ class GuestTokenSerializer(serializers.ModelSerializer):
         user = User.objects.create_user(username=guest_username)
         guest_group = get_group_guest()
         user.groups.add(guest_group)
-        refresh_token = RefreshToken.for_user(user)
-        return {'access': str(refresh_token.access_token), 'refresh': str(refresh_token)}
+        return create_user_token(user)
