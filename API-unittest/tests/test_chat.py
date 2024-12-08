@@ -85,6 +85,12 @@ class Test02_CreateChatError(UnitTest):
     def test_010_chat_with_guest(self):
         self.assertResponse(create_chat(new_user(), guest_user()['username']), 404, {'detail': 'User not found.'})
 
+    def test_011_guest_create_chat(self):
+        user1 = new_user()
+
+        self.assertResponse(accept_chat(user1, 'none'), 200)
+        self.assertResponse(create_chat(guest_user(), user1['username']), 403, {'detail': 'Guest users cannot create chat.'})
+
 
 # todo add local possiblitie user
 class Test03_GetChat(UnitTest):

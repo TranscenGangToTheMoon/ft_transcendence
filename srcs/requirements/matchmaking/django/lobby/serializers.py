@@ -3,7 +3,7 @@ from lib_transcendence.game import GameMode
 from lib_transcendence.game import Bo
 from lib_transcendence.Lobby import MatchType, Teams
 from lib_transcendence.auth import get_auth_user
-from lib_transcendence.utils import generate_code
+from lib_transcendence.generate import generate_code
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
 

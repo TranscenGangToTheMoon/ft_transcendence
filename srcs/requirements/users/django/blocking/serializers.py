@@ -24,6 +24,9 @@ class BlockedSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user = get_user(self.context.get('request'))
 
+        if user.is_guest:
+            raise PermissionDenied(MessagesException.PermissionDenied.GUEST_BLOCK)
+
         if user.blocked.count() >= 50:
             raise PermissionDenied(MessagesException.PermissionDenied.BLOCK_MORE_THAN_50_USERS)
 

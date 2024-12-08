@@ -1,6 +1,7 @@
 import unittest
 
 from services.auth import register, register_guest
+from services.play import play
 from services.user import me
 from utils.credentials import guest_user, new_user, login, auth_guest
 from utils.generate_random import rnstr
@@ -54,6 +55,13 @@ class Test02_Guest(UnitTest):
 
     def test_005_login_guest(self):
         self.assertResponse(login(guest_user()['username'], rnstr()), 401, {'detail': 'No active account found with the given credentials'})
+
+    def test_006_register_guest_try_play_ranked(self):
+        guest = guest_user()
+
+        self.assertResponse(play(guest, 'ranked'), 403, {'detail': 'Guest users cannot play ranked games.'})
+        user = {'token': self.assertResponse(register_guest(guest=guest), 200, get_id='access')}
+        self.assertResponse(play(user, 'ranked'), 201)
 
 
 class Test03_Login(UnitTest):
