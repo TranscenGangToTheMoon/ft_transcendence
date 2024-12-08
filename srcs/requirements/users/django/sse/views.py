@@ -1,3 +1,5 @@
+from rest_framework import status
+from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.http import StreamingHttpResponse
 import time
@@ -42,6 +44,17 @@ class SSEView(APIView):
         response = StreamingHttpResponse(event_stream(), content_type='text/event-stream')
         response['Cache-Control'] = 'no-cache'
         return response
+
+
+class NotificationView(APIView):
+
+    @staticmethod
+    def post(self, request):
+        message = request.data.get('message')
+        if message:
+            SSEManager.send_message(message)
+            return Response({"status": "Notification sent"}, status=status.HTTP_201_CREATED)
+        return Response({"error": "Message is required"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 sse_view = SSEView.as_view()
