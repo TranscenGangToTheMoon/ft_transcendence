@@ -2,7 +2,7 @@ import unittest
 from random import randint
 
 from services.blocked import are_blocked, blocked_user, unblocked_user
-from utils.credentials import new_user
+from utils.credentials import new_user, guest_user
 from utils.my_unittest import UnitTest
 
 
@@ -71,6 +71,12 @@ class Test03_BlockedError(UnitTest):
         user2 = guest_user()
 
         self.assertResponse(blocked_user(user1, user2['id']), 404, {'detail': 'User not found.'})
+
+    def test_005_blocked_by_guest(self):
+        user1 = guest_user()
+        user2 = new_user()
+
+        self.assertResponse(blocked_user(user1, user2['id']), 403, {'detail': 'Guest users cannot blocked users.'})
 
         self.assertResponse(unblocked_user(new_user(), 123456), 403, {'detail': 'This blocked user entry does not belong to you.'})
 
