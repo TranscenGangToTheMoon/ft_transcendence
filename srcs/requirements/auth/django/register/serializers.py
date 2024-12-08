@@ -3,7 +3,7 @@ from lib_transcendence.exceptions import MessagesException
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from auth.utils import create_user_token
+from auth.utils import create_user_get_token
 from auth.validators import validate_username
 from guest.group import get_group_guest
 
@@ -35,7 +35,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         instance = super().create(validated_data)
         instance.set_password(password)
         instance.save()
-        return create_user_token(instance)
+        return create_user_get_token(instance)
 
     def update(self, instance, validated_data):
         guest_group = get_group_guest()
