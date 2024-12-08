@@ -190,6 +190,15 @@ class Test03_DeleteUser(UnitTest):
         self.assertResponse(me(user1, method='DELETE', password=True), 204)
         self.assertResponse(friend(user2, id), 200, count=0)
 
+    def test_015_blocked(self):
+        user1 = new_user()
+        user2 = new_user()
+
+        self.assertResponse(blocked_user(user2, user1['id']), 201)
+        self.assertResponse(blocked_user(user2, user1['id'], method='GET'), 200, count=1)
+        self.assertResponse(me(user1, method='DELETE', password=True), 204)
+        self.assertResponse(blocked_user(user2, user1['id'], method='GET'), 200, count=0)
+
 
 class Test04_UpdateUserMe(UnitTest):
 
