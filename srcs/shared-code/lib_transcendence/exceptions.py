@@ -68,6 +68,7 @@ class MessagesException:
         GUEST_UPDATE_USERNAME = 'Guest users can only update their username.'
         GUEST_CANNOT_FRIEND_REQUEST = 'Guest users cannot make friend request.'
         GUEST_REQUIRED = 'You must be a guest user.' # todo useless
+        GUEST_BLOCK = 'Guest users cannot blocked users.'
 
         NOT_BELONG = 'You do not belong to this {obj}.'
         NOT_BELONG_TO_CHAT = NOT_BELONG.format(obj='chat')
