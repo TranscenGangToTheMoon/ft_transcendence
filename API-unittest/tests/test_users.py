@@ -3,7 +3,7 @@ import unittest
 
 from services.blocked import blocked_user
 from services.chat import create_chat, accept_chat, request_chat_id
-from services.friend import friend_requests, get_friend_requests_received, create_friendship, friend
+from services.friend import friend_requests, get_friend_requests_received, create_friendship, friend, get_friends
 from services.game import create_game, is_in_game
 from services.lobby import create_lobby, join_lobby
 from services.play import play
@@ -184,11 +184,18 @@ class Test03_DeleteUser(UnitTest):
     def test_014_friend(self):
         user1 = new_user()
         user2 = new_user()
+        user3 = new_user()
 
         id = self.assertFriendResponse(create_friendship(user1, user2))
+        self.assertFriendResponse(create_friendship(user1, user3))
         self.assertResponse(friend(user2, id), 200)
+        self.assertResponse(get_friends(user1), 200, count=2)
+        self.assertResponse(get_friends(user2), 200, count=1)
+        self.assertResponse(get_friends(user3), 200, count=1)
         self.assertResponse(me(user1, method='DELETE', password=True), 204)
         self.assertResponse(friend(user2, id), 404, {'detail': 'Friendship not found.'})
+        self.assertResponse(get_friends(user2), 200, count=0)
+        self.assertResponse(get_friends(user3), 200, count=0)
 
     def test_015_blocked(self):
         user1 = new_user()
