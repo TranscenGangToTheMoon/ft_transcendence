@@ -235,6 +235,21 @@ class Test05_RenameUser(UnitTest):
         self.assertResponse(login(new_username, user1['password']), 200)
         self.assertResponse(login(old_username, user1['password']), 401, {'detail': 'No active account found with the given credentials'}) # todo no . at the end
 
+    def test_002_rename_user_friend(self):
+        user1 = new_user()
+        user2 = new_user()
+        new_username = user1['username'] + '_new'
+
+        id = self.assertFriendResponse(create_friendship(user1, user2))
+        self.assertResponse(me(user1, method='PATCH', data={'username': new_username}), 200)
+        response = friend(user1, id)
+        self.assertResponse(response, 200)
+        for f in response.json['friends']:
+            if f['id'] == user1['id']:
+                self.assertEqual(f['username'], new_username)
+                break
+
+
 
 if __name__ == '__main__':
     unittest.main()
