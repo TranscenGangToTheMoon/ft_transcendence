@@ -3,7 +3,6 @@ import string
 from typing import Literal
 
 from lib_transcendence.exceptions import MessagesException
-from rest_framework import serializers
 from rest_framework.exceptions import APIException
 
 

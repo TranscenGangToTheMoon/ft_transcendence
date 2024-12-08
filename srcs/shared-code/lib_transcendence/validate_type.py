@@ -1,3 +1,5 @@
+from rest_framework import serializers
+
 
 def validate_type(value, name, choices):
     if value not in choices:
