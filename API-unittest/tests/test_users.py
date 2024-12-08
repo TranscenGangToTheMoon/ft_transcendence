@@ -249,6 +249,17 @@ class Test05_RenameUser(UnitTest):
                 self.assertEqual(f['username'], new_username)
                 break
 
+    def test_003_rename_blocked_user(self):
+        user1 = new_user()
+        user2 = new_user()
+        new_username = user1['username'] + '_new'
+
+        self.assertResponse(blocked_user(user2, user1['id']), 201)
+        self.assertResponse(me(user1, method='PATCH', data={'username': new_username}), 200)
+        response = blocked_user(user2, method='GET')
+        self.assertResponse(response, 200, count=1)
+        self.assertEqual(response.json['results'][0]['blocked']['username'], new_username)
+
 
 
 if __name__ == '__main__':
