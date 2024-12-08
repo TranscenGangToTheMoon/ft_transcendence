@@ -65,6 +65,9 @@ class ChatsSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         user = get_auth_user(request)
 
+        if user['is_guest']:
+            raise PermissionDenied(MessagesException.PermissionDenied.GUEST_CREATE_CHAT)
+
         username = validated_data.pop('username')
         if username == user['username']:
             raise PermissionDenied(MessagesException.PermissionDenied.CANNOT_CHAT_YOURSELF)
