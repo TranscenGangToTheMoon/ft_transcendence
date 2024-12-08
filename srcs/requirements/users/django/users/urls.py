@@ -28,7 +28,6 @@ urlpatterns = [
     path(UsersManagement.manage_user, manage_user_view),
 ]
 
-# 3. todo handle create user
 # 4. todo make sse
 
 # todo make endpoint for user stats, xp, trophies (when match ended, or when tournament ended)
