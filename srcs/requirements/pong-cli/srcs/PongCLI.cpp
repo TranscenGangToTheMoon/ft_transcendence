@@ -6,7 +6,7 @@
 /*   By: xcharra <xcharra@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/03 17:35:02 by xcharra           #+#    #+#             */
-/*   Updated: 2024/12/06 17:46:27 by xcharra          ###   ########.fr       */
+/*   Updated: 2024/12/09 18:44:28 by xcharra          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,7 +52,7 @@ void PongCLI::changePage(Page newPage) {
 	}
 }
 
-void	PongCLI::signInAction(std::string &server, std::string &username, std::string &password) {
+void	PongCLI::loginAction(std::string &server, std::string &username, std::string &password) {
 	if (!server.empty() && !username.empty() && !password.empty()) {
 		_server = server;
 		_username = username;
@@ -61,9 +61,10 @@ void	PongCLI::signInAction(std::string &server, std::string &username, std::stri
 			_curl.setServer(_server);
 			_user.setUsername(_username);
 			_user.setPassword(_password);
-			_user.signInUser(_curl);
+			_user.loginUser(_curl);
 			_user.setAccessToken(jsonParser(_curl.getResponse(), "access"));
 			_user.setRefreshToken(jsonParser(_curl.getResponse(), "refresh"));
+			_curl.addHeader("Authorization: Bearer " + _user.getAccessToken());
 			_info = text("(" + std::to_string(_curl.getHTTPCode()) + ") Connexion success !") | color(Color::Green);
 			changePage(Page::MainMenuPage);
 			_screen.ExitLoopClosure()();
@@ -81,7 +82,7 @@ void	PongCLI::signInAction(std::string &server, std::string &username, std::stri
 	}
 }
 
-void	PongCLI::signUpAction(std::string &server, std::string &username, std::string &password) {
+void	PongCLI::registerAction(std::string &server, std::string &username, std::string &password) {
 	if (!server.empty() && !username.empty() && !password.empty()) {
 		_server = server;
 		_username = username;
@@ -90,9 +91,7 @@ void	PongCLI::signUpAction(std::string &server, std::string &username, std::stri
 			_curl.setServer(_server);
 			_user.setUsername(_username);
 			_user.setPassword(_password);
-//			_user.setGuestTokens(_curl); // delete when flo allow register without token
-//			_user.signUpUser(_curl);
-			_user.signUpUserWithoutToken(_curl);
+			_user.registerUser(_curl);
 			_user.setAccessToken(jsonParser(_curl.getResponse(), "access"));
 			_user.setRefreshToken(jsonParser(_curl.getResponse(), "refresh"));
 			_info = text("(" + std::to_string(_curl.getHTTPCode()) + ") Connexion success !") | color(Color::Green);
@@ -163,20 +162,26 @@ void PongCLI::renderLoginPage() {
 	Component	usernameInput = Input(&username, usernameOption);
 	Component	passwordInput = Input(&password, passwordOption);
 
-	Component	signInButton = Button("Sign In", [this, &server, &username, &password] { signInAction(server, username, password); }, ButtonOption::Animated(Color::Red));
-	Component	signUpButton = Button("Sign Up", [this, &server, &username, &password] { signUpAction(server, username, password); },ButtonOption::Animated(Color::Green));
-	Component	guestUpButton = Button("Guest up", [this, &server] { guestUpAction(server); }, ButtonOption::Animated(Color::Blue));
+	Component	loginButton = Button("Login", [this, &server, &username, &password] {
+		loginAction(server, username, password);
+	}, ButtonOption::Animated(Color::Red));
+	Component	registerButton = Button("Register", [this, &server, &username, &password] {
+		registerAction(server, username, password);
+	},ButtonOption::Animated(Color::Green));
+	Component	guestUpButton = Button("Guest up", [this, &server] {
+		guestUpAction(server);
+	}, ButtonOption::Animated(Color::Blue));
 
 	Component	pageComponents = Container::Vertical({
 		serverInput,
 		usernameInput,
 		passwordInput,
 		guestUpButton,
-		signInButton,
-		signUpButton
+		loginButton,
+		registerButton
 	});
 
-	Component render =  Renderer(pageComponents, [&] {
+	Component	render =  Renderer(pageComponents, [&] {
 		return (
 			vbox({
 				getBanner() | hcenter | border,
@@ -200,8 +205,8 @@ void PongCLI::renderLoginPage() {
 							vbox({
 								guestUpButton->Render() | flex,
 								hbox({
-									signInButton->Render() | flex,
-									signUpButton->Render() | flex,
+									loginButton->Render() | flex,
+									registerButton->Render() | flex,
 								}),
 							})
 						})
@@ -213,7 +218,7 @@ void PongCLI::renderLoginPage() {
 		);
 	});
 
-	auto finalRender = CatchEvent(render, [&](const Event &event) {
+	Component	finalRender = CatchEvent(render, [&](const Event &event) {
 		if (event == Event::Escape) {
 			_screen.ExitLoopClosure()();
 			return (true);
@@ -225,29 +230,79 @@ void PongCLI::renderLoginPage() {
 }
 
 void PongCLI::renderMainMenuPage() {
-
-	Component settingsButton = Button("Settings", [this] { changePage(Page::SettingsPage); });
-	Component gameButton = Button("Settings", [this] { changePage(Page::SettingsPage); });
+	int			id = 9;
+	std::string	username;
+	bool		guest;
+//	profile_picture: None, // not handle yet
+//	status: None, // not handle yet
+	int			stardust = 12996;
+	int			aura = 1200;
+//	current_rank: None, // not handle yes
+//	friends: None,
+	bool		accept_friend_request;
+	bool		accept_chat_from;
 
 	Component	pageComponents = Container::Vertical({
-		settingsButton,
-		gameButton
 	});
+	std::string	json;
+	std::string info;
+	try {
+		_curl.GET("/api/users/me/", "");
+		json = _curl.getResponse();
+//		id = std::stoi(jsonParser(json, "id"));
+		info = "username";
+		username = jsonParser(json, "username");
+		info = "is_guest";
+		guest = jsonParser(json, "is_guest") == "true";
+		info = "coins";
+//		stardust = std::stoi(jsonParser(json, "coins"));
+		info = "trophies";
+//		aura = std::stoi(jsonParser(json, "trophies"));
+		info = "accept_friend_request";
+		accept_friend_request = jsonParser(json, "accept_friend_request") == "true";
+		info = "accept_chat_from";
+		accept_chat_from = jsonParser(json, "accept_chat_from") == "true";
+		//request to /api/user/me >> get user information
+	}
+	catch (std::exception &error) {
+		_info = text("(" + std::to_string(_curl.getHTTPCode()) + ") " + error.what() + info) | color(Color::Red);
+	}
 
 	auto render = Renderer(pageComponents, [&] {
 		return (
 			vbox({
 				getBanner() | hcenter | border,
 				vbox({
-					vbox({
-						gridbox({{
-							text("Settings") | center | border | flex,
-							gridbox({
-								{ text("Normal Game") | center | border | flex },
-								{ text("Ranked Game") | center | border | flex }
-							}) | flex
-						}}) | flex,
-					})| xflex_grow | yflex_grow | flex
+					gridbox({{
+						window(
+							text("Profile: "),
+							vbox ({
+								hbox({
+									vbox({ // left
+										text("id: ") | vcenter | yflex_grow,
+										text("username: ") | vcenter | yflex_grow,
+										text("guest: ") | vcenter | yflex_grow,
+										text("stardust: ") | vcenter | yflex_grow,
+										text("aura: ") | vcenter | yflex_grow,
+									}),
+									separator(),
+									vbox({ // right
+										text(std::to_string(id)) | vcenter | yflex_grow,
+										text(username) | vcenter | yflex_grow,
+										text(guest ? "true" : "false") | vcenter | yflex_grow,
+										text(std::to_string(stardust)) | vcenter | yflex_grow,
+										text(std::to_string(aura)) | vcenter | yflex_grow,
+									}) | flex,
+								}) | flex,
+								paragraph(json)
+							})
+						) | flex,
+						gridbox({
+							{ text("Normal Game") | center | border | flex },
+							{ text("Ranked Game") | center | border | flex }
+						}) | flex
+					}}) | flex,
+					_info | hcenter,
 				}) | xflex_grow | yflex_grow | flex,
 			}) | border | size(WIDTH, GREATER_THAN, 150) | size(HEIGHT, GREATER_THAN, 40)
 		);

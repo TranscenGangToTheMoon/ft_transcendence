@@ -6,7 +6,7 @@
 /*   By: xcharra <xcharra@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/03 17:34:55 by xcharra           #+#    #+#             */
-/*   Updated: 2024/12/05 17:48:24 by xcharra          ###   ########.fr       */
+/*   Updated: 2024/12/09 13:49:22 by xcharra          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,8 +61,8 @@ public:
 	PongCLI &operator=(PongCLI const &rhs) = delete;
 
 private:
-	void	signInAction(std::string &server, std::string &username, std::string &password);
-	void	signUpAction(std::string &server, std::string &username, std::string &password);
+	void	loginAction(std::string &server, std::string &username, std::string &password);
+	void	registerAction(std::string &server, std::string &username, std::string &password);
 	void	guestUpAction(std::string &server);
 
 	Element	getBanner();
