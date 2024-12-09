@@ -58,12 +58,12 @@ class Server:
     def launch_monitoring(self):
         Thread(target=self.monitoring_routine).start()
 
-    def get_player(self, id: int):
+    def get_player_and_match_code(self, id: int):
         self.games_lock.acquire()
         for match_code in self.games:
             for team in self.games[match_code].match.teams:
                 for player in team.players:
                     if player.user_id == id:
-                        return player
+                        return player, match_code
         self.games_lock.release()
         raise Exception(f'No player with id {id} is awaited on this server')

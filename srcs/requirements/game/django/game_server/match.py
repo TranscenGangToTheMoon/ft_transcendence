@@ -11,7 +11,8 @@ django.setup()
 from matches.models import Matches
 
 class Player():
-    def __init__(self, model):
+    def __init__(self, model, match_code):
+        self.match_code = match_code
         self.racket: Racket
         self.model = model
         self.user_id = self.model.user_id
@@ -19,12 +20,13 @@ class Player():
         self.game = None
 
 class Team():
-    def __init__(self, model):
+    def __init__(self, model, match_code):
+        self.match_code = match_code
         self.players: List[Player] = []
         self.model = model
         raw_players = self.model.players.all()
         for player in raw_players:
-            self.players.append(Player(player))
+            self.players.append(Player(player, self.match_code))
 
 class Match():
     def __init__(self, match_code):
@@ -34,7 +36,7 @@ class Match():
         self.game_mode = self.model.game_mode
         raw_teams = self.model.teams.all()
         for team in raw_teams:
-            self.teams.append(Team(team))
+            self.teams.append(Team(team, self.code))
 
     def __str__(self):
         return self.model.code + ' ' + str(self.teams[0].model.players.all()) + ' ' + \

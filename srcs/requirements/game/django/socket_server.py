@@ -18,9 +18,10 @@ async def connect(sid, environ, auth):
         raise ConnectionRefusedError('Authentication failed')
     id = auth['id']
     try:
-        player = server.get_player(id)
+        player, match_code = server.get_player_and_match_code(id)
         player.socket_id = sid
         server.players[sid] = player
+        await sio.enter_room(sid, str(match_code))
     except Exception as e:
         print(e, flush=True)
         raise ConnectionRefusedError('Player does not belong to any game')
@@ -29,16 +30,24 @@ async def connect(sid, environ, auth):
 
 @sio.event
 async def move_up(sid, data):
-    racket = server.players[sid].racket
+    player = server.players[sid]
+    racket = player.racket
     racket.move_up()
+    await sio.emit('move_up', data={'player': player.user_id}, room=str(player.match_code), skip_sid=sid)
+
 @sio.event
 async def move_down(sid, data):
-    racket = server.players[sid].racket
+    player = server.players[sid]
+    racket = player.racket
     racket.move_down()
+    await sio.emit('move_down', data={'player': player.user_id}, room=str(player.match_code), skip_sid=sid)
+
 @sio.event
 async def stop_moving(sid, data):
-    racket = server.players[sid].racket
+    player = server.players[sid]
+    racket = player.racket
     racket.stop_moving()
+    await sio.emit('stop_moving', data={'player': player.user_id}, room=str(player.match_code), skip_sid=sid)
 
 
 async def send_games(sid):
@@ -50,8 +59,11 @@ async def send_games(sid):
 sio.on('get_games', handler=send_games)
 
 @sio.event
-def disconnect(sid):
-    pass
+async def disconnect(sid):
+    player = server.players[sid]
+    match_code = player.match_code
+    await sio.leave_room(sid, str(match_code))
+
 
 async def create_game(request: web.Request):
     if request.remote == '127.0.0.1':
