@@ -1,7 +1,6 @@
 from lib_transcendence.serializer import SerializerAuthContext
 from lib_transcendence.utils import get_host
 from rest_framework import generics, status
-from rest_framework.exceptions import MethodNotAllowed
 from rest_framework.response import Response
 
 from chat_messages.utils import get_chat_participants

@@ -1,6 +1,6 @@
 from django.db.models import Q
 from lib_transcendence.exceptions import MessagesException
-from lib_transcendence.serializer import SerializerContext
+from lib_transcendence.serializer import SerializerKwargsContext
 from rest_framework import generics
 from rest_framework.exceptions import NotFound
 
@@ -26,7 +26,7 @@ class FriendRequestsReceiveListView(generics.ListAPIView, FriendRequestsMixin):
         return queryset.filter(receiver=self.request.user.id)
 
 
-class FriendRequestView(SerializerContext, generics.CreateAPIView, generics.RetrieveDestroyAPIView, FriendRequestsMixin):
+class FriendRequestView(SerializerKwargsContext, generics.CreateAPIView, generics.RetrieveDestroyAPIView, FriendRequestsMixin):
 
     def get_object(self):
         try:

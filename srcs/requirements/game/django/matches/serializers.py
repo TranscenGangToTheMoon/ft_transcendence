@@ -1,5 +1,5 @@
 from lib_transcendence.game import GameMode
-from lib_transcendence.utils import generate_code
+from lib_transcendence.generate import generate_code
 from lib_transcendence.exceptions import MessagesException, Conflict
 from lib_transcendence.request import request_service
 from rest_framework import serializers

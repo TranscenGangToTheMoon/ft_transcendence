@@ -2,10 +2,12 @@ from django.db import models
 from threading import Thread
 from lib_transcendence.game import GameMode
 # import matchmaking #cant import some function from matchmaking (circular import)
+
+
 class Players(models.Model):
     user_id = models.IntegerField(unique=True)
     trophies = models.IntegerField()
-    game_mode = models.CharField(max_length=50) # duel, ranked
+    game_mode = models.CharField(max_length=10) # todo try to set available option right here (not in serializer)
     join_at = models.DateTimeField(auto_now_add=True)
 
     @staticmethod
@@ -18,7 +20,8 @@ class Players(models.Model):
             launch_dual_game(players.filter(game_mode=GameMode.duel))
             print('normal taged')
         if players.filter(game_mode=GameMode.ranked).count() == 1:
-            Thread(target=search_ranked_players()).start()
+            pass
+            # Thread(target=search_ranked_players()).start()
             #subprocess ??
 
     def __str__(self):

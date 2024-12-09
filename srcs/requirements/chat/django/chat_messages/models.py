@@ -21,4 +21,4 @@ class Messages(models.Model):
         self.save()
 
     def __str__(self):
-        return f'{self.author.username}: {self.content}'
+        return f'{self.author}: {self.content}'

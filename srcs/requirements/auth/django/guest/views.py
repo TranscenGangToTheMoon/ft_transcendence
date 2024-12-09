@@ -4,9 +4,9 @@ from auth.permissions import IsNotAuthenticated
 from guest.serializers import GuestTokenSerializer
 
 
-class GuestTokenView(generics.CreateAPIView):
+class OptainGuestTokenView(generics.CreateAPIView):
     serializer_class = GuestTokenSerializer
     permission_classes = [IsNotAuthenticated]
 
 
-guest_token = GuestTokenView.as_view()
+optain_guest_token_view = OptainGuestTokenView.as_view()

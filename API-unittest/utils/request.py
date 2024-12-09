@@ -30,18 +30,14 @@ def make_request(endpoint, method: Literal['GET', 'POST', 'DELETE', 'PATCH', 'PU
         verify=False,
     )
 
-    if 'auth' not in endpoint:
-        print(method, endpoint, '=>', r.status_code)
+    print(method, endpoint, '=>', r.status_code)
 
     if r.status_code == 204:
         return RequestResult(r.status_code)
 
     try:
         result = r.json()
-        if 'auth' in endpoint:
-            return result
-        else:
-            print('JSON =>', result)
+        print('JSON =>', result)
         return RequestResult(r.status_code, result)
     except json.decoder.JSONDecodeError:
         pass

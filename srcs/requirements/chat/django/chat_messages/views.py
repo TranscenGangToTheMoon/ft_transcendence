@@ -1,14 +1,12 @@
 from rest_framework import generics
-from rest_framework.exceptions import MethodNotAllowed
 from lib_transcendence.serializer import SerializerAuthContext
-from lib_transcendence.utils import get_host
 
 from chat_messages.models import Messages
 from chat_messages.serializers import MessagesSerializer
 from chat_messages.utils import get_chat_participants
 
 
-class MessagesView(SerializerAuthContext, generics.ListCreateAPIView):
+class RetrieveMessagesView(SerializerAuthContext, generics.ListAPIView):
     queryset = Messages.objects.all().order_by('-sent_at')
     serializer_class = MessagesSerializer
 
@@ -18,10 +16,10 @@ class MessagesView(SerializerAuthContext, generics.ListCreateAPIView):
         get_chat_participants(chat_id, self.request.user.id)
         return queryset.filter(chat_id=chat_id)
 
-    def create(self, request, *args, **kwargs):
-        if get_host(request) != 'chat':
-            raise MethodNotAllowed('POST')
-        return super().create(request, *args, **kwargs)
+
+class CreateMessageView(SerializerAuthContext, generics.CreateAPIView):
+    serializer_class = MessagesSerializer
 
 
-messages_view = MessagesView.as_view()
+retrieve_messages_view = RetrieveMessagesView.as_view()
+create_message_view = CreateMessageView.as_view()

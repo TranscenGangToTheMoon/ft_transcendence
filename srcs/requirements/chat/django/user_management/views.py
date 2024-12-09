@@ -8,8 +8,9 @@ from chats.serializers import BlockChatSerializer
 from chats.utils import get_chat_together
 
 
-#todo try to make with generics view
 class RenameUserView(generics.UpdateAPIView):
+    authentication_classes = []
+
     def update(self, request, *args, **kwargs):
         new_username = request.data.get('username')
         if not new_username:
@@ -25,7 +26,7 @@ class RenameUserView(generics.UpdateAPIView):
 
 class UpdateBlockedUserView(generics.UpdateAPIView):
     serializer_class = BlockChatSerializer
-    permission_classes = []
+    authentication_classes = []
 
     def update(self, request, *args, **kwargs):
         if self.get_object() is None:
@@ -37,9 +38,10 @@ class UpdateBlockedUserView(generics.UpdateAPIView):
 
 
 class DeleteUserView(generics.DestroyAPIView):
+    authentication_classes = []
+
     def delete(self, request, *args, **kwargs):
-        chats = ChatParticipants.objects.filter(user_id=kwargs['user_id']).values_list('chat', flat=True)
-        Chats.objects.filter(id__in=chats).delete()
+        Chats.objects.filter(participants__user_id=kwargs['user_id']).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
