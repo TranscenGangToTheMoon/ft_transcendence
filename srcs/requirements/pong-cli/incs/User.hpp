@@ -6,7 +6,7 @@
 /*   By: xcharra <xcharra@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/28 13:58:57 by xcharra           #+#    #+#             */
-/*   Updated: 2024/12/04 15:18:36 by xcharra          ###   ########.fr       */
+/*   Updated: 2024/12/09 13:49:22 by xcharra          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,9 +25,9 @@ public:
 
 	void	setGuestTokens(CurlWrapper &curl);
 
-	void	signUpUser(CurlWrapper &curl);
-	void	signUpUserWithoutToken(CurlWrapper &curl);
-	void	signInUser(CurlWrapper &curl);
+	void	registerUser(CurlWrapper &curl);
+	void	registerGuestUser(CurlWrapper &curl);
+	void	loginUser(CurlWrapper &curl);
 
 	void	tokenRefresh(CurlWrapper &curl);
 

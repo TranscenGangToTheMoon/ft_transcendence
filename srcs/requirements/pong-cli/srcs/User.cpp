@@ -6,7 +6,7 @@
 /*   By: xcharra <xcharra@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/28 13:59:31 by xcharra           #+#    #+#             */
-/*   Updated: 2024/12/06 16:33:06 by xcharra          ###   ########.fr       */
+/*   Updated: 2024/12/09 14:05:23 by xcharra          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,12 +55,12 @@ void User::setGuestTokens(CurlWrapper &curl) {
 	curl.addHeader("Authorization: Bearer " + getAccessToken());
 }
 
-void User::signUpUser(CurlWrapper &curl) {
+void User::registerGuestUser(CurlWrapper &curl) {
 	std::string data = R"({"username": ")" + getUsername() +
 		R"(", "password": ")" + getPassword() + R"("})";
 
 	curl.getResponse().clear();
-	curl.PUT("/api/auth/register/", data);
+	curl.PUT("/api/auth/register/guest/", data);
 	std::string res = curl.getResponse();
 	if (curl.getHTTPCode() >= 300)
 		throw (std::runtime_error("Failed to sign up !"));
@@ -69,20 +69,22 @@ void User::signUpUser(CurlWrapper &curl) {
 
 }
 
-void User::signUpUserWithoutToken(CurlWrapper &curl) {
+void User::registerUser(CurlWrapper &curl) {
 	std::string data = R"({"username": ")" + getUsername() +
-					   R"(", "password": ")" + getPassword() + R"("})";
+		R"(", "password": ")" + getPassword() + R"("})";
 
 	curl.getResponse().clear();
 	curl.POST("/api/auth/register/", data);
-	std::string res = curl.getResponse();
 	if (curl.getHTTPCode() >= 300)
 		throw (std::runtime_error("Failed to sign up !"));
+
+	setAccessToken(jsonParser(curl.getResponse(), "access"));
+	setRefreshToken(jsonParser(curl.getResponse(), "refresh"));
 //	else
 //		std::cout << I_MSG("(" << curl.getHTTPCode() << ") User sign up !") << std::endl;
 
 }
-void User::signInUser(CurlWrapper &curl) {
+void User::loginUser(CurlWrapper &curl) {
 	std::string data = R"({"username": ")" + getUsername() +
 		R"(", "password": ")" + getPassword() + R"("})";
 
@@ -90,7 +92,9 @@ void User::signInUser(CurlWrapper &curl) {
 	curl.POST("/api/auth/login/", data);
 	if (curl.getHTTPCode() >= 300)
 		throw (std::runtime_error("Failed to sign in !"));
-	std::string res = curl.getResponse();
+
+	setAccessToken(jsonParser(curl.getResponse(), "access"));
+	setRefreshToken(jsonParser(curl.getResponse(), "refresh"));
 //	else
 //		std::cout << I_MSG("(" << curl.getHTTPCode() << ") User sign in !") << std::endl;
 
