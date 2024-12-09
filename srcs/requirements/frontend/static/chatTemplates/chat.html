@@ -14,14 +14,18 @@
 </style>
 
 <div id="chat-section">
-	<form id="startChat">
-		<button type="submit">Start Chat</button>
-		<input id="chatId" placeholder="Enter chat ID" type="text">
-	</form>
-	<div id="chat-view" style="display:none;">
+	<button id="selectChat">Select Chat</button>
+	<div id="chatsListView" style="display:none;">
+		<form id="searchChatForm">
+			<input id="User" placeholder="Enter user" type="text">
+			<button type="submit">New Chat</button>
+		</form>
+		<div id="chatsList"></div>
+	</div>
+	<div id="chatView" style="display:none;">
 		<button id="endChat">End Chat</button>
-		<div id="chats-box"></div>
-		<form id="chat-form">
+		<div id="messages"></div>
+		<form id="newMessageForm">
 			<input id="message" placeholder="Enter message" type="text">
 			<button type="submit">Send</button>
 		</form>

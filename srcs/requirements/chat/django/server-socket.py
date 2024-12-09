@@ -5,8 +5,8 @@ import django
 import socketio
 import asyncio
 from aiohttp import web
-from lib_transcendence.auth import auth_verify
-from socketio.exceptions import ConnectionRefusedError
+# from lib_transcendence.auth import auth_verify
+# from socketio.exceptions import ConnectionRefusedError
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_DIR)
@@ -30,29 +30,29 @@ async def connect(sid, environ):
     chat_id = environ.get('HTTP_CHATID')
     if token and chat_id:
         await sio.emit('debug', {'token': token, 'chat_id': chat_id}, to=sid)
-        try:
-            print("trying to auth")
-            res = auth_verify(token)
-            await sio.emit('message', {'message': "<em>Authentification validated!</em>"}, to=sid)
-            await sio.emit('debug', res, to=sid)
-            # userConnected[sid] = ChatParticipants.objects.get(id=chat_id, user_id=res['user_id'], blocked=False)
-            # if user.chat.blocked:
-            print(f"Connection successeeded{sid}")
-        except Exception as e:
-            print("failed to auth")
-            await sio.emit('message', {'message': '<em>Invalid token!</em>',}, to=sid)
-            raise ConnectionRefusedError({"error": 401, "message": "Invalid token", "chat_id": chat_id})
-        try:
-            test = Chats.objects.get(id=chat_id)
-            print(test)
-            await sio.emit('debug', {test}, to=sid)
-        except Exception as e:
-            print(e)
+        # try:
+        #     print("trying to auth")
+        #     res = auth_verify(token)
+        #     await sio.emit('message', {'message': "<em>Authentification validated!</em>"}, to=sid)
+        #     await sio.emit('debug', res, to=sid)
+        #     # userConnected[sid] = ChatParticipants.objects.get(id=chat_id, user_id=res['user_id'], blocked=False)
+        #     # if user.chat.blocked:
+        #     print(f"Connection successeeded{sid}")
+        # except Exception as e:
+        #     print("failed to auth")
+        #     await sio.emit('message', {'message': '<em>Invalid token!</em>',}, to=sid)
+        #     raise ConnectionRefusedError({"error": 401, "message": "Invalid token", "chat_id": chat_id})
+        # try:
+        #     test = Chats.objects.get(id=chat_id)
+        #     print(test)
+        #     await sio.emit('debug', {test}, to=sid)
+        # except Exception as e:
+        #     print(e)
         await sio.emit('message', {'message': '<em>Welcome!</em>',}, to=sid)
     else:
         print(f"Connection failed{sid}")
         await sio.emit('message', {'message': '<em>missing args!</em>',}, to=sid)
-        raise ConnectionRefusedError({"error": 400, "message": "missing args"})
+        # raise ConnectionRefusedError({"error": 400, "message": "missing args"})
 
 
 

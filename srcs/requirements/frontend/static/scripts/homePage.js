@@ -23,6 +23,10 @@
 
 // NAVIGAtORS
 
+document.getElementById('chat').addEventListener('click', async event => {
+    await navigateTo('/chat');
+})
+
 document.getElementById('ranked').addEventListener('click', async event => {
     await navigateTo('/game');
 })

@@ -19,8 +19,8 @@ FROM base AS development
 RUN apt-get install -y --no-install-recommends curl net-tools
 
 ENTRYPOINT ["/init.d/entrypoint.sh"]
-CMD [ "python3", "server-socket.py" ]
-# CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+# CMD [ "python3", "server-socket.py" ]
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
 
 ##### Production build
 FROM base AS production
@@ -30,5 +30,5 @@ COPY django /code
 RUN pip install daphne
 
 ENTRYPOINT ["/init.d/entrypoint.sh"]
-CMD [ "python3", "server-socket.py" ]
-# CMD ["daphne", "-b", "0.0.0.0", "-p", "8000", "chat.asgi:application"]
+# CMD [ "python3", "server-socket.py" ]
+CMD ["daphne", "-b", "0.0.0.0", "-p", "8000", "chat.asgi:application"]

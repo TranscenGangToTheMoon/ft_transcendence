@@ -222,8 +222,7 @@ async function handleRoute() {
         '/': '/homePage.html',
         '/profile' : 'profile.html',
         '/lobby' : '/lobby.html',
-        '/chat' : '/testChat.html',
-        '/chatTest' : '/chatTemplates/chat.html',
+        '/chat' : '/chatTemplates/chat.html',
         '/game' : '/game/game.html'
     };
     
@@ -439,7 +438,7 @@ async function  indexInit(auto=true) {
         history.replaceState({state: currentState}, '', window.location.pathname);
         incrementCurrentState();
         loadCSS('/css/styles.css', false);
-        await loadFriendListModal();
+        // await loadFriendListModal();
         initSSE();
         handleRoute();
     }
