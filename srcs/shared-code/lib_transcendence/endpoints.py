@@ -7,6 +7,7 @@ class Auth:
 
     guest = _base_auth + 'guest/'
     register = _base_auth + 'register/'
+    register_guest = register + 'guest/'
     login = _base_auth + 'login/'
     refresh = _base_auth + 'refresh/'
 
@@ -73,6 +74,8 @@ class Users:
     blocked = me + 'blocked/'
     blocked_user = blocked + '<int:blocking_id>/'
 
+    sse = me + 'sse/'
+
     fchat = base_api + 'chat/{user1_id}/{username2}/'
     chat = fchat.format(user1_id='<int:user1_id>', username2='<str:username2>')
     fare_blocked = base_api + 'blocked/{user1_id}/{user2_id}/'
@@ -80,7 +83,9 @@ class Users:
 
 
 class UsersManagement:
-    rename_user = base_api + f'rename-user/{_user_id}/' # todo remake (/delete/me, etc...)
+    manage_user = base_api + 'manage-user/'
+    frename_user = base_api + 'rename-user/{user_id}/'
+    rename_user = frename_user.format(user_id=_user_id)
     fblocked_user = base_api + 'blocked-user/{user_id}/{blocked_user_id}/'
     blocked_user = fblocked_user.format(user_id=_user_id, blocked_user_id='<int:blocked_user_id>')
     fdelete_user = base_api + 'delete-user/{user_id}/'

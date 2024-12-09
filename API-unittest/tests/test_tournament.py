@@ -1,3 +1,5 @@
+import unittest
+
 from services.blocked import blocked_user, unblocked_user
 from services.tournament import create_tournament, join_tournament, kick_user, search_tournament
 from utils.credentials import new_user, guest_user

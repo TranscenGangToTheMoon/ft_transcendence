@@ -1,7 +1,9 @@
+from lib_transcendence import endpoints
 from lib_transcendence.Chat import AcceptChat
 from lib_transcendence.exceptions import MessagesException
+from lib_transcendence.services import request_chat
 from rest_framework import serializers
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import PermissionDenied, APIException
 
 from friends.serializers import FriendsSerializer
 from friends.utils import get_friendship
@@ -48,6 +50,12 @@ class UsersMeSerializer(serializers.ModelSerializer):
             raise PermissionDenied(MessagesException.PermissionDenied.GUEST_UPDATE_USERNAME)
         if 'username' in validated_data or 'password' in validated_data:
             auth_update(self.context['request'].headers.get('Authorization'), validated_data)
+            if 'username' in validated_data and not instance.is_guest:
+                try:
+                    request_chat(endpoints.UsersManagement.frename_user.format(user_id=instance.id), data={'username': validated_data['username']})
+                except APIException:
+                    pass
+        validated_data.pop('password', None)
         return super().update(instance, validated_data)
 
 
@@ -90,3 +98,14 @@ class UsersSerializer(serializers.ModelSerializer):
         if friendship is None:
             return None
         return friendship
+
+
+class ManageUserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Users
+        fields = [
+            'id',
+            'username',
+            'is_guest',
+        ]

@@ -1,8 +1,11 @@
 from django.contrib.auth.models import User
 from lib_transcendence.exceptions import MessagesException
+from lib_transcendence import endpoints
+from lib_transcendence.services import request_users
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from auth.utils import create_user_get_token
 from auth.validators import validate_username
 from guest.group import get_group_guest
 
@@ -22,20 +25,22 @@ class RegisterSerializer(serializers.ModelSerializer):
             'refresh',
         ]
 
-    def validated_username(self, value):
+    def validate_username(self, value):
         request = self.context.get('request')
-
         if request is None:
             raise serializers.ValidationError(MessagesException.ValidationError.REQUEST_REQUIRED)
 
         return validate_username(value, request.method == 'POST')
 
     def create(self, validated_data):
+        password = validated_data.pop('password')
         instance = super().create(validated_data)
-        refresh_token = RefreshToken.for_user(instance)
-        return {'access': str(refresh_token.access_token), 'refresh': str(refresh_token)}
+        instance.set_password(password)
+        instance.save()
+        return create_user_get_token(instance)
 
     def update(self, instance, validated_data):
+        request_users(endpoints.UsersManagement.manage_user, method='PATCH', data={'id': instance.id, 'is_guest': False})
         guest_group = get_group_guest()
         instance.groups.remove(guest_group)
         password = validated_data.pop('password', None)
