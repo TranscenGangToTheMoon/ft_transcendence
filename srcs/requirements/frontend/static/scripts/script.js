@@ -170,6 +170,7 @@ function loadScript(scriptSrc, type) {
 function loadCSS(cssHref, toUpdate=true) {
     const existingLink = document.querySelector('link[dynamic-css]');
     if (existingLink) {
+        console.log('deleted', existingLink);
         existingLink.remove();
     }
     // console.log('will update =', toUpdate);
@@ -205,8 +206,9 @@ async function loadContent(url, container='content', append=false) {
         else if (userInformations.is_guest)
             style = 'guestStyle'
         css = contentDiv.querySelector(`[${style}]`);
+        // console.log(style, css)
         if (css)
-            loadCSS(css.getAttribute(style), !css.getAttribute(style).includes('Guest'));
+            loadCSS(css.getAttribute(style));//, !css.getAttribute(style).includes('Guest'));
     } catch (error) {
         contentDiv.innerHTML = '<h1>Erreur 404 : Page non trouvée</h1>';
     }
@@ -396,7 +398,8 @@ async function loadUserProfile(){
     }
     await loadContent(`/${profileMenu}`, 'profileMenu');
     // await loadContent('/blockedUsers.html', 'modals', true);
-    await loadFriendListModal();
+    if (!userInformations.is_guest)
+        await loadFriendListModal();
     // document.getElementById('title').innerText = userInformations.title;
 }
 
@@ -422,13 +425,13 @@ async function  indexInit(auto=true) {
         //         backdrop.remove;
         //     }
         // }, 500);
-        await fetchUserInfos(true);
-        if (window.location.pathname === '/login'){
-            document.getElementById('profileMenu').innerHTML = "";
-        }
-        else{
-            await loadUserProfile();
-        }
+        // await fetchUserInfos(true);
+        // if (window.location.pathname === '/login'){
+        //     document.getElementById('profileMenu').innerHTML = "";
+        // }
+        // else{
+        await loadUserProfile();
+        // }
         if (userInformations.code === 'user_not_found'){
             console.log('user was deleted from database, switching to guest mode');
             displayMainAlert("Unable to retrieve your account/guest profile","We're sorry your account has been permanently deleted and cannot be recovered.");
@@ -438,6 +441,7 @@ async function  indexInit(auto=true) {
         }
     }
     else{
+        await fetchUserInfos();
         let currentState = getCurrentState();
         console.log(`added ${window.location.pathname} to history with state ${currentState}`)
         history.replaceState({state: currentState}, '', window.location.pathname);
