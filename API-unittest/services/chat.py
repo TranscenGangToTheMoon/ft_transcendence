@@ -37,9 +37,11 @@ def request_chat_id(user1, chat_id, data=None, method: Literal['GET', 'DELETE'] 
 def create_message(user, chat_id, message=None, data=None, method: Literal['GET', 'POST'] = 'POST'):
     if data is None and method == 'POST':
         data = {'content': message}
-    return make_request(
-        endpoint=f'chat/{chat_id}/messages/',
-        method=method,
-        token=user['token'],
-        data=data,
-    )
+
+    kwargs = {'endpoint': f'{chat_id}/messages/', 'method': method, 'token': user['token'], 'data': data, 'port': 8002}
+    if method == 'GET':
+        kwargs.pop('data')
+        kwargs.pop('port')
+        kwargs['endpoint'] = 'chat/' + kwargs['endpoint']
+
+    return make_request(**kwargs)

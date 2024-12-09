@@ -5,10 +5,11 @@ from rest_framework.exceptions import NotFound, PermissionDenied
 from friend_requests.models import FriendRequests
 from friends.models import Friends
 from users.auth import get_user
+from users.serializers_utils import SmallUsersSerializer
 
 
 class FriendsSerializer(serializers.ModelSerializer):
-    friends = serializers.SerializerMethodField()
+    friends = SmallUsersSerializer(many=True, read_only=True)
 
     class Meta:
         model = Friends
@@ -17,14 +18,19 @@ class FriendsSerializer(serializers.ModelSerializer):
             'friends',
             'friends_since',
             'matches_play_against',
-            'user1_win', # todo remake
+            'user1_win',
             'matches_play_together',
             'matches_win_together',
         ]
-
-    @staticmethod
-    def get_friends(obj):
-        return [user.username for user in obj.friends.all()]
+        read_only_fields = [
+            'id',
+            'friends',
+            'friends_since',
+            'matches_play_against',
+            'user1_win',
+            'matches_play_together',
+            'matches_win_together',
+        ]
 
     def create(self, validated_data):
         user_accept = get_user(self.context.get('request'))

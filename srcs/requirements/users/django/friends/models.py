@@ -7,7 +7,7 @@ class Friends(models.Model):
     friends = models.ManyToManyField(Users, symmetrical=False)
     friends_since = models.DateTimeField(auto_now_add=True)
     matches_play_against = models.PositiveIntegerField(default=0)
-    user1_win = models.PositiveIntegerField(default=0)
+    user1_win = models.PositiveIntegerField(default=0)  # todo remake
     matches_play_together = models.PositiveIntegerField(default=0)
     matches_win_together = models.PositiveIntegerField(default=0)
 

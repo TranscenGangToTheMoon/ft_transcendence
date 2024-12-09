@@ -11,12 +11,12 @@ class FriendsMixin(generics.GenericAPIView):
     serializer_class = FriendsSerializer
 
 
-class FriendshipsView(generics.ListAPIView, FriendsMixin):
+class FriendsView(generics.ListAPIView, FriendsMixin):
     def filter_queryset(self, queryset):
         return queryset.filter(friends=self.request.user.id)
 
 
-class FriendsDeleteView(generics.RetrieveDestroyAPIView, FriendsMixin):
+class FriendView(generics.RetrieveDestroyAPIView, FriendsMixin):
 
     def get_object(self):
         try:
@@ -25,5 +25,5 @@ class FriendsDeleteView(generics.RetrieveDestroyAPIView, FriendsMixin):
             raise NotFound(MessagesException.NotFound.FRIENDSHIP)
 
 
-friends_list_create_view = FriendshipsView.as_view()
-friends_delete_view = FriendsDeleteView.as_view()
+friends_view = FriendsView.as_view()
+friend_view = FriendView.as_view()

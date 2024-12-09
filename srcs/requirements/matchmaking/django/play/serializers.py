@@ -4,10 +4,12 @@ from lib_transcendence.exceptions import MessagesException
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
 
+from blocking.utils import create_player_instance
 from matchmaking.utils import verify_user
 from play.models import Players
 
 import threading
+
 
 class PlayersSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(source='user_id', read_only=True)
@@ -27,7 +29,8 @@ class PlayersSerializer(serializers.ModelSerializer):
         ]
 
     def create(self, validated_data):
-        user = get_auth_user(self.context.get('request'))
+        request = self.context.get('request')
+        user = get_auth_user(request)
 
         verify_user(user['id'])
 
@@ -36,11 +39,4 @@ class PlayersSerializer(serializers.ModelSerializer):
 
         validated_data['user_id'] = user['id']
         validated_data['trophies'] = user['trophies']
-        # threading.Thread(target=func).start()
-        return super().create(validated_data)
-
-# def func():
-# 	import subprocess
-# 	import time
-# 	time.sleep(10)
-# 	subprocess.run(["python", "matchmaking/matchmaking.py"])
+        return create_player_instance(request, Players, **validated_data)

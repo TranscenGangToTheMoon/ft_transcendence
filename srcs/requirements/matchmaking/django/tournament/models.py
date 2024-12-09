@@ -17,6 +17,7 @@ class Tournaments(models.Model):
     start_at = models.DateTimeField(default=None, null=True)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     created_by = models.IntegerField()
+    created_by_username = models.CharField(max_length=30)
 
     def start_timer(self):
         self.start_at = datetime.now(timezone.utc) + timedelta(seconds=20)
@@ -64,7 +65,7 @@ class Tournaments(models.Model):
             name = '*'
         else:
             name = ''
-        name += f'{self.code}/{self.name} ({self.participants.count()}/{self.size})'
+        name += f'{self.code}/{self.name} {self.created_by} ({self.participants.count()}/{self.size})'
         if self.is_started:
             name += ' STARTED'
         return name

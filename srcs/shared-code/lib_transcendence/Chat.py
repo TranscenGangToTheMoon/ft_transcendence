@@ -1,4 +1,4 @@
-from lib_transcendence.utils import validate_type
+from lib_transcendence.validate_type import validate_type
 
 
 class ChatType:
