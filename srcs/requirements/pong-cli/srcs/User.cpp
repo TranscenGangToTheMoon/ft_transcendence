@@ -6,7 +6,7 @@
 /*   By: xcharra <xcharra@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/28 13:59:31 by xcharra           #+#    #+#             */
-/*   Updated: 2024/12/04 15:06:28 by xcharra          ###   ########.fr       */
+/*   Updated: 2024/12/06 16:33:06 by xcharra          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,6 +69,19 @@ void User::signUpUser(CurlWrapper &curl) {
 
 }
 
+void User::signUpUserWithoutToken(CurlWrapper &curl) {
+	std::string data = R"({"username": ")" + getUsername() +
+					   R"(", "password": ")" + getPassword() + R"("})";
+
+	curl.getResponse().clear();
+	curl.POST("/api/auth/register/", data);
+	std::string res = curl.getResponse();
+	if (curl.getHTTPCode() >= 300)
+		throw (std::runtime_error("Failed to sign up !"));
+//	else
+//		std::cout << I_MSG("(" << curl.getHTTPCode() << ") User sign up !") << std::endl;
+
+}
 void User::signInUser(CurlWrapper &curl) {
 	std::string data = R"({"username": ")" + getUsername() +
 		R"(", "password": ")" + getPassword() + R"("})";
