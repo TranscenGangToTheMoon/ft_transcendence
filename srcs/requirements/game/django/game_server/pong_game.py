@@ -3,6 +3,7 @@ from typing import List
 from game_server.pong_racket import Racket
 from game_server.pong_position import Position
 from game_server.match import Match, Player
+from datetime import datetime, timezone
 import time
 import os
 
@@ -17,6 +18,9 @@ class Game:
         self.match: Match = match
         self.sio = sio
         self.canvas = canvas
+        self.game_timeout = None
+        if self.match.game_mode == 'ranked':
+            self.game_timeout = 5
         if self.canvas is None:
             try:
                 self.canvas = Position(
@@ -46,7 +50,9 @@ class Game:
         raise Exception(f'no racket matching socket id {player_id}')
 
     def update(self):
-        pass
+        for racket in self.rackets:
+            racket.update()
+        # self.ball.update()
 
     def get_player(self, user_id: int) -> Player:
         for team in self.match.teams:
@@ -57,14 +63,25 @@ class Game:
 
     def wait_for_players(self, timeout: int):
         start_waiting = time.time()
-        # for team in self.match.teams:
-        print(self.match.teams[0].model, flush=True)
-        # for player in self.match.teams[0].players:
-        while self.match.teams[0].players[0].socket_id == '':
-            if time.time() - start_waiting > timeout:
-                raise Exception(f'player socketio connection timed out : player_id: {self.match.teams[0].players[0].user_id}')
-            time.sleep(1)
+        for team in self.match.teams:
+            # print(self.match.teams[0].model, flush=True)
+            for player in team.players:
+                while player.socket_id == '':
+                    if time.time() - start_waiting > timeout:
+                        raise Exception(f'player socketio connection timed out : player_id: {self.match.teams[0].players[0].user_id}')
+                    time.sleep(1)
         print(f'player {self.match.teams[0].players[0].user_id} has join in!', flush=True)
+
+    def play(self):
+        start_time = time.time()
+        last_frame_time = time.time()
+        while True:
+            if self.game_timeout is not None and (time.time() - start_time < self.game_timeout * 60):
+                break
+            while time.time() - last_frame_time >= (1 / 60):
+                time.sleep(0.005)
+            self.update()
+            last_frame_time = time.time()
 
     def launch(self):
         # try:
@@ -75,11 +92,18 @@ class Game:
             self.wait_for_players(timeout)
         except Exception as e:
             print(e, flush=True)
-            self.match.model.finished = True
-            self.match.model.save()
+            self.match.model.finish_match()
             return
         print('game launched', flush=True)
-        start_time = time.time()
-        while (time.time() - start_time < 120):
-            time.sleep(0.02)
-            print(self.rackets[0].velocity, flush=True)
+        self.play()
+
+    def check_zombie(self) -> bool:
+        if self.match.model.finished:
+            return True
+        game_start_time: datetime = self.match.model.created_at
+        game_timeout = self.match.model.game_duration
+        now = datetime.now(timezone.utc)
+        if game_start_time <= now - game_timeout:
+            self.match.model.finish_match()
+            return True
+        return False
