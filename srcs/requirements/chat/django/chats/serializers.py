@@ -40,6 +40,7 @@ class ChatsSerializer(serializers.ModelSerializer):
             'chat_with',
             'last_message',
             'created_at',
+            'last_updated',
             'username',
             'view_chat',
         ]
@@ -48,6 +49,7 @@ class ChatsSerializer(serializers.ModelSerializer):
             'chat_with',
             'last_message',
             'created_at',
+            'last_updated',
         ]
 
     def get_chat_with(self, obj):
