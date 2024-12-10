@@ -20,7 +20,7 @@
             delay : 2000,
         },
         maxBounceAngle : 2 * (Math.PI / 5),
-        displayDemo: true
+        displayDemo: false
     };
 
     config.enemyScore = {
@@ -536,7 +536,7 @@ document.getElementById('testA').addEventListener('click', event => {
 
 async function initGame(){
     await indexInit(false);
-    // window.PongGame.startGame();
+    window.PongGame.startGame();
 }
 
 initGame();

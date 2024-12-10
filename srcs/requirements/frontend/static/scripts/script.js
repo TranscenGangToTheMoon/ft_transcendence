@@ -1,6 +1,8 @@
 // ========================== GLOBAL VALUES ==========================
 
 const MAX_DISPLAYED_NOTIFICATIONS = 3;
+const MAX_DISPLAYED_FRIENDS = 12;
+const MAX_DISPLAYED_FRIEND_REQUESTS = 5;
 const baseAPIUrl = "https://localhost:4443/api"
 let userInformations = undefined;
 var notificationIdentifier = 0;
@@ -156,7 +158,7 @@ function loadScript(scriptSrc, type) {
         if (type)
             script.type = type;
         script.onload = () => {
-            console.log(`Script ${scriptSrc} loaded.`);
+            // console.log(`Script ${scriptSrc} loaded.`);
             resolve();
         };
         script.onerror = () => {
@@ -170,7 +172,7 @@ function loadScript(scriptSrc, type) {
 function loadCSS(cssHref, toUpdate=true) {
     const existingLink = document.querySelector('link[dynamic-css]');
     if (existingLink) {
-        console.log('deleted', existingLink);
+        // console.log('deleted', existingLink);
         existingLink.remove();
     }
     // console.log('will update =', toUpdate);
@@ -180,7 +182,7 @@ function loadCSS(cssHref, toUpdate=true) {
     if (toUpdate)
         link.setAttribute('dynamic-css', 'true');
     document.head.appendChild(link);
-    console.log(`Style ${cssHref} loaded.`)
+    // console.log(`Style ${cssHref} loaded.`)
 }
 
 async function loadContent(url, container='content', append=false) {
