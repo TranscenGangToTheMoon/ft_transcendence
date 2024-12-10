@@ -44,10 +44,10 @@ class SSEManager:
             client.flush()
 
 
-def event_stream():
+def event_stream(user):
     while True:
-        time.sleep(1)  # Simulez un délai pour l'exemple
-        yield "data: {}\n\n".format("Hello from SSE!")
+        time.sleep(10)
+        yield "data: {}\n\n".format("Hello from SSE! " + user.username)
 
 
 class SSEView(APIView):
