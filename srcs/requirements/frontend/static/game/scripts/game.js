@@ -10,7 +10,7 @@
         animationDuration: 800,
         font: "48px Arial",
         fontColor: "white",
-        defaultBallSpeed : 4,
+        defaultBallSpeed : 0,
         ballSpeedIncrement: 1,
         winningScore: 3,
         enemyScore : {},
@@ -20,7 +20,7 @@
             delay : 2000,
         },
         maxBounceAngle : 2 * (Math.PI / 5),
-        displayDemo: true
+        displayDemo: false
     };
 
     config.enemyScore = {
@@ -259,8 +259,10 @@
             pauseGame(false);
         if (state.isGamePaused) return;
         if (state.keys["ArrowUp"] && state.paddles.right.y > 0){
-            if (!state.paddles.right.blockGlide || state.paddles.right.y - 10 > config.ballSize)
+            if (!state.paddles.right.blockGlide || state.paddles.right.y - 10 > config.ballSize){
                 state.paddles.right.y -= 10;
+                socket.emit('move_up');
+            }
             else if (state.paddles.right.y - 10 <= config.ballSize)
                 state.paddles.right.y = config.ballSize;
         }
@@ -497,15 +499,20 @@ function initSocket(){
 		// extraHeaders: {
 		// }
 	});
+    window.socket = socket;
     console.log(socket)
 	socket.on('connect', () => {
         console.log('Connecté au serveur Socket.IO !');
       
         // Envoie un message au serveur
-        socket.emit('message', 'Bonjour depuis le frontend !');
+        socket.emit('join_room');
     });
     socket.on('connect_error', (error)=> {
         console.log('error', error);
+    })
+
+    socket.on('move_up', event=> {
+        console.log(event);
     })
 }
 
@@ -536,7 +543,7 @@ document.getElementById('testA').addEventListener('click', event => {
 
 async function initGame(){
     await indexInit(false);
-    // window.PongGame.startGame();
+    window.PongGame.startGame();
 }
 
 initGame();

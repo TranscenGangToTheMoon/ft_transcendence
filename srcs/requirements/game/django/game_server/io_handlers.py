@@ -25,12 +25,12 @@ async def join_room(sid):
     await sio.enter_room(sid, str(match_code))
 
 
-async def move_up(sid, data):
+async def move_up(sid):
     from socket_server import server, sio
-    player = server.clients[sid]
-    racket = player.racket
-    racket.move_up()
-    await sio.emit('move_up', data={'player': player.user_id}, room=str(player.match_code), skip_sid=sid)
+    # player = server.clients[sid]
+    # racket = server.
+    # racket.move_up()
+    await sio.emit('move_up')#, data={'player': player.user_id}, room=str(player.match_code), skip_sid=sid)
 
 
 async def move_down(sid, data):
