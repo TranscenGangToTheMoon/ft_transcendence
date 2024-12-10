@@ -6,14 +6,14 @@
 /*   By: xcharra <xcharra@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/25 16:32:19 by xcharra           #+#    #+#             */
-/*   Updated: 2024/12/05 17:23:30 by xcharra          ###   ########.fr       */
+/*   Updated: 2024/12/06 17:28:04 by xcharra          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <cstring>
 #include <iostream>
 #include <random>
-#include <csignal>
+//#include <csignal>
 
 #include "pong-cli.h"
 #include "CurlWrapper.hpp"
@@ -30,8 +30,8 @@ int main(void)
 		PongCLI		app(curl, user);
 
 		curl.addHeader("Content-Type: application/json");
-		app.run();
-//		app.changePage(PongCLI::Page::MainMenuPage);
+//		app.run();
+		app.changePage(PongCLI::Page::MainMenuPage);
 
 		std::cout << "server: " << app.getServer() << std::endl;
 		std::cout << "username: " << app.getUsername() << std::endl;
@@ -39,7 +39,6 @@ int main(void)
 	}
 	return (0);
 }
-
 
 //std::string generateCustomID(size_t length) {
 //	const char charset[] = "0123456789abcdef";

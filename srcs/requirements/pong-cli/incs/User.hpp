@@ -26,6 +26,7 @@ public:
 	void	setGuestTokens(CurlWrapper &curl);
 
 	void	signUpUser(CurlWrapper &curl);
+	void	signUpUserWithoutToken(CurlWrapper &curl);
 	void	signInUser(CurlWrapper &curl);
 
 	void	tokenRefresh(CurlWrapper &curl);

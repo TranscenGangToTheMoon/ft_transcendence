@@ -78,7 +78,7 @@ banner		:
 			@echo -e '$(RESET)'
 
 .PHONY: secrets #if secrets directory are needed delete phony secrets and uncomment the following lines
-secrets		:	$(ENV_FILE) 
+secrets		:	$(ENV_FILE)
 #			mkdir $@
 
 $(ENV_FILE)	:	$(ENV_EXEMPLE)
@@ -99,7 +99,7 @@ vclean		:
 .PHONY: fclean
 fclean		:	dusting
 			$(COMPOSE) $(FLAGS) down -v --rmi all --remove-orphans
-			docker image prune -af
+			docker system prune -af
 			rm -rf $(VOLS_PATH)
 			rm -rf $(ENV_FILE)
 			rm -rf ./srcs/shared-code/lib_transcendence.egg-info/ # todo remove in prod
