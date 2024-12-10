@@ -1,4 +1,5 @@
 from aiohttp import web
+from threading import Thread
 import sys
 
 async def create_game(request: web.Request):
@@ -8,5 +9,5 @@ async def create_game(request: web.Request):
         data = await request.post()
         match_code = data['match_code']
         print('launching match ', match_code, flush=True)
-        await server.launch_game(match_code)
+        Thread(target=server.launch_game, args=(match_code,)).start()
     return web.Response()

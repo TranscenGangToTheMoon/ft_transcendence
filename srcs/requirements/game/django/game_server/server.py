@@ -1,5 +1,5 @@
 from aiohttp import web
-from game_server.match import fetch_match_async
+from game_server.match import fetch_match
 from game_server.pong_game import Game
 from game_server.pong_position import Position
 from game_server.match import Player, fetch_matches
@@ -12,6 +12,8 @@ import socketio
 
 class Server:
     sio: socketio.AsyncServer
+    app: web.Application
+
     def __init__(self):
         self.games: Dict[int, Game] = {}
         self.games_lock = Lock()
@@ -24,9 +26,9 @@ class Server:
         self.launch_monitoring()
         web.run_app(Server.app, host='0.0.0.0', port=port)
 
-    async def launch_game(self, match_code):
-        await asyncio.sleep(1)
-        match = await fetch_match_async(match_code)
+    def launch_game(self, match_code):
+        time.sleep(1)
+        match = fetch_match(match_code)
         print('launching game with : ')
         for team in match.teams:
             for player in team.players:
@@ -36,7 +38,7 @@ class Server:
         self.games_lock.acquire()
         self.games[match_code] = game
         self.games_lock.release()
-        Thread(target=self.games[match_code].launch).start()
+        self.games[match_code].launch()
 
     def monitoring_routine(self):
         # setting all matches in DB as finished

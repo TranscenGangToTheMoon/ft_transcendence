@@ -42,7 +42,7 @@ class Match():
         return self.model.code + ' ' + str(self.teams[0].model.players.all()) + ' ' + \
         str(self.teams[1].model.players.all())
 
-def fetch_match_sync(match_code):
+def fetch_match(match_code):
     print(f'fetching match {match_code}', flush=True)
     match = Match(match_code)
     print(str(match))
