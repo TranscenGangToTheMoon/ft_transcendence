@@ -30,7 +30,7 @@ if (document.getElementById('modals').friendListened !== true){
             for (let i = 0; i < nb; i++){
                 try {
                     let data = await apiRequest(undefined, `${baseAPIUrl}/auth/guest/`, 'POST');
-                    data = await apiRequest(data.access, `${baseAPIUrl}/auth/register/`, 'PUT', undefined, undefined, {
+                    data = await apiRequest(data.access, `${baseAPIUrl}/auth/register/guest/`, 'PUT', undefined, undefined, {
                         'username' : `test${localStorage.getItem('currentState') + i}`,
                         'password' : `password${i}`
                     });
