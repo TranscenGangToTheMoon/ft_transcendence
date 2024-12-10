@@ -75,6 +75,8 @@ class Users:
     blocked_user = blocked + '<int:blocking_id>/'
 
     sse = me + 'sse/'
+    notification = base_api + 'notification/'
+    event = base_api + 'event/'
 
     fchat = base_api + 'chat/{user1_id}/{username2}/'
     chat = fchat.format(user1_id='<int:user1_id>', username2='<str:username2>')
