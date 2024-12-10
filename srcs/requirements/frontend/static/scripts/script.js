@@ -432,15 +432,14 @@ async function  indexInit(auto=true) {
         //     document.getElementById('profileMenu').innerHTML = "";
         // }
         // else{
-        await loadUserProfile();
-        // }
-        if (userInformations.code === 'user_not_found'){
+            // }
+        if (userInformations.detail === 'Incorrect authentication credentials.'){
             console.log('user was deleted from database, switching to guest mode');
             displayMainAlert("Unable to retrieve your account/guest profile","We're sorry your account has been permanently deleted and cannot be recovered.");
             await generateToken();
             await fetchUserInfos(true);
-            await loadUserProfile();
         }
+        await loadUserProfile();
     }
     else{
         await fetchUserInfos();
