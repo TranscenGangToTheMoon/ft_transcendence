@@ -17,11 +17,11 @@ class Server:
     def __init__(self):
         self.games: Dict[int, Game] = {}
         self.games_lock = Lock()
+        self.clients: Dict[str, Player] = {}
 
     def serve(self, app: web.Application, sio: socketio.AsyncServer, port: int):
         Server.sio = sio
         Server.app = app
-        self.clients: Dict[str, Player] = {}
         print(f"SocketIO server running on port {port}", flush=True)
         self.launch_monitoring()
         web.run_app(Server.app, host='0.0.0.0', port=port)
@@ -62,11 +62,13 @@ class Server:
         Thread(target=self.monitoring_routine).start()
 
     def get_player_and_match_code(self, id: int):
+        print(self.games_lock, flush=True)
         self.games_lock.acquire()
         for match_code in self.games:
             for team in self.games[match_code].match.teams:
                 for player in team.players:
                     if player.user_id == id:
+                        self.games_lock.release()
                         return player, match_code
         self.games_lock.release()
         raise Exception(f'No player with id {id} is awaited on this server')

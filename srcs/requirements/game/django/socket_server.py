@@ -14,12 +14,12 @@ port = 5500
 if __name__ == '__main__':
     app.add_routes([web.post('/create-game', requests_handlers.create_game)])
 
-    sio.event('connect', handler=io_handlers.connect)
-    sio.event('disconnect', handler=io_handlers.disconnect)
-    sio.event('get_games', handler=io_handlers.send_games)
-    sio.event('move_down', handler=io_handlers.move_down)
-    sio.event('move_up', handler=io_handlers.move_up)
-    sio.event('stop_moving', handler=io_handlers.stop_moving)
+    sio.on('connect', handler=io_handlers.connect)
+    sio.on('disconnect', handler=io_handlers.disconnect)
+    sio.on('get_games', handler=io_handlers.send_games)
+    sio.on('move_down', handler=io_handlers.move_down)
+    sio.on('move_up', handler=io_handlers.move_up)
+    sio.on('stop_moving', handler=io_handlers.stop_moving)
 
     server.serve(app, sio, port) # runs web.run_app(...)
 

@@ -34,7 +34,7 @@ document.getElementById("loginButton").addEventListener('click', event => {
     }
     else {
         endpoint = `${baseAPIUrl}/auth/register/`;
-        method = 'PUT';
+        method = 'POST';
     }
     getDataFromApi(getAccessToken(), endpoint, method, undefined, undefined, userInfo)
         .then (async data => {
