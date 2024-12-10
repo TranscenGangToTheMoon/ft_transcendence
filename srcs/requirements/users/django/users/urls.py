@@ -34,6 +34,8 @@ urlpatterns = [
 ]
 
 # todo 1. make sse
+# todo 7. message discord
+# todo 7. message private discord
 # todo 2. update user status (connected, disconnected, ...)
 # todo 3. if disconnected, send to matchmaking (to leave lobby, tournament, ...)
 # todo 4. create endpoint for send notification (message, demande d'amis, demande de join lobby,, demande de join tournament, ...)
