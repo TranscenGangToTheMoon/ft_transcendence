@@ -1,8 +1,29 @@
+from lib_transcendence.exceptions import MessagesException
 from rest_framework import status
+from rest_framework.exceptions import ParseError
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.http import StreamingHttpResponse
 import time
+
+from users.auth import get_user
+from users.models import Users
+
+
+# SSE Usage
+#  - user join lobby
+#  - user leave lobby
+#  - user set ready lobby
+#  - game start lobby
+#  - user join tournament
+#  - user leave tournament
+#  - game start lobby
+#  - game not start lobby
+#  - friend request
+#  - accept friend request
+#  - chat notification
+#  - friend status update ?
+#  - game port
 
 
 class SSEManager:
@@ -53,13 +74,31 @@ class SSEView(APIView):
 
 class NotificationView(APIView):
 
-    @staticmethod
     def post(self, request):
+        # message = 'coucou mon ptit loulou'
         message = request.data.get('message')
         if message:
-            SSEManager.send_message(message)
+            SSEManager.send_message(user_to, message)
+            return Response({"status": "Notification sent"}, status=status.HTTP_201_CREATED)
+        return Response({"error": "Message is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class EventView(APIView):
+
+    def post(self, request):
+        # message = 'coucou mon ptit loulou'
+        message = request.data.get('message')
+        if message is None:
+            raise ParseError({'detail': [MessagesException.ValidationError.FIELD_REQUIRED]})
+        user_to = request.data.get('user_to')
+        if user_to is None:
+            raise ParseError({'detail': [MessagesException.ValidationError.FIELD_REQUIRED]})
+        if message:
+            SSEManager.send_message(user_to, message)
             return Response({"status": "Notification sent"}, status=status.HTTP_201_CREATED)
         return Response({"error": "Message is required"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 sse_view = SSEView.as_view()
+notification_view = NotificationView.as_view()
+event_view = EventView.as_view()
