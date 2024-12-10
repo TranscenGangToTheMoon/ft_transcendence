@@ -21,7 +21,7 @@
                 <div class="tab-content mt-3" id="tabContent">
                     <div class="tab-pane fade show active" id="innerFriendList" role="tabpanel" aria-labelledby="innerFriendList-tab">
                         <div id="onlineFriends"></div>
-                        <div id="knownFriends"></div>
+                        <div id="knownFriends" class="overflow-auto" style="background-color: aquamarine    ;"></div>
                     </div>
                     <div class="tab-pane fade" id="innerFriendRequests" role="tabpanel" aria-labelledby="innerFriendRequests-tab">
                         <form id="requestFriendship">
@@ -30,8 +30,13 @@
                         </form>
                         
                         <div id="searchResults"></div>
-                        <div id="friendRequests">friend requests :</div>
-                        <div id="sentFriendRequests">sent friend requests:</div>
+                        <div id="friendRequestsTitle">friend requests :</div>
+                        <div class="overflow-auto" id="friendRequests" style="background-color: red;"></div>
+                        <div id="sentFriendRequestsTitle">sent friend requests:</div>
+                        <div class="overflow-auto" style="background-color: blueviolet;" id="sentFriendRequests"></div>
+                        <input type="text" placeholder="nb" id="simulateNb">
+                        <button id="simulateFriends">simulate friends</button>
+                        <img id="loading" src="/assets/loading-gif.gif" alt="loading" style="height: 30px; width: 30px; display: none;">
                     </div>
                 </div>
             </div>
