@@ -41,4 +41,4 @@ def get_auth_user(request=None):
 
 
 def auth_verify(token):
-    return requests_auth(token, Auth.verify, method='GET')
+    return request_auth(token, Auth.verify, method='GET')

@@ -10,11 +10,11 @@ from users.models import Users
 
 
 def auth_update(token, data):
-    return requests_auth(token, Auth.update, method='PATCH', data=data)
+    return request_auth(token, Auth.update, method='PATCH', data=data)
 
 
 def auth_delete(token, data):
-    requests_auth(token, Auth.delete, method='DELETE', data=data)
+    request_auth(token, Auth.delete, method='DELETE', data=data)
 
 
 class Authentication(BaseAuthentication):
