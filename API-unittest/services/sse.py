@@ -16,8 +16,8 @@ def notification(user_to, message):
 
 
 def connect_to_sse(user=None):
-    print('start sse')
-    sse_url = "https://localhost:4443/api/users/me/sse/"
+    sse_url = "https://localhost:4443/sse/users/"
+    print('start sse on', sse_url)
     if user is None:
         user = new_user()
 

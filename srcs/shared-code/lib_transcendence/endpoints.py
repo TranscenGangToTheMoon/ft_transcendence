@@ -1,4 +1,5 @@
 base_api = 'api/'
+base_sse = 'sse/'
 _user_id = '<int:user_id>'
 
 
@@ -74,7 +75,7 @@ class Users:
     blocked = me + 'blocked/'
     blocked_user = blocked + '<int:blocking_id>/'
 
-    sse = me + 'sse/'
+    sse = base_sse + 'users/'
     notification = base_api + 'notification/'
     event = base_api + 'event/'
 
