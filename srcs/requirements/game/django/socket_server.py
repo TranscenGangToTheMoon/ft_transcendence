@@ -1,5 +1,7 @@
 from aiohttp import web
 from game_server.server import Server
+from game_server import io_handlers
+from game_server import requests_handlers
 import socketio
 
 sio = socketio.AsyncServer(async_mode='aiohttp', cors_allowed_origins='*', logger=True)
@@ -9,74 +11,16 @@ server = Server()
 port = 5500
 
 
-@sio.event
-async def connect(sid, environ, auth):
-    print('trying to connect', flush=True)
-    if auth['token'] == 'kk':
-        print(f"Client connecté : {sid}", flush=True)
-    else:
-        raise ConnectionRefusedError('Authentication failed')
-    id = auth['id']
-    try:
-        player, match_code = server.get_player_and_match_code(id)
-        player.socket_id = sid
-        server.players[sid] = player
-        await sio.enter_room(sid, str(match_code))
-    except Exception as e:
-        print(e, flush=True)
-        raise ConnectionRefusedError('Player does not belong to any game')
-    print('registered a new racket', flush=True)
-
-
-@sio.event
-async def move_up(sid, data):
-    player = server.players[sid]
-    racket = player.racket
-    racket.move_up()
-    await sio.emit('move_up', data={'player': player.user_id}, room=str(player.match_code), skip_sid=sid)
-
-@sio.event
-async def move_down(sid, data):
-    player = server.players[sid]
-    racket = player.racket
-    racket.move_down()
-    await sio.emit('move_down', data={'player': player.user_id}, room=str(player.match_code), skip_sid=sid)
-
-@sio.event
-async def stop_moving(sid, data):
-    player = server.players[sid]
-    racket = player.racket
-    racket.stop_moving()
-    await sio.emit('stop_moving', data={'player': player.user_id}, room=str(player.match_code), skip_sid=sid)
-
-
-async def send_games(sid):
-    codes = []
-    for game in server.games:
-        codes.append(game)
-    await sio.emit('games', data=codes, to=sid)
-    print(f'games are: {codes}', flush=True)
-sio.on('get_games', handler=send_games)
-
-@sio.event
-async def disconnect(sid):
-    player = server.players[sid]
-    match_code = player.match_code
-    await sio.leave_room(sid, str(match_code))
-
-
-async def create_game(request: web.Request):
-    if request.remote == '127.0.0.1':
-        data = await request.post()
-        match_code = data['match_code']
-        print('launching match ', match_code, flush=True)
-        await server.launch_game(match_code)
-    return web.Response()
-
-app.add_routes([web.post('/create-game', create_game)])
-
-
 if __name__ == '__main__':
+    app.add_routes([web.post('/create-game', requests_handlers.create_game)])
+
+    sio.event('connect', handler=io_handlers.connect)
+    sio.event('disconnect', handler=io_handlers.disconnect)
+    sio.event('get_games', handler=io_handlers.send_games)
+    sio.event('move_down', handler=io_handlers.move_down)
+    sio.event('move_up', handler=io_handlers.move_up)
+    sio.event('stop_moving', handler=io_handlers.stop_moving)
+
     server.serve(app, sio, port) # runs web.run_app(...)
 
 '''

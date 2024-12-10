@@ -1,14 +1,16 @@
-from typing import List
-# from game_server.pong_ball import Ball
-from game_server.pong_racket import Racket
-from game_server.pong_position import Position
-from game_server.match import Match, Player
 from datetime import datetime, timezone
-import time
+from game_server.match import Match, Player
+# from game_server.pong_ball import Ball
+from game_server.pong_position import Position
+from game_server.pong_racket import Racket
+from typing import List
 import os
+import time
+
 
 def get_random_direction() -> Position:
     return Position(0, 0)
+
 
 class Game:
     def __init__(self,
@@ -42,7 +44,6 @@ class Game:
         for player in self.match.teams[1].players:
             self.rackets.append(Racket(player.user_id, Position(self.canvas.x - racket_size.x, int(self.canvas.y / 2 - racket_size.y / 2)), racket_size.x, racket_size.y))
 
-
     def get_racket(self, player_id) -> Racket:
         for racket in self.rackets:
             if racket.player_id == player_id:
@@ -64,13 +65,12 @@ class Game:
     def wait_for_players(self, timeout: int):
         start_waiting = time.time()
         for team in self.match.teams:
-            # print(self.match.teams[0].model, flush=True)
             for player in team.players:
                 while player.socket_id == '':
                     if time.time() - start_waiting > timeout:
-                        raise Exception(f'player socketio connection timed out : player_id: {self.match.teams[0].players[0].user_id}')
+                        raise Exception(f'player socketio connection timed out : player_id: {player.user_id}')
                     time.sleep(1)
-        print(f'player {self.match.teams[0].players[0].user_id} has join in!', flush=True)
+                print(f'player {player.user_id} has join in!', flush=True)
 
     def play(self):
         start_time = time.time()

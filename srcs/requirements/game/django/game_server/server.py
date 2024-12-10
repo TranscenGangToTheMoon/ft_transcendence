@@ -9,6 +9,7 @@ import time
 import asyncio
 import socketio
 
+
 class Server:
     sio: socketio.AsyncServer
     def __init__(self):
