@@ -1,9 +1,22 @@
 import httpx
+import pyperclip
 
 from utils.credentials import new_user
+from utils.request import make_request
+
+
+def notification(user_to, message):
+    return make_request(
+        endpoint='notification/',
+        method='POST',
+        data={'user_to': user_to['id'], 'message': message},
+        port=8005,
+        token=user_to['token'],
+    )
 
 
 def connect_to_sse(user=None):
+    print('start sse')
     sse_url = "https://localhost:4443/api/users/me/sse/"
     if user is None:
         user = new_user()
