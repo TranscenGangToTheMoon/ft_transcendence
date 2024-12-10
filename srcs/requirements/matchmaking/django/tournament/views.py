@@ -1,15 +1,18 @@
 from datetime import datetime, timezone
+from typing import Literal
 
 from django.db.models import Q
 from lib_transcendence.exceptions import MessagesException
 from lib_transcendence.serializer import SerializerAuthContext
 from lib_transcendence.services import request_game
 from lib_transcendence import endpoints
-from rest_framework import generics, serializers
+from rest_framework import generics, serializers, status
 from rest_framework.exceptions import PermissionDenied, NotFound
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
+from blocking.models import Blocked
+from blocking.utils import create_player_instance, delete_player_instance
 from matchmaking.create_match import create_tournament_match
 from matchmaking.utils import get_tournament_participant, get_tournament, get_kick_participants, kick_yourself
 from tournament.models import Tournaments, TournamentParticipants
@@ -22,34 +25,57 @@ class TournamentView(generics.CreateAPIView, generics.RetrieveAPIView):
     serializer_class = TournamentSerializer
 
     def get_object(self):
-        return Tournaments.objects.get(id=get_tournament_participant(None, self.request.user.id, from_place=True).tournament_id)
+        try:
+            return Tournaments.objects.get(id=get_tournament_participant(None, self.request.user.id, from_place=True).tournament_id)
+        except TournamentParticipants.DoesNotExist:
+            return NotFound(MessagesException.NotFound.TOURNAMENT)
 
 
 class TournamentSearchView(generics.ListAPIView):
     serializer_class = TournamentSearchSerializer
 
-    def get_queryset(self): # todo filter all blocked users
+    def get_queryset(self):
+        def get_blocked_users(kwargs: Literal['user_id', 'blocked_user_id']):
+            if kwargs == 'user_id':
+                create_player_instance(self.request)
+                values_list = 'blocked_user_id'
+            else:
+                values_list = 'user_id'
+            blocked_results = list(Blocked.objects.filter(**{kwargs: self.request.user.id}).values_list(values_list, flat=True))
+            if kwargs == 'user_id':
+                delete_player_instance(user_id=self.request.user.id)
+            return blocked_results
+
         query = self.request.data.get('q')
         if query is None:
             raise serializers.ValidationError({'q': [MessagesException.ValidationError.FIELD_REQUIRED]})
-        return Tournaments.objects.filter(Q(private=False) | Q(created_by=self.request.user.id), name__icontains=query) # todo don't show particiapant, only number of join participants
+        results = Tournaments.objects.filter(Q(private=False) | Q(created_by=self.request.user.id), name__icontains=query)
+        exclude_blocked = get_blocked_users('user_id') + get_blocked_users('blocked_user_id')
+        return results.exclude(created_by__in=exclude_blocked)
 
 
 class TournamentParticipantsView(SerializerAuthContext, generics.ListCreateAPIView, generics.DestroyAPIView):
     queryset = TournamentParticipants.objects.all()
     serializer_class = TournamentParticipantsSerializer
     pagination_class = None
-    # todo return tournament instance when create
 
     def filter_queryset(self, queryset):
         tournament = get_tournament(code=self.kwargs.get('code'))
         queryset = queryset.filter(tournament_id=tournament.id)
-        if self.request.user.id not in queryset.values_list('user_id', flat=True):
+        if not queryset.filter(user_id=self.request.user.id).exists():
             raise PermissionDenied(MessagesException.PermissionDenied.NOT_BELONG_TOURNAMENT)
         return queryset
 
     def get_object(self):
         return get_tournament_participant(get_tournament(code=self.kwargs.get('code')), self.request.user.id)
+
+    def create(self, request, *args, **kwargs):
+        serializer_participant = TournamentParticipantsSerializer(data=request.data, context=self.get_serializer_context())
+        if serializer_participant.is_valid():
+            instance = serializer_participant.save()
+            serializer_tournament = TournamentSerializer(instance.tournament, context=self.get_serializer_context())
+            return Response(serializer_tournament.data, status=status.HTTP_201_CREATED)
+        return Response(serializer_participant.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class TournamentKickView(generics.DestroyAPIView):

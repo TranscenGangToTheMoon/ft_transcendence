@@ -1,6 +1,6 @@
 from rest_framework import permissions
 
-from guest.group import group_guests
+from guest.group import is_guest
 
 
 class IsNotAuthenticated(permissions.BasePermission):
@@ -12,4 +12,4 @@ class IsNotAuthenticated(permissions.BasePermission):
 class IsGuest(permissions.BasePermission):
 
     def has_permission(self, request, view):
-        return request.user.groups.filter(name=group_guests).exists()
+        return is_guest(request)

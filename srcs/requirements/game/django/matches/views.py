@@ -1,4 +1,4 @@
-from lib_transcendence.auth import IsAuthenticated
+from lib_transcendence.auth import Authentication
 from rest_framework import generics
 import requests
 
@@ -6,7 +6,7 @@ from matches.models import Matches
 from matches.serializers import MatchSerializer, validate_user_id
 
 
-class MatchCreateView(generics.CreateAPIView):
+class CreateMatchView(generics.CreateAPIView):
     serializer_class = MatchSerializer
 
     def perform_create(self, serializer):
@@ -15,10 +15,10 @@ class MatchCreateView(generics.CreateAPIView):
         r = requests.post('http://localhost:5500/create-game', data={'match_code': match.code})
         self.status_code = r.status_code
 
-class MatchListView(generics.ListAPIView):
+class ListMatchesView(generics.ListAPIView):
     serializer_class = MatchSerializer
     queryset = Matches.objects.all()
-    permission_classes = [IsAuthenticated]
+    authentication_classes = [Authentication]
 
     def filter_queryset(self, queryset):
         return queryset.filter(players__user_id=self.kwargs['user_id'])
@@ -31,6 +31,6 @@ class MatchRetrieveView(generics.RetrieveAPIView):
         return validate_user_id(self.kwargs.get('user_id'), True)
 
 
-match_create_view = MatchCreateView.as_view()
-match_list_view = MatchListView.as_view()
-match_retrieve_view = MatchRetrieveView.as_view()
+create_match_view = CreateMatchView.as_view()
+list_matches_view = ListMatchesView.as_view()
+retrieve_match_view = MatchRetrieveView.as_view()

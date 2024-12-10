@@ -5,20 +5,17 @@ from rest_framework.exceptions import PermissionDenied
 from blocking.models import BlockedUsers
 from friends.utils import get_friendship
 from users.auth import get_user, get_valid_user
+from users.serializers_utils import SmallUsersSerializer
 
 
 class BlockedSerializer(serializers.ModelSerializer):
     user_id = serializers.IntegerField(write_only=True)
-    user = serializers.SerializerMethodField(read_only=True)
-    blocked = serializers.SerializerMethodField(read_only=True)
+    user = SmallUsersSerializer(read_only=True)
+    blocked = SmallUsersSerializer(read_only=True)
 
     class Meta:
         model = BlockedUsers
         fields = '__all__'
-
-    @staticmethod
-    def get_user(obj):
-        return {'id': obj.user.id, 'username': obj.user.username} # todo remake
 
     @staticmethod
     def get_blocked(obj):
@@ -26,6 +23,9 @@ class BlockedSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         user = get_user(self.context.get('request'))
+
+        if user.is_guest:
+            raise PermissionDenied(MessagesException.PermissionDenied.GUEST_BLOCK)
 
         if user.blocked.count() >= 50:
             raise PermissionDenied(MessagesException.PermissionDenied.BLOCK_MORE_THAN_50_USERS)

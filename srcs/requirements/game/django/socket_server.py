@@ -4,7 +4,7 @@ import socketio
 
 sio = socketio.AsyncServer(async_mode='aiohttp', cors_allowed_origins='*', logger=True)
 app = web.Application()
-sio.attach(app, socketio_path='/ws/')
+sio.attach(app, socketio_path='/ws/') #TODO -> change with '/ws/game/'
 server = Server()
 port = 5500
 
@@ -24,7 +24,7 @@ async def connect(sid, environ, auth):
     except Exception as e:
         print(e, flush=True)
         raise ConnectionRefusedError('Player does not belong to any game')
-    print('registered a new racket')
+    print('registered a new racket', flush=True)
 
 
 @sio.event
@@ -42,28 +42,22 @@ async def stop_moving(sid, data):
 
 
 async def send_games(sid):
-    # games = {server.games.match_code: match.code}
     codes = []
-    for game in Server.games:
+    for game in server.games:
         codes.append(game)
     await sio.emit('games', data=codes, to=sid)
-    print('sending games', flush=True)
     print(f'games are: {codes}', flush=True)
 sio.on('get_games', handler=send_games)
 
 @sio.event
 def disconnect(sid):
-    print('disconnected', sid, flush=True)
-
+    pass
 
 async def create_game(request: web.Request):
-    print('received create_game request', flush=True)
-    print(f'host is {request.remote}', flush=True)
     if request.remote == '127.0.0.1':
-        print('request has been accepted', flush=True)
         data = await request.post()
         match_code = data['match_code']
-        print('match_code : ', match_code, flush=True)
+        print('launching match ', match_code, flush=True)
         await server.launch_game(match_code)
     return web.Response()
 

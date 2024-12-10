@@ -28,10 +28,13 @@ class BlockedUsers(models.Model):
             pass
 
         if status == 'block':
-            try:
-                request_matchmaking(
-                    endpoint=endpoint,
-                    method='DELETE',
-                )
-            except APIException:
-                pass
+            method = 'POST'
+        else:
+            method = 'DELETE'
+        try:
+            request_matchmaking(
+                endpoint=endpoint,
+                method=method,
+            )
+        except APIException:
+            pass

@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from verify.serializers import VerifyUserSerializer
 
 
-class VerifyView(generics.RetrieveAPIView):
+class VerifyTokenView(generics.RetrieveAPIView):
     serializer_class = VerifyUserSerializer
     permission_classes = [IsAuthenticated]
 
@@ -12,4 +12,4 @@ class VerifyView(generics.RetrieveAPIView):
         return self.request.user
 
 
-token_verify = VerifyView.as_view()
+verify_token_view = VerifyTokenView.as_view()

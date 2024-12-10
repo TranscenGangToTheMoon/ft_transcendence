@@ -1,3 +1,5 @@
+from typing import Literal
+
 from lib_transcendence.game import GameMode
 from rest_framework import status
 from rest_framework.exceptions import APIException
@@ -12,6 +14,8 @@ class MessagesException:
         USER = NOT_FOUND.format(obj='User')
         FRIEND_REQUEST = NOT_FOUND.format(obj='Friend request')
         FRIENDSHIP = NOT_FOUND.format(obj='Friendship')
+        TOURNAMENT = NOT_FOUND.format(obj='Tournament')
+        BLOCKED_INSTANCE = NOT_FOUND.format(obj='Blocked instance')
 
         NOT_BELONG = 'You do not belong to any {obj}.'
         NOT_BELONG_TOURNAMENT = NOT_BELONG.format(obj='tournament')
@@ -35,6 +39,7 @@ class MessagesException:
         USERNAME_SHORTER_THAN_30_CHAR = 'Username must be less than 30 characters long.'
         INVALIDE_CHAR = 'Use of an invlid character.'
         USERNAME_ALREAY_EXISTS = 'This username already exists.'
+        SAME_PASSWORD = 'Password is the same as the old one.'
 
         ONLY_1V1_3V3_ALLOWED = 'Only 1v1 and 3v3 are allowed.'
         BO_MUST_BE = 'Best of must be 1, 3 or 5.'
@@ -61,6 +66,10 @@ class MessagesException:
         GUEST_USERS_NOT_ALLOWED = 'Guest users are not allowed to change their password.'
         GUEST_CANNOT_PLAY_RANKED = 'Guest users cannot play ranked games.'
         GUEST_UPDATE_USERNAME = 'Guest users can only update their username.'
+        GUEST_CANNOT_FRIEND_REQUEST = 'Guest users cannot make friend request.'
+        GUEST_REQUIRED = 'You must be a guest user.' # todo useless
+        GUEST_BLOCK = 'Guest users cannot blocked users.'
+        GUEST_CREATE_CHAT = 'Guest users cannot create chat.'
 
         NOT_BELONG = 'You do not belong to this {obj}.'
         NOT_BELONG_TO_CHAT = NOT_BELONG.format(obj='chat')
@@ -118,6 +127,9 @@ class MessagesException:
 
         JOIN = 'You already joined this {obj}.'
 
+    class InternalServerError:
+        CODE_GENERATION = 'Code generation failed.'
+
     class ServiceUnavailable:
         SERVICE_UNAVAILABLE = 'Failed to connect to {service} service.'
 
@@ -130,7 +142,7 @@ class ServiceUnavailable(APIException):
     default_detail = MessagesException.ServiceUnavailable.SERVICE_UNAVAILABLE
     default_code = 'service_unavailable'
 
-    def __init__(self, service):
+    def __init__(self, service: Literal['auth', 'chat', 'game', 'matchmaking', 'users']):
         self.detail = ServiceUnavailable.default_detail.format(service=service)
 
 

@@ -4,7 +4,7 @@ from lib_transcendence.auth import get_auth_user
 from lib_transcendence.services import request_users
 from lib_transcendence.utils import get_host
 from rest_framework import serializers
-from rest_framework.exceptions import MethodNotAllowed, PermissionDenied, ValidationError
+from rest_framework.exceptions import MethodNotAllowed, PermissionDenied
 from lib_transcendence.exceptions import MessagesException
 from lib_transcendence.exceptions import ResourceExists
 
@@ -65,6 +65,9 @@ class ChatsSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         user = get_auth_user(request)
 
+        if user['is_guest']:
+            raise PermissionDenied(MessagesException.PermissionDenied.GUEST_CREATE_CHAT)
+
         username = validated_data.pop('username')
         if username == user['username']:
             raise PermissionDenied(MessagesException.PermissionDenied.CANNOT_CHAT_YOURSELF)
@@ -80,7 +83,6 @@ class ChatsSerializer(serializers.ModelSerializer):
         ChatParticipants.objects.create(user_id=user['id'], username=user['username'], chat_id=result.id)
         ChatParticipants.objects.create(user_id=user2['id'], username=user2['username'], chat_id=result.id)
         return result
-    # todo return last message
 
 
 class BlockChatSerializer(serializers.ModelSerializer):

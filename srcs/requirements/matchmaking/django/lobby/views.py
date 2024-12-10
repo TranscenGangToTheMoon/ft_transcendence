@@ -1,8 +1,9 @@
 from lib_transcendence.game import GameMode
 from lib_transcendence.exceptions import MessagesException
 from lib_transcendence.serializer import SerializerAuthContext
-from rest_framework import generics
+from rest_framework import generics, status
 from rest_framework.exceptions import PermissionDenied
+from rest_framework.response import Response
 
 from lobby.models import Lobby, LobbyParticipants
 from lobby.serializers import LobbySerializer, LobbyParticipantsSerializer
@@ -24,17 +25,24 @@ class LobbyParticipantsView(SerializerAuthContext, generics.ListCreateAPIView, g
     queryset = LobbyParticipants.objects.all()
     serializer_class = LobbyParticipantsSerializer
     pagination_class = None
-    # todo return tournament instance when create
 
     def filter_queryset(self, queryset):
         lobby = get_lobby(self.kwargs.get('code'))
         queryset = queryset.filter(lobby_id=lobby.id)
-        if self.request.user.id not in queryset.values_list('user_id', flat=True):
+        if not queryset.filter(user_id=self.request.user.id).exists():
             raise PermissionDenied(MessagesException.PermissionDenied.NOT_BELONG_LOBBY)
         return queryset
 
     def get_object(self):
         return get_lobby_participant(get_lobby(self.kwargs.get('code')), self.request.user.id)
+
+    def create(self, request, *args, **kwargs):
+        serializer_participant = LobbyParticipantsSerializer(data=request.data, context=self.get_serializer_context())
+        if serializer_participant.is_valid():
+            instance = serializer_participant.save()
+            serializer_lobby = LobbySerializer(instance.lobby, context=self.get_serializer_context())
+            return Response(serializer_lobby.data, status=status.HTTP_201_CREATED)
+        return Response(serializer_participant.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class LobbyKickView(generics.DestroyAPIView):

@@ -9,14 +9,12 @@ TESTS = [
     'test_auth',
     'test_blocked',
     'test_chat',
-    # 'test_game',
-    'test_matchmaking',
-    # 'test_users',
     'test_friends',
     'test_game',
     'test_lobby',
     'test_matchmaking',
     'test_play',
+    'test_sse',
     'test_tournament',
     'test_users',
 ]
@@ -28,10 +26,12 @@ def auth_guest():
 
 
 def register(data):
-    return make_request('auth/register/', 'PUT', token=auth_guest()['access'], data=data)
+    return make_request('auth/register/', 'POST', data=data)
 
 
-def login(data):
+def login(username=None, password=None, data=None):
+    if data is None:
+        data = {'username': username, 'password': password}
     return make_request('auth/login/', 'POST', data=data)
 
 
@@ -46,7 +46,7 @@ def verify_token(access_token):
 # -------------------- GET TOKEN ------------------------------------------------------------------------------------- #
 def get_token(type: Literal['login', 'register', 'guest'], username=None, password=None):
     if type == 'guest':
-        token = auth_guest()
+        token = auth_guest().json
     else:
         if username is None:
             username = ''.join(rnstr(20))
@@ -55,9 +55,9 @@ def get_token(type: Literal['login', 'register', 'guest'], username=None, passwo
         data = {'username': username, 'password': password}
 
         if type == 'login':
-            token = login(data)
+            token = login(data=data).json
         else:
-            token = register(data)
+            token = register(data).json
     return token
 
 
@@ -75,21 +75,22 @@ def get_service():
     return service_name.replace('test_', '')
 
 
-def new_user(username=None, password=None):
+def new_user(username=None, password=None, get_me=True):
     if username is None:
         username = f'{get_service()}-user-' + rnstr()
     if password is None:
         password = f'password-{username}'
-    _new_user = {'username': username}
+    _new_user = {'username': username, 'password': password}
     token = get_token('register', _new_user['username'], password)
     _new_user['token'] = token['access']
     _new_user['refresh'] = token['refresh']
-    response = make_request(
-        endpoint='users/me/',
-        token=_new_user['token'],
-    )
-    assert response.status_code == 200
-    _new_user['id'] = response.json['id']
+    if get_me:
+        response = make_request(
+            endpoint='users/me/',
+            token=_new_user['token'],
+        )
+        assert response.status_code == 200
+        _new_user['id'] = response.json['id']
     return _new_user
 
 

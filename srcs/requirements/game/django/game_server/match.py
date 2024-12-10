@@ -4,26 +4,25 @@ from game_server.pong_racket import Racket
 
 # Django ORM setup
 import os
-import sys
 import django
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'game.settings')
 django.setup()
-from matches.models import Matches, Teams, Players
+from matches.models import Matches
 
 class Player():
     def __init__(self, model):
         self.racket: Racket
         self.model = model
-        self.user_id = model.id
+        self.user_id = self.model.user_id
         self.socket_id = ''
+        self.game = None
 
 class Team():
     def __init__(self, model):
         self.players: List[Player] = []
         self.model = model
-        raw_players = model.players.all()
+        raw_players = self.model.players.all()
         for player in raw_players:
             self.players.append(Player(player))
 
@@ -38,7 +37,8 @@ class Match():
             self.teams.append(Team(team))
 
     def __str__(self):
-        return self.model.code + ' ' + str(self.teams[0].model.players.all() + ' ' + str(self.teams[0].model.players.all()))
+        return self.model.code + ' ' + str(self.teams[0].model.players.all()) + ' ' + \
+        str(self.teams[1].model.players.all())
 
 def fetch_match_sync(match_code):
     print(f'fetching match {match_code}', flush=True)
@@ -48,3 +48,7 @@ def fetch_match_sync(match_code):
 
 async def fetch_match_async(match_code):
     return await sync_to_async(fetch_match_sync)(match_code)
+
+def fetch_matches():
+    matches = Matches.objects.all()
+    return matches

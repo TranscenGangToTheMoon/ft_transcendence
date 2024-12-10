@@ -10,7 +10,7 @@ class Chats(models.Model):
 class ChatParticipants(models.Model):
     chat = models.ForeignKey(Chats, on_delete=models.CASCADE, related_name='participants')
     user_id = models.IntegerField()
-    username = models.CharField(max_length=50)
+    username = models.CharField(max_length=30)
     view_chat = models.BooleanField(default=True)
 
     def set_view_chat(self, view_chat=True):
