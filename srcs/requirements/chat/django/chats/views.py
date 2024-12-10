@@ -1,3 +1,4 @@
+from lib_transcendence.Chat import ChatType
 from lib_transcendence.serializer import SerializerAuthContext
 from lib_transcendence.utils import get_host
 from rest_framework import generics, status
