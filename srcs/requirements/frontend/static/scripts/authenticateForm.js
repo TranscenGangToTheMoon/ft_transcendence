@@ -48,6 +48,7 @@ document.getElementById("loginButton").addEventListener('click', event => {
                     await navigateTo('/');
                 else
                     handleRoute();
+                await loadFriendListModal();
                 return;//todo redirect to uri
             }
             if (data.username) {

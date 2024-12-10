@@ -3,6 +3,7 @@
 const MAX_DISPLAYED_NOTIFICATIONS = 3;
 const MAX_DISPLAYED_FRIENDS = 12;
 const MAX_DISPLAYED_FRIEND_REQUESTS = 5;
+const MAX_DISPLAYED_BLOCKED_USERS = 10;
 const baseAPIUrl = "https://localhost:4443/api"
 let userInformations = undefined;
 var notificationIdentifier = 0;
@@ -399,10 +400,8 @@ async function loadUserProfile(){
         document.getElementById('balance').innerText = userInformations.coins;
     }
     await loadContent(`/${profileMenu}`, 'profileMenu');
-    // await loadContent('/blockedUsers.html', 'modals', true);
-    if (!userInformations.is_guest)
-        await loadFriendListModal();
-    // document.getElementById('title').innerText = userInformations.title;
+    // if (!userInformations.is_guest)
+        
 }
 
 document.getElementById('home').addEventListener('click', async event => {
@@ -443,6 +442,7 @@ async function  indexInit(auto=true) {
     }
     else{
         await fetchUserInfos();
+        await loadFriendListModal()
         let currentState = getCurrentState();
         console.log(`added ${window.location.pathname} to history with state ${currentState}`)
         history.replaceState({state: currentState}, '', window.location.pathname);
