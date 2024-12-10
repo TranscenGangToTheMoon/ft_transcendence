@@ -155,7 +155,7 @@ class Test03_GetChat(UnitTest):
         self.assertResponse(accept_chat(user2), 200)
         chat_id = self.assertResponse(create_chat(user1, user2['username']), 201, get_id=True)
 
-        self.assertResponse(request_chat_id(user1, chat_id, {'view_chat': False}, 'DELETE'), 204)
+        self.assertResponse(request_chat_id(user1, chat_id, 'DELETE'), 204)
         self.assertResponse(create_chat(user1, method='GET'), 200, count=0)
         self.assertResponse(create_chat(user2, method='GET'), 200, count=1)
         self.assertResponse(request_chat_id(user1, chat_id), 200)
