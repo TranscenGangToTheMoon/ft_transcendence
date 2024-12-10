@@ -74,13 +74,17 @@ class SSEView(APIView):
 
 class NotificationView(APIView):
 
-    def post(self, request):
+    @staticmethod
+    def post(request):
         # message = 'coucou mon ptit loulou'
         message = request.data.get('message')
-        if message:
-            SSEManager.send_message(user_to, message)
-            return Response({"status": "Notification sent"}, status=status.HTTP_201_CREATED)
-        return Response({"error": "Message is required"}, status=status.HTTP_400_BAD_REQUEST)
+        if message is None:
+            raise ParseError({'detail': [MessagesException.ValidationError.FIELD_REQUIRED]})
+        user_to = request.data.get('user_to')
+        if user_to is None:
+            raise ParseError({'detail': [MessagesException.ValidationError.FIELD_REQUIRED]})
+        SSEManager.send_message(user_to, message)
+        return Response({"status": "Notification sent"}, status=status.HTTP_201_CREATED)
 
 
 class EventView(APIView):
