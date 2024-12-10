@@ -17,3 +17,11 @@ def connect_to_sse(user=None):
                         print(f"Received: {line.strip()}")
             else:
                 print(f"Failed to connect: {response.status_code}")
+
+
+if __name__ == "__main__":
+    user1 = new_user()
+
+    print(user1['username'], user1['password'])
+    pyperclip.copy(user1['username'] + ' ' + user1['password'])
+    connect_to_sse(user1)
