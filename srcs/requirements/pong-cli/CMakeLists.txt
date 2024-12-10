@@ -21,7 +21,6 @@ FetchContent_MakeAvailable(FTXUI)
 FetchContent_Declare(curl
 		URL https://curl.se/download/curl-8.11.0.tar.gz
 )
-
 FetchContent_MakeAvailable(curl)
 
 find_package(curl)
