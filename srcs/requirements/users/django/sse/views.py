@@ -27,21 +27,28 @@ from users.models import Users
 
 
 class SSEManager:
-    clients = []
+    clients = {}
 
     @classmethod
-    def add_client(cls, response):
-        cls.clients.append(response)
+    def add_client(cls, user, response):
+        print('NEW USER CONNECTED:', user.id, flush=True)
+        cls.clients[user.id] = {'user': user, 'response': response}
 
     @classmethod
-    def remove_client(cls, response):
-        cls.clients.remove(response)
+    def remove_client(cls, user_id):
+        print('USER DISCONNECTED:', user_id, flush=True)
+        cls.clients.pop(user_id)
 
     @classmethod
-    def send_message(cls, message):
-        for client in cls.clients:
-            client.write(f"data: {message}\n\n")
-            client.flush()
+    def send_message(cls, user_id, message):
+        print(cls.clients, flush=True)
+        print('USER SENT MESSAGE:', user_id, message, flush=True)
+        if user_id not in cls.clients:
+            print('USER NOT CONNECTED:', user_id, flush=True)
+            return
+        client = cls.clients[user_id]['response']
+        client.write(f"data: {message}\n\n")
+        client.flush()
 
 
 def event_stream(user):
