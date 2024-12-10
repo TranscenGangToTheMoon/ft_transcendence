@@ -21,7 +21,7 @@ class Server:
     def serve(self, app: web.Application, sio: socketio.AsyncServer, port: int):
         Server.sio = sio
         Server.app = app
-        self.players: Dict[str, Player] = {}
+        self.clients: Dict[str, Player] = {}
         print(f"SocketIO server running on port {port}", flush=True)
         self.launch_monitoring()
         web.run_app(Server.app, host='0.0.0.0', port=port)

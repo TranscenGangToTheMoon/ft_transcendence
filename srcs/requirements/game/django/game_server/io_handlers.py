@@ -9,7 +9,7 @@ async def connect(sid, environ, auth):
     try:
         player, match_code = server.get_player_and_match_code(id)
         player.socket_id = sid
-        server.players[sid] = player
+        server.clients[sid] = player
         await sio.enter_room(sid, str(match_code))
     except Exception as e:
         print(e, flush=True)
@@ -20,7 +20,7 @@ async def connect(sid, environ, auth):
 async def move_up(sid, data):
     from ..socket_server import server, sio
 
-    player = server.players[sid]
+    player = server.clients[sid]
     racket = player.racket
     racket.move_up()
     await sio.emit('move_up', data={'player': player.user_id}, room=str(player.match_code), skip_sid=sid)
@@ -28,7 +28,7 @@ async def move_up(sid, data):
 
 async def move_down(sid, data):
     from ..socket_server import server, sio
-    player = server.players[sid]
+    player = server.clients[sid]
     racket = player.racket
     racket.move_down()
     await sio.emit('move_down', data={'player': player.user_id}, room=str(player.match_code), skip_sid=sid)
@@ -36,7 +36,7 @@ async def move_down(sid, data):
 
 async def stop_moving(sid, data):
     from ..socket_server import server, sio
-    player = server.players[sid]
+    player = server.clients[sid]
     racket = player.racket
     racket.stop_moving()
     await sio.emit('stop_moving', data={'player': player.user_id}, room=str(player.match_code), skip_sid=sid)
@@ -53,6 +53,6 @@ async def send_games(sid):
 
 async def disconnect(sid):
     from ..socket_server import server, sio
-    player = server.players[sid]
+    player = server.clients[sid]
     match_code = player.match_code
     await sio.leave_room(sid, str(match_code))
