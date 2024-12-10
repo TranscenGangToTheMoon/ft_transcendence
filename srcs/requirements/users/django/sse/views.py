@@ -53,7 +53,7 @@ class SSEManager:
 
 def event_stream(user):
     while True:
-        time.sleep(10)
+        time.sleep(1)
         yield "data: {}\n\n".format("Hello from SSE! " + user.username)
 
 
