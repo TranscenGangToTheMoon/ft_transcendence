@@ -1,33 +1,74 @@
 
 <style>
-	#chats-box {
+	#chatSection {
+		display: flex;
+		min-height:100%;
+	}
+	#chatsListView {
 		padding: 5px;
-		border: 1px solid #ccc;
-		width: 40%;
-		height: 50vh;
+		border-right: 1px solid #ccc;
+		background-color: #f7f7f7;
+		width: 20%;
+		min-height:90vh;
 		overflow-y: auto;
 	}
-
-	#co-failed{
-		color: red;
+	#chatsList {
+		padding: 5px;
 	}
+	#chatListElement{
+		border-bottom: 1px solid #ccc;
+		border-top: 1px solid #ccc;
+		padding: 5px;
+	}
+	#chatListElementTarget {
+		font-weight: bold;
+	}
+	#chatListElementMessagePreview { 
+		color: #606060;
+	}
+	#chatView {
+		width: 80%;
+		height: 90vh;
+		overflow-y: auto;
+	}
+	#chatTitle {
+		display: flex;
+		padding: 5px;
+		border-bottom: 1px solid #ccc;
+		width: 100%;
+	}
+	#messages {
+		padding: 5px;
+		width: 100%;
+		height: 80vh;
+		overflow-y: auto;
+	}
+	#sendMessageForm {
+		border-top: 1px solid #ccc;
+		padding: 5px;
+		width: 100%;
+		height: 5%;
+	}
+
 </style>
 
-<div id="chat-section">
-	<button id="selectChat">Select Chat</button>
-	<div id="chatsListView" style="display:none;">
+<div id="chatSection" style="display:flex;">
+	<div id="chatsListView">
 		<form id="searchChatForm">
-			<input id="User" placeholder="Enter user" type="text">
-			<button type="submit">New Chat</button>
+			<input id="searchUser" placeholder="Search user" type="text">
+			<button type="submit">Start Chat</button>
 		</form>
 		<div id="chatsList"></div>
 	</div>
-	<div id="chatView" style="display:none;">
-		<button id="endChat">End Chat</button>
+	<div id="chatView" style="display:none">
+		<div id="chatTitle">
+			<div id="chatName"><p>User test</p></div>
+			<button id="endChat">End Chat</button>
+		</div>
 		<div id="messages"></div>
-		<form id="newMessageForm">
-			<input id="message" placeholder="Enter message" type="text">
-			<button type="submit">Send</button>
+		<form id="sendMessageForm">
+			<input autocomplete="off" id="message" placeholder="Enter message" type="text">
+			<button type="submit">Send </button>
 		</form>
 	</div>
 </div>
