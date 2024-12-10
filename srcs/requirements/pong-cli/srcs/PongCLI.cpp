@@ -6,11 +6,12 @@
 /*   By: xcharra <xcharra@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/03 17:35:02 by xcharra           #+#    #+#             */
-/*   Updated: 2024/12/10 17:02:30 by xcharra          ###   ########.fr       */
+/*   Updated: 2024/12/10 17:47:06 by xcharra          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <iostream>
+#include <future>
 #include "PongCLI.hpp"
 
 
@@ -243,7 +244,21 @@ void PongCLI::renderMainMenuPage() {
 	bool		accept_friend_request;
 	std::string	accept_chat_from;
 
+	auto		launchAsyncTask = Button("Launch async task", [this] {
+		_info = text("Async task running...") | color(Color::Yellow);
+		auto res = std::async(std::launch::async, [this] {
+			std::this_thread::sleep_for(std::chrono::seconds(5));
+			_info = text("Async task done !") | color(Color::Green);
+		});
+		for (int i = 0; i < 1; i++) {
+			std::this_thread::sleep_for(std::chrono::seconds(1));
+			_info = text("Async task running..." + std::to_string(i)) | color(Color::Yellow);
+		}
+		res.get();
+	});
+
 	Component	pageComponents = Container::Vertical({
+		launchAsyncTask,
 	});
 	std::string	json;
 	std::string info;
@@ -271,33 +286,36 @@ void PongCLI::renderMainMenuPage() {
 					gridbox({{
 						window(
 							text("Profile: "),
-							vbox ({
-								hbox({ // Profile
-									vbox({ // left
-										text("id: ") | vcenter | yflex_grow,
-										text("username: ") | vcenter | yflex_grow,
-										text("guest: ") | vcenter | yflex_grow,
-										text("stardust: ") | vcenter | yflex_grow,
-										text("aura: ") | vcenter | yflex_grow,
-										text("accept_friend_request: ") | vcenter | yflex_grow,
-										text("accept_chat_from: ") | vcenter | yflex_grow,
-									}),
-									separator(),
-									vbox({ // right
-										text(std::to_string(id)) | vcenter | yflex_grow,
-										text(username) | vcenter | yflex_grow,
-										text(guest ? "true" : "false") | vcenter | yflex_grow,
-										text(std::to_string(stardust)) | vcenter | yflex_grow,
-										text(std::to_string(aura)) | vcenter | yflex_grow,
-										text(std::to_string(accept_friend_request)) | vcenter | yflex_grow,
-										text(accept_chat_from) | vcenter | yflex_grow,
-									}) | flex,
+							hbox({ // Profile
+								vbox({ // left
+									text("id: ") | vcenter | yflex_grow,
+									text("username: ") | vcenter | yflex_grow,
+									text("guest: ") | vcenter | yflex_grow,
+									text("stardust: ") | vcenter | yflex_grow,
+									text("aura: ") | vcenter | yflex_grow,
+									text("accept_friend_request: ") | vcenter | yflex_grow,
+									text("accept_chat_from: ") | vcenter | yflex_grow,
+								}),
+								separator(),
+								vbox({ // right
+									text(std::to_string(id)) | vcenter | yflex_grow,
+									text(username) | vcenter | yflex_grow,
+									text(guest ? "true" : "false") | vcenter | yflex_grow,
+									text(std::to_string(stardust)) | vcenter | yflex_grow,
+									text(std::to_string(aura)) | vcenter | yflex_grow,
+									text(accept_friend_request ? "true" : "false") | vcenter | yflex_grow,
+									text(accept_chat_from) | vcenter | yflex_grow,
 								}) | flex,
-							})
-						) | flex,
-						gridbox({ //game
-							{ text("Normal Game") | center | border | flex },
-							{ text("Ranked Game") | center | border | flex }
+							}) | flex
+						),
+						vbox({ //game
+							vbox({
+								text("Normal Game") | center | border | flex,
+								launchAsyncTask->Render(),
+							}) | yflex_grow,
+							vbox({
+								text("Ranked Game") | center | border | flex
+							}) | yflex_grow
 						}) | flex
 					}}) | flex,
 					_info | hcenter,

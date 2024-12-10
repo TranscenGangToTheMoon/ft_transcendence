@@ -6,7 +6,7 @@
 /*   By: xcharra <xcharra@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/25 16:32:19 by xcharra           #+#    #+#             */
-/*   Updated: 2024/12/10 16:55:10 by xcharra          ###   ########.fr       */
+/*   Updated: 2024/12/10 17:17:26 by xcharra          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,8 +31,8 @@ int main(void)
 		PongCLI		app(curl, user);
 
 		curl.addHeader("Content-Type: application/json");
-		app.run();
-//		app.changePage(PongCLI::Page::MainMenuPage);
+//		app.run();
+		app.changePage(PongCLI::Page::MainMenuPage);
 
 		std::cout << "server: " << app.getServer() << std::endl;
 		std::cout << "username: " << app.getUsername() << std::endl;
