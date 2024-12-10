@@ -11,10 +11,7 @@ from chats.serializers import ChatsSerializer
 class ChatsView(generics.ListCreateAPIView):
     serializer_class = ChatsSerializer
 
-
-class ChatsView(generics.ListCreateAPIView, ChatsMixin):
-
-    def filter_queryset(self, queryset):
+    def get_queryset(self):
         query = self.request.data.pop('q', None)
         kwars = {'user_id': self.request.user.id}
         if query is None:
