@@ -53,23 +53,14 @@ def event_stream():
 class SSEView(APIView):
 
     def get(self, request, *args, **kwargs):
-        def event_stream():
-            try:
-                for i in range(1, 1000):
-                    yield f"data: still connected\n\n"
-                    time.sleep(10)
-            except GeneratorExit:
-                print("Connexion SSE terminée.")
-
-        print(self.request.user)
-        response = StreamingHttpResponse(event_stream(), content_type='text/event-stream')
+        user = get_user(self.request)
+        response = StreamingHttpResponse(event_stream(user), content_type='text/event-stream')
         response['Cache-Control'] = 'no-cache'
-        response['Connection'] = 'keep-alive'
-        SSEManager.add_client(response)
-        try:
-            return response
-        finally:
-            SSEManager.remove_client(response)
+        SSEManager.add_client(user, response)
+        # try:
+        return response
+        # finally:
+        #     SSEManager.remove_client(user.id)
 
 
 class NotificationView(APIView):
