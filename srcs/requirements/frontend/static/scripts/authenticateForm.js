@@ -33,7 +33,7 @@ document.getElementById("loginButton").addEventListener('click', event => {
         method = 'POST';
     }
     else {
-        endpoint = `${baseAPIUrl}/auth/register/`;
+        endpoint = `${baseAPIUrl}/auth/register/guest/`;
         method = 'PUT';
     }
     getDataFromApi(getAccessToken(), endpoint, method, undefined, undefined, userInfo)
