@@ -8,8 +8,7 @@ from chats.models import Chats, ChatParticipants
 from chats.serializers import ChatsSerializer
 
 
-class ChatsMixin(generics.GenericAPIView):
-    queryset = Chats.objects.all()
+class ChatsView(generics.ListCreateAPIView):
     serializer_class = ChatsSerializer
 
 
@@ -26,7 +25,8 @@ class ChatsView(generics.ListCreateAPIView, ChatsMixin):
         return queryset.filter(id__in=join_chats, blocked=False).distinct()
 
 
-class ChatView(SerializerAuthContext, generics.RetrieveDestroyAPIView, ChatsMixin):
+class ChatView(SerializerAuthContext, generics.RetrieveDestroyAPIView):
+    serializer_class = ChatsSerializer
     lookup_field = 'chat_id'
 
     def get_object(self):
