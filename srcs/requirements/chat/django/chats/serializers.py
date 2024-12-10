@@ -30,7 +30,7 @@ class ChatsSerializer(serializers.ModelSerializer):
     chat_with = serializers.SerializerMethodField(read_only=True)
     last_message = MessagesSerializer(source='messages.last', read_only=True)
     type = serializers.CharField()
-    view_chat = serializers.BooleanField(write_only=True, required=False)
+    view_chat = serializers.BooleanField(required=False)
 
     class Meta:
         model = Chats
@@ -56,6 +56,15 @@ class ChatsSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(MessagesException.ValidationError.REQUEST_REQUIRED)
         chat_with = obj.participants.exclude(user_id=get_auth_user(request)['id']).first()
         return {'id': chat_with.user_id, 'username': chat_with.username}
+
+    def get_view_chat(self, obj):
+        request = self.context.get('request')
+        if request is None:
+            raise serializers.ValidationError(MessagesException.ValidationError.REQUEST_REQUIRED)
+        try:
+            return obj.participants.get(user_id=get_auth_user(request)['id']).view_chat
+        except ChatParticipants.DoesNotExist:
+            return False
 
     def validate_type(self, value):
         request = self.context.get('request')
