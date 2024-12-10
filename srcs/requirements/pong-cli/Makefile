@@ -63,6 +63,16 @@ FTXUI_A		:=	$(FTXUI:%=$(FTXUI_D)/build/%)
 
 FTXUI_F		:=	-L$(FTXUI_D)/build/ -lftxui-component -lftxui-dom -lftxui-screen
 
+###############JSON###############
+JSON		:=	\
+
+
+JSON_D		:=	$(LIB_D)/json
+
+JSON_I		:=	$(LIB_D)/json/single_include/
+
+JSON_A		:=	$(JSON:%=$(JSON_D)/build/%)
+
 ########################################################################################################################
 #                                                        FLAGS                                                         #
 ########################################################################################################################
@@ -72,7 +82,7 @@ MFLAGS		:= --jobs=$(shell nproc)
 
 RM			:=	rm -rf
 
-IFLAGS		:=	-I$(INCS_D) -I$(FTXUI_I) -I$(CURL_I)
+IFLAGS		:=	-I$(INCS_D) -I$(FTXUI_I) -I$(CURL_I) -I$(JSON_I)
 
 DFLAGS		=	-MMD -MP -MT $@ -MF $(DEPS_D)$*.d
 
@@ -120,10 +130,10 @@ RESET		:=	\001\033[0m\002
 .PHONY: all
 all			:	$(NAME) banner
 
-$(NAME)		:	ftxui curl $(CERT) $(OBJS)
+$(NAME)		:	ftxui curl json $(CERT) $(OBJS)
 			$(CXX) $(CXXFLAGS) -o $(NAME) $(OBJS) $(LFLAGS)
 
-$(OBJS)		:	$(OBJS_D)%.o: $(SRCS_D)%.cpp $(FTXUI_D) $(CURL_D) | $(OBJS_D) $(DEPS_D)
+$(OBJS)		:	$(OBJS_D)%.o: $(SRCS_D)%.cpp $(FTXUI_D) $(CURL_D) $(JSON_D) | $(OBJS_D) $(DEPS_D)
 			$(CXX) $(CXXFLAGS) -c $< -o $@
 
 $(OBJS_D)	:
@@ -154,6 +164,14 @@ $(CURL_D)	:
 			mkdir	$@
 			tar -xf	$@.tar.gz	-C $@ --strip-components=1
 			rm -rf	$@.tar.gz
+
+.PHONY: json
+json		:	$(JSON_D)
+			cmake $(JSON_D) -B $(JSON_D)/build
+			$(MAKE) $(MFLAGS) -C $(JSON_D)/build
+
+$(JSON_D)	:
+			git clone --depth 1 --branch v3.11.3 git@github.com:nlohmann/json.git $@
 
 $(CERT)		:
 			openssl s_client -connect localhost:4443 -servername localhost </dev/null \

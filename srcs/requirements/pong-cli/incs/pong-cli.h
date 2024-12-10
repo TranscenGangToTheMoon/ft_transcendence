@@ -22,6 +22,8 @@
 # include <openssl/x509.h>
 # include <openssl/evp.h>
 
+#include "nlohmann/json.hpp"
+
 # include "colors.h"
 
 #define BANNER R"(

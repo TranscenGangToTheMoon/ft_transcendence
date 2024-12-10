@@ -6,7 +6,7 @@
 /*   By: xcharra <xcharra@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/25 16:32:19 by xcharra           #+#    #+#             */
-/*   Updated: 2024/12/09 18:43:52 by xcharra          ###   ########.fr       */
+/*   Updated: 2024/12/10 16:55:10 by xcharra          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@
 #include "User.hpp"
 
 using namespace ftxui;
+using namespace nlohmann;
 
 int main(void)
 {

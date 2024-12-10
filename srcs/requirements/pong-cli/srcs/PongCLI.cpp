@@ -6,17 +6,18 @@
 /*   By: xcharra <xcharra@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/03 17:35:02 by xcharra           #+#    #+#             */
-/*   Updated: 2024/12/09 18:44:28 by xcharra          ###   ########.fr       */
+/*   Updated: 2024/12/10 17:02:30 by xcharra          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <iostream>
 #include "PongCLI.hpp"
 
-#include <ftxui/component/screen_interactive.hpp>
-#include <csignal>
 
 #include "colors.h"
+#include "pong-cli.h"
+
+using namespace nlohmann;
 
 PongCLI::PongCLI(CurlWrapper &curl, User &user) : _curl(curl), _info(text("")), _currentPage(Page::LoginPage),
 	_user(user), _password(), _server("https://localhost:4443"), _username() {
@@ -240,7 +241,7 @@ void PongCLI::renderMainMenuPage() {
 //	current_rank: None, // not handle yes
 //	friends: None,
 	bool		accept_friend_request;
-	bool		accept_chat_from;
+	std::string	accept_chat_from;
 
 	Component	pageComponents = Container::Vertical({
 	});
@@ -248,20 +249,14 @@ void PongCLI::renderMainMenuPage() {
 	std::string info;
 	try {
 		_curl.GET("/api/users/me/", "");
-		json = _curl.getResponse();
-//		id = std::stoi(jsonParser(json, "id"));
-		info = "username";
-		username = jsonParser(json, "username");
-		info = "is_guest";
-		guest = jsonParser(json, "is_guest") == "true";
-		info = "coins";
-//		stardust = std::stoi(jsonParser(json, "coins"));
-		info = "trophies";
-//		aura = std::stoi(jsonParser(json, "trophies"));
-		info = "accept_friend_request";
-		accept_friend_request = jsonParser(json, "accept_friend_request") == "true";
-		info = "accept_chat_from";
-		accept_chat_from = jsonParser(json, "accept_chat_from") == "true";
+		auto json = json::parse(_curl.getResponse());
+
+		username = json["username"];
+		guest = json["is_guest"];
+		stardust = json["coins"];
+		aura = json["trophies"];
+		accept_friend_request = json["accept_friend_request"];
+		accept_chat_from = json["accept_chat_from"];
 		//request to /api/user/me >> get user information
 	}
 	catch (std::exception &error) {
@@ -277,13 +272,15 @@ void PongCLI::renderMainMenuPage() {
 						window(
 							text("Profile: "),
 							vbox ({
-								hbox({
+								hbox({ // Profile
 									vbox({ // left
 										text("id: ") | vcenter | yflex_grow,
 										text("username: ") | vcenter | yflex_grow,
 										text("guest: ") | vcenter | yflex_grow,
 										text("stardust: ") | vcenter | yflex_grow,
 										text("aura: ") | vcenter | yflex_grow,
+										text("accept_friend_request: ") | vcenter | yflex_grow,
+										text("accept_chat_from: ") | vcenter | yflex_grow,
 									}),
 									separator(),
 									vbox({ // right
@@ -292,12 +289,13 @@ void PongCLI::renderMainMenuPage() {
 										text(guest ? "true" : "false") | vcenter | yflex_grow,
 										text(std::to_string(stardust)) | vcenter | yflex_grow,
 										text(std::to_string(aura)) | vcenter | yflex_grow,
+										text(std::to_string(accept_friend_request)) | vcenter | yflex_grow,
+										text(accept_chat_from) | vcenter | yflex_grow,
 									}) | flex,
 								}) | flex,
-								paragraph(json)
 							})
 						) | flex,
-						gridbox({
+						gridbox({ //game
 							{ text("Normal Game") | center | border | flex },
 							{ text("Ranked Game") | center | border | flex }
 						}) | flex
