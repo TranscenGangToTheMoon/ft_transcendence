@@ -30,7 +30,6 @@ class Server:
         Server.sio.on('get_games', handler=io_handlers.send_games)
         Server.sio.on('move_down', handler=io_handlers.move_down)
         Server.sio.on('move_up', handler=io_handlers.move_up)
-        Server.sio.on('join_room', handler=io_handlers.join_room)
         Server.sio.on('stop_moving', handler=io_handlers.stop_moving)
         Server.games_lock = Lock()
         port=5500
