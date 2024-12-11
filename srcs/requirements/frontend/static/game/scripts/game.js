@@ -262,6 +262,7 @@
             if (!state.paddles.right.blockGlide || state.paddles.right.y - 10 > config.ballSize){
                 state.paddles.right.y -= 10;
                 socket.emit('move_up');
+                console.log('move_up');
             }
             else if (state.paddles.right.y - 10 <= config.ballSize)
                 state.paddles.right.y = config.ballSize;
