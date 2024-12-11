@@ -437,12 +437,14 @@ async function  indexInit(auto=true) {
             displayMainAlert("Unable to retrieve your account/guest profile","We're sorry your account has been permanently deleted and cannot be recovered.");
             await generateToken();
             await fetchUserInfos(true);
+            return handleRoute();
         }
         await loadUserProfile();
     }
     else{
         await fetchUserInfos();
-        await loadFriendListModal()
+        if (!userInformations?.is_guest)
+            await loadFriendListModal()
         let currentState = getCurrentState();
         console.log(`added ${window.location.pathname} to history with state ${currentState}`)
         history.replaceState({state: currentState}, '', window.location.pathname);
