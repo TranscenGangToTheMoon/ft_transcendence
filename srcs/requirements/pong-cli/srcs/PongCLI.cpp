@@ -6,7 +6,7 @@
 /*   By: xcharra <xcharra@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/03 17:35:02 by xcharra           #+#    #+#             */
-/*   Updated: 2024/12/10 17:47:06 by xcharra          ###   ########.fr       */
+/*   Updated: 2024/12/11 16:04:51 by xcharra          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -244,21 +244,36 @@ void PongCLI::renderMainMenuPage() {
 	bool		accept_friend_request;
 	std::string	accept_chat_from;
 
-	auto		launchAsyncTask = Button("Launch async task", [this] {
+	std::atomic<bool>	reloading = true;
+
+	auto		searchMatchDuel = Button("Launch async task", [this, &reloading] {
+		reloading = true;
 		_info = text("Async task running...") | color(Color::Yellow);
+		_screen.RequestAnimationFrame();
 		auto res = std::async(std::launch::async, [this] {
+			// search match, request to an API, take time
+			// response from sse
 			std::this_thread::sleep_for(std::chrono::seconds(5));
-			_info = text("Async task done !") | color(Color::Green);
+
+//			_info = text("Match found !") | color(Color::Green);
+			(void)this;
 		});
-		for (int i = 0; i < 1; i++) {
+
+		// loading animation
+		for (int i = 0; i < 10; i++) {
 			std::this_thread::sleep_for(std::chrono::seconds(1));
-			_info = text("Async task running..." + std::to_string(i)) | color(Color::Yellow);
+			_info = text("Search match..." + std::to_string(i)) | color(Color::Yellow);
+			_screen.RequestAnimationFrame();
 		}
+
+		// wait for async task to finish
 		res.get();
-	});
+		// make socket connection to game server
+//		changePage(Page::GamePage)
+	}, ButtonOption::Animated(Color::Red));
 
 	Component	pageComponents = Container::Vertical({
-		launchAsyncTask,
+		searchMatchDuel,
 	});
 	std::string	json;
 	std::string info;
@@ -311,13 +326,53 @@ void PongCLI::renderMainMenuPage() {
 						vbox({ //game
 							vbox({
 								text("Normal Game") | center | border | flex,
-								launchAsyncTask->Render(),
+								searchMatchDuel->Render(),
 							}) | yflex_grow,
 							vbox({
 								text("Ranked Game") | center | border | flex
 							}) | yflex_grow
 						}) | flex
 					}}) | flex,
+					_info | hcenter,
+				}) | xflex_grow | yflex_grow | flex,
+			}) | border | size(WIDTH, GREATER_THAN, 150) | size(HEIGHT, GREATER_THAN, 40)
+		);
+	});
+
+	auto	finalRenderer = CatchEvent(render, [&](Event event) {
+		if (event == Event::Escape) {
+			reloading = false;
+			_screen.ExitLoopClosure()();
+			return (true);
+		}
+		return (false);
+	});
+
+	auto	screenRedraw = std::thread([&] {
+		int	i = 0;
+		while (reloading) {
+			_screen.PostEvent(Event::Custom);
+			std::this_thread::sleep_for(std::chrono::seconds(1));
+//			_info = text("Redraw " + std::to_string(i)) | color(Color::Red);
+			i++;
+		}
+	});
+
+	_screen.Loop(finalRenderer);
+	reloading = false;
+	screenRedraw.join();
+}
+
+void PongCLI::renderSettingsPage() {
+	Component	pageComponents = Container::Vertical({
+	});
+
+	auto render = Renderer(pageComponents, [&] {
+		return (
+			vbox({
+				getBanner() | hcenter | border,
+				vbox({
+					text("Settings page") | hcenter | border | flex,
 					_info | hcenter,
 				}) | xflex_grow | yflex_grow | flex,
 			}) | border | size(WIDTH, GREATER_THAN, 150) | size(HEIGHT, GREATER_THAN, 40)
@@ -335,31 +390,58 @@ void PongCLI::renderMainMenuPage() {
 	_screen.Loop(finalRenderer);
 }
 
-void PongCLI::renderSettingsPage() {
-	// std::cout << C_MSG("SettingsPage called") << std::endl;
-
-//	return (Renderer([this] {
-//		(void)this;
-//		return (vbox(text("Settings page load !")));
-//	}));
-}
-
 void PongCLI::renderGamePage() {
-	// std::cout << C_MSG("GamePage called") << std::endl;
+	Component	pageComponents = Container::Vertical({
+	});
 
-//	return (Renderer([this] {
-//		(void)this;
-//		return (vbox(text("Game page load !")));
-//	}));
+	auto render = Renderer(pageComponents, [&] {
+		return (
+			vbox({
+				getBanner() | hcenter | border,
+				vbox({
+					text("Game page") | hcenter | border | flex,
+					_info | hcenter,
+				}) | xflex_grow | yflex_grow | flex,
+			}) | border | size(WIDTH, GREATER_THAN, 150) | size(HEIGHT, GREATER_THAN, 40)
+		);
+	});
+
+	auto finalRenderer = CatchEvent(render, [&](Event event) {
+		if (event == Event::Escape) {
+			_screen.ExitLoopClosure()();
+			return (true);
+		}
+		return (false);
+	});
+
+	_screen.Loop(finalRenderer);
 }
 
 void PongCLI::renderDefaultPage() {
-	std::cout << C_MSG("LoginPage called") << std::endl;
+	Component	pageComponents = Container::Vertical({
+	});
 
-//	return (Renderer([this] {
-//		(void)this;
-//		return (vbox(text("Default page !")));
-//	}));
+	auto render = Renderer(pageComponents, [&] {
+		return (
+			vbox({
+				getBanner() | hcenter | border,
+				vbox({
+					text("Default page") | hcenter | border | flex,
+					_info | hcenter,
+				}) | xflex_grow | yflex_grow | flex,
+			}) | border | size(WIDTH, GREATER_THAN, 150) | size(HEIGHT, GREATER_THAN, 40)
+		);
+	});
+
+	auto finalRenderer = CatchEvent(render, [&](Event event) {
+		if (event == Event::Escape) {
+			_screen.ExitLoopClosure()();
+			return (true);
+		}
+		return (false);
+	});
+
+	_screen.Loop(finalRenderer);
 }
 
 Element PongCLI::getBanner() {

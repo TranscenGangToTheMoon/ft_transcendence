@@ -88,7 +88,7 @@ DFLAGS		=	-MMD -MP -MT $@ -MF $(DEPS_D)$*.d
 
 OFLAGS		:=	-O3 #-Ofast -march=native -fomit-frame-pointer -funroll-loops
 
-CXXFLAGS	=	-Wall -Wextra -Werror -g $(IFLAGS) $(OFLAGS) $(DFLAGS)
+CXXFLAGS	=	-Wall -Wextra -Werror -g -fsanitize=thread $(IFLAGS) $(OFLAGS) $(DFLAGS)
 
 LFLAGS		= 	$(FTXUI_F) $(CURL_F) #-lssl -lcrypto
 
