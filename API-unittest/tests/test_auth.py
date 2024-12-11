@@ -16,9 +16,8 @@ class Test01_Register(UnitTest):
         username = 'register_test' + rnstr()
         password = 'password_' + username
 
-        response = register(username, password)
-        user = {'token': response.json['access']}
-        self.assertResponse(response, 201)
+        response = self.assertResponse(register(username, password), 201)
+        user = {'token': response['access']}
         self.assertResponse(me(user), 200)
         self.assertResponse(login(username, password), 200)
 

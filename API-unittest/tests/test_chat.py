@@ -195,9 +195,8 @@ class Test04_Messages(UnitTest):
         user1 = new_user()
 
         chat_id = self.send_message(user1)
-        response = request_chat_id(user1, chat_id)
-        self.assertResponse(response, 200)
-        self.assertEqual('and u ?', response.json['last_message']['content'])
+        response = self.assertResponse(request_chat_id(user1, chat_id), 200)
+        self.assertEqual('and u ?', response['last_message']['content'])
 
     def test_002_get_messages(self):
         user1 = new_user()
@@ -267,12 +266,11 @@ class Test04_Messages(UnitTest):
             if i == 0:
                 chat_id = tmp_chat_id
 
-        response = create_chat(user1, method='GET')
-        self.assertResponse(response, 200, count=5)
-        self.assertEqual(tmp_chat_id, response.json['results'][0]['id'])
+        response = self.assertResponse(create_chat(user1, method='GET'), 200, count=5)
+        self.assertEqual(tmp_chat_id, response['results'][0]['id'])
         self.assertResponse(create_message(user1, chat_id, 'Hey !'), 201)
-        response = create_chat(user1, method='GET')
-        self.assertEqual(chat_id, response.json['results'][0]['id'])
+        response = self.assertResponse(create_chat(user1, method='GET'), 200)
+        self.assertEqual(chat_id, response['results'][0]['id'])
 
 
 if __name__ == '__main__':

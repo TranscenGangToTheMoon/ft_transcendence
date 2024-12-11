@@ -3,7 +3,7 @@ import unittest
 
 class UnitTest(unittest.TestCase):
 
-    def assertResponse(self, response, status_code, json=None, count=None, get_field=None, get_response=False):
+    def assertResponse(self, response, status_code, json=None, count=None, get_field=None):
         self.assertEqual(status_code, response.status_code)
         if json is not None:
             self.assertEqual(json, response.json)
@@ -13,8 +13,7 @@ class UnitTest(unittest.TestCase):
             if get_field is True:
                 get_field = 'id'
             return response.json[get_field]
-        if get_response:
-            return response.json
+        return response.json
 
     def assertFriendResponse(self, responses, status_code=201, json=None):
         self.assertEqual(201, responses[0].status_code)
