@@ -80,8 +80,8 @@ class Test02_Guest(UnitTest):
         username = 'guest-register' + rnstr()
 
         # todo make get response
-        user = {'token': self.assertResponse(register_guest(username=username, guest=guest), 200, get_id='access')} #todo make truc pour avoir le bon token
-        test_username = self.assertResponse(me(user), 200, get_id='username') # todo rename get id get field
+        user = {'token': self.assertResponse(register_guest(username=username, guest=guest), 200, get_field='access')} #todo make truc pour avoir le bon token
+        test_username = self.assertResponse(me(user), 200, get_field='username') # todo rename get id get field
         self.assertEquals(username, test_username)
 
     def test_003_register_guest_without_tokent(self):
@@ -99,7 +99,7 @@ class Test02_Guest(UnitTest):
         guest = guest_user()
 
         self.assertResponse(play(guest, 'ranked'), 403, {'detail': 'Guest users cannot play ranked games.'})
-        user = {'token': self.assertResponse(register_guest(guest=guest), 200, get_id='access')}
+        user = {'token': self.assertResponse(register_guest(guest=guest), 200, get_field='access')}
         self.assertResponse(play(user, 'ranked'), 201)
 
 

@@ -92,7 +92,7 @@ class Test03_DeleteUser(UnitTest):
     def test_005_user_in_lobby(self):
         user1 = new_user()
 
-        code = self.assertResponse(create_lobby(user1), 201, get_id='code')
+        code = self.assertResponse(create_lobby(user1), 201, get_field='code')
         self.assertResponse(me(user1, method='DELETE', password=True), 204)
         self.assertResponse(create_lobby(user1, method='GET'), 401, {'detail': 'Incorrect authentication credentials.'})
         self.assertResponse(join_lobby(code), 404, {'detail': 'Lobby not found.'})
@@ -109,7 +109,7 @@ class Test03_DeleteUser(UnitTest):
         user1 = new_user()
         name = rnstr()
 
-        code = self.assertResponse(create_tournament(user1, {'name': 'Delete User ' + name}), 201, get_id='code')
+        code = self.assertResponse(create_tournament(user1, {'name': 'Delete User ' + name}), 201, get_field='code')
         self.assertResponse(search_tournament(name), 200, count=1)
         self.assertResponse(me(user1, method='DELETE', password=True), 204)
         self.assertResponse(create_tournament(user1, method='GET'), 401, {'detail': 'Incorrect authentication credentials.'})
@@ -119,7 +119,7 @@ class Test03_DeleteUser(UnitTest):
         user1 = new_user()
         name = rnstr()
 
-        code = self.assertResponse(create_tournament(user1, {'name': 'Delete User ' + name}), 201, get_id='code')
+        code = self.assertResponse(create_tournament(user1, {'name': 'Delete User ' + name}), 201, get_field='code')
         self.assertResponse(join_tournament(code), 201)
         response = search_tournament(name)
         self.assertResponse(response, 200, count=1)
@@ -135,7 +135,7 @@ class Test03_DeleteUser(UnitTest):
         user2 = new_user()
 
         self.assertResponse(accept_chat(user2), 200)
-        chat_id = self.assertResponse(create_chat(user1, user2['username']), 201, get_id=True)
+        chat_id = self.assertResponse(create_chat(user1, user2['username']), 201, get_field=True)
         self.assertResponse(request_chat_id(user2, chat_id), 200)
         self.assertResponse(me(user1, method='DELETE', password=True), 204)
         self.assertResponse(request_chat_id(user2, chat_id), 403, {'detail': 'You do not belong to this chat.'})
@@ -176,7 +176,7 @@ class Test03_DeleteUser(UnitTest):
         user1 = new_user()
         user2 = new_user()
 
-        friend_request_id = self.assertResponse(friend_requests(user1, user2), 201, get_id=True)
+        friend_request_id = self.assertResponse(friend_requests(user1, user2), 201, get_field=True)
         self.assertResponse(get_friend_requests_received(user2), 200, count=1)
         self.assertResponse(me(user1, method='DELETE', password=True), 204)
         self.assertResponse(get_friend_requests_received(user2), 200, count=0)
@@ -266,7 +266,7 @@ class Test05_RenameUser(UnitTest):
         new_username = user1['username'] + '_new'
 
         self.assertResponse(accept_chat(user2), 200)
-        chat_id = self.assertResponse(create_chat(user1, user2['username']), 201, get_id=True)
+        chat_id = self.assertResponse(create_chat(user1, user2['username']), 201, get_field=True)
         self.assertResponse(me(user1, method='PATCH', data={'username': new_username}), 200)
         response = request_chat_id(user2, chat_id)
         self.assertResponse(response, 200)

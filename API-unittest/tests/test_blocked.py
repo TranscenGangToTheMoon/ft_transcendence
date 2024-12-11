@@ -38,7 +38,7 @@ class Test02_Blocked(UnitTest):
         user1 = new_user()
         user2 = new_user()
 
-        block_id = self.assertResponse(blocked_user(user1, user2['id']), 201, get_id=True)
+        block_id = self.assertResponse(blocked_user(user1, user2['id']), 201, get_field=True)
         self.assertResponse(blocked_user(user1, method='GET'), 200, count=1)
         self.assertResponse(unblocked_user(user1, block_id), 204)
         self.assertResponse(blocked_user(user1, method='GET'), 200, count=0)
@@ -81,7 +81,7 @@ class Test03_BlockedError(UnitTest):
         self.assertResponse(unblocked_user(new_user(), 123456), 403, {'detail': 'This blocked user entry does not belong to you.'})
 
     def test_007_unblock_not_self_instance(self):
-        block_id = self.assertResponse(blocked_user(new_user()), 201, get_id=True)
+        block_id = self.assertResponse(blocked_user(new_user()), 201, get_field=True)
         self.assertResponse(unblocked_user(new_user(), block_id), 403, {'detail': 'This blocked user entry does not belong to you.'})
 
 
