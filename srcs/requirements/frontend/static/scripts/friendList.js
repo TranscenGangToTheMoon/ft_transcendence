@@ -214,9 +214,9 @@ async function loadFriendList(){
         resultDiv.innerText = "you don't have any friends";
     else{
         resultDiv.innerText = "";
-        for (let friend of data.results){   
-            const friend1 = friend.friends[0];
-            const friend2 = friend.friends[1];
+        for (let friend of data.results){
+            const friend1 = friend.friends[0].username;
+            const friend2 = friend.friends[1].username;
             resultDiv.innerHTML += `<div class="friendRequestBlock knownFriend" id="friend${friend.id}">\
             <div>${friend1 === userInformations.username ? friend2 : friend1}</div>\
             <button class='deleteFriend'>delete X</button></div>\n`;
