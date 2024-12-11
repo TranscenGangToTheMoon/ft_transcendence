@@ -6,14 +6,17 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from guest.group import is_guest
 
 
-def create_user_get_token(user):
+def create_user_get_token(user, create=True):
+    print('create_user_get_token', create, flush=True)
     refresh_token = RefreshToken.for_user(user)
     token = {'access': str(refresh_token.access_token), 'refresh': str(refresh_token)}
 
     try:
-        request_users(endpoints.UsersManagement.manage_user, method='POST', data={'id': user.id, 'username': user.username, 'is_guest': is_guest(user=user)})
+        data = {'id': user.id, 'username': user.username, 'is_guest': is_guest(user=user)}
+        request_users(endpoints.UsersManagement.manage_user, method='POST' if create else 'PATCH', data=data)
     except APIException:
-        user.delete()
+        if create:
+            user.delete()
         raise APIException
 
     return token

@@ -19,8 +19,8 @@ class FriendsSerializer(serializers.ModelSerializer):
             'friends_since',
             'matches_play_against',
             'user1_win',
-            'matches_play_together',
-            'matches_win_together',
+            'matches_played_together',
+            'matches_won_together',
         ]
         read_only_fields = [
             'id',
@@ -28,8 +28,8 @@ class FriendsSerializer(serializers.ModelSerializer):
             'friends_since',
             'matches_play_against',
             'user1_win',
-            'matches_play_together',
-            'matches_win_together',
+            'matches_played_together',
+            'matches_won_together',
         ]
 
     def create(self, validated_data):

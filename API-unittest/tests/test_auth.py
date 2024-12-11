@@ -40,10 +40,12 @@ class Test02_Guest(UnitTest):
 
     def test_002_register_guest(self):
         guest = guest_user()
+        username = 'guest-register' + rnstr()
 
         # todo make get response
-        user = {'token': self.assertResponse(register_guest(guest=guest), 200, get_id='access')}
-        self.assertResponse(me(user), 200)
+        user = {'token': self.assertResponse(register_guest(username=username, guest=guest), 200, get_id='access')} #todo make truc pour avoir le bon token
+        test_username = self.assertResponse(me(user), 200, get_id='username') # todo rename get id get field
+        self.assertEquals(username, test_username)
 
     def test_003_register_guest_without_tokent(self):
         random_name = rnstr()
