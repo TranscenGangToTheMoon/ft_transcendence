@@ -65,8 +65,10 @@ document.getElementById('pChangePassword').addEventListener('submit', async even
         undefined, undefined, {'password' : newPassword});
         if (!data.id){
             document.getElementById('pChangePasswordError').innerText = data.username;
-            if (data.detail)
-                document.getElementById('pChangePasswordError').innerText = data.detail;
+            let error = data.detail ? data.detail : data.password;
+            if (error)
+                document.getElementById('pChangePasswordError').innerText = error;
+            
         }
         else{
             displayMainAlert("password updated", "successfully updated your password.");
