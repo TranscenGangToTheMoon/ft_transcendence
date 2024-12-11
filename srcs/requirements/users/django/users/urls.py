@@ -42,6 +42,7 @@ urlpatterns = [
 # todo 5. create endpoint for send lobby status
 # todo 6. create endpoint for send tournament status
 # todo 9 send chat_id in lobby or tournament
+# todo 10 make dl all data
 
 # todo make endpoint for user stats, xp, trophies (when match ended, or when tournament ended)
 # - pas de stat (custom_game)
