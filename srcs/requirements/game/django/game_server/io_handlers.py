@@ -67,7 +67,7 @@ async def send_games(sid):
     for game in Server.games:
         codes.append(game)
     await Server.sio.emit('games', data=codes, to=sid)
-    #print(f'games are: {codes}', flush=True)
+    info(f'games are: {codes}')
 
 
 async def disconnect(sid):

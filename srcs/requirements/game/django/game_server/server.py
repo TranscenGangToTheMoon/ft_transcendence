@@ -7,6 +7,7 @@ from game_server.pong_game import Game
 from game_server.pong_position import Position
 from threading import Lock, Thread
 from typing import Dict
+import logging
 import asyncio
 import socketio
 import time
@@ -33,7 +34,8 @@ class Server:
         Server.sio.on('stop_moving', handler=io_handlers.stop_moving)
         Server.games_lock = Lock()
         port=5500
-        #print(f"SocketIO server running on port {port}", flush=True)
+        logging.info(f"SocketIO server running on port {port}")
+        # print(f"SocketIO server running on port {port}", flush=True)
         Server.launch_monitoring()
         web.run_app(Server.app, host='0.0.0.0', port=port)
 
@@ -41,12 +43,11 @@ class Server:
     def launch_game(match_code):
         time.sleep(1)
         match = fetch_match(match_code)
-        #print('launching game with : ')
-        # for team in match.teams:
-        #     for player in team.players:
-                #print(player.user_id, flush=True)
+        print('launching game with : ')
+        for team in match.teams:
+            for player in team.players:
+                print(player.user_id, flush=True)
         game = Game(Server.sio, match, Position(800, 600))
-        #print(Server.games_lock, flush=True)
         Server.games_lock.acquire()
         Server.games[match_code] = game
         Server.games_lock.release()
@@ -54,6 +55,7 @@ class Server:
 
     @staticmethod
     def monitoring_routine():
+        log = False
         # setting all matches in DB as finished
         #print(Server.games_lock, flush=True)
         matches = fetch_matches()
@@ -70,7 +72,11 @@ class Server:
                 pass
                 #print(Server.games_lock)
             Server.games_lock.release()
-            time.sleep(35)
+            time.sleep(15)
+            # Flush stdout to print help aiohttp print its things
+            if log == False:
+                print('', flush=True)
+                log = True
 
     @staticmethod
     def launch_monitoring():
