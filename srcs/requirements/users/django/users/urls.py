@@ -5,7 +5,7 @@ from blocking.views import blocked_view, delete_blocked_view
 from friend_requests.views import friend_requests_list_create_view, friend_request_view, \
     friend_requests_receive_list_view
 from friends.views import friends_view, friend_view
-from sse.views import sse_view
+from sse.views import sse_view, notification_view, event_view
 from users.views import users_me_view, retrieve_user_view, manage_user_view
 from validate.views import validate_chat_view, are_blocked_view
 
@@ -24,6 +24,8 @@ urlpatterns = [
     path(Users.blocked_user, delete_blocked_view),
 
     path(Users.sse, sse_view),
+    path(Users.notification, notification_view),
+    path(Users.event, event_view),
 
     path(Users.chat, validate_chat_view),
     path(Users.are_blocked, are_blocked_view),
@@ -32,11 +34,14 @@ urlpatterns = [
 ]
 
 # todo 1. make sse
+# todo 7. message discord
+# todo 7. message private discord
 # todo 2. update user status (connected, disconnected, ...)
 # todo 3. if disconnected, send to matchmaking (to leave lobby, tournament, ...)
 # todo 4. create endpoint for send notification (message, demande d'amis, demande de join lobby,, demande de join tournament, ...)
 # todo 5. create endpoint for send lobby status
 # todo 6. create endpoint for send tournament status
+# todo 9 send chat_id in lobby or tournament
 
 # todo make endpoint for user stats, xp, trophies (when match ended, or when tournament ended)
 # - pas de stat (custom_game)

@@ -9,7 +9,7 @@ document.getElementById('switchAcceptFriendRequests').addEventListener('change',
 })
 
 async function initFriendsTemplate() {
-    await loadContent('/blockedUsers.html', 'modals', true);
+    await loadBlockedModal();
 }
 
 initFriendsTemplate();

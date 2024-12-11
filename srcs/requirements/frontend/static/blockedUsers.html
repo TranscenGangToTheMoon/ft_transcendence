@@ -6,15 +6,12 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-            <div class="unblockUser" style="display: none;"></div>
-                <div id="blockedUsersList">
-                    
-                </div>
+            <div id="blockedTitle"></div>
+            <div id="blockedUsersList" class="overflow-auto">
+                
             </div>
-            <button id="blockXavier">test block user 'xavier'</button>
-            <button id="blockJules">test block user 'jules'</button>
-            <button id="deleteXavier">test delete user xavier</button>
-            <button id="createXavier">test create user xavier</button>
+            <input type="text" id="blockedNb" placeholder="nb">
+            <button id="simulateBlock">simulate block</button>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>

@@ -1,3 +1,4 @@
+from lib_transcendence.Chat import ChatType
 from lib_transcendence.serializer import SerializerAuthContext
 from lib_transcendence.utils import get_host
 from rest_framework import generics, status
@@ -8,14 +9,10 @@ from chats.models import Chats, ChatParticipants
 from chats.serializers import ChatsSerializer
 
 
-class ChatsMixin(generics.GenericAPIView):
-    queryset = Chats.objects.all()
+class ChatsView(generics.ListCreateAPIView):
     serializer_class = ChatsSerializer
 
-
-class ChatsView(generics.ListCreateAPIView, ChatsMixin):
-
-    def filter_queryset(self, queryset):
+    def get_queryset(self):
         query = self.request.data.pop('q', None)
         kwars = {'user_id': self.request.user.id}
         if query is None:
@@ -23,10 +20,11 @@ class ChatsView(generics.ListCreateAPIView, ChatsMixin):
         join_chats = ChatParticipants.objects.filter(**kwars).values_list('chat_id', flat=True)
         if query is not None:
             join_chats = ChatParticipants.objects.exclude(user_id=self.request.user.id).filter(chat_id__in=join_chats, username__icontains=query).values_list('chat_id', flat=True)
-        return queryset.filter(id__in=join_chats, blocked=False).distinct()
+        return Chats.objects.filter(id__in=join_chats, blocked=False, type=ChatType.private_message).distinct().order_by('-last_updated')
 
 
-class ChatView(SerializerAuthContext, generics.RetrieveDestroyAPIView, ChatsMixin):
+class ChatView(SerializerAuthContext, generics.RetrieveDestroyAPIView):
+    serializer_class = ChatsSerializer
     lookup_field = 'chat_id'
 
     def get_object(self):

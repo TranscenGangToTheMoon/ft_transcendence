@@ -33,7 +33,7 @@ class Server:
         Server.sio.on('stop_moving', handler=io_handlers.stop_moving)
         Server.games_lock = Lock()
         port=5500
-        print(f"SocketIO server running on port {port}", flush=True)
+        #print(f"SocketIO server running on port {port}", flush=True)
         Server.launch_monitoring()
         web.run_app(Server.app, host='0.0.0.0', port=port)
 
@@ -41,12 +41,12 @@ class Server:
     def launch_game(match_code):
         time.sleep(1)
         match = fetch_match(match_code)
-        print('launching game with : ')
-        for team in match.teams:
-            for player in team.players:
-                print(player.user_id, flush=True)
+        #print('launching game with : ')
+        # for team in match.teams:
+        #     for player in team.players:
+                #print(player.user_id, flush=True)
         game = Game(Server.sio, match, Position(800, 600))
-        print(Server.games_lock, flush=True)
+        #print(Server.games_lock, flush=True)
         Server.games_lock.acquire()
         Server.games[match_code] = game
         Server.games_lock.release()
@@ -55,7 +55,7 @@ class Server:
     @staticmethod
     def monitoring_routine():
         # setting all matches in DB as finished
-        print(Server.games_lock, flush=True)
+        #print(Server.games_lock, flush=True)
         matches = fetch_matches()
         for match in matches:
             if match.finished == False:
@@ -67,7 +67,8 @@ class Server:
                     if game.check_zombie() == True:
                         Server.games.pop(match_code)
             except RuntimeError:
-                print(Server.games_lock)
+                pass
+                #print(Server.games_lock)
             Server.games_lock.release()
             time.sleep(35)
 
@@ -77,7 +78,7 @@ class Server:
 
     @staticmethod
     def get_player_and_match_code(id: int):
-        print(Server.games_lock, flush=True)
+        #print(Server.games_lock, flush=True)
         Server.games_lock.acquire()
         for match_code in Server.games:
             for team in Server.games[match_code].match.teams:

@@ -5,7 +5,7 @@ from rest_framework import serializers
 from rest_framework.authentication import BaseAuthentication
 from rest_framework.exceptions import ParseError
 
-from lib_transcendence.services import request_users, requests_auth
+from lib_transcendence.services import request_users, request_auth
 from lib_transcendence.generate import generate_code
 
 
@@ -41,4 +41,4 @@ def get_auth_user(request=None):
 
 
 def auth_verify(token):
-    return requests_auth(token, Auth.verify, method='GET')
+    return request_auth(token, Auth.verify, method='GET')
