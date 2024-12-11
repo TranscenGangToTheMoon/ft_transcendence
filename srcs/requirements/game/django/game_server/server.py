@@ -21,7 +21,7 @@ class Server:
 
     @staticmethod
     def serve():
-        Server.sio = socketio.AsyncServer(async_mode='aiohttp', cors_allowed_origins='*', logger=True)
+        Server.sio = socketio.AsyncServer(async_mode='aiohttp', cors_allowed_origins='*', logger=False)
         Server.app = web.Application()
         Server.app.add_routes([web.post('/create-game', requests_handlers.create_game)])
         Server.sio.attach(Server.app, socketio_path='/ws/') #TODO -> change with '/ws/game/'

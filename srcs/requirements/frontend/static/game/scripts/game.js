@@ -512,6 +512,7 @@
 
 function initSocket(){
     let socket = io("wss://localhost:4443/", {
+        transports: ["websocket"],
         path: "/ws/",
         auth : {
 
