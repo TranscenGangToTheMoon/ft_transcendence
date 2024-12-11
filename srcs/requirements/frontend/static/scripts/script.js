@@ -386,6 +386,13 @@ async function loadFriendListModal() {
     await loadContent('/friendList.html', 'modals', true);
 }
 
+async function loadBlockedModal(){
+    const friendModal = document.getElementById('blockedUsersModal')
+    if (friendModal)
+        friendModal.remove();
+    await loadContent('/blockedUsers.html', 'modals', true);
+}
+
 async function loadUserProfile(){
     let profileMenu = 'profileMenu.html';
 

@@ -8,8 +8,8 @@ document.getElementById('switchAcceptFriendRequests').addEventListener('change',
     setTimeout(() => this.checked=false, 150);
 })
 
-function initFriendsTemplate() {
-    loadContent('/blockedUsers.html', 'modals', true);
+async function initFriendsTemplate() {
+    await loadBlockedModal();
 }
 
 initFriendsTemplate();
