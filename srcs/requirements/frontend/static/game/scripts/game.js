@@ -51,11 +51,13 @@
                 x: 100,
                 y: (config.canvasHeight - config.paddleHeight) / 2,
                 blockGlide: false,
+                speed:0
             },
             right: {
                 x: config.canvasWidth - config.paddleWidth - 100,
                 y: (config.canvasHeight - config.paddleHeight) / 2,
                 blockGlide: false,
+                speed : 0
             },
             // leftRight :{
             //     x : 100 + 100,
@@ -253,29 +255,56 @@
         ctx.fillText('Game over', config.canvasWidth / 2, config.canvasHeight / 2);
     }
 
+    function handlePaddleInput(){
+        if (state.keys["ArrowUp"] && state.paddles.right.speed != -1){
+            state.paddles.right.speed = -1;
+            if (typeof socket !== 'undefined')
+                socket.emit('move_up');  console.log('emitting move_up')
+        }
+        if (state.paddles.right.speed === -1 && state.paddles.right.y > 0){
+            if (!state.paddles.right.blockGlide || state.paddles.right.y - 10 > config.ballSize)
+                state.paddles.right.y -= 10;
+            else if (state.paddles.right.y - 10 <= config.ballSize)
+                state.paddles.right.y = config.ballSize;
+        }
+        if (state.keys["ArrowDown"] && state.paddles.right.speed != 1){
+            state.paddles.right.speed = 1;
+            if (typeof window.socket !== 'undefined')
+                socket.emit('move_down'); console.log('emitting move_down')
+        }
+        if (state.paddles.right.speed === 1 && state.paddles.right.y < config.canvasHeight - config.paddleHeight){
+            if (!state.paddles.right.blockGlide || state.paddles.right.y + config.paddleHeight + 10 < config.canvasHeight - config.ballSize)
+                state.paddles.right.y += 10;
+            else if (state.paddles.right.y + config.paddleHeight + 10 >= config.canvasHeight - config.ballSize)
+                state.paddles.right.y = config.canvasHeight - config.ballSize - config.paddleHeight;
+        }
+        if (!state.keys["ArrowDown"] && !state.keys['ArrowUp'] && state.paddles.right.speed != 0){
+            state.paddles.right.speed = 0;
+            if (typeof socket !== 'undefined')
+                socket.emit('stop_moving'); console.log('emitting stop_moving')
+        }
+
+        if (state.paddles.left.speed === -1 && state.paddles.left.y > 0){
+            if (!state.paddles.left.blockGlide || state.paddles.left.y - 10 > config.ballSize)
+                state.paddles.left.y -= 10;
+            else if (state.paddles.left.y - 10 <= config.ballSize)
+                state.paddles.left.y = config.ballSize;
+        }
+        if (state.paddles.left.speed === 1 && state.paddles.left.y < config.canvasHeight - config.paddleHeight){
+            if (!state.paddles.left.blockGlide || state.paddles.left.y + config.paddleHeight + 10 < config.canvasHeight - config.ballSize)
+                state.paddles.left.y += 10;
+            else if (state.paddles.left.y + config.paddleHeight + 10 >= config.canvasHeight - config.ballSize)
+                state.paddles.left.y = config.canvasHeight - config.ballSize - config.paddleHeight;
+        }
+    }
+
     function handleUserInput(){
         if (state.keys['d']) config.displayDemo ? config.displayDemo = false : config.displayDemo = true;
         if (state.keys[' '])
             pauseGame(false);
         if (state.isGamePaused) return;
-        if (state.keys["ArrowUp"] && state.paddles.right.y > 0){
-            if (!state.paddles.right.blockGlide || state.paddles.right.y - 10 > config.ballSize){
-                state.paddles.right.y -= 10;
-                socket.emit('move_up');
-                console.log('move_up');
-            }
-            else if (state.paddles.right.y - 10 <= config.ballSize)
-                state.paddles.right.y = config.ballSize;
-        }
-        if (state.keys["ArrowDown"] && state.paddles.right.y < config.canvasHeight - config.paddleHeight){
-            if (!state.paddles.right.blockGlide || state.paddles.right.y + config.paddleHeight + 10 < config.canvasHeight - config.ballSize){
-                socket.emit('move_down');
-                console.log('move_down');
-                state.paddles.right.y += 10;
-            }
-            else if (state.paddles.right.y + config.paddleHeight + 10 >= config.canvasHeight - config.ballSize)
-                state.paddles.right.y = config.canvasHeight - config.ballSize - config.paddleHeight;
-        }
+        // console.log(state.paddles.right.speed);
+        handlePaddleInput();
         if (state.keys["w"] && state.paddles.left.y > 0){
             if (!state.paddles.left.blockGlide || state.paddles.left.y - 10 > config.ballSize)
                 state.paddles.left.y -= 10;
@@ -506,7 +535,7 @@
         }
     }
 
-    window.PongGame = {startGame, stopGame, pauseGame, resumeGame, test, test1};
+    window.PongGame = {startGame, stopGame, pauseGame, resumeGame, state};
 })();
 
 
@@ -536,14 +565,16 @@ function initSocket(){
         console.log('error', error);
     })
     socket.on('move_up', event => {
-        window.PongGame.test();
+        console.log('move_up received');
+        window.PongGame.state.paddles.left.speed = -1;
     })
     socket.on('move_down', event => {
         console.log('move_down received');
-        window.PongGame.test1();
+        window.PongGame.state.paddles.left.speed = 1;
     })
     socket.on('stop_moving', event => {
         console.log('received stop_moving')
+        window.PongGame.state.paddles.left.speed = 0;
     })
 }
 
@@ -571,10 +602,22 @@ document.getElementById('testA').addEventListener('click', event => {
     window.PongGame.stopGame();
 })
 
+function checkGameAuthorization(){
+    console.log(window.location.pathname);
+    if (userInformations.is_guest && window.location.pathname === '/game/ranked')
+        throw `${window.location.pathname}`
+}
 
 async function initGame(){
     await indexInit(false);
-    window.PongGame.startGame();
+    try {
+        checkGameAuthorization();
+        window.PongGame.startGame();
+    }
+    catch (unauthorized){
+        displayMainAlert("Error", `You don't have permission to play in ${unauthorized}`);
+        await navigateTo('/');
+    }
 }
 
 initGame();
