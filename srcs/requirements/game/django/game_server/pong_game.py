@@ -39,10 +39,14 @@ class Game:
         self.rackets: List[Racket] = []
         # create rackets for left players
         for player in self.match.teams[0].players:
-            self.rackets.append(Racket(player.user_id, Position(0, int(self.canvas.y / 2 - racket_size.y / 2)), racket_size.x, racket_size.y))
+            racket = Racket(player.user_id, Position(0, int(self.canvas.y / 2 - racket_size.y / 2)), racket_size.x, racket_size.y)
+            player.racket = racket
+            self.rackets.append(racket)
         # create rackets for right players
         for player in self.match.teams[1].players:
-            self.rackets.append(Racket(player.user_id, Position(self.canvas.x - racket_size.x, int(self.canvas.y / 2 - racket_size.y / 2)), racket_size.x, racket_size.y))
+            racket = Racket(player.user_id, Position(self.canvas.x - racket_size.x, int(self.canvas.y / 2 - racket_size.y / 2)), racket_size.x, racket_size.y)
+            player.racket = racket
+            self.rackets.append(racket)
 
     def get_racket(self, player_id) -> Racket:
         for racket in self.rackets:
