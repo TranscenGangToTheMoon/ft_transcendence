@@ -28,6 +28,26 @@ class Test01_Register(UnitTest):
         self.assertResponse(register(user1['username'], user1['password']), 409)
         self.assertResponse(register(user1['username'].upper(), user1['password']), 409)
 
+    def test_003_register_invalid_username(self):
+        usernames = [
+            'de',
+            'username_too_long_because_its_must_be_short',
+            'invalid_char!@#$',
+            'admin',
+            'staff',
+            'support',
+            'ft_transcendence',
+            'transcendence',
+            'anonymus',
+        ]
+        passwords = ['InvalideUser_123' + rnstr()]
+
+        for username in usernames:
+            self.assertResponse(register(username, password), 400)
+
+        self.assertResponse(register(username, password), 400)
+
+
 
 class Test02_Guest(UnitTest):
 
