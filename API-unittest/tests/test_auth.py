@@ -47,6 +47,27 @@ class Test01_Register(UnitTest):
 
         self.assertResponse(register(username, password), 400)
 
+    def test_004_register_invalid_password(self):
+        username = 'register_inv_password' + rnstr()
+        passwords = [
+            '!$@^Invalid_char123',
+            'Contain_username1' + username,
+            'min_len',
+            'no_upper_case123',
+            'NO_LOWER_CASE123',
+            'NoSpecialChar123',
+            'NoNumbers',
+            '123456',
+            'password',
+            'azerty',
+            'qwerty',
+            'aaaaaaaa',
+            '123456789',
+            'abcdefg'
+        ]
+
+        for password in passwords:
+            self.assertResponse(register(username, password), 400)
 
 
 class Test02_Guest(UnitTest):
