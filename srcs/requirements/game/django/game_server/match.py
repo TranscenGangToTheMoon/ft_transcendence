@@ -13,7 +13,7 @@ from matches.models import Matches
 class Player():
     def __init__(self, model, match_code):
         self.match_code = match_code
-        self.racket: Racket
+        self.racket: Racket = None
         self.model = model
         self.user_id = self.model.user_id
         self.socket_id = ''
@@ -43,9 +43,9 @@ class Match():
         str(self.teams[1].model.players.all())
 
 def fetch_match(match_code):
-    print(f'fetching match {match_code}', flush=True)
+    #print(f'fetching match {match_code}', flush=True)
     match = Match(match_code)
-    print(str(match))
+    #print(str(match))
     return match
 
 async def fetch_match_async(match_code):

@@ -39,10 +39,14 @@ class Game:
         self.rackets: List[Racket] = []
         # create rackets for left players
         for player in self.match.teams[0].players:
-            self.rackets.append(Racket(player.user_id, Position(0, int(self.canvas.y / 2 - racket_size.y / 2)), racket_size.x, racket_size.y))
+            racket = Racket(player.user_id, Position(0, int(self.canvas.y / 2 - racket_size.y / 2)), racket_size.x, racket_size.y)
+            player.racket = racket
+            self.rackets.append(racket)
         # create rackets for right players
         for player in self.match.teams[1].players:
-            self.rackets.append(Racket(player.user_id, Position(self.canvas.x - racket_size.x, int(self.canvas.y / 2 - racket_size.y / 2)), racket_size.x, racket_size.y))
+            racket = Racket(player.user_id, Position(self.canvas.x - racket_size.x, int(self.canvas.y / 2 - racket_size.y / 2)), racket_size.x, racket_size.y)
+            player.racket = racket
+            self.rackets.append(racket)
 
     def get_racket(self, player_id) -> Racket:
         for racket in self.rackets:
@@ -70,7 +74,7 @@ class Game:
                     if time.time() - start_waiting > timeout:
                         raise Exception(f'player socketio connection timed out : player_id: {player.user_id}')
                     time.sleep(1)
-                print(f'player {player.user_id} has join in!', flush=True)
+                #print(f'player {player.user_id} has join in!', flush=True)
 
     def play(self):
         start_time = time.time()
@@ -91,10 +95,10 @@ class Game:
         try:
             self.wait_for_players(timeout)
         except Exception as e:
-            print(e, flush=True)
+            #print(e, flush=True)
             self.match.model.finish_match()
             return
-        print('game launched', flush=True)
+        #print('game launched', flush=True)
         self.play()
 
     def check_zombie(self) -> bool:

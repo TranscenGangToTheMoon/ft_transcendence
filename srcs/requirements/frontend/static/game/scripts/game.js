@@ -268,8 +268,11 @@
                 state.paddles.right.y = config.ballSize;
         }
         if (state.keys["ArrowDown"] && state.paddles.right.y < config.canvasHeight - config.paddleHeight){
-            if (!state.paddles.right.blockGlide || state.paddles.right.y + config.paddleHeight + 10 < config.canvasHeight - config.ballSize)
+            if (!state.paddles.right.blockGlide || state.paddles.right.y + config.paddleHeight + 10 < config.canvasHeight - config.ballSize){
+                socket.emit('move_down');
+                console.log('move_down');
                 state.paddles.right.y += 10;
+            }
             else if (state.paddles.right.y + config.paddleHeight + 10 >= config.canvasHeight - config.ballSize)
                 state.paddles.right.y = config.canvasHeight - config.ballSize - config.paddleHeight;
         }
@@ -485,7 +488,25 @@
         }
     }
 
-    window.PongGame = {startGame, stopGame, pauseGame, resumeGame};
+    function test (){
+        if (state.paddles.left.y > 0){
+            if (!state.paddles.left.blockGlide || state.paddles.left.y - 10 > config.ballSize)
+                state.paddles.left.y -= 10;
+            else if (state.paddles.left.y - 10 <= config.ballSize)
+                state.paddles.left.y = config.ballSize;
+        }
+    }
+
+    function test1(){
+        if (state.paddles.left.y < config.canvasHeight - config.paddleHeight){
+            if (!state.paddles.left.blockGlide || state.paddles.left.y + config.paddleHeight + 10 < config.canvasHeight - config.ballSize)
+                state.paddles.left.y += 10;
+            else if (state.paddles.left.y + config.paddleHeight + 10 >= config.canvasHeight - config.ballSize)
+                state.paddles.left.y = config.canvasHeight - config.ballSize - config.paddleHeight;
+        }
+    }
+
+    window.PongGame = {startGame, stopGame, pauseGame, resumeGame, test, test1};
 })();
 
 
@@ -515,10 +536,11 @@ function initSocket(){
         console.log('error', error);
     })
     socket.on('move_up', event => {
-        console.log('received move_up')
+        window.PongGame.test();
     })
     socket.on('move_down', event => {
-        console.log('received move_down')
+        console.log('move_down received');
+        window.PongGame.test1();
     })
     socket.on('stop_moving', event => {
         console.log('received stop_moving')

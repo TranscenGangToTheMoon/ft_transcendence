@@ -17,10 +17,10 @@ def launch_dual_game(players):
 	player2 = players[1]
 
 	create_match(GameMode.duel, [[player1.user_id], [player2.user_id]])
-	print('made request for: ', player1.user_id, ' ', player1.trophies, ' ', player2.user_id, ' ', player2.trophies, flush=True)
+	#print('made request for: ', player1.user_id, ' ', player1.trophies, ' ', player2.user_id, ' ', player2.trophies, flush=True)
 	player1.delete()
 	player2.delete()
-	print('Normal Game created=============')
+	#print('Normal Game created=============')
 
 def get_optimal_rank_range(player):
 	waiting_time = datetime.now(timezone.utc) - player.join_at
