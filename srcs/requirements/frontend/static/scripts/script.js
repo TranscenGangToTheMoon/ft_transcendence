@@ -166,6 +166,10 @@ function loadScript(scriptSrc, type) {
             console.error(`Error while loading script ${scriptSrc}.`);
             reject(new Error(`Failed to load script ${scriptSrc}`));
         };
+        const scripts = document.querySelectorAll('script');
+        for (let existingScript of scripts)
+            if (existingScript.src === `https://localhost:4443${scriptSrc}`)
+                existingScript.remove();
         document.body.appendChild(script);
     });
 }
