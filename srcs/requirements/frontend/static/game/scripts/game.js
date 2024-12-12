@@ -255,46 +255,62 @@
         ctx.fillText('Game over', config.canvasWidth / 2, config.canvasHeight / 2);
     }
 
+    function moveUp(paddle){
+        if (!paddle.blockGlide || paddle.y - 10 > config.ballSize)
+            paddle.y -= 10;
+        else if (paddle.y - 10 <= config.ballSize)
+            paddle.y = config.ballSize;
+    }
+
+    function moveDown(paddle){
+        if (!paddle.blockGlide || paddle.y + config.paddleHeight + 10 < config.canvasHeight - config.ballSize)
+            paddle.y += 10;
+        else if (paddle.y + config.paddleHeight + 10 >= config.canvasHeight - config.ballSize)
+            paddle.y = config.canvasHeight - config.ballSize - config.paddleHeight;
+    }
+
     function handlePaddleInput(){
-        if (state.keys["ArrowUp"] && state.paddles.right.speed != -1){
-            state.paddles.right.speed = -1;
-            if (typeof socket !== 'undefined')
-                socket.emit('move_up');  console.log('emitting move_up')
+        if (state.keys['ArrowUp'] && state.keys['ArrowDown']){
+            if (state.paddles.right.speed != 0){
+                if (typeof socket !== 'undefined'){
+                    console.log('emitting stop_moving');
+                    socket.emit('stop_moving', {'position': state.paddles.right.y});
+                }
+                state.paddles.right.speed = 0;
+            }
+            return;
         }
-        if (state.paddles.right.speed === -1 && state.paddles.right.y > 0){
-            if (!state.paddles.right.blockGlide || state.paddles.right.y - 10 > config.ballSize)
-                state.paddles.right.y -= 10;
-            else if (state.paddles.right.y - 10 <= config.ballSize)
-                state.paddles.right.y = config.ballSize;
+        if (state.keys["ArrowUp"] && state.paddles.right.speed != -1){
+            if (typeof socket !== 'undefined'){
+                if (state.paddles.right.speed === 1){
+                    socket.emit('stop_moving'); console.log('emitting stop_moving');
+                }
+                socket.emit('move_up');  console.log('emitting move_up')
+            }
+            state.paddles.right.speed = -1;
         }
         if (state.keys["ArrowDown"] && state.paddles.right.speed != 1){
-            state.paddles.right.speed = 1;
-            if (typeof window.socket !== 'undefined')
+            if (typeof window.socket !== 'undefined'){
+                if (state.paddles.right.speed === -1){
+                    socket.emit('stop_moving');console.log('emitting move_stop');
+                }
                 socket.emit('move_down'); console.log('emitting move_down')
-        }
-        if (state.paddles.right.speed === 1 && state.paddles.right.y < config.canvasHeight - config.paddleHeight){
-            if (!state.paddles.right.blockGlide || state.paddles.right.y + config.paddleHeight + 10 < config.canvasHeight - config.ballSize)
-                state.paddles.right.y += 10;
-            else if (state.paddles.right.y + config.paddleHeight + 10 >= config.canvasHeight - config.ballSize)
-                state.paddles.right.y = config.canvasHeight - config.ballSize - config.paddleHeight;
+            }
+            state.paddles.right.speed = 1;
         }
         if (!state.keys["ArrowDown"] && !state.keys['ArrowUp'] && state.paddles.right.speed != 0){
             state.paddles.right.speed = 0;
-            if (typeof socket !== 'undefined')
-                socket.emit('stop_moving'); console.log('emitting stop_moving')
+            if (typeof socket !== 'undefined'){
+                socket.emit('stop_moving', {'position': state.paddles.right.y}); console.log('emitting stop_moving');
+            }
         }
 
-        if (state.paddles.left.speed === -1 && state.paddles.left.y > 0){
-            if (!state.paddles.left.blockGlide || state.paddles.left.y - 10 > config.ballSize)
-                state.paddles.left.y -= 10;
-            else if (state.paddles.left.y - 10 <= config.ballSize)
-                state.paddles.left.y = config.ballSize;
-        }
-        if (state.paddles.left.speed === 1 && state.paddles.left.y < config.canvasHeight - config.paddleHeight){
-            if (!state.paddles.left.blockGlide || state.paddles.left.y + config.paddleHeight + 10 < config.canvasHeight - config.ballSize)
-                state.paddles.left.y += 10;
-            else if (state.paddles.left.y + config.paddleHeight + 10 >= config.canvasHeight - config.ballSize)
-                state.paddles.left.y = config.canvasHeight - config.ballSize - config.paddleHeight;
+        for (let paddle in state.paddles){
+            paddle = state.paddles[paddle];
+            if (paddle.speed === 1 && paddle.y + config.paddleHeight < config.canvasHeight)
+                  moveDown(paddle);
+            else if (paddle.speed === -1 && paddle.y > 0)
+                moveUp(paddle);
         }
     }
 
@@ -500,15 +516,6 @@
         if (state.isCountDownActive)
             drawCountdown();
         drawPaddles();
-        // ctx.drawImage(paddleImage, state.paddles.left.x, state.paddles.left.y, config.paddleWidth, config.paddleHeight);
-
-        // ctx.drawImage(
-        //     paddleImage,
-        //     state.paddles.right.x,
-        //     state.paddles.right.y,
-        //     config.paddleWidth,
-        //     config.paddleHeight
-        // );
 
         if (!state.isCountDownActive) {
             ctx.fillText(`${state.playerScore}`, config.playerScore.x, config.playerScore.y);
@@ -517,38 +524,18 @@
         }
     }
 
-    function test (){
-        if (state.paddles.left.y > 0){
-            if (!state.paddles.left.blockGlide || state.paddles.left.y - 10 > config.ballSize)
-                state.paddles.left.y -= 10;
-            else if (state.paddles.left.y - 10 <= config.ballSize)
-                state.paddles.left.y = config.ballSize;
-        }
-    }
-
-    function test1(){
-        if (state.paddles.left.y < config.canvasHeight - config.paddleHeight){
-            if (!state.paddles.left.blockGlide || state.paddles.left.y + config.paddleHeight + 10 < config.canvasHeight - config.ballSize)
-                state.paddles.left.y += 10;
-            else if (state.paddles.left.y + config.paddleHeight + 10 >= config.canvasHeight - config.ballSize)
-                state.paddles.left.y = config.canvasHeight - config.ballSize - config.paddleHeight;
-        }
-    }
-
-    window.PongGame = {startGame, stopGame, pauseGame, resumeGame, state};
+    window.PongGame = {startGame, stopGame, pauseGame, resumeGame, state, moveUp, moveDown};
 })();
 
 
 function initSocket(){
     let socket = io("wss://localhost:4443/", {
+        transports: ["websocket"],
         path: "/ws/",
         auth : {
-
             "id": userInformations.id,
             "token": 'kk',
         },
-		// extraHeaders: {
-		// }
 	});
     window.socket = socket;
     console.log(socket)
@@ -573,8 +560,10 @@ function initSocket(){
         window.PongGame.state.paddles.left.speed = 1;
     })
     socket.on('stop_moving', event => {
+        console.log(event);
         console.log('received stop_moving')
         window.PongGame.state.paddles.left.speed = 0;
+        window.PongGame.state.paddles.left.y = event.position;
     })
 }
 
@@ -612,6 +601,12 @@ async function initGame(){
     await indexInit(false);
     try {
         checkGameAuthorization();
+        try {
+            let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/play/duel/`, 'POST');
+        }
+        catch(error) {
+            console.log(error);
+        }
         window.PongGame.startGame();
     }
     catch (unauthorized){
