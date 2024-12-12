@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   PongCLI.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: xcharra <xcharra@student.42lyon.fr>        +#+  +:+       +#+        */
+/*   By: xcharra <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/03 17:35:02 by xcharra           #+#    #+#             */
-/*   Updated: 2024/12/11 16:04:51 by xcharra          ###   ########.fr       */
+/*   Updated: 2024/12/12 23:58:42 by xcharra          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -249,25 +249,26 @@ void PongCLI::renderMainMenuPage() {
 	auto		searchMatchDuel = Button("Launch async task", [this, &reloading] {
 		reloading = true;
 		_info = text("Async task running...") | color(Color::Yellow);
-		_screen.RequestAnimationFrame();
-		auto res = std::async(std::launch::async, [this] {
-			// search match, request to an API, take time
-			// response from sse
-			std::this_thread::sleep_for(std::chrono::seconds(5));
-
-//			_info = text("Match found !") | color(Color::Green);
-			(void)this;
-		});
-
-		// loading animation
+// 		// _screen.RequestAnimationFrame();
+// 		auto res = std::async(std::launch::async, [this] {
+// 			// search match, request to an API, take time
+// 			// response from sse
+// 			std::this_thread::sleep_for(std::chrono::seconds(5));
+//
+// //			_info = text("Match found !") | color(Color::Green);
+// 			(void)this;
+// 		});
+//
+// 		// loading animation
 		for (int i = 0; i < 10; i++) {
-			std::this_thread::sleep_for(std::chrono::seconds(1));
+			// std::this_thread::sleep_for(std::chrono::seconds(1));
 			_info = text("Search match..." + std::to_string(i)) | color(Color::Yellow);
-			_screen.RequestAnimationFrame();
+			_screen.PostEvent(Event::Custom);
+			// _screen.RequestAnimationFrame();
 		}
-
-		// wait for async task to finish
-		res.get();
+//
+// 		// wait for async task to finish
+// 		res.get();
 		// make socket connection to game server
 //		changePage(Page::GamePage)
 	}, ButtonOption::Animated(Color::Red));
@@ -348,19 +349,19 @@ void PongCLI::renderMainMenuPage() {
 		return (false);
 	});
 
-	auto	screenRedraw = std::thread([&] {
-		int	i = 0;
-		while (reloading) {
-			_screen.PostEvent(Event::Custom);
-			std::this_thread::sleep_for(std::chrono::seconds(1));
-//			_info = text("Redraw " + std::to_string(i)) | color(Color::Red);
-			i++;
-		}
-	});
+// 	auto	screenRedraw = std::thread([&] {
+// 		int	i = 0;
+// 		while (reloading) {
+// 			_screen.PostEvent(Event::Custom);
+// 			std::this_thread::sleep_for(std::chrono::seconds(1));
+// //			_info = text("Redraw " + std::to_string(i)) | color(Color::Red);
+// 			i++;
+// 		}
+// 	});
 
 	_screen.Loop(finalRenderer);
 	reloading = false;
-	screenRedraw.join();
+	// screenRedraw.join();
 }
 
 void PongCLI::renderSettingsPage() {
