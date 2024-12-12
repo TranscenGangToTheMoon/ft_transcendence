@@ -61,6 +61,10 @@ down		:
 dettach		:	build
 			$(COMPOSE) $(FLAGS) up -d $(SERVICE)
 
+.PHONY: logs
+logs		:	build
+			$(COMPOSE) $(FLAGS) $@ -f $(SERVICE)
+
 .PHONY: exec
 exec		:
 			$(COMPOSE) $(FLAGS) $@ $(SERVICE) $(DSHELL)
