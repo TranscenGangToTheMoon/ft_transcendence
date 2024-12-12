@@ -1,5 +1,7 @@
 from game_server.pong_position import Position
 
 class Ball:
-    def __init__(self, position: Position, direction: Position) -> None:
+    def __init__(self, position: Position, direction_x, direction_y) -> None:
         self.position = position
+        self.direction_x = direction_x
+        self.direction_y = direction_y

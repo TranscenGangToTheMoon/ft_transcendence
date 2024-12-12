@@ -1,15 +1,20 @@
 from datetime import datetime, timezone
+import math
 from game_server.match import Match, Player
-# from game_server.pong_ball import Ball
+from game_server.pong_ball import Ball
 from game_server.pong_position import Position
 from game_server.pong_racket import Racket
 from typing import List
 import os
 import time
+import random
 
 
-def get_random_direction() -> Position:
-    return Position(0, 0)
+def get_random_direction():
+    random_angle = random.random() * 2 * math.pi
+    while abs(math.cos(random_angle)) < (math.pi / 3):
+        random_angle = random.random() * 2 * math.pi
+    return math.cos(random_angle), math.sin(random_angle)
 
 
 class Game:
@@ -32,8 +37,8 @@ class Game:
             except KeyError:
                 self.canvas = Position(800, 600)
 
-        # direction = get_random_direction()
-        # self.ball = Ball(Position(int(canvas_size.x / 2), int(canvas_size.y / 2)), direction)
+        direction_x, direction_y = get_random_direction()
+        self.ball = Ball(Position(int(self.canvas.x / 2), int(self.canvas.y / 2)), direction_x, direction_y)
 
         racket_size: Position = Position(10, 100)
         self.rackets: List[Racket] = []
@@ -79,6 +84,16 @@ class Game:
     def play(self):
         start_time = time.time()
         last_frame_time = time.time()
+        self.sio.emit(
+            'start_game',
+            data={
+                'position_x': self.ball.position.x,
+                'position_y': self.ball.position.y,
+                'direction_x': self.ball.direction_x,
+                'direction_y': self.ball.direction_y
+            },
+            room=str(self.match.code)
+        )
         while True:
             if self.game_timeout is not None and (time.time() - start_time < self.game_timeout * 60):
                 break
