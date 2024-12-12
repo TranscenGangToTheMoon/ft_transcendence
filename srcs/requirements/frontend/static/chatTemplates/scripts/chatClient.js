@@ -97,6 +97,22 @@ function setupSocketListeners(chatData)
 	send(chatData);
 }
 
+function parsChatRequest(chat)
+{
+	let chatData = {
+		'chatId': chat.id,
+		// 'target': chat.participants[0].username,
+		// 'targetId': chat.participants[0].id,
+		'target': chat.chat_with.username,
+		'targetId': chat.chat_with.id,
+		'lastMessage': chat.last_message,
+	};
+	if (chatData.lastMessage === null) {
+		chatData.lastMessage = '< Say hi! >';
+	}
+	return chatData;
+}
+
 async function loadOldMessages(chatData){
 	const chatBox = document.getElementById('messages');
 	try {
@@ -120,25 +136,17 @@ async function selectChatMenu(filter='') {
 	chatsList.innerHTML = '';
 	console.log('filter', filter);
 	try {
-		const data = await apiRequest(getAccessToken(), `${baseAPIUrl}/chat/?q=${filter}`);
-		if (data.count > 0) {
-			data.results.forEach(element => {
-				let data = {
-					'chatId': element.id,
-					'target': element.participants[0].username,
-					'targetId': element.participants[0].id,
-					'lastMessage': element.last_message,
-				};
-				if (data.lastMessage === null) {
-					data.lastMessage = '< Say hi! >';
-				}
+		const apiAnswer = await apiRequest(getAccessToken(), `${baseAPIUrl}/chat/?q=${filter}`);
+		if (apiAnswer.count > 0) {
+			apiAnswer.results.forEach(element => {
+				let chatData = parsChatRequest(element);
 				let chat = document.createElement('div');
 				chat.setAttribute('id', 'chatListElement');
-				chat.innerHTML = `<p id="chatListElementTarget">${data.target}:</p><p id="chatListElementMessagePreview">${data.lastMessage}</p>`;
+				chat.innerHTML = `<p id="chatListElementTarget">${chatData.target}:</p><p id="chatListElementMessagePreview">${chatData.lastMessage}</p>`;
 				chat.addEventListener('click', () => {
-					console.log(data.user, 'selected');
-					connect(getAccessToken(), data);
-					loadOldMessages(data);
+					console.log(chatData.user, 'selected');
+					connect(getAccessToken(), chatData);
+					loadOldMessages(chatData);
 				});
 				chatsList.appendChild(chat);
 			});
@@ -150,8 +158,26 @@ async function selectChatMenu(filter='') {
 }
 
 async function startChat(username) {
-
+	try{
+		const apiAnswer = await apiRequest(getAccessToken(), `${baseAPIUrl}/chat/?q=${username}`);
+		if (apiAnswer.count === 0)
+		{
+			const newchat = await apiRequest(getAccessToken(), `${baseAPIUrl}/chat/`, 'POST', undefined, undefined, {'username': username, 'type':"private_message"});
+			console.log(newchat.code);
+			let chatData = parsChatRequest(newchat);
+			connect(getAccessToken(), chatData);
+		}
+		else {
+			console.log('chat already exists');
+			let chatData = parsChatRequest(apiAnswer.results[0]);
+			connect(getAccessToken(), chatData);
+		}
+	}
+	catch(error) {
+		console.log(error);
+	}
 }
+
 
 async function chatClientInit() {
 	await indexInit(false);
@@ -166,6 +192,5 @@ document.getElementById('searchChatForm').addEventListener('keyup', (e) => {
 });
 document.getElementById('searchChatForm').addEventListener('submit', (e) => {
 	e.preventDefault();
-	//selectChatMenu(e.target.value);
-	closeChat();
+	startChat(e.target.searchUser.value);
 });

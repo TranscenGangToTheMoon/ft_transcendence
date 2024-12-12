@@ -1,6 +1,9 @@
 // ========================== GLOBAL VALUES ==========================
 
 const MAX_DISPLAYED_NOTIFICATIONS = 3;
+const MAX_DISPLAYED_FRIENDS = 12;
+const MAX_DISPLAYED_FRIEND_REQUESTS = 5;
+const MAX_DISPLAYED_BLOCKED_USERS = 10;
 const baseAPIUrl = "https://localhost:4443/api"
 let userInformations = undefined;
 var notificationIdentifier = 0;
@@ -21,7 +24,7 @@ async function apiRequest(token, endpoint, method="GET", authType="Bearer",
             "content-type": contentType
         }
     }
-    if (token)
+    if (token && endpoint != `${baseAPIUrl}/auth/login/`)
         options.headers["Authorization"] = `${authType} ${token}`;
     if (body)
         options.body = JSON.stringify(body);
@@ -48,7 +51,7 @@ async function apiRequest(token, endpoint, method="GET", authType="Bearer",
             return data;
         })
         .catch(error =>{
-            if (error.code || error.message === 'Failed to fetch')
+            if (error.code === 500 || error.message === 'Failed to fetch')
                 document.getElementById('container').innerText = `alala pas bien ${error.code? `: ${error.code}` : ''} (jcrois c'est pas bon)`;
             throw error;
         })
@@ -156,13 +159,17 @@ function loadScript(scriptSrc, type) {
         if (type)
             script.type = type;
         script.onload = () => {
-            console.log(`Script ${scriptSrc} loaded.`);
+            // console.log(`Script ${scriptSrc} loaded.`);
             resolve();
         };
         script.onerror = () => {
             console.error(`Error while loading script ${scriptSrc}.`);
             reject(new Error(`Failed to load script ${scriptSrc}`));
         };
+        const scripts = document.querySelectorAll('script');
+        for (let existingScript of scripts)
+            if (existingScript.src === `https://localhost:4443${scriptSrc}`)
+                existingScript.remove();
         document.body.appendChild(script);
     });
 }
@@ -170,6 +177,7 @@ function loadScript(scriptSrc, type) {
 function loadCSS(cssHref, toUpdate=true) {
     const existingLink = document.querySelector('link[dynamic-css]');
     if (existingLink) {
+        // console.log('deleted', existingLink);
         existingLink.remove();
     }
     // console.log('will update =', toUpdate);
@@ -179,7 +187,7 @@ function loadCSS(cssHref, toUpdate=true) {
     if (toUpdate)
         link.setAttribute('dynamic-css', 'true');
     document.head.appendChild(link);
-    console.log(`Style ${cssHref} loaded.`)
+    // console.log(`Style ${cssHref} loaded.`)
 }
 
 async function loadContent(url, container='content', append=false) {
@@ -194,7 +202,7 @@ async function loadContent(url, container='content', append=false) {
         if(!append)
             contentDiv.innerHTML = html;
         else
-            contentDiv.innerHTML += html;
+            contentDiv.innerHTML += `\n${html}`;
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = html;
         const script = tempDiv.querySelector('[script]');
@@ -206,8 +214,9 @@ async function loadContent(url, container='content', append=false) {
         else if (userInformations.is_guest)
             style = 'guestStyle'
         css = contentDiv.querySelector(`[${style}]`);
+        // console.log(style, css)
         if (css)
-            loadCSS(css.getAttribute(style), !css.getAttribute(style).includes('Guest'));
+            loadCSS(css.getAttribute(style));//, !css.getAttribute(style).includes('Guest'));
     } catch (error) {
         contentDiv.innerHTML = '<h1>Erreur 404 : Page non trouvée</h1>';
     }
@@ -223,9 +232,13 @@ async function handleRoute() {
         '/profile' : 'profile.html',
         '/lobby' : '/lobby.html',
         '/chat' : '/chatTemplates/chat.html',
-        '/game' : '/game/game.html'
+
+        '/game/ranked' : '/game/game.html',
+        '/game/duel' : '/game/game.html',
+        '/game/custom' : '/game/game.html',
+        '/tournament' : '/workInProgress.html'
     };
-    
+
     const page = routes[path] || '/404.html';
     await loadContent(page);
 }
@@ -237,7 +250,7 @@ async function handleRoute() {
         //         await navigateTo(event.target.href);
         //     }
         // });
-        
+
 
 let lastState = 0;
 if (!localStorage.getItem('currentState'))
@@ -266,7 +279,7 @@ async function navigateTo(url, doNavigate=true){
 }
 
 window.navigateTo = navigateTo;
-        
+
 function confirmPopstate() {
     // const confirmModal = document.getElementById('confirmModal');
     // confirmModal.removeAttribute('style');
@@ -307,7 +320,7 @@ function cancelNavigation(event, url, callback=undefined){
         isUserGoBack = false;
     }
 }
-        
+
 window.addEventListener('popstate', async event => {
     console.log(event.state, 'last state:', lastState);
     if (!isUserGoBack)
@@ -350,9 +363,6 @@ function displayMainAlert(alertTitle, alertContent) {
 
     alertContentDiv.innerText = alertContent;
     alertTitleDiv.innerText = alertTitle;
-    document.getElementById('alertModal').addEventListener('shown.bs.modal', function() {
-        document.getElementById('alertModalClose').focus();
-    })
     alertModal.show();
 }
 
@@ -364,9 +374,9 @@ function displayConfirmModal(confirmTitle, confirmContent) {
 
     confirmContentDiv.innerText = confirmContent;
     confirmTitleDiv.innerText = confirmTitle;
-    document.getElementById('confirmModal').addEventListener('shown.bs.modal', function() {
-        document.getElementById('confirmModalClose').focus();
-    })
+    // document.getElementById('confirmModal').addEventListener('shown.bs.modal', function() {
+    //     document.getElementById('confirmModalClose').focus();
+    // })
     confirmModal.show();
 }
 
@@ -375,7 +385,17 @@ window.displayMainAlert = displayMainAlert;
 // ========================== INDEX SCRIPT ==========================
 
 async function loadFriendListModal() {
+    const friendModal = document.getElementById('friendListModal');
+    if (friendModal)
+        friendModal.remove();
     await loadContent('/friendList.html', 'modals', true);
+}
+
+async function loadBlockedModal(){
+    const friendModal = document.getElementById('blockedUsersModal')
+    if (friendModal)
+        friendModal.remove();
+    await loadContent('/blockedUsers.html', 'modals', true);
 }
 
 async function loadUserProfile(){
@@ -392,7 +412,8 @@ async function loadUserProfile(){
         document.getElementById('balance').innerText = userInformations.coins;
     }
     await loadContent(`/${profileMenu}`, 'profileMenu');
-    // document.getElementById('title').innerText = userInformations.title;
+    // if (!userInformations.is_guest)
+        
 }
 
 document.getElementById('home').addEventListener('click', async event => {
@@ -410,35 +431,37 @@ function initSSE(){
 
 async function  indexInit(auto=true) {
     if (!auto){
-        setTimeout(()=> {
-            const backdrops = document.querySelectorAll('.modal-backdrop');
-            for (let backdrop of backdrops){
-                console.log(backdrop, 'removed');
-                backdrop.remove;
-            }
-        }, 500);
-        await fetchUserInfos(true);
-        if (window.location.pathname === '/login'){
-            document.getElementById('profileMenu').innerHTML = "";
-        }
-        else{
-            await loadUserProfile();
-        }
-        if (userInformations.code === 'user_not_found'){
+        // setTimeout(()=> {
+        //     const backdrops = document.querySelectorAll('.modal-backdrop');
+        //     for (let backdrop of backdrops){
+        //         console.log(backdrop, 'removed');
+        //         backdrop.remove;
+        //     }
+        // }, 500);
+        // await fetchUserInfos(true);
+        // if (window.location.pathname === '/login'){
+        //     document.getElementById('profileMenu').innerHTML = "";
+        // }
+        // else{
+            // }
+        if (userInformations.detail === 'Incorrect authentication credentials.'){
             console.log('user was deleted from database, switching to guest mode');
             displayMainAlert("Unable to retrieve your account/guest profile","We're sorry your account has been permanently deleted and cannot be recovered.");
             await generateToken();
             await fetchUserInfos(true);
-            await loadUserProfile();
+            return handleRoute();
         }
+        await loadUserProfile();
     }
     else{
+        await fetchUserInfos();
+        if (!userInformations?.is_guest)
+            await loadFriendListModal()
         let currentState = getCurrentState();
         console.log(`added ${window.location.pathname} to history with state ${currentState}`)
         history.replaceState({state: currentState}, '', window.location.pathname);
         incrementCurrentState();
         loadCSS('/css/styles.css', false);
-        // await loadFriendListModal();
         initSSE();
         handleRoute();
     }

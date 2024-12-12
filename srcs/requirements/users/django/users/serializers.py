@@ -11,6 +11,13 @@ from users.auth import auth_update
 from users.models import Users
 
 
+def rename_username(user_id, new_username): # todo remake
+    try:
+        request_chat(endpoints.UsersManagement.frename_user.format(user_id=user_id), data={'username': new_username})
+    except APIException:
+        pass
+
+
 class UsersMeSerializer(serializers.ModelSerializer):
     accept_friend_request = serializers.BooleanField()
     password = serializers.CharField(write_only=True)
@@ -51,10 +58,7 @@ class UsersMeSerializer(serializers.ModelSerializer):
         if 'username' in validated_data or 'password' in validated_data:
             auth_update(self.context['request'].headers.get('Authorization'), validated_data)
             if 'username' in validated_data and not instance.is_guest:
-                try:
-                    request_chat(endpoints.UsersManagement.frename_user.format(user_id=instance.id), data={'username': validated_data['username']})
-                except APIException:
-                    pass
+                rename_username(instance.id, validated_data['username'])
         validated_data.pop('password', None)
         return super().update(instance, validated_data)
 
@@ -109,3 +113,8 @@ class ManageUserSerializer(serializers.ModelSerializer):
             'username',
             'is_guest',
         ]
+
+    def update(self, instance, validated_data):
+        if 'username' in validated_data:
+            rename_username(instance.id, validated_data['username'])
+        return super().update(instance, validated_data)

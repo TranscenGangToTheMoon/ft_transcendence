@@ -27,28 +27,46 @@ class ChatPaticipantsSerializer(serializers.ModelSerializer):
 
 class ChatsSerializer(serializers.ModelSerializer):
     username = serializers.CharField(write_only=True)
-    participants = ChatPaticipantsSerializer(many=True, read_only=True)
+    chat_with = serializers.SerializerMethodField(read_only=True)
     last_message = MessagesSerializer(source='messages.last', read_only=True)
     type = serializers.CharField()
-    view_chat = serializers.BooleanField(write_only=True, required=False)
+    view_chat = serializers.BooleanField(required=False)
 
     class Meta:
         model = Chats
         fields = [
             'id',
             'type',
-            'participants',
+            'chat_with',
             'last_message',
             'created_at',
+            'last_updated',
             'username',
             'view_chat',
         ]
         read_only_fields = [
             'id',
-            'participants',
+            'chat_with',
             'last_message',
             'created_at',
+            'last_updated',
         ]
+
+    def get_chat_with(self, obj):
+        request = self.context.get('request')
+        if request is None:
+            raise serializers.ValidationError(MessagesException.ValidationError.REQUEST_REQUIRED)
+        chat_with = obj.participants.exclude(user_id=get_auth_user(request)['id']).first()
+        return {'id': chat_with.user_id, 'username': chat_with.username}
+
+    def get_view_chat(self, obj):
+        request = self.context.get('request')
+        if request is None:
+            raise serializers.ValidationError(MessagesException.ValidationError.REQUEST_REQUIRED)
+        try:
+            return obj.participants.get(user_id=get_auth_user(request)['id']).view_chat
+        except ChatParticipants.DoesNotExist:
+            return False
 
     def validate_type(self, value):
         request = self.context.get('request')

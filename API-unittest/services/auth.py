@@ -16,10 +16,17 @@ def register(username=None, password=None, data=None, method='POST'):
 
 def register_guest(guest=None, username=None, password=None, data=None, method='PATCH', token=None):
     if data is None:
-        if guest is None:
-            data = {'username': username, 'password': password}
-        else:
-            data = {'username': guest['username'], 'password': 'password_' + guest['username']}
+        data = {}
+
+        if username is not None:
+            data['username'] = username
+        elif guest is not None:
+            data['username'] = guest['username']
+
+        if password is not None:
+            data['password'] = password
+        elif guest is not None:
+            data['password'] = 'password_' + guest['username']
 
     kwargs = {
         'endpoint': 'auth/register/guest/',

@@ -6,7 +6,9 @@ import socketio
 import asyncio
 from asgiref.sync import async_to_sync, sync_to_async
 from aiohttp import web
+from lib_transcendence.endpoints import Chat
 from lib_transcendence.auth import auth_verify
+from lib_transcendence.services import request_chat
 from socketio.exceptions import ConnectionRefusedError
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -64,6 +66,12 @@ async def message(sid, data):
         await sio.emit('error', {'error': 400, 'message': 'Invalid message format'}, to=sid)
         await sio.disconnect(sid)
         return
+    try:
+        await sio.emit('debug', {'chat_id': chatId, 'content': content, 'endpoint': Chat.fmessages.format(chat_id=chatId)}, to=sid)
+        request_chat(Chat.fmessages.format(chat_id=chatId), 'POST', {'content': content})
+    except Exception as e:
+        print(e)
+        await sio.emit('error', {'error': 401, 'message': 'Internal server error'}, to=sid)
     print(f"New message from {sid}: {data}")
     await sio.emit('message', {'chatId':chatId, 'author':usersConnected[sid].username, 'content': content}, room=str(chatId))
 

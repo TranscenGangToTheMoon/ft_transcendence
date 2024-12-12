@@ -33,8 +33,8 @@ document.getElementById("loginButton").addEventListener('click', event => {
         method = 'POST';
     }
     else {
-        endpoint = `${baseAPIUrl}/auth/register/`;
-        method = 'POST';
+        endpoint = `${baseAPIUrl}/auth/register/guest/`;
+        method = 'PUT';
     }
     getDataFromApi(getAccessToken(), endpoint, method, undefined, undefined, userInfo)
         .then (async data => {
@@ -48,6 +48,7 @@ document.getElementById("loginButton").addEventListener('click', event => {
                     await navigateTo('/');
                 else
                     handleRoute();
+                await loadFriendListModal();
                 return;//todo redirect to uri
             }
             if (data.username) {
