@@ -48,7 +48,7 @@ void User::registerGuestUser(CurlWrapper &curl) {
 	curl.getResponse().clear();
 	curl.PUT("/api/auth/register/guest/", data.dump());
 	if (curl.getHTTPCode() >= 300)
-		throw (std::runtime_error("Failed to sign up !" + curl.getResponse()));
+		throw (std::runtime_error("Failed to register guest !" + curl.getResponse()));
 	basic_json	json = json::parse(curl.getResponse());
 
 	setAccessToken(json["access"]);
@@ -65,7 +65,7 @@ void User::registerUser(CurlWrapper &curl) {
 	curl.getResponse().clear();
 	curl.POST("/api/auth/register/", data.dump());
 	if (curl.getHTTPCode() >= 300)
-		throw (std::runtime_error("Failed to sign up !"));
+		throw (std::runtime_error("Failed to register !"));
 	basic_json	json = json::parse(curl.getResponse());
 
 	setAccessToken(json["access"]);

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   PongCLI.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: xcharra <marvin@42.fr>                     +#+  +:+       +#+        */
+/*   By: xcharra <xcharra@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/03 17:35:02 by xcharra           #+#    #+#             */
-/*   Updated: 2024/12/12 23:58:42 by xcharra          ###   ########.fr       */
+/*   Updated: 2024/12/13 17:43:01 by xcharra          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,19 +63,20 @@ void	PongCLI::loginAction(std::string &server, std::string &username, std::strin
 			_curl.setServer(_server);
 			_user.setUsername(_username);
 			_user.setPassword(_password);
+
 			_user.loginUser(_curl);
-			_user.setAccessToken(jsonParser(_curl.getResponse(), "access"));
-			_user.setRefreshToken(jsonParser(_curl.getResponse(), "refresh"));
-			_curl.addHeader("Authorization: Bearer " + _user.getAccessToken());
-			_info = text("(" + std::to_string(_curl.getHTTPCode()) + ") Connexion success !") | color(Color::Green);
+
+			_info = text("(" + std::to_string(_curl.getHTTPCode()) + ") Connexion succeed !") | color(Color::Green);
 			changePage(Page::MainMenuPage);
 			_screen.ExitLoopClosure()();
 		}
 		catch (std::exception &error) {
 			if (_curl.getHTTPCode() == 401)
-				_info = text("(" + std::to_string(_curl.getHTTPCode()) + "): " + "Unknown user, please sign up") | color(Color::Red);
-			else if (_curl.getHTTPCode() >= 301)
+				_info = text("(" + std::to_string(_curl.getHTTPCode()) + "): " + std::string(json::parse(_curl.getResponse())["detail"])) | color(Color::Red);
+			else if (_curl.getHTTPCode() >= 300)
 				_info = text("(" + std::to_string(_curl.getHTTPCode()) + "): " + _curl.getResponse()) | color(Color::Red);
+			else
+				_info = text("(" + std::to_string(_curl.getHTTPCode()) + "): " + error.what()) | color(Color::Red);
 		}
 	}
 	else if (server.empty() || username.empty() || password.empty()) {
@@ -93,16 +94,20 @@ void	PongCLI::registerAction(std::string &server, std::string &username, std::st
 			_curl.setServer(_server);
 			_user.setUsername(_username);
 			_user.setPassword(_password);
+
 			_user.registerUser(_curl);
-			_user.setAccessToken(jsonParser(_curl.getResponse(), "access"));
-			_user.setRefreshToken(jsonParser(_curl.getResponse(), "refresh"));
-			_info = text("(" + std::to_string(_curl.getHTTPCode()) + ") Connexion success !") | color(Color::Green);
+
+			_info = text("(" + std::to_string(_curl.getHTTPCode()) + ") Registration succeed !") | color(Color::Green);
 			changePage(Page::MainMenuPage);
 			_screen.ExitLoopClosure()();
 		}
 		catch (std::exception &error) {
-			if (_curl.getHTTPCode() >= 301)
-				_info = text("(" + std::to_string(_curl.getHTTPCode()) + "): " + _curl.getResponse()) | color(Color::Red);
+			if (_curl.getHTTPCode() >= 500)
+				_info = text("(" + std::to_string(_curl.getHTTPCode()) + "): " + error.what()) | color(Color::Red);
+			else if (_curl.getHTTPCode() >= 300)
+				_info = text("(" + std::to_string(_curl.getHTTPCode()) + "): " + std::string(json::parse(_curl.getResponse())["username"][0])) | color(Color::Red);
+			else
+				_info = text("(" + std::to_string(_curl.getHTTPCode()) + "): " + error.what()) | color(Color::Red);
 		}
 	}
 	else if (server.empty() || username.empty() || password.empty()) {
@@ -116,8 +121,10 @@ void	PongCLI::guestUpAction(std::string &server) {
 		_server = server;
 		try {
 			_curl.setServer(_server);
-			_user.setGuestTokens(_curl);
-			_info = text("(" + std::to_string(_curl.getHTTPCode()) + ") Guest up success !") | color(Color::Green);
+
+			_user.guestUser(_curl);
+
+			_info = text("(" + std::to_string(_curl.getHTTPCode()) + ") Guest up succeed !") | color(Color::Green);
 			changePage(Page::MainMenuPage);
 			_screen.ExitLoopClosure()();
 		}
@@ -280,8 +287,10 @@ void PongCLI::renderMainMenuPage() {
 	std::string info;
 	try {
 		_curl.GET("/api/users/me/", "");
-		auto json = json::parse(_curl.getResponse());
-
+		basic_json	json = json::parse(_curl.getResponse());
+		if (_curl.getHTTPCode() >= 300)
+			throw std::runtime_error("Error: " + std::to_string(_curl.getHTTPCode()) + " " + _curl.getResponse());
+		id = json["id"];
 		username = json["username"];
 		guest = json["is_guest"];
 		stardust = json["coins"];
@@ -305,21 +314,21 @@ void PongCLI::renderMainMenuPage() {
 							hbox({ // Profile
 								vbox({ // left
 									text("id: ") | vcenter | yflex_grow,
-									text("username: ") | vcenter | yflex_grow,
-									text("guest: ") | vcenter | yflex_grow,
-									text("stardust: ") | vcenter | yflex_grow,
-									text("aura: ") | vcenter | yflex_grow,
-									text("accept_friend_request: ") | vcenter | yflex_grow,
-									text("accept_chat_from: ") | vcenter | yflex_grow,
+									text("Username: ") | vcenter | yflex_grow,
+									text("Guest user: ") | vcenter | yflex_grow,
+									text("Stardust: ") | vcenter | yflex_grow,
+									text("Aura: ") | vcenter | yflex_grow,
+									text("Accept friends request: ") | vcenter | yflex_grow,
+									text("DM open for: ") | vcenter | yflex_grow,
 								}),
 								separator(),
 								vbox({ // right
 									text(std::to_string(id)) | vcenter | yflex_grow,
 									text(username) | vcenter | yflex_grow,
-									text(guest ? "true" : "false") | vcenter | yflex_grow,
+									text(guest ? "yes" : "no") | vcenter | yflex_grow,
 									text(std::to_string(stardust)) | vcenter | yflex_grow,
 									text(std::to_string(aura)) | vcenter | yflex_grow,
-									text(accept_friend_request ? "true" : "false") | vcenter | yflex_grow,
+									text(accept_friend_request ? "yes" : "no") | vcenter | yflex_grow,
 									text(accept_chat_from) | vcenter | yflex_grow,
 								}) | flex,
 							}) | flex
