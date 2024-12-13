@@ -48,10 +48,12 @@ class Server:
             for player in team.players:
                 print(player.user_id, flush=True)
         game = Game(Server.sio, match, Position(800, 600))
+        print(Server.games_lock, flush=True)
         Server.games_lock.acquire()
+        print(match_code, flush=True)
         Server.games[match_code] = game
         Server.games_lock.release()
-        Server.games[match_code].launch()
+        asyncio.run(Server.games[match_code].launch())
 
     @staticmethod
     def monitoring_routine():
@@ -69,7 +71,7 @@ class Server:
                     if game.check_zombie() == True:
                         Server.games.pop(match_code)
             except RuntimeError:
-                pass
+                Server.games_lock.release()
                 #print(Server.games_lock)
             Server.games_lock.release()
             time.sleep(15)
@@ -85,10 +87,14 @@ class Server:
     @staticmethod
     def get_player_and_match_code(id: int):
         #print(Server.games_lock, flush=True)
+        # await asyncio.sleep(1)
         Server.games_lock.acquire()
         for match_code in Server.games:
+            print('la1', flush=True)
             for team in Server.games[match_code].match.teams:
+                print('la2', flush=True)
                 for player in team.players:
+                    print(player.user_id, flush=True)
                     if player.user_id == id:
                         Server.games_lock.release()
                         return player, match_code

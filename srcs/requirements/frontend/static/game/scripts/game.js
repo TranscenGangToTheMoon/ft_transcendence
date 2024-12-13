@@ -10,8 +10,8 @@
         animationDuration: 800,
         font: "48px Arial",
         fontColor: "white",
-        defaultBallSpeed : 0,
-        ballSpeedIncrement: 1,
+        defaultBallSpeed : 2,
+        ballSpeedIncrement: 0,
         winningScore: 3,
         enemyScore : {},
         playerScore : {},
@@ -349,7 +349,11 @@
 
     function handleGoal(){
         if (state.ball.x + config.ballSize <= 0 || state.ball.x >= canvas.width){
-			if (state.ball.x + config.ballSize <= 0) state.playerScore++;
+			if (state.ball.x + config.ballSize <= 0){
+                state.playerScore++;
+                if (typeof socket !== 'undefined')
+                    socket.emit('goal');
+            }
 			else state.enemyScore++;
 			resetBall();
             // state.ball.speedX = -state.ball.speedX;
@@ -362,6 +366,11 @@
         state.ball.speed = config.defaultBallSpeed;
         state.ball.speedX = (Math.random()) < 0.5 ? config.defaultBallSpeed : -config.defaultBallSpeed;
         state.ball.speedY = (Math.random()) < 0.5 ? config.defaultBallSpeed : -config.defaultBallSpeed;
+        if (typeof socket !=='undefined'){
+            state.ball.speed = 0;
+            state.ball.speedX = 0;
+            state.ball.speedY = 0;
+        }
     }
 
     function incrementBallSpeed(){
@@ -375,16 +384,19 @@
 
     function calculateNewBallDirection(paddleY, paddleSpeed=0) {
         const impactPosition = calculateImpactPosition(state.ball.y + config.ballSize/2, paddleY, config.paddleHeight);
+        console.log(impactPosition);
         const bounceAngle = impactPosition * config.maxBounceAngle;
 
         //ADD SPEED INFLUENCE HERE
 
         const speed = state.ball.speed;
-        console.log('speed', speed);
+        console.log(bounceAngle);
         const xNewSpeed = speed * Math.cos(bounceAngle);
         const yNewSpeed = speed * -Math.sin(bounceAngle);
+        console.log(xNewSpeed, yNewSpeed);
         state.ball.speedX = state.ball.speedX < 0 ? xNewSpeed * -1 : xNewSpeed;
         state.ball.speedY = yNewSpeed;
+        console.log(state.ball.speedX, state.ball.speedY);
     }
 
     function handlePaddleBounce(paddle){
@@ -416,11 +428,9 @@
                 if (state.ball.x + config.ballSize > paddle.x &&
                     state.ball.x + config.ballSize < paddle.x + config.paddleWidth
                 ){
-                    console.log('derriere');
                     state.ball.x = paddle.x - config.ballSize;
                 }
                 else{
-                    console.log('devant')
                     state.ball.x = paddle.x + config.paddleWidth;
                 }
             }
@@ -524,7 +534,7 @@
         }
     }
 
-    window.PongGame = {startGame, stopGame, pauseGame, resumeGame, state, moveUp, moveDown};
+    window.PongGame = {startGame, stopGame, pauseGame, resumeGame, state, config, moveUp, moveDown};
 })();
 
 
@@ -548,6 +558,16 @@ function initSocket(){
         console.log('envoi join_room')
         socket.emit('join_room')
     });
+    socket.on('start_game', event => {
+        console.log(event);
+        window.PongGame.state.ball.y = event.position_y - window.PongGame.config.ballSize / 2;
+        window.PongGame.state.ball.x = event.position_x - window.PongGame.config.ballSize / 2;
+        window.PongGame.state.ball.speedX = event.direction_x * window.PongGame.config.defaultBallSpeed;
+        window.PongGame.state.ball.speedY = (-event.direction_y) * window.PongGame.config.defaultBallSpeed;
+        console.log(window.PongGame.state.ball.speedX);
+        console.log(window.PongGame.state.ball.speedY);
+        window.PongGame.startGame();
+    })
     socket.on('connect_error', (error)=> {
         console.log('error', error);
     })
@@ -564,6 +584,12 @@ function initSocket(){
         console.log('received stop_moving')
         window.PongGame.state.paddles.left.speed = 0;
         window.PongGame.state.paddles.left.y = event.position;
+    })
+    socket.on('goal', event => {
+        window.PongGame.state.ball.y = event.position_y;
+        window.PongGame.state.ball.x = event.position_x;
+        window.PongGame.state.ball.speedX = event.direction_x * window.PongGame.config.defaultBallSpeed;
+        window.PongGame.state.ball.speedY = (-event.direction_y) * window.PongGame.config.defaultBallSpeed;
     })
 }
 
@@ -607,7 +633,7 @@ async function initGame(){
         catch(error) {
             console.log(error);
         }
-        window.PongGame.startGame();
+        // window.PongGame.startGame();
     }
     catch (unauthorized){
         displayMainAlert("Error", `You don't have permission to play in ${unauthorized}`);

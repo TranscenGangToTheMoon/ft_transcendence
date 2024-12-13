@@ -28,31 +28,29 @@ async def connect(sid, environ, auth):
 async def move_up(sid):
     from game_server.server import Server
     player = Server.clients[sid]
-    player.racket.move_up()
     await Server.sio.emit(
         'move_up',
         data={'player': player.user_id},
         room=str(player.match_code),
-        skip_sid=sid
-    )
+        skip_sid=sid)
+    player.racket.move_up()
 
 
 async def move_down(sid):
     from game_server.server import Server
     player = Server.clients[sid]
-    player.racket.move_down()
     await Server.sio.emit(
         'move_down',
         data={'player': player.user_id},
         room=str(player.match_code),
         skip_sid=sid
     )
+    player.racket.move_down()
 
 
 async def stop_moving(sid, data):
     from game_server.server import Server
     player = Server.clients[sid]
-    player.racket.stop_moving()
     position = data['position']
     await Server.sio.emit(
         'stop_moving',
@@ -60,6 +58,7 @@ async def stop_moving(sid, data):
         room=str(player.match_code),
         skip_sid=sid
     )
+    player.racket.stop_moving()
 
 
 async def send_games(sid):
@@ -71,7 +70,16 @@ async def send_games(sid):
     info(f'games are: {codes}')
 
 
+async def goal(sid):
+    from game_server.server import Server
+    player = Server.clients[sid]
+    Server.games[player.match_code].score()
+    await Server.sio.emit('goal', data={'player': player.user_id}, room=str(player.match_code), skip_sid=sid)
+
+
 async def disconnect(sid):
     from game_server.server import Server
+    if Server.clients == {}:
+        return
     match_code = Server.clients[sid].match_code
     await Server.sio.leave_room(sid, str(match_code))
