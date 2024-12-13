@@ -45,6 +45,17 @@ urlpatterns = [
 # todo 10 make dl all data
 # todo handle nb spectactgame
 
+# todo game -> {type: game, 'code')
+# todo event -> FINISH GAME (args, abandon)
+# todo chat -> {type: notification, 'message'}
+# todo lobby -> {type: event, 'tournoi', 'id', 'status'}
+# todo lobby -> connect chat
+# todo tournoi -> connect chat
+# todo dans user serializer nb message 1 message, 1 notif dans friend
+# todo demande de game only if connected
+# todo normaliser les vecteurs
+# todo Use verify since me
+
 # todo make endpoint for user stats, xp, trophies (when match ended, or when tournament ended)
 # - pas de stat (custom_game)
 # - stat tournoi gagne
