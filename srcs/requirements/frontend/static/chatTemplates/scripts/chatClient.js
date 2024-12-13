@@ -39,7 +39,7 @@ function send(chatData) {
         chatForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const message = e.target.message.value;
-            socket.emit('message', {'chatId': chatData.chatId, 'content': message});
+            socket.emit('message', {'chatId': chatData.chatId, 'content': message, 'token' : 'Bearer ' + getAccessToken()});
             console.log('Message sent: ', message);
             chatForm.reset();
         });
@@ -105,7 +105,7 @@ function parsChatRequest(chat)
 		// 'targetId': chat.participants[0].id,
 		'target': chat.chat_with.username,
 		'targetId': chat.chat_with.id,
-		'lastMessage': chat.last_message,
+		'lastMessage': chat.last_message.content,
 	};
 	if (chatData.lastMessage === null) {
 		chatData.lastMessage = '< Say hi! >';
@@ -118,13 +118,18 @@ async function loadOldMessages(chatData){
 	try {
 		console.log('loading old messages');
 		let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/chat/${chatData.chatId}/messages`, 'GET');
-		data.results.forEach(element => {
-			if (element.author === chatData.targetId) {
-				chatBox.insertAdjacentHTML('afterbegin', `<div><strong>${chatData.target}:</strong> ${element.content}</div>`);
-			} else {
-				chatBox.insertAdjacentHTML('afterbegin', `<div><strong>You:</strong> ${element.content}</div>`);
-			}
-		});
+		if (data.count === 0) {
+			console.log('no messages to load');
+		}
+		else {
+			data.results.forEach(element => {
+				if (element.author === chatData.targetId) {
+					chatBox.insertAdjacentHTML('afterbegin', `<div><strong>${chatData.target}:</strong> ${element.content}</div>`);
+				} else {
+					chatBox.insertAdjacentHTML('afterbegin', `<div><strong>You:</strong> ${element.content}</div>`);
+				}
+			});
+		}
 	}
 	catch (error) {
 		console.log(error);
@@ -150,6 +155,9 @@ async function selectChatMenu(filter='') {
 				});
 				chatsList.appendChild(chat);
 			});
+		}
+		else {
+			console.log('no chats found');
 		}
 	}
 	catch(error) {

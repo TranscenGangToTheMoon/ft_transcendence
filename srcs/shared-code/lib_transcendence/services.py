@@ -35,8 +35,9 @@ def request_game(endpoint: Literal['match/', 'tournaments/', 'playing/{user_id}/
     return request_service('game', endpoint, method, data)
 
 # endpoints.Chat.fmessages.format(chat_id=15), {'content': 'Hello, World!'}
-def request_chat(endpoint: str, method: Literal['POST', 'PATCH', 'DELETE'] = 'PATCH', data=None):
-    return request_service('chat', endpoint, method, data)
+def request_chat(endpoint: str, method: Literal['POST', 'PATCH', 'DELETE'] = 'PATCH', data=None, token=None):
+    print(f"my token in request_chat: {token}")
+    return request_service('chat', endpoint, method, data, token)
 
 
 def request_auth(token, endpoint: Literal['update/', 'verify/', 'delete/'], method: Literal['GET', 'PUT', 'PATCH', 'DELETE'], data=None):
