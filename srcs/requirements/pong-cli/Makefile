@@ -57,7 +57,7 @@ FTXUI		:=	\
 
 FTXUI_D		:=	$(LIB_D)/ftxui
 
-FTXUI_I		:=	$(LIB_D)/ftxui/include/
+FTXUI_I		:=	$(FTXUI_D)/include
 
 FTXUI_A		:=	$(FTXUI:%=$(FTXUI_D)/build/%)
 
@@ -66,13 +66,24 @@ FTXUI_F		:=	-L$(FTXUI_D)/build/ -lftxui-component -lftxui-dom -lftxui-screen
 ###############JSON###############
 JSON		:=	\
 
-
 JSON_D		:=	$(LIB_D)/json
 
-JSON_I		:=	$(LIB_D)/json/single_include/
+JSON_I		:=	$(JSON_D)/single_include
 
 JSON_A		:=	$(JSON:%=$(JSON_D)/build/%)
 
+###############FTXUI###############
+SOKCT		:=	\
+				libsioclient.a\
+				libsioclient_tls.a
+
+SOKCT_D		:=	$(LIB_D)/socketio
+
+SOKCT_I		:=	$(SOKCT_D)/src
+
+SOKCT_A		:=	$(SOKCT:%=$(SOKCT_D)/build/%)
+
+SOKCT_F		:=	-L$(SOKCT_D)/build/ -sioclient -sioclient_tls
 ########################################################################################################################
 #                                                        FLAGS                                                         #
 ########################################################################################################################
@@ -82,11 +93,11 @@ MFLAGS		:= --jobs=$(shell nproc)
 
 RM			:=	rm -rf
 
-IFLAGS		:=	-I$(INCS_D) -I$(FTXUI_I) -I$(CURL_I) -I$(JSON_I)
+IFLAGS		:=	-I$(INCS_D) -I$(FTXUI_I) -I$(CURL_I) -I$(JSON_I) -I$(SOKCT_I)
 
 DFLAGS		=	-MMD -MP -MT $@ -MF $(DEPS_D)$*.d
 
-OFLAGS		:=	-O3 #-Ofast -march=native -fomit-frame-pointer -funroll-loops
+OFLAGS		:=	#-O3 #-Ofast -march=native -fomit-frame-pointer -funroll-loops
 
 CXXFLAGS	=	-Wall -Wextra -Werror -g -fsanitize=thread $(IFLAGS) $(OFLAGS) $(DFLAGS)
 
@@ -130,10 +141,10 @@ RESET		:=	\001\033[0m\002
 .PHONY: all
 all			:	$(NAME) banner
 
-$(NAME)		:	ftxui curl json $(CERT) $(OBJS)
+$(NAME)		:	ftxui curl json socketio $(CERT) $(OBJS)
 			$(CXX) $(CXXFLAGS) -o $(NAME) $(OBJS) $(LFLAGS)
 
-$(OBJS)		:	$(OBJS_D)%.o: $(SRCS_D)%.cpp $(FTXUI_D) $(CURL_D) $(JSON_D) | $(OBJS_D) $(DEPS_D)
+$(OBJS)		:	$(OBJS_D)%.o: $(SRCS_D)%.cpp $(FTXUI_D) $(CURL_D) $(JSON_D) $(SOKCT_D) | $(OBJS_D) $(DEPS_D)
 			$(CXX) $(CXXFLAGS) -c $< -o $@
 
 $(OBJS_D)	:
@@ -172,6 +183,14 @@ json		:	$(JSON_D)
 
 $(JSON_D)	:
 			git clone --depth 1 --branch v3.11.3 git@github.com:nlohmann/json.git $@
+
+.PHONY: socketio
+socketio	:	$(SOKCT_D)
+			cmake $(SOKCT_D) -B $(SOKCT_D)/build
+			$(MAKE) $(MFLAGS) -C $(SOKCT_D)/build
+
+$(SOKCT_D)	:
+			git clone --recurse-submodules --depth 1 --branch 3.1.0 https://github.com/socketio/socket.io-client-cpp.git  $@
 
 $(CERT)		:
 			openssl s_client -connect localhost:4443 -servername localhost </dev/null \

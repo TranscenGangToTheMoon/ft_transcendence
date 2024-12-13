@@ -19,10 +19,10 @@
 #include "CurlWrapper.hpp"
 #include "PongCLI.hpp"
 #include "User.hpp"
+#include "sio_client.h"
 
 using namespace ftxui;
 using namespace nlohmann;
-
 int main(void)
 {
 	{
