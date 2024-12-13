@@ -23,7 +23,7 @@ public:
 	User(User const &src) = delete;
 	User	&operator=(User const &rhs) = delete;
 
-	void	setGuestTokens(CurlWrapper &curl);
+	void	guestUser(CurlWrapper &curl);
 
 	void	registerUser(CurlWrapper &curl);
 	void	registerGuestUser(CurlWrapper &curl);
