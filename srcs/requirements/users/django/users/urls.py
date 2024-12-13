@@ -33,6 +33,9 @@ urlpatterns = [
     path(UsersManagement.manage_user, manage_user_view),
 ]
 
+# todo 1 truc jules
+# todo 2 truc basile (endpoint)
+
 # todo 1. make sse
 # todo 7. message discord
 # todo 7. message private discord
