@@ -34,11 +34,13 @@ class Test01_Register(UnitTest):
             'username_too_long_because_its_must_be_short',
             'invalid_char!@#$',
             'admin',
+            'adminstrator',
+            'admin123',
             'staff',
-            'support',
+            'support22',
             'ft_transcendence',
-            'transcendence',
-            'anonymus',
+            'transcendence2',
+            'anonymous',
             '',
         ]
         password = 'InvalideUser_123' + rnstr()
