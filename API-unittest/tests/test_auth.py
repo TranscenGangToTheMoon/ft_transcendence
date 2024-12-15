@@ -61,7 +61,8 @@ class Test01_Register(UnitTest):
             'qwerty',
             'aaaaaaaa',
             '123456789',
-            'abcdefg'
+            'abcdefg',
+            ''
         ]
 
         for password in passwords:
