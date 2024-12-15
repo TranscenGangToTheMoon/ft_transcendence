@@ -81,7 +81,7 @@ class Test02_Guest(UnitTest):
         # todo make get response
         user = {'token': self.assertResponse(register_guest(username=username, guest=guest), 200, get_field='access')} #todo make truc pour avoir le bon token
         test_username = self.assertResponse(me(user), 200, get_field='username') # todo rename get id get field
-        self.assertEquals(username, test_username)
+        self.assertEqual(username, test_username)
 
     def test_003_register_guest_without_tokent(self):
         random_name = rnstr()
