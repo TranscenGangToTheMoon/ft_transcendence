@@ -100,11 +100,11 @@ def get_participants(self, obj, add_fields: list[str] = None):
     fields = ['user_id', 'creator', 'join_at']
     if add_fields is not None:
         fields.extend(add_fields)
-    participants = list(obj.participants.all().values(*fields))
-    results = retrieve_users([p['user_id'] for p in participants], self.context.get('request'))
-    for n, participant in enumerate(results):
+    participants = {p['user_id']: p for p in obj.participants.all().values(*fields)}
+    results = retrieve_users(list(participants), self.context.get('request'))
+    for participant in results:
         for f in fields[1:]:
-            participant[f] = participants[n][f]
+            participant[f] = participants[participant['id']][f]
     return results
 
 
