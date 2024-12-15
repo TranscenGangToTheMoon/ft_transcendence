@@ -28,6 +28,19 @@ class Test01_Game(UnitTest):
     def test_003_invalid_game_mode(self):
         self.assertResponse(create_game(new_user(), new_user(), game_mode='caca'), 400)
 
+    def test_004_invalid_teams(self):
+        invalid_teams = [
+            [[], []],
+            [[1], []],
+            [[], [1]],
+            [['coucou'], ['hey']],
+            [[1, 2], [5]],
+            [[1], [1]],
+        ]
+
+        for invalid_team in invalid_teams:
+            self.assertResponse(create_game(data={'game_mode': 'ranked', 'teams': invalid_team}), 400)
+
 
 if __name__ == '__main__':
     unittest.main()
