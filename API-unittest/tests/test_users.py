@@ -14,12 +14,8 @@ from utils.generate_random import rnstr
 from utils.my_unittest import UnitTest
 
 
-# todo test rename
-# todo test rename invalid name
-# todo test rename invalid name already exist
-
 # todo test update user
-# todo test get user friend field
+# todo test get friend field
 # todo test get status field
 
 
