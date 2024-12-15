@@ -28,7 +28,7 @@ def validate_username(value, check_exists=True, only_check_exists=False):
     return value
 
 
-def set_password(password, user, remove_instance=False, check_previous_password=False):
+def set_password(password, user, remove_instance=False, check_previous_password=False, old_username=None):
     if password is None:
         return
     try:
@@ -42,5 +42,8 @@ def set_password(password, user, remove_instance=False, check_previous_password=
     except ValidationError as e:
         if remove_instance:
             user.delete()
+        if old_username:
+            user.username = old_username
+            user.save()
         raise serializers.ValidationError({'password': e.messages})
     user.set_password(password)
