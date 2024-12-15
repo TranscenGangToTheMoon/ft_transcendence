@@ -1,5 +1,6 @@
 from typing import Literal
 
+from utils.generate_random import rnstr
 from utils.request import make_request
 
 
@@ -26,7 +27,7 @@ def register_guest(guest=None, username=None, password=None, data=None, method='
         if password is not None:
             data['password'] = password
         elif guest is not None:
-            data['password'] = 'password_' + guest['username']
+            data['password'] = 'password_guest' + rnstr(10)
 
     kwargs = {
         'endpoint': 'auth/register/guest/',
