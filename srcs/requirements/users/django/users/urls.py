@@ -48,7 +48,6 @@ urlpatterns = [
 # todo 9 send chat_id in lobby or tournament
 # todo 10 make dl all data
 # todo handle nb spectactgame
-# todo fix unit test failed
 # todo fix permiision denied guest
 
 # todo game -> {type: game, 'code')
