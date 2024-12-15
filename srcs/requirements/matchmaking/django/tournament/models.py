@@ -35,8 +35,7 @@ class Tournaments(models.Model):
     def start(self):
         self.is_started = True
         self.save()
-        first_stage = TournamentStage.objects.create(tournament=self, label=Tournament.get_label(self.n_stage)) # todo create direclty from self.stage
-        # todo make seeding
+        first_stage = self.stages.create(label=Tournament.get_label(self.n_stage))
         participants = self.participants.all().order_by('seeding')
 
         for p in participants:
