@@ -29,6 +29,9 @@ class Test01_Game(UnitTest):
         self.assertResponse(create_game(new_user(), new_user(), game_mode='caca'), 400)
 
     def test_004_invalid_teams(self):
+    def test_004_no_game_mode(self):
+        self.assertResponse(create_game(data={'teams': [[1], [2]]}), 400, {'game_mode': ['This field is required.']})
+
         invalid_teams = [
             [[], []],
             [[1], []],
