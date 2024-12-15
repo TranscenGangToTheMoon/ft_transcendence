@@ -64,7 +64,8 @@ class Users:
     _base_users = base_api + 'users/'
 
     me = _base_users + 'me/'
-    user = _base_users + f'{_user_id}/'
+    fuser = _base_users + '{user_id}/'
+    user = fuser.format(user_id=_user_id)
 
     friends = me + 'friends/'
     friend = friends + '<int:friendship_id>/'
