@@ -24,8 +24,8 @@ class Test01_Register(UnitTest):
     def test_002_register_already_exist(self):
         user1 = new_user()
 
-        self.assertResponse(register(user1['username'], user1['password']), 409)
-        self.assertResponse(register(user1['username'].upper(), user1['password']), 409)
+        self.assertResponse(register(user1['username'], user1['password']), 400)
+        self.assertResponse(register(user1['username'].upper(), user1['password']), 400)
 
     def test_003_register_invalid_username(self):
         usernames = [
