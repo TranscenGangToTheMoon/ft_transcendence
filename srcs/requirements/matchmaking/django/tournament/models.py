@@ -122,7 +122,7 @@ class TournamentParticipants(models.Model):
         self.save()
         return None
 
-    def __str__(self): # todo make __str__ for all models
+    def __str__(self):
         name = f'{self.tournament.code}/ {self.user_id}'
         if self.creator:
             name += '*'

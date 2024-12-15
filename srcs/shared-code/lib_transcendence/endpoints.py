@@ -1,5 +1,5 @@
 base_api = 'api/'
-base_private_api = base_api + 'private/' # todo change to all private
+base_private_api = base_api + 'private/'
 base_sse = 'sse/'
 _user_id = '<int:user_id>'
 

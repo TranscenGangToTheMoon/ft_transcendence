@@ -34,21 +34,33 @@ urlpatterns = [
     path(UsersManagement.manage_user, manage_user_view),
 ]
 
-# todo 2 truc basile (endpoint)
-# todo 2 truc basile finish game
+# todo make sse
+#   - create endpoint for send notification (message, demande d'amis, demande de join lobby,, demande de join tournament, ...)
+#   - create models for notification
+#   - send notfication when reconnect
+#   - create endpoint for send event (lobby, tournament, etc...)
+#   - update user status (connected, disconnected, ...)
+#   - if disconnected, send to matchmaking (to leave lobby, tournament, ...)
+#   - make function for create event
+#   - make function for create notification
+# todo handle download all data
+# todo token pb (@Florian1215 je sais pas pourquoi mais quand je fais un make re puis que je me log avec chrome sur un user, ca log aussi tous les autres navigateurs sur cet user en mode le nouveau token de celui qui se log est le meme que celui qui est pas log sur l'autre navigateur)
+# todo handle abandon when finish game
+# todo handle local possiblitie user in custom_game
+# todo surcharge __str__ for all models
 
-# todo 1. make sse
-# todo 7. message discord
-# todo 7. message private discord
-# todo 2. update user status (connected, disconnected, ...)
-# todo 3. if disconnected, send to matchmaking (to leave lobby, tournament, ...)
-# todo 4. create endpoint for send notification (message, demande d'amis, demande de join lobby,, demande de join tournament, ...)
-# todo 5. create endpoint for send lobby status
-# todo 6. create endpoint for send tournament status
-# todo 9 send chat_id in lobby or tournament
-# todo 10 make dl all data
-# todo handle nb spectactgame
-# todo fix permiision denied guest
+
+# todo CHAT
+#   - create chat when lobby is created
+#   - create chat when tournament is created
+#   - delete chat when tournament is finish
+#   - delete chat when lobby is destroy
+#   - send chat_id in lobby
+#   - send chat_id in tournament
+
+
+# todo handle nb spectact game
+# todo fix permision denied guest
 
 # todo game -> {type: game, 'code')
 # todo event -> FINISH GAME (args, abandon)
@@ -93,7 +105,6 @@ urlpatterns = [
 
 # todo make endpoint for online status
 # todo fix github issue
-# todo create chat when lobby or tournament is created
 # todo delete chat after finish tournament
 # todo delete chat after finish lobby
 

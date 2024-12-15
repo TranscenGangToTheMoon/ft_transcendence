@@ -6,7 +6,7 @@ from rest_framework.authentication import BaseAuthentication
 from rest_framework.exceptions import ParseError, AuthenticationFailed
 
 
-#todo delete user after request
+# todo delete user after request
 def get_user_from_auth(user_data):
     from django.contrib.auth.models import User
 
