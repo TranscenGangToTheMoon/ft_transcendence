@@ -8,8 +8,6 @@ from blocking.utils import create_player_instance
 from matchmaking.utils import verify_user
 from play.models import Players
 
-import threading
-
 
 class PlayersSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(source='user_id', read_only=True)
