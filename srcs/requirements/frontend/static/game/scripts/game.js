@@ -351,8 +351,10 @@
         if (state.ball.x + config.ballSize <= 0 || state.ball.x >= canvas.width){
 			if (state.ball.x + config.ballSize <= 0){
                 state.playerScore++;
-                if (typeof socket !== 'undefined')
+                if (typeof socket !== 'undefined') {
                     socket.emit('goal');
+                    console.log('emitted goal');
+                }
             }
 			else state.enemyScore++;
 			resetBall();
@@ -413,6 +415,9 @@
             if (state.ball.speed < config.maxBallSpeed)
                 incrementBallSpeed();
             calculateNewBallDirection(paddle.y);
+        }
+        if (paddle == state.paddles.right) {
+            window.socket.emit('bounce', {'dir_x': state.ball.speedX, 'dir_y': state.ball.speedY})
         }
     }
 
@@ -554,9 +559,6 @@ function initSocket(){
 
         // Envoie un message au serveur
         console.log('envoi message')
-        socket.emit('message', 'Bonjour depuis le frontend !');
-        console.log('envoi join_room')
-        socket.emit('join_room')
     });
     socket.on('start_game', event => {
         console.log(event);
@@ -586,10 +588,15 @@ function initSocket(){
         window.PongGame.state.paddles.left.y = event.position;
     })
     socket.on('goal', event => {
+        console.log('received goal');
         window.PongGame.state.ball.y = event.position_y;
         window.PongGame.state.ball.x = event.position_x;
         window.PongGame.state.ball.speedX = event.direction_x * window.PongGame.config.defaultBallSpeed;
         window.PongGame.state.ball.speedY = (-event.direction_y) * window.PongGame.config.defaultBallSpeed;
+    })
+    socket.on('bounce', event => {
+        window.PongGame.state.ball.speedX = event.direction_x * window.PongGame.state.ball.speed;
+        window.PongGame.state.ball.speedY = (-event.direction_y) * window.PongGame.state.ball.speed;
     })
 }
 

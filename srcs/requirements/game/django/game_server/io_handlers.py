@@ -73,8 +73,14 @@ async def send_games(sid):
 async def goal(sid):
     from game_server.server import Server
     player = Server.clients[sid]
-    Server.games[player.match_code].score()
+    await Server.games[player.match_code].score()
     await Server.sio.emit('goal', data={'player': player.user_id}, room=str(player.match_code), skip_sid=sid)
+
+
+async def bounce(sid, data):
+    from game_server.server import Server
+    player = Server.clients[sid]
+    await Server.sio.emit('bounce', data={'dir_x': -data['dir_x'], 'dir_y': data['dir_y']}, skip_sid=sid)
 
 
 async def disconnect(sid):

@@ -72,7 +72,6 @@ class Server:
                         Server.games.pop(match_code)
             except RuntimeError:
                 Server.games_lock.release()
-                #print(Server.games_lock)
             Server.games_lock.release()
             time.sleep(15)
             # Flush stdout to print help aiohttp print its things
