@@ -10,8 +10,10 @@ valid_charset = ascii_letters + digits + '_-'
 
 def validate_username(value, check_exists=True, only_check_exists=False):
     if not only_check_exists:
-        if value in ('anonymous', 'admin', 'staff'):
-            raise serializers.ValidationError(MessagesException.ValidationError.USERNAME_NOT_ALLOWED)
+        not_allowed = ('anonymous', 'admin', 'staff', 'support', 'ft_transcendence', 'transcendence')
+        for not_allowed_value in not_allowed:
+            if not_allowed_value in value:
+                raise serializers.ValidationError(MessagesException.ValidationError.USERNAME_NOT_ALLOWED)
         if len(value) < 3:
             raise serializers.ValidationError(MessagesException.ValidationError.USERNAME_LONGER_THAN_3_CHAR)
         if len(value) > 30:
