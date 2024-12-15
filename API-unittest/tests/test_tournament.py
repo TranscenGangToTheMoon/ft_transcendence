@@ -39,7 +39,7 @@ class Test02_ErrorTournament(UnitTest):
         for _ in range(3):
             self.assertResponse(join_tournament(code), 201)
         self.assertResponse(join_tournament(code), 403, {'detail': 'Tournament already started.'})
-        # self.assertResponse(join_tournament(code), 403, {'detail': 'Tournament is full.'}) todo make
+        # self.assertResponse(join_tournament(code), 403, {'detail': 'Tournament is full.'}) todo make when tournament work
 
     def test_004_tournament_is_already_started(self):
         code = self.assertResponse(create_tournament(), 201, get_field='code')
