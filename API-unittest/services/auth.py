@@ -5,8 +5,18 @@ from utils.request import make_request
 
 
 def register(username=None, password=None, data=None, method='POST'):
-    if data is None and password is not None and username is not None:
-        data = {'username': username, 'password': password}
+    if data is None:
+        data = {}
+
+    if username is not None:
+        data['username'] = username
+    else:
+        data['username'] = 'register_test' + rnstr(10)
+
+    if password is not None:
+        data['password'] = password
+    else:
+        data['password'] = 'register_password' + rnstr(10)
 
     return make_request(
         endpoint='auth/register/',
