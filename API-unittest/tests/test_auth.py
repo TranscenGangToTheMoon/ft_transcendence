@@ -97,7 +97,6 @@ class Test02_Guest(UnitTest):
         guest = guest_user()
         username = 'guest-register' + rnstr()
 
-        # todo make get response
         user = {'token': self.assertResponse(register_guest(username=username, guest=guest), 200, get_field='access')} #todo make truc pour avoir le bon token
         test_username = self.assertResponse(me(user), 200, get_field='username')
         self.assertEqual(username, test_username)
