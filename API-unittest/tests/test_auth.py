@@ -38,13 +38,12 @@ class Test01_Register(UnitTest):
             'ft_transcendence',
             'transcendence',
             'anonymus',
+            '',
         ]
-        passwords = ['InvalideUser_123' + rnstr()]
+        password = 'InvalideUser_123' + rnstr()
 
         for username in usernames:
             self.assertResponse(register(username, password), 400)
-
-        self.assertResponse(register(username, password), 400)
 
     def test_004_register_invalid_password(self):
         username = 'register_inv_password' + rnstr()
