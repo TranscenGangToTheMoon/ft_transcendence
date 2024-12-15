@@ -34,7 +34,6 @@ urlpatterns = [
     path(UsersManagement.manage_user, manage_user_view),
 ]
 
-# todo get user instance in chat
 # todo get user instance in lobby and tournament
 # todo get user instance in tournament
 # todo 2 truc basile (endpoint)
