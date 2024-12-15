@@ -200,7 +200,7 @@ class Test06_LeaveTournament(UnitTest):
         user1 = new_user()
         users = [new_user() for _ in range(2)]
 
-        response = self.assertResponse(create_tournament(user1), 201, get_field='code')
+        response = self.assertResponse(create_tournament(user1), 201)
         code = response['code']
         name = response['name']
 
