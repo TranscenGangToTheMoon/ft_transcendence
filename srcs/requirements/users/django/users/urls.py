@@ -49,6 +49,7 @@ urlpatterns = [
 # todo 10 make dl all data
 # todo handle nb spectactgame
 # todo fix unit test failed
+# todo fix permiision denied guest
 
 # todo game -> {type: game, 'code')
 # todo event -> FINISH GAME (args, abandon)
