@@ -6,3 +6,6 @@
 # todo test not team
 # todo test invalide team
 # todo test invlaid game mode
+
+
+class Test01_Game(UnitTest):
