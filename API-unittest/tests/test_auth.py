@@ -106,7 +106,7 @@ class Test02_Guest(UnitTest):
         self.assertResponse(register_guest(username='username_' + random_name, password='password_,' + random_name), 401)
 
     def test_004_register_user_since_guest(self):
-        self.assertResponse(register_guest(guest=new_user()), 403)  # todo add json response test
+        self.assertResponse(register_guest(guest=new_user()), 403)
 
     def test_005_login_guest(self):
         self.assertResponse(login(guest_user()['username'], rnstr()), 401, {'detail': 'No active account found with the given credentials'})
