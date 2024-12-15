@@ -6,12 +6,13 @@ from friend_requests.views import friend_requests_list_create_view, friend_reque
     friend_requests_receive_list_view
 from friends.views import friends_view, friend_view
 from sse.views import sse_view, notification_view, event_view
-from users.views import users_me_view, retrieve_user_view, manage_user_view
+from users.views import users_me_view, retrieve_user_view, retrieve_users_view, manage_user_view
 from validate.views import validate_chat_view, are_blocked_view
 
 urlpatterns = [
     path(Users.me, users_me_view),
     path(Users.user, retrieve_user_view),
+    path(Users.users, retrieve_users_view),
 
     path(Users.friend_requests, friend_requests_list_create_view),
     path(Users.friend_request, friend_request_view),
@@ -33,7 +34,6 @@ urlpatterns = [
     path(UsersManagement.manage_user, manage_user_view),
 ]
 
-# todo fix unit test failed
 # todo change rename (only auth)
 # todo auth with auth (not user/me)
 # todo get user instance in chat and lobby and tournament
@@ -51,6 +51,7 @@ urlpatterns = [
 # todo 9 send chat_id in lobby or tournament
 # todo 10 make dl all data
 # todo handle nb spectactgame
+# todo fix unit test failed
 
 # todo game -> {type: game, 'code')
 # todo event -> FINISH GAME (args, abandon)
@@ -115,5 +116,5 @@ urlpatterns = [
 
 # --- before push ---
 # todo type all python code (make variable)
-# todo check norm
+# todo check norm (sort line all import)
 # todo check problem

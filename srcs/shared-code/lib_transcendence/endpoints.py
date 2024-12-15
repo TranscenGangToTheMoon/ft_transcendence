@@ -1,4 +1,5 @@
 base_api = 'api/'
+base_private_api = 'papi/' # todo change to all private
 base_sse = 'sse/'
 _user_id = '<int:user_id>'
 
@@ -63,9 +64,9 @@ class Matchmaking:
 class Users:
     _base_users = base_api + 'users/'
 
+    users = base_private_api + 'users/'
     me = _base_users + 'me/'
-    fuser = _base_users + '{user_id}/'
-    user = fuser.format(user_id=_user_id)
+    user = _base_users + f'{_user_id}/'
 
     friends = me + 'friends/'
     friend = friends + '<int:friendship_id>/'
