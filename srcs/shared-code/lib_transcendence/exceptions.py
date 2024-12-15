@@ -47,6 +47,7 @@ class MessagesException:
 
         TEAMS_LIST = 'Teams must be a list.'
         TEAMS_NOT_EQUAL = 'Both teams must have the same number of players.'
+        IN_BOTH_TEAMS = 'User cannot be in both teams.'
 
         GAME_MODE_PLAYERS = '{obj} mode must have {n} players in each teams.'
         CLASH_3_PLAYERS = GAME_MODE_PLAYERS.format(obj='Clash', n=3)
