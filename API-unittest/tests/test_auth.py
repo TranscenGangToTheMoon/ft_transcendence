@@ -51,21 +51,19 @@ class Test01_Register(UnitTest):
     def test_004_register_invalid_password(self):
         username = 'register_inv_password' + rnstr()
         passwords = [
-            '!$@^Invalid_char123',
-            'Contain_username1' + username,
+            '!Invalid_char123 😂 🤣 😃 😄 😅 😆 ',
+            '!password_tooooooooooooooooooooooooooooooooooooooooo_long',
             'min_len',
-            'no_upper_case123',
-            'NO_LOWER_CASE123',
-            'NoSpecialChar123',
-            'NoNumbers',
             '123456',
             'password',
-            'azerty',
-            'qwerty',
+            'azertyui',
+            'qwertyui',
             'aaaaaaaa',
             '123456789',
-            'abcdefg',
-            ''
+            'abcdefgh',
+            '',
+            username + 'password',
+            'register_inv_password',
         ]
 
         for password in passwords:
