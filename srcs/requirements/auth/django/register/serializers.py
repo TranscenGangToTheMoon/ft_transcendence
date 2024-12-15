@@ -36,12 +36,14 @@ class RegisterSerializer(serializers.ModelSerializer):
         return create_user_get_token(instance)
 
     def update(self, instance, validated_data):
-        set_password(validated_data.pop('password', None), instance)
+        password = validated_data.pop('password', None)
+        old_username = instance.username
         if validated_data['username'] == instance.username:
             validated_data.pop('username')
         else:
             validate_username(validated_data['username'], only_check_exists=True)
+        new_instance = super().update(instance, validated_data)
+        set_password(password, instance, old_username=old_username)
         guest_group = get_group_guest()
         instance.groups.remove(guest_group)
-        new_instance = super().update(instance, validated_data)
         return create_user_get_token(new_instance, False)
