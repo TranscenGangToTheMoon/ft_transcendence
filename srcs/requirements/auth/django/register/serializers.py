@@ -33,7 +33,6 @@ class RegisterSerializer(serializers.ModelSerializer):
         password = validated_data.pop('password')
         instance = super().create(validated_data)
         set_password(password, instance, remove_instance=True)
-        instance.save()
         return create_user_get_token(instance)
 
     def update(self, instance, validated_data):
