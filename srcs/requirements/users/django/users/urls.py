@@ -34,8 +34,6 @@ urlpatterns = [
     path(UsersManagement.manage_user, manage_user_view),
 ]
 
-# todo get user instance in lobby and tournament
-# todo get user instance in tournament
 # todo 2 truc basile (endpoint)
 # todo 2 truc basile finish game
 
@@ -61,7 +59,6 @@ urlpatterns = [
 # todo dans user serializer nb message 1 message, 1 notif dans friend
 # todo demande de game only if connected
 # todo normaliser les vecteurs
-# todo Use verify since me
 
 # todo make endpoint for user stats, xp, trophies (when match ended, or when tournament ended)
 # - pas de stat (custom_game)
