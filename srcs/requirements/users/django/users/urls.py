@@ -33,6 +33,10 @@ urlpatterns = [
     path(UsersManagement.manage_user, manage_user_view),
 ]
 
+# todo fix unit test failed
+# todo change rename (only auth)
+# todo auth with auth (not user/me)
+# todo get user instance in chat and lobby and tournament
 # todo 1 truc jules
 # todo 2 truc basile (endpoint)
 # todo 2 truc basile finish game
