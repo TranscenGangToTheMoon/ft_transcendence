@@ -255,6 +255,18 @@ class Test05_RenameUser(UnitTest):
         response = self.assertResponse(blocked_user(user2, method='GET'), 200, count=1)
         self.assertEqual(response['results'][0]['blocked']['username'], new_username)
 
+    def test_004_rename_chat(self):
+        old_username = 'rename-chat-' + rnstr()
+        user1 = new_user(username=old_username)
+        user2 = new_user()
+        new_username = 'new-username-' + rnstr()
+
+        self.assertResponse(accept_chat(user2), 200)
+        self.assertResponse(create_chat(user1, user2['username']), 201)
+        self.assertResponse(me(user1, method='PATCH', data={'username': new_username}), 200)
+
+        self.assertResponse(create_chat(user2, method='GET', data={'q': old_username}), 200, count=0)
+        self.assertResponse(create_chat(user2, method='GET', data={'q': new_username}), 200, count=1)
 
 
 if __name__ == '__main__':
