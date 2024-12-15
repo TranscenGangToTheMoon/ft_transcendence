@@ -7,4 +7,4 @@ def retrieve_users(user_id: list[int] | int, request):
         user_ids = [user_id]
     else:
         user_ids = user_id
-    return request_users(endpoints.Users.users, 'GET', request, {'user_ids': [89849889, 194894]})
+    return request_users(endpoints.Users.users, 'GET', request, {'user_ids': user_ids})
