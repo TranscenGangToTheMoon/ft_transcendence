@@ -1,5 +1,6 @@
 from lib_transcendence.auth import get_auth_user
 from lib_transcendence.exceptions import MessagesException
+from lib_transcendence.users import retrieve_users
 from lib_transcendence.generate import generate_code
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
@@ -40,6 +41,7 @@ class TournamentSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = [
             'code',
+            'participants',
             'created_at',
             'created_by',
             'is_started',
@@ -52,6 +54,14 @@ class TournamentSerializer(serializers.ModelSerializer):
         if value < 4:
             raise serializers.ValidationError(MessagesException.ValidationError.TOURNAMENT_MIN_SIZE)
         return value
+
+    def get_participants(self, obj):
+        participants = list(obj.participants.all().values('user_id', 'creator', 'join_at'))
+        results = retrieve_users([p['user_id'] for p in participants], self.context.get('request'))
+        for n, participant in enumerate(results):
+            participant['creator'] = participants[n]['creator']
+            participant['join_at'] = participants[n]['join_at']
+        return results
 
     def create(self, validated_data):
         request = self.context.get('request')
