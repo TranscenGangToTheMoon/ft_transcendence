@@ -14,3 +14,6 @@ from utils.my_unittest import UnitTest
 
 
 class Test01_Game(UnitTest):
+
+    def test_001_create_game(self):
+        self.assertResponse(create_game(new_user(), new_user()), 201)
