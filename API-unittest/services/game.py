@@ -7,7 +7,7 @@ def create_game(user1, user2, game_mode: Literal['ranked', 'duel'] = 'duel', dat
     if data is None:
         data = {'game_mode': game_mode, 'teams': [[user1['id']], [user2['id']]]}
     return make_request(
-        endpoint='match/',
+        endpoint='private/game/match/',
         method=method,
         data=data,
         port=8003,
@@ -16,6 +16,6 @@ def create_game(user1, user2, game_mode: Literal['ranked', 'duel'] = 'duel', dat
 
 def is_in_game(user1):
     return make_request(
-        endpoint=f'match/{user1["id"]}/',
+        endpoint=f'private/game/match/{user1["id"]}/',
         port=8003,
     )

@@ -31,6 +31,6 @@ def unblocked_user(user, block_id):
 
 def are_blocked(user1_id, user2_id):
     return make_request(
-        endpoint=f'blocked/{user1_id}/{user2_id}/',
+        endpoint=f'private/users/blocked/{user1_id}/{user2_id}/',
         port=8005,
     )
