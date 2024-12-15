@@ -19,6 +19,9 @@ class Test01_Game(UnitTest):
         self.assertResponse(create_game(new_user(), new_user()), 201)
 
 
+    def test_003_invalid_game_mode(self):
+        self.assertResponse(create_game(new_user(), new_user(), game_mode='caca'), 400)
+
 
 if __name__ == '__main__':
     unittest.main()
