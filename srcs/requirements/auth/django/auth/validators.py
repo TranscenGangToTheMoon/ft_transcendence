@@ -44,4 +44,3 @@ def set_password(password, user, remove_instance=False, check_previous_password=
             user.delete()
         raise serializers.ValidationError({'password': e.messages})
     user.set_password(password)
-    user.save()
