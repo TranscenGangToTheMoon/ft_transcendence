@@ -9,6 +9,7 @@ from utils.my_unittest import UnitTest
 
 
 # todo test refresh
+# todo test verify
 
 class Test01_Register(UnitTest):
 
