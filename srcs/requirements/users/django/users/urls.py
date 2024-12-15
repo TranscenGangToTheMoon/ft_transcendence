@@ -35,6 +35,7 @@ urlpatterns = [
 
 # todo 1 truc jules
 # todo 2 truc basile (endpoint)
+# todo 2 truc basile finish game
 
 # todo 1. make sse
 # todo 7. message discord
