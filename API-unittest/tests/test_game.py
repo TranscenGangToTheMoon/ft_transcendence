@@ -36,6 +36,7 @@ class Test01_Game(UnitTest):
             [['coucou'], ['hey']],
             [[1, 2], [5]],
             [[1], [1]],
+            [[1, 2, 3], [4, 5, 6]],
         ]
 
         for invalid_team in invalid_teams:
