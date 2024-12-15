@@ -45,6 +45,9 @@ class Test01_Game(UnitTest):
         for invalid_team in invalid_teams:
             self.assertResponse(create_game(data={'game_mode': 'ranked', 'teams': invalid_team}), 400)
 
+    def test_005_no_teams(self):
+        self.assertResponse(create_game(data={'game_mode': 'ranked'}), 400)
+
 
 if __name__ == '__main__':
     unittest.main()
