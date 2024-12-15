@@ -18,12 +18,12 @@ class Matches(models.Model):
     def winner(self):
         if not self.finished:
             return None
-        return self.teams.get(score=max(self.teams.all().values_list('score', flat=True))) # todo remake for work when abandon
+        return self.teams.get(score=max(self.teams.all().values_list('score', flat=True)))
 
     @property
     def finish_str(self):
         if self.finished:
-            return 'finish' # ({self.winner} won) '
+            return 'finish'
         return ''
 
     def finish_match(self):
