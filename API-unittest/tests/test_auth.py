@@ -8,12 +8,7 @@ from utils.generate_random import rnstr
 from utils.my_unittest import UnitTest
 
 
-# todo test register
-# todo test register invalid name
-# todo test register invalid password
 # todo test refresh
-# todo test get token
-# todo test guest
 
 class Test01_Register(UnitTest):
 
@@ -21,9 +16,8 @@ class Test01_Register(UnitTest):
         username = 'register_test' + rnstr()
         password = 'password_' + username
 
-        response = register(username, password)
-        user = {'token': response.json['access']}
-        self.assertResponse(response, 201)
+        response = self.assertResponse(register(username, password), 201)
+        user = {'token': response['access']}
         self.assertResponse(me(user), 200)
         self.assertResponse(login(username, password), 200)
 
@@ -31,6 +25,48 @@ class Test01_Register(UnitTest):
         user1 = new_user()
 
         self.assertResponse(register(user1['username'], user1['password']), 400)
+        self.assertResponse(register(user1['username'].upper(), user1['password']), 400)
+
+    def test_003_register_invalid_username(self):
+        usernames = [
+            'de',
+            'username_too_long_because_its_must_be_short',
+            'invalid_char!@#$',
+            'admin',
+            'staff',
+            'support',
+            'ft_transcendence',
+            'transcendence',
+            'anonymus',
+            '',
+        ]
+        password = 'InvalideUser_123' + rnstr()
+
+        for username in usernames:
+            self.assertResponse(register(username, password), 400)
+
+    def test_004_register_invalid_password(self):
+        username = 'register_inv_password' + rnstr()
+        passwords = [
+            '!$@^Invalid_char123',
+            'Contain_username1' + username,
+            'min_len',
+            'no_upper_case123',
+            'NO_LOWER_CASE123',
+            'NoSpecialChar123',
+            'NoNumbers',
+            '123456',
+            'password',
+            'azerty',
+            'qwerty',
+            'aaaaaaaa',
+            '123456789',
+            'abcdefg',
+            ''
+        ]
+
+        for password in passwords:
+            self.assertResponse(register(username, password), 400)
 
 
 class Test02_Guest(UnitTest):
@@ -43,8 +79,8 @@ class Test02_Guest(UnitTest):
         username = 'guest-register' + rnstr()
 
         # todo make get response
-        user = {'token': self.assertResponse(register_guest(username=username, guest=guest), 200, get_id='access')} #todo make truc pour avoir le bon token
-        test_username = self.assertResponse(me(user), 200, get_id='username') # todo rename get id get field
+        user = {'token': self.assertResponse(register_guest(username=username, guest=guest), 200, get_field='access')} #todo make truc pour avoir le bon token
+        test_username = self.assertResponse(me(user), 200, get_field='username') # todo rename get id get field
         self.assertEquals(username, test_username)
 
     def test_003_register_guest_without_tokent(self):
@@ -62,7 +98,7 @@ class Test02_Guest(UnitTest):
         guest = guest_user()
 
         self.assertResponse(play(guest, 'ranked'), 403, {'detail': 'Guest users cannot play ranked games.'})
-        user = {'token': self.assertResponse(register_guest(guest=guest), 200, get_id='access')}
+        user = {'token': self.assertResponse(register_guest(guest=guest), 200, get_field='access')}
         self.assertResponse(play(user, 'ranked'), 201)
 
 

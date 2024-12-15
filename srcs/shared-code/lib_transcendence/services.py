@@ -1,6 +1,8 @@
 from typing import Literal
 
 from rest_framework.exceptions import NotAuthenticated
+
+from lib_transcendence import endpoints
 from lib_transcendence.request import request_service
 
 
@@ -45,3 +47,7 @@ def request_auth(token, endpoint: Literal['update/', 'verify/', 'delete/'], meth
         raise NotAuthenticated()
 
     return request_service('auth', endpoint, method, data, token)
+
+
+def post_messages(chat_id: int, content: str, token: str):
+    return request_service('chat', endpoints.Chat.fmessage.format(chat_id=chat_id), 'POST', {'content': content}, token)

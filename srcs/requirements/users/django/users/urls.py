@@ -33,6 +33,14 @@ urlpatterns = [
     path(UsersManagement.manage_user, manage_user_view),
 ]
 
+# todo fix unit test failed
+# todo change rename (only auth)
+# todo auth with auth (not user/me)
+# todo get user instance in chat and lobby and tournament
+# todo 1 truc jules
+# todo 2 truc basile (endpoint)
+# todo 2 truc basile finish game
+
 # todo 1. make sse
 # todo 7. message discord
 # todo 7. message private discord
@@ -42,6 +50,19 @@ urlpatterns = [
 # todo 5. create endpoint for send lobby status
 # todo 6. create endpoint for send tournament status
 # todo 9 send chat_id in lobby or tournament
+# todo 10 make dl all data
+# todo handle nb spectactgame
+
+# todo game -> {type: game, 'code')
+# todo event -> FINISH GAME (args, abandon)
+# todo chat -> {type: notification, 'message'}
+# todo lobby -> {type: event, 'tournoi', 'id', 'status'}
+# todo lobby -> connect chat
+# todo tournoi -> connect chat
+# todo dans user serializer nb message 1 message, 1 notif dans friend
+# todo demande de game only if connected
+# todo normaliser les vecteurs
+# todo Use verify since me
 
 # todo make endpoint for user stats, xp, trophies (when match ended, or when tournament ended)
 # - pas de stat (custom_game)

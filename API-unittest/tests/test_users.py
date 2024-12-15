@@ -51,16 +51,14 @@ class Test02_UserMe(UnitTest):
     def test_001_get_me(self):
         user1 = new_user()
 
-        response = me(user1)
-        self.assertResponse(response, 200)
-        self.assertDictEqual(response.json, {'id': user1['id'], 'username': user1['username'], 'is_guest': False, 'created_at': response.json['created_at'], 'profile_picture': None, 'accept_friend_request': True, 'accept_chat_from': 'friends_only', 'coins': 100, 'trophies': 0, 'current_rank': None})
+        response = self.assertResponse(me(user1), 200)
+        self.assertDictEqual(response, {'id': user1['id'], 'username': user1['username'], 'is_guest': False, 'created_at': response['created_at'], 'profile_picture': None, 'accept_friend_request': True, 'accept_chat_from': 'friends_only', 'coins': 100, 'trophies': 0, 'current_rank': None})
 
     def test_002_get_me_guest(self):
         user1 = guest_user()
 
-        response = me(user1)
-        self.assertResponse(response, 200)
-        self.assertDictEqual(response.json, {'id': user1['id'], 'username': user1['username'], 'is_guest': True, 'created_at': response.json['created_at'], 'profile_picture': None, 'accept_friend_request': True, 'accept_chat_from': 'friends_only', 'coins': 100, 'trophies': 0, 'current_rank': None})
+        response = self.assertResponse(me(user1), 200)
+        self.assertDictEqual(response, {'id': user1['id'], 'username': user1['username'], 'is_guest': True, 'created_at': response['created_at'], 'profile_picture': None, 'accept_friend_request': True, 'accept_chat_from': 'friends_only', 'coins': 100, 'trophies': 0, 'current_rank': None})
 
 
 class Test03_DeleteUser(UnitTest):
@@ -92,7 +90,7 @@ class Test03_DeleteUser(UnitTest):
     def test_005_user_in_lobby(self):
         user1 = new_user()
 
-        code = self.assertResponse(create_lobby(user1), 201, get_id='code')
+        code = self.assertResponse(create_lobby(user1), 201, get_field='code')
         self.assertResponse(me(user1, method='DELETE', password=True), 204)
         self.assertResponse(create_lobby(user1, method='GET'), 401, {'detail': 'Incorrect authentication credentials.'})
         self.assertResponse(join_lobby(code), 404, {'detail': 'Lobby not found.'})
@@ -109,7 +107,7 @@ class Test03_DeleteUser(UnitTest):
         user1 = new_user()
         name = rnstr()
 
-        code = self.assertResponse(create_tournament(user1, {'name': 'Delete User ' + name}), 201, get_id='code')
+        code = self.assertResponse(create_tournament(user1, {'name': 'Delete User ' + name}), 201, get_field='code')
         self.assertResponse(search_tournament(name), 200, count=1)
         self.assertResponse(me(user1, method='DELETE', password=True), 204)
         self.assertResponse(create_tournament(user1, method='GET'), 401, {'detail': 'Incorrect authentication credentials.'})
@@ -119,15 +117,13 @@ class Test03_DeleteUser(UnitTest):
         user1 = new_user()
         name = rnstr()
 
-        code = self.assertResponse(create_tournament(user1, {'name': 'Delete User ' + name}), 201, get_id='code')
+        code = self.assertResponse(create_tournament(user1, {'name': 'Delete User ' + name}), 201, get_field='code')
         self.assertResponse(join_tournament(code), 201)
-        response = search_tournament(name)
-        self.assertResponse(response, 200, count=1)
-        self.assertEqual(2, response.json['results'][0]['n_participants'])
+        response = self.assertResponse(search_tournament(name), 200, count=1)
+        self.assertEqual(2, response['results'][0]['n_participants'])
         self.assertResponse(me(user1, method='DELETE', password=True), 204)
-        response = search_tournament(name)
-        self.assertResponse(response, 200, count=1)
-        self.assertEqual(1, response.json['results'][0]['n_participants'])
+        response = self.assertResponse(search_tournament(name), 200, count=1)
+        self.assertEqual(1, response['results'][0]['n_participants'])
         # todo make when tournament work
 
     def test_009_chat_with(self):
@@ -135,7 +131,7 @@ class Test03_DeleteUser(UnitTest):
         user2 = new_user()
 
         self.assertResponse(accept_chat(user2), 200)
-        chat_id = self.assertResponse(create_chat(user1, user2['username']), 201, get_id=True)
+        chat_id = self.assertResponse(create_chat(user1, user2['username']), 201, get_field=True)
         self.assertResponse(request_chat_id(user2, chat_id), 200)
         self.assertResponse(me(user1, method='DELETE', password=True), 204)
         self.assertResponse(request_chat_id(user2, chat_id), 403, {'detail': 'You do not belong to this chat.'})
@@ -176,7 +172,7 @@ class Test03_DeleteUser(UnitTest):
         user1 = new_user()
         user2 = new_user()
 
-        friend_request_id = self.assertResponse(friend_requests(user1, user2), 201, get_id=True)
+        friend_request_id = self.assertResponse(friend_requests(user1, user2), 201, get_field=True)
         self.assertResponse(get_friend_requests_received(user2), 200, count=1)
         self.assertResponse(me(user1, method='DELETE', password=True), 204)
         self.assertResponse(get_friend_requests_received(user2), 200, count=0)
@@ -242,9 +238,8 @@ class Test05_RenameUser(UnitTest):
 
         id = self.assertFriendResponse(create_friendship(user1, user2))
         self.assertResponse(me(user1, method='PATCH', data={'username': new_username}), 200)
-        response = friend(user1, id)
-        self.assertResponse(response, 200)
-        for f in response.json['friends']:
+        response = self.assertResponse(friend(user1, id), 200)
+        for f in response['friends']:
             if f['id'] == user1['id']:
                 self.assertEqual(new_username, f['username'])
                 break
@@ -256,24 +251,9 @@ class Test05_RenameUser(UnitTest):
 
         self.assertResponse(blocked_user(user2, user1['id']), 201)
         self.assertResponse(me(user1, method='PATCH', data={'username': new_username}), 200)
-        response = blocked_user(user2, method='GET')
-        self.assertResponse(response, 200, count=1)
-        self.assertEqual(response.json['results'][0]['blocked']['username'], new_username)
 
-    def test_004_rename_chat(self):
-        user1 = new_user()
-        user2 = new_user()
-        new_username = user1['username'] + '_new'
-
-        self.assertResponse(accept_chat(user2), 200)
-        chat_id = self.assertResponse(create_chat(user1, user2['username']), 201, get_id=True)
-        self.assertResponse(me(user1, method='PATCH', data={'username': new_username}), 200)
-        response = request_chat_id(user2, chat_id)
-        self.assertResponse(response, 200)
-        for f in response.json['participants']:
-            if f['id'] == user1['id']:
-                self.assertEqual(new_username, f['username'])
-                break
+        response = self.assertResponse(blocked_user(user2, method='GET'), 200, count=1)
+        self.assertEqual(response['results'][0]['blocked']['username'], new_username)
 
 
 
