@@ -1,12 +1,9 @@
 from lib_transcendence.endpoints import Auth
 from lib_transcendence.exceptions import MessagesException
-from lib_transcendence import endpoints
+from lib_transcendence.services import request_users, request_auth, get_auth_token
 from rest_framework import serializers
 from rest_framework.authentication import BaseAuthentication
 from rest_framework.exceptions import ParseError
-
-from lib_transcendence.services import request_users, request_auth
-from lib_transcendence.generate import generate_code
 
 
 #todo delete user after request
@@ -24,7 +21,8 @@ class Authentication(BaseAuthentication):
     def authenticate(self, request):
         if type(request.data) is not dict:
             raise ParseError(MessagesException.ValidationError.REQUEST_DATA_REQUIRED)
-        json_data = request_users(endpoints.Users.me, 'GET', request)
+        json_data = auth_verify(request=request)
+        # json_data = request_users(endpoints.Users.me, 'GET', request)
         request.data['auth_user'] = json_data
         user = get_user_from_auth(json_data)
 
@@ -40,5 +38,7 @@ def get_auth_user(request=None):
     return request.data['auth_user']
 
 
-def auth_verify(token):
+def auth_verify(token=None, request=None):
+    if request is not None:
+        token = get_auth_token(request)
     return request_auth(token, Auth.verify, method='GET')
