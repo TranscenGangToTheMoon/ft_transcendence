@@ -18,10 +18,13 @@ class UpdateSerializer(serializers.ModelSerializer):
         fields = ['username', 'password']
 
     def update(self, instance, validated_data):
-        set_password(validated_data.pop('password', None), instance, check_previous_password=True)
+        old_username = instance.username
+        password = validated_data.pop('password', None)
+        result = super().update(instance, validated_data)
+        set_password(password, result, check_previous_password=True, old_username=old_username)
         if 'username' in validated_data and not is_guest(user=instance):
             try:
                 request_chat(endpoints.UsersManagement.frename_user.format(user_id=instance.id), data={'username': validated_data['username']})
             except APIException:
                 pass
-        return super().update(instance, validated_data)
+        return result
