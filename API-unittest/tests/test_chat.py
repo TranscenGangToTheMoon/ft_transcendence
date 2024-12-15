@@ -90,7 +90,6 @@ class Test02_CreateChatError(UnitTest):
         self.assertResponse(create_chat(guest_user(), user1['username']), 403, {'detail': 'Guest users cannot create chat.'})
 
 
-# todo add local possiblitie user
 class Test03_GetChat(UnitTest):
 
     def test_001_get_chats(self):
