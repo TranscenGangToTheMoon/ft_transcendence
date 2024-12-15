@@ -10,18 +10,6 @@ from matchmaking.utils import verify_user, get_tournament, verify_place
 from tournament.models import Tournaments, TournamentStage, TournamentParticipants
 
 
-class TournamentGetParticipantsSerializer(serializers.ModelSerializer):
-    id = serializers.IntegerField(source='user_id')
-
-    class Meta:
-        model = TournamentParticipants
-        fields = [
-            'id',
-            'creator',
-            'join_at',
-        ]
-
-
 class TournamentSerializer(serializers.ModelSerializer):
     participants = serializers.SerializerMethodField(read_only=True)
 
