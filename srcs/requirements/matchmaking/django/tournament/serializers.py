@@ -1,12 +1,11 @@
 from lib_transcendence.auth import get_auth_user
 from lib_transcendence.exceptions import MessagesException
-from lib_transcendence.users import retrieve_users
 from lib_transcendence.generate import generate_code
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
 
 from blocking.utils import create_player_instance
-from matchmaking.utils import verify_user, get_tournament, verify_place
+from matchmaking.utils import verify_user, get_tournament, verify_place, get_participants
 from tournament.models import Tournaments, TournamentStage, TournamentParticipants
 
 
@@ -44,12 +43,7 @@ class TournamentSerializer(serializers.ModelSerializer):
         return value
 
     def get_participants(self, obj):
-        participants = list(obj.participants.all().values('user_id', 'creator', 'join_at'))
-        results = retrieve_users([p['user_id'] for p in participants], self.context.get('request'))
-        for n, participant in enumerate(results):
-            participant['creator'] = participants[n]['creator']
-            participant['join_at'] = participants[n]['join_at']
-        return results
+        return get_participants(self, obj)
 
     def create(self, validated_data):
         request = self.context.get('request')

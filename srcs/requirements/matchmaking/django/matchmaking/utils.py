@@ -2,6 +2,7 @@ from lib_transcendence.game import GameMode
 from lib_transcendence import endpoints
 from lib_transcendence.exceptions import MessagesException, Conflict, ResourceExists, ServiceUnavailable
 from lib_transcendence.services import request_game
+from lib_transcendence.users import retrieve_users
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied, NotFound, APIException
 
@@ -95,6 +96,19 @@ def verify_place(user, model, request):
 
 
 # -------------------- GET PARTICIPANT ------------------------------------------------------------------------------- #
+def get_participants(self, obj, add_fields: list[str] = None):
+    fields = ['user_id', 'creator', 'join_at']
+    if add_fields is not None:
+        fields.extend(add_fields)
+    participants = list(obj.participants.all().values(*fields))
+    results = retrieve_users([p['user_id'] for p in participants], self.context.get('request'))
+    for n, participant in enumerate(results):
+        for f in fields[1:]:
+            participant[f] = participants[n][f]
+    return results
+
+
+# -------------------- KICK ------------------------------------------------------------------------------------------ #
 def kick_yourself(user_id, kick_user_id):
     if user_id == kick_user_id:
         raise PermissionDenied(MessagesException.PermissionDenied.KICK_YOURSELF)
