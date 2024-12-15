@@ -116,6 +116,7 @@ class MessagesException:
         _ALREADY = 'You are already in a {obj}.'
         ALREADY_IN_GAME = _ALREADY.format(obj='game')
         ALREADY_IN_TOURNAMENT = _ALREADY.format(obj='tournament')
+        USER_ALREADY_IN_GAME = 'Users are already in a game.'
 
     class ResourceExists:
         DEFAULT = 'Resource already exists.'
