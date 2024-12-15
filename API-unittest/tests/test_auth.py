@@ -78,6 +78,15 @@ class Test01_Register(UnitTest):
         self.assertResponse(me(user, 'PATCH', data={'username': new_username, 'password': password}), 200)
         self.assertResponse(login(new_username, password), 200)
 
+    def test_006_register_password_contain_new_username(self):
+        password = 'first_pass' + rnstr(10)
+        user = {'token': self.assertResponse(register(password=password), 201)['access']}
+        new_username = 'new_username' + rnstr()
+        new_password = 'password' + new_username
+
+        self.assertResponse(me(user, 'PATCH', data={'username': new_username, 'password': new_password}), 400)
+        self.assertResponse(login(new_username, password), 401)
+
 
 class Test02_Guest(UnitTest):
 
