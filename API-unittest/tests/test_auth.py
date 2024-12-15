@@ -17,8 +17,7 @@ class Test01_Register(UnitTest):
         username = 'register_test' + rnstr()
         password = 'password_test' + rnstr()
 
-        response = self.assertResponse(register(username, password), 201)
-        user = {'token': response['access']}
+        user = self.assertResponse(register(username, password), 201, get_user=True)
         self.assertResponse(me(user), 200)
         self.assertResponse(login(username, password), 200)
 
@@ -72,7 +71,7 @@ class Test01_Register(UnitTest):
     def test_005_register_password_contain_paste_username(self):
         username = 'pass_contain_username' + rnstr()
         password = 'password' + username
-        user = {'token': self.assertResponse(register(username), 201)['access']}
+        user = self.assertResponse(register(username), 201, get_user=True)
         new_username = 'new_username' + rnstr()
 
         self.assertResponse(me(user, 'PATCH', data={'username': new_username, 'password': password}), 200)
@@ -80,7 +79,7 @@ class Test01_Register(UnitTest):
 
     def test_006_register_password_contain_new_username(self):
         password = 'first_pass' + rnstr(10)
-        user = {'token': self.assertResponse(register(password=password), 201)['access']}
+        user = self.assertResponse(register(password=password), 201, get_user=True)
         new_username = 'new_username' + rnstr()
         new_password = 'password' + new_username
 
@@ -97,7 +96,7 @@ class Test02_Guest(UnitTest):
         guest = guest_user()
         username = 'guest-register' + rnstr()
 
-        user = {'token': self.assertResponse(register_guest(username=username, guest=guest), 200, get_field='access')} #todo make truc pour avoir le bon token
+        user = self.assertResponse(register_guest(username=username, guest=guest), 200, get_user=True)
         test_username = self.assertResponse(me(user), 200, get_field='username')
         self.assertEqual(username, test_username)
 
@@ -116,7 +115,7 @@ class Test02_Guest(UnitTest):
         guest = guest_user()
 
         self.assertResponse(play(guest, 'ranked'), 403, {'detail': 'Guest users cannot play ranked games.'})
-        user = {'token': self.assertResponse(register_guest(guest=guest), 200, get_field='access')}
+        user = self.assertResponse(register_guest(guest=guest), 200, get_user=True)
         self.assertResponse(play(user, 'ranked'), 201)
 
 

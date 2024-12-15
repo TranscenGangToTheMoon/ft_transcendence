@@ -3,12 +3,14 @@ import unittest
 
 class UnitTest(unittest.TestCase):
 
-    def assertResponse(self, response, status_code, json=None, count=None, get_field=None):
+    def assertResponse(self, response, status_code, json=None, count=None, get_field=None, get_user=False):
         self.assertEqual(status_code, response.status_code)
         if json is not None:
             self.assertEqual(json, response.json)
         if count is not None:
             self.assertEqual(count, response.json['count'])
+        if get_user:
+            return {'token': response.json['access']}
         if get_field is not None:
             if get_field is True:
                 get_field = 'id'
