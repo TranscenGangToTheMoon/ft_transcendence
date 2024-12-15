@@ -207,7 +207,7 @@ class Test04_UpdateUserMe(UnitTest):
 
         self.assertResponse(me(user1, method='PATCH', data={'password': 'new_password'}), 200)
         self.assertResponse(login(user1['username'], 'new_password'), 200)
-        self.assertResponse(login(user1['username'], old_password), 401, {'detail': 'No active account found with the given credentials'}) # todo no . at the end
+        self.assertResponse(login(user1['username'], old_password), 401, {'detail': 'No active account found with the given credentials'})
 
     def test_002_update_password_same_as_before(self):
         user1 = new_user()
@@ -225,7 +225,7 @@ class Test05_RenameUser(UnitTest):
 
         self.assertResponse(me(user1, method='PATCH', data={'username': new_username}), 200)
         self.assertResponse(login(new_username, user1['password']), 200)
-        self.assertResponse(login(old_username, user1['password']), 401, {'detail': 'No active account found with the given credentials'}) # todo no . at the end
+        self.assertResponse(login(old_username, user1['password']), 401, {'detail': 'No active account found with the given credentials'})
 
     def test_002_rename_user_friend(self):
         user1 = new_user()
