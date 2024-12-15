@@ -35,14 +35,6 @@ def login(username=None, password=None, data=None):
     return make_request('auth/login/', 'POST', data=data)
 
 
-def refresh_token(access_token, _refresh_token):
-    return make_request('auth/refresh/', 'POST', access_token, {'refresh': _refresh_token})
-
-
-def verify_token(access_token):
-    return make_request('auth/verify/', token=access_token)
-
-
 # -------------------- GET TOKEN ------------------------------------------------------------------------------------- #
 def get_token(type: Literal['login', 'register', 'guest'], username=None, password=None):
     if type == 'guest':
