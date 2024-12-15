@@ -5,6 +5,7 @@ import time
 from django.db import models
 from lib_transcendence.Tournament import Tournament
 
+from blocking.utils import delete_player_instance
 from matchmaking.create_match import create_tournament_match
 
 
@@ -99,6 +100,7 @@ class TournamentParticipants(models.Model):
         if tournament.is_started:
             self.eliminate()
         else:
+            delete_player_instance(self.user_id)
             super().delete(using=using, keep_parents=keep_parents)
             if tournament.participants.count() == 0:
                 tournament.delete()

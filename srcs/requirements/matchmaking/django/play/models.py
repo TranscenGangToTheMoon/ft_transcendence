@@ -1,6 +1,10 @@
 from django.db import models
 from threading import Thread
 from lib_transcendence.game import GameMode
+
+from blocking.utils import delete_player_instance
+
+
 # import matchmaking #cant import some function from matchmaking (circular import)
 
 
@@ -23,6 +27,10 @@ class Players(models.Model):
             pass
             # Thread(target=search_ranked_players()).start()
             #subprocess ??
+
+    def delete(self, using=None, keep_parents=False):
+        delete_player_instance(self.user_id)
+        super().delete(using=using, keep_parents=keep_parents)
 
     def __str__(self):
         return str(self.user_id)
