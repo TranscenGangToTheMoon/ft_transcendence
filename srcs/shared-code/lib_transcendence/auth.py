@@ -3,7 +3,7 @@ from lib_transcendence.exceptions import MessagesException
 from lib_transcendence.services import request_users, request_auth, get_auth_token
 from rest_framework import serializers
 from rest_framework.authentication import BaseAuthentication
-from rest_framework.exceptions import ParseError
+from rest_framework.exceptions import ParseError, AuthenticationFailed
 
 
 #todo delete user after request
@@ -21,8 +21,10 @@ class Authentication(BaseAuthentication):
     def authenticate(self, request):
         if type(request.data) is not dict:
             raise ParseError(MessagesException.ValidationError.REQUEST_DATA_REQUIRED)
-        json_data = auth_verify(request=request)
-        # json_data = request_users(endpoints.Users.me, 'GET', request)
+        try:
+            json_data = auth_verify(request=request)
+        except AuthenticationFailed:
+            raise AuthenticationFailed()
         request.data['auth_user'] = json_data
         user = get_user_from_auth(json_data)
 
