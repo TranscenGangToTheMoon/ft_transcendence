@@ -636,8 +636,11 @@ async function initGame(){
         // window.PongGame.startGame();
     }
     catch (unauthorized){
-        displayMainAlert("Error", `You don't have permission to play in ${unauthorized}`);
-        await navigateTo('/');
+        if (window.location.pathname !== '/'){
+            if (!document.getElementById('alertModal').classList.contains('show'))
+                displayMainAlert("Error", `You don't have permission to play in ${unauthorized}`);
+            await navigateTo('/');
+        }
     }
 }
 

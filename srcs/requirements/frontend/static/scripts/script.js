@@ -447,7 +447,7 @@ async function  indexInit(auto=true) {
             displayMainAlert("Unable to retrieve your account/guest profile","We're sorry your account has been permanently deleted and cannot be recovered.");
             await generateToken();
             await fetchUserInfos(true);
-            return handleRoute();
+            return await navigateTo('/');
         }
         await loadUserProfile();
     }
