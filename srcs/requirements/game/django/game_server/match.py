@@ -54,3 +54,6 @@ async def fetch_match_async(match_code):
 def fetch_matches():
     matches = Matches.objects.all()
     return matches
+
+async def finish_match(match):
+    return await sync_to_async(match.model.finish_match)()

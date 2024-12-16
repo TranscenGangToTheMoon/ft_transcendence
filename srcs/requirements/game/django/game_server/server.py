@@ -72,8 +72,9 @@ class Server:
                 for match_code, game in Server.games.items():
                     if game.check_zombie() == True:
                         Server.games.pop(match_code)
+                        print(f'match {match_code} has been popped of the server', flush=True)
             except RuntimeError:
-                Server.games_lock.release()
+                pass
             Server.games_lock.release()
             time.sleep(0.1)
             # Flush stdout to print help aiohttp print its things

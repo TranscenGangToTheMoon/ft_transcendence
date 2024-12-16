@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 import math
-from game_server.match import Match, Player
+from game_server.match import Match, Player, finish_match
 from game_server.pong_ball import Ball
 from game_server.pong_position import Position
 from game_server.pong_racket import Racket
@@ -176,7 +176,7 @@ class Game:
             side = -1
         print(time.time(), "Finished emitting start_game", flush=True)
         while True:
-            print(time.time(), "game loop", flush=True)
+            # print(time.time(), "game loop", flush=True)
             if self.game_timeout is not None and (time.time() - start_time < self.game_timeout * 60):
                 break
             while time.time() - last_frame_time < (1 / 60):
@@ -192,11 +192,10 @@ class Game:
         timeout = 60.
         try:
             self.wait_for_players(timeout)
-            print(time.time(), "wait_for_players() ended", flush=True)
+            print(time.time(), "all players are connected", flush=True)
         except Exception as e:
-            print(time.time(), "wait_for_players() ended", flush=True)
-            #print(e, flush=True)
-            self.match.model.finish_match()
+            print(e, flush=True)
+            await finish_match(self.match)
             return
         print('game launched', flush=True)
         if await self.play() == False:
@@ -210,6 +209,7 @@ class Game:
         now = datetime.now(timezone.utc)
         if game_start_time <= now - game_timeout:
             self.match.model.finish_match()
+            print('finished match', self.match.code)
             return True
         return False
 
