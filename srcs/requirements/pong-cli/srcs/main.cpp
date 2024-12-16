@@ -6,37 +6,67 @@
 /*   By: xcharra <xcharra@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/25 16:32:19 by xcharra           #+#    #+#             */
-/*   Updated: 2024/12/10 17:17:26 by xcharra          ###   ########.fr       */
+/*   Updated: 2024/12/16 13:17:43 by xcharra          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
-
-#include <cstring>
-#include <iostream>
-#include <random>
-//#include <csignal>
 
 #include "pong-cli.h"
 #include "CurlWrapper.hpp"
 #include "PongCLI.hpp"
 #include "User.hpp"
-#include "sio_client.h"
 
-using namespace ftxui;
-using namespace nlohmann;
+#define SERVER	"https://localhost:4443"
+
 int main(void)
 {
 	{
 		CurlWrapper	curl;
 		User		user;
-		PongCLI		app(curl, user);
+//		client	client;
 
+//		client.connect(SERVER);
+		curl.setServer(SERVER);
+		user.setUsername("xcharra");
+		user.setPassword("test");
 		curl.addHeader("Content-Type: application/json");
-//		app.run();
-		app.changePage(PongCLI::Page::MainMenuPage);
 
-		std::cout << "server: " << app.getServer() << std::endl;
-		std::cout << "username: " << app.getUsername() << std::endl;
-		std::cout << "password: " << app.getPassword() << std::endl;
+		try {
+			user.loginUser(curl);
+			std::cout << "Login Succeed" << std::endl;
+		}
+		catch (std::exception &error) {
+			if (curl.getHTTPCode() == 401)
+				try {
+					user.registerUser(curl);
+					std::cout << "Register Succeed" << std::endl;
+				}
+				catch (std::exception &error) {
+					std::cerr << ("(" + std::to_string(curl.getHTTPCode()) + ") " + error.what()) << std::endl;
+				}
+		}
+
+		try {
+			curl.POST("/api/play/duel/", "");
+			std::cout << "Duel request Succeed" << std::endl;
+			std::cout << json::parse(curl.getResponse()).dump(1, '\t') << std::endl;
+		}
+		catch (std::exception &error) {
+			std::cerr << ("(" + std::to_string(curl.getHTTPCode()) + ") " + error.what()) << std::endl;
+			std::cerr << json::parse(curl.getResponse()).dump(1, '\t') << std::endl;
+		}
+	}
+	{
+//		CurlWrapper	curl;
+//		User		user;
+//		PongCLI		app(curl, user);
+//
+//		curl.addHeader("Content-Type: application/json");
+////		app.run();
+//		app.changePage(PongCLI::Page::MainMenuPage);
+//
+//		std::cout << "server: " << app.getServer() << std::endl;
+//		std::cout << "username: " << app.getUsername() << std::endl;
+//		std::cout << "password: " << app.getPassword() << std::endl;
 	}
 	{
 //		CurlWrapper	curl("https://localhost:4443");

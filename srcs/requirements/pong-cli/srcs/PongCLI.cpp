@@ -10,15 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <iostream>
-#include <future>
 #include "PongCLI.hpp"
-
-
-#include "colors.h"
-#include "pong-cli.h"
-
-using namespace nlohmann;
 
 PongCLI::PongCLI(CurlWrapper &curl, User &user) : _curl(curl), _info(text("")), _currentPage(Page::LoginPage),
 	_user(user), _password(), _server("https://localhost:4443"), _username() {

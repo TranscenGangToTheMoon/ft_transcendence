@@ -83,7 +83,7 @@ SOKCT_I		:=	$(SOKCT_D)/src
 
 SOKCT_A		:=	$(SOKCT:%=$(SOKCT_D)/build/%)
 
-SOKCT_F		:=	-L$(SOKCT_D)/build/ -sioclient -sioclient_tls
+SOKCT_F		:=	-L$(SOKCT_D)/build/ -lsioclient -lsioclient_tls
 ########################################################################################################################
 #                                                        FLAGS                                                         #
 ########################################################################################################################
@@ -101,7 +101,7 @@ OFLAGS		:=	#-O3 #-Ofast -march=native -fomit-frame-pointer -funroll-loops
 
 CXXFLAGS	=	-Wall -Wextra -Werror -g -fsanitize=thread $(IFLAGS) $(OFLAGS) $(DFLAGS)
 
-LFLAGS		= 	$(FTXUI_F) $(CURL_F) #-lssl -lcrypto
+LFLAGS		= 	$(FTXUI_F) $(CURL_F) $(SOKCT_F) #-lssl -lcrypto
 
 ARGS		?=	#
 

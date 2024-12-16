@@ -10,14 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <iostream>
-#include <cstring>
 #include "User.hpp"
-#include "colors.h"
-
-#include "nlohmann/json.hpp"
-
-using namespace nlohmann;
 
 User::User() : _accessToken(), _password(), _refreshToken(), _username() {
 	std::cout << C_MSG("User default constructor called") << std::endl;

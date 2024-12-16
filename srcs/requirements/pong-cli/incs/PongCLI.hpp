@@ -6,22 +6,16 @@
 /*   By: xcharra <xcharra@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/03 17:34:55 by xcharra           #+#    #+#             */
-/*   Updated: 2024/12/11 16:00:06 by xcharra          ###   ########.fr       */
+/*   Updated: 2024/12/16 12:34:35 by xcharra          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef PONGCLI_HPP
 # define PONGCLI_HPP
 
-#include "ftxui/component/screen_interactive.hpp"
-#include "ftxui/dom/elements.hpp"
-#include "ftxui/screen/screen.hpp"
-#include "ftxui/component/component.hpp"
-
-#include "pong-cli.h"
-#include "CurlWrapper.hpp"
-#include "PongCLI.hpp"
-#include "User.hpp"
+# include "pong-cli.h"
+# include "CurlWrapper.hpp"
+# include "User.hpp"
 
 using namespace ftxui;
 
@@ -78,6 +72,5 @@ private:
 	std::string			_server;
 	std::string			_username;
 };
-
 
 #endif //PONGCLI_HPP

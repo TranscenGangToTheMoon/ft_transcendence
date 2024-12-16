@@ -10,10 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <iostream>
-#include <cstring>
 #include "CurlWrapper.hpp"
-#include "colors.h"
 
 CurlWrapper::CurlWrapper(const std::string &server) : _serverSet(true), _server(server), _SSLCertificate("./ft_transcendence.crt"),
 	_headers(nullptr), _HTTPCode(0) {

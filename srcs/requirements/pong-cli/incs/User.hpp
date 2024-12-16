@@ -13,7 +13,8 @@
 #ifndef USER_HPP
 # define USER_HPP
 
-#include "CurlWrapper.hpp"
+# include "pong-cli.h"
+# include "CurlWrapper.hpp"
 
 class User {
 public:
@@ -36,10 +37,10 @@ public:
 	void	setRefreshToken(const std::string &refreshToken);
 	void	setUsername(const std::string &username);
 
-	const std::string	&getAccessToken() const;
-	const std::string	&getPassword() const;
-	const std::string	&getRefreshToken() const;
-	const std::string	&getUsername() const;
+	[[ nodiscard ]] const std::string	&getAccessToken() const;
+	[[ nodiscard ]] const std::string	&getPassword() const;
+	[[ nodiscard ]] const std::string	&getRefreshToken() const;
+	[[ nodiscard ]] const std::string	&getUsername() const;
 
 private:
 	std::string	_accessToken;
@@ -47,5 +48,5 @@ private:
 	std::string	_refreshToken;
 	std::string	_username;
 };
-std::string	jsonParser(const std::string &json, const std::string &key);
+
 #endif //USER_HPP
