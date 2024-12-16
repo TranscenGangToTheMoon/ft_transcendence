@@ -6,30 +6,11 @@
 /*   By: xcharra <xcharra@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/28 13:59:31 by xcharra           #+#    #+#             */
-/*   Updated: 2024/12/06 16:33:06 by xcharra          ###   ########.fr       */
+/*   Updated: 2024/12/13 17:21:51 by xcharra          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <iostream>
-#include <cstring>
 #include "User.hpp"
-#include "colors.h"
-
-std::string	jsonParser(const std::string &json, const std::string &key) {
-	std::string value;
-	std::string formatedKey = "\"" + key + "\":";
-
-	size_t pos = json.find(formatedKey);
-	if (pos == std::string::npos) {
-		throw (std::invalid_argument("Key not found in json"));
-	}
-	pos += formatedKey.length();
-	pos = json.find("\"", pos);
-	pos++;
-	size_t end = json.find("\"", pos);
-	value = json.substr(pos, end - pos);
-	return (value);
-}
 
 User::User() : _accessToken(), _password(), _refreshToken(), _username() {
 	std::cout << C_MSG("User default constructor called") << std::endl;
@@ -39,77 +20,81 @@ User::~User() {
 	std::cout << C_MSG("User destructor called") << std::endl;
 }
 
-void User::setGuestTokens(CurlWrapper &curl) {
-	curl.addHeader("Content-Type: application/json");
-
+void User::guestUser(CurlWrapper &curl) {
 	curl.getResponse().clear();
 	curl.POST("/api/auth/guest/", "");
-	if (curl.getHTTPCode() >= 300) {
+	if (curl.getHTTPCode() >= 300)
 		throw (std::runtime_error("Failed to guest up !"));
-	}
-	std::string json = curl.getResponse();
+	basic_json	json = json::parse(curl.getResponse());
 
-	setAccessToken(jsonParser(json, "access"));
-	setRefreshToken(jsonParser(json, "refresh"));
-
+	setAccessToken(json["access"]);
+	setRefreshToken(json["refresh"]);
 	curl.addHeader("Authorization: Bearer " + getAccessToken());
 }
 
-void User::signUpUser(CurlWrapper &curl) {
-	std::string data = R"({"username": ")" + getUsername() +
-		R"(", "password": ")" + getPassword() + R"("})";
+void User::registerGuestUser(CurlWrapper &curl) {
+	json	data;
+
+	data["username"] = getUsername();
+	data["password"] = getPassword();
 
 	curl.getResponse().clear();
-	curl.PUT("/api/auth/register/", data);
-	std::string res = curl.getResponse();
+	curl.PUT("/api/auth/register/guest/", data.dump());
 	if (curl.getHTTPCode() >= 300)
-		throw (std::runtime_error("Failed to sign up !"));
-//	else
-//		std::cout << I_MSG("(" << curl.getHTTPCode() << ") User sign up !") << std::endl;
+		throw (std::runtime_error("Failed to register guest !" + curl.getResponse()));
+	basic_json	json = json::parse(curl.getResponse());
 
+	setAccessToken(json["access"]);
+	setRefreshToken(json["refresh"]);
+	curl.addHeader("Authorization: Bearer " + getAccessToken());
 }
 
-void User::signUpUserWithoutToken(CurlWrapper &curl) {
-	std::string data = R"({"username": ")" + getUsername() +
-					   R"(", "password": ")" + getPassword() + R"("})";
+void User::registerUser(CurlWrapper &curl) {
+	json	data;
+
+	data["username"] = getUsername();
+	data["password"] = getPassword();
 
 	curl.getResponse().clear();
-	curl.POST("/api/auth/register/", data);
-	std::string res = curl.getResponse();
+	curl.POST("/api/auth/register/", data.dump());
 	if (curl.getHTTPCode() >= 300)
-		throw (std::runtime_error("Failed to sign up !"));
-//	else
-//		std::cout << I_MSG("(" << curl.getHTTPCode() << ") User sign up !") << std::endl;
+		throw (std::runtime_error("Failed to register !"));
+	basic_json	json = json::parse(curl.getResponse());
 
+	setAccessToken(json["access"]);
+	setRefreshToken(json["refresh"]);
+	curl.addHeader("Authorization: Bearer " + getAccessToken());
 }
-void User::signInUser(CurlWrapper &curl) {
-	std::string data = R"({"username": ")" + getUsername() +
-		R"(", "password": ")" + getPassword() + R"("})";
+
+void User::loginUser(CurlWrapper &curl) {
+	json	data;
+
+	data["username"] = getUsername();
+	data["password"] = getPassword();
 
 	curl.getResponse().clear();
-	curl.POST("/api/auth/login/", data);
+	curl.POST("/api/auth/login/", data.dump());
 	if (curl.getHTTPCode() >= 300)
 		throw (std::runtime_error("Failed to sign in !"));
-	std::string res = curl.getResponse();
-//	else
-//		std::cout << I_MSG("(" << curl.getHTTPCode() << ") User sign in !") << std::endl;
+	basic_json	json = json::parse(curl.getResponse());
 
+	setAccessToken(json["access"]);
+	setRefreshToken(json["refresh"]);
+	curl.addHeader("Authorization: Bearer " + getAccessToken());
 }
 
 void User::tokenRefresh(CurlWrapper &curl) {
-	std::string data = R"({"refresh": ")" + getRefreshToken() + R"("})";
+	json	data;
 
+	data["refresh"] = getRefreshToken();
 	curl.getResponse().clear();
 	curl.POST("/api/auth/refresh/", data);
 	if (curl.getHTTPCode() >= 300)
 		throw (std::runtime_error("Failed to refresh token !"));
-	std::string res = curl.getResponse();
-//	else
-//		std::cout << I_MSG("(" << curl.getHTTPCode() << ") New tokens obtained !") << std::endl;
+	basic_json	json = json::parse(curl.getResponse());
 
-	setAccessToken(jsonParser(res, "access"));
-	setRefreshToken(jsonParser(res, "refresh"));
-
+	setAccessToken(json["access"]);
+	setRefreshToken(json["refresh"]);
 	curl.clearHeaders();
 	curl.addHeader("Content-Type: application/json");
 	curl.addHeader("Authorization: Bearer " + getAccessToken());

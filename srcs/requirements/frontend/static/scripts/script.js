@@ -1,6 +1,9 @@
 // ========================== GLOBAL VALUES ==========================
 
 const MAX_DISPLAYED_NOTIFICATIONS = 3;
+const MAX_DISPLAYED_FRIENDS = 12;
+const MAX_DISPLAYED_FRIEND_REQUESTS = 5;
+const MAX_DISPLAYED_BLOCKED_USERS = 10;
 const baseAPIUrl = "https://localhost:4443/api"
 let userInformations = undefined;
 var notificationIdentifier = 0;
@@ -48,7 +51,7 @@ async function apiRequest(token, endpoint, method="GET", authType="Bearer",
             return data;
         })
         .catch(error =>{
-            if (error.code || error.message === 'Failed to fetch')
+            if (error.code === 500 || error.message === 'Failed to fetch')
                 document.getElementById('container').innerText = `alala pas bien ${error.code? `: ${error.code}` : ''} (jcrois c'est pas bon)`;
             throw error;
         })
@@ -156,13 +159,17 @@ function loadScript(scriptSrc, type) {
         if (type)
             script.type = type;
         script.onload = () => {
-            console.log(`Script ${scriptSrc} loaded.`);
+            // console.log(`Script ${scriptSrc} loaded.`);
             resolve();
         };
         script.onerror = () => {
             console.error(`Error while loading script ${scriptSrc}.`);
             reject(new Error(`Failed to load script ${scriptSrc}`));
         };
+        const scripts = document.querySelectorAll('script');
+        for (let existingScript of scripts)
+            if (existingScript.src === `https://localhost:4443${scriptSrc}`)
+                existingScript.remove();
         document.body.appendChild(script);
     });
 }
@@ -170,6 +177,7 @@ function loadScript(scriptSrc, type) {
 function loadCSS(cssHref, toUpdate=true) {
     const existingLink = document.querySelector('link[dynamic-css]');
     if (existingLink) {
+        // console.log('deleted', existingLink);
         existingLink.remove();
     }
     // console.log('will update =', toUpdate);
@@ -179,7 +187,7 @@ function loadCSS(cssHref, toUpdate=true) {
     if (toUpdate)
         link.setAttribute('dynamic-css', 'true');
     document.head.appendChild(link);
-    console.log(`Style ${cssHref} loaded.`)
+    // console.log(`Style ${cssHref} loaded.`)
 }
 
 async function loadContent(url, container='content', append=false) {
@@ -193,7 +201,7 @@ async function loadContent(url, container='content', append=false) {
         if(!append)
             contentDiv.innerHTML = html;
         else
-            contentDiv.innerHTML += html;
+            contentDiv.innerHTML += `\n${html}`;
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = html;
         const script = tempDiv.querySelector('[script]');
@@ -205,8 +213,9 @@ async function loadContent(url, container='content', append=false) {
         else if (userInformations.is_guest)
             style = 'guestStyle'
         css = contentDiv.querySelector(`[${style}]`);
+        // console.log(style, css)
         if (css)
-            loadCSS(css.getAttribute(style), !css.getAttribute(style).includes('Guest'));
+            loadCSS(css.getAttribute(style));//, !css.getAttribute(style).includes('Guest'));
     } catch (error) {
         contentDiv.innerHTML = '<h1>Erreur 404 : Page non trouvée</h1>';
     }
@@ -262,7 +271,6 @@ async function navigateTo(url, doNavigate=true){
     history.pushState({state: currentState}, '', url);
     console.log(`added ${url} to history with state : ${currentState}`);
     pathName = window.location.pathname;
-    console.log(pathName);
     incrementCurrentState();
     if (doNavigate)
         await handleRoute();
@@ -364,9 +372,9 @@ function displayConfirmModal(confirmTitle, confirmContent) {
 
     confirmContentDiv.innerText = confirmContent;
     confirmTitleDiv.innerText = confirmTitle;
-    document.getElementById('confirmModal').addEventListener('shown.bs.modal', function() {
-        document.getElementById('confirmModalClose').focus();
-    })
+    // document.getElementById('confirmModal').addEventListener('shown.bs.modal', function() {
+    //     document.getElementById('confirmModalClose').focus();
+    // })
     confirmModal.show();
 }
 
@@ -375,7 +383,17 @@ window.displayMainAlert = displayMainAlert;
 // ========================== INDEX SCRIPT ==========================
 
 async function loadFriendListModal() {
+    const friendModal = document.getElementById('friendListModal');
+    if (friendModal)
+        friendModal.remove();
     await loadContent('/friendList.html', 'modals', true);
+}
+
+async function loadBlockedModal(){
+    const friendModal = document.getElementById('blockedUsersModal')
+    if (friendModal)
+        friendModal.remove();
+    await loadContent('/blockedUsers.html', 'modals', true);
 }
 
 async function loadUserProfile(){
@@ -392,7 +410,8 @@ async function loadUserProfile(){
         document.getElementById('balance').innerText = userInformations.coins;
     }
     await loadContent(`/${profileMenu}`, 'profileMenu');
-    // document.getElementById('title').innerText = userInformations.title;
+    // if (!userInformations.is_guest)
+        
 }
 
 document.getElementById('home').addEventListener('click', async event => {
@@ -417,28 +436,30 @@ async function  indexInit(auto=true) {
         //         backdrop.remove;
         //     }
         // }, 500);
-        await fetchUserInfos(true);
-        if (window.location.pathname === '/login'){
-            document.getElementById('profileMenu').innerHTML = "";
-        }
-        else{
-            await loadUserProfile();
-        }
-        if (userInformations.code === 'user_not_found'){
+        // await fetchUserInfos(true);
+        // if (window.location.pathname === '/login'){
+        //     document.getElementById('profileMenu').innerHTML = "";
+        // }
+        // else{
+            // }
+        if (userInformations.detail === 'Incorrect authentication credentials.'){
             console.log('user was deleted from database, switching to guest mode');
             displayMainAlert("Unable to retrieve your account/guest profile","We're sorry your account has been permanently deleted and cannot be recovered.");
             await generateToken();
             await fetchUserInfos(true);
-            await loadUserProfile();
+            return handleRoute();
         }
+        await loadUserProfile();
     }
     else{
+        await fetchUserInfos();
+        if (!userInformations?.is_guest)
+            await loadFriendListModal()
         let currentState = getCurrentState();
         console.log(`added ${window.location.pathname} to history with state ${currentState}`)
         history.replaceState({state: currentState}, '', window.location.pathname);
         incrementCurrentState();
         loadCSS('/css/styles.css', false);
-        await loadFriendListModal();
         initSSE();
         handleRoute();
     }

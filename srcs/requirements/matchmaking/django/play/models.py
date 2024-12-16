@@ -17,12 +17,12 @@ class Players(models.Model):
     @staticmethod
     def tag(new_players):
         from matchmaking.matchmaking import launch_dual_game, search_ranked_players
-        print('tag')
+        #print('tag')
         players = Players.objects.all()
-        print('in normal game = ', players.filter(game_mode=GameMode.duel).count())
+        #print('in normal game = ', players.filter(game_mode=GameMode.duel).count())
         if players.filter(game_mode=GameMode.duel).count() >= 2:#change at 1 maybe ?
             launch_dual_game(players.filter(game_mode=GameMode.duel))
-            print('normal taged')
+            #print('normal taged')
         if players.filter(game_mode=GameMode.ranked).count() == 1:
             pass
             # Thread(target=search_ranked_players()).start()
