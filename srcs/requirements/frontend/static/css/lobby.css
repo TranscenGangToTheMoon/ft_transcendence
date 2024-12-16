@@ -10,14 +10,15 @@
 #gameType {
     background-color: purple;
 }
+
 #gameId {
-    background-color: blue;
+    background-color: goldenrod;
 }
 
 #lobbyInterface {
     background-color: grey;
-    display: flex;
     padding: 10px;
+    display: flex;
 }
 
 #joinGameField {
@@ -29,6 +30,7 @@
 }
 
 #teamDisplay {
+    display: flex;
     background-color: aqua;
 }
 

@@ -1,18 +1,24 @@
 <div id="lobbyHeader">
-    <div id="leaveGame">[insert leave game icon]</div>
+    <div id="leaveLobby">[insert leave game icon]</div>
     <div id="gameInfos">
         <div id="gameType">[insert game type]</div>
-        <div id="gameId">[insert game id]</div>
+        <div id="gameId">Lobby code :</div>
     </div>
 </div>
 <div id="lobbyInterface">
-    <div id="joinGameField">[insert join game field]</div>
+    <form id="joinGameField">
+        <label for="joinCode">Join Lobby</label>
+        <input type="text" id="joinCode" placeholder="code">
+        <button id="joinLobby">Join</button>
+        <div class="inputError" id="joinLobbyError"></div>
+        <button id="inviteFriends">Invite friends</button>
+        <div id="feedback" style="display: none;">Link copied to clipboard</div>
+    </form>
     <div id="lobbyOptions">
         <div id="teamSelector">[insert team selector]</div>
-        <div id="teamDisplay">[insert team display]</div>
-        <div id="playButton">[insert play button]</div>
+        <div id="teamDisplay"></div>
+        <div id="settingsButton">[insert settings button]</div>
     </div>
-    <div id="settingsButton">[insert settings button]</div>
 </div>
 
 <div class="modal fade" id="lobbySettingsModal" tabindex="-1" aria-labelledby="lobbySettingsModalLabel" aria-hidden="true">
@@ -25,7 +31,7 @@
             <div class="modal-body" id="lobbySettingsContent">
                 <div id="mode">[insert game mode buttons]</div>
                 <div id="gameTime">[insert game time selector]</div>
-                <div id="bestOf">[insert BO selector]</div>
+                <!-- <div id="bestOf">[insert BO selector]</div> -->
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary mx-auto" data-bs-dismiss="modal">[insert save button]</button>
@@ -35,5 +41,5 @@
 </div>
 
 <div script="/scripts/lobby.js"></div>
-<div _style="/css/lobby.css"></div>
-<div guestStyle="/css/lobby.css"></div>
+<!-- <div _style="/css/lobby.css"></div>
+<div guestStyle="/css/lobby.css"></div> -->
