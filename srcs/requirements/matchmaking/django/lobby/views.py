@@ -21,7 +21,7 @@ class LobbyView(generics.CreateAPIView, generics.RetrieveUpdateAPIView):
         return participant.lobby
 
 
-class LobbyParticipantsView(SerializerAuthContext, generics.ListCreateAPIView, generics.UpdateAPIView, generics.DestroyAPIView):
+class LobbyParticipantsView(SerializerAuthContext, generics.ListCreateAPIView, generics.UpdateAPIView, generics.DestroyAPIView): # todo GET usefull ? also for tournament
     queryset = LobbyParticipants.objects.all()
     serializer_class = LobbyParticipantsSerializer
     pagination_class = None
