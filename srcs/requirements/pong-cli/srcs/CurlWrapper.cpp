@@ -6,14 +6,11 @@
 /*   By: xcharra <xcharra@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/27 13:57:24 by xcharra           #+#    #+#             */
-/*   Updated: 2024/12/04 15:24:43 by xcharra          ###   ########.fr       */
+/*   Updated: 2024/12/09 18:34:34 by xcharra          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <iostream>
-#include <cstring>
 #include "CurlWrapper.hpp"
-#include "colors.h"
 
 CurlWrapper::CurlWrapper(const std::string &server) : _serverSet(true), _server(server), _SSLCertificate("./ft_transcendence.crt"),
 	_headers(nullptr), _HTTPCode(0) {
@@ -77,6 +74,7 @@ void CurlWrapper::GET(const std::string &path, const std::string &data) {
 
 	curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L);
 
+	_response.clear();
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeCallback);
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, &_response);
 
@@ -109,6 +107,7 @@ void CurlWrapper::POST(const std::string &path, const std::string &data) {
 
 	curl_easy_setopt(curl, CURLOPT_HTTPHEADER, _headers);
 
+	_response.clear();
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeCallback);
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, &_response);
 
@@ -143,6 +142,7 @@ void CurlWrapper::PUT(const std::string &path, const std::string &data) {
 
 	curl_easy_setopt(curl, CURLOPT_HTTPHEADER, _headers);
 
+	_response.clear();
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeCallback);
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, &_response);
 

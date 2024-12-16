@@ -6,15 +6,15 @@
 /*   By: xcharra <xcharra@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/27 13:57:16 by xcharra           #+#    #+#             */
-/*   Updated: 2024/12/04 14:54:45 by xcharra          ###   ########.fr       */
+/*   Updated: 2024/12/16 12:38:10 by xcharra          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef CURLWRAPPER_HPP
 # define CURLWRAPPER_HPP
 
-#include "curl/curl.h"
-typedef struct	curl_slist curl_slist_t;
+# include "pong-cli.h"
+
 
 class CurlWrapper {
 public:
@@ -54,6 +54,5 @@ private:
 	static size_t	writeCallback(void *buffer, size_t size, size_t nmemb, std::string &response);
 	static size_t	readCallback(void *buffer, size_t size, size_t nmemb, std::string &data);
 };
-
 
 #endif //CURLWRAPPER_HPP

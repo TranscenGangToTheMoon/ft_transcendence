@@ -6,17 +6,11 @@
 /*   By: xcharra <xcharra@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/03 17:35:02 by xcharra           #+#    #+#             */
-/*   Updated: 2024/12/06 17:46:27 by xcharra          ###   ########.fr       */
+/*   Updated: 2024/12/13 17:43:01 by xcharra          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <iostream>
 #include "PongCLI.hpp"
-
-#include <ftxui/component/screen_interactive.hpp>
-#include <csignal>
-
-#include "colors.h"
 
 PongCLI::PongCLI(CurlWrapper &curl, User &user) : _curl(curl), _info(text("")), _currentPage(Page::LoginPage),
 	_user(user), _password(), _server("https://localhost:4443"), _username() {
@@ -52,7 +46,7 @@ void PongCLI::changePage(Page newPage) {
 	}
 }
 
-void	PongCLI::signInAction(std::string &server, std::string &username, std::string &password) {
+void	PongCLI::loginAction(std::string &server, std::string &username, std::string &password) {
 	if (!server.empty() && !username.empty() && !password.empty()) {
 		_server = server;
 		_username = username;
@@ -61,18 +55,20 @@ void	PongCLI::signInAction(std::string &server, std::string &username, std::stri
 			_curl.setServer(_server);
 			_user.setUsername(_username);
 			_user.setPassword(_password);
-			_user.signInUser(_curl);
-			_user.setAccessToken(jsonParser(_curl.getResponse(), "access"));
-			_user.setRefreshToken(jsonParser(_curl.getResponse(), "refresh"));
-			_info = text("(" + std::to_string(_curl.getHTTPCode()) + ") Connexion success !") | color(Color::Green);
+
+			_user.loginUser(_curl);
+
+			_info = text("(" + std::to_string(_curl.getHTTPCode()) + ") Connexion succeed !") | color(Color::Green);
 			changePage(Page::MainMenuPage);
 			_screen.ExitLoopClosure()();
 		}
 		catch (std::exception &error) {
 			if (_curl.getHTTPCode() == 401)
-				_info = text("(" + std::to_string(_curl.getHTTPCode()) + "): " + "Unknown user, please sign up") | color(Color::Red);
-			else if (_curl.getHTTPCode() >= 301)
+				_info = text("(" + std::to_string(_curl.getHTTPCode()) + "): " + std::string(json::parse(_curl.getResponse())["detail"])) | color(Color::Red);
+			else if (_curl.getHTTPCode() >= 300)
 				_info = text("(" + std::to_string(_curl.getHTTPCode()) + "): " + _curl.getResponse()) | color(Color::Red);
+			else
+				_info = text("(" + std::to_string(_curl.getHTTPCode()) + "): " + error.what()) | color(Color::Red);
 		}
 	}
 	else if (server.empty() || username.empty() || password.empty()) {
@@ -81,7 +77,7 @@ void	PongCLI::signInAction(std::string &server, std::string &username, std::stri
 	}
 }
 
-void	PongCLI::signUpAction(std::string &server, std::string &username, std::string &password) {
+void	PongCLI::registerAction(std::string &server, std::string &username, std::string &password) {
 	if (!server.empty() && !username.empty() && !password.empty()) {
 		_server = server;
 		_username = username;
@@ -90,18 +86,20 @@ void	PongCLI::signUpAction(std::string &server, std::string &username, std::stri
 			_curl.setServer(_server);
 			_user.setUsername(_username);
 			_user.setPassword(_password);
-//			_user.setGuestTokens(_curl); // delete when flo allow register without token
-//			_user.signUpUser(_curl);
-			_user.signUpUserWithoutToken(_curl);
-			_user.setAccessToken(jsonParser(_curl.getResponse(), "access"));
-			_user.setRefreshToken(jsonParser(_curl.getResponse(), "refresh"));
-			_info = text("(" + std::to_string(_curl.getHTTPCode()) + ") Connexion success !") | color(Color::Green);
+
+			_user.registerUser(_curl);
+
+			_info = text("(" + std::to_string(_curl.getHTTPCode()) + ") Registration succeed !") | color(Color::Green);
 			changePage(Page::MainMenuPage);
 			_screen.ExitLoopClosure()();
 		}
 		catch (std::exception &error) {
-			if (_curl.getHTTPCode() >= 301)
-				_info = text("(" + std::to_string(_curl.getHTTPCode()) + "): " + _curl.getResponse()) | color(Color::Red);
+			if (_curl.getHTTPCode() >= 500)
+				_info = text("(" + std::to_string(_curl.getHTTPCode()) + "): " + error.what()) | color(Color::Red);
+			else if (_curl.getHTTPCode() >= 300)
+				_info = text("(" + std::to_string(_curl.getHTTPCode()) + "): " + std::string(json::parse(_curl.getResponse())["username"][0])) | color(Color::Red);
+			else
+				_info = text("(" + std::to_string(_curl.getHTTPCode()) + "): " + error.what()) | color(Color::Red);
 		}
 	}
 	else if (server.empty() || username.empty() || password.empty()) {
@@ -115,8 +113,10 @@ void	PongCLI::guestUpAction(std::string &server) {
 		_server = server;
 		try {
 			_curl.setServer(_server);
-			_user.setGuestTokens(_curl);
-			_info = text("(" + std::to_string(_curl.getHTTPCode()) + ") Guest up success !") | color(Color::Green);
+
+			_user.guestUser(_curl);
+
+			_info = text("(" + std::to_string(_curl.getHTTPCode()) + ") Guest up succeed !") | color(Color::Green);
 			changePage(Page::MainMenuPage);
 			_screen.ExitLoopClosure()();
 		}
@@ -163,20 +163,26 @@ void PongCLI::renderLoginPage() {
 	Component	usernameInput = Input(&username, usernameOption);
 	Component	passwordInput = Input(&password, passwordOption);
 
-	Component	signInButton = Button("Sign In", [this, &server, &username, &password] { signInAction(server, username, password); }, ButtonOption::Animated(Color::Red));
-	Component	signUpButton = Button("Sign Up", [this, &server, &username, &password] { signUpAction(server, username, password); },ButtonOption::Animated(Color::Green));
-	Component	guestUpButton = Button("Guest up", [this, &server] { guestUpAction(server); }, ButtonOption::Animated(Color::Blue));
+	Component	loginButton = Button("Login", [this, &server, &username, &password] {
+		loginAction(server, username, password);
+	}, ButtonOption::Animated(Color::Red));
+	Component	registerButton = Button("Register", [this, &server, &username, &password] {
+		registerAction(server, username, password);
+	},ButtonOption::Animated(Color::Green));
+	Component	guestUpButton = Button("Guest up", [this, &server] {
+		guestUpAction(server);
+	}, ButtonOption::Animated(Color::Blue));
 
 	Component	pageComponents = Container::Vertical({
 		serverInput,
 		usernameInput,
 		passwordInput,
 		guestUpButton,
-		signInButton,
-		signUpButton
+		loginButton,
+		registerButton
 	});
 
-	Component render =  Renderer(pageComponents, [&] {
+	Component	render =  Renderer(pageComponents, [&] {
 		return (
 			vbox({
 				getBanner() | hcenter | border,
@@ -200,8 +206,8 @@ void PongCLI::renderLoginPage() {
 							vbox({
 								guestUpButton->Render() | flex,
 								hbox({
-									signInButton->Render() | flex,
-									signUpButton->Render() | flex,
+									loginButton->Render() | flex,
+									registerButton->Render() | flex,
 								}),
 							})
 						})
@@ -213,7 +219,7 @@ void PongCLI::renderLoginPage() {
 		);
 	});
 
-	auto finalRender = CatchEvent(render, [&](const Event &event) {
+	Component	finalRender = CatchEvent(render, [&](const Event &event) {
 		if (event == Event::Escape) {
 			_screen.ExitLoopClosure()();
 			return (true);
@@ -225,13 +231,142 @@ void PongCLI::renderLoginPage() {
 }
 
 void PongCLI::renderMainMenuPage() {
+	int			id = 9;
+	std::string	username;
+	bool		guest;
+//	profile_picture: None, // not handle yet
+//	status: None, // not handle yet
+	int			stardust = 12996;
+	int			aura = 1200;
+//	current_rank: None, // not handle yes
+//	friends: None,
+	bool		accept_friend_request;
+	std::string	accept_chat_from;
 
-	Component settingsButton = Button("Settings", [this] { changePage(Page::SettingsPage); });
-	Component gameButton = Button("Settings", [this] { changePage(Page::SettingsPage); });
+	std::atomic<bool>	reloading = true;
+
+	auto		searchMatchDuel = Button("Launch async task", [this, &reloading] {
+		reloading = true;
+		_info = text("Async task running...") | color(Color::Yellow);
+// 		// _screen.RequestAnimationFrame();
+// 		auto res = std::async(std::launch::async, [this] {
+// 			// search match, request to an API, take time
+// 			// response from sse
+// 			std::this_thread::sleep_for(std::chrono::seconds(5));
+//
+// //			_info = text("Match found !") | color(Color::Green);
+// 			(void)this;
+// 		});
+//
+// 		// loading animation
+		for (int i = 0; i < 10; i++) {
+			// std::this_thread::sleep_for(std::chrono::seconds(1));
+			_info = text("Search match..." + std::to_string(i)) | color(Color::Yellow);
+			_screen.PostEvent(Event::Custom);
+			// _screen.RequestAnimationFrame();
+		}
+//
+// 		// wait for async task to finish
+// 		res.get();
+		// make socket connection to game server
+//		changePage(Page::GamePage)
+	}, ButtonOption::Animated(Color::Red));
 
 	Component	pageComponents = Container::Vertical({
-		settingsButton,
-		gameButton
+		searchMatchDuel,
+	});
+	std::string	json;
+	std::string info;
+	try {
+		_curl.GET("/api/users/me/", "");
+		basic_json	json = json::parse(_curl.getResponse());
+		if (_curl.getHTTPCode() >= 300)
+			throw std::runtime_error("Error: " + std::to_string(_curl.getHTTPCode()) + " " + _curl.getResponse());
+		id = json["id"];
+		username = json["username"];
+		guest = json["is_guest"];
+		stardust = json["coins"];
+		aura = json["trophies"];
+		accept_friend_request = json["accept_friend_request"];
+		accept_chat_from = json["accept_chat_from"];
+		//request to /api/user/me >> get user information
+	}
+	catch (std::exception &error) {
+		_info = text("(" + std::to_string(_curl.getHTTPCode()) + ") " + error.what() + info) | color(Color::Red);
+	}
+
+	auto render = Renderer(pageComponents, [&] {
+		return (
+			vbox({
+				getBanner() | hcenter | border,
+				vbox({
+					gridbox({{
+						window(
+							text("Profile: "),
+							hbox({ // Profile
+								vbox({ // left
+									text("id: ") | vcenter | yflex_grow,
+									text("Username: ") | vcenter | yflex_grow,
+									text("Guest user: ") | vcenter | yflex_grow,
+									text("Stardust: ") | vcenter | yflex_grow,
+									text("Aura: ") | vcenter | yflex_grow,
+									text("Accept friends request: ") | vcenter | yflex_grow,
+									text("DM open for: ") | vcenter | yflex_grow,
+								}),
+								separator(),
+								vbox({ // right
+									text(std::to_string(id)) | vcenter | yflex_grow,
+									text(username) | vcenter | yflex_grow,
+									text(guest ? "yes" : "no") | vcenter | yflex_grow,
+									text(std::to_string(stardust)) | vcenter | yflex_grow,
+									text(std::to_string(aura)) | vcenter | yflex_grow,
+									text(accept_friend_request ? "yes" : "no") | vcenter | yflex_grow,
+									text(accept_chat_from) | vcenter | yflex_grow,
+								}) | flex,
+							}) | flex
+						),
+						vbox({ //game
+							vbox({
+								text("Normal Game") | center | border | flex,
+								searchMatchDuel->Render(),
+							}) | yflex_grow,
+							vbox({
+								text("Ranked Game") | center | border | flex
+							}) | yflex_grow
+						}) | flex
+					}}) | flex,
+					_info | hcenter,
+				}) | xflex_grow | yflex_grow | flex,
+			}) | border | size(WIDTH, GREATER_THAN, 150) | size(HEIGHT, GREATER_THAN, 40)
+		);
+	});
+
+	auto	finalRenderer = CatchEvent(render, [&](Event event) {
+		if (event == Event::Escape) {
+			reloading = false;
+			_screen.ExitLoopClosure()();
+			return (true);
+		}
+		return (false);
+	});
+
+// 	auto	screenRedraw = std::thread([&] {
+// 		int	i = 0;
+// 		while (reloading) {
+// 			_screen.PostEvent(Event::Custom);
+// 			std::this_thread::sleep_for(std::chrono::seconds(1));
+// //			_info = text("Redraw " + std::to_string(i)) | color(Color::Red);
+// 			i++;
+// 		}
+// 	});
+
+	_screen.Loop(finalRenderer);
+	reloading = false;
+	// screenRedraw.join();
+}
+
+void PongCLI::renderSettingsPage() {
+	Component	pageComponents = Container::Vertical({
 	});
 
 	auto render = Renderer(pageComponents, [&] {
@@ -239,15 +374,8 @@ void PongCLI::renderMainMenuPage() {
 			vbox({
 				getBanner() | hcenter | border,
 				vbox({
-					vbox({
-						gridbox({{
-							text("Settings") | center | border | flex,
-							gridbox({
-								{ text("Normal Game") | center | border | flex },
-								{ text("Ranked Game") | center | border | flex }
-							}) | flex
-						}}) | flex,
-					})| xflex_grow | yflex_grow | flex
+					text("Settings page") | hcenter | border | flex,
+					_info | hcenter,
 				}) | xflex_grow | yflex_grow | flex,
 			}) | border | size(WIDTH, GREATER_THAN, 150) | size(HEIGHT, GREATER_THAN, 40)
 		);
@@ -264,31 +392,58 @@ void PongCLI::renderMainMenuPage() {
 	_screen.Loop(finalRenderer);
 }
 
-void PongCLI::renderSettingsPage() {
-	// std::cout << C_MSG("SettingsPage called") << std::endl;
-
-//	return (Renderer([this] {
-//		(void)this;
-//		return (vbox(text("Settings page load !")));
-//	}));
-}
-
 void PongCLI::renderGamePage() {
-	// std::cout << C_MSG("GamePage called") << std::endl;
+	Component	pageComponents = Container::Vertical({
+	});
 
-//	return (Renderer([this] {
-//		(void)this;
-//		return (vbox(text("Game page load !")));
-//	}));
+	auto render = Renderer(pageComponents, [&] {
+		return (
+			vbox({
+				getBanner() | hcenter | border,
+				vbox({
+					text("Game page") | hcenter | border | flex,
+					_info | hcenter,
+				}) | xflex_grow | yflex_grow | flex,
+			}) | border | size(WIDTH, GREATER_THAN, 150) | size(HEIGHT, GREATER_THAN, 40)
+		);
+	});
+
+	auto finalRenderer = CatchEvent(render, [&](Event event) {
+		if (event == Event::Escape) {
+			_screen.ExitLoopClosure()();
+			return (true);
+		}
+		return (false);
+	});
+
+	_screen.Loop(finalRenderer);
 }
 
 void PongCLI::renderDefaultPage() {
-	std::cout << C_MSG("LoginPage called") << std::endl;
+	Component	pageComponents = Container::Vertical({
+	});
 
-//	return (Renderer([this] {
-//		(void)this;
-//		return (vbox(text("Default page !")));
-//	}));
+	auto render = Renderer(pageComponents, [&] {
+		return (
+			vbox({
+				getBanner() | hcenter | border,
+				vbox({
+					text("Default page") | hcenter | border | flex,
+					_info | hcenter,
+				}) | xflex_grow | yflex_grow | flex,
+			}) | border | size(WIDTH, GREATER_THAN, 150) | size(HEIGHT, GREATER_THAN, 40)
+		);
+	});
+
+	auto finalRenderer = CatchEvent(render, [&](Event event) {
+		if (event == Event::Escape) {
+			_screen.ExitLoopClosure()();
+			return (true);
+		}
+		return (false);
+	});
+
+	_screen.Loop(finalRenderer);
 }
 
 Element PongCLI::getBanner() {
