@@ -9,7 +9,7 @@ from rest_framework.exceptions import PermissionDenied
 
 from blocking.utils import create_player_instance
 from lobby.models import Lobby, LobbyParticipants
-from matchmaking.utils import verify_user, get_lobby, verify_place
+from matchmaking.utils import verify_user, get_lobby, verify_place, get_participants
 
 
 class LobbyGetParticipantsSerializer(serializers.ModelSerializer):
@@ -34,7 +34,7 @@ class LobbyGetParticipantsSerializer(serializers.ModelSerializer):
 
 
 class LobbySerializer(serializers.ModelSerializer):
-    participants = LobbyGetParticipantsSerializer(many=True, read_only=True)
+    participants = serializers.SerializerMethodField(read_only=True)
     is_full = serializers.BooleanField(read_only=True)
 
     class Meta:
@@ -53,10 +53,6 @@ class LobbySerializer(serializers.ModelSerializer):
             self.fields['match_type'].read_only = True
 
     @staticmethod
-    def get_is_full(obj):
-        return obj.is_full
-
-    @staticmethod
     def validate_game_mode(value):
         return GameMode.validate_lobby(value)
 
@@ -67,6 +63,16 @@ class LobbySerializer(serializers.ModelSerializer):
     @staticmethod
     def validate_bo(value):
         return Bo.validate(value)
+
+    def get_participants(self, obj):
+        fields = ['is_ready']
+        if obj.game_mode == GameMode.custom_game:
+            fields.extend(['team'])
+        return get_participants(self, obj, fields)
+
+    @staticmethod
+    def get_is_full(obj):
+        return obj.is_full
 
     def create(self, validated_data):
         request = self.context.get('request')

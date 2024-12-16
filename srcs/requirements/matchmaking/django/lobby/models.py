@@ -2,6 +2,8 @@ from django.db import models
 from lib_transcendence.game import GameMode
 from lib_transcendence.Lobby import MatchType, Teams
 
+from blocking.utils import delete_player_instance
+
 
 class Lobby(models.Model):
     code = models.CharField(max_length=4, unique=True, editable=False)
@@ -65,6 +67,7 @@ class LobbyParticipants(models.Model):
         # todo inform other players that xxx leave the lobby
         creator = self.creator
         lobby = self.lobby
+        delete_player_instance(self.user_id)
         super().delete(using=using, keep_parents=keep_parents)
         participants = lobby.participants.filter(is_guest=False)
         if not participants.exists():
