@@ -153,6 +153,7 @@ class Game:
                 print(f'player {player.user_id} has join in!', flush=True)
 
     async def play(self):
+        from game_server.server import Server
         start_time = time.time()
         last_frame_time = start_time
         side = 1
@@ -160,7 +161,7 @@ class Game:
         await self.sio.emit('debug')
         for team in self.match.teams:
             for player in team.players:
-                await self.sio.emit(
+                Server.loop.call_soon_threadsafe(asyncio.create_task, self.sio.emit(
                     'start_game',
                     data={
                         'position_x': self.ball.position.x,
@@ -171,7 +172,7 @@ class Game:
                         'canvas_height': self.canvas.y
                     },
                     to=player.socket_id
-                )
+                ))
             side = -1
         print(time.time(), "Finished emitting start_game", flush=True)
         while True:
@@ -198,7 +199,8 @@ class Game:
             self.match.model.finish_match()
             return
         print('game launched', flush=True)
-        await self.play()
+        if await self.play() == False:
+            return False
 
     def check_zombie(self) -> bool:
         if self.match.model.finished:
