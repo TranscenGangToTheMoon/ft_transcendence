@@ -12,7 +12,6 @@ class Lobby(models.Model):
     game_mode = models.CharField(max_length=11)
 
     match_type = models.CharField(max_length=3)
-    bo = models.IntegerField(default=1)
 
     @property
     def max_team_participants(self):
@@ -44,7 +43,7 @@ class Lobby(models.Model):
     def __str__(self):
         name = f'{self.code}/{self.game_mode} ({self.participants.count()}/{self.max_participants})'
         if self.game_mode == GameMode.custom_game:
-            name += ' {bo' + str(self.bo) + ', ' + self.match_type + '}'
+            name += ' {' + self.match_type + '}'
         return name
 
     str_name = 'lobby'
