@@ -1,10 +1,8 @@
 from lib_transcendence.exceptions import MessagesException
 from lib_transcendence.services import request_auth
-from lib_transcendence.auth import auth_verify, get_user_from_auth
 from lib_transcendence.endpoints import Auth
 from rest_framework import serializers
-from rest_framework.authentication import BaseAuthentication
-from rest_framework.exceptions import NotFound, PermissionDenied, AuthenticationFailed, NotAuthenticated
+from rest_framework.exceptions import NotFound, PermissionDenied
 
 from users.models import Users
 
@@ -15,27 +13,6 @@ def auth_update(token, data):
 
 def auth_delete(token, data):
     request_auth(token, Auth.delete, method='DELETE', data=data)
-
-
-class Authentication(BaseAuthentication):
-    def authenticate(self, request):
-        token = request.headers.get('Authorization')
-
-        if not token:
-            raise NotAuthenticated()
-
-        try:
-            json_data = auth_verify(token)
-        except AuthenticationFailed:
-            raise AuthenticationFailed()
-        if json_data is None:
-            raise AuthenticationFailed()
-
-        auth_user = get_user_from_auth(json_data)
-        return auth_user, token
-
-    def authenticate_header(self, request):
-        return 'Bearer realm="api"'
 
 
 def get_user(request=None, id=None):

@@ -6,7 +6,6 @@ from rest_framework.authentication import BaseAuthentication
 from rest_framework.exceptions import ParseError, AuthenticationFailed
 
 
-# todo delete user after request
 def get_user_from_auth(user_data):
     from django.contrib.auth.models import User
 
@@ -19,16 +18,21 @@ def get_user_from_auth(user_data):
 
 class Authentication(BaseAuthentication):
     def authenticate(self, request):
-        if type(request.data) is not dict:
-            raise ParseError(MessagesException.ValidationError.REQUEST_DATA_REQUIRED)
+        token = request.headers.get('Authorization')
+
+        if not token:
+            raise NotAuthenticated()
+
         try:
-            json_data = auth_verify(request=request)
+            json_data = auth_verify(token)
         except AuthenticationFailed:
             raise AuthenticationFailed()
-        request.data['auth_user'] = json_data
-        user = get_user_from_auth(json_data)
+        if json_data is None:
+            raise AuthenticationFailed()
 
-        return user, None
+        request.data['auth_user'] = json_data
+        auth_user = get_user_from_auth(json_data)
+        return auth_user, token
 
     def authenticate_header(self, request):
         return 'Bearer realm="api"'
