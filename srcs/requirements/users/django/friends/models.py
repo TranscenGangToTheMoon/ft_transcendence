@@ -8,8 +8,8 @@ class Friends(models.Model):
     friends_since = models.DateTimeField(auto_now_add=True)
     matches_play_against = models.PositiveIntegerField(default=0)
     user1_win = models.PositiveIntegerField(default=0)  # todo remake
-    matches_play_together = models.PositiveIntegerField(default=0)
-    matches_win_together = models.PositiveIntegerField(default=0)
+    matches_played_together = models.PositiveIntegerField(default=0)
+    matches_won_together = models.PositiveIntegerField(default=0)
 
     def play_against(self, winner: Users):
         if winner.id == self.user1_win:
@@ -19,8 +19,8 @@ class Friends(models.Model):
 
     def play_together(self, win: bool):
         if win:
-            self.matches_win_together += 1
-        self.matches_play_together += 1
+            self.matches_won_together += 1
+        self.matches_played_together += 1
         self.save()
 
     def __str__(self):

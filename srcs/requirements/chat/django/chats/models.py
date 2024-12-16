@@ -5,6 +5,11 @@ class Chats(models.Model):
     type = models.CharField(max_length=20)
     blocked = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
+    last_updated = models.DateTimeField(auto_now=True)
+
+    def update(self):
+        self.last_updated = self.last_updated
+        self.save()
 
 
 class ChatParticipants(models.Model):

@@ -11,3 +11,9 @@
 .toast-container {
     right: 20px;
 }
+
+.friendRequestBlock {
+    margin-left: 30px;
+    display: flex;
+    justify-content: space-between;
+}

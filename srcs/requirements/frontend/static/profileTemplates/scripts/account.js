@@ -43,7 +43,8 @@ document.getElementById('pChangeNickname').addEventListener('submit', async even
         if (!data.id)
             document.getElementById('pChangeNicknameError').innerText = data.username;
         else {
-            indexInit(false);
+            await fetchUserInfos(true);
+            await indexInit(false);
             displayMainAlert("Nickname updated", `Successfully updated your nickname to '${newUsername}'`)
             handleRoute();
         }

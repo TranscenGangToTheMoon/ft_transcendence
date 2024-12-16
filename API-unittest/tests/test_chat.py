@@ -155,7 +155,7 @@ class Test03_GetChat(UnitTest):
         self.assertResponse(accept_chat(user2), 200)
         chat_id = self.assertResponse(create_chat(user1, user2['username']), 201, get_id=True)
 
-        self.assertResponse(request_chat_id(user1, chat_id, {'view_chat': False}, 'DELETE'), 204)
+        self.assertResponse(request_chat_id(user1, chat_id, 'DELETE'), 204)
         self.assertResponse(create_chat(user1, method='GET'), 200, count=0)
         self.assertResponse(create_chat(user2, method='GET'), 200, count=1)
         self.assertResponse(request_chat_id(user1, chat_id), 200)
@@ -251,6 +251,28 @@ class Test04_Messages(UnitTest):
 
         self.assertResponse(create_chat(user1, method='GET'), 200, count=1)
         self.assertResponse(create_message(user1, chat_id, 'Fine and u?'), 201)
+
+    def test_007_get_chat_sort_by_last_update(self):
+        user1 = new_user()
+        user2 = new_user()
+        chat_id = None
+        tmp_chat_id = None
+
+        for i in range(5):
+            if i == 0:
+                tmp_user = user2
+            else:
+                tmp_user = new_user()
+            tmp_chat_id = self.send_message(user1, tmp_user)
+            if i == 0:
+                chat_id = tmp_chat_id
+
+        response = create_chat(user1, method='GET')
+        self.assertResponse(response, 200, count=5)
+        self.assertEqual(tmp_chat_id, response.json['results'][0]['id'])
+        self.assertResponse(create_message(user1, chat_id, 'Hey !'), 201)
+        response = create_chat(user1, method='GET')
+        self.assertEqual(chat_id, response.json['results'][0]['id'])
 
 
 if __name__ == '__main__':
