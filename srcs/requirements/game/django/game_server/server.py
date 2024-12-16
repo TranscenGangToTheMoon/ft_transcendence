@@ -19,11 +19,13 @@ class Server:
     clients: Dict[str, Player] = {}
     games: Dict[int, Game] = {}
     games_lock: Lock
+    loop: asyncio.AbstractEventLoop
 
     @staticmethod
     def serve():
         Server.sio = socketio.AsyncServer(async_mode='aiohttp', cors_allowed_origins='*', logger=False)
         Server.app = web.Application()
+        Server.loop = asyncio.get_event_loop()
         Server.app.add_routes([web.post('/create-game', requests_handlers.create_game)])
         Server.sio.attach(Server.app, socketio_path='/ws/') #TODO -> change with '/ws/game/'
         Server.sio.on('connect', handler=io_handlers.connect)
@@ -37,7 +39,7 @@ class Server:
         logging.info(f"SocketIO server running on port {port}")
         # print(f"SocketIO server running on port {port}", flush=True)
         Server.launch_monitoring()
-        web.run_app(Server.app, host='0.0.0.0', port=port)
+        web.run_app(Server.app, host='0.0.0.0', port=port, loop=Server.loop)
 
     @staticmethod
     def launch_game(match_code):
@@ -72,9 +74,8 @@ class Server:
                         Server.games.pop(match_code)
             except RuntimeError:
                 Server.games_lock.release()
-                #print(Server.games_lock)
             Server.games_lock.release()
-            time.sleep(15)
+            time.sleep(0.1)
             # Flush stdout to print help aiohttp print its things
             if log == False:
                 print('', flush=True)

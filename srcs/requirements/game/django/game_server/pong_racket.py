@@ -12,6 +12,7 @@ class Racket:
         self.width = width
         self.position = position
         self.velocity = 0
+        self.block_glide = False
 
     def move_up(self):
         self.velocity = -1
