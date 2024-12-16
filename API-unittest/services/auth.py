@@ -16,7 +16,7 @@ def register(username=None, password=None, data=None, method='POST'):
     if password is not None:
         data['password'] = password
     else:
-        data['password'] = 'register_password' + rnstr(10)
+        data['password'] = 'register_' + rnstr(15)
 
     return make_request(
         endpoint='auth/register/',
