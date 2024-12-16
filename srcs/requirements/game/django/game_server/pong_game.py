@@ -1,14 +1,22 @@
-from typing import List
-# from game_server.pong_ball import Ball
-from game_server.pong_racket import Racket
-from game_server.pong_position import Position
-from game_server.match import Match, Player
 from datetime import datetime, timezone
-import time
+import math
+from game_server.match import Match, Player
+from game_server.pong_ball import Ball
+from game_server.pong_position import Position
+from game_server.pong_racket import Racket
+from typing import List
 import os
+import time
+import random
 
-def get_random_direction() -> Position:
-    return Position(0, 0)
+
+def get_random_direction():
+    random_angle = random.random() * 2 * math.pi
+    while abs(math.cos(random_angle)) < math.cos(math.pi / 3):
+        print(random_angle, abs(math.cos(random_angle)), flush=True)
+        random_angle = random.random() * 2 * math.pi
+    return math.cos(random_angle), math.sin(random_angle)
+
 
 class Game:
     def __init__(self,
@@ -30,18 +38,24 @@ class Game:
             except KeyError:
                 self.canvas = Position(800, 600)
 
-        # direction = get_random_direction()
-        # self.ball = Ball(Position(int(canvas_size.x / 2), int(canvas_size.y / 2)), direction)
+        print('BASILKK', flush=True)
+        direction_x, direction_y = get_random_direction()
+        print(direction_x, direction_y, flush=True)
+        self.ball = Ball(Position(int(self.canvas.x / 2), int(self.canvas.y / 2)), direction_x, direction_y)
+        print('BASILKK2', flush=True)
 
         racket_size: Position = Position(10, 100)
         self.rackets: List[Racket] = []
         # create rackets for left players
         for player in self.match.teams[0].players:
-            self.rackets.append(Racket(player.user_id, Position(0, int(self.canvas.y / 2 - racket_size.y / 2)), racket_size.x, racket_size.y))
+            racket = Racket(player.user_id, Position(0, int(self.canvas.y / 2 - racket_size.y / 2)), racket_size.x, racket_size.y)
+            player.racket = racket
+            self.rackets.append(racket)
         # create rackets for right players
         for player in self.match.teams[1].players:
-            self.rackets.append(Racket(player.user_id, Position(self.canvas.x - racket_size.x, int(self.canvas.y / 2 - racket_size.y / 2)), racket_size.x, racket_size.y))
-
+            racket = Racket(player.user_id, Position(self.canvas.x - racket_size.x, int(self.canvas.y / 2 - racket_size.y / 2)), racket_size.x, racket_size.y)
+            player.racket = racket
+            self.rackets.append(racket)
 
     def get_racket(self, player_id) -> Racket:
         for racket in self.rackets:
@@ -64,17 +78,50 @@ class Game:
     def wait_for_players(self, timeout: int):
         start_waiting = time.time()
         for team in self.match.teams:
-            # print(self.match.teams[0].model, flush=True)
             for player in team.players:
                 while player.socket_id == '':
                     if time.time() - start_waiting > timeout:
-                        raise Exception(f'player socketio connection timed out : player_id: {self.match.teams[0].players[0].user_id}')
+                        raise Exception(f'player socketio connection timed out : player_id: {player.user_id}')
                     time.sleep(1)
-        print(f'player {self.match.teams[0].players[0].user_id} has join in!', flush=True)
+                #print(f'player {player.user_id} has join in!', flush=True)
 
-    def play(self):
+    async def play(self):
         start_time = time.time()
         last_frame_time = time.time()
+
+        for player in self.match.teams[0].players:
+            await self.sio.emit(
+                'start_game',
+                data={
+                    'position_x': self.ball.position.x,
+                    'position_y': self.ball.position.y,
+                    'direction_x': self.ball.direction_x,
+                    'direction_y': self.ball.direction_y
+                },
+                to=player.socket_id
+            )
+        for player in self.match.teams[1].players:
+            await self.sio.emit(
+                'start_game',
+                data={
+                    'position_x': self.ball.position.x,
+                    'position_y': self.ball.position.y,
+                    'direction_x': -self.ball.direction_x,
+                    'direction_y': self.ball.direction_y
+                },
+                to=player.socket_id
+            )
+
+        # await self.sio.emit(
+        #     'start_game',
+        #     data={
+        #         'position_x': self.ball.position.x,
+        #         'position_y': self.ball.position.y,
+        #         'direction_x': self.ball.direction_x,
+        #         'direction_y': self.ball.direction_y
+        #     },
+        #     room=str(self.match.code)
+        # )
         while True:
             if self.game_timeout is not None and (time.time() - start_time < self.game_timeout * 60):
                 break
@@ -83,7 +130,7 @@ class Game:
             self.update()
             last_frame_time = time.time()
 
-    def launch(self):
+    async def launch(self):
         # try:
         #     timeout = int(os.environ['GAME_PLAYER_CONNECT_TIMEOUT'])
         # except KeyError:
@@ -91,11 +138,11 @@ class Game:
         try:
             self.wait_for_players(timeout)
         except Exception as e:
-            print(e, flush=True)
+            #print(e, flush=True)
             self.match.model.finish_match()
             return
-        print('game launched', flush=True)
-        self.play()
+        #print('game launched', flush=True)
+        await self.play()
 
     def check_zombie(self) -> bool:
         if self.match.model.finished:
@@ -107,3 +154,29 @@ class Game:
             self.match.model.finish_match()
             return True
         return False
+
+    async def score(self):
+        self.ball.position = Position(int(self.canvas.x / 2), int(self.canvas.y / 2))
+        self.ball.direction_x, self.ball.direction_y = get_random_direction()
+        for player in self.match.teams[0].players:
+            await self.sio.emit(
+                'goal',
+                data={
+                    'position_x': self.ball.position.x,
+                    'position_y': self.ball.position.y,
+                    'direction_x': self.ball.direction_x,
+                    'direction_y': self.ball.direction_y
+                },
+                to=player.socket_id
+            )
+        for player in self.match.teams[1].players:
+            await self.sio.emit(
+                'goal',
+                data={
+                    'position_x': self.ball.position.x,
+                    'position_y': self.ball.position.y,
+                    'direction_x': -self.ball.direction_x,
+                    'direction_y': self.ball.direction_y
+                },
+                to=player.socket_id
+            )

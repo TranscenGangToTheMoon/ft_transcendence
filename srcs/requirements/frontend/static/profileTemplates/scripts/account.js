@@ -43,6 +43,7 @@ document.getElementById('pChangeNickname').addEventListener('submit', async even
         if (!data.id)
             document.getElementById('pChangeNicknameError').innerText = data.username;
         else {
+            document.getElementById('pChangeNicknameError').innerText = "";
             await fetchUserInfos(true);
             await indexInit(false);
             displayMainAlert("Nickname updated", `Successfully updated your nickname to '${newUsername}'`)
@@ -65,10 +66,13 @@ document.getElementById('pChangePassword').addEventListener('submit', async even
         undefined, undefined, {'password' : newPassword});
         if (!data.id){
             document.getElementById('pChangePasswordError').innerText = data.username;
-            if (data.detail)
-                document.getElementById('pChangePasswordError').innerText = data.detail;
+            let error = data.detail ? data.detail : data.password;
+            if (error)
+                document.getElementById('pChangePasswordError').innerText = error;
+            
         }
         else{
+            document.getElementById('pChangePasswordError').innerText = "";
             displayMainAlert("password updated", "successfully updated your password.");
             newPasswordInputDiv.value = "";
         }
