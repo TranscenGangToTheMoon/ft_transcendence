@@ -72,7 +72,7 @@ JSON_I		:=	$(JSON_D)/single_include
 
 JSON_A		:=	$(JSON:%=$(JSON_D)/build/%)
 
-###############FTXUI###############
+###############SOCKT###############
 SOKCT		:=	\
 				libsioclient.a\
 				libsioclient_tls.a
@@ -83,7 +83,7 @@ SOKCT_I		:=	$(SOKCT_D)/src
 
 SOKCT_A		:=	$(SOKCT:%=$(SOKCT_D)/build/%)
 
-SOKCT_F		:=	-L$(SOKCT_D)/build/ -lsioclient -lsioclient_tls
+SOKCT_F		:=	-L$(SOKCT_D)/build/ -lsioclient_tls
 ########################################################################################################################
 #                                                        FLAGS                                                         #
 ########################################################################################################################
@@ -93,7 +93,7 @@ MFLAGS		:= --jobs=$(shell nproc)
 
 RM			:=	rm -rf
 
-IFLAGS		:=	-I$(INCS_D) -I$(FTXUI_I) -I$(CURL_I) -I$(JSON_I) -I$(SOKCT_I)
+IFLAGS		:=	-I$(INCS_D) -I$(FTXUI_I) -I$(CURL_I) -I$(JSON_I) -I$(SOKCT_I) -I$(SOKCT_D)/lib/asio/asio/include
 
 DFLAGS		=	-MMD -MP -MT $@ -MF $(DEPS_D)$*.d
 
@@ -101,7 +101,7 @@ OFLAGS		:=	#-O3 #-Ofast -march=native -fomit-frame-pointer -funroll-loops
 
 CXXFLAGS	=	-Wall -Wextra -Werror -g -fsanitize=thread $(IFLAGS) $(OFLAGS) $(DFLAGS)
 
-LFLAGS		= 	$(FTXUI_F) $(CURL_F) $(SOKCT_F) #-lssl -lcrypto
+LFLAGS		= 	$(FTXUI_F) $(CURL_F) $(SOKCT_F) -lssl -lcrypto
 
 ARGS		?=	#
 
@@ -186,11 +186,11 @@ $(JSON_D)	:
 
 .PHONY: socketio
 socketio	:	$(SOKCT_D)
-			cmake $(SOKCT_D) -B $(SOKCT_D)/build
+			cmake $(SOKCT_D) -B $(SOKCT_D)/build -DCMAKE_CXX_FLAGS="-DSIO_TLS"
 			$(MAKE) $(MFLAGS) -C $(SOKCT_D)/build
 
 $(SOKCT_D)	:
-			git clone --recurse-submodules --depth 1 --branch 3.1.0 https://github.com/socketio/socket.io-client-cpp.git  $@
+			git clone --recurse-submodules --depth 1 https://github.com/socketio/socket.io-client-cpp.git  $@
 
 $(CERT)		:
 			openssl s_client -connect localhost:4443 -servername localhost </dev/null \
