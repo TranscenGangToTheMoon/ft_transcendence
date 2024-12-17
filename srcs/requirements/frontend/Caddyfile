@@ -1,4 +1,12 @@
+{
+    log {
+        output stdout
+        level debug
+    }
+}
+
 localhost:443 {
+
 	root * /var/www/html
 	handle {
 		@trailing path_regexp trailing ^(/.+)/$

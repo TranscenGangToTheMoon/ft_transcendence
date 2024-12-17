@@ -39,12 +39,8 @@
 //json
 # include "nlohmann/json.hpp"
 
-//socketio
-# include "sio_client.h"
-
 using namespace	ftxui;
 using namespace	nlohmann;
-using namespace	sio;
 
 typedef struct curl_slist	curl_slist_t;
 

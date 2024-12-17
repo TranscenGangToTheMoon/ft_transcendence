@@ -72,18 +72,29 @@ JSON_I		:=	$(JSON_D)/single_include
 
 JSON_A		:=	$(JSON:%=$(JSON_D)/build/%)
 
-###############SOCKT###############
-SOKCT		:=	\
-				libsioclient.a\
-				libsioclient_tls.a
+################SOCKT###############
+#SOKCT		:=	\
+#				libsioclient.a\
+#				libsioclient_tls.a
+#
+#SOKCT_D		:=	$(LIB_D)/socketio
+#
+#SOKCT_I		:=	$(SOKCT_D)/src
+#
+#SOKCT_A		:=	$(SOKCT:%=$(SOKCT_D)/build/%)
+#
+#SOKCT_F		:=	-L$(SOKCT_D)/build/ -lsioclient_tls
 
-SOKCT_D		:=	$(LIB_D)/socketio
+###############BOOST###############
+BOOST		:=	\
 
-SOKCT_I		:=	$(SOKCT_D)/src
+BOOST_D		:=	$(LIB_D)/boost
 
-SOKCT_A		:=	$(SOKCT:%=$(SOKCT_D)/build/%)
+BOOST_I		:=	$(BOOST_D)/libs/asio/include -I$(BOOST_D)/libs/beast/include -I$(BOOST_D)/libs/config/include -I$(BOOST_D)/libs/assert/include -I$(BOOST_D)/libs/thow_exception/include
 
-SOKCT_F		:=	-L$(SOKCT_D)/build/ -lsioclient_tls
+BOOST_A		:=	$(BOOST:%=$(BOOST_D)/build/%)
+
+BOOST_F		:=	#-L$(BOOST_D)/build/
 ########################################################################################################################
 #                                                        FLAGS                                                         #
 ########################################################################################################################
@@ -93,7 +104,7 @@ MFLAGS		:= --jobs=$(shell nproc)
 
 RM			:=	rm -rf
 
-IFLAGS		:=	-I$(INCS_D) -I$(FTXUI_I) -I$(CURL_I) -I$(JSON_I) -I$(SOKCT_I) -I$(SOKCT_D)/lib/asio/asio/include
+IFLAGS		:=	-I$(INCS_D) -I$(FTXUI_I) -I$(CURL_I) -I$(JSON_I) -I$(BOOST_I)
 
 DFLAGS		=	-MMD -MP -MT $@ -MF $(DEPS_D)$*.d
 
@@ -184,13 +195,24 @@ json		:	$(JSON_D)
 $(JSON_D)	:
 			git clone --depth 1 --branch v3.11.3 git@github.com:nlohmann/json.git $@
 
-.PHONY: socketio
-socketio	:	$(SOKCT_D)
-			cmake $(SOKCT_D) -B $(SOKCT_D)/build -DCMAKE_CXX_FLAGS="-DSIO_TLS"
-			$(MAKE) $(MFLAGS) -C $(SOKCT_D)/build
+#.PHONY: socketio
+#socketio	:	$(SOKCT_D)
+#			cmake $(SOKCT_D) -B $(SOKCT_D)/build -DCMAKE_CXX_FLAGS="-DSIO_TLS"
+#			$(MAKE) $(MFLAGS) -C $(SOKCT_D)/build
+#
+#$(SOKCT_D)	:
+#			git clone --recurse-submodules --depth 1 https://github.com/socketio/socket.io-client-cpp.git  $@
 
-$(SOKCT_D)	:
-			git clone --recurse-submodules --depth 1 https://github.com/socketio/socket.io-client-cpp.git  $@
+.PHONY: boost
+boost		:	$(BOOST_D)
+			cmake $(BOOST_D) -B $(BOOST_D)/build
+			$(MAKE) $(MFLAGS) -C $(BOOST_D)/build
+
+$(BOOST_D)	:
+			curl -o	$@.tar.gz -L https://github.com/boostorg/boost/releases/download/boost-1.87.0/boost-1.87.0-cmake.tar.gz
+			mkdir	$@
+			tar -xf	$@.tar.gz	-C $@ --strip-components=1
+			rm -rf	$@.tar.gz
 
 $(CERT)		:
 			openssl s_client -connect localhost:4443 -servername localhost </dev/null \
