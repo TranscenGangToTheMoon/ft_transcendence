@@ -86,8 +86,11 @@ function setupSocketListeners(chatData)
 		chatBox.insertAdjacentHTML('beforeend', `<div><p><strong>${data.author}:</strong> ${data.content}</p></div>`);
 	});
 	
-	socket.on("error", (data) => {
+	socket.on("error", async (data) => {
 		console.log("Error received: ", data);
+		// if (data.error === 401){
+		// 	socket.emit('message', {'chatId': chatData.chatId, 'content': data.previousTry, 'token' : 'Bearer ' + await refreshToken(), 'retry': true});
+		// }
 	});
 	
 	socket.on("debug", (data) => {
@@ -101,14 +104,12 @@ function parsChatRequest(chat)
 {
 	let chatData = {
 		'chatId': chat.id,
-		// 'target': chat.participants[0].username,
-		// 'targetId': chat.participants[0].id,
 		'target': chat.chat_with.username,
 		'targetId': chat.chat_with.id,
-		'lastMessage': chat.last_message.content,
+		'lastMessage': '< Say hi! >',
 	};
-	if (chatData.lastMessage === null) {
-		chatData.lastMessage = '< Say hi! >';
+	if (chat.last_message) {
+		chatData.lastMessage = chat.last_message.content;
 	}
 	return chatData;
 }
@@ -196,8 +197,11 @@ selectChatMenu();
 
 document.getElementById('searchChatForm').addEventListener('keyup', (e) => {
 	e.preventDefault();
+	console.log("dewpokdowek", e.key === 'Enter');
+	if (e.key === 'Enter') return;
 	selectChatMenu(e.target.value);
 });
+
 document.getElementById('searchChatForm').addEventListener('submit', (e) => {
 	e.preventDefault();
 	startChat(e.target.searchUser.value);
