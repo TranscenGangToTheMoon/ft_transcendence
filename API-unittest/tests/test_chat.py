@@ -168,6 +168,22 @@ class Test03_GetChat(UnitTest):
         self.assertResponse(request_chat_id(user1, chat_id, method='DELETE'), 204)
         self.assertResponse(request_chat_id(user2, chat_id), 200)
 
+    def test_008_search_chats_in_url(self):
+        user1 = new_user()
+
+        for i in range(5):
+            tmp_user = new_user()
+            self.assertResponse(accept_chat(tmp_user), 200)
+            self.assertResponse(create_chat(user1, tmp_user['username']), 201)
+
+        tmp_user = new_user('caca' + rnstr())
+        self.assertResponse(accept_chat(tmp_user), 200)
+        self.assertResponse(create_chat(user1, tmp_user['username']), 201)
+
+        self.assertResponse(create_chat(user1, method='GET', query='caca'), 200, count=1)
+
+        self.assertResponse(create_chat(user1, method='GET', query='chat'), 200, count=5)
+
 
 class Test04_Messages(UnitTest):
 
