@@ -90,7 +90,34 @@ BOOST		:=	\
 
 BOOST_D		:=	$(LIB_D)/boost
 
-BOOST_I		:=	$(BOOST_D)/libs/asio/include -I$(BOOST_D)/libs/beast/include -I$(BOOST_D)/libs/config/include -I$(BOOST_D)/libs/assert/include -I$(BOOST_D)/libs/thow_exception/include
+BOOST_I		:=	\
+				-I$(BOOST_D)/libs/asio/include\
+				-I$(BOOST_D)/libs/beast/include\
+				-I$(BOOST_D)/libs/config/include\
+				-I$(BOOST_D)/libs/assert/include\
+				-I$(BOOST_D)/libs/throw_exception/include\
+				-I$(BOOST_D)/libs/system/include\
+				-I$(BOOST_D)/libs/date_time/include\
+				-I$(BOOST_D)/libs/smart_ptr/include\
+				-I$(BOOST_D)/libs/core/include\
+				-I$(BOOST_D)/libs/utility/include\
+				-I$(BOOST_D)/libs/static_assert/include\
+				-I$(BOOST_D)/libs/type_traits/include\
+				-I$(BOOST_D)/libs/numeric/conversion/include\
+				-I$(BOOST_D)/libs/mpl/include\
+				-I$(BOOST_D)/libs/preprocessor/include\
+				-I$(BOOST_D)/libs/optional/include\
+				-I$(BOOST_D)/libs/mp11/include\
+				-I$(BOOST_D)/libs/bind/include\
+				-I$(BOOST_D)/libs/intrusive/include\
+				-I$(BOOST_D)/libs/move/include\
+				-I$(BOOST_D)/libs/logic/include\
+				-I$(BOOST_D)/libs/static_string/include\
+				-I$(BOOST_D)/libs/container_hash/include\
+				-I$(BOOST_D)/libs/describe/include\
+				-I$(BOOST_D)/libs/io/include\
+				-I$(BOOST_D)/libs/endian/include\
+
 
 BOOST_A		:=	$(BOOST:%=$(BOOST_D)/build/%)
 
@@ -100,17 +127,17 @@ BOOST_F		:=	#-L$(BOOST_D)/build/
 ########################################################################################################################
 CXX			:=	c++ -std=c++17
 
-MFLAGS		:= --jobs=$(shell nproc)
+MFLAGS		:=	--jobs=$(shell nproc)
 
 RM			:=	rm -rf
 
-IFLAGS		:=	-I$(INCS_D) -I$(FTXUI_I) -I$(CURL_I) -I$(JSON_I) -I$(BOOST_I)
+IFLAGS		:=	-I$(INCS_D) -I$(FTXUI_I) -I$(CURL_I) -I$(JSON_I) $(BOOST_I)
 
 DFLAGS		=	-MMD -MP -MT $@ -MF $(DEPS_D)$*.d
 
 OFLAGS		:=	#-O3 #-Ofast -march=native -fomit-frame-pointer -funroll-loops
 
-CXXFLAGS	=	-Wall -Wextra -Werror -g -fsanitize=thread $(IFLAGS) $(OFLAGS) $(DFLAGS)
+CXXFLAGS	=	-Wall -Wextra -Werror -g  $(IFLAGS) $(OFLAGS) $(DFLAGS)
 
 LFLAGS		= 	$(FTXUI_F) $(CURL_F) $(SOKCT_F) -lssl -lcrypto
 

@@ -55,7 +55,7 @@ int main(void)
 		}
 		catch (std::exception &error) {
 			std::cerr << ("(" + std::to_string(curl.getHTTPCode()) + ") " + error.what()) << std::endl;
-			std::cerr << json::parse(curl.getResponse()).dump(1, '\t') << std::endl;
+			// std::cerr << json::parse(curl.getResponse()).dump(1, '\t') << std::endl;
 		}
 		std::string id;
 		try {
@@ -68,23 +68,23 @@ int main(void)
 		}
 		catch (std::exception &error) {
 			std::cerr << ("(" + std::to_string(curl.getHTTPCode()) + ") " + error.what()) << std::endl;
-			std::cerr << json::parse(curl.getResponse()).dump(1, '\t') << std::endl;
+			// std::cerr << json::parse(curl.getResponse()).dump(1, '\t') << std::endl;
 		}
 
-		boost::asio::io_context io_context;
-		boost::asio::ssl::context ssl_context(boost::asio::ssl::context::tlsv12_client);
-
-		boost::asio::ip::tcp::resolver resolver(io_context);
-		auto const results = resolver.resolve("localhost", "4444");
-
-		boost::asio::ssl::stream<boost::asio::ip::tcp::socket> ws(io_context, ssl_context);
-		boost::asio::connect(ws.next_layer(), results.begin(), results.end());
-		ws.handshake(boost::asio::ssl::stream_base::client);
-
-		ws.next_layer().handshake(boost::asio::ssl::stream_base::client);
-		ws.handshake("localhost", "/");
-
-		std::cout << "Connected to WebSocket server" << std::endl;
+		// boost::asio::io_context io_context;
+		// boost::asio::ssl::context ssl_context(boost::asio::ssl::context::tlsv12_client);
+		//
+		// boost::asio::ip::tcp::resolver resolver(io_context);
+		// auto const results = resolver.resolve("localhost", "4444");
+		//
+		// boost::asio::ssl::stream<boost::asio::ip::tcp::socket> ws(io_context, ssl_context);
+		// boost::asio::connect(ws.next_layer(), results.begin(), results.end());
+		// ws.handshake(boost::asio::ssl::stream_base::client);
+		//
+		// ws.next_layer().handshake(boost::asio::ssl::stream_base::client);
+		// ws.handshake("localhost", "/");
+		//
+		// std::cout << "Connected to WebSocket server" << std::endl;
 
 
 	}
