@@ -56,8 +56,7 @@ class Server:
         game = Game(Server._sio, match, Position(800, 600))
         print(Server._games_lock, flush=True)
         Server._games_lock.acquire()
-        print(match_code, flush=True)
-        Server._games[match_code] = game
+        Server._games.pop(match_id)
         Server._games_lock.release()
         Server._games[match_code].launch()
 
@@ -106,16 +105,14 @@ class Server:
         Server._games_lock.release()
 
     @staticmethod
-    def get_player_and_match_code(id: int):
+    def get_player_and_match_id(user_id: int):
         Server._games_lock.acquire()
-        for match_code in Server._games:
-            print('la1', flush=True)
-            for team in Server._games[match_code].match.teams:
-                print('la2', flush=True)
+        for match_id in Server._games:
+            for team in Server._games[match_id].match.teams:
                 for player in team.players:
                     print(player.user_id, flush=True)
                     if player.user_id == id:
                         Server._games_lock.release()
-                        return player, match_code
+                        return player, match_id
         Server._games_lock.release()
-        raise Exception(f'No player with id {id} is awaited on this server')
+        raise Exception(f'No player with id {user_id} is awaited on this server')

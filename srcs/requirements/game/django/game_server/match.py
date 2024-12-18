@@ -27,20 +27,20 @@ class Team():
         self.model = model
         raw_players = self.model.players.all()
         for player in raw_players:
-            self.players.append(Player(player, self.match_id))
+            self.players.append(Player(player, self.match_id, self))
 
 class Match():
     def __init__(self, match_id):
-        self.model = Matches.objects.get(code=match_id)
-        self.code = self.model.code
+        self.model = Matches.objects.get(id=match_id)
+        self.id = match_id
         self.teams: List[Team] = []
         self.game_mode = self.model.game_mode
         raw_teams = self.model.teams.all()
         for team in raw_teams:
-            self.teams.append(Team(team, self.code))
+            self.teams.append(Team(team, self.id))
 
     def __str__(self):
-        return self.model.code + ' ' + str(self.teams[0].model.players.all()) + ' ' + \
+        return self.model.id + ' ' + str(self.teams[0].model.players.all()) + ' ' + \
         str(self.teams[1].model.players.all())
 
 def fetch_match(match_id):

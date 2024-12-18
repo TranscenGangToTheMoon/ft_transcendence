@@ -158,7 +158,7 @@ class Game:
                 'canvas_width': self.canvas.x,
                 'canvas_height': self.canvas.y
             },
-            room=str(self.match.code)
+            room=str(self.match.id)
         )
 
     def send_game_state(self):
@@ -182,10 +182,11 @@ class Game:
 
     def send_start_game(self):
             from game_server.server import Server
-            Server.emit('start_game', room=str(self.match.code))
+            Server.emit('start_game', room=str(self.match.id))
             print('emitted start_game', flush=True)
 
     def play(self):
+        from game_server.server import Server
         start_time = time.time()
         last_frame_time = start_time
         self.send_start_game()
@@ -227,7 +228,7 @@ class Game:
         now = datetime.now(timezone.utc)
         if game_start_time <= now - game_timeout:
             self.match.model.finish_match()
-            print('finished match', self.match.code)
+            print('finished match', self.match.id)
             return True
         return False
 

@@ -7,7 +7,7 @@ async def create_game(request: web.Request):
     # only accept requests from django (on the same host)
     if request.remote == '127.0.0.1':
         data = await request.post()
-        match_code = data['match_code']
-        print('launching match ', match_code, flush=True)
-        Thread(target=Server.launch_game, args=(match_code,)).start()
+        match_id = data['match_id']
+        print('launching match ', match_id, flush=True)
+        Thread(target=Server.launch_game, args=(match_id,)).start()
     return web.Response()
