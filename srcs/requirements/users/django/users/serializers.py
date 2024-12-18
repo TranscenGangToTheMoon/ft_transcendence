@@ -28,6 +28,8 @@ class UsersMeSerializer(serializers.ModelSerializer):
             'trophies',
             'current_rank',
             'created_at',
+            'chat_notifications',
+            'friend_notifications',
             'password',
 
         ]
@@ -39,6 +41,8 @@ class UsersMeSerializer(serializers.ModelSerializer):
             'trophies',
             'current_rank',
             'created_at',
+            'friend_notifications',
+            'chat_notifications',
         ]
 
     @staticmethod
