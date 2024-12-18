@@ -89,7 +89,7 @@ class Server:
 
     @staticmethod
     def emit(event: str, data=None, room=None, to=None, skip_sid=None):
-        with Server._games_lock:
+        with Server._loop_lock:
             Server._loop.call_soon_threadsafe(asyncio.create_task, Server._sio.emit(event, data=data, room=room, to=to, skip_sid=skip_sid))
 
     @staticmethod
