@@ -178,9 +178,9 @@ class Game:
             side = -1
 
     def send_start_game(self):
-            from game_server.server import Server
-            Server.emit('start_game', room=str(self.match.id))
-            print('emitted start_game', flush=True)
+        from game_server.server import Server
+        Server.emit('start_game', room=str(self.match.id))
+        print('emitted start_game', flush=True)
 
     def play(self):
         from game_server.server import Server
