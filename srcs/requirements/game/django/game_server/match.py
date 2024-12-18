@@ -1,3 +1,4 @@
+from aiohttp.web_routedef import AbstractRouteDef
 from asgiref.sync import sync_to_async
 from typing import List
 from game_server.pong_racket import Racket
@@ -11,26 +12,26 @@ django.setup()
 from matches.models import Matches
 
 class Player():
-    def __init__(self, model, match_code):
-        self.match_code = match_code
-        self.racket = None
+    def __init__(self, model, match_id):
+        self.match_id = match_id
+        self.racket: Racket
         self.model = model
         self.user_id = self.model.user_id
         self.socket_id = ''
         self.game = None
 
 class Team():
-    def __init__(self, model, match_code):
-        self.match_code = match_code
+    def __init__(self, model, match_id):
+        self.match_id = match_id
         self.players: List[Player] = []
         self.model = model
         raw_players = self.model.players.all()
         for player in raw_players:
-            self.players.append(Player(player, self.match_code))
+            self.players.append(Player(player, self.match_id))
 
 class Match():
-    def __init__(self, match_code):
-        self.model = Matches.objects.get(code=match_code)
+    def __init__(self, match_id):
+        self.model = Matches.objects.get(code=match_id)
         self.code = self.model.code
         self.teams: List[Team] = []
         self.game_mode = self.model.game_mode
@@ -42,14 +43,14 @@ class Match():
         return self.model.code + ' ' + str(self.teams[0].model.players.all()) + ' ' + \
         str(self.teams[1].model.players.all())
 
-def fetch_match(match_code):
-    #print(f'fetching match {match_code}', flush=True)
-    match = Match(match_code)
+def fetch_match(match_id):
+    #print(f'fetching match {match_id}', flush=True)
+    match = Match(match_id)
     #print(str(match))
     return match
 
-async def fetch_match_async(match_code):
-    return await sync_to_async(fetch_match)(match_code)
+async def fetch_match_async(match_id):
+    return await sync_to_async(fetch_match)(match_id)
 
 def fetch_matches():
     matches = Matches.objects.all()

@@ -1,6 +1,6 @@
 from aiohttp import web
 from threading import Thread
-import sys
+
 
 async def create_game(request: web.Request):
     from game_server.server import Server

@@ -1,11 +1,10 @@
 from datetime import datetime, timezone
 import math
-from game_server.match import Match, Player, finish_match
+from game_server.match import Match, Player
 from game_server.pong_ball import Ball
 from game_server.pong_position import Position
 from game_server.pong_racket import Racket
 from typing import List
-import asyncio
 import os
 import time
 import random

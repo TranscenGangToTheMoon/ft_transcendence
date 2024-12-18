@@ -1,4 +1,4 @@
-from logging import info, debug, warning, error
+from logging import info, debug, error
 
 
 async def connect(sid, environ, auth):
