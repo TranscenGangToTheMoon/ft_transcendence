@@ -7,3 +7,5 @@ class Ball:
         self.direction_x = direction_x
         self.direction_y = direction_y
         self.size = size
+        self.last_racket_touched = None
+        # TODO -> update and check last_racket_touched to count CSC goals
