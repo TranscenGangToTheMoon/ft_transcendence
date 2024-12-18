@@ -38,7 +38,7 @@ async function apiRequest(token, endpoint, method="GET", authType="Bearer",
                 return;
             }
             let data = await response.json();
-            // console.log(data);
+            console.log(data);
             if (data.code === 'token_not_valid') {
                 if (currentlyRefreshing)
                     return {};
@@ -232,7 +232,6 @@ async function handleRoute() {
         window.PongGame?.stopGame();
     if (containsCode(path))
         path = "/" + path.split("/")[1];
-    console.log('ici' , path);
     const routes = {
         '/login': '/authentication.html',
         '/': '/homePage.html',

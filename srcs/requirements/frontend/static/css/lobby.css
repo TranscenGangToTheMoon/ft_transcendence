@@ -27,11 +27,24 @@
 
 #teamSelector {
     background-color: brown;
+    display: flex;
+}
+
+.teamDisplay {
+    display: flex;
 }
 
 #teamDisplay {
     display: flex;
-    background-color: aqua;
+}
+
+#benchPlayerListLabel {
+    width: 100%;
+    text-align: center;
+}
+
+#bench {
+    background-color: aquamarine;
 }
 
 #playButton {
@@ -43,3 +56,69 @@
     cursor: pointer;
     user-select: none;
 }
+
+#benchPlayerList, #teamADisplay, #teamBDisplay {
+    padding: 10px;
+}
+
+#benchPlayerList {
+    height: 100%;
+}
+
+#teamA .player{
+    background-color: red !important;
+    outline: auto;
+    outline-color: white;
+    width: 70px;
+    height: 100px;
+}
+
+#teamB .player{
+    background-color: rgb(0, 181, 247) !important;
+    outline: auto;
+    outline-color: white;
+    width: 70px;
+    height: 100px;
+}
+
+#bench .player {
+    background-color: rgb(100, 102, 104);
+    outline: auto;
+    outline-color: white;
+    width: 70px;
+    height: 100px;
+}
+
+#teamALabel {
+    text-align: center;
+    width: 100%;
+}
+
+
+.draggable {
+    cursor: grab;
+}
+.dropzone {
+    min-height: 100px;
+    user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+}
+.dropzone.hovered {
+    background-color: #f8f9fa !important;
+}
+
+img {
+    -webkit-user-drag : none;
+    pointer-events: none;
+}
+
+.custom-context-menu {
+    position: absolute;
+    z-index: 1000;
+    display: none;
+    min-width: 150px;
+    background-color: white;
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  }

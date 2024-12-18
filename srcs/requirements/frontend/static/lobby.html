@@ -15,29 +15,31 @@
         <div id="feedback" style="display: none;">Link copied to clipboard</div>
     </form>
     <div id="lobbyOptions">
-        <div id="teamSelector">[insert team selector]</div>
+        <div id="teamSelector">
+            <div class="team" id="teamA">
+                <label for="teamADisplay" id="teamALabel">Team A</label>
+                <div id="teamADisplay" class="teamDisplay dropzone"></div>
+            </div>
+            <div class="team" id="teamB">
+                <label for="teamBDisplay" id="teamALabel">Team B</label>
+                <div id="teamBDisplay" class="teamDisplay dropzone"></div>
+            </div>
+        </div>
         <div id="teamDisplay"></div>
-        <div id="settingsButton">[insert settings button]</div>
+        <button id="settingsButton">1v1</button>
+    </div>
+    <div id="bench">
+        <label for="benchPlayerList" id="benchPlayerListLabel">Bench</label>
+        <div id="benchPlayerList" class="dropzone">
+        </div>
+        <!-- <button id="addToBench">+</button> -->
     </div>
 </div>
 
-<div class="modal fade" id="lobbySettingsModal" tabindex="-1" aria-labelledby="lobbySettingsModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="lobbySettingsModalLabel">Settings</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body" id="lobbySettingsContent">
-                <div id="mode">[insert game mode buttons]</div>
-                <div id="gameTime">[insert game time selector]</div>
-                <!-- <div id="bestOf">[insert BO selector]</div> -->
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary mx-auto" data-bs-dismiss="modal">[insert save button]</button>
-            </div>
-        </div>
-    </div>
+<div id="contextMenu" class="custom-context-menu dropdown-menu">
+    <button id="cKick" class="dropdown-item">kick</button>
+    <button id="cFriendRequest" class="dropdown-item" style="display: flex;">Send friend request<div id="friendRequestValidator" style="display: none;margin-left: 5px;"> V</div></button>
+    <button id="cBlock" class="dropdown-item">block</button>
 </div>
 
 <div script="/scripts/lobby.js"></div>
