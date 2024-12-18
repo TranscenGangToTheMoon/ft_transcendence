@@ -70,8 +70,7 @@ class Server:
     @staticmethod
     def monitoring_routine():
         log = False
-        # setting all matches in DB as finished
-        #print(Server._games_lock, flush=True)
+        '''setting all matches in DB as finished'''
         matches = fetch_matches()
         for match in matches:
             if match.finished == False:
@@ -108,8 +107,6 @@ class Server:
 
     @staticmethod
     def get_player_and_match_code(id: int):
-        #print(Server._games_lock, flush=True)
-        # await asyncio.sleep(1)
         Server._games_lock.acquire()
         for match_code in Server._games:
             print('la1', flush=True)
