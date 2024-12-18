@@ -123,7 +123,7 @@ async function fillTeamDisplay(player){
 
 }
 
-async function makeRequest(dropzone, draggable){
+async function makeRequest(dropzone){
     let dropTeam = dropzone.id.substring(0, 5);
     switch(dropTeam){
         case 'teamA':
@@ -190,15 +190,26 @@ function initDragAndDrop(){
         dropzone.addEventListener("dragleave", () => {
             dropzone.classList.remove("hovered");
         });
-
         dropzone.addEventListener("drop", async (e) => {
             e.preventDefault();
             dropzone.classList.remove("hovered");
+
             const draggableId = e.dataTransfer.getData("text/plain");
             const draggable = document.getElementById(draggableId);
 
-            if (draggable && await makeRequest(dropzone, draggable)) {
-                dropzone.appendChild(draggable);
+            if (draggable && await makeRequest(dropzone)) {
+                console.log('parents :;',draggable.parentElement);
+                let customDiv = document.createElement('div');
+                customDiv.id = 'tempPl';
+                document.body.appendChild(customDiv);
+                await loadContent('/lobby/no_player.html', customDiv.id, true);
+                customDiv.removeAttribute('id');
+                customDiv.classList.add('no-player');
+                draggable.parentElement.replaceChild(customDiv, draggable);
+                let placeholders = dropzone.querySelectorAll('.no-player');
+                dropzone.insertBefore(draggable, placeholders[0]);
+                if (placeholders.length)
+                    placeholders[0].remove();
                 await reloadPlayerList();
             }
         });
@@ -278,6 +289,22 @@ document.getElementById('cBlock').addEventListener('click', async () => {
     }
 })
 
+async function completeTeams(){
+    const teamsDivs = document.querySelectorAll('.teamDisplay');
+    for (let teamDiv of teamsDivs){
+        let playerInTeam = teamDiv.querySelectorAll('.player').length;
+        console.log(playerInTeam);
+        for (; playerInTeam < (matchType === '1v1' ? 1 : 3); playerInTeam++){
+            playerPlaceholder = document.createElement('div');
+            playerPlaceholder.id = 'tempPl';
+            teamDiv.appendChild(playerPlaceholder);
+            await loadContent('/lobby/no_player.html', playerPlaceholder.id ,true);
+            playerPlaceholder.removeAttribute('id');
+            playerPlaceholder.classList.add('no-player');
+        }
+    }
+}
+
 async function fillPlayerList(data, noTeam=false){
     const playerListDiv = document.getElementById('teamDisplay');
     removeIds(playerListDiv);
@@ -325,8 +352,10 @@ async function fillPlayerList(data, noTeam=false){
             console.log('error');
         }
     })
-    if (!noTeam)
+    if (!noTeam){
+        completeTeams();
         initDragAndDrop();
+    }
 }
 
 async function lobbyInit() {
