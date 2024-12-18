@@ -48,7 +48,6 @@ class Game:
                 match,
                 canvas: Position = Position(0, 0)) -> None:
         self.match: Match = match
-        self.sio = sio
         self.canvas = canvas
         self.game_timeout = None
         if self.match.game_mode == 'ranked':
@@ -152,17 +151,24 @@ class Game:
                 print(time.time(),flush=True)
                 print(f'player {player.user_id} has join in!', flush=True)
 
-    async def play(self):
+    def send_canvas(self):
         from game_server.server import Server
-        start_time = time.time()
-        last_frame_time = start_time
+        Server.emit(
+            'game_state',
+            data={
+                'canvas_width': self.canvas.x,
+                'canvas_height': self.canvas.y
+            },
+            room=str(self.match.code)
+        )
+
+    def send_game_state(self):
+        from game_server.server import Server
         side = 1
-        print(time.time(), "emitting start_game", flush=True)
-        await self.sio.emit('debug')
         for team in self.match.teams:
             for player in team.players:
-                Server.loop.call_soon_threadsafe(asyncio.create_task, self.sio.emit(
-                    'start_game',
+                Server.emit(
+                    'game_state',
                     data={
                         'position_x': self.ball.position.x,
                         'position_y': self.ball.position.y,
@@ -172,11 +178,19 @@ class Game:
                         'canvas_height': self.canvas.y
                     },
                     to=player.socket_id
-                ))
+                )
             side = -1
-        print(time.time(), "Finished emitting start_game", flush=True)
+
+    def send_start_game(self):
+            from game_server.server import Server
+            Server.emit('start_game', room=str(self.match.code))
+            print('emitted start_game', flush=True)
+
+    def play(self):
+        start_time = time.time()
+        last_frame_time = start_time
+        self.send_start_game()
         while True:
-            # print(time.time(), "game loop", flush=True)
             if self.game_timeout is not None and (time.time() - start_time < self.game_timeout * 60):
                 break
             while time.time() - last_frame_time < (1 / 60):
@@ -184,7 +198,8 @@ class Game:
             self.update()
             last_frame_time = time.time()
 
-    async def launch(self):
+    def launch(self):
+        from game_server.server import Server
         # try:
         #     timeout = int(os.environ['GAME_PLAYER_CONNECT_TIMEOUT'])
         # except KeyError:
@@ -195,10 +210,13 @@ class Game:
             print(time.time(), "all players are connected", flush=True)
         except Exception as e:
             print(e, flush=True)
-            await finish_match(self.match)
+            self.match.model.finish_match()
+            print('game canceled', flush=True)
             return
+        self.send_canvas()
+        self.send_game_state()
         print('game launched', flush=True)
-        if await self.play() == False:
+        if self.play() == False:
             return False
 
     def check_zombie(self) -> bool:
@@ -213,13 +231,14 @@ class Game:
             return True
         return False
 
-    async def score(self):
+    def score(self):
+        from game_server.server import Server
         self.ball.position = Position(int(self.canvas.x / 2), int(self.canvas.y / 2))
         self.ball.direction_x, self.ball.direction_y = get_random_direction()
         side = 1
         for team in self.match.teams:
             for player in team.players:
-                await self.sio.emit(
+                Server.emit(
                     'goal',
                     data={
                         'position_x': self.ball.position.x,
