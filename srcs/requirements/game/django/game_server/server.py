@@ -55,23 +55,24 @@ class Server:
 
     @staticmethod
     def delete_game(match_id) -> None:
-        # TODO -> set game as finished (django endpoint)
-        Server._games_lock.acquire()
-        Server._games.pop(match_id)
-        Server._games_lock.release()
+        with Server._games_lock:
+                if Server._games[match_id].match.model.is_finished == False:
+                    Server._games[match_id].finish()
+                Server._games.pop(match_id)
 
     @staticmethod
     def push_game(match_id, game) -> None:
-        Server._games_lock.acquire()
-        Server._games[match_id] = game
-        Server._games_lock.release()
+        with Server._games_lock:
+            Server._games[match_id] = game
 
     @staticmethod
     def get_game(match_id) -> Game:
-        Server._games_lock.acquire()
-        game = Server._games[match_id]
-        Server._games_lock.acquire()
-        return game
+        with Server._games_lock:
+            try:
+                game = Server._games[match_id]
+            except KeyError as e:
+                raise e
+            return game
 
     @staticmethod
     def launch_game(match_id):
@@ -88,18 +89,15 @@ class Server:
 
     @staticmethod
     def emit(event: str, data=None, room=None, to=None, skip_sid=None):
-        Server._loop_lock.acquire()
-        Server._loop.call_soon_threadsafe(asyncio.create_task, Server._sio.emit(event, data=data, room=room, to=to, skip_sid=skip_sid))
-        Server._loop_lock.release()
+        with Server._games_lock:
+            Server._loop.call_soon_threadsafe(asyncio.create_task, Server._sio.emit(event, data=data, room=room, to=to, skip_sid=skip_sid))
 
     @staticmethod
     def get_player_and_match_id(user_id: int):
-        Server._games_lock.acquire()
-        for match_id in Server._games:
-            for team in Server._games[match_id].match.teams:
-                for player in team.players:
-                    if player.user_id == user_id:
-                        Server._games_lock.release()
-                        return player, match_id
-        Server._games_lock.release()
-        raise Exception(f'No player with id {user_id} is awaited on this server')
+        with Server._games_lock:
+            for match_id in Server._games:
+                for team in Server._games[match_id].match.teams:
+                    for player in team.players:
+                        if player.user_id == user_id:
+                            return player, match_id
+            raise Exception(f'No player with id {user_id} is awaited on this server')
