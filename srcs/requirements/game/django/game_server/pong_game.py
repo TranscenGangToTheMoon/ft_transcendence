@@ -200,9 +200,10 @@ class Game:
 
     def launch(self):
         from game_server.server import Server
-        # try:
-        #     timeout = int(os.environ['GAME_PLAYER_CONNECT_TIMEOUT'])
-        # except KeyError:
+        try:
+            timeout = int(os.environ['GAME_PLAYER_CONNECT_TIMEOUT'])
+        except KeyError:
+            timeout = 5
         print(time.time(), "launch()", flush=True)
         timeout = 60.
         try:
