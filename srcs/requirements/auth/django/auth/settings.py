@@ -29,8 +29,24 @@ DEBUG = environ["DEBUG"]
 ALLOWED_HOSTS = [
     'localhost',
     'auth',
+    # '127.0.0.1',
+    # environ["HOSTNAME"]
+    '*'
 ]
 
+# LOGGING = {
+#     'version': 1,
+#     'disable_existing_loggers': False,
+#     'handlers': {
+#         'console': {
+#             'class': 'logging.StreamHandler',
+#         },
+#     },
+#     'root': {
+#         'handlers': ['console'],
+#         'level': 'DEBUG',
+#     },
+# }
 
 # Application definition
 

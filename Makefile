@@ -81,9 +81,10 @@ banner		:
 			@echo -e '                                          bajeanno fguirama jcoquard nfaust xcharra'
 			@echo -e '$(RESET)'
 
-.PHONY: secrets #if secrets directory are needed delete phony secrets and uncomment the following lines
 secrets		:	$(ENV_FILE)
-#			mkdir $@
+			mkdir -p $@
+			./launch.d/02set-hostname.sh
+			./launch.d/03genreateSSL.sh
 
 $(ENV_FILE)	:	$(ENV_EXEMPLE)
 			./launch.d/01passwords.sh $(ENV_EXEMPLE) $(ENV_FILE)
@@ -108,7 +109,7 @@ fclean		:	dusting
 			rm -rf $(ENV_FILE)
 			rm -rf ./srcs/shared-code/lib_transcendence.egg-info/ # todo remove in prod
 			rm -rf ./srcs/shared-code/build/ # todo remove in prod
-#			rm -rf $(SECRETS_D)
+			rm -rf $(SECRETS_D)
 
 .PHONY: dusting
 dusting		:
