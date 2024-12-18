@@ -12,19 +12,22 @@ django.setup()
 from matches.models import Matches
 
 class Player():
-    def __init__(self, model, match_id):
+    def __init__(self, model, match_id, team):
         self.match_id = match_id
         self.racket: Racket
         self.model = model
         self.user_id = self.model.user_id
         self.socket_id = ''
         self.game = None
+        self.team = team
+        self.csc = 0
 
 class Team():
     def __init__(self, model, match_id):
         self.match_id = match_id
         self.players: List[Player] = []
         self.model = model
+        self.score = 0
         raw_players = self.model.players.all()
         for player in raw_players:
             self.players.append(Player(player, self.match_id, self))

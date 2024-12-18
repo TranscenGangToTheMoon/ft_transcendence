@@ -232,21 +232,18 @@ class Game:
             return True
         return False
 
-    def score(self):
+    def finish(self):
+        self.match.model.finish_match()
+
+    def score(self, player):
         from game_server.server import Server
+        last_touch: Player | None = self.ball.last_racket_touched
+        if last_touch is not None:
+            last_touch.csc += 1
         self.ball.position = Position(int(self.canvas.x / 2), int(self.canvas.y / 2))
         self.ball.direction_x, self.ball.direction_y = get_random_direction()
-        side = 1
         for team in self.match.teams:
-            for player in team.players:
-                Server.emit(
-                    'goal',
-                    data={
-                        'position_x': self.ball.position.x,
-                        'position_y': self.ball.position.y,
-                        'direction_x': self.ball.direction_x * side,
-                        'direction_y': self.ball.direction_y
-                    },
-                    to=player.socket_id
-                )
-            side = -1
+            if (player.team == team):
+                if (team.score == 4):
+                    self.finish()
+        self.send_game_state()
