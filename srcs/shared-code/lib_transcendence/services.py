@@ -40,9 +40,8 @@ def request_tournament_matchmaking(tournament_id, stage_id, winner, looser):
 def request_game(endpoint: Literal['match/', 'tournaments/', 'playing/{user_id}/'], method: Literal['GET', 'POST'] = 'POST', data=None):
     return request_service('game', endpoint, method, data)
 
-# endpoints.Chat.fmessages.format(chat_id=15), {'content': 'Hello, World!'}
-def request_chat(endpoint: str, method: Literal['POST', 'PATCH', 'DELETE'] = 'PATCH', data=None, token=None):
-    print(f"my token in request_chat: {token}")
+
+def request_chat(endpoint: str, method: Literal['GET', 'PATCH', 'DELETE'] = 'PATCH', data=None, token=None):
     return request_service('chat', endpoint, method, data, token)
 
 

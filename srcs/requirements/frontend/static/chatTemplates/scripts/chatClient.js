@@ -39,7 +39,7 @@ function send(chatData) {
         chatForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const message = e.target.message.value;
-            socket.emit('message', {'chatId': chatData.chatId, 'content': message, 'token' : 'Bearer ' + getAccessToken()});
+            socket.emit('message', {'content': message, 'token' : 'Bearer ' + getAccessToken()});
             console.log('Message sent: ', message);
             chatForm.reset();
         });
@@ -51,6 +51,7 @@ function setupSocketListeners(chatData)
 {
 	document.getElementById('endChat').addEventListener('click', () => {
 		closeChat();
+		lastClick = undefined;
 	});
 	document.getElementById('logOut').addEventListener('click', () => {
 		closeChat();
@@ -88,9 +89,9 @@ function setupSocketListeners(chatData)
 	
 	socket.on("error", async (data) => {
 		console.log("Error received: ", data);
-		// if (data.error === 401){
-		// 	socket.emit('message', {'chatId': chatData.chatId, 'content': data.previousTry, 'token' : 'Bearer ' + await refreshToken(), 'retry': true});
-		// }
+		if (data.error === 401){
+			socket.emit('message', {'content': data.retry_content, 'token' : 'Bearer ' + await refreshToken(), 'retry': true});
+		}
 	});
 	
 	socket.on("debug", (data) => {
@@ -137,6 +138,8 @@ async function loadOldMessages(chatData){
 	}
 }
 
+var lastClick;
+
 async function selectChatMenu(filter='') {
 	chatsList = document.getElementById('chatsList');
 	chatsList.innerHTML = '';
@@ -149,7 +152,9 @@ async function selectChatMenu(filter='') {
 				let chat = document.createElement('div');
 				chat.setAttribute('id', 'chatListElement');
 				chat.innerHTML = `<p id="chatListElementTarget">${chatData.target}:</p><p id="chatListElementMessagePreview">${chatData.lastMessage}</p>`;
-				chat.addEventListener('click', () => {
+				chat.addEventListener('click', e => {
+					if (lastClick === e.target.closest('#chatListElement')) return;
+					lastClick = e.target.closest('#chatListElement');
 					console.log(chatData.user, 'selected');
 					connect(getAccessToken(), chatData);
 					loadOldMessages(chatData);
@@ -180,6 +185,7 @@ async function startChat(username) {
 			console.log('chat already exists');
 			let chatData = parsChatRequest(apiAnswer.results[0]);
 			connect(getAccessToken(), chatData);
+			loadOldMessages(chatData);
 		}
 	}
 	catch(error) {
