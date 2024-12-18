@@ -145,7 +145,7 @@ class ServiceUnavailable(APIException):
     default_detail = MessagesException.ServiceUnavailable.SERVICE_UNAVAILABLE
     default_code = 'service_unavailable'
 
-    def __init__(self, service: Literal['auth', 'chat', 'game', 'matchmaking', 'users']):
+    def __init__(self, service: Literal['auth', 'chat', 'game', 'matchmaking', 'redis', 'users']):
         self.detail = ServiceUnavailable.default_detail.format(service=service)
 
 
