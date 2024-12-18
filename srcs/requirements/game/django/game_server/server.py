@@ -5,7 +5,7 @@ from game_server.match import fetch_match
 from game_server.match import Player, fetch_matches, finish_match
 from game_server.pong_game import Game
 from game_server.pong_position import Position
-from threading import Lock, Thread
+from threading import Lock
 from typing import Dict
 import logging
 import asyncio

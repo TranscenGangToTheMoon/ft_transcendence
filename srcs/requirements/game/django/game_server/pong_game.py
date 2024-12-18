@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 import math
-from game_server.match import Match, Player
+from game_server.match import Match, Player, finish_match
 from game_server.pong_ball import Ball
 from game_server.pong_position import Position
 from game_server.pong_racket import Racket
@@ -30,12 +30,12 @@ class Game:
     def create_rackets(match, canvas) -> List[Racket]:
         rackets: List[Racket] = []
         racket_size: Position = Position(30, 200)
-        # create rackets for left players
+        # create rackets for right players
         for player in match.teams[0].players:
             racket = Racket(player.user_id, Position(0, int(canvas.y / 2 - racket_size.y / 2)), racket_size.x, racket_size.y)
             player.racket = racket
             rackets.append(racket)
-        # create rackets for right players
+        # create rackets for left players
         for player in match.teams[1].players:
             racket = Racket(player.user_id, Position(canvas.x - racket_size.x, int(canvas.y / 2 - racket_size.y / 2)), racket_size.x, racket_size.y)
             player.racket = racket
@@ -70,8 +70,6 @@ class Game:
             if racket.player_id == player_id:
                 return racket
         raise Exception(f'no racket matching socket id {player_id}')
-
-
 
     # def calculate_impact_position(self, ball_y, paddle_y, paddle_height):
     #     relative_y = (paddle_y + paddle_height / 2) - ball_y
@@ -121,7 +119,6 @@ class Game:
     #             #     self.increment_ball_speed()
     #             self.calculate_new_ball_direction(paddle.position.y)
     #             self.sio.emit('bounce', {'dir_x': self.ball.direction_x, 'dir_y': self.ball.direction_y})
-
 
     def update(self):
         for racket in self.rackets:
@@ -197,6 +194,7 @@ class Game:
                 time.sleep(0.005)
             self.update()
             last_frame_time = time.time()
+        Server.delete_game(self.match.id)
 
     def launch(self):
         from game_server.server import Server
@@ -217,8 +215,7 @@ class Game:
         self.send_canvas()
         self.send_game_state()
         print('game launched', flush=True)
-        if self.play() == False:
-            return False
+        self.play()
 
     def check_zombie(self) -> bool:
         if self.match.model.finished:
