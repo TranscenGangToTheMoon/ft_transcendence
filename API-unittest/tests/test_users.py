@@ -48,7 +48,7 @@ class Test02_UserMe(UnitTest):
         user1 = new_user()
 
         response = self.assertResponse(me(user1), 200)
-        self.assertDictEqual(response, {'id': user1['id'], 'username': user1['username'], 'is_guest': False, 'created_at': response['created_at'], 'profile_picture': None, 'accept_friend_request': True, 'accept_chat_from': 'friends_only', 'coins': 100, 'trophies': 0, 'current_rank': None})
+        self.assertDictEqual(response, {'id': user1['id'], 'username': user1['username'], 'is_guest': False, 'created_at': response['created_at'], 'profile_picture': None, 'accept_friend_request': True, 'accept_chat_from': 'friends_only', 'coins': 100, 'trophies': 0, 'current_rank': None, 'friend_notifications': 0, 'chat_notifications': 0})
 
     def test_002_get_me_guest(self):
         user1 = guest_user()
