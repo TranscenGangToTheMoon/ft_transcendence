@@ -2,6 +2,7 @@
 vscode
 .DS_Store
 *.pyc
+secrets
 .zed
 __pycache__
 .venv
