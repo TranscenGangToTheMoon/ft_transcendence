@@ -29,9 +29,24 @@ DEBUG = environ["DEBUG"]
 ALLOWED_HOSTS = [
     'localhost',
     'auth',
-    # '*'
+    # '127.0.0.1',
+    # environ["HOSTNAME"]
+    '*'
 ]
 
+# LOGGING = {
+#     'version': 1,
+#     'disable_existing_loggers': False,
+#     'handlers': {
+#         'console': {
+#             'class': 'logging.StreamHandler',
+#         },
+#     },
+#     'root': {
+#         'handlers': ['console'],
+#         'level': 'DEBUG',
+#     },
+# }
 
 # Application definition
 
@@ -62,15 +77,6 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-
-# ALLOWED_HOSTS = ['*']
-
-# CORS_ALLOWED_ALL_ORIGINS = True
-# CORS_ALLOWED_ORIGINS = [
-#     "https://localhost:4443",
-#     "https://127.0.0.1:4443", 
-#     "https://z3r5p2.42lyon.fr:4443"
-# ]
 
 ROOT_URLCONF = 'auth.urls'
 

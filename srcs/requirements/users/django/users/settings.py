@@ -29,7 +29,7 @@ DEBUG = environ["DEBUG"]
 ALLOWED_HOSTS = [
     'localhost',
     'users',
-    # '*'
+    '*'
 ]
 
 
@@ -61,15 +61,6 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-
-# ALLOWED_HOSTS = ['*']
-
-# CORS_ALLOWED_ALL_ORIGINS = True
-# CORS_ALLOWED_ORIGINS = [
-#     "https://localhost:4443",
-#     "https://127.0.0.1:4443", 
-#     "https://z3r5p2.42lyon.fr:4443"
-# ]
 
 ROOT_URLCONF = 'users.urls'
 
