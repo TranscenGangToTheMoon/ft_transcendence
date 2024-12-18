@@ -272,7 +272,6 @@ async function navigateTo(url, doNavigate=true){
     history.pushState({state: currentState}, '', url);
     console.log(`added ${url} to history with state : ${currentState}`);
     pathName = window.location.pathname;
-    console.log(pathName);
     incrementCurrentState();
     if (doNavigate)
         await handleRoute();

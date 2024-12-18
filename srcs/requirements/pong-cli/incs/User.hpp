@@ -6,14 +6,15 @@
 /*   By: xcharra <xcharra@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/28 13:58:57 by xcharra           #+#    #+#             */
-/*   Updated: 2024/12/04 15:18:36 by xcharra          ###   ########.fr       */
+/*   Updated: 2024/12/09 13:49:22 by xcharra          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef USER_HPP
 # define USER_HPP
 
-#include "CurlWrapper.hpp"
+# include "pong-cli.h"
+# include "CurlWrapper.hpp"
 
 class User {
 public:
@@ -23,11 +24,11 @@ public:
 	User(User const &src) = delete;
 	User	&operator=(User const &rhs) = delete;
 
-	void	setGuestTokens(CurlWrapper &curl);
+	void	guestUser(CurlWrapper &curl);
 
-	void	signUpUser(CurlWrapper &curl);
-	void	signUpUserWithoutToken(CurlWrapper &curl);
-	void	signInUser(CurlWrapper &curl);
+	void	registerUser(CurlWrapper &curl);
+	void	registerGuestUser(CurlWrapper &curl);
+	void	loginUser(CurlWrapper &curl);
 
 	void	tokenRefresh(CurlWrapper &curl);
 
@@ -36,10 +37,10 @@ public:
 	void	setRefreshToken(const std::string &refreshToken);
 	void	setUsername(const std::string &username);
 
-	const std::string	&getAccessToken() const;
-	const std::string	&getPassword() const;
-	const std::string	&getRefreshToken() const;
-	const std::string	&getUsername() const;
+	[[ nodiscard ]] const std::string	&getAccessToken() const;
+	[[ nodiscard ]] const std::string	&getPassword() const;
+	[[ nodiscard ]] const std::string	&getRefreshToken() const;
+	[[ nodiscard ]] const std::string	&getUsername() const;
 
 private:
 	std::string	_accessToken;
@@ -47,5 +48,5 @@ private:
 	std::string	_refreshToken;
 	std::string	_username;
 };
-std::string	jsonParser(const std::string &json, const std::string &key);
+
 #endif //USER_HPP

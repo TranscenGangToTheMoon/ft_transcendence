@@ -35,14 +35,6 @@ def login(username=None, password=None, data=None):
     return make_request('auth/login/', 'POST', data=data)
 
 
-def refresh_token(access_token, _refresh_token):
-    return make_request('auth/refresh/', 'POST', access_token, {'refresh': _refresh_token})
-
-
-def verify_token(access_token):
-    return make_request('auth/verify/', token=access_token)
-
-
 # -------------------- GET TOKEN ------------------------------------------------------------------------------------- #
 def get_token(type: Literal['login', 'register', 'guest'], username=None, password=None):
     if type == 'guest':
@@ -79,7 +71,7 @@ def new_user(username=None, password=None, get_me=True):
     if username is None:
         username = f'{get_service()}-user-' + rnstr()
     if password is None:
-        password = f'password-{username}'
+        password = 'password-' + rnstr(15)
     _new_user = {'username': username, 'password': password}
     token = get_token('register', _new_user['username'], password)
     _new_user['token'] = token['access']

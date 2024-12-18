@@ -9,15 +9,15 @@ from utils.my_unittest import UnitTest
 
 
 # todo test refresh
+# todo test verify
 
 class Test01_Register(UnitTest):
 
     def test_001_register(self):
         username = 'register_test' + rnstr()
-        password = 'password_' + username
+        password = 'password_test' + rnstr()
 
-        response = self.assertResponse(register(username, password), 201)
-        user = {'token': response['access']}
+        user = self.assertResponse(register(username, password), 201, get_user=True)
         self.assertResponse(me(user), 200)
         self.assertResponse(login(username, password), 200)
 
@@ -33,11 +33,13 @@ class Test01_Register(UnitTest):
             'username_too_long_because_its_must_be_short',
             'invalid_char!@#$',
             'admin',
+            'adminstrator',
+            'admin123',
             'staff',
-            'support',
+            'support22',
             'ft_transcendence',
-            'transcendence',
-            'anonymus',
+            'transcendence2',
+            'anonymous',
             '',
         ]
         password = 'InvalideUser_123' + rnstr()
@@ -48,25 +50,41 @@ class Test01_Register(UnitTest):
     def test_004_register_invalid_password(self):
         username = 'register_inv_password' + rnstr()
         passwords = [
-            '!$@^Invalid_char123',
-            'Contain_username1' + username,
+            '!Invalid_char123 😂 🤣 😃 😄 😅 😆 ',
+            '!password_tooooooooooooooooooooooooooooooooooooooooo_long',
             'min_len',
-            'no_upper_case123',
-            'NO_LOWER_CASE123',
-            'NoSpecialChar123',
-            'NoNumbers',
             '123456',
             'password',
-            'azerty',
-            'qwerty',
+            'azertyui',
+            'qwertyui',
             'aaaaaaaa',
             '123456789',
-            'abcdefg',
-            ''
+            'abcdefgh',
+            '',
+            username + 'password',
+            'register_inv_password',
         ]
 
         for password in passwords:
             self.assertResponse(register(username, password), 400)
+
+    def test_005_register_password_contain_paste_username(self):
+        username = 'pass_contain_username' + rnstr()
+        password = 'password' + username
+        user = self.assertResponse(register(username), 201, get_user=True)
+        new_username = 'new_username' + rnstr()
+
+        self.assertResponse(me(user, 'PATCH', data={'username': new_username, 'password': password}), 200)
+        self.assertResponse(login(new_username, password), 200)
+
+    def test_006_register_password_contain_new_username(self):
+        password = 'first_pass' + rnstr(10)
+        user = self.assertResponse(register(password=password), 201, get_user=True)
+        new_username = 'new_username' + rnstr()
+        new_password = 'password' + new_username
+
+        self.assertResponse(me(user, 'PATCH', data={'username': new_username, 'password': new_password}), 400)
+        self.assertResponse(login(new_username, password), 401)
 
 
 class Test02_Guest(UnitTest):
@@ -78,10 +96,9 @@ class Test02_Guest(UnitTest):
         guest = guest_user()
         username = 'guest-register' + rnstr()
 
-        # todo make get response
-        user = {'token': self.assertResponse(register_guest(username=username, guest=guest), 200, get_field='access')} #todo make truc pour avoir le bon token
-        test_username = self.assertResponse(me(user), 200, get_field='username') # todo rename get id get field
-        self.assertEquals(username, test_username)
+        user = self.assertResponse(register_guest(username=username, guest=guest), 200, get_user=True)
+        test_username = self.assertResponse(me(user), 200, get_field='username')
+        self.assertEqual(username, test_username)
 
     def test_003_register_guest_without_tokent(self):
         random_name = rnstr()
@@ -89,7 +106,7 @@ class Test02_Guest(UnitTest):
         self.assertResponse(register_guest(username='username_' + random_name, password='password_,' + random_name), 401)
 
     def test_004_register_user_since_guest(self):
-        self.assertResponse(register_guest(guest=new_user()), 403)  # todo add json response test
+        self.assertResponse(register_guest(guest=new_user()), 403)
 
     def test_005_login_guest(self):
         self.assertResponse(login(guest_user()['username'], rnstr()), 401, {'detail': 'No active account found with the given credentials'})
@@ -98,8 +115,14 @@ class Test02_Guest(UnitTest):
         guest = guest_user()
 
         self.assertResponse(play(guest, 'ranked'), 403, {'detail': 'Guest users cannot play ranked games.'})
-        user = {'token': self.assertResponse(register_guest(guest=guest), 200, get_field='access')}
+        user = self.assertResponse(register_guest(guest=guest), 200, get_user=True)
         self.assertResponse(play(user, 'ranked'), 201)
+
+    def test_007_register_guest_already_exist(self):
+        user1 = new_user()
+        guest = guest_user()
+
+        self.assertResponse(register_guest(username=user1['username'], guest=guest), 400)
 
 
 class Test03_Login(UnitTest):

@@ -14,12 +14,8 @@ from utils.generate_random import rnstr
 from utils.my_unittest import UnitTest
 
 
-# todo test rename
-# todo test rename invalid name
-# todo test rename invalid name already exist
-
 # todo test update user
-# todo test get user friend field
+# todo test get friend field
 # todo test get status field
 
 
@@ -211,7 +207,7 @@ class Test04_UpdateUserMe(UnitTest):
 
         self.assertResponse(me(user1, method='PATCH', data={'password': 'new_password'}), 200)
         self.assertResponse(login(user1['username'], 'new_password'), 200)
-        self.assertResponse(login(user1['username'], old_password), 401, {'detail': 'No active account found with the given credentials'}) # todo no . at the end
+        self.assertResponse(login(user1['username'], old_password), 401, {'detail': 'No active account found with the given credentials'})
 
     def test_002_update_password_same_as_before(self):
         user1 = new_user()
@@ -229,7 +225,7 @@ class Test05_RenameUser(UnitTest):
 
         self.assertResponse(me(user1, method='PATCH', data={'username': new_username}), 200)
         self.assertResponse(login(new_username, user1['password']), 200)
-        self.assertResponse(login(old_username, user1['password']), 401, {'detail': 'No active account found with the given credentials'}) # todo no . at the end
+        self.assertResponse(login(old_username, user1['password']), 401, {'detail': 'No active account found with the given credentials'})
 
     def test_002_rename_user_friend(self):
         user1 = new_user()
@@ -255,6 +251,18 @@ class Test05_RenameUser(UnitTest):
         response = self.assertResponse(blocked_user(user2, method='GET'), 200, count=1)
         self.assertEqual(response['results'][0]['blocked']['username'], new_username)
 
+    def test_004_rename_chat(self):
+        old_username = 'rename-chat-' + rnstr()
+        user1 = new_user(username=old_username)
+        user2 = new_user()
+        new_username = 'new-username-' + rnstr()
+
+        self.assertResponse(accept_chat(user2), 200)
+        self.assertResponse(create_chat(user1, user2['username']), 201)
+        self.assertResponse(me(user1, method='PATCH', data={'username': new_username}), 200)
+
+        self.assertResponse(create_chat(user2, method='GET', data={'q': old_username}), 200, count=0)
+        self.assertResponse(create_chat(user2, method='GET', data={'q': new_username}), 200, count=1)
 
 
 if __name__ == '__main__':

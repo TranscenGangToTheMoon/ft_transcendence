@@ -7,7 +7,6 @@ from guest.group import is_guest
 
 
 def create_user_get_token(user, create=True):
-    print('create_user_get_token', create, flush=True)
     refresh_token = RefreshToken.for_user(user)
     token = {'access': str(refresh_token.access_token), 'refresh': str(refresh_token)}
 

@@ -157,11 +157,8 @@ class Test04_UpdateLobby(UnitTest):
     def test_001_update_lobby(self):
         user1 = new_user()
 
-        code = self.assertResponse(create_lobby(user1, data={'game_mode': 'custom_game'}), 201, get_field='code')
-
-        response = self.assertResponse(create_lobby(user1, {'bo': 1, 'match_type': '3v3'}, 'PATCH'), 200)
-        self.assertEqual(1, response['bo'])
-        self.assertEqual('3v3', response['match_type'])
+        self.assertResponse(create_lobby(user1, data={'game_mode': 'custom_game'}), 201, get_field='code')
+        self.assertEqual('3v3', self.assertResponse(create_lobby(user1, {'match_type': '3v3'}, 'PATCH'), 200, get_field='match_type'))
 
     def test_002_invalid_match_type(self):
         user1 = new_user()
@@ -170,35 +167,28 @@ class Test04_UpdateLobby(UnitTest):
         self.assertResponse(create_lobby(user1, data={'match_type': 42}, method='PATCH'), 400, {'match_type': ["Match type must be '1v1' or '3v3'."]})
         self.assertResponse(create_lobby(user1, data={'match_type': 'cac'}, method='PATCH'), 400, {'match_type': ["Match type must be '1v1' or '3v3'."]})
 
-    def test_003_invalid_bo(self):
-        user1 = new_user()
-
-        self.assertResponse(create_lobby(user1, data={'game_mode': 'custom_game'}), 201)
-        self.assertResponse(create_lobby(user1, data={'bo': 42}, method='PATCH'), 400, {'bo': ['Best of must be 1, 3 or 5.']})
-        self.assertResponse(create_lobby(user1, data={'bo': 'caca'}, method='PATCH'), 400, {'bo': ['A valid integer is required.']})
-
-    def test_004_update_not_creator(self):
+    def test_003_update_not_creator(self):
         user1 = new_user()
         user2 = new_user()
 
         code = self.assertResponse(create_lobby(user1, data={'game_mode': 'custom_game'}), 201, get_field='code')
 
         self.assertResponse(join_lobby(code, user2), 201)
-        self.assertResponse(create_lobby(user2, data={'bo': 3}, method='PATCH'), 403, {'detail': 'Only creator can update this lobby.'})
+        self.assertResponse(create_lobby(user2, data={'match_type': '3v3'}, method='PATCH'), 403, {'detail': 'Only creator can update this lobby.'})
 
-    def test_005_update_clash(self):
+    def test_004_update_clash(self):
         user1 = new_user()
 
         self.assertResponse(create_lobby(user1), 201)
-        self.assertResponse(create_lobby(user1, data={'bo': 1}, method='PATCH'), 403, {'detail': 'You cannot update clash lobby.'})
+        self.assertResponse(create_lobby(user1, data={'match_type': '3v3'}, method='PATCH'), 403, {'detail': 'You cannot update clash lobby.'})
 
-    def test_006_update_game_mode(self):
+    def test_005_update_game_mode(self):
         user1 = new_user()
 
         self.assertResponse(create_lobby(user1, data={'game_mode': 'custom_game'}), 201)
         self.assertResponse(create_lobby(user1, data={'game_mode': 'clash'}, method='PATCH'), 403, {'detail': 'You cannot update game mode.'})
 
-    def test_007_update_match_type_when_full(self):
+    def test_006_update_match_type_when_full(self):
         user1 = new_user()
         users = [new_user() for _ in range(5)]
 
@@ -225,6 +215,7 @@ class Test04_UpdateLobby(UnitTest):
                 if user['id'] == users[i]['id']:
                     self.assertEqual(teams[i], user['team'])
                     break
+
 
 class Test05_UpdateParticipantLobby(UnitTest):
 

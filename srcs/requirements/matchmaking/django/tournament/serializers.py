@@ -5,24 +5,12 @@ from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
 
 from blocking.utils import create_player_instance
-from matchmaking.utils import verify_user, get_tournament, verify_place
+from matchmaking.utils import verify_user, get_tournament, verify_place, get_participants
 from tournament.models import Tournaments, TournamentStage, TournamentParticipants
 
 
-class TournamentGetParticipantsSerializer(serializers.ModelSerializer):
-    id = serializers.IntegerField(source='user_id')
-
-    class Meta:
-        model = TournamentParticipants
-        fields = [
-            'id',
-            'creator',
-            'join_at',
-        ]
-
-
 class TournamentSerializer(serializers.ModelSerializer):
-    participants = TournamentGetParticipantsSerializer(many=True, read_only=True)
+    participants = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Tournaments
@@ -40,6 +28,7 @@ class TournamentSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = [
             'code',
+            'participants',
             'created_at',
             'created_by',
             'is_started',
@@ -52,6 +41,9 @@ class TournamentSerializer(serializers.ModelSerializer):
         if value < 4:
             raise serializers.ValidationError(MessagesException.ValidationError.TOURNAMENT_MIN_SIZE)
         return value
+
+    def get_participants(self, obj):
+        return get_participants(self, obj)
 
     def create(self, validated_data):
         request = self.context.get('request')
@@ -66,7 +58,7 @@ class TournamentSerializer(serializers.ModelSerializer):
         validated_data['created_by'] = user['id']
         validated_data['created_by_username'] = user['username']
         result = super().create(validated_data)
-        create_player_instance(request, TournamentParticipants, user_id=user['id'], trophies=user['trophies'], tournament=result, creator=True)
+        create_player_instance(request, TournamentParticipants, user_id=user['id'], tournament=result, creator=True)
         return result
 
 
@@ -110,7 +102,6 @@ class TournamentParticipantsSerializer(serializers.ModelSerializer):
         if tournament.created_by == user['id']:
             validated_data['creator'] = True
         validated_data['user_id'] = user['id']
-        validated_data['trophies'] = user['trophies']
         validated_data['tournament'] = tournament
         result = super().create(validated_data)
         # todo websocket: send to tournament chat that user 'xxx' join team
