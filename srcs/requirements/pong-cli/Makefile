@@ -64,8 +64,8 @@ leaks		:	$(NAME)
 			$(VALGRIND) ./$(NAME) $(ARGS)
 
 $(CERT)		:
-			openssl s_client -connect localhost:4443 -servername localhost </dev/null \
-				| sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > $(BUILD_D)/$(CERT)
+			openssl s_client -connect localhost:4444 -servername localhost </dev/null \
+				| sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > $(CERT)
 
 ########################################################################################################################
 #                                                    MISCELLANEOUS                                                     #

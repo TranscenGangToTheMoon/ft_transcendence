@@ -4,44 +4,48 @@ project(pongCLI CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-set(CMAKE_CXX_FLAGS "-Wall -Wextra -Werror")
+set(CMAKE_CXX_FLAGS "-Wall -Wextra -Werror -g")
+set(CMAKE_CXX_FLAGS_DEBUG "-Wall -Wextra -Werror -g -fsanitize=address")
 #set(CMAKE_CXX_LINK_LIBRARY_FLAG "-lftxui")
 
 include_directories(incs)
 
 include(FetchContent)
 
-FetchContent_Declare(ftxui
-		GIT_REPOSITORY https://github.com/ArthurSonzogni/ftxui
-		GIT_TAG v5.0.0
-)
-FetchContent_MakeAvailable(FTXUI)
-
-FetchContent_Declare(curl
-		URL https://curl.se/download/curl-8.11.0.tar.gz
-)
-FetchContent_MakeAvailable(curl)
-
-FetchContent_Declare(json
-		URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz
-)
-FetchContent_MakeAvailable(json)
-
 set(BOOST_INCLUDE_LIBRARIES asio beast)
 set(BOOST_ENABLE_CMAKE ON)
+find_package(OpenSSL REQUIRED)
 
-FetchContent_Declare(Boost
-		GIT_REPOSITORY https://github.com/boostorg/boost.git
-		GIT_TAG boost-1.87.0
-		GIT_SHALLOW TRUE
+FetchContent_Declare(
+	Boost
+	GIT_REPOSITORY https://github.com/boostorg/boost.git
+	GIT_TAG boost-1.87.0
+	GIT_SHALLOW TRUE
 )
-FetchContent_MakeAvailable(Boost)
 
-#FetchContent_Declare(boost
-#		URL https://github.com/boostorg/boost/releases/download/boost-1.87.0/boost-1.87.0-cmake.tar.xz
-#)
-#FetchContent_MakeAvailable(boost)
+FetchContent_Declare(
+	curl
+	URL https://curl.se/download/curl-8.11.0.tar.gz
+)
+
+FetchContent_Declare(
+	ftxui
+	GIT_REPOSITORY https://github.com/ArthurSonzogni/ftxui
+	GIT_TAG v5.0.0
+	GIT_SHALLOW TRUE
+)
+
+FetchContent_Declare(
+	json
+	URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz
+)
+
+FetchContent_MakeAvailable(
+	Boost
+	curl
+	ftxui
+	json
+)
 
 set(SRCS
 	srcs/CurlWrapper.cpp
@@ -61,11 +65,13 @@ set(INCS
 add_executable(pongCLI ${SRCS} ${INCS})
 
 target_link_libraries(pongCLI
+		PRIVATE Boost::asio
+		PRIVATE Boost::beast
 		PRIVATE ftxui::screen
 		PRIVATE ftxui::dom
 		PRIVATE ftxui::component
 		PRIVATE libcurl
 		PRIVATE nlohmann_json::nlohmann_json
-		PRIVATE Boost::asio
-		PRIVATE Boost::beast
+		PRIVATE OpenSSL::SSL
+		PRIVATE OpenSSL::Crypto
 )
