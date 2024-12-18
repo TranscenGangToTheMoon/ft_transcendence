@@ -1,6 +1,3 @@
-/lib/*
-*.o
-*.d
-/build/*
+/build
+/cmake-build-debug
 ft_transcendence.crt
-pong-cli

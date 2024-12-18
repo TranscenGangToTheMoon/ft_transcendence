@@ -23,21 +23,20 @@ FetchContent_Declare(curl
 )
 FetchContent_MakeAvailable(curl)
 
-set(BOOST_INCLUDE_LIBRARIES asio beast)
-set(BOOST_ENABLE_CMAKE ON)
-
-include(FetchContent)
-FetchContent_Declare(
-		Boost
-		GIT_REPOSITORY https://github.com/boostorg/boost.git
-		GIT_TAG boost-1.87.0
-)
-FetchContent_MakeAvailable(Boost)
-
 FetchContent_Declare(json
 		URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz
 )
 FetchContent_MakeAvailable(json)
+
+set(BOOST_INCLUDE_LIBRARIES asio beast)
+set(BOOST_ENABLE_CMAKE ON)
+
+FetchContent_Declare(Boost
+		GIT_REPOSITORY https://github.com/boostorg/boost.git
+		GIT_TAG boost-1.87.0
+		GIT_SHALLOW TRUE
+)
+FetchContent_MakeAvailable(Boost)
 
 #FetchContent_Declare(boost
 #		URL https://github.com/boostorg/boost/releases/download/boost-1.87.0/boost-1.87.0-cmake.tar.xz
@@ -62,11 +61,11 @@ set(INCS
 add_executable(pongCLI ${SRCS} ${INCS})
 
 target_link_libraries(pongCLI
-#		PRIVATE ftxui::screen
-#		PRIVATE ftxui::dom
-#		PRIVATE ftxui::component
-#		PRIVATE libcurl
-#		PRIVATE nlohmann_json::nlohmann_json
+		PRIVATE ftxui::screen
+		PRIVATE ftxui::dom
+		PRIVATE ftxui::component
+		PRIVATE libcurl
+		PRIVATE nlohmann_json::nlohmann_json
 		PRIVATE Boost::asio
 		PRIVATE Boost::beast
 )

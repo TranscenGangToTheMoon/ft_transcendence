@@ -6,18 +6,18 @@
 /*   By: xcharra <xcharra@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/25 16:32:19 by xcharra           #+#    #+#             */
-/*   Updated: 2024/12/17 19:14:41 by xcharra          ###   ########.fr       */
+/*   Updated: 2024/12/18 13:16:46 by xcharra          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pong-cli.h"
 #include "CurlWrapper.hpp"
-#include "PongCLI.hpp"
+//#include "PongCLI.hpp"
 #include "User.hpp"
 //#include "boost/asio.hpp"
 //#include "boost/asio/ssl.hpp"
 //#include "boost/beast.hpp"
-
+#define RECOMPILE true
 #define HTTPS_SERVER	"https://localhost:4443"
 #define WSS_SERVER		"wss://localhost:4444"
 int main(void)
