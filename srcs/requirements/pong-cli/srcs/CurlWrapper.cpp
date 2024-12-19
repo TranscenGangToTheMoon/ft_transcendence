@@ -69,7 +69,8 @@ void CurlWrapper::GET(const std::string &path, const std::string &data) {
 
 	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
 	curl_easy_setopt(curl, CURLOPT_CAINFO, _SSLCertificate.c_str());
-
+	std::cout << _SSLCertificate << std::endl;
+	system("/usr/bin/ls");
 	curl_easy_setopt(curl, CURLOPT_HTTPHEADER, _headers);
 
 	curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L);

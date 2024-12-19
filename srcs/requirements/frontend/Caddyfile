@@ -1,6 +1,3 @@
-:443 {
-	tls /run/secrets/ssl.crt /run/secrets/ssl.key
-
 {
     log {
         output stdout
@@ -8,7 +5,8 @@
     }
 }
 
-localhost:443 {
+:443 {
+	tls /run/secrets/ssl.crt /run/secrets/ssl.key
 
 	root * /var/www/html
 	handle {
