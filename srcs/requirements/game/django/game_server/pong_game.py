@@ -32,12 +32,12 @@ class Game:
         racket_size: Position = Position(30, 200)
         # create rackets for right players
         for player in match.teams[0].players:
-            racket = Racket(player.user_id, Position(0, int(canvas.y / 2 - racket_size.y / 2)), racket_size.x, racket_size.y)
+            racket = Racket(player.user_id, Position(0, int(canvas.y / 2 - racket_size.y / 2)))
             player.racket = racket
             rackets.append(racket)
         # create rackets for left players
         for player in match.teams[1].players:
-            racket = Racket(player.user_id, Position(canvas.x - racket_size.x, int(canvas.y / 2 - racket_size.y / 2)), racket_size.x, racket_size.y)
+            racket = Racket(player.user_id, Position(canvas.x - racket_size.x, int(canvas.y / 2 - racket_size.y / 2)))
             player.racket = racket
             rackets.append(racket)
         return rackets
@@ -60,8 +60,10 @@ class Game:
             except KeyError:
                 self.canvas = Position(800, 600)
 
+        # TODO -> set all variables from .env
         self.max_bounce_angle = 2 * (math.pi / 5)
         self.max_ball_speed = 15
+        self.speed_increment = 1
         self.ball = self.create_ball(self.canvas)
         self.rackets = self.create_rackets(self.match, self.canvas)
 

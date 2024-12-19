@@ -1,15 +1,15 @@
 from game_server.pong_position import Position
+import os
 
 
 class Racket:
+    # TODO -> add height and width to racket from env
+    height: int
+    width: int
     def __init__(self,
                  player: int,
-                 position: Position,
-                 width: int = 10,
-                 height: int = 100) -> None:
+                 position: Position) -> None:
         self.player_id = player
-        self.height = height
-        self.width = width
         self.position = position
         self.velocity = 0
         self.block_glide = False
