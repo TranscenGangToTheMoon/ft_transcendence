@@ -194,6 +194,7 @@ class Game:
                 time.sleep(0.005)
             self.update()
             last_frame_time = time.time()
+        self.finish()
         Server.delete_game(self.match.id)
 
     def launch(self):
@@ -209,7 +210,7 @@ class Game:
             print(time.time(), "all players are connected", flush=True)
         except Exception as e:
             print(e, flush=True)
-            self.match.model.finish_match()
+            self.finish('game timed out, not all players connected to server')
             print('game canceled', flush=True)
             return
         self.send_canvas()
@@ -224,13 +225,13 @@ class Game:
         game_timeout = self.match.model.game_duration
         now = datetime.now(timezone.utc)
         if game_start_time <= now - game_timeout:
-            self.match.model.finish_match()
+            self.match.model.finish_match('game cancelled') # TODO -> ask flo for more details on what to set as reason
             print('finished match', self.match.id)
             return True
         return False
 
-    def finish(self):
-        self.match.model.finish_match()
+    def finish(self, reason: str | None = None):
+            self.match.model.finish_match(reason)
 
     def score(self, player):
         from game_server.server import Server
