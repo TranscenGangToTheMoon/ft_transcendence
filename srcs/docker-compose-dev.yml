@@ -10,7 +10,7 @@ x-pgsql-healtcheck: &healthcheck
   timeout: 5s
   retries: 5
 
-##### ========== Database ================================================ #####
+##### ========== Secrets ================================================= #####
 secrets:
   ssl.crt:
     file: ../secrets/ssl.crt
