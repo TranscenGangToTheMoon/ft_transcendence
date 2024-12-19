@@ -16,6 +16,7 @@ document.getElementById('leaveLobby').addEventListener('click', async () => {
 })
 
 document.getElementById('settingsButton').addEventListener('click', async function() {
+    if (!creator || gameMode != 'Custom Game') return;
     try {
         const newMatchType = matchType === '1v1' ? '3v3' : '1v1';
         await apiRequest(getAccessToken(), `${baseAPIUrl}/play/lobby/`, 'PATCH', undefined, undefined, {
@@ -68,7 +69,7 @@ document.getElementById('joinLobby').addEventListener('click', async event => {
         document.getElementById('gameId').innerText = data.code;
         document.getElementById('gameType').innerText = data.game_mode === 'clash' ? '3v3' : 'Custom Game';
         navigateTo(`/lobby/${data.code}`, false);
-        document.getElementById('settingsButton').style.display = 'none';
+        // document.getElementById('settingsButton').style.display = 'none';
         await fillPlayerList(data);
     }
     catch (error){
@@ -91,7 +92,7 @@ async function fillBench(player){
     const benchDiv = document.getElementById('benchPlayerList');
     const playerDiv = document.createElement('div');
     playerDiv.id = `benchPlayer${player.id}`;
-    if (player.id === userInformations.id || creator){
+    if (player.id === userInformations.id){
         playerDiv.draggable = 'true';
         playerDiv.classList.add('draggable');
     }
@@ -108,7 +109,7 @@ async function fillTeamDisplay(player){
     if (player.team === 'Spectator') return;
     const teamDisplayDiv = document.getElementById((player.team === 'Team A' ? 'teamA' : 'teamB') + 'Display');
     const playerDiv = document.createElement('div');
-    if (player.id === userInformations.id || creator){
+    if (player.id === userInformations.id){
         playerDiv.classList.add('draggable');
         playerDiv.draggable = true;
     }
@@ -198,17 +199,18 @@ function initDragAndDrop(){
             const draggable = document.getElementById(draggableId);
 
             if (draggable && await makeRequest(dropzone)) {
-                console.log('parents :;',draggable.parentElement);
-                let customDiv = document.createElement('div');
-                customDiv.id = 'tempPl';
-                document.body.appendChild(customDiv);
-                await loadContent('/lobby/no_player.html', customDiv.id, true);
-                customDiv.removeAttribute('id');
-                customDiv.classList.add('no-player');
-                draggable.parentElement.replaceChild(customDiv, draggable);
+                if(draggable.parentElement.id !== 'benchPlayerList'){
+                    let customDiv = document.createElement('div');
+                    customDiv.id = 'tempPl';
+                    document.body.appendChild(customDiv);
+                    await loadContent('/lobby/no_player.html', customDiv.id, true);
+                    customDiv.removeAttribute('id');
+                    customDiv.classList.add('no-player');
+                    draggable.parentElement.replaceChild(customDiv, draggable);
+                }
                 let placeholders = dropzone.querySelectorAll('.no-player');
                 dropzone.insertBefore(draggable, placeholders[0]);
-                if (placeholders.length)
+                if (placeholders.length && dropzone.id != 'benchPlayerList')
                     placeholders[0].remove();
                 await reloadPlayerList();
             }
@@ -303,6 +305,15 @@ async function completeTeams(){
             playerPlaceholder.classList.add('no-player');
         }
     }
+    const benchPlaceholder = document.getElementById('benchPlayerList').querySelector('.no-player');
+    if (!benchPlaceholder){
+        playerPlaceholder = document.createElement('div');
+        playerPlaceholder.id = 'tempPl';
+        document.getElementById('benchPlayerList').appendChild(playerPlaceholder);
+        await loadContent('/lobby/no_player.html', playerPlaceholder.id ,true);
+        playerPlaceholder.removeAttribute('id');
+        playerPlaceholder.classList.add('no-player');
+    }
 }
 
 async function fillPlayerList(data, noTeam=false){
@@ -318,8 +329,6 @@ async function fillPlayerList(data, noTeam=false){
         if (player.id === userInformations.id){
             isReady = player.is_ready;
             creator = player.creator;
-            if (gameMode === 'Custom Game' && !player.creator)
-                document.getElementById('settingsButton').style.display = 'none';
         }
         if (gameMode === 'Custom Game' && player.team === 'Spectator'){
             if (!noTeam)
@@ -375,7 +384,7 @@ async function lobbyInit() {
             document.getElementById('settingsButton').innerText = matchType;
             gameMode = data.game_mode === 'clash' ? '3v3': 'Custom Game';
             if (gameMode === '3v3'){
-                document.getElementById('settingsButton').style.display = 'none';
+                // document.getElementById('settingsButton').style.display = 'none';
                 document.getElementById('teamSelector').style.display = 'none';
             }
             else
@@ -395,10 +404,10 @@ async function lobbyInit() {
                 code = data.code;
                 matchType = data.match_type;
                 document.getElementById('settingsButton').innerText = matchType;
-                document.getElementById('settingsButton').style.display = 'none';
+                // document.getElementById('settingsButton').style.display = 'none';
                 gameMode = data.game_mode === 'clash' ? '3v3': 'Custom Game';
                 if (gameMode === '3v3'){
-                    document.getElementById('settingsButton').style.display = 'none';
+                    // document.getElementById('settingsButton').style.display = 'none';
                     document.getElementById('teamSelector').style.display = 'none';
                 }
                 else{

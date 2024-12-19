@@ -4,6 +4,12 @@
     display: flex;
 }
 
+#lobbyOptions{
+    background-color: bisque;
+    width: 100%;
+    text-align: center;
+}
+
 #leaveGame {
     background-color: green;
 }
@@ -17,17 +23,18 @@
 
 #lobbyInterface {
     background-color: grey;
-    padding: 10px;
     display: flex;
 }
 
 #joinGameField {
     background-color: cornflowerblue;
+    height: 100%;
 }
 
 #teamSelector {
     background-color: brown;
     display: flex;
+    justify-content: center;
 }
 
 .teamDisplay {
@@ -35,6 +42,7 @@
 }
 
 #teamDisplay {
+    justify-content: center;
     display: flex;
 }
 
@@ -45,6 +53,10 @@
 
 #bench {
     background-color: aquamarine;
+    position: absolute; /* ou `absolute` si nécessaire */
+    right: 0;
+    margin-right: 0;
+    padding-right: 0;
 }
 
 #playButton {
@@ -59,10 +71,6 @@
 
 #benchPlayerList, #teamADisplay, #teamBDisplay {
     padding: 10px;
-}
-
-#benchPlayerList {
-    height: 100%;
 }
 
 #teamA .player{
