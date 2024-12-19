@@ -32,7 +32,8 @@ using boost::asio::ip::tcp;
 namespace ssl = boost::asio::ssl;
 using SSLSocket = ssl::stream<tcp::socket>;
 
-#define HTTPS_SERVER	"https://xcharra-laptop:4443"
+//put the hostname of the website
+#define HTTPS_SERVER	"https://localhost:4443"
 #define WSS_SERVER		"wss://localhost:4443"
 int main(void)
 {
