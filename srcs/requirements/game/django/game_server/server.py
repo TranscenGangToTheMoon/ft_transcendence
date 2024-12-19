@@ -78,11 +78,8 @@ class Server:
     def launch_game(match_id):
         time.sleep(1)
         match = fetch_match(match_id)
-        print('creating game', end='')
-        for team in match.teams:
-            for player in team.players:
-                print(player.user_id, flush=True, end='')
-        print('', flush=True)
+        print('creating game', flush=True)
+        print(match, flush=True)
         game = Game(Server._sio, match, Position(800, 600))
         Server.push_game(match_id, game)
         Server._games[match_id].launch()
