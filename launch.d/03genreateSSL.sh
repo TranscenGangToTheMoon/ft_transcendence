@@ -5,6 +5,6 @@ openssl req -x509 -newkey rsa:2048\
             -out ./secrets/ssl.crt\
             -days 365\
             -nodes\
-            -subj "/"
+            -subj "/C=FR/ST=Auvergne-Rhone-Alpes/L=Lyon/O=42Lyon/CN=localhost"
 
 exit 0
