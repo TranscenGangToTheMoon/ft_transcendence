@@ -20,8 +20,9 @@ class Racket:
     def move_down(self):
         self.velocity = 1
 
-    def stop_moving(self):
+    def stop_moving(self, y):
         self.velocity = 0
+        self.position.y = y
 
     def update(self):
         self.position.y += self.velocity

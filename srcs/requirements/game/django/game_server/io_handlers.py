@@ -58,7 +58,7 @@ async def stop_moving(sid, data):
         room=str(player.match_id),
         skip_sid=sid
     )
-    player.racket.stop_moving()
+    player.racket.stop_moving(position)
 
 
 async def send_games(sid):

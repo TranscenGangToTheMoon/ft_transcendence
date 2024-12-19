@@ -377,6 +377,8 @@
 
     function incrementBallSpeed(){
         state.ball.speed += config.ballSpeedIncrement;
+        if (state.ball.speed > config.maxBallSpeed)
+            state.ball.speed = config.maxBallSpeed;
     }
 
     function calculateImpactPosition(ballY, paddleY, paddleHeight) {
@@ -388,8 +390,6 @@
         const impactPosition = calculateImpactPosition(state.ball.y + config.ballSize/2, paddleY, config.paddleHeight);
         console.log(impactPosition);
         const bounceAngle = impactPosition * config.maxBounceAngle;
-
-        //ADD SPEED INFLUENCE HERE
 
         const speed = state.ball.speed;
         console.log(bounceAngle);
@@ -412,22 +412,21 @@
         }
         else{
             state.ball.speedX = -state.ball.speedX;
-            if (state.ball.speed < config.maxBallSpeed)
-                incrementBallSpeed();
+            incrementBallSpeed();
             calculateNewBallDirection(paddle.y);
         }
         if (paddle == state.paddles.right) {
-            window.socket.emit('bounce', {'dir_x': state.ball.speedX, 'dir_y': state.ball.speedY})
+            if (typeof socket !== 'undefined')
+                window.socket.emit('bounce', {'dir_x': state.ball.speedX, 'dir_y': state.ball.speedY})
         }
     }
 
     function handlePaddleCollision(paddle){
-        if (((state.ball.x < paddle.x + config.paddleWidth &&
-            state.ball.x > paddle.x ) ||
-            (state.ball.x + config.ballSize > paddle.x &&
-            state.ball.x + config.ballSize < paddle.x + config.paddleWidth))&&
-			state.ball.y + config.ballSize > paddle.y &&
-			state.ball.y < paddle.y + config.paddleHeight){
+        var ball_is_right_from_racket = state.ball.x < paddle.x + config.paddleWidth && state.ball.x > paddle.x;
+        var ball_is_left_from_racket = state.ball.x + config.ballSize > paddle.x && state.ball.x + config.ballSize < paddle.x + config.paddleWidth;
+        var is_ball_y_in_paddle_range = state.ball.y + config.ballSize > paddle.y && state.ball.y < paddle.y + config.paddleHeight;
+
+        if ((ball_is_left_from_racket || ball_is_right_from_racket) && is_ball_y_in_paddle_range){
             handlePaddleBounce(paddle);
             if (!paddle.blockGlide){
                 if (state.ball.x + config.ballSize > paddle.x &&
@@ -440,12 +439,13 @@
                 }
             }
         }
-        else if (state.ball.x < paddle.x + config.paddleWidth &&
-                 state.ball.x + config.ballSize > paddle.x
-        )
-            paddle.blockGlide = true;
-        else
-            paddle.blockGlide = false;
+        else {
+            let is_ball_x_in_paddle_range = state.ball.x < paddle.x + config.paddleWidth && state.ball.x + config.ballSize > paddle.x
+            if (is_ball_x_in_paddle_range)
+                paddle.blockGlide = true;
+            else
+                paddle.blockGlide = false;
+        }
     }
 
     function displayDemo() {
@@ -645,7 +645,7 @@ async function initGame(){
         catch(error) {
             console.log(error);
         }
-        // window.PongGame.startGame();
+        window.PongGame.startGame();
     }
     catch (unauthorized){
         if (!document.getElementById('alertModal').classList.contains('show'))

@@ -104,28 +104,87 @@ class Game:
 
     #     print(self.ball.direction_x, self.ball.direction_y)
 
+    def calculateImpactPosition(self, ballY, paddleY, paddleHeight):
+        const relativeY = (paddleY + paddleHeight / 2) - ballY
+        return relativeY / (paddleHeight / 2)
 
-    # def handle_racket_collision(self):
-    #     for paddle in self.rackets:
-    #         if paddle.block_glide:
-    #             self.ball.direction_y = -self.ball.direction_y
-    #             if abs(self.ball.position.y - (paddle.position.y + paddle.height)) < abs(self.ball.position.y - paddle.position.y):
-    #                 self.ball.position.y = paddle.position.y + paddle.height
-    #             else:
-    #                 self.ball.position.y = paddle.position.y - self.ball.size
-    #         else:
-    #             self.ball.direction_x = -self.ball.direction_x
-    #             # if self.ball.speed < self.max_ball_speed:
-    #             #     self.increment_ball_speed()
-    #             self.calculate_new_ball_direction(paddle.position.y)
-    #             self.sio.emit('bounce', {'dir_x': self.ball.direction_x, 'dir_y': self.ball.direction_y})
+    def calculateNewBallDirection(self, paddleY):
+        impactPosition = self.calculateImpactPosition(self.ball.position.y + self.ball.size / 2, paddleY, Racket.height)
+        bounceAngle = impactPosition * self.max_bounce_angle
+
+        speed = self.ball.speed
+        xNewSpeed = speed * math.cos(bounceAngle)
+        yNewSpeed = speed * -math.sin(bounceAngle)
+        self.ball.speed_x = self.ball.speed_x < 0 ? xNewSpeed * -1 : xNewSpeed
+        self.ball.speed_y = yNewSpeed
+
+    def handle_racket_bounce(self, racket):
+        if (racket.blockGlide){
+            self.ball.speed_y = -self.ball.speed_y;
+            if (abs(self.ball.y - (racket.y + racket.height)) <
+                abs(self.ball.y - (racket.y)))
+                self.ball.y = racket.y + racket.height;
+            else
+                self.ball.y = racket.y - self.ball.size;
+        }
+        else{
+            self.ball.speedX = -self.ball.speedX;
+            self.ball.increment_speed(self.max_ball_speed, self.speed_increment);
+            self.calculateNewBallDirection(racket.y);
+        }
+        # if (paddle == state.paddles.right) {
+        #     if (typeof socket !== 'undefined')
+        #         window.socket.emit('bounce', {'dir_x': state.ball.speedX, 'dir_y': state.ball.speedY})
+        # }
+
+    def handle_racket_collision(self, racket):
+        ball_is_right_from_racket = self.ball.position.x < racket.position.x + racket.width && self.ball.position.x > racket.position.x;
+        ball_is_left_from_racket = self.ball.position.x + self.ball.size > racket.position.x && self.ball.position.x + self.ball.size < racket.position.x + racket.width;
+        is_ball_y_in_paddle_range = self.ball.position.y + self.ball.size > racket.position.y && self.ball.position.y < racket.position.y + racket.height;
+
+        if ((ball_is_left_from_racket || ball_is_right_from_racket) && is_ball_y_in_paddle_range){
+            self.handle_racket_bounce(racket);
+            if (!racket.blockGlide){
+                if (self.ball.position.x + self.ball.size > racket.position.x &&
+                    self.ball.position.x + self.ball.size < racket.position.x + racket.width
+                ){
+                    self.ball.position.x = racket.position.x - self.ball.size;
+                }
+                else{
+                    self.ball.position.x = racket.position.x + racket.width;
+                }
+            }
+        }
+        else {
+            is_ball_x_in_paddle_range = self.ball.position.x < paddle.x + racket.width && self.ball.position.x + self.ball.size > paddle.x
+            if (is_ball_x_in_paddle_range)
+                paddle.blockGlide = true;
+            else
+                paddle.blockGlide = false;
+        }
+        # for paddle in self.rackets:
+        #     if paddle.block_glide:
+        #         self.ball.direction_y = -self.ball.direction_y
+        #         if abs(self.ball.position.y - (paddle.position.y + paddle.height)) < abs(self.ball.position.y - paddle.position.y):
+        #             self.ball.position.y = paddle.position.y + paddle.height
+        #         else:
+        #             self.ball.position.y = paddle.position.y - self.ball.size
+        #     else:
+        #         self.ball.direction_x = -self.ball.direction_x
+        #         # if self.ball.speed < self.max_ball_speed:
+        #         #     self.increment_ball_speed()
+        #         self.calculate_new_ball_direction(paddle.position.y)
+        #         self.sio.emit('bounce', {'dir_x': self.ball.direction_x, 'dir_y': self.ball.direction_y})
 
     def update(self):
         for racket in self.rackets:
             racket.update()
+            self.handle_racket_collision(racket);
         # update ball position
         self.ball.position.x += self.ball.direction_x * self.ball.speed
         self.ball.position.x += self.ball.direction_y * self.ball.speed
+
+
         # update ball direction (in case it bounces)
 
     def get_player(self, user_id: int) -> Player:
