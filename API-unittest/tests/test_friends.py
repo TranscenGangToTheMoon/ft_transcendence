@@ -74,7 +74,7 @@ class Test02_FriendRequest(UnitTest):
         user1 = new_user()
         user2 = new_user()
 
-        friend_request_id = self.assertResponse(friend_requests(user1, user2), 201, get_id=True)
+        friend_request_id = self.assertResponse(friend_requests(user1, user2), 201, get_field=True)
 
         self.assertResponse(get_friend_requests_received(user2), 200, count=1)
         self.assertResponse(friend_requests(user1, method='GET'), 200, count=1)
@@ -130,7 +130,7 @@ class Test02_FriendRequest(UnitTest):
         user1 = new_user()
         user2 = new_user()
 
-        friend_request_id = self.assertResponse(friend_requests(user1, user2), 201, get_id=True)
+        friend_request_id = self.assertResponse(friend_requests(user1, user2), 201, get_field=True)
 
         self.assertResponse(friend_request(friend_request_id), 404, {'detail': 'Friend request not found.'})
 
@@ -138,7 +138,7 @@ class Test02_FriendRequest(UnitTest):
         user1 = new_user()
         user2 = new_user()
 
-        friend_request_id = self.assertResponse(friend_requests(user1, user2), 201, get_id=True)
+        friend_request_id = self.assertResponse(friend_requests(user1, user2), 201, get_field=True)
 
         self.assertResponse(friend_request(friend_request_id, user2, 'DELETE'), 204)
         self.assertResponse(friend_request(friend_request_id, user1, 'GET'), 404, {'detail': 'Friend request not found.'})
@@ -147,7 +147,7 @@ class Test02_FriendRequest(UnitTest):
         user1 = new_user()
         user2 = new_user()
 
-        friend_request_id = self.assertResponse(friend_requests(user1, user2), 201, get_id=True)
+        friend_request_id = self.assertResponse(friend_requests(user1, user2), 201, get_field=True)
 
         self.assertResponse(friend_request(friend_request_id, user1, 'DELETE'), 204)
         self.assertResponse(friend_request(friend_request_id, user1, 'GET'), 404, {'detail': 'Friend request not found.'})
@@ -157,8 +157,8 @@ class Test02_FriendRequest(UnitTest):
         user1 = new_user()
         user2 = new_user()
 
-        friend_request_id = self.assertResponse(friend_requests(user1, user2), 201, get_id=True)
-        self.assertResponse(friend_request(friend_request_id, user2), 201, get_id=True)
+        friend_request_id = self.assertResponse(friend_requests(user1, user2), 201, get_field=True)
+        self.assertResponse(friend_request(friend_request_id, user2), 201, get_field=True)
         self.assertResponse(friend_request(friend_request_id, user1, 'GET'), 404, {'detail': 'Friend request not found.'})
         self.assertResponse(friend_request(friend_request_id, user2, 'GET'), 404, {'detail': 'Friend request not found.'})
 
@@ -166,7 +166,7 @@ class Test02_FriendRequest(UnitTest):
         user1 = new_user()
         user2 = new_user()
 
-        friend_request_id = self.assertResponse(friend_requests(user1, user2), 201, get_id=True)
+        friend_request_id = self.assertResponse(friend_requests(user1, user2), 201, get_field=True)
         self.assertResponse(friend_request(friend_request_id, user1), 403, {'detail': 'you cannot accept your own friend request.'})
 
     def test_014_guest_user_make_friend_request(self):

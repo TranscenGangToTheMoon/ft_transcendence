@@ -3,7 +3,7 @@ from lib_transcendence.exceptions import MessagesException
 from rest_framework import serializers
 
 from auth.utils import create_user_get_token
-from auth.validators import validate_username
+from auth.validators import validate_username, set_password
 from guest.group import get_group_guest
 
 
@@ -32,19 +32,18 @@ class RegisterSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         password = validated_data.pop('password')
         instance = super().create(validated_data)
-        instance.set_password(password)
-        instance.save()
+        set_password(password, instance, remove_instance=True)
         return create_user_get_token(instance)
 
     def update(self, instance, validated_data):
-        guest_group = get_group_guest()
-        instance.groups.remove(guest_group)
         password = validated_data.pop('password', None)
-        if password is not None:
-            instance.set_password(password)
+        old_username = instance.username
         if validated_data['username'] == instance.username:
             validated_data.pop('username')
         else:
             validate_username(validated_data['username'], only_check_exists=True)
         new_instance = super().update(instance, validated_data)
+        set_password(password, instance, old_username=old_username)
+        guest_group = get_group_guest()
+        instance.groups.remove(guest_group)
         return create_user_get_token(new_instance, False)

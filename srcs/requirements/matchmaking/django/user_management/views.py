@@ -13,7 +13,7 @@ from tournament.models import TournamentParticipants
 
 class BlockedUserView(SerializerKwargsContext, generics.CreateAPIView, generics.DestroyAPIView):
     serializer_class = BlockedSerializer
-    authentication_classes = [] # todo remake
+    authentication_classes = []
 
     def get_object(self):
         try:
@@ -23,7 +23,7 @@ class BlockedUserView(SerializerKwargsContext, generics.CreateAPIView, generics.
 
 
 class DeleteUserView(generics.DestroyAPIView):
-    authentication_classes = [] # todo remake
+    authentication_classes = []
 
     def delete(self, request, *args, **kwargs):
         try:

@@ -5,6 +5,7 @@ import time
 from django.db import models
 from lib_transcendence.Tournament import Tournament
 
+from blocking.utils import delete_player_instance
 from matchmaking.create_match import create_tournament_match
 
 
@@ -34,8 +35,7 @@ class Tournaments(models.Model):
     def start(self):
         self.is_started = True
         self.save()
-        first_stage = TournamentStage.objects.create(tournament=self, label=Tournament.get_label(self.n_stage)) # todo create direclty from self.stage
-        # todo make seeding
+        first_stage = self.stages.create(label=Tournament.get_label(self.n_stage))
         participants = self.participants.all().order_by('seeding')
 
         for p in participants:
@@ -84,7 +84,6 @@ class TournamentStage(models.Model):
 
 class TournamentParticipants(models.Model):
     user_id = models.IntegerField()
-    trophies = models.IntegerField()
     tournament = models.ForeignKey(Tournaments, on_delete=models.CASCADE, related_name='participants')
     stage = models.ForeignKey(TournamentStage, on_delete=models.CASCADE, default=None, null=True, related_name='participants')
     seeding = models.IntegerField(default=None, null=True)
@@ -100,6 +99,7 @@ class TournamentParticipants(models.Model):
         if tournament.is_started:
             self.eliminate()
         else:
+            delete_player_instance(self.user_id)
             super().delete(using=using, keep_parents=keep_parents)
             if tournament.participants.count() == 0:
                 tournament.delete()
@@ -122,7 +122,7 @@ class TournamentParticipants(models.Model):
         self.save()
         return None
 
-    def __str__(self): # todo make __str__ for all models
+    def __str__(self):
         name = f'{self.tournament.code}/ {self.user_id}'
         if self.creator:
             name += '*'
