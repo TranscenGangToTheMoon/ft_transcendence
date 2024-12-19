@@ -22,12 +22,8 @@ def create_player_instance(request, instance=None, *args, **kwargs):
         return instance.objects.create(*args, **kwargs)
 
 
-def delete_player_instance(player_instance=None, user_id=None): # todo use
-    if player_instance is not None:
-        user_id = player_instance.user_id
+def delete_player_instance(user_id=None):
     Blocked.objects.filter(user_id=user_id).delete()
-    if player_instance is not None:
-        player_instance.delete()
 
 
 def are_users_blocked(user1, user2):

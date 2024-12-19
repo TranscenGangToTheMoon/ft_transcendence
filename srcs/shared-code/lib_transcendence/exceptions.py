@@ -39,6 +39,7 @@ class MessagesException:
         USERNAME_SHORTER_THAN_30_CHAR = 'Username must be less than 30 characters long.'
         INVALIDE_CHAR = 'Use of an invlid character.'
         USERNAME_ALREAY_EXISTS = 'This username already exists.'
+        PASSWORD_SHORTER_THAN_50_CHAR = 'Password must be less than 50 characters long.'
         SAME_PASSWORD = 'Password is the same as the old one.'
 
         ONLY_1V1_3V3_ALLOWED = 'Only 1v1 and 3v3 are allowed.'
@@ -46,6 +47,7 @@ class MessagesException:
 
         TEAMS_LIST = 'Teams must be a list.'
         TEAMS_NOT_EQUAL = 'Both teams must have the same number of players.'
+        IN_BOTH_TEAMS = 'User cannot be in both teams.'
 
         GAME_MODE_PLAYERS = '{obj} mode must have {n} players in each teams.'
         CLASH_3_PLAYERS = GAME_MODE_PLAYERS.format(obj='Clash', n=3)
@@ -115,6 +117,7 @@ class MessagesException:
         _ALREADY = 'You are already in a {obj}.'
         ALREADY_IN_GAME = _ALREADY.format(obj='game')
         ALREADY_IN_TOURNAMENT = _ALREADY.format(obj='tournament')
+        USER_ALREADY_IN_GAME = 'Users are already in a game.'
 
     class ResourceExists:
         DEFAULT = 'Resource already exists.'

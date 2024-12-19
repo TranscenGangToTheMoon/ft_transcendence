@@ -1,15 +1,21 @@
 from typing import Literal
 
-from rest_framework.exceptions import NotAuthenticated
+from lib_transcendence import endpoints
 from lib_transcendence.request import request_service
+from rest_framework.exceptions import NotAuthenticated
+
+
+def get_auth_token(request):
+    token = request.headers.get('Authorization')
+    if token is not None:
+        return token
+    raise NotAuthenticated()
 
 
 def request_users(endpoint: Literal['users/me/', 'validate/chat/', 'blocked/<>/'], method: Literal['GET', 'POST', 'PUT', 'PATCH', 'DELETE'], request=None, data=None):
     kwargs = {}
     if request is not None:
-        kwargs['token'] = request.headers.get('Authorization')
-        if kwargs['token'] is None:
-            raise NotAuthenticated()
+        kwargs['token'] = get_auth_token(request)
     if data is not None:
         kwargs['data'] = data
 
@@ -44,3 +50,7 @@ def request_auth(token, endpoint: Literal['update/', 'verify/', 'delete/'], meth
         raise NotAuthenticated()
 
     return request_service('auth', endpoint, method, data, token)
+
+
+def post_messages(chat_id: int, content: str, token: str):
+    return request_service('chat', endpoints.Chat.fmessage.format(chat_id=chat_id), 'POST', {'content': content}, token)
