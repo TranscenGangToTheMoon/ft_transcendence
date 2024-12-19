@@ -2,6 +2,7 @@ x-django-env: &django-env
   TZ: Europe/Paris
   DEBUG: "True" # True or False
   MIGRATION: "true" # true or false
+  HOSTNAME: ${HOSTNAME}
 
 x-pgsql-healtcheck: &healthcheck
   test: ["CMD-SHELL", "pg_isready --dbname=$$POSTGRES_DB --username=$$POSTGRES_USER"]
@@ -9,8 +10,15 @@ x-pgsql-healtcheck: &healthcheck
   timeout: 5s
   retries: 5
 
-services:
+##### ========== Secrets ================================================= #####
+secrets:
+  ssl.crt:
+    file: ../secrets/ssl.crt
+  ssl.key:
+    file: ../secrets/ssl.key
+
 ##### ========== Django Projects ========================================= #####
+services:
   auth:
     build:
       context: "requirements/auth"
@@ -71,6 +79,9 @@ services:
       - ./requirements/frontend/Caddyfile:/etc/caddy/Caddyfile
     environment:
       TZ: Europe/Paris
+    secrets:
+      - ssl.crt
+      - ssl.key
 
   game:
     build:
