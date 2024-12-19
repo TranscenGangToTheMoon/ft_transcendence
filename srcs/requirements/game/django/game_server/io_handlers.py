@@ -1,4 +1,4 @@
-from logging import info, debug, warning, error
+from logging import info, debug, error
 
 
 async def connect(sid, environ, auth):
@@ -14,11 +14,11 @@ async def connect(sid, environ, auth):
         raise ConnectionRefusedError('Authentication failed')
     id = auth['id']
     try:
-        player, match_code = Server.get_player_and_match_code(id)
+        player, match_id = Server.get_player_and_match_id(id)
         player.socket_id = sid
-        Server.clients[sid] = player
-        print('Transport is : ', Server.sio.transport(sid), flush=True)
-        await Server.sio.enter_room(sid, str(match_code))
+        Server._clients[sid] = player
+        print('Transport is : ', Server._sio.transport(sid), flush=True)
+        await Server._sio.enter_room(sid, str(match_id))
     except Exception as e:
         error(e)
         raise ConnectionRefusedError('Player does not belong to any game')
@@ -27,22 +27,22 @@ async def connect(sid, environ, auth):
 
 async def move_up(sid):
     from game_server.server import Server
-    player = Server.clients[sid]
-    await Server.sio.emit(
+    player = Server._clients[sid]
+    await Server._sio.emit(
         'move_up',
         data={'player': player.user_id},
-        room=str(player.match_code),
+        room=str(player.match_id),
         skip_sid=sid)
     player.racket.move_up()
 
 
 async def move_down(sid):
     from game_server.server import Server
-    player = Server.clients[sid]
-    await Server.sio.emit(
+    player = Server._clients[sid]
+    await Server._sio.emit(
         'move_down',
         data={'player': player.user_id},
-        room=str(player.match_code),
+        room=str(player.match_id),
         skip_sid=sid
     )
     player.racket.move_down()
@@ -50,12 +50,12 @@ async def move_down(sid):
 
 async def stop_moving(sid, data):
     from game_server.server import Server
-    player = Server.clients[sid]
+    player = Server._clients[sid]
     position = data['position']
-    await Server.sio.emit(
+    await Server._sio.emit(
         'stop_moving',
         data={'player': player.user_id, 'position': position},
-        room=str(player.match_code),
+        room=str(player.match_id),
         skip_sid=sid
     )
     player.racket.stop_moving()
@@ -64,28 +64,27 @@ async def stop_moving(sid, data):
 async def send_games(sid):
     from game_server.server import Server
     codes = []
-    for game in Server.games:
+    for game in Server._games:
         codes.append(game)
-    await Server.sio.emit('games', data=codes, to=sid)
+    await Server._sio.emit('games', data=codes, to=sid)
     info(f'games are: {codes}')
 
 
 async def goal(sid):
     from game_server.server import Server
-    player = Server.clients[sid]
-    await Server.games[player.match_code].score()
-    await Server.sio.emit('goal', data={'player': player.user_id}, room=str(player.match_code), skip_sid=sid)
+    player = Server._clients[sid]
+    Server._games[player.match_id].score()
 
 
 async def bounce(sid, data):
     from game_server.server import Server
-    player = Server.clients[sid]
-    await Server.sio.emit('bounce', data={'dir_x': -data['dir_x'], 'dir_y': data['dir_y']}, skip_sid=sid)
+    player = Server._clients[sid]
+    await Server._sio.emit('bounce', data={'dir_x': -data['dir_x'], 'dir_y': data['dir_y']}, skip_sid=sid)
 
 
 async def disconnect(sid):
     from game_server.server import Server
-    if Server.clients == {}:
+    if Server._clients == {}:
         return
-    match_code = Server.clients[sid].match_code
-    await Server.sio.leave_room(sid, str(match_code))
+    match_id = Server._clients[sid].match_id
+    await Server._sio.leave_room(sid, str(match_id))

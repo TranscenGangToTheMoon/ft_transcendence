@@ -26,10 +26,14 @@ class Matches(models.Model):
             return 'finish'
         return ''
 
-    def finish_match(self):
+    def finish_match(self, reason: str | None = None):
         if self.finished:
             return
         self.finished = True
+        if reason is None:
+            self.finish_reason = 'Match is over'
+        else:
+            self.finish_reason = reason
         self.game_duration = self.created_at - datetime.now(timezone.utc)
         if self.tournament_id is not None:
             winner, looser = self.players.order_by('-score')

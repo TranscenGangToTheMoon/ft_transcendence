@@ -1,11 +1,10 @@
 from datetime import datetime, timezone
 import math
-from game_server.match import Match, Player
+from game_server.match import Match, Player, finish_match
 from game_server.pong_ball import Ball
 from game_server.pong_position import Position
 from game_server.pong_racket import Racket
 from typing import List
-import asyncio
 import os
 import time
 import random
@@ -31,12 +30,12 @@ class Game:
     def create_rackets(match, canvas) -> List[Racket]:
         rackets: List[Racket] = []
         racket_size: Position = Position(30, 200)
-        # create rackets for left players
+        # create rackets for right players
         for player in match.teams[0].players:
             racket = Racket(player.user_id, Position(0, int(canvas.y / 2 - racket_size.y / 2)), racket_size.x, racket_size.y)
             player.racket = racket
             rackets.append(racket)
-        # create rackets for right players
+        # create rackets for left players
         for player in match.teams[1].players:
             racket = Racket(player.user_id, Position(canvas.x - racket_size.x, int(canvas.y / 2 - racket_size.y / 2)), racket_size.x, racket_size.y)
             player.racket = racket
@@ -48,7 +47,6 @@ class Game:
                 match,
                 canvas: Position = Position(0, 0)) -> None:
         self.match: Match = match
-        self.sio = sio
         self.canvas = canvas
         self.game_timeout = None
         if self.match.game_mode == 'ranked':
@@ -72,8 +70,6 @@ class Game:
             if racket.player_id == player_id:
                 return racket
         raise Exception(f'no racket matching socket id {player_id}')
-
-
 
     # def calculate_impact_position(self, ball_y, paddle_y, paddle_height):
     #     relative_y = (paddle_y + paddle_height / 2) - ball_y
@@ -124,7 +120,6 @@ class Game:
     #             self.calculate_new_ball_direction(paddle.position.y)
     #             self.sio.emit('bounce', {'dir_x': self.ball.direction_x, 'dir_y': self.ball.direction_y})
 
-
     def update(self):
         for racket in self.rackets:
             racket.update()
@@ -152,17 +147,24 @@ class Game:
                 print(time.time(),flush=True)
                 print(f'player {player.user_id} has join in!', flush=True)
 
-    async def play(self):
+    def send_canvas(self):
         from game_server.server import Server
-        start_time = time.time()
-        last_frame_time = start_time
+        Server.emit(
+            'game_state',
+            data={
+                'canvas_width': self.canvas.x,
+                'canvas_height': self.canvas.y
+            },
+            room=str(self.match.id)
+        )
+
+    def send_game_state(self):
+        from game_server.server import Server
         side = 1
-        print(time.time(), "emitting start_game", flush=True)
-        await self.sio.emit('debug')
         for team in self.match.teams:
             for player in team.players:
-                Server.loop.call_soon_threadsafe(asyncio.create_task, self.sio.emit(
-                    'start_game',
+                Server.emit(
+                    'game_state',
                     data={
                         'position_x': self.ball.position.x,
                         'position_y': self.ball.position.y,
@@ -172,35 +174,49 @@ class Game:
                         'canvas_height': self.canvas.y
                     },
                     to=player.socket_id
-                ))
+                )
             side = -1
-        print(time.time(), "Finished emitting start_game", flush=True)
+
+    def send_start_game(self):
+        from game_server.server import Server
+        Server.emit('start_game', room=str(self.match.id))
+        print('emitted start_game', flush=True)
+
+    def play(self):
+        from game_server.server import Server
+        start_time = time.time()
+        last_frame_time = start_time
+        self.send_start_game()
         while True:
-            print(time.time(), "game loop", flush=True)
             if self.game_timeout is not None and (time.time() - start_time < self.game_timeout * 60):
                 break
             while time.time() - last_frame_time < (1 / 60):
                 time.sleep(0.005)
             self.update()
             last_frame_time = time.time()
+        self.finish()
+        Server.delete_game(self.match.id)
 
-    async def launch(self):
-        # try:
-        #     timeout = int(os.environ['GAME_PLAYER_CONNECT_TIMEOUT'])
-        # except KeyError:
+    def launch(self):
+        from game_server.server import Server
+        try:
+            timeout = int(os.environ['GAME_PLAYER_CONNECT_TIMEOUT'])
+        except KeyError:
+            timeout = 5
         print(time.time(), "launch()", flush=True)
         timeout = 60.
         try:
             self.wait_for_players(timeout)
-            print(time.time(), "wait_for_players() ended", flush=True)
+            print(time.time(), "all players are connected", flush=True)
         except Exception as e:
-            print(time.time(), "wait_for_players() ended", flush=True)
-            #print(e, flush=True)
-            self.match.model.finish_match()
+            print(e, flush=True)
+            self.finish('game timed out, not all players connected to server')
+            print('game canceled', flush=True)
             return
+        self.send_canvas()
+        self.send_game_state()
         print('game launched', flush=True)
-        if await self.play() == False:
-            return False
+        self.play()
 
     def check_zombie(self) -> bool:
         if self.match.model.finished:
@@ -209,24 +225,23 @@ class Game:
         game_timeout = self.match.model.game_duration
         now = datetime.now(timezone.utc)
         if game_start_time <= now - game_timeout:
-            self.match.model.finish_match()
+            self.match.model.finish_match('game cancelled') # TODO -> ask flo for more details on what to set as reason
+            print('finished match', self.match.id)
             return True
         return False
 
-    async def score(self):
+    def finish(self, reason: str | None = None):
+            self.match.model.finish_match(reason)
+
+    def score(self, player):
+        from game_server.server import Server
+        last_touch: Player | None = self.ball.last_racket_touched
+        if last_touch is not None:
+            last_touch.csc += 1
         self.ball.position = Position(int(self.canvas.x / 2), int(self.canvas.y / 2))
         self.ball.direction_x, self.ball.direction_y = get_random_direction()
-        side = 1
         for team in self.match.teams:
-            for player in team.players:
-                await self.sio.emit(
-                    'goal',
-                    data={
-                        'position_x': self.ball.position.x,
-                        'position_y': self.ball.position.y,
-                        'direction_x': self.ball.direction_x * side,
-                        'direction_y': self.ball.direction_y
-                    },
-                    to=player.socket_id
-                )
-            side = -1
+            if (player.team == team):
+                if (team.score == 4):
+                    self.finish()
+        self.send_game_state()
