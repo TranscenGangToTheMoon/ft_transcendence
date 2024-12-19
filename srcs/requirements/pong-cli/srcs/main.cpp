@@ -6,7 +6,7 @@
 /*   By: xcharra <xcharra@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/25 16:32:19 by xcharra           #+#    #+#             */
-/*   Updated: 2024/12/18 15:41:57 by xcharra          ###   ########.fr       */
+/*   Updated: 2024/12/19 18:48:02 by xcharra          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,103 +38,104 @@ using SSLSocket = ssl::stream<tcp::socket>;
 int main(void)
 {
 	{
-		CurlWrapper	curl;
-		User		user;
+//		CurlWrapper	curl;
+//		User		user;
+//
+//		curl.setServer(HTTPS_SERVER);
+//		curl.addHeader("Content-Type: application/json");
+//
+//		user.setUsername("test");
+//		user.setPassword("test");
+//
+//
+//		try {
+//			user.loginUser(curl);
+//			std::cout << "Login Succeed" << std::endl;
+//		}
+//		catch (std::exception &error) {
+//			if (curl.getHTTPCode() == 401)
+//				try {
+//					user.registerUser(curl);
+//					std::cout << "Register Succeed" << std::endl;
+//				}
+//				catch (std::exception &error) {
+//					std::cerr << ("(" + std::to_string(curl.getHTTPCode()) + ") " + error.what()) << std::endl;
+//				}
+//		}
+//
+//		try {
+//			curl.POST("/api/play/duel/", "");
+//			std::cout << "Duel request Succeed" << std::endl;
+//			std::cout << json::parse(curl.getResponse()).dump(1, '\t') << std::endl;
+//		}
+//		catch (std::exception &error) {
+//			std::cerr << ("(" + std::to_string(curl.getHTTPCode()) + ") " + error.what()) << std::endl;
+//			// std::cerr << json::parse(curl.getResponse()).dump(1, '\t') << std::endl;
+//		}
+//		std::string id;
+//		try {
+//			curl.GET("/api/users/me/", "");
+//			std::cout << "Users me succeed!" << std::endl;
+//			std::cout << json::parse(curl.getResponse()).dump(1, '\t') << std::endl;
+//			id = std::to_string((int)json::parse(curl.getResponse())["id"]);
+//			std::cout << id << std::endl;
+//
+//		}
+//		catch (std::exception &error) {
+//			std::cerr << ("(" + std::to_string(curl.getHTTPCode()) + ") " + error.what()) << std::endl;
+//			// std::cerr << json::parse(curl.getResponse()).dump(1, '\t') << std::endl;
+//		}
 
-		curl.setServer(HTTPS_SERVER);
-		curl.addHeader("Content-Type: application/json");
 
-		user.setUsername("test");
-		user.setPassword("test");
+		 try {
+			asio::io_context io_context;
+			asio::ssl::context ssl_context(asio::ssl::context::tlsv13_client);
 
+			ssl_context.load_verify_file("ft_transcendence.crt");
+			ssl_context.set_verify_mode(asio::ssl::verify_peer);
 
-		try {
-			user.loginUser(curl);
-			std::cout << "Login Succeed" << std::endl;
-		}
-		catch (std::exception &error) {
-			if (curl.getHTTPCode() == 401)
-				try {
-					user.registerUser(curl);
-					std::cout << "Register Succeed" << std::endl;
-				}
-				catch (std::exception &error) {
-					std::cerr << ("(" + std::to_string(curl.getHTTPCode()) + ") " + error.what()) << std::endl;
-				}
-		}
+			// Résolution de l'adresse et du port
+			tcp::resolver resolver(io_context);
+			auto endpoints = resolver.resolve("localhost", "4444");
 
-		try {
-			curl.POST("/api/play/duel/", "");
-			std::cout << "Duel request Succeed" << std::endl;
-			std::cout << json::parse(curl.getResponse()).dump(1, '\t') << std::endl;
-		}
-		catch (std::exception &error) {
-			std::cerr << ("(" + std::to_string(curl.getHTTPCode()) + ") " + error.what()) << std::endl;
-			// std::cerr << json::parse(curl.getResponse()).dump(1, '\t') << std::endl;
-		}
-		std::string id;
-		try {
-			curl.GET("/api/users/me/", "");
-			std::cout << "Users me succeed!" << std::endl;
-			std::cout << json::parse(curl.getResponse()).dump(1, '\t') << std::endl;
-			id = std::to_string((int)json::parse(curl.getResponse())["id"]);
-			std::cout << id << std::endl;
+			// Création du socket SSL
+			asio::ssl::stream<tcp::socket> ssl_socket(io_context, ssl_context);
 
-		}
-		catch (std::exception &error) {
-			std::cerr << ("(" + std::to_string(curl.getHTTPCode()) + ") " + error.what()) << std::endl;
-			// std::cerr << json::parse(curl.getResponse()).dump(1, '\t') << std::endl;
-		}
+			// Connexion au serveur
+			asio::connect(ssl_socket.next_layer(), endpoints);
+
+			// Handshake SSL/TLS
+			ssl_socket.handshake(asio::ssl::stream_base::client);
 
 
-		// try {
-		// 	// Création du contexte d'IO
-		// 	asio::io_context io_context;
+			 // Create HTTP GET request
+			 const std::string request =
+				 "GET /ws/?EIO=4&transport=websocket HTTP/1.1\r\n"
+				 "Host: localhost\r\n"
+				 "Connection: Upgrade\r\n\r\n";
 
-		// 	// Configuration du contexte SSL pour TLS 1.3
-		// 	asio::ssl::context ssl_context(asio::ssl::context::tlsv13_client);
+			std::cout << "Ca a pas throw" << std::endl;
 
-		// 	// Charger le certificat auto-signé
-		// 	ssl_context.load_verify_file("ft_transcendence.crt");
+			// Envoi d'une requête HTTP basique
+			asio::write(ssl_socket, asio::buffer(request));
 
-		// 	// Activer la vérification stricte (le certificat auto-signé sera accepté grâce à load_verify_file)
-		// 	ssl_context.set_verify_mode(asio::ssl::verify_peer);
+			char buffer[4096];
+			boost::asio::read(ssl_socket, boost::asio::buffer(buffer, 4096));
+			std::cout << buffer << std::endl;
+//			boost::asio::async_read(ssl_socket, boost::asio::buffer(buffer, 4096), [&] (boost::system::error_code ec, std::size_t length) {
+//				std::cout << buffer << std::endl;
+//				(void)ec;
+//				(void)length;
+//			});
+//			std::cin.get();
+			// Affichage de la réponse
+//			std::istream response_stream(&response_buffer->data());
+//			std::cout << "Réponse :\n" << response_stream.rdbuf() << std::endl;
 
-		// 	// Résolution de l'adresse et du port
-		// 	tcp::resolver resolver(io_context);
-		// 	auto endpoints = resolver.resolve("localhost", "5500");
-
-		// 	// Création du socket SSL
-		// 	asio::ssl::stream<tcp::socket> ssl_socket(io_context, ssl_context);
-
-		// 	// Connexion au serveur
-		// 	asio::connect(ssl_socket.lowest_layer(), endpoints);
-
-		// 	// Handshake SSL/TLS
-		// 	ssl_socket.handshake(asio::ssl::stream_base::client);
-
-		// 	std::cout << "Connexion sécurisée établie avec TLS 1.3.\n";
-
-		// 	// Envoi d'une requête HTTP basique
-		// 	std::string request = "GET / HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n";
-		// 	asio::write(ssl_socket, asio::buffer(request));
-
-		// 	// Lecture de la réponse
-		// 	boost::system::error_code error;
-		// 	asio::streambuf response_buffer;
-		// 	asio::read(ssl_socket, response_buffer, asio::transfer_all(), error);
-
-		// 	if (error && error != asio::error::eof) {
-		// 		throw boost::system::system_error(error);
-		// 	}
-
-		// 	// Affichage de la réponse
-		// 	std::istream response_stream(&response_buffer);
-		// 	std::cout << "Réponse :\n" << response_stream.rdbuf() << std::endl;
-
-		// } catch (const std::exception& e) {
-		// 	std::cerr << "Erreur : " << e.what() << std::endl;
-		// }
+			}
+			catch (const std::exception& e) {
+				std::cerr << "Erreur : " << e.what() << std::endl;
+			}
 
 		return 0;
 	}

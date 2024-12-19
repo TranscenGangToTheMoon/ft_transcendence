@@ -7,6 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_FLAGS "-Wall -Wextra -Werror -g")
 set(CMAKE_CXX_FLAGS_DEBUG "-Wall -Wextra -Werror -g -fsanitize=address")
 #set(CMAKE_CXX_LINK_LIBRARY_FLAG "-lftxui")
+set(FETCHCONTENT_QUIET OFF)
 
 include_directories(incs)
 
