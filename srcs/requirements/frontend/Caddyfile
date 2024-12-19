@@ -1,3 +1,6 @@
+:443 {
+	tls /run/secrets/ssl.crt /run/secrets/ssl.key
+
 {
     log {
         output stdout
@@ -11,7 +14,7 @@ localhost:443 {
 	handle {
 		@trailing path_regexp trailing ^(/.+)/$
 		redir @trailing {re.trailing.1} permanent
-		try_files {path} /index.html
+		try_files {path} /index.html		
 		file_server
 	}
 
