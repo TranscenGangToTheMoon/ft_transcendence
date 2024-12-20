@@ -23,7 +23,7 @@ class Matches(models.Model):
     @property
     def finish_str(self):
         if self.finished:
-            return 'finish'
+            return f'finished: {self.finish_reason}'
         return ''
 
     def finish_match(self, reason: str | None = None):
