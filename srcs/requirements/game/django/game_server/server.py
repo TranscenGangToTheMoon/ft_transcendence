@@ -37,10 +37,9 @@ class Server:
         Server._app = web.Application()
         Server._loop = asyncio.get_event_loop()
         Server._app.add_routes([web.post('/create-game', requests_handlers.create_game)])
-        Server._sio.attach(Server._app, socketio_path='/ws/') #TODO -> change with '/ws/game/'
+        Server._sio.attach(Server._app, socketio_path='/ws/game/') #TODO -> change with '/ws/game/'
         Server._sio.on('connect', handler=io_handlers.connect)
         Server._sio.on('disconnect', handler=io_handlers.disconnect)
-        Server._sio.on('get_games', handler=io_handlers.send_games) # TODO -> remove in production
         Server._sio.on('move_down', handler=io_handlers.move_down)
         Server._sio.on('move_up', handler=io_handlers.move_up)
         Server._sio.on('stop_moving', handler=io_handlers.stop_moving)

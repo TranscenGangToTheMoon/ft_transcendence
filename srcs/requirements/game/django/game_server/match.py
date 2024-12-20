@@ -37,7 +37,7 @@ class Team():
             self.players.append(Player(player, self.match_id, self))
 
     def __str__(self):
-        return str(self.id + '[' + str(self.players) + ']')
+        return str(self.id) + '[' + str(self.players) + ']'
 
 class Match():
     def __init__(self, match_id):

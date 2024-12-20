@@ -12,6 +12,8 @@ class Racket:
         self.player_id = player
         self.position = position
         self.velocity = 0
+        self.height = Racket.height
+        self.width = Racket.width
         self.block_glide = False
 
     def move_up(self):

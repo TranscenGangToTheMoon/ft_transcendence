@@ -8,11 +8,12 @@ async def connect(sid, environ, auth):
     if auth['token'] == 'debug': # TODO -> remove this in prod
         debug('Debug client connected')
         return True
-
+    print('trying to connect', flush=True)
     # TODO -> do authentication here
     if auth['token'] != 'kk':
         raise ConnectionRefusedError('Authentication failed')
     id = auth['id']
+    print('id is : ', id, flush=True)
     try:
         player, match_id = Server.get_player_and_match_id(id)
         player.socket_id = sid
@@ -59,27 +60,6 @@ async def stop_moving(sid, data):
         skip_sid=sid
     )
     player.racket.stop_moving(position)
-
-
-async def send_games(sid):
-    from game_server.server import Server
-    codes = []
-    for game in Server._games:
-        codes.append(game)
-    await Server._sio.emit('games', data=codes, to=sid)
-    info(f'games are: {codes}')
-
-
-async def goal(sid):
-    from game_server.server import Server
-    player = Server._clients[sid]
-    Server._games[player.match_id].score()
-
-
-async def bounce(sid, data):
-    from game_server.server import Server
-    player = Server._clients[sid]
-    await Server._sio.emit('bounce', data={'dir_x': -data['dir_x'], 'dir_y': data['dir_y']}, skip_sid=sid)
 
 
 async def disconnect(sid):

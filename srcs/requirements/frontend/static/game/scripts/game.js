@@ -10,8 +10,8 @@
         animationDuration: 800,
         font: "48px Arial",
         fontColor: "white",
-        defaultBallSpeed : 2,
-        ballSpeedIncrement: 0,
+        defaultBallSpeed : 4,
+        ballSpeedIncrement: 1,
         winningScore: 3,
         enemyScore : {},
         playerScore : {},
@@ -351,10 +351,6 @@
         if (state.ball.x + config.ballSize <= 0 || state.ball.x >= canvas.width){
 			if (state.ball.x + config.ballSize <= 0){
                 state.playerScore++;
-                if (typeof socket !== 'undefined') {
-                    socket.emit('goal');
-                    console.log('emitted goal');
-                }
             }
 			else state.enemyScore++;
 			resetBall();
@@ -544,13 +540,14 @@
 
 
 function initSocket(){
-    let socket = io("wss://localhost:4443/", {
-        transports: ["websocket"],
-        path: "/ws/",
-        auth : {
-            "id": userInformations.id,
-            "token": 'kk',
-        },
+	const host = window.location.origin;
+  let socket = io(host, {
+      transports: ["websocket"],
+      path: "/ws/game/",
+      auth : {
+          "id": userInformations.id,
+          "token": 'kk',
+      },
 	});
     window.socket = socket;
     console.log(socket)
@@ -645,7 +642,7 @@ async function initGame(){
         catch(error) {
             console.log(error);
         }
-        window.PongGame.startGame();
+        // window.PongGame.startGame();
     }
     catch (unauthorized){
         if (!document.getElementById('alertModal').classList.contains('show'))
