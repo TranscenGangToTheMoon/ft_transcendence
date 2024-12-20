@@ -4,7 +4,7 @@ const MAX_DISPLAYED_NOTIFICATIONS = 3;
 const MAX_DISPLAYED_FRIENDS = 12;
 const MAX_DISPLAYED_FRIEND_REQUESTS = 5;
 const MAX_DISPLAYED_BLOCKED_USERS = 10;
-const baseAPIUrl = "https://localhost:4443/api"
+const baseAPIUrl = "/api"
 let userInformations = undefined;
 var notificationIdentifier = 0;
 var displayedNotifications = 0;
@@ -222,10 +222,17 @@ async function loadContent(url, container='content', append=false) {
     }
 }
 
+function containsCode(path){
+    const regex = /^\/(game|lobby)\/\d+$/;
+    return regex.test(path);
+}
+
 async function handleRoute() {
-    const path = window.location.pathname;
+    var path = window.location.pathname;
     if (window.location.pathname !== 'game')
         window.PongGame?.stopGame();
+    if (containsCode(path))
+        path = "/" + path.split("/")[1];
     const routes = {
         '/login': '/authentication.html',
         '/': '/homePage.html',
@@ -448,7 +455,7 @@ async function  indexInit(auto=true) {
             displayMainAlert("Unable to retrieve your account/guest profile","We're sorry your account has been permanently deleted and cannot be recovered.");
             await generateToken();
             await fetchUserInfos(true);
-            return handleRoute();
+            return navigateTo('/');
         }
         await loadUserProfile();
     }

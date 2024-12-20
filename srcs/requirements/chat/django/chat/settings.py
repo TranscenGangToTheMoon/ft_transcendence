@@ -29,6 +29,7 @@ DEBUG = environ["DEBUG"]
 ALLOWED_HOSTS = [
     'localhost',
     'chat',
+    '*'
 ]
 
 

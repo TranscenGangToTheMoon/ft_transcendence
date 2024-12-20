@@ -35,12 +35,12 @@ def set_password(password, user, remove_instance=False, check_previous_password=
     if password is None:
         return
     # try:
-    #     if check_previous_password and user.check_password(password):
-    #         raise ValidationError(MessagesException.ValidationError.SAME_PASSWORD)
-    #     if len(password) > 50:
-    #         raise ValidationError(MessagesException.ValidationError.PASSWORD_SHORTER_THAN_50_CHAR)
-    #     if any(char not in valid_password_charset for char in password):
-    #         raise ValidationError(MessagesException.ValidationError.INVALIDE_CHAR)
+        # if check_previous_password and user.check_password(password):
+        #     raise ValidationError(MessagesException.ValidationError.SAME_PASSWORD)
+        # if len(password) > 50:
+        #     raise ValidationError(MessagesException.ValidationError.PASSWORD_SHORTER_THAN_50_CHAR)
+        # if any(char not in valid_password_charset for char in password):
+        #     raise ValidationError(MessagesException.ValidationError.INVALIDE_CHAR)
     #     validate_password(password, user)
     # except ValidationError as e:
     #     if remove_instance:
