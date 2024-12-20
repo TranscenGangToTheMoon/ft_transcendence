@@ -243,7 +243,7 @@ async function handleRoute() {
         '/game/ranked' : '/game/game.html',
         '/game/duel' : '/game/game.html',
         '/game/custom' : '/game/game.html',
-        '/tournament' : '/workInProgress.html'
+        '/tournament' : '/tournament/tournament.html'
     };
 
     const page = routes[path] || '/404.html';
