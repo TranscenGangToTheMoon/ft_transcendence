@@ -24,7 +24,10 @@ def validate_username(value, check_exists=True, only_check_exists=False):
         if any(char not in valid_charset for char in value):
             raise serializers.ValidationError(MessagesException.ValidationError.INVALIDE_CHAR)
     if (check_exists or only_check_exists) and User.objects.filter(username__iexact=value).exists():
-        raise serializers.ValidationError(MessagesException.ValidationError.USERNAME_ALREAY_EXISTS)
+        exception_msg = MessagesException.ValidationError.USERNAME_ALREAY_EXISTS
+        if only_check_exists:
+            exception_msg = {'username': [exception_msg]}
+        raise serializers.ValidationError(exception_msg)
     return value
 
 

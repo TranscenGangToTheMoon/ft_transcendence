@@ -8,7 +8,7 @@ RUN apt-get upgrade -y
 
 COPY init.d /init.d
 
-RUN pip install -r /init.d/requirements.txt
+RUN pip install --no-cache-dir -r /init.d/requirements.txt
 RUN chmod u+x /init.d/entrypoint.sh
 
 WORKDIR /code
@@ -19,6 +19,7 @@ FROM base AS development
 RUN apt-get install -y --no-install-recommends curl net-tools
 
 ENTRYPOINT ["/init.d/entrypoint.sh"]
+# CMD [ "python3", "server-socket.py" ]
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
 
 ##### Production build
@@ -29,4 +30,5 @@ COPY django /code
 RUN pip install daphne
 
 ENTRYPOINT ["/init.d/entrypoint.sh"]
+# CMD [ "python3", "server-socket.py" ]
 CMD ["daphne", "-b", "0.0.0.0", "-p", "8000", "chat.asgi:application"]

@@ -71,7 +71,7 @@ def new_user(username=None, password=None, get_me=True):
     if username is None:
         username = f'{get_service()}-user-' + rnstr()
     if password is None:
-        password = 'password-' + rnstr(10)
+        password = 'password-' + rnstr(15)
     _new_user = {'username': username, 'password': password}
     token = get_token('register', _new_user['username'], password)
     _new_user['token'] = token['access']

@@ -6,4 +6,4 @@ fi
 
 TESTS_FOLDER=./tests/
 echo "Running API unittest "
-python -m unittest discover -s $TESTS_FOLDER -p "test_*.py"
+python3 -m unittest discover -s $TESTS_FOLDER -p "test_*.py"

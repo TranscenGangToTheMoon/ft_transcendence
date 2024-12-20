@@ -1,6 +1,5 @@
 from lib_transcendence.exceptions import MessagesException, ResourceExists
 from lib_transcendence.game import GameMode
-from lib_transcendence.game import Bo
 from lib_transcendence.Lobby import MatchType, Teams
 from lib_transcendence.auth import get_auth_user
 from lib_transcendence.generate import generate_code
@@ -59,10 +58,6 @@ class LobbySerializer(serializers.ModelSerializer):
     @staticmethod
     def validate_match_type(value):
         return MatchType.validate(value)
-
-    @staticmethod
-    def validate_bo(value):
-        return Bo.validate(value)
 
     def get_participants(self, obj):
         fields = ['is_ready']

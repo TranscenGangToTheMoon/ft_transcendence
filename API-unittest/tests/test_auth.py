@@ -118,6 +118,12 @@ class Test02_Guest(UnitTest):
         user = self.assertResponse(register_guest(guest=guest), 200, get_user=True)
         self.assertResponse(play(user, 'ranked'), 201)
 
+    def test_007_register_guest_already_exist(self):
+        user1 = new_user()
+        guest = guest_user()
+
+        self.assertResponse(register_guest(username=user1['username'], guest=guest), 400)
+
 
 class Test03_Login(UnitTest):
 

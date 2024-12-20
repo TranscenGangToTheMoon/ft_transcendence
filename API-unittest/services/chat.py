@@ -12,11 +12,14 @@ def accept_chat(user, accept_chat_from: Literal['everyone', 'friend_only', 'none
     )
 
 
-def create_chat(user1, username=None, data=None, method: Literal['GET', 'POST'] = 'POST'):
+def create_chat(user1, username=None, data=None, method: Literal['GET', 'POST'] = 'POST', query=None):
     if data is None and method == 'POST':
         data = {'username': username, 'type': 'private_message'}
+    endpoint = 'chat/'
+    if query is not None:
+        endpoint += f'?q={query}'
     return make_request(
-        endpoint='chat/',
+        endpoint=endpoint,
         method=method,
         token=user1['token'],
         data=data,
