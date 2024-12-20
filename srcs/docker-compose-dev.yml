@@ -152,6 +152,12 @@ services:
     networks:
         - redis-network
 
+# todo user depends on redis
+# todo sort redis correctly (if needed)
+# todo make on docker-compose-prod
+# todo rename things (if needed)
+# todo move redis hostname in .env (if needed) (redis hostname is 'redis')
+
 ##### ========== Database ================================================ #####
   auth-db:
     image: postgres:14
