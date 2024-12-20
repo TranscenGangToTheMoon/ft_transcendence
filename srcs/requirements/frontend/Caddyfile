@@ -12,12 +12,7 @@ localhost:443 {
 	}
 
 	handle /sse/* {
-		@notEventStream {
-			not header Content-Type text/event-stream
-		}
-
 		handle /sse/users/* {
-			respond @notEventStream "Unsupported Media Type" 415
 			reverse_proxy http://users:8000
 		}
 
