@@ -140,9 +140,17 @@ services:
       POSTGRES_USER: ${POSTGRES_USERS_USER}
       POSTGRES_PASSWORD: ${POSTGRES_USERS_PASSWORD}
       POSTGRES_HOST: ${POSTGRES_USERS_HOST}
+      REDIS_HOST: redis
     networks:
       - transcendence-network
       - users-network
+      - redis-network
+
+  redis:
+    image: redis:alpine
+    container_name: redis
+    networks:
+        - redis-network
 
 ##### ========== Database ================================================ #####
   auth-db:
@@ -219,6 +227,10 @@ networks:
 ##### ========== Global network ========================================== #####
   transcendence-network:
     name: transcendence-network
+    driver: bridge
+
+  redis-network:
+    name: redis-network
     driver: bridge
 
 ##### ========== DB to Django networks =================================== #####
