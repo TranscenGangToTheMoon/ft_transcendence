@@ -202,7 +202,7 @@ async function loadContent(url, container='content', append=false) {
         if(!append)
             contentDiv.innerHTML = html;
         else
-            contentDiv.innerHTML += `\n${html}`;
+        contentDiv.innerHTML += `\n${html}`;
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = html;
         const script = tempDiv.querySelector('[script]');

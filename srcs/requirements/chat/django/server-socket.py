@@ -30,10 +30,12 @@ sio.attach(app, socketio_path='/ws/chat/')
 usersConnected = ConnectedUsers()
 
 @sio.event
-async def connect(sid, environ):
+async def connect(sid, environ, auth):
     print(f"Client attempting to connect : {sid}")
-    token = environ.get('HTTP_TOKEN')
-    chatId = environ.get('HTTP_CHATID')
+    # token = environ.get('HTTP_TOKEN')
+    # chatId = environ.get('HTTP_CHATID')
+    token = auth.get('token')
+    chatId = auth.get('chatId')
     user = None
     chat = None
     if token and chatId:

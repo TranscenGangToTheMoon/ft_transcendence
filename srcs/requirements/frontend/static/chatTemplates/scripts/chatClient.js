@@ -4,7 +4,8 @@ async function connect(token, chatData) {
     }
 	let socket = await io("wss://localhost:4443", {
 		path: "/ws/chat/",
-		extraHeaders: {
+		transport: ['websocket'],
+		auth: {
 			"token": 'Bearer ' + token,
 			"chatId": chatData.chatId
 		}
@@ -138,6 +139,9 @@ async function loadOldMessages(chatData){
 	}
 }
 
+// await loadContent('chatTemplates/chatUserCard.html', 'chatList', true);
+
+
 var lastClick;
 
 async function selectChatMenu(filter='') {
@@ -147,19 +151,63 @@ async function selectChatMenu(filter='') {
 	try {
 		const apiAnswer = await apiRequest(getAccessToken(), `${baseAPIUrl}/chat/?q=${filter}`);
 		if (apiAnswer.count > 0) {
-			apiAnswer.results.forEach(element => {
+			apiAnswer.results.forEach(async element => {
 				let chatData = parsChatRequest(element);
-				let chat = document.createElement('div');
-				chat.setAttribute('id', 'chatListElement');
-				chat.innerHTML = `<p id="chatListElementTarget">${chatData.target}:</p><p id="chatListElementMessagePreview">${chatData.lastMessage}</p>`;
-				chat.addEventListener('click', e => {
-					if (lastClick === e.target.closest('#chatListElement')) return;
-					lastClick = e.target.closest('#chatListElement');
-					console.log(chatData.user, 'selected');
-					connect(getAccessToken(), chatData);
-					loadOldMessages(chatData);
-				});
-				chatsList.appendChild(chat);
+				let chatUserCard = document.createElement('div');
+				chatUserCard.id = 'chatListElement' + chatData.target;
+				chatUserCard.classList.add('chatUserCard');
+				chatsList.appendChild(chatUserCard);
+				await loadContent('/chatTemplates/chatUserCard.html', chatUserCard.id);
+				console.log(chatUserCard);
+				chatUserCard.querySelector('.chatUserCardTitleUsername').innerText = chatData.target;
+				chatUserCard.querySelector('.chatUserCardTitleStatus').innerText = 'prout';
+				chatUserCard.querySelector('.chatUserCardLastMessage').innerText = chatData.lastMessage;
+				// try {
+				// 	response = await fetch('chatTemplates/chatUserCard.html');
+				// 	if (!response.ok) {
+				// 		throw new Error('Network response was not ok');
+				// 	}+
+				// 	const html = response.text();
+				// 	html.setAttribute('id', 'chatListElement' + chatData.user);
+				// 	html.querySelector('.chatUserCardTitleUsername').innerText = chatData.user;
+				// 	html.querySelector('.chatUserCardTitleStatus').innerText = 'prout';
+				// 	html.querySelector('.chatUserCardLastMessage').innerText = chatData.lastMessage;
+				// 	html.querySelector('.chatUserCardButtonDeleteChat').addEventListener('click',async e => {
+				// 		e.preventDefault();
+				// 		console.log('delete chat');
+				// 		//https://ft_transcendence.fr/api/chat/<int:chat_id>/
+				// 		try {
+				// 			const response = await apiRequest(getAccessToken(), `${baseAPIUrl}/chat/${chatData.chatId}/`, 'DELETE');
+				// 			Document.getElementById('chatListElement' + chatData.user).remove();
+				// 		}catch(error){
+				// 			console.log(error);
+				// 		}
+				// 	});
+				// 	html.addEventListener('click', e => {
+				// 		if (lastClick === e.target.closest('#chatListElement' + chatData.user)) return;
+				// 			lastClick = e.target.closest('#chatListElement' + chatData.user);
+				// 			console.log(chatData.user, 'selected');
+				// 			connect(getAccessToken(), chatData);
+				// 			loadOldMessages(chatData);
+				// 	});
+				// 	chatsList.appendChild(html);
+				// }
+				// catch (error) {
+				// 	notFound = document.createElement('div');
+				// 	notFound.innerHTML = '<div>Error 404 : Page not found : </div>'
+				// 	chatsList.appendChild(notFound);
+				// }
+				// let chat = document.createElement('div');
+				// chat.setAttribute('id', 'chatListElement');
+				// chat.innerHTML = `<p id="chatListElementTarget">${chatData.target}:</p><p id="chatListElementMessagePreview">${chatData.lastMessage}</p>`;
+				// chat.addEventListener('click', e => {
+				// 	if (lastClick === e.target.closest('#chatListElement')) return;
+				// 	lastClick = e.target.closest('#chatListElement');
+				// 	console.log(chatData.user, 'selected');
+				// 	connect(getAccessToken(), chatData);
+				// 	loadOldMessages(chatData);
+				// });
+				// chatsList.appendChild(chat);
 			});
 		}
 		else {
@@ -210,5 +258,6 @@ document.getElementById('searchChatForm').addEventListener('keyup', (e) => {
 
 document.getElementById('searchChatForm').addEventListener('submit', (e) => {
 	e.preventDefault();
+	if (e.target.searchUser.value === '') return;
 	startChat(e.target.searchUser.value);
 });
