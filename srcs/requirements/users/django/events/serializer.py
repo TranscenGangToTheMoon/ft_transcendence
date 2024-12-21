@@ -10,6 +10,9 @@ from users.auth import get_user
 redis_client = redis.StrictRedis(host='redis')
 
 
+# todo reset to 0 notfication when sended
+# todo when retrieve many user, handle friend field
+
 class SSEType:
     notification = 'notification'
     event = 'event'
