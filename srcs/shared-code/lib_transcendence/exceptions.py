@@ -12,6 +12,7 @@ class MessagesException:
         NOT_FOUND = '{obj} not found.'
         CREATOR = NOT_FOUND.format(obj='Creator')
         USER = NOT_FOUND.format(obj='User')
+        USERS = NOT_FOUND.format(obj='Users')
         FRIEND_REQUEST = NOT_FOUND.format(obj='Friend request')
         FRIENDSHIP = NOT_FOUND.format(obj='Friendship')
         TOURNAMENT = NOT_FOUND.format(obj='Tournament')
