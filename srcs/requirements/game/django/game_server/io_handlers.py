@@ -67,4 +67,9 @@ async def disconnect(sid):
     if Server._clients == {}:
         return
     match_id = Server._clients[sid].match_id
+    try:
+        game = Server._games[match_id]
+        game.finish('player disconnected')
+    except KeyError:
+        pass # if the game is not registered, it means the game has already finished
     await Server._sio.leave_room(sid, str(match_id))

@@ -13,16 +13,17 @@ import random
 def get_random_direction():
     random_angle = random.random() * 2 * math.pi
     while abs(math.cos(random_angle)) < math.cos(math.pi / 3):
-        print(random_angle, abs(math.cos(random_angle)), flush=True)
         random_angle = random.random() * 2 * math.pi
     return math.cos(random_angle), math.sin(random_angle)
 
 
 class Game:
+    default_ball_speed = 2
+
     @staticmethod
     def create_ball(canvas: Position):
         direction_x, direction_y = get_random_direction()
-        ball_speed = 2
+        ball_speed = Game.default_ball_speed
         ball_size = 20
         return Ball(Position(int(canvas.x / 2 - (ball_size / 2)), int(canvas.y / 2 - (ball_size / 2))), direction_x, direction_y, ball_speed, ball_size)
 
@@ -34,12 +35,12 @@ class Game:
         racket_size: Position = Position(30, 200)
         # create rackets for right players
         for player in match.teams[0].players:
-            racket = Racket(player.user_id, Position(0, int(canvas.y / 2 - racket_size.y / 2)))
+            racket = Racket(player.user_id, Position(canvas.x - racket_size.x - 100, int(canvas.y / 2 - racket_size.y / 2)))
             player.racket = racket
             rackets.append(racket)
         # create rackets for left players
         for player in match.teams[1].players:
-            racket = Racket(player.user_id, Position(canvas.x - racket_size.x, int(canvas.y / 2 - racket_size.y / 2)))
+            racket = Racket(player.user_id, Position(100, int(canvas.y / 2 - racket_size.y / 2)))
             player.racket = racket
             rackets.append(racket)
         return rackets
@@ -50,6 +51,7 @@ class Game:
                 canvas: Position = Position(0, 0)) -> None:
         self.match: Match = match
         self.finished = False
+        self.frames = 0
         self.canvas = canvas
         self.game_timeout = None
         if self.match.game_mode == 'ranked':
@@ -58,7 +60,7 @@ class Game:
             try:
                 self.canvas = Position(
                     int(os.environ['CANVAS_SIZE_X']),
-                    int(os.environ['CANVAS_SIZE_X'])
+                    int(os.environ['CANVAS_SIZE_Y'])
                 )
             except KeyError:
                 self.canvas = Position(800, 600)
@@ -76,22 +78,22 @@ class Game:
                 return racket
         raise Exception(f'no racket matching socket id {player_id}')
 
-    # todo -> make the ball bounce on walls
-
     def handle_wall_bounce(self):
         ball_pos_y = self.ball.position.y
         if ball_pos_y < 0:
             self.ball.position.y = - ball_pos_y
-            self.ball.direction_y -= 2 * self.ball.direction_y
+            self.ball.direction_y = - self.ball.direction_y
+            print('wall_bounce up', flush=True)
         elif ball_pos_y > self.canvas.y:
             self.ball.position.y -= 2 * (ball_pos_y - self.canvas.y)
             self.ball.direction_y = - self.ball.direction_y
+            print('wall_bounce down', flush=True)
 
     def handle_goal(self):
         if self.ball.position.x + self.ball.size < 0:
-            self.score(self.match.teams[1].players[0])
+            self.score(self.match.teams[1])
         elif self.ball.position.x > self.canvas.x:
-            self.score(self.match.teams[0].players[0])
+            self.score(self.match.teams[0])
 
     def calculateImpactPosition(self, ballY, paddleY, paddleHeight):
         relativeY = (paddleY + paddleHeight / 2) - ballY
@@ -119,7 +121,7 @@ class Game:
             self.ball.speed_x = -self.ball.speed_x
             self.ball.increment_speed(self.max_ball_speed, self.speed_increment)
             self.calculateNewBallDirection(racket.position.y)
-        self.send_game_state()
+            self.send_game_state()
 
     def handle_racket_collision(self, racket):
         ball_is_right_from_racket = self.ball.position.x < racket.position.x + racket.width and self.ball.position.x > racket.position.x
@@ -133,7 +135,6 @@ class Game:
                     self.ball.position.x + self.ball.size < racket.position.x + racket.width
                 ):
                     self.ball.position.x = racket.position.x - self.ball.size;
-
                 else:
                     self.ball.position.x = racket.position.x + racket.width;
         else:
@@ -144,13 +145,16 @@ class Game:
                 racket.blockGlide = False
 
     def update(self):
+        self.frames += 1
+        print(self.frames, flush=True)
         for racket in self.rackets:
             racket.update()
-            self.handle_racket_collision(racket);
-        self.ball.position.x += self.ball.direction_x * self.ball.speed
-        self.ball.position.x += self.ball.direction_y * self.ball.speed
+        self.ball.position.x += self.ball.speed_x
+        self.ball.position.y += self.ball.speed_y
         self.handle_wall_bounce()
         self.handle_goal()
+        for racket in self.rackets:
+            self.handle_racket_collision(racket);
 
     def get_player(self, user_id: int) -> Player:
         for team in self.match.teams:
@@ -187,19 +191,22 @@ class Game:
             return {
                 'position_x': self.ball.position.x,
                 'position_y': self.ball.position.y,
-                'direction_x': self.ball.direction_x,
-                'direction_y': self.ball.direction_y,
+                'direction_x': self.ball.speed_x,
+                'direction_y': self.ball.speed_y,
+                'speed': self.ball.speed,
             }
         else:
             return {
-            'position_x': self.canvas.x - self.ball.position.x - self.ball.size,
-            'position_y': self.canvas.y - self.ball.position.y,
-            'direction_x': -self.ball.direction_x,
-            'direction_y': self.ball.direction_y,
+                'position_x': self.canvas.x - self.ball.position.x - self.ball.size,
+                'position_y': self.ball.position.y,
+                'direction_x': -self.ball.speed_x,
+                'direction_y': self.ball.speed_y,
+                'speed': self.ball.speed,
             }
 
     def send_game_state(self):
         from game_server.server import Server
+        print('send_game_state', flush=True)
         side = 1
         for team in self.match.teams:
             for player in team.players:
@@ -220,12 +227,14 @@ class Game:
         start_time = time.time()
         last_frame_time = start_time
         self.send_start_game()
+        print(self.get_game_state(1), flush=True)`
+        time.sleep(2)
         while not self.finished:
             if self.game_timeout is not None and (time.time() - start_time < self.game_timeout * 60):
                 break
+            self.update()
             while time.time() - last_frame_time < (1 / 60):
                 time.sleep(0.005)
-            self.update()
             last_frame_time = time.time()
 
     def launch(self):
@@ -248,47 +257,57 @@ class Game:
         self.send_game_state()
         print('game launched', flush=True)
         self.play()
-
-    def check_zombie(self) -> bool:
-        if self.match.model.finished:
-            return True
-        game_start_time: datetime = self.match.model.created_at
-        game_timeout = self.match.model.game_duration
-        now = datetime.now(timezone.utc)
-        if game_start_time <= now - game_timeout:
-            self.match.model.finish_match('game cancelled')
-            print('finished match', self.match.id)
-            return True
-        return False
+        print('game finished', flush=True)
 
     def send_finish(self, reason: str | None = None, winner: str | None = None):
         from game_server.server import Server
         Server.emit('game_over', data={'reason': reason, 'winner': winner}, room=str(self.match.id))
 
+    def disconnect_players(self):
+        from game_server.server import Server
+        Server.emit('disconnect', room=str(self.match.id))
+
     def finish(self, reason: str | None = None, winner: str | None = None):
+        from game_server.server import Server
         self.finished = True
         self.match.model.finish_match(reason)
         self.send_finish(reason, winner)
+        time.sleep(1)
+        Server.delete_game(self.match.id)
+        self.disconnect_players()
 
-    def send_goal(self, player):
+    def send_goal(self, scorer_team):
         from game_server.server import Server
-        for scorer in player.team.players:
-            Server.emit('you_scored', to=scorer.socket_id)
         for team in self.match.teams:
-            if team != player.team:
+            if team != scorer_team:
                 for player in team.players:
                     Server.emit('enemy_scored', to=player.socket_id)
+            else:
+                for player in team.players:
+                    Server.emit('you_scored', to=player.socket_id)
 
-    def score(self, player):
+    def reset_game_state(self):
+        print('reset_game_state', flush=True)
+        self.ball.position = Position(int(self.canvas.x / 2 - (self.ball.size / 2)), int(self.canvas.y / 2 - self.ball.size / 2))
+        self.ball.direction_x, self.ball.direction_y = get_random_direction()
+        self.ball.speed = Game.default_ball_speed
+        for racket in self.rackets:
+            racket.position.y = int(self.canvas.y / 2 - Racket.height / 2)
+            racket.velocity = 0
+            racket.block_glide = False
+
+    def score(self, team):
         from game_server.server import Server
+        print('score', flush=True)
         last_touch: Player | None = self.ball.last_racket_touched
         if last_touch is not None:
             last_touch.csc += 1
-        self.ball.position = Position(int(self.canvas.x / 2), int(self.canvas.y / 2))
-        self.ball.direction_x, self.ball.direction_y = get_random_direction()
+        team.score += 1
+        self.send_goal(team)
         for team in self.match.teams:
-            if (player.team == team):
-                if (team.score == 4):
-                    self.finish('game is over')
-        self.send_goal(player)
+            if (team.score == 3):
+                self.finish('game is over')
+        self.reset_game_state()
         self.send_game_state()
+        self.send_start_game()
+        time.sleep(2)

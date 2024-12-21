@@ -283,9 +283,11 @@
         if (state.keys["ArrowUp"] && state.paddles.right.speed != -1){
             if (typeof socket !== 'undefined'){
                 if (state.paddles.right.speed === 1){
-                    socket.emit('stop_moving'); console.log('emitting stop_moving');
+                		socket.emit('stop_moving', {'position': state.paddles.right.y});
+                  	console.log('emitting stop_moving');
                 }
-                socket.emit('move_up');  console.log('emitting move_up')
+                socket.emit('move_up');
+                console.log('emitting move_up')
             }
             state.paddles.right.speed = -1;
         }
@@ -552,10 +554,7 @@ function initSocket(){
     window.socket = socket;
     console.log(socket)
 	socket.on('connect', () => {
-        console.log('Connecté au serveur Socket.IO !');
-
-        // Envoie un message au serveur
-        console.log('envoi message')
+        console.log('Connected to socketIO server!');
     });
     socket.on('start_game', event => {
         console.log('received start_game');
@@ -563,8 +562,9 @@ function initSocket(){
     })
     socket.on('game_state', event => {
 	   	console.log(event);
-	    window.PongGame.state.ball.y = event.position_y - window.PongGame.config.ballSize / 2;
-	    window.PongGame.state.ball.x = event.position_x - window.PongGame.config.ballSize / 2;
+	    window.PongGame.state.ball.y = event.position_y;
+	    window.PongGame.state.ball.x = event.position_x;
+			window.PongGame.state.ball.speed = event.speed;
 	    window.PongGame.state.ball.speedX = event.direction_x * window.PongGame.config.defaultBallSpeed;
 	    window.PongGame.state.ball.speedY = (-event.direction_y) * window.PongGame.config.defaultBallSpeed;
 	    console.log(window.PongGame.state.ball.speedX);
@@ -589,11 +589,11 @@ function initSocket(){
     })
     socket.on('you_scored', event => {
         console.log('received goal');
-        config.playerScore++
+        window.PongGame.state.playerScore++
     })
     socket.on('enemy_scored', event => {
         console.log('received goal');
-        config.enemyScore++
+        window.PongGame.state.enemyScore++
     })
 }
 
