@@ -102,14 +102,16 @@ class EventSerializer(serializers.Serializer):
             channel = f'events:user_{user_id}'
 
             try:
-                redis_client.publish(channel, json.dumps({
+                message = {
                     'service': validated_data['service'],
                     'event_code': validated_data['event_code'],
                     'type': event['type'],
                     'message': event['message'],
                     'target': event['target'],
-                    'data': validated_data['data'],
-                }))
+                }
+                if 'data' in validated_data:
+                    message['data'] = validated_data['data']
+                redis_client.publish(channel, json.dumps(message))
             except redis.exceptions.ConnectionError:
                 raise ServiceUnavailable('redis')
 
