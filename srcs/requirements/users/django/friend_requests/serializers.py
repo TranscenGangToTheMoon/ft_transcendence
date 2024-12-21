@@ -1,4 +1,5 @@
 from lib_transcendence.exceptions import MessagesException, ResourceExists
+from lib_transcendence.services import create_sse_event
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
 
@@ -48,4 +49,7 @@ class FriendRequestsSerializer(serializers.ModelSerializer):
         if not receiver.accept_friend_request:
             raise PermissionDenied(MessagesException.PermissionDenied.NOT_ACCEPT_FRIEND_REQUEST)
 
+        if receiver.is_online:
+            create_sse_event(receiver.id, 'friends', 'receive-friend-requests') # todo try catch
+        #todo else: add notification += 1
         return super().create({'sender': sender, 'receiver': receiver})
