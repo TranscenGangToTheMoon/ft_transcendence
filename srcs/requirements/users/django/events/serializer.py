@@ -62,7 +62,7 @@ events = {
 class EventSerializer(serializers.Serializer):
     users_id = serializers.ListField(child=serializers.IntegerField())
     service = serializers.CharField(max_length=20)
-    event_code = serializers.CharField(max_length=20)
+    event_code = serializers.CharField(max_length=30)
     data = serializers.DictField(required=False)
 
     @staticmethod
