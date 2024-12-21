@@ -587,16 +587,13 @@ function initSocket(){
         window.PongGame.state.paddles.left.speed = 0;
         window.PongGame.state.paddles.left.y = event.position;
     })
-    socket.on('goal', event => {
+    socket.on('you_scored', event => {
         console.log('received goal');
-        window.PongGame.state.ball.y = event.position_y;
-        window.PongGame.state.ball.x = event.position_x;
-        window.PongGame.state.ball.speedX = event.direction_x * window.PongGame.config.defaultBallSpeed;
-        window.PongGame.state.ball.speedY = (-event.direction_y) * window.PongGame.config.defaultBallSpeed;
+        config.playerScore++
     })
-    socket.on('bounce', event => {
-        window.PongGame.state.ball.speedX = event.direction_x * window.PongGame.state.ball.speed;
-        window.PongGame.state.ball.speedY = (-event.direction_y) * window.PongGame.state.ball.speed;
+    socket.on('enemy_scored', event => {
+        console.log('received goal');
+        config.enemyScore++
     })
 }
 

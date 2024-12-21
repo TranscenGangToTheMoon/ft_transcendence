@@ -24,7 +24,7 @@ class Game:
         direction_x, direction_y = get_random_direction()
         ball_speed = 2
         ball_size = 20
-        return Ball(Position(int(canvas.x / 2), int(canvas.y / 2)), direction_x, direction_y, ball_speed, ball_size)
+        return Ball(Position(int(canvas.x / 2 - (ball_size / 2)), int(canvas.y / 2 - (ball_size / 2))), direction_x, direction_y, ball_speed, ball_size)
 
     @staticmethod
     def create_rackets(match, canvas) -> List[Racket]:
@@ -270,6 +270,14 @@ class Game:
         self.match.model.finish_match(reason)
         self.send_finish(reason, winner)
 
+    def send_goal(self, player):
+        from game_server.server import Server
+        for scorer in player.team.players:
+            Server.emit('you_scored', to=scorer.socket_id)
+        for team in self.match.teams:
+            if team != player.team:
+                for player in team.players:
+                    Server.emit('enemy_scored', to=player.socket_id)
 
     def score(self, player):
         from game_server.server import Server
@@ -282,4 +290,5 @@ class Game:
             if (player.team == team):
                 if (team.score == 4):
                     self.finish('game is over')
+        self.send_goal(player)
         self.send_game_state()
