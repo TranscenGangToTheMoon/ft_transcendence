@@ -1,9 +1,11 @@
+from abc import ABC, abstractmethod
+
 from lib_transcendence.endpoints import Auth
 from lib_transcendence.exceptions import MessagesException
-from lib_transcendence.services import request_users, request_auth, get_auth_token
+from lib_transcendence.services import request_auth, get_auth_token
 from rest_framework import serializers
 from rest_framework.authentication import BaseAuthentication
-from rest_framework.exceptions import ParseError, AuthenticationFailed
+from rest_framework.exceptions import AuthenticationFailed
 
 
 def get_user_from_auth(user_data):
@@ -40,6 +42,11 @@ class AbstractAuthentication(ABC, BaseAuthentication):
 
     def authenticate_header(self, request):
         return 'Bearer realm="api"'
+
+
+class Authentication(AbstractAuthentication):
+    def auth_request(self, token):
+        return auth_verify(token)
 
 
 def get_auth_user(request=None):
