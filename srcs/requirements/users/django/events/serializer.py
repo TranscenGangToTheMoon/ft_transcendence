@@ -60,7 +60,6 @@ events = {
 
 class EventSerializer(serializers.Serializer):
     users_id = serializers.ListField(child=serializers.IntegerField())
-    type = serializers.CharField(max_length=20)
     service = serializers.CharField(max_length=20)
     event_code = serializers.CharField(max_length=20)
     data = serializers.DictField(required=False)
@@ -84,12 +83,6 @@ class EventSerializer(serializers.Serializer):
     def validate_service(value):
         if value not in events.keys():
             raise serializers.ValidationError('Invalid service') # todo add message to lib
-        return value
-
-    @staticmethod
-    def validate_type(value):
-        if value not in (SSEType.event, SSEType.notification):
-            raise serializers.ValidationError('Invalid sse type') # todo add message to lib
         return value
 
     def validate_event_code(self, value):
