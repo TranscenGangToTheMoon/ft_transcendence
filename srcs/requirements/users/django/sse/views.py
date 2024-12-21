@@ -19,7 +19,7 @@ class SSEView(APIView):
                 yield f"data: Successfully connected !\n\n" # todo remake message ?
                 for message in pubsub.listen():
                     if message['type'] == 'message':
-                        yield f"data: {message['data'].decode('utf-8')}\n\n"
+                        yield f"{message['data'].decode('utf-8')}\n\n"
             except GeneratorExit:
                 pubsub.close() # todo remove channel
                 user.disconnect()
