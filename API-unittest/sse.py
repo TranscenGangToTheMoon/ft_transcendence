@@ -31,5 +31,5 @@ if __name__ == "__main__":
     user1 = new_user()
     with open('user1.json', 'w') as f:
         json.dump(user1, f, indent=4)
-    print(user1['username'], user1['password'])
+    print(user1['id'], user1['username'], user1['password'])
     connect_to_sse(user1)
