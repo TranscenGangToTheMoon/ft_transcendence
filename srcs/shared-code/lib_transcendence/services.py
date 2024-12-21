@@ -12,9 +12,11 @@ def get_auth_token(request):
     raise NotAuthenticated()
 
 
-def request_users(endpoint: Literal['users/me/', 'validate/chat/', 'blocked/<>/'], method: Literal['GET', 'POST', 'PUT', 'PATCH', 'DELETE'], request=None, data=None):
+def request_users(endpoint: Literal['users/me/', 'validate/chat/', 'blocked/<>/'], method: Literal['GET', 'POST', 'PUT', 'PATCH', 'DELETE'] = 'GET', request=None, data=None, token=None):
     kwargs = {}
-    if request is not None:
+    if token is not None:
+        kwargs['token'] = token
+    elif request is not None:
         kwargs['token'] = get_auth_token(request)
     if data is not None:
         kwargs['data'] = data
