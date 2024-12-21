@@ -12,6 +12,8 @@ redis_client = redis.StrictRedis(host='redis')
 
 # todo reset to 0 notfication when sended
 # todo when retrieve many user, handle friend field
+# todo when create match return user instance not only id
+# todo when create match return teams id not list
 
 class SSEType:
     notification = 'notification'
