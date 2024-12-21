@@ -1,7 +1,6 @@
 from lib_transcendence.game import GameMode
 from lib_transcendence.auth import get_auth_user
 from lib_transcendence.exceptions import MessagesException
-from lib_transcendence.services import request_users
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
 
