@@ -32,23 +32,27 @@ class SSEView(APIView):
     def get(request, *args, **kwargs):
         def event_stream():
             user.connect()
-            yield f"data: Successfully connected !\n\n"
-
-            # for message in pubsub.listen():
-            #     if message['type'] == 'message':
-            #         yield f"data: {message['data'].decode('utf-8')}\n\n"
 
             try:
-                while True:
-                    yield f"data: PING\n\n"
-                    message = pubsub.get_message(ignore_subscribe_messages=True)
-                    if message:
+                yield f"data: Successfully connected !\n\n" # todo remake message ?
+                for message in pubsub.listen():
+                    if message['type'] == 'message':
                         yield f"data: {message['data'].decode('utf-8')}\n\n"
-                    time.sleep(1)
             except GeneratorExit:
+                pubsub.close() # todo remove channel
                 user.disconnect()
-            finally:
-                pubsub.close()
+
+            # try:
+            #     while True:
+            #         yield f"data: PING\n\n"
+            #         message = pubsub.get_message(ignore_subscribe_messages=True)
+            #         if message:
+            #             yield f"data: {message['data'].decode('utf-8')}\n\n"
+            #         time.sleep(1)
+            # except GeneratorExit:
+            #     user.disconnect()
+            # finally:
+            #     pubsub.close()
 
         user = get_user(request)
         try:
