@@ -93,13 +93,22 @@ class EventSerializer(serializers.Serializer):
         return value
 
     def create(self, validated_data):
+        event = events[validated_data['service']][validated_data['event_code']]
+
         for user_id in validated_data['users_id']:
             if not get_user(id=user_id).is_online:
                 raise NotFound(MessagesException.NotFound.USER)
             channel = f'events:user_{user_id}'
 
             try:
-                redis_client.publish(channel, json.dumps(validated_data))
+                redis_client.publish(channel, json.dumps({
+                    'service': validated_data['service'],
+                    'event_code': validated_data['event_code'],
+                    'type': event['type'],
+                    'message': event['message'],
+                    'target': event['target'],
+                    'data': validated_data['data'],
+                }))
             except redis.exceptions.ConnectionError:
                 raise ServiceUnavailable('redis')
 
