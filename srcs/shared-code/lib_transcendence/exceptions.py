@@ -59,7 +59,7 @@ class MessagesException:
     class NotAuthenticated:
         PASSWORD_CONFIRMATION_REQUIRED = 'Password confirmation is required to delete the account.'
 
-    class AuthentificationFailed:
+    class AuthenticationFailed:
         INCORRECT_PASSWORD = 'Incorrect password.'
 
     class PermissionDenied:
