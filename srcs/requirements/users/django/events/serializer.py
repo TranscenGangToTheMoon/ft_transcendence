@@ -76,7 +76,9 @@ class EventSerializer(serializers.Serializer):
         return value
 
     def validate_event_code(self, value):
-        if value not in events[self.initial_data['service']]:
+        service = self.initial_data.get('service')
+        self.validate_service(service)
+        if value not in events[service]:
             raise serializers.ValidationError('Invalid event code') # todo add message to lib
         return value
 
