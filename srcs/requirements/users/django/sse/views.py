@@ -1,24 +1,6 @@
-import time
-
+from django.http import StreamingHttpResponse
 from lib_transcendence.exceptions import ServiceUnavailable
 from rest_framework.views import APIView
-from django.http import StreamingHttpResponse
-
-# SSE Usage
-#  - user join lobby
-#  - user leave lobby
-#  - user set ready lobby
-#  - game start lobby
-#  - user join tournament
-#  - user leave tournament
-#  - game start lobby
-#  - game not start lobby
-#  - friend request
-#  - accept friend request
-#  - chat notification
-#  - friend status update ?
-#  - game port
-
 import redis
 
 from users.auth import get_user
