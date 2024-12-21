@@ -13,7 +13,11 @@ def connect_to_sse(user=None):
         user = new_user()
 
     with httpx.Client(verify=False, timeout=5000) as client:
-        with client.stream("GET", sse_url, headers={'Authorization': f'Bearer {user["token"]}'}) as response:
+        headers = {
+            'Authorization': f'Bearer {user["token"]}',
+            'Content-Type': 'text/event-stream',
+        }
+        with client.stream("GET", sse_url, headers=headers) as response:
             if response.status_code == 200:
                 print("Connected to SSE server.")
                 for line in response.iter_text():
