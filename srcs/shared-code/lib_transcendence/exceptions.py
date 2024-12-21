@@ -61,6 +61,7 @@ class MessagesException:
 
     class AuthenticationFailed:
         INCORRECT_PASSWORD = 'Incorrect password.'
+        NOT_CONNECTED_SSE = 'You need to be connected to SSE to access this resource'
 
     class PermissionDenied:
         _GUEST_CANNOT_CREATE = 'Guest users cannot create {obj}.'
