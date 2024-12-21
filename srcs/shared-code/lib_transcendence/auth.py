@@ -16,7 +16,11 @@ def get_user_from_auth(user_data):
     return user
 
 
-class Authentication(BaseAuthentication):
+class AbstractAuthentication(ABC, BaseAuthentication):
+    @abstractmethod
+    def auth_request(self, token):
+        pass
+
     def authenticate(self, request):
         token = request.headers.get('Authorization')
 
@@ -24,9 +28,9 @@ class Authentication(BaseAuthentication):
             raise NotAuthenticated()
 
         try:
-            json_data = auth_verify(token)
-        except AuthenticationFailed:
-            raise AuthenticationFailed()
+            json_data = self.auth_request(token)
+        except AuthenticationFailed as e:
+            raise e
         if json_data is None:
             raise AuthenticationFailed()
 
