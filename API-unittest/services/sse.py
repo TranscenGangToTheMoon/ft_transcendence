@@ -7,7 +7,7 @@ def events(user_to, message, type: Literal['notification'] = 'notification', ser
     return make_request(
         endpoint='private/users/events/',
         method='POST',
-        data={'user_id': user_to['id'], 'data': {'message': message}, 'type': type, 'service': service, 'event_code': event_code},
+        data={'users_id': [user_to['id']], 'data': {'message': message}, 'type': type, 'event_code': event_code, 'service': service},
         port=8005,
         token=user_to['token'],
     )
