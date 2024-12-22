@@ -29,7 +29,7 @@ class UsersMeSerializer(serializers.ModelSerializer):
             'current_rank',
             'created_at',
             'friend_notifications',
-            'chat_notifications',
+            # 'chat_notifications',
             'is_online',
             'password',
 
@@ -43,7 +43,7 @@ class UsersMeSerializer(serializers.ModelSerializer):
             'current_rank',
             'created_at',
             'friend_notifications',
-            'chat_notifications',
+            # 'chat_notifications', # todo handle
             'is_online',
         ]
 
