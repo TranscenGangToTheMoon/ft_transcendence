@@ -185,6 +185,22 @@ class Test02_FriendRequest(UnitTest):
 
         self.assertResponse(friend_requests(user1, user2), 404, {'detail': 'User not found.'})
 
+    def test_016_friend_request_receive(self):
+        user1 = new_user()
+        user2 = new_user()
+        n = 4
+
+        self.assertEqual(0, self.assertResponse(me(user1), 200, get_field='friend_notifications'))
+
+        self.assertResponse(friend_requests(user2, user1), 201)
+        for _ in range(n):
+            self.assertResponse(friend_requests(receiver=user1), 201)
+
+        self.assertResponse(get_friend_requests_received(user2), 200)
+        self.assertEqual(n + 1, self.assertResponse(me(user1), 200, get_field='friend_notifications'))
+        self.assertResponse(get_friend_requests_received(user1), 200)
+        self.assertEqual(0, self.assertResponse(me(user1), 200, get_field='friend_notifications'))
+
 
 if __name__ == '__main__':
     unittest.main()
