@@ -59,7 +59,7 @@ class UnitTest(unittest.TestCase):
                                 data = json.loads(line.strip())
                                 if ignore_connection_message and data['event_code'] == 'connection-success':
                                     continue
-                                print(f"Received: {data}")
+                                print(f"SSE RECEIVED: {data}", flush=True)
                                 self.assertEqual(tests[i]['service'], data['service'])
                                 self.assertEqual(tests[i]['event_code'], data['event_code'])
                                 i += 1
