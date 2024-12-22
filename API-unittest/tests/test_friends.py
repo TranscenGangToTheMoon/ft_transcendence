@@ -11,19 +11,24 @@ class Test01_Friend(UnitTest):
 
     def test_001_friend(self):
         user1 = self.new_user()
+        user2 = self.new_user()
 
         thread = self.connect_to_sse(user1, [{'service': 'friends', 'event_code': 'accept-friend-requests'}], 3)
-        self.assertFriendResponse(create_friendship(user1, self.new_user()))
+        self.assertFriendResponse(create_friendship(user1, user2))
         thread.join()
 
     def test_002_friend_without_friend_request(self):
-        self.assertResponse(friend_request('123456', self.new_user()), 404, {'detail': 'Friend request not found.'})
+        user1 = self.new_user()
+
+        self.assertResponse(friend_request('123456', user1), 404, {'detail': 'Friend request not found.'})
 
     def test_003_get_friends(self):
         user1 = self.new_user()
 
         for i in range(7):
-            self.assertFriendResponse(create_friendship(user1, self.new_user()))
+            user_tmp = self.new_user()
+
+            self.assertFriendResponse(create_friendship(user1, user_tmp))
 
         self.assertResponse(get_friends(user1), 200, count=7)
 
@@ -64,11 +69,12 @@ class Test01_Friend(UnitTest):
     def test_007_delete_friend_not_belong_user(self):
         user1 = self.new_user()
         user2 = self.new_user()
+        user3 = self.new_user()
 
         friendship_id = self.assertFriendResponse(create_friendship(user1, user2))
         self.assertResponse(friend(user1, friendship_id), 200)
 
-        self.assertResponse(friend(self.new_user(), friendship_id, 'DELETE'), 404, {'detail': 'Friendship not found.'})
+        self.assertResponse(friend(user3, friendship_id, 'DELETE'), 404, {'detail': 'Friendship not found.'})
         self.assertResponse(friend(user1, friendship_id), 200)
 
 
@@ -130,15 +136,18 @@ class Test02_FriendRequest(UnitTest):
         self.assertResponse(friend_requests(user1, user1), 403, {'detail': 'You cannot send a friend request to yourself.'})
 
     def test_008_forget_username_field(self):
-        self.assertResponse(friend_requests(data={}), 400, {'username': ['This field is required.']})
+        user1 = self.new_user()
+
+        self.assertResponse(friend_requests(user1, data={}), 400, {'username': ['This field is required.']})
 
     def test_009_get_friend_request_not_belong(self):
         user1 = self.new_user()
         user2 = self.new_user()
+        user3 = self.new_user()
 
         friend_request_id = self.assertResponse(friend_requests(user1, user2), 201, get_field=True)
 
-        self.assertResponse(friend_request(friend_request_id, self.new_user()), 404, {'detail': 'Friend request not found.'})
+        self.assertResponse(friend_request(friend_request_id, user3), 404, {'detail': 'Friend request not found.'})
 
     def test_010_reject_friend_request(self):
         user1 = self.new_user()
@@ -183,7 +192,7 @@ class Test02_FriendRequest(UnitTest):
 
     def test_015_guest_user_receive_friend_request(self):
         user1 = self.new_user()
-        user2 = self.guest_user()
+        user2 = self.guest_user(get_me=True)
 
         self.assertResponse(friend_requests(user1, user2), 404, {'detail': 'User not found.'})
 
@@ -196,7 +205,8 @@ class Test02_FriendRequest(UnitTest):
 
         self.assertResponse(friend_requests(user2, user1), 201)
         for _ in range(n):
-            self.assertResponse(friend_requests(receiver=user1), 201)
+            user_tmp = self.new_user()
+            self.assertResponse(friend_requests(user_tmp, receiver=user1), 201)
 
         self.assertResponse(get_friend_requests_received(user2), 200)
         self.assertEqual(n + 1, self.assertResponse(me(user1), 200, get_field='friend_notifications'))

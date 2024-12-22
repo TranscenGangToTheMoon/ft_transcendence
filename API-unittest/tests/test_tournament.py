@@ -286,7 +286,9 @@ class Test07_GetTournament(UnitTest):
         self.assertEqual(code, response['code'])
 
     def test_002_get_tournament_does_not_join(self):
-        self.assertResponse(create_tournament(self.new_user(), method='GET'), 404, {'detail': 'You do not belong to any tournament.'})
+        user1 = self.new_user()
+
+        self.assertResponse(create_tournament(user1, method='GET'), 404, {'detail': 'You do not belong to any tournament.'})
 
     def test_002_get_tournament_participant(self):
         user1 = self.new_user()
@@ -301,19 +303,22 @@ class Test07_GetTournament(UnitTest):
 
     def test_003_get_tournament_participant_does_not_join(self):
         user1 = self.new_user()
+        user2 = self.new_user()
 
         code = self.assertResponse(create_tournament(user1), 201, get_field='code')
 
-        self.assertResponse(join_tournament(code, self.new_user(), 'GET'), 403, {'detail': 'You do not belong to this tournament.'})
+        self.assertResponse(join_tournament(code, user2, 'GET'), 403, {'detail': 'You do not belong to this tournament.'})
 
     def test_004_search_tournaments(self):
         user1 = self.new_user()
+        user2 = self.new_user()
         name = rnstr()
 
         for i in range(5):
-            self.assertResponse(create_tournament(self.new_user(), data={'name': 'Tournoi ' + name + rnstr()}), 201)
+            user_tmp = self.new_user()
+            self.assertResponse(create_tournament(user_tmp, data={'name': 'Tournoi ' + name + rnstr()}), 201)
 
-        self.assertResponse(create_tournament(self.new_user(), data={'name': 'coucou' + name}), 201)
+        self.assertResponse(create_tournament(user2, data={'name': 'coucou' + name}), 201)
 
         self.assertResponse(search_tournament('coucou' + name, user1), 200, count=1)
 
@@ -335,9 +340,10 @@ class Test07_GetTournament(UnitTest):
     def test_007_search_tournaments_blocked_by_creator_tournament(self):
         user1 = self.new_user()
         user2 = self.new_user()
+        user3 = self.new_user()
         name = rnstr()
 
-        self.assertResponse(create_tournament(self.new_user(), data={'name': 'Blocked ' + name + rnstr()}), 201)
+        self.assertResponse(create_tournament(user3, data={'name': 'Blocked ' + name + rnstr()}), 201)
         self.assertResponse(create_tournament(user1, data={'name': 'Blocked ' + name + rnstr()}), 201)
         blocked_id = self.assertResponse(blocked_user(user1, user2['id']), 201, get_field=True)
         self.assertResponse(search_tournament('Blocked ' + name, user2), 200, count=1)
@@ -347,9 +353,10 @@ class Test07_GetTournament(UnitTest):
     def test_008_search_tournaments_blocked_by_user_tournament(self):
         user1 = self.new_user()
         user2 = self.new_user()
+        user3 = self.new_user()
         name = rnstr()
 
-        self.assertResponse(create_tournament(self.new_user(), data={'name': 'Blocked ' + name + rnstr()}), 201)
+        self.assertResponse(create_tournament(user3, data={'name': 'Blocked ' + name + rnstr()}), 201)
         self.assertResponse(create_tournament(user1, data={'name': 'Blocked ' + name + rnstr()}), 201)
         blocked_id = self.assertResponse(blocked_user(user2, user1['id']), 201, get_field=True)
         self.assertResponse(search_tournament('Blocked ' + name, user2), 200, count=1)

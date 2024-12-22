@@ -3,7 +3,7 @@ from typing import Literal
 from utils.request import make_request
 
 
-def friend_requests(sender=None, receiver=None, method: Literal['POST', 'GET'] = 'POST', data=None):
+def friend_requests(sender, receiver=None, method: Literal['POST', 'GET'] = 'POST', data=None):
     if method == 'POST':
         if data is None:
             data = {'username': receiver['username']}

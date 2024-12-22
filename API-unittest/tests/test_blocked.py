@@ -30,7 +30,8 @@ class Test02_Blocked(UnitTest):
 
         n = randint(1, 10)
         for _ in range(n):
-            self.assertResponse(blocked_user(user1, self.new_user(get_me=True)['id']), 201)
+            user_tmp = self.new_user(get_me=True)
+            self.assertResponse(blocked_user(user1, user_tmp['id']), 201)
         self.assertResponse(blocked_user(user1, method='GET'), 200, count=n)
 
     def test_002_unblocked(self):
@@ -66,7 +67,7 @@ class Test03_BlockedError(UnitTest):
 
     def test_004_blocked_guest(self):
         user1 = self.new_user()
-        user2 = self.guest_user()
+        user2 = self.guest_user(get_me=True)
 
         self.assertResponse(blocked_user(user1, user2['id']), 404, {'detail': 'User not found.'})
 
@@ -77,11 +78,17 @@ class Test03_BlockedError(UnitTest):
         self.assertResponse(blocked_user(user1, user2['id']), 403, {'detail': 'Guest users cannot blocked users.'})
 
     def test_006_unblock_doest_not_exist(self):
-        self.assertResponse(unblocked_user(self.new_user(), 123456), 403, {'detail': 'This blocked user entry does not belong to you.'})
+        user1 = self.new_user()
+
+        self.assertResponse(unblocked_user(user1, 123456), 403, {'detail': 'This blocked user entry does not belong to you.'})
 
     def test_007_unblock_not_self_instance(self):
-        block_id = self.assertResponse(blocked_user(self.new_user()), 201, get_field=True)
-        self.assertResponse(unblocked_user(self.new_user(), block_id), 403, {'detail': 'This blocked user entry does not belong to you.'})
+        user1 = self.new_user()
+        user2 = self.new_user(get_me=True)
+        user3 = self.new_user()
+
+        block_id = self.assertResponse(blocked_user(user1, user2['id']), 201, get_field=True)
+        self.assertResponse(unblocked_user(user3, block_id), 403, {'detail': 'This blocked user entry does not belong to you.'})
 
 
 if __name__ == '__main__':

@@ -23,24 +23,29 @@ from utils.my_unittest import UnitTest
 class Test01_GetUsers(UnitTest):
 
     def test_001_get_user(self):
-        self.assertResponse(get_user(self.new_user(), self.new_user(get_me=True)['id']), 200)
+        user1 = self.new_user()
+        user2 = self.new_user(get_me=True)
+
+        self.assertResponse(get_user(user1, user2['id']), 200)
 
     def test_002_get_blocked_by_user(self):
         user1 = self.new_user()
-        user2 = self.new_user()
+        user2 = self.new_user(get_me=True)
 
         self.assertResponse(blocked_user(user2, user1['id']), 201)
         self.assertResponse(get_user(user1, user2['id']), 404, {'detail': 'User not found.'})
 
     def test_003_get_blocked_user(self):
         user1 = self.new_user()
-        user2 = self.new_user()
+        user2 = self.new_user(get_me=True)
 
         self.assertResponse(blocked_user(user1, user2['id']), 201)
         self.assertResponse(get_user(user1, user2['id']), 403, {'detail': 'You blocked this user.'})
 
     def test_004_get_user_doest_not_exist(self):
-        self.assertResponse(get_user(self.new_user(), user2_id=123456), 404, {'detail': 'User not found.'})
+        user1 = self.new_user()
+
+        self.assertResponse(get_user(user1, user2_id=123456), 404, {'detail': 'User not found.'})
 
 
 class Test02_UserMe(UnitTest):
@@ -49,13 +54,13 @@ class Test02_UserMe(UnitTest):
         user1 = self.new_user()
 
         response = self.assertResponse(me(user1), 200)
-        self.assertDictEqual(response, {'id': user1['id'], 'username': user1['username'], 'is_guest': False, 'created_at': response['created_at'], 'profile_picture': None, 'accept_friend_request': True, 'accept_chat_from': 'friends_only', 'coins': 100, 'trophies': 0, 'current_rank': None, 'friend_notifications': 0, 'chat_notifications': 0})
+        self.assertDictEqual(response, {'id': response['id'], 'username': user1['username'], 'is_guest': False, 'created_at': response['created_at'], 'profile_picture': None, 'accept_friend_request': True, 'accept_chat_from': 'friends_only', 'coins': 100, 'trophies': 0, 'current_rank': None, 'friend_notifications': 0, 'chat_notifications': 0})
 
     def test_002_get_me_guest(self):
         user1 = self.guest_user()
 
         response = self.assertResponse(me(user1), 200)
-        self.assertDictEqual(response, {'id': user1['id'], 'username': user1['username'], 'is_guest': True, 'created_at': response['created_at'], 'profile_picture': None, 'accept_friend_request': True, 'accept_chat_from': 'friends_only', 'coins': 100, 'trophies': 0, 'current_rank': None})
+        self.assertDictEqual(response, {'id': response['id'], 'username': response['username'], 'is_guest': True, 'created_at': response['created_at'], 'profile_picture': None, 'accept_friend_request': True, 'accept_chat_from': 'friends_only', 'coins': 100, 'trophies': 0, 'current_rank': None})
 
 
 class Test03_DeleteUser(UnitTest):
@@ -86,11 +91,12 @@ class Test03_DeleteUser(UnitTest):
 
     def test_005_user_in_lobby(self):
         user1 = self.new_user()
+        user2 = self.new_user()
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
         self.assertResponse(me(user1, method='DELETE', password=True), 204)
         self.assertResponse(create_lobby(user1, method='GET'), 401, {'detail': 'Incorrect authentication credentials.'})
-        self.assertResponse(join_lobby(code, self.new_user()), 404, {'detail': 'Lobby not found.'})
+        self.assertResponse(join_lobby(code, user2), 404, {'detail': 'Lobby not found.'})
 
     def test_006_user_in_game(self):
         user1 = self.new_user()
@@ -102,21 +108,24 @@ class Test03_DeleteUser(UnitTest):
 
     def test_007_user_in_tournament(self):
         user1 = self.new_user()
+        user2 = self.new_user()
+        user3 = self.new_user()
         name = rnstr()
 
         code = self.assertResponse(create_tournament(user1, {'name': 'Delete User ' + name}), 201, get_field='code')
         self.assertResponse(search_tournament(name), 200, count=1)
         self.assertResponse(me(user1, method='DELETE', password=True), 204)
         self.assertResponse(create_tournament(user1, method='GET'), 401, {'detail': 'Incorrect authentication credentials.'})
-        self.assertResponse(search_tournament(name, self.new_user()), 200, count=0)
-        self.assertResponse(join_tournament(code, self.new_user()), 404)
+        self.assertResponse(search_tournament(name, user2), 200, count=0)
+        self.assertResponse(join_tournament(code, user3), 404)
 
     def test_008_user_in_start_tournament(self):
         user1 = self.new_user()
+        user2 = self.new_user()
         name = rnstr()
 
         code = self.assertResponse(create_tournament(user1, {'name': 'Delete User ' + name}), 201, get_field='code')
-        self.assertResponse(join_tournament(code, self.new_user()), 201)
+        self.assertResponse(join_tournament(code, user2), 201)
         response = self.assertResponse(search_tournament(name), 200, count=1)
         self.assertEqual(2, response['results'][0]['n_participants'])
         self.assertResponse(me(user1, method='DELETE', password=True), 204)
@@ -236,7 +245,7 @@ class Test05_RenameUser(UnitTest):
         new_username = user1['username'] + '_new'
 
         id = self.assertFriendResponse(create_friendship(user1, user2))
-        self.assertResponse(me(user1, method='PATCH', data={'username': new_username}), 200)
+        user1['id'] = self.assertResponse(me(user1, method='PATCH', data={'username': new_username}), 200, get_field=True)
         response = self.assertResponse(friend(user1, id), 200)
         for f in response['friends']:
             if f['id'] == user1['id']:
@@ -245,7 +254,7 @@ class Test05_RenameUser(UnitTest):
 
     def test_003_rename_blocked_user(self):
         user1 = self.new_user()
-        user2 = self.new_user()
+        user2 = self.new_user(get_me=True)
         new_username = user1['username'] + '_new'
 
         self.assertResponse(blocked_user(user2, user1['id']), 201)

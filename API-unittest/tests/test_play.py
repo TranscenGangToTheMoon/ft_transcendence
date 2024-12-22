@@ -14,18 +14,23 @@ from utils.my_unittest import UnitTest
 class Test01_Play(UnitTest):
 
     def test_001_play_duel(self):
-        self.assertResponse(play(self.new_user()), 201)
+        user1 = self.new_user()
+
+        self.assertResponse(play(user1), 201)
 
     def test_002_play_ranked(self):
-        self.assertResponse(play(self.new_user(), game_mode='ranked'), 201)
+        user1 = self.new_user()
+
+        self.assertResponse(play(user1, game_mode='ranked'), 201)
 
 
 class Test02_PlayError(UnitTest):
 
     def test_001_already_in_game(self):
         user1 = self.new_user()
+        user2 = self.new_user()
 
-        self.assertResponse(create_game(user1, self.new_user()), 201)
+        self.assertResponse(create_game(user1, user2), 201)
         self.assertResponse(play(user1), 409, {'detail': 'You are already in a game.'})
 
     def test_002_already_in_tournament(self):
@@ -34,7 +39,8 @@ class Test02_PlayError(UnitTest):
         code = self.assertResponse(create_tournament(user1), 201, get_field='code')
 
         for i in range(3):
-            self.assertResponse(join_tournament(code, self.new_user()), 201)
+            user_tmp = self.new_user()
+            self.assertResponse(join_tournament(code, user_tmp), 201)
 
         self.assertResponse(play(user1), 409, {'detail': 'You are already in a tournament.'})
 
@@ -72,7 +78,9 @@ class Test02_PlayError(UnitTest):
         self.assertResponse(play(user1, method='DELETE'), 204)
 
     def test_006_delete_not_play(self):
-        self.assertResponse(play(self.new_user(), method='DELETE'), 404, {'detail': 'You are not currently playing.'})
+        user1 = self.new_user()
+
+        self.assertResponse(play(user1, method='DELETE'), 404, {'detail': 'You are not currently playing.'})
 
 
 if __name__ == '__main__':

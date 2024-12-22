@@ -7,8 +7,11 @@ from utils.my_unittest import UnitTest
 class Test01_SSE(UnitTest):
 
     def test_001_connection_success(self):
-        thread1 = self.connect_to_sse(tests=[{'service': 'auth', 'event_code': 'connection-success'}], ignore_connection_message=False)
-        thread2 = self.connect_to_sse(user=self.guest_user(), tests=[{'service': 'auth', 'event_code': 'connection-success'}], ignore_connection_message=False)
+        user1 = self.new_user()
+        user2 = self.guest_user()
+
+        thread1 = self.connect_to_sse(user1, tests=[{'service': 'auth', 'event_code': 'connection-success'}], ignore_connection_message=False)
+        thread2 = self.connect_to_sse(user2, tests=[{'service': 'auth', 'event_code': 'connection-success'}], ignore_connection_message=False)
         thread1.join()
         thread2.join()
 

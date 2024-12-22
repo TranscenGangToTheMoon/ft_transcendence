@@ -105,15 +105,17 @@ class Test02_Guest(UnitTest):
         self.assertResponse(register_guest(username='username_' + random_name, password='password_,' + random_name), 401)
 
     def test_004_register_user_since_guest(self):
-        self.assertResponse(register_guest(guest=self.new_user()), 403)
+        user1 = self.new_user()
+
+        self.assertResponse(register_guest(guest=user1), 403)
 
     def test_005_login_guest(self):
-        self.assertResponse(login(self.guest_user()['username'], rnstr()), 401, {'detail': 'No active account found with the given credentials'})
+        self.assertResponse(login(self.guest_user(get_me=True)['username'], rnstr()), 401, {'detail': 'No active account found with the given credentials'})
 
     def test_006_register_guest_try_play_ranked(self):
         guest = self.guest_user()
 
-        thread = self.connect_to_sse(guest,)
+        thread = self.connect_to_sse(guest)
         self.assertResponse(play(guest, 'ranked'), 403, {'detail': 'Guest users cannot play ranked games.'})
         user = self.assertResponse(register_guest(guest=guest), 200, get_user=True)
         self.assertResponse(play(user, 'ranked'), 201)
