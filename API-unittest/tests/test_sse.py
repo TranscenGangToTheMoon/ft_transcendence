@@ -20,6 +20,10 @@ class Test01_SSE(UnitTest):
         time.sleep(1)
         self.connect_to_sse(user1, timeout=2, status_code=409)
 
+    def test_003_invalid_token(self):
+        self.connect_to_sse({'token': 'invalid_token'}, timeout=1, status_code=401)
+
+
 #todo message d'erreur qui finit pas un point
 #todo test invalid parameters, fogrt, not good type, etc..., not users.
 class Test02_EventsEndpoint(UnitTest):
