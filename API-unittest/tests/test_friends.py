@@ -215,6 +215,11 @@ class Test02_FriendRequest(UnitTest):
         response = self.assertResponse(friend_requests(user2, method='GET'), 200, get_field='results')
         self.assertNotIn('new', response[0])
 
+    def test_018_no_friend_request(self):
+        user1 = new_user()
+
+        self.assertEqual(0, self.assertResponse(me(user1), 200, get_field='friend_notifications'))
+
 
 if __name__ == '__main__':
     unittest.main()
