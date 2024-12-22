@@ -9,6 +9,9 @@ from utils.credentials import new_user, guest_user
 from utils.my_unittest import UnitTest
 
 
+# todo  si pas connecter tu peux pas jouer matchmaking
+
+
 class Test01_Play(UnitTest):
 
     def test_001_play_duel(self):

@@ -7,6 +7,9 @@ from utils.generate_random import rnstr
 from utils.my_unittest import UnitTest
 
 
+# todo  si pas connecter tu peux pas jouer matchmaking
+
+
 class Test01_Tournament(UnitTest):
 
     def test_001_create_tournament(self):
