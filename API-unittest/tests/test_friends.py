@@ -201,6 +201,17 @@ class Test02_FriendRequest(UnitTest):
         self.assertResponse(get_friend_requests_received(user1), 200)
         self.assertEqual(0, self.assertResponse(me(user1), 200, get_field='friend_notifications'))
 
+    def test_017_new_field(self):
+        user1 = new_user()
+        user2 = new_user()
+
+        self.assertResponse(friend_requests(user2, user1), 201)
+        response = self.assertResponse(get_friend_requests_received(user1), 200, get_field='results')
+        self.assertIn('new', response[0])
+        self.assertEqual(response[0]['new'], True)
+        response = self.assertResponse(friend_requests(user2, method='GET'), 200, get_field='results')
+        self.assertNotIn('new', response[0])
+
 
 if __name__ == '__main__':
     unittest.main()
