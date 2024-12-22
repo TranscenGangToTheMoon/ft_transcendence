@@ -29,7 +29,7 @@ class UnitTest(unittest.TestCase):
             self.assertEqual(json, responses[1].json)
         return responses[1].json['id']
 
-    def connect_to_sse(self, user=None, tests: list = None, timeout=5000):
+    def connect_to_sse(self, user=None, tests: list = None, timeout=5000, status_code=200):
         i = 0
         if user is None:
             user = new_user()
@@ -41,13 +41,14 @@ class UnitTest(unittest.TestCase):
                     'Content-Type': 'text/event-stream',
                 }
                 with client.stream('GET', 'https://localhost:4443/sse/users/', headers=headers) as response:
-                    assert response.status_code == 200
-                    for line in response.iter_text():
-                        if line.strip():
-                            data = json.loads(line.strip())
-                            print(f"Received: {data}")
-                            self.assertEqual(tests[i]['service'], data['service'])
-                            self.assertEqual(tests[i]['event_code'], data['event_code'])
-                            i += 1
+                    self.assertEqual(status_code, response.status_code)
+                    if status_code == 200:
+                        for line in response.iter_text():
+                            if line.strip():
+                                data = json.loads(line.strip())
+                                print(f"Received: {data}")
+                                self.assertEqual(tests[i]['service'], data['service'])
+                                self.assertEqual(tests[i]['event_code'], data['event_code'])
+                                i += 1
         except httpx.ReadTimeout:
             self.assertEqual(i, len(tests))
