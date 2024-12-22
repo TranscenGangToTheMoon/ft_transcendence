@@ -16,7 +16,7 @@ class Test01_SSE(UnitTest):
     def test_002_connect_twice(self):
         user1 = new_user()
 
-        Thread(target=self.connect_to_sse, args=(user1, [{'service': 'auth', 'event_code': 'connection-success'}], 3)).start()
+        self.connect_to_sse(user1, [{'service': 'auth', 'event_code': 'connection-success'}], 3)
         time.sleep(1)
         self.connect_to_sse(user1, timeout=2, status_code=409)
 
