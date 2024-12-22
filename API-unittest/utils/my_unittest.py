@@ -8,10 +8,10 @@ from utils.credentials import new_user
 
 class UnitTest(unittest.TestCase):
 
-    def assertResponse(self, response, status_code, json=None, count=None, get_field=None, get_user=False):
+    def assertResponse(self, response, status_code, json_assertion=None, count=None, get_field=None, get_user=False):
         self.assertEqual(status_code, response.status_code)
         if json is not None:
-            self.assertEqual(json, response.json)
+            self.assertEqual(json_assertion, response.json)
         if count is not None:
             self.assertEqual(count, response.json['count'])
         if get_user:
@@ -22,11 +22,11 @@ class UnitTest(unittest.TestCase):
             return response.json[get_field]
         return response.json
 
-    def assertFriendResponse(self, responses, status_code=201, json=None):
+    def assertFriendResponse(self, responses, status_code=201, json_assertion=None):
         self.assertEqual(201, responses[0].status_code)
         self.assertEqual(status_code, responses[1].status_code)
         if json is not None:
-            self.assertEqual(json, responses[1].json)
+            self.assertEqual(json_assertion, responses[1].json)
         return responses[1].json['id']
 
     def connect_to_sse(self, user=None, tests: list = None, timeout=5000, status_code=200):
