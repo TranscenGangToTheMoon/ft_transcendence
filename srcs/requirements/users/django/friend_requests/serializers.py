@@ -1,5 +1,4 @@
 from lib_transcendence.exceptions import MessagesException, ResourceExists
-from lib_transcendence.services import create_sse_event
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
 
@@ -31,6 +30,14 @@ class FriendRequestsSerializer(serializers.ModelSerializer):
             'send_at',
             'new',
         ]
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+
+        user = get_user(self.context.get('request'))
+        if user.id != instance.receiver.id:
+            representation.pop('new', None)
+        return representation
 
     def create(self, validated_data):
         sender = get_user(self.context.get('request'))
