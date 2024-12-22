@@ -3,6 +3,7 @@ from lib_transcendence.exceptions import MessagesException, ServiceUnavailable, 
 from rest_framework.views import APIView
 import redis
 
+from sse.events import publish_event
 from users.auth import get_user
 
 redis_client = redis.StrictRedis(host='redis')
@@ -14,9 +15,9 @@ class SSEView(APIView):
     def get(request, *args, **kwargs):
         def event_stream():
             user.connect()
+            publish_event(user.id, 'auth', 'connection-success')
 
             try:
-                yield f"data: Successfully connected !\n\n" # todo remake message ?
                 for message in pubsub.listen():
                     if message['type'] == 'message':
                         yield f"{message['data'].decode('utf-8')}\n\n"
