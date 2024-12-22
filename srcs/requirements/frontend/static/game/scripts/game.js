@@ -564,9 +564,9 @@ function initSocket(){
 	   	console.log(event);
 	    window.PongGame.state.ball.y = event.position_y;
 	    window.PongGame.state.ball.x = event.position_x;
-			window.PongGame.state.ball.speed = event.speed;
-	    window.PongGame.state.ball.speedX = event.direction_x * window.PongGame.config.defaultBallSpeed;
-	    window.PongGame.state.ball.speedY = (-event.direction_y) * window.PongGame.config.defaultBallSpeed;
+		window.PongGame.state.ball.speed = event.speed / 2;
+	    window.PongGame.state.ball.speedX = event.direction_x;
+	    window.PongGame.state.ball.speedY = event.direction_y;
 	    console.log(window.PongGame.state.ball.speedX);
 	    console.log(window.PongGame.state.ball.speedY);
     })
@@ -589,11 +589,11 @@ function initSocket(){
     })
     socket.on('you_scored', event => {
         console.log('received goal');
-        window.PongGame.state.playerScore++
+        window.PongGame.state.playerScore = event.score
     })
     socket.on('enemy_scored', event => {
         console.log('received goal');
-        window.PongGame.state.enemyScore++
+        window.PongGame.state.enemyScore = event.score
     })
 }
 

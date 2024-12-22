@@ -11,7 +11,8 @@ async def connect(sid, environ, auth):
     print('trying to connect', flush=True)
     # TODO -> do authentication here
     if auth['token'] != 'kk':
-        raise ConnectionRefusedError('Authentication failed')
+        error('Authentication failed')
+        return False
     id = auth['id']
     print('id is : ', id, flush=True)
     try:
@@ -22,7 +23,8 @@ async def connect(sid, environ, auth):
         await Server._sio.enter_room(sid, str(match_id))
     except Exception as e:
         error(e)
-        raise ConnectionRefusedError('Player does not belong to any game')
+        error('Player does not belong to any game')
+        return False
     info('Client connected & authenticated')
 
 
@@ -70,6 +72,7 @@ async def disconnect(sid):
     try:
         game = Server._games[match_id]
         game.finish('player disconnected')
+        # TODO -> change this to avoid django exception on async context (sync_to_async)
     except KeyError:
         pass # if the game is not registered, it means the game has already finished
     await Server._sio.leave_room(sid, str(match_id))

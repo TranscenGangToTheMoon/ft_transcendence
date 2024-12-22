@@ -64,6 +64,7 @@ class Game:
                 )
             except KeyError:
                 self.canvas = Position(800, 600)
+        print('canvas', self.canvas.x, self.canvas.y, flush=True)
 
         # TODO -> set all variables from .env
         self.max_bounce_angle = 2 * (math.pi / 5)
@@ -72,21 +73,35 @@ class Game:
         self.ball = self.create_ball(self.canvas)
         self.rackets = self.create_rackets(self.match, self.canvas)
 
+################--------getters--------################
+
     def get_racket(self, player_id) -> Racket:
         for racket in self.rackets:
             if racket.player_id == player_id:
                 return racket
         raise Exception(f'no racket matching socket id {player_id}')
 
+    def get_player(self, user_id: int) -> Player:
+        for team in self.match.teams:
+            for player in team.players:
+                if player.user_id == user_id:
+                    return player
+        raise Exception(f'cannot find player with user_id {user_id}')
+
+################--------game--------################
+
     def handle_wall_bounce(self):
         ball_pos_y = self.ball.position.y
+        print('ball_pos_y', ball_pos_y, flush=True)
         if ball_pos_y < 0:
             self.ball.position.y = - ball_pos_y
-            self.ball.direction_y = - self.ball.direction_y
+            self.ball.speed_y = - self.ball.speed_y
+            print('after ball_pos_y', self.ball.position.y, flush=True)
             print('wall_bounce up', flush=True)
-        elif ball_pos_y > self.canvas.y:
-            self.ball.position.y -= 2 * (ball_pos_y - self.canvas.y)
-            self.ball.direction_y = - self.ball.direction_y
+        elif ball_pos_y + self.ball.size > self.canvas.y:
+            self.ball.position.y -= (ball_pos_y + self.ball.size) - self.canvas.y
+            self.ball.speed_y = - self.ball.speed_y
+            print('after ball_pos_y', self.ball.position.y, flush=True)
             print('wall_bounce down', flush=True)
 
     def handle_goal(self):
@@ -155,13 +170,7 @@ class Game:
         self.handle_goal()
         for racket in self.rackets:
             self.handle_racket_collision(racket);
-
-    def get_player(self, user_id: int) -> Player:
-        for team in self.match.teams:
-            for player in team.players:
-                if player.user_id == user_id:
-                    return player
-        raise Exception(f'cannot find player with user_id {user_id}')
+        # self.send_game_state()
 
     def wait_for_players(self, timeout: float):
         print(time.time(), "wait_for_players()", flush=True)
@@ -174,6 +183,105 @@ class Game:
                     time.sleep(0.1)
                 print(time.time(),flush=True)
                 print(f'player {player.user_id} has join in!', flush=True)
+
+    def play(self):
+        from game_server.server import Server
+        start_time = time.time()
+        last_frame_time = start_time
+        self.send_start_game()
+        print(self.get_game_state(1), flush=True)
+        time.sleep(2)
+        while not self.finished:
+            if self.game_timeout is not None and (time.time() - start_time < self.game_timeout * 60):
+                break
+            self.update()
+            while time.time() - last_frame_time < (1 / 60):
+                time.sleep(0.005)
+            last_frame_time = time.time()
+
+    def launch(self):
+        from game_server.server import Server
+        try:
+            timeout = int(os.environ['GAME_PLAYER_CONNECT_TIMEOUT'])
+        except KeyError:
+            timeout = 5
+        print(time.time(), "launch()", flush=True)
+        timeout = 60.
+        try:
+            self.wait_for_players(timeout)
+            print(time.time(), "all players are connected", flush=True)
+        except Exception as e:
+            print(e, flush=True)
+            self.finish('game timed out, not all players connected to server')
+            print('game canceled', flush=True)
+            return
+        self.send_canvas()
+        self.send_game_state()
+        print('game launched', flush=True)
+        self.play()
+        print('game finished', flush=True)
+
+    def disconnect_players(self):
+        from game_server.server import Server
+        Server.emit('disconnect', room=str(self.match.id))
+
+    def finish(self, reason: str | None = None, winner: str | None = None):
+        from game_server.server import Server
+        self.finished = True
+        self.match.model.finish_match(reason)
+        self.send_finish(reason, winner)
+        time.sleep(1)
+        Server.delete_game(self.match.id)
+        self.disconnect_players()
+
+    def reset_game_state(self):
+        print('reset_game_state', flush=True)
+        self.ball.position = Position(int(self.canvas.x / 2 - (self.ball.size / 2)), int(self.canvas.y / 2 - self.ball.size / 2))
+        self.ball.direction_x, self.ball.direction_y = get_random_direction()
+        self.ball.speed = Game.default_ball_speed
+        self.ball.speed_x = self.ball.direction_x * self.ball.speed
+        self.ball.speed_y = self.ball.direction_y * self.ball.speed
+        for racket in self.rackets:
+            racket.position.y = int(self.canvas.y / 2 - Racket.height / 2)
+            racket.velocity = 0
+            racket.block_glide = False
+
+    def score(self, team):
+        from game_server.server import Server
+        print('score', flush=True)
+        last_touch: Player | None = self.ball.last_racket_touched
+        if last_touch is not None:
+            last_touch.csc += 1
+        team.score += 1
+        self.send_goal(team)
+        for team in self.match.teams:
+            if (team.score == 3):
+                self.finish('game is over')
+        self.reset_game_state()
+        self.send_game_state()
+        self.send_start_game()
+        time.sleep(2)
+
+################--------senders--------################
+
+    def send_goal(self, scorer_team):
+        from game_server.server import Server
+        for team in self.match.teams:
+            if team != scorer_team:
+                for player in team.players:
+                    Server.emit('enemy_scored', data={'score': team.score}, to=player.socket_id)
+            else:
+                for player in team.players:
+                    Server.emit('you_scored',data={'score': team.score}, to=player.socket_id)
+
+    def send_finish(self, reason: str | None = None, winner: str | None = None):
+        from game_server.server import Server
+        Server.emit('game_over', data={'reason': reason, 'winner': winner}, room=str(self.match.id))
+
+    def send_start_game(self):
+        from game_server.server import Server
+        Server.emit('start_game', room=str(self.match.id))
+        print('emitted start_game', flush=True)
 
     def send_canvas(self):
         from game_server.server import Server
@@ -216,98 +324,3 @@ class Game:
                     to=player.socket_id
                 )
             side = -1
-
-    def send_start_game(self):
-        from game_server.server import Server
-        Server.emit('start_game', room=str(self.match.id))
-        print('emitted start_game', flush=True)
-
-    def play(self):
-        from game_server.server import Server
-        start_time = time.time()
-        last_frame_time = start_time
-        self.send_start_game()
-        print(self.get_game_state(1), flush=True)`
-        time.sleep(2)
-        while not self.finished:
-            if self.game_timeout is not None and (time.time() - start_time < self.game_timeout * 60):
-                break
-            self.update()
-            while time.time() - last_frame_time < (1 / 60):
-                time.sleep(0.005)
-            last_frame_time = time.time()
-
-    def launch(self):
-        from game_server.server import Server
-        try:
-            timeout = int(os.environ['GAME_PLAYER_CONNECT_TIMEOUT'])
-        except KeyError:
-            timeout = 5
-        print(time.time(), "launch()", flush=True)
-        timeout = 60.
-        try:
-            self.wait_for_players(timeout)
-            print(time.time(), "all players are connected", flush=True)
-        except Exception as e:
-            print(e, flush=True)
-            self.finish('game timed out, not all players connected to server')
-            print('game canceled', flush=True)
-            return
-        self.send_canvas()
-        self.send_game_state()
-        print('game launched', flush=True)
-        self.play()
-        print('game finished', flush=True)
-
-    def send_finish(self, reason: str | None = None, winner: str | None = None):
-        from game_server.server import Server
-        Server.emit('game_over', data={'reason': reason, 'winner': winner}, room=str(self.match.id))
-
-    def disconnect_players(self):
-        from game_server.server import Server
-        Server.emit('disconnect', room=str(self.match.id))
-
-    def finish(self, reason: str | None = None, winner: str | None = None):
-        from game_server.server import Server
-        self.finished = True
-        self.match.model.finish_match(reason)
-        self.send_finish(reason, winner)
-        time.sleep(1)
-        Server.delete_game(self.match.id)
-        self.disconnect_players()
-
-    def send_goal(self, scorer_team):
-        from game_server.server import Server
-        for team in self.match.teams:
-            if team != scorer_team:
-                for player in team.players:
-                    Server.emit('enemy_scored', to=player.socket_id)
-            else:
-                for player in team.players:
-                    Server.emit('you_scored', to=player.socket_id)
-
-    def reset_game_state(self):
-        print('reset_game_state', flush=True)
-        self.ball.position = Position(int(self.canvas.x / 2 - (self.ball.size / 2)), int(self.canvas.y / 2 - self.ball.size / 2))
-        self.ball.direction_x, self.ball.direction_y = get_random_direction()
-        self.ball.speed = Game.default_ball_speed
-        for racket in self.rackets:
-            racket.position.y = int(self.canvas.y / 2 - Racket.height / 2)
-            racket.velocity = 0
-            racket.block_glide = False
-
-    def score(self, team):
-        from game_server.server import Server
-        print('score', flush=True)
-        last_touch: Player | None = self.ball.last_racket_touched
-        if last_touch is not None:
-            last_touch.csc += 1
-        team.score += 1
-        self.send_goal(team)
-        for team in self.match.teams:
-            if (team.score == 3):
-                self.finish('game is over')
-        self.reset_game_state()
-        self.send_game_state()
-        self.send_start_game()
-        time.sleep(2)
