@@ -22,6 +22,14 @@ class FriendRequestsSerializer(serializers.ModelSerializer):
             'sender',
             'receiver',
             'send_at',
+            'new',
+        ]
+        read_only_fields = [
+            'id',
+            'sender',
+            'receiver',
+            'send_at',
+            'new',
         ]
 
     def create(self, validated_data):
@@ -49,7 +57,4 @@ class FriendRequestsSerializer(serializers.ModelSerializer):
         if not receiver.accept_friend_request:
             raise PermissionDenied(MessagesException.PermissionDenied.NOT_ACCEPT_FRIEND_REQUEST)
 
-        if receiver.is_online:
-            create_sse_event(receiver.id, 'friends', 'receive-friend-requests') # todo try catch
-        #todo else: add notification += 1
         return super().create({'sender': sender, 'receiver': receiver})

@@ -25,6 +25,11 @@ class FriendRequestsReceiveListView(generics.ListAPIView, FriendRequestsMixin):
     def filter_queryset(self, queryset):
         return queryset.filter(receiver=self.request.user.id)
 
+    def get(self, request, *args, **kwargs):
+        response = super().get(request, *args, **kwargs)
+        self.filter_queryset(self.queryset).update(new=False)
+        return response
+
 
 class FriendRequestView(SerializerKwargsContext, generics.CreateAPIView, generics.RetrieveDestroyAPIView, FriendRequestsMixin):
 
