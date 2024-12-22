@@ -21,7 +21,7 @@ class SSEView(APIView):
                     if message['type'] == 'message':
                         yield f"{message['data'].decode('utf-8')}\n\n"
             except GeneratorExit:
-                pubsub.close() # todo remove channel
+                pubsub.close()
                 user.disconnect()
 
             # try:
