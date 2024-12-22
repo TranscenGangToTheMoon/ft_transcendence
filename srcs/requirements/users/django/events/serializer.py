@@ -46,7 +46,7 @@ events = {
             'set-ready-lobby': {'type': SSEType.event, 'db_field': None, 'message': '{username} is ready to fight (useless ?)', 'target': 'update view and if all user are ready change view (replace it by searching view)', 'required-data': ['user instance set ready lobby']},
         },
     'game':
-        {
+        { # todo when send game message, update profile
             'game-start': {'type': SSEType.event, 'db_field': None, 'message': '', 'target': 'connect to web socket and move players to game', 'required-data': ['game instance (teams, users id, profile, etcc)']},
         },
     'tournament': # todo make
