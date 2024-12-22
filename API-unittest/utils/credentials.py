@@ -67,7 +67,7 @@ def get_service():
     return service_name.replace('test_', '')
 
 
-def new_user(username=None, password=None, get_me=True):
+def new_user(username=None, password=None, get_me=False):
     if username is None:
         username = f'{get_service()}-user-' + rnstr()
     if password is None:
