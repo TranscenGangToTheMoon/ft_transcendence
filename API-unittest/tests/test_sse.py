@@ -9,18 +9,23 @@ from utils.my_unittest import UnitTest
 class Test01_SSE(UnitTest):
 
     def test_001_connection_success(self):
-        self.connect_to_sse(tests=[{'service': 'auth', 'event_code': 'connection-success'}], timeout=1, ignore_connection_message=False)
-        self.connect_to_sse(user=guest_user(), tests=[{'service': 'auth', 'event_code': 'connection-success'}], timeout=1, ignore_connection_message=False)
+        thread1 = self.connect_to_sse(tests=[{'service': 'auth', 'event_code': 'connection-success'}], timeout=1, ignore_connection_message=False)
+        thread2 = self.connect_to_sse(user=guest_user(), tests=[{'service': 'auth', 'event_code': 'connection-success'}], timeout=1, ignore_connection_message=False)
+        thread1.join()
+        thread2.join()
 
     def test_002_connect_twice(self):
         user1 = new_user()
 
-        self.connect_to_sse(user1, [{'service': 'auth', 'event_code': 'connection-success'}], 3, ignore_connection_message=False)
+        thread1 = self.connect_to_sse(user1, [{'service': 'auth', 'event_code': 'connection-success'}], 3, ignore_connection_message=False)
         time.sleep(1)
-        self.connect_to_sse(user1, timeout=2, status_code=409)
+        thread2 = self.connect_to_sse(user1, timeout=2, status_code=409)
+        thread1.join()
+        thread2.join()
 
     def test_003_invalid_token(self):
-        self.connect_to_sse({'token': 'invalid_token'}, timeout=1, status_code=401)
+        thread = self.connect_to_sse({'token': 'invalid_token'}, timeout=1, status_code=401)
+        thread.join()
 
 
 #todo message d'erreur qui finit pas un point
