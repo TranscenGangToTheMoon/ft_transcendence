@@ -15,7 +15,7 @@ class Test01_SSE(UnitTest):
     def test_002_connect_twice(self):
         user1 = new_user()
 
-        self.connect_to_sse(user1, [{'service': 'auth', 'event_code': 'connection-success'}], 3)
+        self.connect_to_sse(user1, [{'service': 'auth', 'event_code': 'connection-success'}], 3, ignore_connection_message=False)
         time.sleep(1)
         self.connect_to_sse(user1, timeout=2, status_code=409)
 
