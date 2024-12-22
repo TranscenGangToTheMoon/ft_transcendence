@@ -14,7 +14,7 @@ def create_lobby(user, data=None, method: Literal['GET', 'POST', 'PATCH', 'DELET
     )
 
 
-def join_lobby(code, user, method: Literal['GET', 'POST', 'PATCH', 'DELETE'] = 'POST', data=None): # todo change order of arguments
+def join_lobby(user, code, method: Literal['GET', 'POST', 'PATCH', 'DELETE'] = 'POST', data=None):
     if data is None:
         data = {}
     else:

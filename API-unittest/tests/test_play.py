@@ -5,6 +5,7 @@ from services.game import create_game, is_in_game
 from services.lobby import create_lobby, join_lobby
 from services.play import play
 from services.tournament import join_tournament, create_tournament
+from sse import connect_to_sse
 from utils.my_unittest import UnitTest
 
 
@@ -40,7 +41,7 @@ class Test02_PlayError(UnitTest):
 
         for i in range(3):
             user_tmp = self.new_user()
-            self.assertResponse(join_tournament(code, user_tmp), 201)
+            self.assertResponse(join_tournament(user_tmp, code), 201)
 
         self.assertResponse(play(user1), 409, {'detail': 'You are already in a tournament.'})
 
@@ -54,7 +55,7 @@ class Test02_PlayError(UnitTest):
 
         self.assertResponse(play(user1), 201)
         self.assertResponse(create_lobby(user1, method='GET'), 404, {'detail': 'You do not belong to any lobby.'})
-        self.assertResponse(join_lobby(code, user1, 'GET'), 403, {'detail': 'You do not belong to this lobby.'})
+        self.assertResponse(join_lobby(user1, code, 'GET'), 403, {'detail': 'You do not belong to this lobby.'})
 
     def test_005_user_in_tournament(self):
         user1 = self.new_user()
@@ -63,7 +64,7 @@ class Test02_PlayError(UnitTest):
 
         self.assertResponse(play(user1), 201)
         self.assertResponse(create_tournament(user1, method='GET'), 404, {'detail': 'You do not belong to any tournament.'})
-        self.assertResponse(join_tournament(code, user1, 'GET'), 403, {'detail': 'You do not belong to this tournament.'})
+        self.assertResponse(join_tournament(user1, code, 'GET'), 403, {'detail': 'You do not belong to this tournament.'})
 
     def test_006_delete(self):
         while True:

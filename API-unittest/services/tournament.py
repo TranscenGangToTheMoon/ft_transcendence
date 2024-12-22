@@ -15,7 +15,7 @@ def create_tournament(user, data=None, method: Literal['GET', 'POST', 'PATCH', '
     )
 
 
-def join_tournament(code, user, method: Literal['GET', 'POST', 'PATCH', 'DELETE'] = 'POST', data=None): #todo change order of arguments
+def join_tournament(user, code, method: Literal['GET', 'POST', 'PATCH', 'DELETE'] = 'POST', data=None):
     if data is None:
         data = {}
     else:
@@ -28,7 +28,7 @@ def join_tournament(code, user, method: Literal['GET', 'POST', 'PATCH', 'DELETE'
     )
 
 
-def search_tournament(query=None, user=None, data=None): # todo pas bon change orddre param
+def search_tournament(user, query, data=None):
     if data is None:
         data = {'q': query}
     return make_request(

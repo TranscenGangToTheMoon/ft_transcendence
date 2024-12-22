@@ -115,9 +115,10 @@ class Test03_GetChat(UnitTest):
 
     def test_002_search_chats(self):
         user1 = self.new_user()
+        name = 'chat-user'
 
         for i in range(5):
-            tmp_user = self.new_user()
+            tmp_user = self.new_user(name + rnstr())
             self.assertResponse(accept_chat(tmp_user), 200)
             self.assertResponse(create_chat(user1, tmp_user['username']), 201)
 
@@ -127,7 +128,7 @@ class Test03_GetChat(UnitTest):
 
         self.assertResponse(create_chat(user1, method='GET', data={'q': 'caca'}), 200, count=1)
 
-        self.assertResponse(create_chat(user1, method='GET', data={'q': 'chat'}), 200, count=5)
+        self.assertResponse(create_chat(user1, method='GET', data={'q': name}), 200, count=5)
 
     def test_003_search_chats_none(self):
         user1 = self.new_user()
@@ -181,9 +182,10 @@ class Test03_GetChat(UnitTest):
 
     def test_008_search_chats_in_url(self):
         user1 = self.new_user()
+        name = 'chat-user'
 
         for i in range(5):
-            tmp_user = self.new_user()
+            tmp_user = self.new_user(name + rnstr())
             self.assertResponse(accept_chat(tmp_user), 200)
             self.assertResponse(create_chat(user1, tmp_user['username']), 201)
 
@@ -193,7 +195,7 @@ class Test03_GetChat(UnitTest):
 
         self.assertResponse(create_chat(user1, method='GET', query='caca'), 200, count=1)
 
-        self.assertResponse(create_chat(user1, method='GET', query='chat'), 200, count=5)
+        self.assertResponse(create_chat(user1, method='GET', query=name), 200, count=5)
 
 
 class Test04_Messages(UnitTest):

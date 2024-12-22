@@ -21,7 +21,7 @@ class Test01_JoinLobby(UnitTest):
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
 
-        self.assertResponse(join_lobby(code, user2), 201)
+        self.assertResponse(join_lobby(user2, code), 201)
 
 
 class Test02_ErrorJoinLobby(UnitTest):
@@ -29,7 +29,7 @@ class Test02_ErrorJoinLobby(UnitTest):
     def test_001_lobby_does_not_exist(self):
         user1 = self.new_user()
 
-        self.assertResponse(join_lobby('123456', user1), 404, {'detail': 'Lobby not found.'})
+        self.assertResponse(join_lobby(user1, '123456'), 404, {'detail': 'Lobby not found.'})
 
     def test_002_already_join(self):
         user1 = self.new_user()
@@ -37,9 +37,9 @@ class Test02_ErrorJoinLobby(UnitTest):
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
 
-        self.assertResponse(join_lobby(code, user2), 201)
-        self.assertResponse(join_lobby(code, user1), 409, {'detail': 'You already joined this lobby.'})
-        self.assertResponse(join_lobby(code, user2), 409, {'detail': 'You already joined this lobby.'})
+        self.assertResponse(join_lobby(user2, code), 201)
+        self.assertResponse(join_lobby(user1, code), 409, {'detail': 'You already joined this lobby.'})
+        self.assertResponse(join_lobby(user2, code), 409, {'detail': 'You already joined this lobby.'})
 
     def test_003_lobby_is_full(self):
         user1 = self.new_user()
@@ -48,9 +48,9 @@ class Test02_ErrorJoinLobby(UnitTest):
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
         for _ in range(2):
             user_tmp = self.new_user()
-            self.assertResponse(join_lobby(code, user_tmp), 201)
+            self.assertResponse(join_lobby(user_tmp, code), 201)
 
-        self.assertResponse(join_lobby(code, user2), 403, {'detail': 'Lobby is full.'})
+        self.assertResponse(join_lobby(user2, code), 403, {'detail': 'Lobby is full.'})
 
     def test_004_guest_create_lobby(self):
         self.assertResponse(create_lobby(self.guest_user()), 403, {'detail': 'Guest users cannot create lobby.'})
@@ -72,7 +72,7 @@ class Test02_ErrorJoinLobby(UnitTest):
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
 
         self.assertResponse(blocked_user(user1, user2['id']), 201)
-        self.assertResponse(join_lobby(code, user2), 404, {'detail': 'Lobby not found.'})
+        self.assertResponse(join_lobby(user2, code), 404, {'detail': 'Lobby not found.'})
 
     def test_008_blocked_user_kick_user(self):
         user1 = self.new_user()
@@ -80,14 +80,14 @@ class Test02_ErrorJoinLobby(UnitTest):
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
 
-        self.assertResponse(join_lobby(code, user2), 201)
+        self.assertResponse(join_lobby(user2, code), 201)
         self.assertResponse(blocked_user(user1, user2['id']), 201)
 
-        response = self.assertResponse(join_lobby(code, user1, 'GET'), 200)
+        response = self.assertResponse(join_lobby(user1, code, 'GET'), 200)
         self.assertEqual(1, len(response))
 
         self.assertResponse(create_lobby(user2, method='GET'), 404, {'detail': 'You do not belong to any lobby.'})
-        self.assertResponse(join_lobby(code, user2), 404, {'detail': 'Lobby not found.'})
+        self.assertResponse(join_lobby(user2, code), 404, {'detail': 'Lobby not found.'})
 
     def test_009_blocked_user_not_creator(self):
         user1 = self.new_user()
@@ -96,11 +96,11 @@ class Test02_ErrorJoinLobby(UnitTest):
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
 
-        self.assertResponse(join_lobby(code, user2), 201)
-        self.assertResponse(join_lobby(code, user3), 201)
+        self.assertResponse(join_lobby(user2, code), 201)
+        self.assertResponse(join_lobby(user3, code), 201)
         self.assertResponse(blocked_user(user2, user3['id']), 201)
 
-        response = self.assertResponse(join_lobby(code, user1, 'GET'), 200)
+        response = self.assertResponse(join_lobby(user1, code, 'GET'), 200)
         self.assertEqual(3, len(response))
 
     def test_010_blocked_then_unblock(self):
@@ -109,15 +109,15 @@ class Test02_ErrorJoinLobby(UnitTest):
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
 
-        self.assertResponse(join_lobby(code, user2), 201)
+        self.assertResponse(join_lobby(user2, code), 201)
         blocked_id = self.assertResponse(blocked_user(user1, user2['id']), 201, get_field=True)
 
-        response = self.assertResponse(join_lobby(code, user1, 'GET'), 200)
+        response = self.assertResponse(join_lobby(user1, code, 'GET'), 200)
         self.assertEqual(1, len(response))
 
-        self.assertResponse(join_lobby(code, user2), 404, {'detail': 'Lobby not found.'})
+        self.assertResponse(join_lobby(user2, code), 404, {'detail': 'Lobby not found.'})
         self.assertResponse(unblocked_user(user1, blocked_id), 204)
-        self.assertResponse(join_lobby(code, user2), 201)
+        self.assertResponse(join_lobby(user2, code), 201)
 
 
 class Test03_KickLobby(UnitTest):
@@ -128,10 +128,10 @@ class Test03_KickLobby(UnitTest):
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
 
-        self.assertResponse(join_lobby(code, user2), 201)
+        self.assertResponse(join_lobby(user2, code), 201)
         self.assertResponse(kick_user(user1, user2, code), 204)
 
-        response = self.assertResponse(join_lobby(code, user1, 'GET'), 200)
+        response = self.assertResponse(join_lobby(user1, code, 'GET'), 200)
         self.assertEqual(1, len(response))
 
     def test_002_user_kick_not_join_lobby(self):
@@ -162,7 +162,7 @@ class Test03_KickLobby(UnitTest):
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
 
-        self.assertResponse(join_lobby(code, user2), 201)
+        self.assertResponse(join_lobby(user2, code), 201)
         self.assertResponse(kick_user(user2, user1, code), 403, {'detail': 'Only creator can update this lobby.'})
 
     def test_006_users_does_exist(self):
@@ -194,7 +194,7 @@ class Test04_UpdateLobby(UnitTest):
 
         code = self.assertResponse(create_lobby(user1, data={'game_mode': 'custom_game'}), 201, get_field='code')
 
-        self.assertResponse(join_lobby(code, user2), 201)
+        self.assertResponse(join_lobby(user2, code), 201)
         self.assertResponse(create_lobby(user2, data={'match_type': '3v3'}, method='PATCH'), 403, {'detail': 'Only creator can update this lobby.'})
 
     def test_004_update_clash(self):
@@ -220,7 +220,7 @@ class Test04_UpdateLobby(UnitTest):
 
         teams = ['Team A', 'Team A', 'Team B', 'Team B', 'Team B']
         for i in range(5):
-            response = self.assertResponse(join_lobby(code, users[i]), 201)
+            response = self.assertResponse(join_lobby(users[i], code), 201)
             for user in response['participants']:
                 if user['id'] == users[i]['id']:
                     self.assertEqual(teams[i], user['team'])
@@ -231,7 +231,7 @@ class Test04_UpdateLobby(UnitTest):
 
         teams = ['Spectator', 'Spectator', 'Team B', 'Spectator', 'Spectator']
         for i in range(5):
-            response = self.assertResponse(join_lobby(code, users[i], method='GET'), 200)
+            response = self.assertResponse(join_lobby(users[i], code, method='GET'), 200)
             for user in response:
                 if user['id'] == users[i]['id']:
                     self.assertEqual(teams[i], user['team'])
@@ -245,7 +245,7 @@ class Test05_UpdateParticipantLobby(UnitTest):
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
 
-        response = self.assertResponse(join_lobby(code, user1, data={'is_ready': True}), 200)
+        response = self.assertResponse(join_lobby(user1, code, data={'is_ready': True}), 200)
         self.assertTrue(response['is_ready'])
 
     def test_002_change_team(self):
@@ -253,10 +253,10 @@ class Test05_UpdateParticipantLobby(UnitTest):
 
         code = self.assertResponse(create_lobby(user1, data={'game_mode': 'custom_game'}), 201, get_field='code')
 
-        response = self.assertResponse(join_lobby(code, user1, data={'team': 'Team B'}), 200)
+        response = self.assertResponse(join_lobby(user1, code, data={'team': 'Team B'}), 200)
         self.assertEqual('Team B', response['team'])
 
-        response = self.assertResponse(join_lobby(code, user1, data={'team': 'Spectator'}), 200)
+        response = self.assertResponse(join_lobby(user1, code, data={'team': 'Spectator'}), 200)
         self.assertEqual('Spectator', response['team'])
 
     def test_003_change_invalid_team(self):
@@ -264,14 +264,14 @@ class Test05_UpdateParticipantLobby(UnitTest):
 
         code = self.assertResponse(create_lobby(user1, data={'game_mode': 'custom_game'}), 201, get_field='code')
 
-        self.assertResponse(join_lobby(code, user1, data={'team': 'Team caca'}), 400, {'team': ["Match type must be 'Team A', 'Team B' or 'Spectator'."]})
+        self.assertResponse(join_lobby(user1, code, data={'team': 'Team caca'}), 400, {'team': ["Match type must be 'Team A', 'Team B' or 'Spectator'."]})
 
     def test_004_change_team_already_in(self):
         user1 = self.new_user()
 
         code = self.assertResponse(create_lobby(user1, data={'game_mode': 'custom_game'}), 201, get_field='code')
 
-        self.assertResponse(join_lobby(code, user1, data={'team': 'Team A'}), 409, {'detail': 'You are already in this team.'})
+        self.assertResponse(join_lobby(user1, code, data={'team': 'Team A'}), 409, {'detail': 'You are already in this team.'})
 
     def test_005_change_team_full(self):
         user1 = self.new_user()
@@ -279,8 +279,8 @@ class Test05_UpdateParticipantLobby(UnitTest):
 
         code = self.assertResponse(create_lobby(user1, data={'game_mode': 'custom_game'}), 201, get_field='code')
 
-        self.assertResponse(join_lobby(code, user2), 201)
-        self.assertResponse(join_lobby(code, user2, data={'team': 'Team A'}, method='PATCH'), 403, {'detail': 'Team is full.'})
+        self.assertResponse(join_lobby(user2, code), 201)
+        self.assertResponse(join_lobby(user2, code, method='PATCH', data={'team': 'Team A'}), 403, {'detail': 'Team is full.'})
 
 
 class Test06_LeaveLobby(UnitTest):
@@ -290,8 +290,8 @@ class Test06_LeaveLobby(UnitTest):
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
 
-        self.assertResponse(join_lobby(code, user1, 'DELETE'), 204)
-        self.assertResponse(join_lobby(code, user1, 'GET'), 403, {'detail': 'You do not belong to this lobby.'})
+        self.assertResponse(join_lobby(user1, code, 'DELETE'), 204)
+        self.assertResponse(join_lobby(user1, code, 'GET'), 403, {'detail': 'You do not belong to this lobby.'})
         self.assertResponse(create_lobby(user1, method='GET'), 404, {'detail': 'You do not belong to any lobby.'})
 
     def test_002_leave_lobby_then_other_member_became_creator(self):
@@ -300,10 +300,10 @@ class Test06_LeaveLobby(UnitTest):
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
 
-        self.assertResponse(join_lobby(code, user2), 201)
-        self.assertResponse(join_lobby(code, user1, 'DELETE'), 204)
+        self.assertResponse(join_lobby(user2, code), 201)
+        self.assertResponse(join_lobby(user1, code, 'DELETE'), 204)
 
-        response = self.assertResponse(join_lobby(code, user2, 'GET'), 200)
+        response = self.assertResponse(join_lobby(user2, code, 'GET'), 200)
         self.assertEqual(1, len(response))
         self.assertTrue(response[0]['creator'])
 
@@ -313,15 +313,15 @@ class Test06_LeaveLobby(UnitTest):
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
 
-        self.assertResponse(join_lobby(code, user2), 201)
-        self.assertResponse(join_lobby(code, user1, 'DELETE'), 204)
-        self.assertResponse(join_lobby(code, user2, 'GET'), 403, {'detail': 'You do not belong to this lobby.'})
+        self.assertResponse(join_lobby(user2, code), 201)
+        self.assertResponse(join_lobby(user1, code, 'DELETE'), 204)
+        self.assertResponse(join_lobby(user2, code, 'GET'), 403, {'detail': 'You do not belong to this lobby.'})
         self.assertResponse(create_lobby(user2, method='GET'), 404, {'detail': 'You do not belong to any lobby.'})
 
     def test_004_leave_lobby_does_not_exist(self):
         user1 = self.new_user()
 
-        self.assertResponse(join_lobby('123456', user1, method='DELETE'), 403, {'detail': 'You do not belong to this lobby.'})
+        self.assertResponse(join_lobby(user1, '123456', method='DELETE'), 403, {'detail': 'You do not belong to this lobby.'})
 
     def test_005_leave_lobby_does_not_join(self):
         user1 = self.new_user()
@@ -329,7 +329,7 @@ class Test06_LeaveLobby(UnitTest):
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
 
-        self.assertResponse(join_lobby(code, user2, 'DELETE'), 403, {'detail': 'You do not belong to this lobby.'})
+        self.assertResponse(join_lobby(user2, code, 'DELETE'), 403, {'detail': 'You do not belong to this lobby.'})
 
     def test_006_leave_lobby_not_creator(self):
         user1 = self.new_user()
@@ -337,10 +337,10 @@ class Test06_LeaveLobby(UnitTest):
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
 
-        self.assertResponse(join_lobby(code, user2), 201)
-        self.assertResponse(join_lobby(code, user2, 'DELETE'), 204)
+        self.assertResponse(join_lobby(user2, code), 201)
+        self.assertResponse(join_lobby(user2, code, 'DELETE'), 204)
 
-        response = self.assertResponse(join_lobby(code, user1, 'GET'), 200)
+        response = self.assertResponse(join_lobby(user1, code, 'GET'), 200)
         self.assertEqual(1, len(response))
 
 
@@ -365,9 +365,9 @@ class Test07_GetLobby(UnitTest):
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
 
-        self.assertResponse(join_lobby(code, user2), 201)
+        self.assertResponse(join_lobby(user2, code), 201)
 
-        response = self.assertResponse(join_lobby(code, user1, 'GET'), 200)
+        response = self.assertResponse(join_lobby(user1, code, 'GET'), 200)
         self.assertEqual(2, len(response))
 
     def test_003_get_lobby_participant_does_not_join(self):
@@ -376,7 +376,7 @@ class Test07_GetLobby(UnitTest):
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
 
-        self.assertResponse(join_lobby(code, user2, 'GET'), 403, {'detail': 'You do not belong to this lobby.'})
+        self.assertResponse(join_lobby(user2, code, 'GET'), 403, {'detail': 'You do not belong to this lobby.'})
 
 
 if __name__ == '__main__':

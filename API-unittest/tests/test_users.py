@@ -96,7 +96,7 @@ class Test03_DeleteUser(UnitTest):
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
         self.assertResponse(me(user1, method='DELETE', password=True), 204)
         self.assertResponse(create_lobby(user1, method='GET'), 401, {'detail': 'Incorrect authentication credentials.'})
-        self.assertResponse(join_lobby(code, user2), 404, {'detail': 'Lobby not found.'})
+        self.assertResponse(join_lobby(user2, code), 404, {'detail': 'Lobby not found.'})
 
     def test_006_user_in_game(self):
         user1 = self.new_user()
@@ -113,23 +113,24 @@ class Test03_DeleteUser(UnitTest):
         name = rnstr()
 
         code = self.assertResponse(create_tournament(user1, {'name': 'Delete User ' + name}), 201, get_field='code')
-        self.assertResponse(search_tournament(name), 200, count=1)
+        self.assertResponse(search_tournament(user2, name), 200, count=1)
         self.assertResponse(me(user1, method='DELETE', password=True), 204)
         self.assertResponse(create_tournament(user1, method='GET'), 401, {'detail': 'Incorrect authentication credentials.'})
-        self.assertResponse(search_tournament(name, user2), 200, count=0)
-        self.assertResponse(join_tournament(code, user3), 404)
+        self.assertResponse(search_tournament(user2, name), 200, count=0)
+        self.assertResponse(join_tournament(user3, code), 404)
 
     def test_008_user_in_start_tournament(self):
         user1 = self.new_user()
         user2 = self.new_user()
+        user3 = self.new_user()
         name = rnstr()
 
         code = self.assertResponse(create_tournament(user1, {'name': 'Delete User ' + name}), 201, get_field='code')
-        self.assertResponse(join_tournament(code, user2), 201)
-        response = self.assertResponse(search_tournament(name), 200, count=1)
+        self.assertResponse(join_tournament(user2, code), 201)
+        response = self.assertResponse(search_tournament(user3, name), 200, count=1)
         self.assertEqual(2, response['results'][0]['n_participants'])
         self.assertResponse(me(user1, method='DELETE', password=True), 204)
-        response = self.assertResponse(search_tournament(name), 200, count=1)
+        response = self.assertResponse(search_tournament(user3, name), 200, count=1)
         self.assertEqual(1, response['results'][0]['n_participants'])
         # todo make when tournament work
 
