@@ -72,6 +72,7 @@ class Test01_Friend(UnitTest):
         self.assertResponse(friend(user1, friendship_id), 200)
 
 
+#todo attendre thread in connect_to_sse
 class Test02_FriendRequest(UnitTest):
 
     def test_001_friend_request(self):
