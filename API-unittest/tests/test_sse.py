@@ -8,7 +8,9 @@ from utils.my_unittest import UnitTest
 
 
 class Test01_SSE(UnitTest):
-    pass
+
+    def test_001_connection_success(self):
+        self.connect_to_sse(tests=[{'service': 'auth', 'event_code': 'connection-success'}], timeout=1)
 
 
 #todo message d'erreur qui finit pas un point
