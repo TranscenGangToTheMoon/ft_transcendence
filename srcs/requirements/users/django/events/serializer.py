@@ -27,6 +27,10 @@ events = {
             'connection-success': {'type': SSEType.event, 'db_field': None, 'message': 'Successfully connected !', 'target': None, 'requiere-data': None},
             'connection-close': {'type': SSEType.event, 'db_field': None, 'message': 'Connection needed to be close', 'target': 'disconnect the client', 'requiere-data': None}, # todo handle disconnect (when user delete account)
         },
+    'chat':
+        {
+            'send-message': {'type': SSEType.notification, 'db_field': 'chat_notifications', 'message': '{username}: {message}', 'target': 'open chat with user sending message', 'requiere-data': ['message_instance (user instance send, chat id, message']},
+        },
     'friends':
         {
             'accept-friend-requests': {'type': SSEType.notification, 'db_field': None, 'message': '{username} has accepted your friend request!', 'target': 'open friend profile (not usefull)', 'required-data': ['friend instance (friencd accpeting, friend receive, profile user instance accepting']},
