@@ -5,9 +5,6 @@ from services.lobby import create_lobby, join_lobby, kick_user
 from utils.my_unittest import UnitTest
 
 
-# todo  si pas connecter tu peux pas jouer matchmaking
-
-
 class Test01_JoinLobby(UnitTest):
 
     def test_001_create_lobby(self):
