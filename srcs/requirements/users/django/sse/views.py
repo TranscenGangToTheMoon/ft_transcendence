@@ -38,7 +38,7 @@ class SSEView(APIView):
 
         user = get_user(request)
         if user.is_online:
-            return ResourceExists(MessagesException.ResourceExists.SSE)
+            raise ResourceExists(MessagesException.ResourceExists.SSE)
 
         try:
             pubsub = redis_client.pubsub()
