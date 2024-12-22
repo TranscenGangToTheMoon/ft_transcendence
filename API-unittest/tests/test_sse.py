@@ -1,21 +1,19 @@
 import time
 import unittest
 
-from services.sse import events
-from utils.credentials import new_user, guest_user
 from utils.my_unittest import UnitTest
 
 
 class Test01_SSE(UnitTest):
 
     def test_001_connection_success(self):
-        thread1 = self.connect_to_sse(tests=[{'service': 'auth', 'event_code': 'connection-success'}], timeout=1, ignore_connection_message=False)
-        thread2 = self.connect_to_sse(user=guest_user(), tests=[{'service': 'auth', 'event_code': 'connection-success'}], timeout=1, ignore_connection_message=False)
+        thread1 = self.connect_to_sse(tests=[{'service': 'auth', 'event_code': 'connection-success'}], ignore_connection_message=False)
+        thread2 = self.connect_to_sse(user=self.guest_user(), tests=[{'service': 'auth', 'event_code': 'connection-success'}], ignore_connection_message=False)
         thread1.join()
         thread2.join()
 
     def test_002_connect_twice(self):
-        user1 = new_user()
+        user1 = self.new_user()
 
         thread1 = self.connect_to_sse(user1, [{'service': 'auth', 'event_code': 'connection-success'}], 3, ignore_connection_message=False)
         time.sleep(1)
@@ -24,24 +22,24 @@ class Test01_SSE(UnitTest):
         thread2.join()
 
     def test_003_invalid_token(self):
-        thread = self.connect_to_sse({'token': 'invalid_token'}, timeout=1, status_code=401)
+        thread = self.connect_to_sse({'token': 'invalid_token'}, status_code=401)
         thread.join()
 
 
 #todo message d'erreur qui finit pas un point
 #todo test invalid parameters, fogrt, not good type, etc..., not users.
-class Test02_EventsEndpoint(UnitTest):
-
-    def test_001_test_message(self):
-        # with open('../user1.json') as f:
-        #     user1 = json.load(f)
-        #
-        # user1 = self.assertResponse(login(user1['username'], user1['password']), 200, get_user=True)
-        # user1 = {**user1, **me(user1).json} # todo user token args
-        # Thread(target=connect_to_sse, args=(user_1,)).start()
-        # time.sleep(1)
-        users = [int(i) for i in input('users -> ').split(' ')]
-        self.assertResponse(events(users=users, data={'caca': 'pipi'}), 201)
+# class Test02_EventsEndpoint(UnitTest):
+#
+#     def test_001_test_message(self):
+#         # with open('../user1.json') as f:
+#         #     user1 = json.load(f)
+#         #
+#         # user1 = self.assertResponse(login(user1['username'], user1['password']), 200, get_user=True)
+#         # user1 = {**user1, **me(user1).json} # todo user token args
+#         # Thread(target=connect_to_sse, args=(user_1,)).start()
+#         # time.sleep(1)
+#         users = [int(i) for i in input('users -> ').split(' ')]
+#         self.assertResponse(events(users=users, data={'caca': 'pipi'}), 201)
 
 
 if __name__ == '__main__':

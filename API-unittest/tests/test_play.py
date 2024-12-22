@@ -5,7 +5,6 @@ from services.game import create_game, is_in_game
 from services.lobby import create_lobby, join_lobby
 from services.play import play
 from services.tournament import join_tournament, create_tournament
-from utils.credentials import new_user, guest_user
 from utils.my_unittest import UnitTest
 
 
@@ -15,35 +14,35 @@ from utils.my_unittest import UnitTest
 class Test01_Play(UnitTest):
 
     def test_001_play_duel(self):
-        self.assertResponse(play(), 201)
+        self.assertResponse(play(self.new_user()), 201)
 
     def test_002_play_ranked(self):
-        self.assertResponse(play(game_mode='ranked'), 201)
+        self.assertResponse(play(self.new_user(), game_mode='ranked'), 201)
 
 
 class Test02_PlayError(UnitTest):
 
     def test_001_already_in_game(self):
-        user1 = new_user()
+        user1 = self.new_user()
 
-        self.assertResponse(create_game(user1, new_user()), 201)
+        self.assertResponse(create_game(user1, self.new_user()), 201)
         self.assertResponse(play(user1), 409, {'detail': 'You are already in a game.'})
 
     def test_002_already_in_tournament(self):
-        user1 = new_user()
+        user1 = self.new_user()
 
         code = self.assertResponse(create_tournament(user1), 201, get_field='code')
 
         for i in range(3):
-            self.assertResponse(join_tournament(code), 201)
+            self.assertResponse(join_tournament(code, self.new_user()), 201)
 
         self.assertResponse(play(user1), 409, {'detail': 'You are already in a tournament.'})
 
     def test_003_guest_cannot_play_ranked(self):
-        self.assertResponse(play(guest_user(), 'ranked'), 403, {'detail': 'Guest users cannot play ranked games.'})
+        self.assertResponse(play(self.guest_user(), 'ranked'), 403, {'detail': 'Guest users cannot play ranked games.'})
 
     def test_004_user_in_lobby(self):
-        user1 = new_user()
+        user1 = self.new_user()
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
 
@@ -52,7 +51,7 @@ class Test02_PlayError(UnitTest):
         self.assertResponse(join_lobby(code, user1, 'GET'), 403, {'detail': 'You do not belong to this lobby.'})
 
     def test_005_user_in_tournament(self):
-        user1 = new_user()
+        user1 = self.new_user()
 
         code = self.assertResponse(create_tournament(user1), 201, get_field='code')
 
@@ -62,7 +61,7 @@ class Test02_PlayError(UnitTest):
 
     def test_006_delete(self):
         while True:
-            user1 = new_user()
+            user1 = self.new_user()
 
             self.assertResponse(play(user1), 201)
             time.sleep(1)
@@ -73,7 +72,7 @@ class Test02_PlayError(UnitTest):
         self.assertResponse(play(user1, method='DELETE'), 204)
 
     def test_006_delete_not_play(self):
-        self.assertResponse(play(method='DELETE'), 404, {'detail': 'You are not currently playing.'})
+        self.assertResponse(play(self.new_user(), method='DELETE'), 404, {'detail': 'You are not currently playing.'})
 
 
 if __name__ == '__main__':

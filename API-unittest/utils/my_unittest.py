@@ -5,10 +5,39 @@ from threading import Thread
 
 import httpx
 
-from utils.credentials import new_user
+from services.auth import register, create_guest
+from services.user import me
+from utils.generate_random import rnstr
 
 
 class UnitTest(unittest.TestCase):
+    def new_user(self, username=None, password=None, get_me=False, connect_sse=False):
+        if username is None:
+            username = 'user-' + rnstr(10)
+        if password is None:
+            password = 'password-' + rnstr(15)
+        _new_user = {'username': username, 'password': password}
+        token = self.assertResponse(register(_new_user['username'], password), 201)
+        _new_user['token'] = token['access']
+        _new_user['refresh'] = token['refresh']
+        if get_me:
+            _new_user['id'] = self.assertResponse(me(_new_user), 200, get_field=True)
+        if connect_sse:
+            _new_user['thread'] = self.connect_to_sse(_new_user)
+        return _new_user
+
+    def guest_user(self, get_me=False, connect_sse=False):
+        _new_user = {}
+        token = self.assertResponse(create_guest(), 201)
+        _new_user['token'] = token['access']
+        _new_user['refresh'] = token['refresh']
+        if get_me:
+            response = self.assertResponse(me(_new_user), 200)
+            _new_user['id'] = response['id']
+            _new_user['username'] = response['username']
+        if connect_sse:
+            _new_user['thread'] = self.connect_to_sse(_new_user)
+        return _new_user
 
     def assertResponse(self, response, status_code, json_assertion=None, count=None, get_field=None, get_user=False):
         self.assertEqual(status_code, response.status_code)
@@ -31,7 +60,7 @@ class UnitTest(unittest.TestCase):
             self.assertEqual(json_assertion, responses[1].json)
         return responses[1].json['id']
 
-    def connect_to_sse(self, user=None, tests: list = None, timeout=5000, status_code=200, ignore_connection_message=True, thread=True):
+    def connect_to_sse(self, user=None, tests: list = None, timeout=1, status_code=200, ignore_connection_message=True, thread=True):
         if thread:
             thread = Thread(target=self._thread_connect_to_sse, args=(user, tests, timeout, status_code, ignore_connection_message))
             thread.start()
@@ -43,7 +72,7 @@ class UnitTest(unittest.TestCase):
     def _thread_connect_to_sse(self, user, tests, timeout, status_code, ignore_connection_message):
         i = 0
         if user is None:
-            user = new_user()
+            user = self.new_user()
 
         try:
             with httpx.Client(verify=False, timeout=timeout) as client:

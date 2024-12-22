@@ -10,7 +10,7 @@ def connect_to_sse(user=None):
     sse_url = "https://localhost:4443/sse/users/"
     print('start sse on', sse_url)
     if user is None:
-        user = new_user()
+        user = self.new_user()
 
     with httpx.Client(verify=False, timeout=5000) as client:
         headers = {
@@ -28,7 +28,7 @@ def connect_to_sse(user=None):
 
 
 if __name__ == "__main__":
-    user1 = new_user()
+    user1 = self.new_user()
     with open('user1.json', 'w') as f:
         json.dump(user1, f, indent=4)
     print(user1['id'], user1['username'], user1['password'])
