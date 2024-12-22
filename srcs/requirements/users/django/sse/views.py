@@ -1,5 +1,5 @@
 from django.http import StreamingHttpResponse
-from lib_transcendence.exceptions import ServiceUnavailable
+from lib_transcendence.exceptions import MessagesException, ServiceUnavailable, ResourceExists
 from rest_framework.views import APIView
 import redis
 
@@ -37,6 +37,9 @@ class SSEView(APIView):
             #     pubsub.close()
 
         user = get_user(request)
+        if user.is_online:
+            return ResourceExists(MessagesException.ResourceExists.SSE)
+
         try:
             pubsub = redis_client.pubsub()
             channel = f'events:user_{user.id}'
