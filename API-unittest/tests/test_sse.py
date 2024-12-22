@@ -1,4 +1,6 @@
+import time
 import unittest
+from threading import Thread
 
 from services.sse import events
 from services.user import me, get_user
@@ -11,6 +13,12 @@ class Test01_SSE(UnitTest):
     def test_001_connection_success(self):
         self.connect_to_sse(tests=[{'service': 'auth', 'event_code': 'connection-success'}], timeout=1)
 
+    def test_002_connect_twice(self):
+        user1 = new_user()
+
+        Thread(target=self.connect_to_sse, args=(user1, [{'service': 'auth', 'event_code': 'connection-success'}], 3)).start()
+        time.sleep(1)
+        self.connect_to_sse(user1, timeout=2, status_code=409)
 
 #todo message d'erreur qui finit pas un point
 #todo test invalid parameters, fogrt, not good type, etc..., not users.
