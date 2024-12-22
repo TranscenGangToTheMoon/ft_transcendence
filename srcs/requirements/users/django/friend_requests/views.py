@@ -52,6 +52,13 @@ class FriendRequestView(SerializerKwargsContext, generics.CreateAPIView, generic
             return FriendsSerializer
         return super().get_serializer_class()
 
+    def perform_create(self, serializer):
+        super().perform_create(serializer)
+
+        sender_friend_request = serializer.instance.friends.exclude(id=self.request.user.id).first()
+        if sender_friend_request.is_online:
+            publish_event(sender_friend_request.id, 'friends', 'accept-friend-requests', data=serializer.data)
+
 
 friend_requests_list_create_view = FriendRequestsListCreateView.as_view()
 friend_requests_receive_list_view = FriendRequestsReceiveListView.as_view()
