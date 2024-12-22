@@ -26,6 +26,9 @@ class UnitTest(unittest.TestCase):
             _new_user['thread'] = self.connect_to_sse(_new_user)
         return _new_user
 
+    def user_sse(self):
+        return self.new_user(connect_sse=True)
+
     def guest_user(self, get_me=False, connect_sse=False):
         _new_user = {}
         token = self.assertResponse(create_guest(), 201)
