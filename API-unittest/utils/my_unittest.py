@@ -11,7 +11,7 @@ class UnitTest(unittest.TestCase):
 
     def assertResponse(self, response, status_code, json_assertion=None, count=None, get_field=None, get_user=False):
         self.assertEqual(status_code, response.status_code)
-        if json is not None:
+        if json_assertion is not None:
             self.assertEqual(json_assertion, response.json)
         if count is not None:
             self.assertEqual(count, response.json['count'])
@@ -26,7 +26,7 @@ class UnitTest(unittest.TestCase):
     def assertFriendResponse(self, responses, status_code=201, json_assertion=None):
         self.assertEqual(201, responses[0].status_code)
         self.assertEqual(status_code, responses[1].status_code)
-        if json is not None:
+        if json_assertion is not None:
             self.assertEqual(json_assertion, responses[1].json)
         return responses[1].json['id']
 
