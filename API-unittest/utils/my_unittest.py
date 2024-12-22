@@ -30,13 +30,13 @@ class UnitTest(unittest.TestCase):
             self.assertEqual(json_assertion, responses[1].json)
         return responses[1].json['id']
 
-    def connect_to_sse(self, user=None, tests: list = None, timeout=5000, status_code=200, thread=True):
+    def connect_to_sse(self, user=None, tests: list = None, timeout=5000, status_code=200, ignore_connection_message=True, thread=True):
         if thread:
-            Thread(target=self._thread_connect_to_sse, args=(user, tests, timeout, status_code)).start()
+            Thread(target=self._thread_connect_to_sse, args=(user, tests, timeout, status_code, ignore_connection_message)).start()
         else:
-            self._thread_connect_to_sse(user, tests, timeout, status_code)
+            self._thread_connect_to_sse(user, tests, timeout, status_code, ignore_connection_message)
 
-    def _thread_connect_to_sse(self, user, tests, timeout, status_code):
+    def _thread_connect_to_sse(self, user, tests, timeout, status_code, ignore_connection_message):
         i = 0
         if user is None:
             user = new_user()
@@ -53,6 +53,8 @@ class UnitTest(unittest.TestCase):
                         for line in response.iter_text():
                             if line.strip():
                                 data = json.loads(line.strip())
+                                if ignore_connection_message and data['event_code'] == 'connection-success':
+                                    continue
                                 print(f"Received: {data}")
                                 self.assertEqual(tests[i]['service'], data['service'])
                                 self.assertEqual(tests[i]['event_code'], data['event_code'])
