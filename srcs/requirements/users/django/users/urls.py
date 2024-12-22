@@ -35,10 +35,6 @@ urlpatterns = [
 ]
 
 # todo make sse
-#   - create endpoint for send notification (message, demande d'amis, demande de join lobby,, demande de join tournament, ...)
-#   - create models for notification
-#   - send notfication when reconnect
-#   - create endpoint for send event (lobby, tournament, etc...)
 #   - update user status (connected, disconnected, ...)
 #   - if disconnected, send to matchmaking (to leave lobby, tournament, ...)
 #   - make function for create event
