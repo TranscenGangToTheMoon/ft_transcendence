@@ -1,6 +1,5 @@
 import time
 import unittest
-from threading import Thread
 
 from services.sse import events
 from utils.credentials import new_user, guest_user
@@ -10,8 +9,8 @@ from utils.my_unittest import UnitTest
 class Test01_SSE(UnitTest):
 
     def test_001_connection_success(self):
-        self.connect_to_sse(tests=[{'service': 'auth', 'event_code': 'connection-success'}], timeout=1)
-        self.connect_to_sse(user=guest_user(), tests=[{'service': 'auth', 'event_code': 'connection-success'}], timeout=1)
+        self.connect_to_sse(tests=[{'service': 'auth', 'event_code': 'connection-success'}], timeout=1, ignore_connection_message=False)
+        self.connect_to_sse(user=guest_user(), tests=[{'service': 'auth', 'event_code': 'connection-success'}], timeout=1, ignore_connection_message=False)
 
     def test_002_connect_twice(self):
         user1 = new_user()
