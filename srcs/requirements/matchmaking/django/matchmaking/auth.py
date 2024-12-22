@@ -10,3 +10,4 @@ class UserMeAuthentication(AbstractAuthentication):
         result = request_users(endpoints.Users.me, token=token)
         if not result['is_online']:
             raise AuthenticationFailed(MessagesException.AuthenticationFailed.NOT_CONNECTED_SSE)
+        return result
