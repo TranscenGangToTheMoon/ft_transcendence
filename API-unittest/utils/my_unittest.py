@@ -32,7 +32,10 @@ class UnitTest(unittest.TestCase):
 
     def connect_to_sse(self, user=None, tests: list = None, timeout=5000, status_code=200, ignore_connection_message=True, thread=True):
         if thread:
-            Thread(target=self._thread_connect_to_sse, args=(user, tests, timeout, status_code, ignore_connection_message)).start()
+            thread = Thread(target=self._thread_connect_to_sse, args=(user, tests, timeout, status_code, ignore_connection_message))
+            thread.start()
+            time.sleep(0.5)
+            return thread
         else:
             self._thread_connect_to_sse(user, tests, timeout, status_code, ignore_connection_message)
 
