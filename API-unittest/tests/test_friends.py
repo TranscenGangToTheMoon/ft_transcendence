@@ -3,6 +3,7 @@ import unittest
 from services.blocked import blocked_user
 from services.friend import create_friendship, friend_request, friend_requests, get_friend_requests_received, \
     get_friends, friend
+from services.user import me
 from utils.credentials import new_user, guest_user
 from utils.my_unittest import UnitTest
 
@@ -10,7 +11,10 @@ from utils.my_unittest import UnitTest
 class Test01_Friend(UnitTest):
 
     def test_001_friend(self):
-        self.assertFriendResponse(create_friendship())
+        user1 = new_user()
+
+        self.connect_to_sse(user1, [{'service': 'friends', 'event_code': 'accept-friend-requests'}], 3)
+        self.assertFriendResponse(create_friendship(user1))
 
     def test_002_friend_without_friend_request(self):
         self.assertResponse(friend_request('123456'), 404, {'detail': 'Friend request not found.'})
