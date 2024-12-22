@@ -83,14 +83,14 @@ class EventSerializer(serializers.Serializer):
     @staticmethod
     def validate_service(value):
         if value not in events.keys():
-            raise serializers.ValidationError('Invalid service') # todo add message to lib
+            raise serializers.ValidationError(MessagesException.ValidationError.INVALID_SERVICE)
         return value
 
     def validate_event_code(self, value):
         service = self.initial_data.get('service')
         self.validate_service(service)
         if value not in events[service]:
-            raise serializers.ValidationError('Invalid event code') # todo add message to lib
+            raise serializers.ValidationError(MessagesException.ValidationError.INVALID_EVENT_CODE)
         return value
 
     def create(self, validated_data):

@@ -56,6 +56,9 @@ class MessagesException:
         TOURNAMENT_MAX_SIZE = 'Tournament size must be less than or equal than 32.'
         TOURNAMENT_MIN_SIZE = 'Tournament size must be greater or equal than 4.'
 
+        INVALID_SERVICE = 'Invalid service'
+        INVALID_EVENT_CODE = 'Invalid event code'
+
     class NotAuthenticated:
         PASSWORD_CONFIRMATION_REQUIRED = 'Password confirmation is required to delete the account.'
 
