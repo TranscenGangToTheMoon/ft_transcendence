@@ -57,7 +57,7 @@ class Test01_Friend(UnitTest):
         self.assertResponse(friend(user2, friendship_id), 404, {'detail': 'Friendship not found.'})
         self.assertResponse(get_friends(user1), 200, count=0)
 
-    def test_007_delete_friend_not_belon_user(self):
+    def test_007_delete_friend_not_belong_user(self):
         user1 = new_user()
         user2 = new_user()
 
