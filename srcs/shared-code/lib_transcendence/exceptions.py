@@ -132,6 +132,7 @@ class MessagesException:
         FRIEND = 'You are already friends with this user.'
         FRIEND_REQUEST_SENT = 'You have already sent a friend request to this user.'
         FRIEND_REQUEST_RECEIVED = 'You have already received a friend request from this user.'
+        SSE = 'You are already connected to SSE.'
 
         JOIN = 'You already joined this {obj}.'
 
