@@ -1,5 +1,6 @@
 import json
 import unittest
+from threading import Thread
 
 import httpx
 
@@ -29,7 +30,13 @@ class UnitTest(unittest.TestCase):
             self.assertEqual(json_assertion, responses[1].json)
         return responses[1].json['id']
 
-    def connect_to_sse(self, user=None, tests: list = None, timeout=5000, status_code=200):
+    def connect_to_sse(self, user=None, tests: list = None, timeout=5000, status_code=200, thread=True):
+        if thread:
+            Thread(target=self._thread_connect_to_sse, args=(user, tests, timeout, status_code)).start()
+        else:
+            self._thread_connect_to_sse(user, tests, timeout, status_code)
+
+    def _thread_connect_to_sse(self, user, tests, timeout, status_code):
         i = 0
         if user is None:
             user = new_user()
