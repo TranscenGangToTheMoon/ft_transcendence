@@ -7,6 +7,7 @@ from rest_framework.exceptions import NotFound
 from friend_requests.models import FriendRequests
 from friend_requests.serializers import FriendRequestsSerializer
 from friends.serializers import FriendsSerializer
+from sse.events import publish_event
 
 
 class FriendRequestsMixin(generics.GenericAPIView):
@@ -18,6 +19,13 @@ class FriendRequestsListCreateView(generics.ListCreateAPIView, FriendRequestsMix
 
     def filter_queryset(self, queryset):
         return queryset.filter(sender=self.request.user.id)
+
+    def perform_create(self, serializer):
+        super().perform_create(serializer)
+
+        receiver = serializer.instance.receiver
+        if receiver.is_online:
+            publish_event(receiver.id, 'friends', 'receive-friend-requests', data=serializer.data)
 
 
 class FriendRequestsReceiveListView(generics.ListAPIView, FriendRequestsMixin):
