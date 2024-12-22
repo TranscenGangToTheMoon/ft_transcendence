@@ -25,8 +25,8 @@ class Test01_SSE(UnitTest):
         thread2.join()
 
     def test_003_invalid_token(self):
-        thread = self.connect_to_sse({'token': 'invalid_token'}, status_code=401)
-        thread.join()
+        thread1 = self.connect_to_sse({'token': 'invalid_token'}, status_code=401)
+        thread1.join()
 
 
 #todo message d'erreur qui finit pas un point

@@ -96,4 +96,5 @@ class UnitTest(unittest.TestCase):
                                 self.assertEqual(tests[i]['event_code'], data['event_code'])
                                 i += 1
         except httpx.ReadTimeout:
-            self.assertEqual(i, len(tests))
+            if tests is not None:
+                self.assertEqual(i, len(tests))

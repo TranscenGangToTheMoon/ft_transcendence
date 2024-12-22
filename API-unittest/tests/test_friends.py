@@ -13,9 +13,9 @@ class Test01_Friend(UnitTest):
         user1 = self.new_user()
         user2 = self.new_user()
 
-        thread = self.connect_to_sse(user1, [{'service': 'friends', 'event_code': 'accept-friend-requests'}], 3)
+        thread1 = self.connect_to_sse(user1, [{'service': 'friends', 'event_code': 'accept-friend-requests'}], 3)
         self.assertFriendResponse(create_friendship(user1, user2))
-        thread.join()
+        thread1.join()
 
     def test_002_friend_without_friend_request(self):
         user1 = self.new_user()
@@ -84,14 +84,14 @@ class Test02_FriendRequest(UnitTest):
         user1 = self.new_user()
         user2 = self.new_user()
 
-        thread = self.connect_to_sse(user2, [{'service': 'friends', 'event_code': 'receive-friend-requests'}], 3)
+        thread1 = self.connect_to_sse(user2, [{'service': 'friends', 'event_code': 'receive-friend-requests'}], 3)
         friend_request_id = self.assertResponse(friend_requests(user1, user2), 201, get_field=True)
 
         self.assertResponse(get_friend_requests_received(user2), 200, count=1)
         self.assertResponse(friend_requests(user1, method='GET'), 200, count=1)
         self.assertResponse(friend_request(friend_request_id, user1, method='GET'), 200)
         self.assertResponse(friend_request(friend_request_id, user2, method='GET'), 200)
-        thread.join()
+        thread1.join()
 
     def test_002_user_does_not_exist(self):
         user1 = self.new_user()
