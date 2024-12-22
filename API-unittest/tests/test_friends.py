@@ -79,6 +79,7 @@ class Test02_FriendRequest(UnitTest):
         user1 = new_user()
         user2 = new_user()
 
+        self.connect_to_sse(user2, [{'service': 'friends', 'event_code': 'receive-friend-requests'}], 3)
         friend_request_id = self.assertResponse(friend_requests(user1, user2), 201, get_field=True)
 
         self.assertResponse(get_friend_requests_received(user2), 200, count=1)
