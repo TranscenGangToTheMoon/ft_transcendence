@@ -1,10 +1,9 @@
-from lib_transcendence import endpoints
 from lib_transcendence.Chat import AcceptChat
 from lib_transcendence.exceptions import MessagesException
-from lib_transcendence.services import request_chat
 from rest_framework import serializers
-from rest_framework.exceptions import PermissionDenied, APIException
+from rest_framework.exceptions import PermissionDenied
 
+from friend_requests.models import FriendRequests
 from friends.serializers import FriendsSerializer
 from friends.utils import get_friendship
 from users.auth import auth_update
@@ -13,6 +12,7 @@ from users.models import Users
 
 class UsersMeSerializer(serializers.ModelSerializer):
     accept_friend_request = serializers.BooleanField()
+    friend_notifications = serializers.SerializerMethodField(read_only=True)
     password = serializers.CharField(write_only=True)
 
     class Meta:
@@ -50,6 +50,10 @@ class UsersMeSerializer(serializers.ModelSerializer):
     @staticmethod
     def validate_accept_chat_from(value):
         return AcceptChat.validate(value)
+
+    @staticmethod
+    def get_friend_notifications(obj):
+        return FriendRequests.objects.filter(receiver=obj, new=True).count()
 
     def update(self, instance, validated_data):
         if instance.is_guest and any([k != 'username' for k in validated_data]):

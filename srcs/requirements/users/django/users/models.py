@@ -27,9 +27,6 @@ class Users(models.Model):
     current_rank = models.IntegerField(default=None, null=True)
     highest_rank = models.IntegerField(default=None, null=True)
 
-    friend_notifications = models.IntegerField(default=0)
-    chat_notifications = models.IntegerField(default=0)
-
     def connect(self):
         print(f'User {self.id} connected', flush=True)
         self.is_online = True
