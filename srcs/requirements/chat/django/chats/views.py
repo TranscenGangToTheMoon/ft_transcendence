@@ -16,7 +16,9 @@ class ChatsView(generics.ListCreateAPIView):
         query = self.request.data.pop('q', None)
         kwars = {'user_id': self.request.user.id}
         if query is None:
-            kwars['view_chat'] = True
+            query = self.request.query_params.get('q', None)
+            if query is None:
+                kwars['view_chat'] = True
         join_chats = ChatParticipants.objects.filter(**kwars).values_list('chat_id', flat=True)
         if query is not None:
             join_chats = ChatParticipants.objects.exclude(user_id=self.request.user.id).filter(chat_id__in=join_chats, username__icontains=query).values_list('chat_id', flat=True)

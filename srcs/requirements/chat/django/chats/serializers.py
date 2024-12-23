@@ -1,12 +1,12 @@
 from lib_transcendence import endpoints
 from lib_transcendence.Chat import ChatType
 from lib_transcendence.auth import get_auth_user
+from lib_transcendence.exceptions import MessagesException, ResourceExists
 from lib_transcendence.services import request_users
+from lib_transcendence.users import retrieve_users
 from lib_transcendence.utils import get_host
 from rest_framework import serializers
-from rest_framework.exceptions import MethodNotAllowed, PermissionDenied
-from lib_transcendence.exceptions import MessagesException
-from lib_transcendence.exceptions import ResourceExists
+from rest_framework.exceptions import MethodNotAllowed, PermissionDenied, NotFound
 
 from chat_messages.serializers import MessagesSerializer
 from chats.models import Chats, ChatParticipants
@@ -57,7 +57,10 @@ class ChatsSerializer(serializers.ModelSerializer):
         if request is None:
             raise serializers.ValidationError(MessagesException.ValidationError.REQUEST_REQUIRED)
         chat_with = obj.participants.exclude(user_id=get_auth_user(request)['id']).first()
-        return {'id': chat_with.user_id, 'username': chat_with.username}
+        chat_with_user = retrieve_users(chat_with.user_id, request)
+        if len(chat_with_user) != 1:
+            raise NotFound(MessagesException.NotFound.USER)
+        return chat_with_user[0]
 
     def get_view_chat(self, obj):
         request = self.context.get('request')

@@ -6,12 +6,13 @@ from friend_requests.views import friend_requests_list_create_view, friend_reque
     friend_requests_receive_list_view
 from friends.views import friends_view, friend_view
 from sse.views import sse_view, notification_view, event_view
-from users.views import users_me_view, retrieve_user_view, manage_user_view
+from users.views import users_me_view, retrieve_user_view, retrieve_users_view, manage_user_view
 from validate.views import validate_chat_view, are_blocked_view
 
 urlpatterns = [
     path(Users.me, users_me_view),
     path(Users.user, retrieve_user_view),
+    path(Users.users, retrieve_users_view),
 
     path(Users.friend_requests, friend_requests_list_create_view),
     path(Users.friend_request, friend_request_view),
@@ -33,15 +34,43 @@ urlpatterns = [
     path(UsersManagement.manage_user, manage_user_view),
 ]
 
-# todo 1. make sse
-# todo 7. message discord
-# todo 7. message private discord
-# todo 2. update user status (connected, disconnected, ...)
-# todo 3. if disconnected, send to matchmaking (to leave lobby, tournament, ...)
-# todo 4. create endpoint for send notification (message, demande d'amis, demande de join lobby,, demande de join tournament, ...)
-# todo 5. create endpoint for send lobby status
-# todo 6. create endpoint for send tournament status
-# todo 9 send chat_id in lobby or tournament
+# todo make sse
+#   - create endpoint for send notification (message, demande d'amis, demande de join lobby,, demande de join tournament, ...)
+#   - create models for notification
+#   - send notfication when reconnect
+#   - create endpoint for send event (lobby, tournament, etc...)
+#   - update user status (connected, disconnected, ...)
+#   - if disconnected, send to matchmaking (to leave lobby, tournament, ...)
+#   - make function for create event
+#   - make function for create notification
+# todo handle download all data
+# todo token pb (@Florian1215 je sais pas pourquoi mais quand je fais un make re puis que je me log avec chrome sur un user, ca log aussi tous les autres navigateurs sur cet user en mode le nouveau token de celui qui se log est le meme que celui qui est pas log sur l'autre navigateur)
+# todo handle abandon when finish game
+# todo handle local possiblitie user in custom_game
+# todo surcharge __str__ for all models
+
+
+# todo CHAT
+#   - create chat when lobby is created
+#   - create chat when tournament is created
+#   - delete chat when tournament is finish
+#   - delete chat when lobby is destroy
+#   - send chat_id in lobby
+#   - send chat_id in tournament
+
+
+# todo handle nb spectact game
+# todo fix permision denied guest
+
+# todo game -> {type: game, 'code')
+# todo event -> FINISH GAME (args, abandon)
+# todo chat -> {type: notification, 'message'}
+# todo lobby -> {type: event, 'tournoi', 'id', 'status'}
+# todo lobby -> connect chat
+# todo tournoi -> connect chat
+# todo dans user serializer nb message 1 message, 1 notif dans friend
+# todo demande de game only if connected
+# todo normaliser les vecteurs
 
 # todo make endpoint for user stats, xp, trophies (when match ended, or when tournament ended)
 # - pas de stat (custom_game)
@@ -76,7 +105,6 @@ urlpatterns = [
 
 # todo make endpoint for online status
 # todo fix github issue
-# todo create chat when lobby or tournament is created
 # todo delete chat after finish tournament
 # todo delete chat after finish lobby
 
@@ -95,5 +123,5 @@ urlpatterns = [
 
 # --- before push ---
 # todo type all python code (make variable)
-# todo check norm
+# todo check norm (sort line all import)
 # todo check problem

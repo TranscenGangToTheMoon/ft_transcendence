@@ -1,15 +1,11 @@
 from lib_transcendence.endpoints import Auth
 from lib_transcendence.exceptions import MessagesException
-from lib_transcendence import endpoints
+from lib_transcendence.services import request_users, request_auth, get_auth_token
 from rest_framework import serializers
 from rest_framework.authentication import BaseAuthentication
-from rest_framework.exceptions import ParseError
-
-from lib_transcendence.services import request_users, request_auth
-from lib_transcendence.generate import generate_code
+from rest_framework.exceptions import ParseError, AuthenticationFailed
 
 
-#todo delete user after request
 def get_user_from_auth(user_data):
     from django.contrib.auth.models import User
 
@@ -22,13 +18,21 @@ def get_user_from_auth(user_data):
 
 class Authentication(BaseAuthentication):
     def authenticate(self, request):
-        if type(request.data) is not dict:
-            raise ParseError(MessagesException.ValidationError.REQUEST_DATA_REQUIRED)
-        json_data = request_users(endpoints.Users.me, 'GET', request)
-        request.data['auth_user'] = json_data
-        user = get_user_from_auth(json_data)
+        token = request.headers.get('Authorization')
 
-        return user, None
+        if not token:
+            raise NotAuthenticated()
+
+        try:
+            json_data = auth_verify(token)
+        except AuthenticationFailed:
+            raise AuthenticationFailed()
+        if json_data is None:
+            raise AuthenticationFailed()
+
+        request.data['auth_user'] = json_data
+        auth_user = get_user_from_auth(json_data)
+        return auth_user, token
 
     def authenticate_header(self, request):
         return 'Bearer realm="api"'
@@ -40,5 +44,7 @@ def get_auth_user(request=None):
     return request.data['auth_user']
 
 
-def auth_verify(token):
+def auth_verify(token=None, request=None):
+    if request is not None:
+        token = get_auth_token(request)
     return request_auth(token, Auth.verify, method='GET')

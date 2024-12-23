@@ -629,6 +629,7 @@ async function initGame(){
         checkGameAuthorization();
         try {
             let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/play/duel/`, 'POST');
+            console.log(data);
         }
         catch(error) {
             console.log(error);

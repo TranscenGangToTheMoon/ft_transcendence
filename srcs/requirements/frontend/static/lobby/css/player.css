@@ -1,0 +1,16 @@
+.player {
+    height: 200px;
+    width: 140px;
+    background-color: darkcyan;
+    text-align: center;
+    justify-content: center;
+}
+
+.playerProfilePic {
+    height: 60px;
+    width: 60px;
+}
+
+.playerId {
+    display: none;
+}

@@ -50,6 +50,17 @@ class RetrieveUserView(generics.RetrieveAPIView):
         return get_valid_user(get_user(self.request), False, True, id=self.kwargs['user_id'])
 
 
+class RetrieveUsersView(generics.ListAPIView):
+    serializer_class = UsersSerializer
+    pagination_class = None
+    authentication_classes = []
+
+    def get_queryset(self):
+        user_ids = self.request.data.get('user_ids')
+        if isinstance(user_ids, list):
+            return Users.objects.filter(id__in=user_ids)
+
+
 class ManageUserView(generics.CreateAPIView, generics.UpdateAPIView):
     serializer_class = ManageUserSerializer
     authentication_classes = []
@@ -60,4 +71,5 @@ class ManageUserView(generics.CreateAPIView, generics.UpdateAPIView):
 
 users_me_view = UsersMeView.as_view()
 retrieve_user_view = RetrieveUserView.as_view()
+retrieve_users_view = RetrieveUsersView.as_view()
 manage_user_view = ManageUserView.as_view()
