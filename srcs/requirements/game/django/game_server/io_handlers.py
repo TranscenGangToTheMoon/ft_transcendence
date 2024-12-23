@@ -1,6 +1,7 @@
 from logging import info, debug, error
 
 
+# TODO -> change this to use the Server class
 async def connect(sid, environ, auth):
     from game_server.server import Server
 
@@ -71,7 +72,7 @@ async def disconnect(sid):
     match_id = Server._clients[sid].match_id
     try:
         game = Server._games[match_id]
-        game.finish('player disconnected')
+        game.finish('A player has disconnected')
         # TODO -> change this to avoid django exception on async context (sync_to_async)
     except KeyError:
         pass # if the game is not registered, it means the game has already finished

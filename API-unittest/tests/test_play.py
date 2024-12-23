@@ -17,7 +17,6 @@ class Test01_Play(UnitTest):
     def test_002_play_ranked(self):
         self.assertResponse(play(game_mode='ranked'), 201)
 
-
 class Test02_PlayError(UnitTest):
 
     def test_001_already_in_game(self):

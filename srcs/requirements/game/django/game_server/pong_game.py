@@ -18,7 +18,7 @@ def get_random_direction():
 
 
 class Game:
-    default_ball_speed = 2
+    default_ball_speed = 4
 
     @staticmethod
     def create_ball(canvas: Position):
@@ -73,6 +73,9 @@ class Game:
         self.ball = self.create_ball(self.canvas)
         self.rackets = self.create_rackets(self.match, self.canvas)
 
+    class PlayerTimeout(Exception):
+        pass
+
 ################--------getters--------################
 
     def get_racket(self, player_id) -> Racket:
@@ -92,17 +95,14 @@ class Game:
 
     def handle_wall_bounce(self):
         ball_pos_y = self.ball.position.y
-        print('ball_pos_y', ball_pos_y, flush=True)
         if ball_pos_y < 0:
             self.ball.position.y = - ball_pos_y
             self.ball.speed_y = - self.ball.speed_y
-            print('after ball_pos_y', self.ball.position.y, flush=True)
-            print('wall_bounce up', flush=True)
+            self.send_game_state()
         elif ball_pos_y + self.ball.size > self.canvas.y:
             self.ball.position.y -= (ball_pos_y + self.ball.size) - self.canvas.y
             self.ball.speed_y = - self.ball.speed_y
-            print('after ball_pos_y', self.ball.position.y, flush=True)
-            print('wall_bounce down', flush=True)
+            self.send_game_state()
 
     def handle_goal(self):
         if self.ball.position.x + self.ball.size < 0:
@@ -121,12 +121,13 @@ class Game:
         speed = self.ball.speed
         xNewSpeed = speed * math.cos(bounceAngle)
         yNewSpeed = speed * -math.sin(bounceAngle)
-        self.ball.speed_x = xNewSpeed * -1 if self.ball.speed_x < 0 else xNewSpeed
+        self.ball.speed_x = -xNewSpeed if self.ball.speed_x < 0 else xNewSpeed
         self.ball.speed_y = yNewSpeed
 
     def handle_racket_bounce(self, racket):
         if (racket.blockGlide):
             self.ball.speed_y = -self.ball.speed_y
+            self.ball.direction_y = -self.ball.direction_y
             if (abs(self.ball.position.y - (racket.position.y + racket.height)) <
                 abs(self.ball.position.y - (racket.position.y))):
                 self.ball.position.y = racket.position.y + racket.height
@@ -134,9 +135,10 @@ class Game:
                 self.ball.position.y = racket.position.y - self.ball.size
         else:
             self.ball.speed_x = -self.ball.speed_x
+            self.ball.direction_x = -self.ball.direction_x
             self.ball.increment_speed(self.max_ball_speed, self.speed_increment)
             self.calculateNewBallDirection(racket.position.y)
-            self.send_game_state()
+        self.send_game_state()
 
     def handle_racket_collision(self, racket):
         ball_is_right_from_racket = self.ball.position.x < racket.position.x + racket.width and self.ball.position.x > racket.position.x
@@ -161,7 +163,8 @@ class Game:
 
     def update(self):
         self.frames += 1
-        print(self.frames, flush=True)
+        # print(self.frames, flush=True)
+        print('ball speed', self.ball.speed, flush=True)
         for racket in self.rackets:
             racket.update()
         self.ball.position.x += self.ball.speed_x
@@ -179,7 +182,7 @@ class Game:
             for player in team.players:
                 while player.socket_id == '':
                     if time.time() - start_waiting > timeout:
-                        raise Exception(f'player socketio connection timed out : player_id: {player.user_id}')
+                        raise self.PlayerTimeout(f'player socketio connection timed out : player_id: {player.user_id}')
                     time.sleep(0.1)
                 print(time.time(),flush=True)
                 print(f'player {player.user_id} has join in!', flush=True)
@@ -189,12 +192,12 @@ class Game:
         start_time = time.time()
         last_frame_time = start_time
         self.send_start_game()
-        print(self.get_game_state(1), flush=True)
         time.sleep(2)
         while not self.finished:
             if self.game_timeout is not None and (time.time() - start_time < self.game_timeout * 60):
                 break
             self.update()
+            # print(self.get_game_state(1), flush=True)
             while time.time() - last_frame_time < (1 / 60):
                 time.sleep(0.005)
             last_frame_time = time.time()
@@ -205,17 +208,17 @@ class Game:
             timeout = int(os.environ['GAME_PLAYER_CONNECT_TIMEOUT'])
         except KeyError:
             timeout = 5
-        print(time.time(), "launch()", flush=True)
         timeout = 60.
         try:
             self.wait_for_players(timeout)
             print(time.time(), "all players are connected", flush=True)
-        except Exception as e:
+        except self.PlayerTimeout as e: # TODO -> change exception to be more precise
             print(e, flush=True)
             self.finish('game timed out, not all players connected to server')
             print('game canceled', flush=True)
             return
         self.send_canvas()
+        self.send_team()
         self.send_game_state()
         print('game launched', flush=True)
         self.play()
@@ -231,8 +234,8 @@ class Game:
         self.match.model.finish_match(reason)
         self.send_finish(reason, winner)
         time.sleep(1)
-        Server.delete_game(self.match.id)
         self.disconnect_players()
+        Server.delete_game(self.match.id)
 
     def reset_game_state(self):
         print('reset_game_state', flush=True)
@@ -257,6 +260,7 @@ class Game:
         for team in self.match.teams:
             if (team.score == 3):
                 self.finish('game is over')
+                return
         self.reset_game_state()
         self.send_game_state()
         self.send_start_game()
@@ -266,13 +270,7 @@ class Game:
 
     def send_goal(self, scorer_team):
         from game_server.server import Server
-        for team in self.match.teams:
-            if team != scorer_team:
-                for player in team.players:
-                    Server.emit('enemy_scored', data={'score': team.score}, to=player.socket_id)
-            else:
-                for player in team.players:
-                    Server.emit('you_scored',data={'score': team.score}, to=player.socket_id)
+        Server.emit('score', data={'team_a': self.match.teams[0].score, 'team_b': self.match.teams[1].score}, room=str(self.match.id))
 
     def send_finish(self, reason: str | None = None, winner: str | None = None):
         from game_server.server import Server
@@ -311,6 +309,14 @@ class Game:
                 'direction_y': self.ball.speed_y,
                 'speed': self.ball.speed,
             }
+
+    def send_team(self):
+        from game_server.server import Server
+        team_str = 'team_a'
+        for team in self.match.teams:
+            for player in team.players:
+                Server.emit('team_id', data={'team': team_str}, to=player.socket_id)
+            team_str = 'team_b'
 
     def send_game_state(self):
         from game_server.server import Server

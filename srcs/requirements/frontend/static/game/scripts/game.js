@@ -20,7 +20,8 @@
             delay : 2000,
         },
         maxBounceAngle : 2 * (Math.PI / 5),
-        displayDemo: false
+        displayDemo: false,
+        team: '',
     };
 
     config.enemyScore = {
@@ -115,7 +116,7 @@
         startCountdown();
         function gameLoop() {
             if (!state.isGameActive) return;
-
+            state.last_frame_time = Date.now()
             updateGameState();
             if (!state.isGamePaused)
                 drawGame();
@@ -413,10 +414,6 @@
             incrementBallSpeed();
             calculateNewBallDirection(paddle.y);
         }
-        if (paddle == state.paddles.right) {
-            if (typeof socket !== 'undefined')
-                window.socket.emit('bounce', {'dir_x': state.ball.speedX, 'dir_y': state.ball.speedY})
-        }
     }
 
     function handlePaddleCollision(paddle){
@@ -488,6 +485,9 @@
     }
 
     function updateGameState() {
+		while ((Date.now() - state.last_frame_time) / 1000 < 1 / 60);
+		state.last_frame_time = Date.now();
+		console.log('ball speed: ', state.ball.speed);
         handleUserInput();
         if (state.isGamePaused)
             return;
@@ -564,9 +564,9 @@ function initSocket(){
 	   	console.log(event);
 	    window.PongGame.state.ball.y = event.position_y;
 	    window.PongGame.state.ball.x = event.position_x;
-		window.PongGame.state.ball.speed = event.speed / 2;
 	    window.PongGame.state.ball.speedX = event.direction_x;
 	    window.PongGame.state.ball.speedY = event.direction_y;
+	    window.PongGame.state.ball.speed = event.speed;
 	    console.log(window.PongGame.state.ball.speedX);
 	    console.log(window.PongGame.state.ball.speedY);
     })
@@ -587,13 +587,18 @@ function initSocket(){
         window.PongGame.state.paddles.left.speed = 0;
         window.PongGame.state.paddles.left.y = event.position;
     })
-    socket.on('you_scored', event => {
-        console.log('received goal');
-        window.PongGame.state.playerScore = event.score
+    socket.on('score', event => {
+    	if (window.PongGame.config.team == 'team_a') {
+        	window.PongGame.state.playerScore = event[window.PongGame.config.team_a]
+        	window.PongGame.state.playerScore = event[window.PongGame.config.team_b]
+     	}
+     	else {
+        	window.PongGame.state.playerScore = event[window.PongGame.config.team_b]
+        	window.PongGame.state.playerScore = event[window.PongGame.config.team_a]
+      	}
     })
-    socket.on('enemy_scored', event => {
-        console.log('received goal');
-        window.PongGame.state.enemyScore = event.score
+    socket.on('team_id', event => {
+    	window.PongGame.config.team = event.team
     })
 }
 
