@@ -18,7 +18,7 @@ def get_random_direction():
 
 
 class Game:
-    default_ball_speed = 4
+    default_ball_speed = 240
 
     @staticmethod
     def create_ball(canvas: Position):
@@ -138,7 +138,7 @@ class Game:
             self.ball.direction_x = -self.ball.direction_x
             self.ball.increment_speed(self.max_ball_speed, self.speed_increment)
             self.calculateNewBallDirection(racket.position.y)
-        self.send_game_state()
+        # self.send_game_state()
 
     def handle_racket_collision(self, racket):
         ball_is_right_from_racket = self.ball.position.x < racket.position.x + racket.width and self.ball.position.x > racket.position.x
@@ -163,17 +163,21 @@ class Game:
 
     def update(self):
         self.frames += 1
-        # print(self.frames, flush=True)
-        print('ball speed', self.ball.speed, flush=True)
+        print(self.frames, flush=True)
         for racket in self.rackets:
             racket.update()
-        self.ball.position.x += self.ball.speed_x
-        self.ball.position.y += self.ball.speed_y
+        if (self.last_update == 0):
+            self.last_update = time.perf_counter()
+        time_delta = (time.perf_counter() - self.last_update)
+        print('time_delta', time_delta, flush=True)
+        self.last_update = time.perf_counter()
+        self.ball.position.x += self.ball.speed_x * time_delta
+        self.ball.position.y += self.ball.speed_y * time_delta
         self.handle_wall_bounce()
         self.handle_goal()
         for racket in self.rackets:
             self.handle_racket_collision(racket);
-        # self.send_game_state()
+        self.send_game_state()
 
     def wait_for_players(self, timeout: float):
         print(time.time(), "wait_for_players()", flush=True)
@@ -188,19 +192,25 @@ class Game:
                 print(f'player {player.user_id} has join in!', flush=True)
 
     def play(self):
-        from game_server.server import Server
-        start_time = time.time()
+        start_time = time.perf_counter()
+        effective_start_time = start_time + 2
         last_frame_time = start_time
+        self.last_update = 0
         self.send_start_game()
-        time.sleep(2)
+        while time.perf_counter() < effective_start_time:
+            time.sleep(1 / 120)
+        self.send_game_state()
         while not self.finished:
-            if self.game_timeout is not None and (time.time() - start_time < self.game_timeout * 60):
+            if self.game_timeout is not None and (time.perf_counter() - start_time < self.game_timeout * 60):
+                self.finish('game timed out')
                 break
             self.update()
-            # print(self.get_game_state(1), flush=True)
-            while time.time() - last_frame_time < (1 / 60):
-                time.sleep(0.005)
-            last_frame_time = time.time()
+            print(self.get_game_state(1), flush=True)
+            elapsed_time = time.perf_counter() - last_frame_time
+            time_to_wait = (1 / 60) - elapsed_time
+            if time_to_wait > 0:
+                time.sleep(time_to_wait)
+            last_frame_time = time.perf_counter()
 
     def launch(self):
         from game_server.server import Server
@@ -230,6 +240,7 @@ class Game:
 
     def finish(self, reason: str | None = None, winner: str | None = None):
         from game_server.server import Server
+        print('finishing game', flush=True)
         self.finished = True
         self.match.model.finish_match(reason)
         self.send_finish(reason, winner)
@@ -245,7 +256,6 @@ class Game:
         self.ball.speed_x = self.ball.direction_x * self.ball.speed
         self.ball.speed_y = self.ball.direction_y * self.ball.speed
         for racket in self.rackets:
-            racket.position.y = int(self.canvas.y / 2 - Racket.height / 2)
             racket.velocity = 0
             racket.block_glide = False
 

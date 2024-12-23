@@ -6,11 +6,11 @@
         paddleWidth: 30,
         paddleHeight: 200,
         ballSize: 20,
-        maxBallSpeed: 15,
+        maxBallSpeed: 630,
         animationDuration: 800,
         font: "48px Arial",
         fontColor: "white",
-        defaultBallSpeed : 4,
+        defaultBallSpeed : 240,
         ballSpeedIncrement: 1,
         winningScore: 3,
         enemyScore : {},
@@ -38,6 +38,7 @@
         isGameActive: false,
         isCountDownActive: false,
         isGamePaused: false,
+        lastFrame: 0,
         playerScore: 0,
         enemyScore: 0,
         ball: {
@@ -114,16 +115,16 @@
         console.log('game started');
 
         startCountdown();
-        function gameLoop() {
+        function gameLoop(timestamp) {
             if (!state.isGameActive) return;
             state.last_frame_time = Date.now()
-            updateGameState();
+            updateGameState(timestamp);
             if (!state.isGamePaused)
                 drawGame();
 
             requestAnimationFrame(gameLoop);
         }
-        gameLoop();
+        requestAnimationFrame(gameLoop);
     }
 
     function resetGame(){
@@ -295,7 +296,7 @@
         if (state.keys["ArrowDown"] && state.paddles.right.speed != 1){
             if (typeof window.socket !== 'undefined'){
                 if (state.paddles.right.speed === -1){
-                    socket.emit('stop_moving');console.log('emitting move_stop');
+                    socket.emit('stop_moving', {'position': state.paddles.right.y}); console.log('emitting move_stop');
                 }
                 socket.emit('move_down'); console.log('emitting move_down')
             }
@@ -484,17 +485,18 @@
         }
     }
 
-    function updateGameState() {
-		while ((Date.now() - state.last_frame_time) / 1000 < 1 / 60);
-		state.last_frame_time = Date.now();
-		console.log('ball speed: ', state.ball.speed);
+    function updateGameState(timestamp) {
+    		if (state.lastFrame == 0)
+		        state.lastFrame = timestamp;
+				let deltaTime = (timestamp - state.lastFrame) / 1000;  // Convert to seconds
+				state.lastFrame = timestamp;
         handleUserInput();
         if (state.isGamePaused)
             return;
 
         if (!state.isCountDownActive){
-            state.ball.x += state.ball.speedX;
-            state.ball.y += state.ball.speedY;
+            state.ball.x += state.ball.speedX * deltaTime;
+            state.ball.y += state.ball.speedY * deltaTime;
         }
 
         if (state.ball.y < 0 || state.ball.y + config.ballSize >= config.canvasHeight){
@@ -561,7 +563,6 @@ function initSocket(){
         window.PongGame.startGame();
     })
     socket.on('game_state', event => {
-	   	console.log(event);
 	    window.PongGame.state.ball.y = event.position_y;
 	    window.PongGame.state.ball.x = event.position_x;
 	    window.PongGame.state.ball.speedX = event.direction_x;
@@ -569,6 +570,7 @@ function initSocket(){
 	    window.PongGame.state.ball.speed = event.speed;
 	    console.log(window.PongGame.state.ball.speedX);
 	    console.log(window.PongGame.state.ball.speedY);
+	    console.log(window.PongGame.state.ball.speed);
     })
     socket.on('connect_error', (error)=> {
         console.log('error', error);
