@@ -58,7 +58,7 @@ events = {
 }
 
 
-redis_client = redis.StrictRedis(host='redis')
+redis_client = redis.StrictRedis(host='event-queue')
 
 
 def publish_event(user_id, service, event_code, data=None):
@@ -77,4 +77,4 @@ def publish_event(user_id, service, event_code, data=None):
             message['data'] = data
         redis_client.publish(channel, json.dumps(message))
     except redis.exceptions.ConnectionError:
-        raise ServiceUnavailable('redis')
+        raise ServiceUnavailable('event-queue')
