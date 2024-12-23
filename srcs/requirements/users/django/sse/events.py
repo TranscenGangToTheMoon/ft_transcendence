@@ -34,7 +34,7 @@ events = {
     'invite':
         {
             'invite-game': {'type': SSEType.notification, 'db_field': 'friend_notifications', 'message': '{username} challeging you to an epic battle, do you accept the challenge?', 'target': 'v (for accpeting challenge) x (for decline invitation)', 'required-data': ['user inviting instance', 'lobby code']},
-            'invite-clash': {'type': SSEType.notification, 'db_field': None, 'message': '{username} inviting you to play clash, a 3v3 fun game !', 'target': 'v (for joinning clash) x (for decline invitation)', 'required-data': ['user inviting instance', 'lobby code']},
+            'invite-clash': {'type': SSEType.notification, 'db_field': None, 'message': '{username} inviting you to play clash, a 3v3 fun game !', 'target': [('OPTION1', 'blabla'), ('OPTION2', 'blabla')], 'required-data': ['user inviting instance', 'lobby code']},
             'invite-custom-game': {'type': SSEType.notification, 'db_field': None, 'message': '{username} inviting you to play custom game !', 'target': 'v (for joinning custum game) x (for decline invitation)', 'required-data': ['user inviting instance', 'lobby code']},
             'invite-tournament': {'type': SSEType.notification, 'db_field': None, 'message': '{username} inviting you to play tournament {tournament.name} !', 'target': 'v (for joinning tournament) x (for decline invitation)', 'required-data': ['user inviting instance', 'lobby code']},
         },
@@ -53,7 +53,9 @@ events = {
             'tournament-start-3': {'type': SSEType.event, 'db_field': None, 'message': '', 'target': None, 'required-data': []},
             'tournament-start-27': {'type': SSEType.event, 'db_field': None, 'message': '', 'target': None, 'required-data': []},
             'tournament-start-cancel': {'type': SSEType.event, 'db_field': None, 'message': '', 'target': None, 'required-data': []},
+            'tournament-match-start': {'type': SSEType.event, 'db_field': None, 'message': '', 'target': None, 'required-data': []},
             'tournament-match-end': {'type': SSEType.event, 'db_field': None, 'message': '', 'target': None, 'required-data': []},
+            'tournament-finish': {'type': SSEType.notification, 'db_field': None, 'message': '', 'target': 'match-history', 'required-data': []},
         },
 }
 
