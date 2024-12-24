@@ -5,7 +5,7 @@ from lib_transcendence.exceptions import MessagesException
 from lib_transcendence.services import request_auth, get_auth_token
 from rest_framework import serializers
 from rest_framework.authentication import BaseAuthentication
-from rest_framework.exceptions import AuthenticationFailed
+from rest_framework.exceptions import AuthenticationFailed, NotAuthenticated
 
 
 def get_user_from_auth(user_data):
