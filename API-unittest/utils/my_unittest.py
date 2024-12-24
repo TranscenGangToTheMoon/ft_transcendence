@@ -11,7 +11,7 @@ from utils.generate_random import rnstr
 
 
 class UnitTest(unittest.TestCase):
-    def new_user(self, username=None, password=None, get_me=False, connect_sse=False):
+    def new_user(self, username=None, password=None, get_me=False, connect_sse=False, tests_sse: list[str] = None):
         if username is None:
             username = 'user-' + rnstr(10)
         if password is None:
@@ -22,12 +22,12 @@ class UnitTest(unittest.TestCase):
         _new_user['refresh'] = token['refresh']
         if get_me:
             _new_user['id'] = self.assertResponse(me(_new_user), 200, get_field=True)
-        if connect_sse:
-            _new_user['thread'] = self.connect_to_sse(_new_user)
+        if connect_sse is not None:
+            _new_user['thread'] = self.connect_to_sse(_new_user, tests_sse)
         return _new_user
 
-    def user_sse(self):
-        return self.new_user(connect_sse=True)
+    def user_sse(self, tests: list[str] = None):
+        return self.new_user(connect_sse=True, tests_sse=tests)
 
     def guest_user(self, get_me=False, connect_sse=False):
         _new_user = {}
