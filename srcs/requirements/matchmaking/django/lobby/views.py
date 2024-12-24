@@ -1,6 +1,8 @@
 from lib_transcendence.game import GameMode
 from lib_transcendence.exceptions import MessagesException
 from lib_transcendence.serializer import SerializerAuthContext
+from lib_transcendence.sse_events import EventCode
+from lib_transcendence.services import create_sse_event
 from rest_framework import generics, status
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
@@ -39,10 +41,16 @@ class LobbyParticipantsView(SerializerAuthContext, generics.ListCreateAPIView, g
     def create(self, request, *args, **kwargs):
         serializer_participant = LobbyParticipantsSerializer(data=request.data, context=self.get_serializer_context())
         if serializer_participant.is_valid():
-            instance = serializer_participant.save()
-            serializer_lobby = LobbySerializer(instance.lobby, context=self.get_serializer_context())
+            self.perform_create(serializer_participant)
+            serializer_lobby = LobbySerializer(serializer_participant.instance.lobby, context=self.get_serializer_context())
             return Response(serializer_lobby.data, status=status.HTTP_201_CREATED)
         return Response(serializer_participant.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def perform_create(self, serializer):
+        super().perform_create(serializer)
+
+        other_members = list(LobbyParticipants.objects.filter(lobby_id=serializer.instance.lobby_id).exclude(id=serializer.instance.id).values_list('user_id', flat=True))
+        create_sse_event(other_members, EventCode.LOBBY_JOIN, data=serializer.data)
 
 
 class LobbyKickView(generics.DestroyAPIView):
