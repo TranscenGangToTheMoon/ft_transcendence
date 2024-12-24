@@ -1,5 +1,6 @@
 from django.http import StreamingHttpResponse
 from lib_transcendence.exceptions import MessagesException, ServiceUnavailable, ResourceExists
+from lib_transcendence.sse_events import EventCode
 from rest_framework.views import APIView
 import redis
 
@@ -15,7 +16,7 @@ class SSEView(APIView):
     def get(request, *args, **kwargs):
         def event_stream():
             user.connect()
-            publish_event(user.id, 'auth', 'connection-success')
+            publish_event(user.id, EventCode.CONNECTION_SUCCESS)
 
             try:
                 for message in pubsub.listen():
