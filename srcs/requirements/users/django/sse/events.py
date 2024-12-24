@@ -15,19 +15,14 @@ from lib_transcendence.sse_event import Event
 redis_client = redis.StrictRedis(host='event-queue')
 
 
-def publish_event(user_id, event: Event, data=None):
+def publish_event(user_id, event_code: EventCode, data=None):
     channel = f'events:user_{user_id}'
+    event = globals().get(event_code.value.replace('-', '_'))
+    if event is None:
+        raise ParseError({'event_code': [MessagesException.ValidationError.INVALID_EVENT_CODE]}) # todo handle error
 
+    print('EVENT', event, type(event), flush=True)
     try:
-        message = {
-            'service': event.service,
-            'event_code': event.name,
-            'type': event['type'],
-            'message': event['message'],
-            'target': event['target'],
-        }
-        if data is not None:
-            message['data'] = data
-        redis_client.publish(channel, json.dumps(message))
+        redis_client.publish(channel, json.dumps(event.get_dict(data)))
     except redis.exceptions.ConnectionError:
         raise ServiceUnavailable('event-queue')
