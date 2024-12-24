@@ -6,7 +6,7 @@ import redis
 from sse.events import publish_event
 from users.auth import get_user
 
-redis_client = redis.StrictRedis(host='redis')
+redis_client = redis.StrictRedis(host='event-queue')
 
 
 class SSEView(APIView):
@@ -46,7 +46,7 @@ class SSEView(APIView):
             channel = f'events:user_{user.id}'
             pubsub.subscribe(channel)
         except redis.exceptions.ConnectionError:
-            raise ServiceUnavailable('redis')
+            raise ServiceUnavailable('event-queue')
 
         response = StreamingHttpResponse(event_stream(), content_type='text/event-stream')
         response['Cache-Control'] = 'no-cache'
