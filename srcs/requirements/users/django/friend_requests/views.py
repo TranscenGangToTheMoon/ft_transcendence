@@ -7,6 +7,7 @@ from rest_framework.exceptions import NotFound
 from friend_requests.models import FriendRequests
 from friend_requests.serializers import FriendRequestsSerializer
 from friends.serializers import FriendsSerializer
+from sse.events import publish_event
 
 
 class FriendRequestsMixin(generics.GenericAPIView):
@@ -19,11 +20,23 @@ class FriendRequestsListCreateView(generics.ListCreateAPIView, FriendRequestsMix
     def filter_queryset(self, queryset):
         return queryset.filter(sender=self.request.user.id)
 
+    def perform_create(self, serializer):
+        super().perform_create(serializer)
+
+        receiver = serializer.instance.receiver
+        if receiver.is_online:
+            publish_event(receiver.id, 'friends', 'receive-friend-requests', data=serializer.data)
+
 
 class FriendRequestsReceiveListView(generics.ListAPIView, FriendRequestsMixin):
 
     def filter_queryset(self, queryset):
         return queryset.filter(receiver=self.request.user.id)
+
+    def get(self, request, *args, **kwargs):
+        response = super().get(request, *args, **kwargs)
+        self.filter_queryset(self.queryset).update(new=False)
+        return response
 
 
 class FriendRequestView(SerializerKwargsContext, generics.CreateAPIView, generics.RetrieveDestroyAPIView, FriendRequestsMixin):
@@ -38,6 +51,13 @@ class FriendRequestView(SerializerKwargsContext, generics.CreateAPIView, generic
         if self.request.method == 'POST':
             return FriendsSerializer
         return super().get_serializer_class()
+
+    def perform_create(self, serializer):
+        super().perform_create(serializer)
+
+        sender_friend_request = serializer.instance.friends.exclude(id=self.request.user.id).first()
+        if sender_friend_request.is_online:
+            publish_event(sender_friend_request.id, 'friends', 'accept-friend-requests', data=serializer.data)
 
 
 friend_requests_list_create_view = FriendRequestsListCreateView.as_view()

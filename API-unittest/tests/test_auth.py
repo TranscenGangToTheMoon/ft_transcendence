@@ -1,9 +1,8 @@
 import unittest
 
-from services.auth import register, register_guest
+from services.auth import register, register_guest, login, create_guest
 from services.play import play
 from services.user import me
-from utils.credentials import guest_user, new_user, login, auth_guest
 from utils.generate_random import rnstr
 from utils.my_unittest import UnitTest
 
@@ -22,7 +21,7 @@ class Test01_Register(UnitTest):
         self.assertResponse(login(username, password), 200)
 
     def test_002_register_already_exist(self):
-        user1 = new_user()
+        user1 = self.new_user()
 
         self.assertResponse(register(user1['username'], user1['password']), 400)
         self.assertResponse(register(user1['username'].upper(), user1['password']), 400)
@@ -90,10 +89,10 @@ class Test01_Register(UnitTest):
 class Test02_Guest(UnitTest):
 
     def test_001_create_guest(self):
-        self.assertResponse(auth_guest(), 201)
+        self.assertResponse(create_guest(), 201)
 
     def test_002_register_guest(self):
-        guest = guest_user()
+        guest = self.guest_user()
         username = 'guest-register' + rnstr()
 
         user = self.assertResponse(register_guest(username=username, guest=guest), 200, get_user=True)
@@ -106,21 +105,25 @@ class Test02_Guest(UnitTest):
         self.assertResponse(register_guest(username='username_' + random_name, password='password_,' + random_name), 401)
 
     def test_004_register_user_since_guest(self):
-        self.assertResponse(register_guest(guest=new_user()), 403)
+        user1 = self.new_user()
+
+        self.assertResponse(register_guest(guest=user1), 403)
 
     def test_005_login_guest(self):
-        self.assertResponse(login(guest_user()['username'], rnstr()), 401, {'detail': 'No active account found with the given credentials'})
+        self.assertResponse(login(self.guest_user(get_me=True)['username'], rnstr()), 401, {'detail': 'No active account found with the given credentials'})
 
     def test_006_register_guest_try_play_ranked(self):
-        guest = guest_user()
+        guest = self.guest_user()
 
+        thread1 = self.connect_to_sse(guest)
         self.assertResponse(play(guest, 'ranked'), 403, {'detail': 'Guest users cannot play ranked games.'})
         user = self.assertResponse(register_guest(guest=guest), 200, get_user=True)
         self.assertResponse(play(user, 'ranked'), 201)
+        thread1.join()
 
     def test_007_register_guest_already_exist(self):
-        user1 = new_user()
-        guest = guest_user()
+        user1 = self.new_user()
+        guest = self.guest_user()
 
         self.assertResponse(register_guest(username=user1['username'], guest=guest), 400)
 
@@ -128,7 +131,7 @@ class Test02_Guest(UnitTest):
 class Test03_Login(UnitTest):
 
     def test_001_login_user_doest_not_exist(self):
-        user1 = new_user()
+        user1 = self.new_user()
 
         self.assertResponse(login(user1['username'], user1['password']), 200)
 
@@ -136,13 +139,11 @@ class Test03_Login(UnitTest):
         self.assertResponse(login('caca', 'pipi'), 401, {'detail': 'No active account found with the given credentials'})
 
     def test_003_invalid_password(self):
-        user1 = new_user()
+        user1 = self.new_user()
 
         self.assertResponse(login(user1['username'], 'zizi'), 401, {'detail': 'No active account found with the given credentials'})
 
     def test_004_missing_field(self):
-        user1 = new_user()
-
         self.assertResponse(login(data={}), 400, {'username': ['This field is required.'], 'password': ['This field is required.']})
 
 

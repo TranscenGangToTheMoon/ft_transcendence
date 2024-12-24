@@ -1,106 +1,57 @@
-from lib_transcendence.exceptions import MessagesException
-from rest_framework import status
-from rest_framework.exceptions import ParseError
-from rest_framework.response import Response
-from rest_framework.views import APIView
 from django.http import StreamingHttpResponse
-import time
+from lib_transcendence.exceptions import MessagesException, ServiceUnavailable, ResourceExists
+from rest_framework.views import APIView
+import redis
 
+from sse.events import publish_event
 from users.auth import get_user
-from users.models import Users
 
-
-# SSE Usage
-#  - user join lobby
-#  - user leave lobby
-#  - user set ready lobby
-#  - game start lobby
-#  - user join tournament
-#  - user leave tournament
-#  - game start lobby
-#  - game not start lobby
-#  - friend request
-#  - accept friend request
-#  - chat notification
-#  - friend status update ?
-#  - game port
-
-
-class SSEManager:
-    clients = {}
-
-    @classmethod
-    def add_client(cls, user, response):
-        print('NEW USER CONNECTED:', user.id, flush=True)
-        cls.clients[user.id] = {'user': user, 'response': response}
-
-    @classmethod
-    def remove_client(cls, user_id):
-        print('USER DISCONNECTED:', user_id, flush=True)
-        cls.clients.pop(user_id)
-
-    @classmethod
-    def send_message(cls, user_id, message):
-        print(cls.clients, flush=True)
-        print('USER SENT MESSAGE:', user_id, message, flush=True)
-        if user_id not in cls.clients:
-            print('USER NOT CONNECTED:', user_id, flush=True)
-            return
-        client = cls.clients[user_id]['response']
-        client.write(f"data: {message}\n\n")
-        client.flush()
-
-
-def event_stream(user):
-    while True:
-        time.sleep(1)
-        yield "data: {}\n\n".format("Hello from SSE! " + user.username)
+redis_client = redis.StrictRedis(host='event-queue')
 
 
 class SSEView(APIView):
 
-    def get(self, request, *args, **kwargs):
-        user = get_user(self.request)
-        response = StreamingHttpResponse(event_stream(user), content_type='text/event-stream')
-        response['Cache-Control'] = 'no-cache'
-        SSEManager.add_client(user, response)
-        # try:
-        return response
-        # finally:
-        #     SSEManager.remove_client(user.id)
-
-
-class NotificationView(APIView):
-
     @staticmethod
-    def post(request):
-        # message = 'coucou mon ptit loulou'
-        message = request.data.get('message')
-        if message is None:
-            raise ParseError({'detail': [MessagesException.ValidationError.FIELD_REQUIRED]})
-        user_to = request.data.get('user_to')
-        if user_to is None:
-            raise ParseError({'detail': [MessagesException.ValidationError.FIELD_REQUIRED]})
-        SSEManager.send_message(user_to, message)
-        return Response({"status": "Notification sent"}, status=status.HTTP_201_CREATED)
+    def get(request, *args, **kwargs):
+        def event_stream():
+            user.connect()
+            publish_event(user.id, 'auth', 'connection-success')
 
+            try:
+                for message in pubsub.listen():
+                    if message['type'] == 'message':
+                        yield f"{message['data'].decode('utf-8')}\n\n"
+            except GeneratorExit:
+                pubsub.close()
+                user.disconnect()
 
-class EventView(APIView):
+            # try:
+            #     while True:
+            #         yield f"data: PING\n\n"
+            #         message = pubsub.get_message(ignore_subscribe_messages=True)
+            #         if message:
+            #             yield f"data: {message['data'].decode('utf-8')}\n\n"
+            #         time.sleep(1)
+            # except GeneratorExit:
+            #     user.disconnect()
+            # finally:
+            #     pubsub.close()
 
-    def post(self, request):
-        # message = 'coucou mon ptit loulou'
-        message = request.data.get('message')
-        if message is None:
-            raise ParseError({'detail': [MessagesException.ValidationError.FIELD_REQUIRED]})
-        user_to = request.data.get('user_to')
-        if user_to is None:
-            raise ParseError({'detail': [MessagesException.ValidationError.FIELD_REQUIRED]})
-        if message:
-            SSEManager.send_message(user_to, message)
-            return Response({"status": "Notification sent"}, status=status.HTTP_201_CREATED)
-        return Response({"error": "Message is required"}, status=status.HTTP_400_BAD_REQUEST)
+        user = get_user(request)
+        if user.is_online:
+            raise ResourceExists(MessagesException.ResourceExists.SSE)
+
+        try:
+            pubsub = redis_client.pubsub()
+            channel = f'events:user_{user.id}'
+            pubsub.subscribe(channel)
+        except redis.exceptions.ConnectionError:
+            raise ServiceUnavailable('event-queue')
+
+        response = StreamingHttpResponse(event_stream(), content_type='text/event-stream')
+        response['Cache-Control'] = 'no-cache'
+        # response['Connection'] = 'keep-alive'
+        return response
 
 
 sse_view = SSEView.as_view()
-notification_view = NotificationView.as_view()
-event_view = EventView.as_view()

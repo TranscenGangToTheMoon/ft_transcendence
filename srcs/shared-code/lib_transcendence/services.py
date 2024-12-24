@@ -12,9 +12,11 @@ def get_auth_token(request):
     raise NotAuthenticated()
 
 
-def request_users(endpoint: Literal['users/me/', 'validate/chat/', 'blocked/<>/'], method: Literal['GET', 'POST', 'PUT', 'PATCH', 'DELETE'], request=None, data=None):
+def request_users(endpoint: Literal['users/me/', 'validate/chat/', 'blocked/<>/'], method: Literal['GET', 'POST', 'PUT', 'PATCH', 'DELETE'] = 'GET', request=None, data=None, token=None):
     kwargs = {}
-    if request is not None:
+    if token is not None:
+        kwargs['token'] = token
+    elif request is not None:
         kwargs['token'] = get_auth_token(request)
     if data is not None:
         kwargs['data'] = data
@@ -50,6 +52,24 @@ def request_auth(token, endpoint: Literal['update/', 'verify/', 'delete/'], meth
         raise NotAuthenticated()
 
     return request_service('auth', endpoint, method, data, token)
+
+
+def create_sse_event(
+        users: list[int] | int,
+        service: Literal['chat', 'friends', 'invite', 'lobby', 'game', 'tournament'],
+        event_code: Literal['send-message', 'accept-friend-requests', 'receive-friend-requests', 'update-status', 'invite-game', 'invite-clash', 'invite-custom-game', 'invite-tournament', 'join-lobby', 'leave-lobby', 'set-ready-lobby', 'game-start', 'tournament-start-3', 'tournament-start-27', 'tournament-start-cancel', 'tournament-match-end'],
+        data: dict | None = None
+):
+    sse_data = {
+        'users_id': [users] if isinstance(users, int) else users,
+        'event_code': event_code,
+        'service': service,
+    }
+
+    if data is not None:
+        sse_data['data'] = data
+
+    return request_service('users', endpoints.Users.event, 'POST', sse_data)
 
 
 def post_messages(chat_id: int, content: str, token: str):

@@ -21,7 +21,23 @@ class FriendRequestsSerializer(serializers.ModelSerializer):
             'sender',
             'receiver',
             'send_at',
+            'new',
         ]
+        read_only_fields = [
+            'id',
+            'sender',
+            'receiver',
+            'send_at',
+            'new',
+        ]
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+
+        user = get_user(self.context.get('request'))
+        if user.id != instance.receiver.id:
+            representation.pop('new', None)
+        return representation
 
     def create(self, validated_data):
         sender = get_user(self.context.get('request'))
