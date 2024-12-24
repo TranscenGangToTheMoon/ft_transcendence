@@ -15,6 +15,7 @@ class CreateMatchView(generics.CreateAPIView):
         r = requests.post('http://localhost:5500/create-game', data={'match_code': match.code})
         self.status_code = r.status_code
 
+
 class ListMatchesView(generics.ListAPIView):
     serializer_class = MatchSerializer
     queryset = Matches.objects.all()
