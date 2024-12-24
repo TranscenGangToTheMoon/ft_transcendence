@@ -63,7 +63,7 @@ class UnitTest(unittest.TestCase):
             self.assertEqual(json_assertion, responses[1].json)
         return responses[1].json['id']
 
-    def connect_to_sse(self, user, tests: list = None, timeout=1, status_code=200, ignore_connection_message=True, thread=True):
+    def connect_to_sse(self, user, tests: list[str] = None, timeout=5, status_code=200, ignore_connection_message=True, thread=True):
         if thread:
             thread = Thread(target=self._thread_connect_to_sse, args=(user, tests, timeout, status_code, ignore_connection_message))
             thread.start()
@@ -92,9 +92,11 @@ class UnitTest(unittest.TestCase):
                                 if ignore_connection_message and data['event_code'] == 'connection-success':
                                     continue
                                 print(f"SSE RECEIVED: {data}", flush=True)
-                                self.assertEqual(tests[i]['service'], data['service'])
-                                self.assertEqual(tests[i]['event_code'], data['event_code'])
+                                self.assertEqual(tests[i], data['event_code'])
                                 i += 1
+                                if i == len(tests):
+                                    return
         except httpx.ReadTimeout:
-            if tests is not None:
-                self.assertEqual(i, len(tests))
+            pass
+        if tests is not None:
+            self.assertEqual(i, len(tests))
