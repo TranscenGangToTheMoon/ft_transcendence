@@ -6,7 +6,7 @@ async def connect(sid, environ, auth):
 
     # Websockets Debug entrypoint
     if auth['token'] == 'debug': # TODO -> remove this in prod
-        debug('Debug client connected')
+        print('Debug client connected', flush=True)
         return True
 
     # TODO -> do authentication here
