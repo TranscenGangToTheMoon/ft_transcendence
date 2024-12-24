@@ -1,6 +1,7 @@
 from django.db.models import Q
 from lib_transcendence.exceptions import MessagesException
 from lib_transcendence.serializer import SerializerKwargsContext
+from lib_transcendence.sse_events import EventCode
 from rest_framework import generics
 from rest_framework.exceptions import NotFound
 
@@ -25,7 +26,7 @@ class FriendRequestsListCreateView(generics.ListCreateAPIView, FriendRequestsMix
 
         receiver = serializer.instance.receiver
         if receiver.is_online:
-            publish_event(receiver.id, 'friends', 'receive-friend-requests', data=serializer.data)
+            publish_event(receiver.id, EventCode.RECEIVE_FRIEND_REQUEST, data=serializer.data)
 
 
 class FriendRequestsReceiveListView(generics.ListAPIView, FriendRequestsMixin):
@@ -57,7 +58,7 @@ class FriendRequestView(SerializerKwargsContext, generics.CreateAPIView, generic
 
         sender_friend_request = serializer.instance.friends.exclude(id=self.request.user.id).first()
         if sender_friend_request.is_online:
-            publish_event(sender_friend_request.id, 'friends', 'accept-friend-requests', data=serializer.data)
+            publish_event(sender_friend_request.id, EventCode.ACCEPT_FRIEND_REQUEST, data=serializer.data)
 
 
 friend_requests_list_create_view = FriendRequestsListCreateView.as_view()
