@@ -14,7 +14,7 @@ class Test01_JoinLobby(UnitTest):
         user1['thread'].join()
 
     def test_002_join_lobby(self):
-        user1 = self.user_sse()
+        user1 = self.user_sse(['lobby-join'])
         user2 = self.user_sse()
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
