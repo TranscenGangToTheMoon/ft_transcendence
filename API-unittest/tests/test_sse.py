@@ -10,15 +10,15 @@ class Test01_SSE(UnitTest):
         user1 = self.new_user()
         user2 = self.guest_user()
 
-        thread1 = self.connect_to_sse(user1, tests=[{'service': 'auth', 'event_code': 'connection-success'}], ignore_connection_message=False)
-        thread2 = self.connect_to_sse(user2, tests=[{'service': 'auth', 'event_code': 'connection-success'}], ignore_connection_message=False)
+        thread1 = self.connect_to_sse(user1, tests=['connection-success'], ignore_connection_message=False)
+        thread2 = self.connect_to_sse(user2, tests=['connection-success'], ignore_connection_message=False)
         thread1.join()
         thread2.join()
 
     def test_002_connect_twice(self):
         user1 = self.new_user()
 
-        thread1 = self.connect_to_sse(user1, [{'service': 'auth', 'event_code': 'connection-success'}], 3, ignore_connection_message=False)
+        thread1 = self.connect_to_sse(user1, ['connection-success'], 3, ignore_connection_message=False)
         time.sleep(1)
         thread2 = self.connect_to_sse(user1, timeout=2, status_code=409)
         thread1.join()
