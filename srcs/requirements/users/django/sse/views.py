@@ -44,8 +44,7 @@ class SSEView(APIView):
                 while True:
                     message = pubsub.get_message(ignore_subscribe_messages=True)
                     if message:
-                        data = message['data'].decode('utf-8')
-                        event = data['event_code']
+                        event, data = message['data'].decode('utf-8').split(':', 1)
                     else:
                         data = 'PING'
                         event = 'ping'
