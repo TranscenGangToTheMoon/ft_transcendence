@@ -3,6 +3,7 @@ import time
 from django.http import StreamingHttpResponse
 from lib_transcendence.exceptions import MessagesException, ServiceUnavailable, ResourceExists
 from lib_transcendence.sse_events import EventCode
+from rest_framework import renderers
 from rest_framework.views import APIView
 import redis
 
@@ -15,10 +16,20 @@ redis_client = redis.StrictRedis(host='event-queue')
 ENDLINE = '\n\n'
 
 
+class EventStreamRenderer(renderers.BaseRenderer):
+    media_type = 'text/event-stream'
+    format = 'text-event-stream'
+
+    def render(self, data, accepted_media_type=None, renderer_context=None):
+        return data
+
+
 class SSEView(APIView):
+    renderer_classes = [EventStreamRenderer]
 
     @staticmethod
     def get(request, *args, **kwargs):
+        # todo when serveur up set all is_connected False
         def event_stream(_user):
             _user.connect()
             publish_event(_user.id, EventCode.CONNECTION_SUCCESS)
