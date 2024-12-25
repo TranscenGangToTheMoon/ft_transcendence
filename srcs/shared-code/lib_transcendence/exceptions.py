@@ -59,12 +59,14 @@ class MessagesException:
         INVALID_SERVICE = 'Invalid service'
         INVALID_EVENT_CODE = 'Invalid event code'
 
-    class NotAuthenticated:
-        PASSWORD_CONFIRMATION_REQUIRED = 'Password confirmation is required to delete the account.'
+    class Authentication:
+        NOT_CONNECTED_SSE = {'detail': 'You need to be connected to SSE to access this resource.', 'code': 'sse_connection_required'}
+        AUTHENTICATION_FAILED = {'detail': 'Incorrect authentication credentials.', 'code': 'authentication_failed'}
+        NOT_AUTHENTICATED = {'detail': 'Authentication credentials were not provided.', 'code': 'not_authenticated'}
+        USER_NOT_FOUND = {'detail': 'User not found.', 'code': 'user_not_found'}
 
-    class AuthenticationFailed:
+        PASSWORD_CONFIRMATION_REQUIRED = 'Password confirmation is required to delete the account.'
         INCORRECT_PASSWORD = 'Incorrect password.'
-        NOT_CONNECTED_SSE = 'You need to be connected to SSE to access this resource'
 
     class PermissionDenied:
         _GUEST_CANNOT_CREATE = 'Guest users cannot create {obj}.'
