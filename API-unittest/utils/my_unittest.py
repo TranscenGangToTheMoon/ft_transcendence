@@ -73,30 +73,36 @@ class UnitTest(unittest.TestCase):
             self._thread_connect_to_sse(user, tests, timeout, status_code, ignore_connection_message)
 
     def _thread_connect_to_sse(self, user, tests, timeout, status_code, ignore_connection_message):
+        def assert_tests():
+            if tests is not None:
+                self.assertEqual(i, len(tests))
+
         i = 0
+        timeout_count = 0
         if user is None:
             user = self.new_user()
 
-        try:
-            with httpx.Client(verify=False, timeout=timeout) as client:
-                headers = {
-                    'Authorization': f'Bearer {user["token"]}',
-                    'Content-Type': 'text/event-stream',
-                }
-                with client.stream('GET', 'https://localhost:4443/sse/users/', headers=headers) as response:
-                    self.assertEqual(status_code, response.status_code)
-                    if status_code == 200:
-                        for line in response.iter_text():
-                            if line.strip():
-                                data = json.loads(line.strip())
-                                if ignore_connection_message and data['event_code'] == 'connection-success':
-                                    continue
-                                print(f"SSE RECEIVED: {data}", flush=True)
-                                self.assertEqual(tests[i], data['event_code'])
-                                i += 1
-                                if i == len(tests):
-                                    return
-        except httpx.ReadTimeout:
-            pass
-        if tests is not None:
-            self.assertEqual(i, len(tests))
+        with httpx.Client(verify=False) as client:
+            headers = {
+                'Authorization': f'Bearer {user["token"]}',
+                'Content-Type': 'text/event-stream',
+            }
+            with client.stream('GET', 'https://localhost:4443/sse/users/', headers=headers) as response:
+                self.assertEqual(status_code, response.status_code)
+                if status_code == 200:
+                    for line in response.iter_text():
+                        if line.strip():
+                            data = json.loads(line.strip())
+                            timeout_count += 1
+                            if ignore_connection_message and data['event_code'] == 'connection-success':
+                                continue
+                            if timeout_count > timeout:
+                                return assert_tests()
+                            if data['event_code'] == 'ping':
+                                continue
+                            print(f"SSE RECEIVED: {data}", flush=True)
+                            self.assertEqual(tests[i], data['event_code'])
+                            i += 1
+                            if i == len(tests):
+                                return
+        assert_tests()
