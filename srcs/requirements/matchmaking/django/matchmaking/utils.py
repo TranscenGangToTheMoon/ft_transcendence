@@ -1,8 +1,9 @@
 from lib_transcendence.game import GameMode
 from lib_transcendence import endpoints
 from lib_transcendence.exceptions import MessagesException, Conflict, ResourceExists, ServiceUnavailable
-from lib_transcendence.services import request_game
+from lib_transcendence.services import request_game, create_sse_event
 from lib_transcendence.users import retrieve_users
+from lib_transcendence.sse_events import EventCode
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied, NotFound, APIException
 
@@ -145,3 +146,19 @@ def verify_user(user_id, created_tournament=False):
         raise ServiceUnavailable('game')
 
     raise Conflict(MessagesException.Conflict.ALREADY_IN_GAME)
+
+
+# -------------------- SSE EVENTS ------------------------------------------------------------------------------------ #
+def send_sse_event(event: EventCode, instance: LobbyParticipants | TournamentParticipants, data=None, request=None):
+    if data is None:
+        data = {}
+    if isinstance(instance, LobbyParticipants):
+        place = instance.lobby
+    else:
+        place = instance.tournament
+    other_members = list(place.participants.exclude(id=instance.id).values_list('user_id', flat=True))
+    if other_members:
+        if request is not None:
+            user_instance = retrieve_users(instance.user_id, request)
+            data.update(user_instance[0])
+        create_sse_event(other_members, event, data=data)
