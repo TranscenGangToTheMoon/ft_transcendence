@@ -3,12 +3,13 @@ from lib_transcendence.game import GameMode
 from lib_transcendence.Lobby import MatchType, Teams
 from lib_transcendence.auth import get_auth_user
 from lib_transcendence.generate import generate_code
+from lib_transcendence.sse_events import EventCode
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
 
 from blocking.utils import create_player_instance
 from lobby.models import Lobby, LobbyParticipants
-from matchmaking.utils import verify_user, get_lobby, verify_place, get_participants
+from matchmaking.utils import verify_user, get_lobby, verify_place, get_participants, send_sse_event
 
 
 class LobbyGetParticipantsSerializer(serializers.ModelSerializer):
@@ -151,7 +152,6 @@ class LobbyParticipantsSerializer(serializers.ModelSerializer):
                     validated_data['team'] = t
                     break
         return super().create(validated_data)
-        #todo websocket: send to chat that user 'xxx' join team
 
     def update(self, instance, validated_data):
         if 'team' in validated_data:
@@ -162,8 +162,9 @@ class LobbyParticipantsSerializer(serializers.ModelSerializer):
             elif self.instance.lobby.is_team_full(validated_data['team']):
                 raise PermissionDenied(MessagesException.PermissionDenied.TEAM_IS_FULL)
         result = super().update(instance, validated_data)
-        # todo websocket: send that lobby thas x change team
+        send_sse_event(EventCode.LOBBY_UPDATE, result, {'id': result.user_id, **validated_data})
         if instance.lobby.is_ready:
-            # todo websocket: send that lobby is ready and start game
-            pass
+            instance.lobby.set_ready_to_play(True)
+        elif instance.lobby.ready_to_play:
+            instance.lobby.set_ready_to_play(False)
         return result

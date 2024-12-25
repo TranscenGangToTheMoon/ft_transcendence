@@ -14,7 +14,7 @@ class EventCode(Enum):
     INVITE_TOURNAMENT = 'invite-tournament'
     LOBBY_JOIN = 'lobby-join'
     LOBBY_LEAVE = 'lobby-leave'
-    LOBBY_SET_READY = 'lobby-set-ready'
+    LOBBY_UPDATE = 'lobby-update'
     TOURNAMENT_JOIN = 'tournament-join'
     TOURNAMENT_LEAVE = 'tournament-leave'
     TOURNAMENT_START_3 = 'tournament-start-3'

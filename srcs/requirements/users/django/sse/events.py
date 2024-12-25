@@ -77,11 +77,18 @@ class Event:
         # todo handle url format
 
     def dumps(self, data=None):
+        if self.fmessage is None:
+            message = ''
+        elif data is None:
+            message = self.fmessage
+        else:
+            message = self.fmessage.format(**data)
+
         result = {
             'service': self.service.value,
             'event_code': self.code.value,
             'type': self.type.value,
-            'message': self.fmessage,#todo handle if data is None else self.fmessage.format(**data),
+            'message': message,
             'target': None,# todo handle if self.target is None else [t.get_dict() for t in self.target],
         }
         if data is not None:
@@ -105,7 +112,7 @@ invite_tournament = Event(Service.INVITE, EventCode.INVITE_TOURNAMENT, '{usernam
 
 lobby_join = Event(Service.LOBBY, EventCode.LOBBY_JOIN, '{username} have joined the lobby.')
 lobby_leave = Event(Service.LOBBY, EventCode.LOBBY_LEAVE, '{username} have left the lobby.')
-lobby_set_ready = Event(Service.LOBBY, EventCode.LOBBY_SET_READY, '{username} is now ready to play.')
+lobby_update = Event(Service.LOBBY, EventCode.LOBBY_UPDATE)
 
 tournament_join = Event(Service.TOURNAMENT, EventCode.TOURNAMENT_JOIN, '{username} have joined the tournament.')
 tournament_leave = Event(Service.TOURNAMENT, EventCode.TOURNAMENT_LEAVE, '{username} have left the tournament.')

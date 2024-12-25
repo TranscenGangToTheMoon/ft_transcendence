@@ -10,6 +10,7 @@ class Lobby(models.Model):
     max_participants = models.IntegerField(editable=False)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     game_mode = models.CharField(max_length=11)
+    ready_to_play = models.BooleanField(default=False)
 
     match_type = models.CharField(max_length=3)
 
@@ -39,6 +40,10 @@ class Lobby(models.Model):
             if not self.is_team_full(Teams.a) or not self.is_team_full(Teams.b):
                 return False
         return qs.filter(is_ready=False).count() == 0
+
+    def set_ready_to_play(self, value: bool):
+        self.ready_to_play = value
+        self.save()
 
     def __str__(self):
         name = f'{self.code}/{self.game_mode} ({self.participants.count()}/{self.max_participants})'
