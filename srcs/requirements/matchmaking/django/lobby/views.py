@@ -55,6 +55,13 @@ class LobbyParticipantsView(SerializerAuthContext, generics.ListCreateAPIView, g
         user_instance = retrieve_users(user_id, self.request)
         create_sse_event(other_members, EventCode.LOBBY_JOIN, data={**serializer.data, **user_instance[0]})
 
+    def perform_destroy(self, instance):
+        super().perform_destroy(instance)
+        user_id = instance.user_id
+        other_members = list(LobbyParticipants.objects.filter(lobby_id=instance.lobby_id).exclude(user_id=user_id).values_list('user_id', flat=True))
+        user_instance = retrieve_users(user_id, self.request)
+        create_sse_event(other_members, EventCode.LOBBY_LEAVE, data=user_instance[0])
+
 
 class LobbyKickView(generics.DestroyAPIView):
     serializer_class = LobbyParticipantsSerializer
