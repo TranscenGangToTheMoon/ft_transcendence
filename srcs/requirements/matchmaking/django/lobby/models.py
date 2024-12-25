@@ -41,6 +41,10 @@ class Lobby(models.Model):
                 return False
         return qs.filter(is_ready=False).count() == 0
 
+    def set_ready_to_play(self, value: bool):
+        self.ready_to_play = value
+        self.save()
+
     def __str__(self):
         name = f'{self.code}/{self.game_mode} ({self.participants.count()}/{self.max_participants})'
         if self.game_mode == GameMode.custom_game:
