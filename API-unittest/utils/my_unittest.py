@@ -90,7 +90,7 @@ class UnitTest(unittest.TestCase):
                 if status_code == 200:
                     for line in response.iter_text():
                         if line.strip():
-                            data = json.loads(line.strip())
+                            data = json.loads(line.strip().split(': ')[1])
                             timeout_count += 1
                             if ignore_connection_message and data['event_code'] == 'connection-success':
                                 continue
