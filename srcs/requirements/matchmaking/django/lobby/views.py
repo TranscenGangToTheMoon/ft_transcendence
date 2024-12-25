@@ -2,15 +2,13 @@ from lib_transcendence.game import GameMode
 from lib_transcendence.exceptions import MessagesException
 from lib_transcendence.serializer import SerializerAuthContext
 from lib_transcendence.sse_events import EventCode
-from lib_transcendence.services import create_sse_event
-from lib_transcendence.users import retrieve_users
 from rest_framework import generics, status
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 
 from lobby.models import Lobby, LobbyParticipants
 from lobby.serializers import LobbySerializer, LobbyParticipantsSerializer
-from matchmaking.utils import get_lobby, get_lobby_participant, get_kick_participants, kick_yourself
+from matchmaking.utils import get_lobby, get_lobby_participant, get_kick_participants, kick_yourself, send_sse_event
 
 
 class LobbyView(generics.CreateAPIView, generics.RetrieveUpdateAPIView):
@@ -49,19 +47,11 @@ class LobbyParticipantsView(SerializerAuthContext, generics.ListCreateAPIView, g
 
     def perform_create(self, serializer):
         super().perform_create(serializer)
-
-        user_id = serializer.instance.user_id
-        other_members = list(LobbyParticipants.objects.filter(lobby_id=serializer.instance.lobby_id).exclude(user_id=user_id).values_list('user_id', flat=True))
-        user_instance = retrieve_users(user_id, self.request)
-        create_sse_event(other_members, EventCode.LOBBY_JOIN, data={**serializer.data, **user_instance[0]})
+        send_sse_event(EventCode.LOBBY_JOIN, serializer.instance, serializer.data, self.request)
 
     def perform_destroy(self, instance):
+        send_sse_event(EventCode.LOBBY_LEAVE, instance, request=self.request)
         super().perform_destroy(instance)
-        user_id = instance.user_id
-        other_members = list(LobbyParticipants.objects.filter(lobby_id=instance.lobby_id).exclude(user_id=user_id).values_list('user_id', flat=True))
-        if other_members:
-            user_instance = retrieve_users(user_id, self.request)
-            create_sse_event(other_members, EventCode.LOBBY_LEAVE, data=user_instance[0])
 
 
 class LobbyKickView(generics.DestroyAPIView):
