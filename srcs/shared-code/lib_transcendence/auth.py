@@ -27,7 +27,9 @@ class AbstractAuthentication(ABC, BaseAuthentication):
         token = request.headers.get('Authorization')
 
         if not token:
-            raise NotAuthenticated(MessagesException.Authentication.NOT_AUTHENTICATED)
+            token = 'Bearer ' + request.query_params.get('token', None)
+            if not token:
+                raise NotAuthenticated(MessagesException.Authentication.NOT_AUTHENTICATED)
 
         try:
             json_data = self.auth_request(token)
