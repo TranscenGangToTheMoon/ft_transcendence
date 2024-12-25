@@ -3,6 +3,7 @@ from lib_transcendence.exceptions import MessagesException
 from lib_transcendence.serializer import SerializerAuthContext
 from lib_transcendence.sse_events import EventCode
 from lib_transcendence.services import create_sse_event
+from lib_transcendence.users import retrieve_users
 from rest_framework import generics, status
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
@@ -49,8 +50,10 @@ class LobbyParticipantsView(SerializerAuthContext, generics.ListCreateAPIView, g
     def perform_create(self, serializer):
         super().perform_create(serializer)
 
-        other_members = list(LobbyParticipants.objects.filter(lobby_id=serializer.instance.lobby_id).exclude(id=serializer.instance.id).values_list('user_id', flat=True))
-        create_sse_event(other_members, EventCode.LOBBY_JOIN, data=serializer.data)
+        user_id = serializer.instance.user_id
+        other_members = list(LobbyParticipants.objects.filter(lobby_id=serializer.instance.lobby_id).exclude(user_id=user_id).values_list('user_id', flat=True))
+        user_instance = retrieve_users(user_id, self.request)
+        create_sse_event(other_members, EventCode.LOBBY_JOIN, data={**serializer.data, **user_instance[0]})
 
 
 class LobbyKickView(generics.DestroyAPIView):
