@@ -25,6 +25,11 @@ class Test01_SSE(UnitTest):
         thread1 = self.connect_to_sse({'token': 'invalid_token'}, status_code=401)
         thread1.join()
 
+    def test_004_connection_success_guest(self):
+        user1 = self.guest_user()
+
+        thread1 = self.connect_to_sse(user1, tests=['connection-success'], ignore_connection_message=False)
+        thread1.join()
 
 #todo message d'erreur qui finit pas un point
 #todo test invalid parameters, fogrt, not good type, etc..., not users.
