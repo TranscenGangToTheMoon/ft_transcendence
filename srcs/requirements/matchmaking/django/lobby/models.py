@@ -10,6 +10,7 @@ class Lobby(models.Model):
     max_participants = models.IntegerField(editable=False)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     game_mode = models.CharField(max_length=11)
+    ready_to_play = models.BooleanField(default=False)
 
     match_type = models.CharField(max_length=3)
 
