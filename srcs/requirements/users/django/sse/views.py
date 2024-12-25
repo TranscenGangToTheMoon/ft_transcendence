@@ -1,3 +1,5 @@
+import time
+
 from django.http import StreamingHttpResponse
 from lib_transcendence.exceptions import MessagesException, ServiceUnavailable, ResourceExists
 from lib_transcendence.sse_events import EventCode
@@ -6,37 +8,44 @@ import redis
 
 from sse.events import publish_event
 from users.auth import get_user
+from sse.events import ping
+
 
 redis_client = redis.StrictRedis(host='event-queue')
+ENDLINE = '\n\n'
 
 
 class SSEView(APIView):
 
     @staticmethod
     def get(request, *args, **kwargs):
-        def event_stream():
-            user.connect()
-            publish_event(user.id, EventCode.CONNECTION_SUCCESS)
-
-            try:
-                for message in pubsub.listen():
-                    if message['type'] == 'message':
-                        yield f"{message['data'].decode('utf-8')}\n\n"
-            except GeneratorExit:
-                pubsub.close()
-                user.disconnect()
+        def event_stream(_user):
+            # todo not connect to database permently
+            _user.connect()
+            publish_event(_user.id, EventCode.CONNECTION_SUCCESS)
 
             # try:
-            #     while True:
-            #         yield f"data: PING\n\n"
-            #         message = pubsub.get_message(ignore_subscribe_messages=True)
-            #         if message:
-            #             yield f"data: {message['data'].decode('utf-8')}\n\n"
-            #         time.sleep(1)
+            #     for message in pubsub.listen():
+            #         if message['type'] == 'message':
+            #             yield f"{message['data'].decode('utf-8')}\n\n"
             # except GeneratorExit:
-            #     user.disconnect()
-            # finally:
             #     pubsub.close()
+            #     _user.disconnect()
+            ping_str = ping.dumps() + ENDLINE
+            try:
+                while True:
+                    message = pubsub.get_message(ignore_subscribe_messages=True)
+                    if message:
+                        print(f'MESSAGE {_user.id}', flush=True)
+                        yield message['data'].decode('utf-8') + ENDLINE
+                    else:
+                        print(f'PING {_user.id}', flush=True)
+                        yield ping_str
+                    time.sleep(1)
+            except GeneratorExit:
+                pass
+            pubsub.close()
+            _user.disconnect()
 
         user = get_user(request)
         if user.is_online:
@@ -49,7 +58,7 @@ class SSEView(APIView):
         except redis.exceptions.ConnectionError:
             raise ServiceUnavailable('event-queue')
 
-        response = StreamingHttpResponse(event_stream(), content_type='text/event-stream')
+        response = StreamingHttpResponse(event_stream(user), content_type='text/event-stream')
         response['Cache-Control'] = 'no-cache'
         # response['Connection'] = 'keep-alive'
         return response
