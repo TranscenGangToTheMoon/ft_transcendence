@@ -2,6 +2,7 @@ from typing import Literal
 
 from lib_transcendence import endpoints
 from lib_transcendence.request import request_service
+from lib_transcendence.sse_events import EventCode
 from rest_framework.exceptions import NotAuthenticated
 
 
@@ -56,14 +57,12 @@ def request_auth(token, endpoint: Literal['update/', 'verify/', 'delete/'], meth
 
 def create_sse_event(
         users: list[int] | int,
-        service: Literal['chat', 'friends', 'invite', 'lobby', 'game', 'tournament'],
-        event_code: Literal['send-message', 'accept-friend-requests', 'receive-friend-requests', 'update-status', 'invite-game', 'invite-clash', 'invite-custom-game', 'invite-tournament', 'join-lobby', 'leave-lobby', 'set-ready-lobby', 'game-start', 'tournament-start-3', 'tournament-start-27', 'tournament-start-cancel', 'tournament-match-end'],
+        event_code: EventCode,
         data: dict | None = None
 ):
     sse_data = {
         'users_id': [users] if isinstance(users, int) else users,
-        'event_code': event_code,
-        'service': service,
+        'event_code': event_code.value,
     }
 
     if data is not None:

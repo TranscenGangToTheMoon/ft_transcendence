@@ -113,13 +113,12 @@ class Test02_Guest(UnitTest):
         self.assertResponse(login(self.guest_user(get_me=True)['username'], rnstr()), 401, {'detail': 'No active account found with the given credentials'})
 
     def test_006_register_guest_try_play_ranked(self):
-        guest = self.guest_user()
+        guest = self.guest_user(get_me=True, connect_sse=True)
 
-        thread1 = self.connect_to_sse(guest)
         self.assertResponse(play(guest, 'ranked'), 403, {'detail': 'Guest users cannot play ranked games.'})
         user = self.assertResponse(register_guest(guest=guest), 200, get_user=True)
         self.assertResponse(play(user, 'ranked'), 201)
-        thread1.join()
+        guest['thread'].join()
 
     def test_007_register_guest_already_exist(self):
         user1 = self.new_user()

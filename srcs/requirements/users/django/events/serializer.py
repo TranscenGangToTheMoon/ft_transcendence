@@ -1,14 +1,14 @@
 from lib_transcendence.exceptions import MessagesException
+from lib_transcendence.sse_events import EventCode
 from rest_framework import serializers
 from rest_framework.exceptions import NotFound, APIException
 
-from sse.events import events, publish_event
+from sse.events import publish_event
 from users.auth import get_user
 
 
 class EventSerializer(serializers.Serializer):
     users_id = serializers.ListField(child=serializers.IntegerField())
-    service = serializers.CharField(max_length=20)
     event_code = serializers.CharField(max_length=30)
     data = serializers.DictField(required=False)
 
@@ -28,15 +28,8 @@ class EventSerializer(serializers.Serializer):
         return result
 
     @staticmethod
-    def validate_service(value):
-        if value not in events.keys():
-            raise serializers.ValidationError(MessagesException.ValidationError.INVALID_SERVICE)
-        return value
-
-    def validate_event_code(self, value):
-        service = self.initial_data.get('service')
-        self.validate_service(service)
-        if value not in events[service]:
+    def validate_event_code(value):
+        if value not in EventCode:
             raise serializers.ValidationError(MessagesException.ValidationError.INVALID_EVENT_CODE)
         return value
 
@@ -44,6 +37,6 @@ class EventSerializer(serializers.Serializer):
         for user_id in validated_data['users_id']:
             if not get_user(id=user_id).is_online:
                 raise NotFound(MessagesException.NotFound.USER)
-            publish_event(user_id, validated_data['service'], validated_data['event_code'], validated_data.get('data'))
+            publish_event(user_id, EventCode(validated_data['event_code']), validated_data.get('data'))
 
         return validated_data

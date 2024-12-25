@@ -29,7 +29,7 @@ class Test01_GetUsers(UnitTest):
         self.assertResponse(get_user(user1, user2['id']), 200)
 
     def test_002_get_blocked_by_user(self):
-        user1 = self.new_user()
+        user1 = self.new_user(get_me=True)
         user2 = self.new_user(get_me=True)
 
         self.assertResponse(blocked_user(user2, user1['id']), 201)
@@ -51,16 +51,16 @@ class Test01_GetUsers(UnitTest):
 class Test02_UserMe(UnitTest):
 
     def test_001_get_me(self):
-        user1 = self.new_user()
+        user1 = self.new_user(connect_sse=True)
 
         response = self.assertResponse(me(user1), 200)
-        self.assertDictEqual(response, {'id': response['id'], 'username': user1['username'], 'is_guest': False, 'created_at': response['created_at'], 'profile_picture': None, 'accept_friend_request': True, 'accept_chat_from': 'friends_only', 'coins': 100, 'trophies': 0, 'current_rank': None, 'friend_notifications': 0, 'chat_notifications': 0})
+        self.assertDictEqual(response, {'id': response['id'], 'username': user1['username'], 'is_guest': False, 'created_at': response['created_at'], 'profile_picture': None, 'accept_friend_request': True, 'accept_chat_from': 'friends_only', 'coins': 100, 'trophies': 0, 'current_rank': None, 'friend_notifications': 0, 'is_online': True})
 
     def test_002_get_me_guest(self):
-        user1 = self.guest_user()
+        user1 = self.guest_user(connect_sse=True)
 
         response = self.assertResponse(me(user1), 200)
-        self.assertDictEqual(response, {'id': response['id'], 'username': response['username'], 'is_guest': True, 'created_at': response['created_at'], 'profile_picture': None, 'accept_friend_request': True, 'accept_chat_from': 'friends_only', 'coins': 100, 'trophies': 0, 'current_rank': None})
+        self.assertDictEqual(response, {'id': response['id'], 'username': response['username'], 'is_guest': True, 'created_at': response['created_at'], 'profile_picture': None, 'accept_friend_request': True, 'accept_chat_from': 'friends_only', 'coins': 100, 'trophies': 0, 'current_rank': None, 'friend_notifications': 0, 'is_online': True})
 
 
 class Test03_DeleteUser(UnitTest):
@@ -254,8 +254,8 @@ class Test05_RenameUser(UnitTest):
                 break
 
     def test_003_rename_blocked_user(self):
-        user1 = self.new_user()
-        user2 = self.new_user(get_me=True)
+        user1 = self.new_user(get_me=True)
+        user2 = self.new_user()
         new_username = user1['username'] + '_new'
 
         self.assertResponse(blocked_user(user2, user1['id']), 201)

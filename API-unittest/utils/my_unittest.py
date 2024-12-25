@@ -11,7 +11,7 @@ from utils.generate_random import rnstr
 
 
 class UnitTest(unittest.TestCase):
-    def new_user(self, username=None, password=None, get_me=False, connect_sse=False):
+    def new_user(self, username=None, password=None, get_me=False, connect_sse=False, tests_sse: list[str] = None):
         if username is None:
             username = 'user-' + rnstr(10)
         if password is None:
@@ -23,11 +23,11 @@ class UnitTest(unittest.TestCase):
         if get_me:
             _new_user['id'] = self.assertResponse(me(_new_user), 200, get_field=True)
         if connect_sse:
-            _new_user['thread'] = self.connect_to_sse(_new_user)
+            _new_user['thread'] = self.connect_to_sse(_new_user, tests_sse)
         return _new_user
 
-    def user_sse(self):
-        return self.new_user(connect_sse=True)
+    def user_sse(self, tests: list[str] = None, get_me=False):
+        return self.new_user(connect_sse=True, tests_sse=tests, get_me=get_me)
 
     def guest_user(self, get_me=False, connect_sse=False):
         _new_user = {}
@@ -63,7 +63,7 @@ class UnitTest(unittest.TestCase):
             self.assertEqual(json_assertion, responses[1].json)
         return responses[1].json['id']
 
-    def connect_to_sse(self, user, tests: list = None, timeout=1, status_code=200, ignore_connection_message=True, thread=True):
+    def connect_to_sse(self, user, tests: list[str] = None, timeout=5, status_code=200, ignore_connection_message=True, thread=True):
         if thread:
             thread = Thread(target=self._thread_connect_to_sse, args=(user, tests, timeout, status_code, ignore_connection_message))
             thread.start()
@@ -73,28 +73,36 @@ class UnitTest(unittest.TestCase):
             self._thread_connect_to_sse(user, tests, timeout, status_code, ignore_connection_message)
 
     def _thread_connect_to_sse(self, user, tests, timeout, status_code, ignore_connection_message):
+        def assert_tests():
+            if tests is not None:
+                self.assertEqual(i, len(tests))
+
         i = 0
+        timeout_count = 0
         if user is None:
             user = self.new_user()
 
-        try:
-            with httpx.Client(verify=False, timeout=timeout) as client:
-                headers = {
-                    'Authorization': f'Bearer {user["token"]}',
-                    'Content-Type': 'text/event-stream',
-                }
-                with client.stream('GET', 'https://localhost:4443/sse/users/', headers=headers) as response:
-                    self.assertEqual(status_code, response.status_code)
-                    if status_code == 200:
-                        for line in response.iter_text():
-                            if line.strip():
-                                data = json.loads(line.strip())
-                                if ignore_connection_message and data['event_code'] == 'connection-success':
-                                    continue
-                                print(f"SSE RECEIVED: {data}", flush=True)
-                                self.assertEqual(tests[i]['service'], data['service'])
-                                self.assertEqual(tests[i]['event_code'], data['event_code'])
-                                i += 1
-        except httpx.ReadTimeout:
-            if tests is not None:
-                self.assertEqual(i, len(tests))
+        with httpx.Client(verify=False) as client:
+            headers = {
+                'Authorization': f'Bearer {user["token"]}',
+                'Content-Type': 'text/event-stream',
+            }
+            with client.stream('GET', 'https://localhost:4443/sse/users/', headers=headers) as response:
+                self.assertEqual(status_code, response.status_code)
+                if status_code == 200:
+                    for line in response.iter_text():
+                        if line.strip():
+                            data = json.loads(line.strip())
+                            timeout_count += 1
+                            if ignore_connection_message and data['event_code'] == 'connection-success':
+                                continue
+                            if timeout_count > timeout:
+                                return assert_tests()
+                            if data['event_code'] == 'ping':
+                                continue
+                            print(f"SSE RECEIVED: {data}", flush=True)
+                            self.assertEqual(tests[i], data['event_code'])
+                            i += 1
+                            if i == len(tests):
+                                return
+        assert_tests()

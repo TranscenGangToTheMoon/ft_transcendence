@@ -14,7 +14,7 @@ class Test01_JoinLobby(UnitTest):
         user1['thread'].join()
 
     def test_002_join_lobby(self):
-        user1 = self.user_sse()
+        user1 = self.user_sse(['lobby-join'])
         user2 = self.user_sse()
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
@@ -58,7 +58,7 @@ class Test02_ErrorJoinLobby(UnitTest):
         user2['thread'].join()
 
     def test_004_guest_create_lobby(self):
-        user1 = self.guest_user()
+        user1 = self.guest_user(connect_sse=True)
 
         self.assertResponse(create_lobby(user1), 403, {'detail': 'Guest users cannot create lobby.'})
 
@@ -76,7 +76,7 @@ class Test02_ErrorJoinLobby(UnitTest):
 
     def test_007_blocked_user_cannot_join(self):
         user1 = self.user_sse()
-        user2 = self.user_sse()
+        user2 = self.user_sse(get_me=True)
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
 
@@ -87,7 +87,7 @@ class Test02_ErrorJoinLobby(UnitTest):
 
     def test_008_blocked_user_kick_user(self):
         user1 = self.user_sse()
-        user2 = self.user_sse()
+        user2 = self.user_sse(get_me=True)
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
 
