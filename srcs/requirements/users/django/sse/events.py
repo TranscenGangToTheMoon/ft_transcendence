@@ -76,7 +76,7 @@ class Event:
         # self.data = data todo handle for each
         # todo handle url format
 
-    def get_dict(self, data=None):
+    def dumps(self, data=None):
         result = {
             'service': self.service.value,
             'event_code': self.code.value,
@@ -86,7 +86,7 @@ class Event:
         }
         if data is not None:
             result['data'] = data
-        return result
+        return json.dumps(result)
 
 
 connection_success = Event(Service.AUTH, EventCode.CONNECTION_SUCCESS, 'Connection has been successfully established.')
