@@ -1,4 +1,5 @@
 import json
+import re
 import time
 import unittest
 from threading import Thread
@@ -89,15 +90,16 @@ class UnitTest(unittest.TestCase):
                 self.assertEqual(status_code, response.status_code)
                 if status_code == 200:
                     for line in response.iter_text():
-                        if line.strip():
-                            data = json.loads(line.strip().split(': ')[1])
+                        if line:
+                            event, data = re.findall(r'event: ([a-z\-]+)\ndata: (.+)\n\n', line)[0]
                             timeout_count += 1
+                            if event == 'ping':
+                                continue
+                            data = json.loads(data)
                             if ignore_connection_message and data['event_code'] == 'connection-success':
                                 continue
                             if tests is None and timeout_count > timeout: # todo remove later
                                 return assert_tests()
-                            if data['event_code'] == 'ping':
-                                continue
                             if 'username' in user:
                                 value = user['username']
                             elif 'id' in user:
