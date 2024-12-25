@@ -112,7 +112,7 @@ invite_tournament = Event(Service.INVITE, EventCode.INVITE_TOURNAMENT, '{usernam
 
 lobby_join = Event(Service.LOBBY, EventCode.LOBBY_JOIN, '{username} have joined the lobby.')
 lobby_leave = Event(Service.LOBBY, EventCode.LOBBY_LEAVE, '{username} have left the lobby.')
-lobby_set_ready = Event(Service.LOBBY, EventCode.LOBBY_SET_READY, '{username} is now ready to play.')
+lobby_update = Event(Service.LOBBY, EventCode.LOBBY_UPDATE)
 
 tournament_join = Event(Service.TOURNAMENT, EventCode.TOURNAMENT_JOIN, '{username} have joined the tournament.')
 tournament_leave = Event(Service.TOURNAMENT, EventCode.TOURNAMENT_LEAVE, '{username} have left the tournament.')
