@@ -14,9 +14,9 @@ class DeleteUserView(generics.DestroyAPIView):
         data = request.data
         password = data.get('password')
         if password is None:
-            raise NotAuthenticated({'password': [MessagesException.NotAuthenticated.PASSWORD_CONFIRMATION_REQUIRED]})
+            raise NotAuthenticated({'password': [MessagesException.Authentication.PASSWORD_CONFIRMATION_REQUIRED]})
         if not request.user.check_password(password):
-            raise AuthenticationFailed({'password': [MessagesException.AuthenticationFailed.INCORRECT_PASSWORD]})
+            raise AuthenticationFailed({'password': [MessagesException.Authentication.INCORRECT_PASSWORD]})
         return super().delete(request, *args, **kwargs)
 
 

@@ -79,8 +79,6 @@ class UnitTest(unittest.TestCase):
 
         i = 0
         timeout_count = 0
-        if user is None:
-            user = self.new_user()
 
         with httpx.Client(verify=False) as client:
             headers = {
@@ -96,11 +94,17 @@ class UnitTest(unittest.TestCase):
                             timeout_count += 1
                             if ignore_connection_message and data['event_code'] == 'connection-success':
                                 continue
-                            if timeout_count > timeout:
+                            if tests is None and timeout_count > timeout: # todo remove later
                                 return assert_tests()
                             if data['event_code'] == 'ping':
                                 continue
-                            print(f"SSE RECEIVED: {data}", flush=True)
+                            if 'username' in user:
+                                value = user['username']
+                            elif 'id' in user:
+                                value = user['id']
+                            else:
+                                value = ''
+                            print(f"SSE RECEIVED {value}: {data}", flush=True)
                             self.assertEqual(tests[i], data['event_code'])
                             i += 1
                             if i == len(tests):
