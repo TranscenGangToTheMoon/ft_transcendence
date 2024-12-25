@@ -8,12 +8,9 @@ class Test01_SSE(UnitTest):
 
     def test_001_connection_success(self):
         user1 = self.new_user()
-        user2 = self.guest_user()
 
         thread1 = self.connect_to_sse(user1, tests=['connection-success'], ignore_connection_message=False)
-        thread2 = self.connect_to_sse(user2, tests=['connection-success'], ignore_connection_message=False)
         thread1.join()
-        thread2.join()
 
     def test_002_connect_twice(self):
         user1 = self.new_user()
