@@ -337,14 +337,22 @@ class Test05_UpdateParticipantLobby(UnitTest):
 class Test06_LeaveLobby(UnitTest):
 
     def test_001_leave_lobby(self):
-        user1 = self.user_sse()
+        user1 = self.user_sse(['lobby-join', 'lobby-join', 'lobby-leave', 'lobby-leave'])
+        user2 = self.user_sse(['lobby-join', 'lobby-leave'])
+        user3 = self.user_sse()
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
+        self.assertResponse(join_lobby(user2, code), 201)
+        self.assertResponse(join_lobby(user3, code), 201)
 
+        self.assertResponse(join_lobby(user3, code, 'DELETE'), 204)
+        self.assertResponse(join_lobby(user2, code, 'DELETE'), 204)
         self.assertResponse(join_lobby(user1, code, 'DELETE'), 204)
         self.assertResponse(join_lobby(user1, code, 'GET'), 403, {'detail': 'You do not belong to this lobby.'})
         self.assertResponse(create_lobby(user1, method='GET'), 404, {'detail': 'You do not belong to any lobby.'})
         user1['thread'].join()
+        user2['thread'].join()
+        user3['thread'].join()
 
     def test_002_leave_lobby_then_other_member_became_creator(self):
         user1 = self.user_sse()
