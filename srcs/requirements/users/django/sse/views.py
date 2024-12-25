@@ -20,7 +20,6 @@ class SSEView(APIView):
     @staticmethod
     def get(request, *args, **kwargs):
         def event_stream(_user):
-            # todo not connect to database permently
             _user.connect()
             publish_event(_user.id, EventCode.CONNECTION_SUCCESS)
 
