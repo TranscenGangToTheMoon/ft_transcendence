@@ -23,4 +23,3 @@ class EventCode(Enum):
     TOURNAMENT_SEEDING = 'tournament-seeding'
     TOURNAMENT_MATCH_END = 'tournament-match-end'
     TOURNAMENT_FINISH = 'tournament-finish'
-    PING = 'ping'
