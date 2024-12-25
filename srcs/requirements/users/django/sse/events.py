@@ -131,6 +131,6 @@ def publish_event(user_id, event_code: EventCode, data=None):
 
     print('EVENT', event, type(event), flush=True)
     try:
-        redis_client.publish(channel, json.dumps(event.get_dict(data)))
+        redis_client.publish(channel, event.dumps(data))
     except redis.exceptions.ConnectionError:
         raise ServiceUnavailable('event-queue')
