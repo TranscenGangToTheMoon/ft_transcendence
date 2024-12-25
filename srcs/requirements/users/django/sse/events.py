@@ -77,11 +77,16 @@ class Event:
         # todo handle url format
 
     def dumps(self, data=None):
+        if data is None:
+            message = self.fmessage
+        else:
+            message = self.fmessage.format(**data)
+
         result = {
             'service': self.service.value,
             'event_code': self.code.value,
             'type': self.type.value,
-            'message': self.fmessage,#todo handle if data is None else self.fmessage.format(**data),
+            'message': message,
             'target': None,# todo handle if self.target is None else [t.get_dict() for t in self.target],
         }
         if data is not None:
