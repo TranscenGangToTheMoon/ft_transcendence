@@ -289,13 +289,15 @@ class Test04_UpdateLobby(UnitTest):
 class Test05_UpdateParticipantLobby(UnitTest):
 
     def test_001_set_ready_to_true(self):
-        user1 = self.user_sse()
+        user1 = self.user_sse(['lobby-join'])
+        user2 = self.user_sse(['lobby-update'])
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
 
-        response = self.assertResponse(join_lobby(user1, code, data={'is_ready': True}), 200)
-        self.assertTrue(response['is_ready'])
+        self.assertResponse(join_lobby(user2, code), 201)
+        self.assertTrue(self.assertResponse(join_lobby(user1, code, data={'is_ready': True}), 200, get_field='is_ready'))
         user1['thread'].join()
+        user2['thread'].join()
 
     def test_002_change_team(self):
         user1 = self.user_sse()
