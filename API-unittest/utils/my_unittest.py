@@ -22,7 +22,7 @@ class UnitTest(unittest.TestCase):
         _new_user['refresh'] = token['refresh']
         if get_me:
             _new_user['id'] = self.assertResponse(me(_new_user), 200, get_field=True)
-        if connect_sse is not None:
+        if connect_sse:
             _new_user['thread'] = self.connect_to_sse(_new_user, tests_sse)
         return _new_user
 
