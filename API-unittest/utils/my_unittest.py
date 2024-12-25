@@ -26,8 +26,8 @@ class UnitTest(unittest.TestCase):
             _new_user['thread'] = self.connect_to_sse(_new_user, tests_sse)
         return _new_user
 
-    def user_sse(self, tests: list[str] = None):
-        return self.new_user(connect_sse=True, tests_sse=tests)
+    def user_sse(self, tests: list[str] = None, get_me=False):
+        return self.new_user(connect_sse=True, tests_sse=tests, get_me=get_me)
 
     def guest_user(self, get_me=False, connect_sse=False):
         _new_user = {}
