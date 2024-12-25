@@ -41,17 +41,15 @@ class SSEView(APIView):
             # except GeneratorExit:
             #     pubsub.close()
             #     _user.disconnect()
-            ping_str = ping.dumps() + ENDLINE
             try:
                 while True:
                     message = pubsub.get_message(ignore_subscribe_messages=True)
                     if message:
                         print(f'MESSAGE {_user.id}', flush=True)
-                        data = message['data'].decode('utf-8')
+                        yield 'data: ' + message['data'].decode('utf-8') + ENDLINE
+
                     else:
-                        print(f'PING {_user.id}', flush=True)
-                        data = ping_str
-                    yield 'data: ' + data + ENDLINE
+                        yield 'ping: PING' + ENDLINE
                     time.sleep(1)
             except GeneratorExit:
                 pass
