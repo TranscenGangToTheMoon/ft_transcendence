@@ -77,7 +77,9 @@ class Event:
         # todo handle url format
 
     def dumps(self, data=None):
-        if data is None:
+        if self.fmessage is None:
+            message = ''
+        elif data is None:
             message = self.fmessage
         else:
             message = self.fmessage.format(**data)
