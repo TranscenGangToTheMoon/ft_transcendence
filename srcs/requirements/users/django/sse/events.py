@@ -134,7 +134,7 @@ def publish_event(user_id, event_code: EventCode, data=None):
     if event is None:
         raise ParseError({'event_code': [MessagesException.ValidationError.INVALID_EVENT_CODE]}) # todo handle error
 
-    print('EVENT', event, type(event), flush=True)
+    print('EVENT', event, data, flush=True)
     try:
         redis_client.publish(channel, event.code.value + ':' + event.dumps(data))
     except redis.exceptions.ConnectionError:
