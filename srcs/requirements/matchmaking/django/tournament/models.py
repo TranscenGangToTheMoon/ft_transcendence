@@ -100,6 +100,9 @@ class TournamentParticipants(models.Model):
     # todo add delete method and inform players that xxx leave the tournament
     # todo cans leave the tournament if started
 
+    def place(self):
+        return self.tournament
+
     def delete(self, using=None, keep_parents=False):
         tournament = self.tournament
         if tournament.is_started:
@@ -109,9 +112,6 @@ class TournamentParticipants(models.Model):
             super().delete(using=using, keep_parents=keep_parents)
             if tournament.participants.count() == 0:
                 tournament.delete()
-
-    def get_location_id(self):
-        return self.tournament.id
 
     def eliminate(self):
         self.still_in = False

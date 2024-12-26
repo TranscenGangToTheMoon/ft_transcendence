@@ -70,8 +70,8 @@ class LobbyParticipants(models.Model):
 
     team = models.CharField(default=None, null=True)
 
-    def get_location_id(self):
-        return self.lobby.id
+    def place(self):
+        return self.lobby
 
     def delete(self, using=None, keep_parents=False):
         # todo inform other players that xxx leave the lobby

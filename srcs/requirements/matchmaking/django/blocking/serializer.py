@@ -36,7 +36,7 @@ class BlockedSerializer(serializers.ModelSerializer):
         if not isinstance(model, Players):
             blocked_user = get_user_from_model(validated_data['blocked_user_id'], model)
             if blocked_user is not None:
-                if user.get_location_id() == blocked_user.get_location_id() and user.creator:
+                if user.place.id == blocked_user.place.id and user.creator:
                     blocked_user.delete()
 
         return super().create(validated_data)
