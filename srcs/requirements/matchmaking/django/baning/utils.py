@@ -11,14 +11,14 @@ from tournament.models import TournamentParticipants
 
 def is_banned(code: str, user_id: int) -> bool:
     try:
-        Baned.objects.get(code=code, user_id=user_id)
+        Baned.objects.get(code=code, baned_user_id=user_id)
         return True
     except Baned.DoesNotExist:
         return False
 
 
 def banned(participant: LobbyParticipants | TournamentParticipants, request):
-    Baned.objects.create(code=participant.place.code, user_id=participant.user_id)
+    Baned.objects.create(code=participant.place.code, baned_user_id=participant.user_id)
     if isinstance(participant, LobbyParticipants):
         ban_code = EventCode.LOBBY_BAN
         leave_code = EventCode.LOBBY_LEAVE
