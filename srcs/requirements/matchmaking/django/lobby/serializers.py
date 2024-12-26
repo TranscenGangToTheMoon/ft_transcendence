@@ -9,7 +9,10 @@ from rest_framework.exceptions import PermissionDenied
 
 from blocking.utils import create_player_instance
 from lobby.models import Lobby, LobbyParticipants
-from matchmaking.utils import verify_user, get_lobby, verify_place, get_participants, send_sse_event
+from matchmaking.utils.participant import get_participants
+from matchmaking.utils.place import get_lobby, verify_place
+from matchmaking.utils.sse import send_sse_event
+from matchmaking.utils.user import verify_user
 
 
 class LobbyGetParticipantsSerializer(serializers.ModelSerializer):
@@ -141,7 +144,7 @@ class LobbyParticipantsSerializer(serializers.ModelSerializer):
         user = self.context['auth_user']
         lobby = get_lobby(self.context.get('code'), True)
 
-        verify_place(user, lobby, self.context.get('request'))
+        verify_place(user, lobby)
 
         validated_data['lobby'] = lobby
         validated_data['user_id'] = user['id']

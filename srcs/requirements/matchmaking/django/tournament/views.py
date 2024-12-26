@@ -14,7 +14,8 @@ from rest_framework.response import Response
 from blocking.models import Blocked
 from blocking.utils import create_player_instance, delete_player_instance
 from matchmaking.create_match import create_tournament_match
-from matchmaking.utils import get_tournament_participant, get_tournament, get_ban_participants, ban_yourself
+from matchmaking.utils.participant import get_tournament_participant
+from matchmaking.utils.place import get_tournament
 from tournament.models import Tournaments, TournamentParticipants
 from tournament.serializers import TournamentSerializer, TournamentStageSerializer, TournamentParticipantsSerializer, \
     TournamentSearchSerializer

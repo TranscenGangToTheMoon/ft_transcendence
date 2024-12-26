@@ -5,7 +5,9 @@ from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
 
 from blocking.utils import create_player_instance
-from matchmaking.utils import verify_user, get_tournament, verify_place, get_participants
+from matchmaking.utils.participant import get_participants
+from matchmaking.utils.place import get_tournament, verify_place
+from matchmaking.utils.user import verify_user
 from tournament.models import Tournaments, TournamentStage, TournamentParticipants
 
 
@@ -97,7 +99,7 @@ class TournamentParticipantsSerializer(serializers.ModelSerializer):
         user = self.context['auth_user']
         tournament = get_tournament(create=True, code=self.context.get('code'))
 
-        verify_place(user, tournament, self.context.get('request'))
+        verify_place(user, tournament)
 
         if tournament.created_by == user['id']:
             validated_data['creator'] = True

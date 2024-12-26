@@ -8,8 +8,9 @@ from rest_framework.response import Response
 
 from lobby.models import Lobby, LobbyParticipants
 from lobby.serializers import LobbySerializer, LobbyParticipantsSerializer
-from matchmaking.utils import get_lobby, get_lobby_participant, get_ban_participants, ban_yourself, send_sse_event, \
-    banned
+from matchmaking.utils.participant import get_lobby_participant
+from matchmaking.utils.place import get_lobby
+from matchmaking.utils.sse import send_sse_event
 
 
 class LobbyView(generics.CreateAPIView, generics.RetrieveUpdateAPIView):
