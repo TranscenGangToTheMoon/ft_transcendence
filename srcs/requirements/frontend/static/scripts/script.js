@@ -6,6 +6,7 @@ const MAX_DISPLAYED_FRIEND_REQUESTS = 5;
 const MAX_DISPLAYED_BLOCKED_USERS = 10;
 const baseAPIUrl = "/api"
 let userInformations = undefined;
+var sse;
 var notificationIdentifier = 0;
 var displayedNotifications = 0;
 window.baseAPIUrl = baseAPIUrl;
@@ -431,8 +432,24 @@ document.getElementById('home').addEventListener('click', async event => {
         await navigateTo('/');
 })
 
+
+
 function initSSE(){
-    console.log('SERVER SENT EVENT INITIALIZATION HERE');
+    sse = new EventSource(`/sse/users/?token=${getAccessToken()}`);
+
+    sse.onopen = connection => {
+        console.log(connection);
+    }
+
+    sse.onmessage = event => {
+        let data = JSON.parse(event.data);
+        console.log(data);
+    }
+
+    sse.onerror = async error => {
+        console.log(error);
+        displayMainAlert('Error', 'Unable to connect to Server Sent Events. Note that several services will be unaivailable.');
+    }
 }
 
 async function  indexInit(auto=true) {
@@ -450,17 +467,19 @@ async function  indexInit(auto=true) {
         // }
         // else{
             // }
-        if (userInformations.detail === 'Incorrect authentication credentials.'){
+        if (userInformations.code === 'user_not_found'){
             console.log('user was deleted from database, switching to guest mode');
             displayMainAlert("Unable to retrieve your account/guest profile","We're sorry your account has been permanently deleted and cannot be recovered.");
             await generateToken();
             await fetchUserInfos(true);
+            initSSE();
             return navigateTo('/');
         }
         await loadUserProfile();
     }
     else{
         await fetchUserInfos();
+        initSSE();
         if (!userInformations?.is_guest)
             await loadFriendListModal()
         let currentState = getCurrentState();
@@ -468,7 +487,6 @@ async function  indexInit(auto=true) {
         history.replaceState({state: currentState}, '', window.location.pathname);
         incrementCurrentState();
         loadCSS('/css/styles.css', false);
-        initSSE();
         handleRoute();
     }
 }

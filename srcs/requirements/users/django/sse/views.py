@@ -5,6 +5,7 @@ from lib_transcendence.exceptions import MessagesException, ServiceUnavailable, 
 from lib_transcendence.sse_events import EventCode
 from rest_framework import renderers
 from rest_framework.views import APIView
+
 import redis
 
 from sse.events import publish_event
@@ -22,7 +23,6 @@ class EventStreamRenderer(renderers.BaseRenderer):
 
     def render(self, data, accepted_media_type=None, renderer_context=None):
         return data
-
 
 class SSEView(APIView):
     renderer_classes = [EventStreamRenderer]
@@ -49,7 +49,7 @@ class SSEView(APIView):
                         yield 'data: ' + message['data'].decode('utf-8') + ENDLINE
 
                     else:
-                        yield 'ping: PING' + ENDLINE
+                        yield 'event: PING\ndata: ' + ping.dumps() + ENDLINE
                     time.sleep(1)
             except GeneratorExit:
                 pass
@@ -71,6 +71,5 @@ class SSEView(APIView):
         response['Cache-Control'] = 'no-cache'
         # response['Connection'] = 'keep-alive'
         return response
-
 
 sse_view = SSEView.as_view()

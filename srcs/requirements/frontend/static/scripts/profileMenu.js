@@ -4,6 +4,8 @@ document.getElementById('logOut').addEventListener('click', async event => {
     await generateToken();
     await fetchUserInfos(true);
     handleRoute();
+    sse.close();
+    initSSE();
 })
 
 document.getElementById('chats').addEventListener('click', async event => {
