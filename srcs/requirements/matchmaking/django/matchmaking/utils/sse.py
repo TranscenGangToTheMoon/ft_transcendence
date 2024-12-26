@@ -1,5 +1,4 @@
 from lib_transcendence.services import create_sse_event
-from lib_transcendence.users import retrieve_users
 from lib_transcendence.sse_events import EventCode
 
 
@@ -15,5 +14,5 @@ def send_sse_event(event: EventCode, instance, data=None, exclude_myself=True):
         if event == EventCode.LOBBY_UPDATE:
             data['id'] = instance.user_id
         else:
-            kwargs['username'] = retrieve_users(instance.user_id)[0]['username']
+            kwargs['username'] = instance.id
         create_sse_event(other_members, event, data=data, kwargs=kwargs)
