@@ -2,7 +2,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import NotFound, PermissionDenied
 from lib_transcendence.exceptions import MessagesException, ResourceExists
 
-from baning.utils import is_bnned
+from baning.utils import is_baned
 from blocking.utils import are_users_blocked
 from lobby.models import Lobby, LobbyParticipants
 from matchmaking.utils.user import verify_user
