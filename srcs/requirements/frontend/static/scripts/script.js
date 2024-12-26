@@ -193,7 +193,6 @@ function loadCSS(cssHref, toUpdate=true) {
 
 async function loadContent(url, container='content', append=false) {
     const contentDiv = document.getElementById(container);
-    console.log(url, container)
     try {
         const response = await fetch(url);
         if (!response.ok) {
@@ -445,6 +444,10 @@ function initSSE(){
         let data = JSON.parse(event.data);
         console.log(data);
     }
+
+    // sse.addEventListener('ping', event => {
+    //     console.log(event);
+    // })
 
     sse.onerror = async error => {
         console.log(error);

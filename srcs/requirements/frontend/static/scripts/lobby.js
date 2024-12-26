@@ -295,7 +295,6 @@ async function completeTeams(){
     const teamsDivs = document.querySelectorAll('.teamDisplay');
     for (let teamDiv of teamsDivs){
         let playerInTeam = teamDiv.querySelectorAll('.player').length;
-        console.log(playerInTeam);
         for (; playerInTeam < (matchType === '1v1' ? 1 : 3); playerInTeam++){
             playerPlaceholder = document.createElement('div');
             playerPlaceholder.id = 'tempPl';
