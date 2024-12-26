@@ -167,8 +167,8 @@ class Test02_ErrorJoinLobby(UnitTest):
 class Test03_BanLobby(UnitTest):
 
     def test_001_ban_lobby(self):
-        user1 = self.user_sse()
-        user2 = self.user_sse()
+        user1 = self.user_sse(['lobby-join', 'lobby-leave'])
+        user2 = self.user_sse(get_me=True)
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
 
@@ -176,6 +176,7 @@ class Test03_BanLobby(UnitTest):
         self.assertResponse(ban_user(user1, user2, code), 204)
 
         response = self.assertResponse(join_lobby(user1, code, 'GET'), 200)
+        self.assertResponse(join_lobby(user2, code), 404, {'detail': 'Lobby not found.'})
         self.assertEqual(1, len(response))
         user1['thread'].join()
         user2['thread'].join()
