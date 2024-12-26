@@ -2,6 +2,7 @@ from typing import Literal
 
 from lib_transcendence import endpoints
 from lib_transcendence.request import request_service
+from lib_transcendence.sse_events import EventCode
 from rest_framework.exceptions import NotAuthenticated
 
 
@@ -12,9 +13,11 @@ def get_auth_token(request):
     raise NotAuthenticated()
 
 
-def request_users(endpoint: Literal['users/me/', 'validate/chat/', 'blocked/<>/'], method: Literal['GET', 'POST', 'PUT', 'PATCH', 'DELETE'], request=None, data=None):
+def request_users(endpoint: Literal['users/me/', 'validate/chat/', 'blocked/<>/'], method: Literal['GET', 'POST', 'PUT', 'PATCH', 'DELETE'] = 'GET', request=None, data=None, token=None):
     kwargs = {}
-    if request is not None:
+    if token is not None:
+        kwargs['token'] = token
+    elif request is not None:
         kwargs['token'] = get_auth_token(request)
     if data is not None:
         kwargs['data'] = data
@@ -50,6 +53,22 @@ def request_auth(token, endpoint: Literal['update/', 'verify/', 'delete/'], meth
         raise NotAuthenticated()
 
     return request_service('auth', endpoint, method, data, token)
+
+
+def create_sse_event(
+        users: list[int] | int,
+        event_code: EventCode,
+        data: dict | None = None
+):
+    sse_data = {
+        'users_id': [users] if isinstance(users, int) else users,
+        'event_code': event_code.value,
+    }
+
+    if data is not None:
+        sse_data['data'] = data
+
+    return request_service('users', endpoints.Users.event, 'POST', sse_data)
 
 
 def post_messages(chat_id: int, content: str, token: str):

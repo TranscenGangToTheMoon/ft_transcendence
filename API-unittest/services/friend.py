@@ -1,15 +1,10 @@
 from typing import Literal
 
-from utils.credentials import new_user
 from utils.request import make_request
 
 
-def friend_requests(sender=None, receiver=None, method: Literal['POST', 'GET'] = 'POST', data=None):
-    if sender is None:
-        sender = new_user()
+def friend_requests(sender, receiver=None, method: Literal['POST', 'GET'] = 'POST', data=None):
     if method == 'POST':
-        if receiver is None:
-            receiver = new_user()
         if data is None:
             data = {'username': receiver['username']}
     else:
@@ -44,10 +39,7 @@ def friend(user, friendship_id, method: Literal['GET', 'DELETE'] = 'GET'):
     )
 
 
-def friend_request(friend_request_id, user=None, method: Literal['POST', 'GET', 'DELETE'] = 'POST'):
-    if user is None:
-        user = new_user()
-
+def friend_request(friend_request_id, user, method: Literal['POST', 'GET', 'DELETE'] = 'POST'):
     return make_request(
         endpoint=f'users/me/friend_requests/{friend_request_id}/',
         method=method,
@@ -55,11 +47,7 @@ def friend_request(friend_request_id, user=None, method: Literal['POST', 'GET', 
     )
 
 
-def create_friendship(user1=None, user2=None):
-    if user1 is None:
-        user1 = new_user()
-    if user2 is None:
-        user2 = new_user()
+def create_friendship(user1, user2):
     response_request = friend_requests(user1, user2)
     response_accept = friend_request(response_request.json['id'], user2)
     return [response_request, response_accept]

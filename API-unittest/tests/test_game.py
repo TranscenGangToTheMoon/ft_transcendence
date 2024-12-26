@@ -1,24 +1,30 @@
 import unittest
 
 from services.game import create_game, is_in_game
-from utils.credentials import new_user
 from utils.my_unittest import UnitTest
 
 
 class Test01_Game(UnitTest):
 
     def test_001_create_game(self):
-        self.assertResponse(create_game(new_user(), new_user()), 201)
+        user1 = self.new_user(get_me=True)
+        user2 = self.new_user(get_me=True)
+
+        self.assertResponse(create_game(user1, user2), 201)
 
     def test_002_already_in_game(self):
-        user1 = new_user()
+        user1 = self.new_user(get_me=True)
+        user2 = self.new_user(get_me=True)
 
         self.assertResponse(is_in_game(user1), 404)
-        self.assertResponse(create_game(user1, new_user()), 201)
+        self.assertResponse(create_game(user1, user2), 201)
         self.assertResponse(is_in_game(user1), 200)
 
     def test_003_invalid_game_mode(self):
-        self.assertResponse(create_game(new_user(), new_user(), game_mode='caca'), 400)
+        user1 = self.new_user(get_me=True)
+        user2 = self.new_user(get_me=True)
+
+        self.assertResponse(create_game(user1, user2, game_mode='caca'), 400)
 
     def test_004_no_game_mode(self):
         self.assertResponse(create_game(data={'teams': [[1], [2]]}), 400, {'game_mode': ['This field is required.']})

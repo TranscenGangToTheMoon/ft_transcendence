@@ -1,7 +1,6 @@
 from lib_transcendence.game import GameMode
 from lib_transcendence.auth import get_auth_user
 from lib_transcendence.exceptions import MessagesException
-from lib_transcendence.services import request_users
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
 
@@ -37,6 +36,5 @@ class PlayersSerializer(serializers.ModelSerializer):
             raise PermissionDenied(MessagesException.PermissionDenied.GUEST_CANNOT_PLAY_RANKED)
 
         validated_data['user_id'] = user['id']
-        validated_data['trophies'] = 0 #todo remake
-        # validated_data['trophies'] = request_users('users/me/', 'GET', request)['trophies']
+        validated_data['trophies'] = user['trophies']
         return create_player_instance(request, Players, **validated_data)

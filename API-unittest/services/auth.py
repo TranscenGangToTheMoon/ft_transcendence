@@ -1,5 +1,3 @@
-from typing import Literal
-
 from utils.generate_random import rnstr
 from utils.request import make_request
 
@@ -51,3 +49,23 @@ def register_guest(guest=None, username=None, password=None, data=None, method='
         kwargs['token'] = token
 
     return make_request(**kwargs)
+
+
+def create_guest():
+    return make_request(
+        endpoint='auth/guest/',
+        method='POST',
+    )
+
+
+def login(username=None, password=None, data=None):
+    if data is None:
+        data = {
+            'username': username,
+            'password': password
+        }
+    return make_request(
+        endpoint='auth/login/',
+        method='POST',
+        data=data,
+    )
