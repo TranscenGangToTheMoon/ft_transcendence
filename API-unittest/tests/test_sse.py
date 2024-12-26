@@ -1,6 +1,10 @@
 import time
 import unittest
 
+from services.auth import register, register_guest
+from services.friend import friend_requests
+from services.user import me
+from utils.generate_random import rnstr
 from utils.my_unittest import UnitTest
 
 
