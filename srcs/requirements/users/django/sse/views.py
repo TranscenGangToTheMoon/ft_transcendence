@@ -29,9 +29,8 @@ class SSEView(APIView):
     @staticmethod
     def get(request, *args, **kwargs):
         # todo when serveur up set all is_connected False
-        def event_stream(_user):
-            _user.connect()
-            publish_event(_user.id, EventCode.CONNECTION_SUCCESS)
+        def event_stream(_user_id, _channel):
+            publish_event(_user_id, EventCode.CONNECTION_SUCCESS) # todo useless
 
             # try:
             #     for message in pubsub.listen():
@@ -53,20 +52,23 @@ class SSEView(APIView):
             except GeneratorExit:
                 pass
             pubsub.close()
-            _user.disconnect()
+            if redis_client.get(_channel) is None:
+                _user = get_user(request)
+                _user.disconnect()
 
         user = get_user(request)
-        if user.is_online:
-            raise ResourceExists(MessagesException.ResourceExists.SSE)
+        user.connect()
+        user_id = user.id
+        del user
 
         try:
             pubsub = redis_client.pubsub()
-            channel = f'events:user_{user.id}'
+            channel = f'events:user_{user_id}'
             pubsub.subscribe(channel)
         except redis.exceptions.ConnectionError:
             raise ServiceUnavailable('event-queue')
 
-        response = StreamingHttpResponse(event_stream(user), content_type='text/event-stream')
+        response = StreamingHttpResponse(event_stream(user_id, channel), content_type='text/event-stream')
         response['Cache-Control'] = 'no-cache'
         # response['Connection'] = 'keep-alive'
         return response

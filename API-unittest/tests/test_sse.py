@@ -1,6 +1,10 @@
 import time
 import unittest
 
+from services.auth import register, register_guest
+from services.friend import friend_requests
+from services.user import me
+from utils.generate_random import rnstr
 from utils.my_unittest import UnitTest
 
 
@@ -13,12 +17,14 @@ class Test01_SSE(UnitTest):
         thread1.join()
 
     def test_002_connect_twice(self):
-        user1 = self.new_user()
+        user1 = self.new_user(get_me=True)
+        user2 = self.new_user()
 
-        thread1 = self.connect_to_sse(user1, ['connection-success'], 3, ignore_connection_message=False)
+        thread1 = self.connect_to_sse(user1, ['connection-success'], ignore_connection_message=False)
         time.sleep(1)
-        thread2 = self.connect_to_sse(user1, timeout=2, status_code=409)
+        thread2 = self.connect_to_sse(user1, ['connection-success', 'receive-friend-requests'], timeout=10, ignore_connection_message=False)
         thread1.join()
+        self.assertResponse(friend_requests(user2, user1), 201)
         thread2.join()
 
     def test_003_invalid_token(self):
@@ -29,6 +35,16 @@ class Test01_SSE(UnitTest):
         user1 = self.guest_user()
 
         thread1 = self.connect_to_sse(user1, tests=['connection-success'], ignore_connection_message=False)
+        thread1.join()
+
+    def test_005_guest_then_register(self):
+        user1 = self.guest_user()
+        username = 'sse-register-' + rnstr()
+        thread1 = self.connect_to_sse(user1, tests=['connection-success'], ignore_connection_message=False)
+        user1['username'] = self.assertResponse(register_guest(user1, username=username), 200, get_field='username')
+        response = self.assertResponse(me(user1), 200)
+        self.assertFalse(response['is_guest'])
+        self.assertEqual(username, response['username'])
         thread1.join()
 
 #todo message d'erreur qui finit pas un point
