@@ -85,6 +85,7 @@ secrets		:	$(ENV_FILE)
 			mkdir -p $@
 			./launch.d/02set-hostname.sh
 			./launch.d/03genreateSSL.sh
+			ln -sf ./secrets/ssl.crt ./srcs/requirements/pong-cli/ft_transcendence.crt
 
 $(ENV_FILE)	:	$(ENV_EXEMPLE)
 			./launch.d/01passwords.sh $(ENV_EXEMPLE) $(ENV_FILE)

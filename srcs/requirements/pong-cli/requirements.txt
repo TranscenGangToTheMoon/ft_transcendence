@@ -1,3 +1,5 @@
 requests==2.32.3
 python-socketio==5.11.4
 websocket-client==1.8.0
+textual==1.0.0
+textual-dev==1.7.0
