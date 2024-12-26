@@ -9,7 +9,7 @@ from matchmaking.utils.sse import send_sse_event
 from tournament.models import TournamentParticipants
 
 
-def is_banned(code: str, user_id: int) -> bool:
+def is_baned(code: str, user_id: int) -> bool:
     try:
         Baned.objects.get(code=code, baned_user_id=user_id)
         return True
