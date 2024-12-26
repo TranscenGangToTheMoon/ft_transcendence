@@ -6,12 +6,22 @@ from lib_transcendence.exceptions import MessagesException, ServiceUnavailable
 from lib_transcendence.sse_events import EventCode
 from rest_framework.exceptions import ParseError
 
+from users.models import Users
+
 
 # todo reset to 0 notfication when sended
 # todo handle notification for chat
 # todo when retrieve many user, handle friend field
 # todo when create match return user instance not only id
 # todo when create match return teams id not list
+
+def get_username(user_id):
+    print('USER ID', user_id, flush=True)
+    try:
+        return Users.objects.get(id=user_id).username
+    except Users.DoesNotExist:
+        return 'DeleteUser'
+
 
 class SSEType(Enum):
     NOTIFICATION = 'notification'
@@ -80,9 +90,9 @@ class Event:
         if self.fmessage is None:
             message = ''
         elif kwargs is not None:
+            if 'username' in kwargs:
+                kwargs['username'] = get_username(kwargs['username'])
             message = self.fmessage.format(**kwargs)
-        elif data is not None:
-            message = self.fmessage.format(**data)
         else:
             message = self.fmessage
 
@@ -92,9 +102,8 @@ class Event:
             'type': self.type.value,
             'message': message,
             'target': None,# todo handle if self.target is None else [t.get_dict() for t in self.target],
+            'data': data,
         }
-        if data is not None:
-            result['data'] = data
         return json.dumps(result)
 
 
