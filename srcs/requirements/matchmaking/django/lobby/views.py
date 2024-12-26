@@ -50,25 +50,6 @@ class LobbyParticipantsView(SerializerAuthContext, generics.ListCreateAPIView, g
         super().perform_create(serializer)
         send_sse_event(EventCode.LOBBY_JOIN, serializer.instance, serializer.data, self.request)
 
-    def perform_destroy(self, instance):
-        send_sse_event(EventCode.LOBBY_LEAVE, instance, request=self.request)
-        super().perform_destroy(instance)
-
-
-class LobbyBanView(generics.DestroyAPIView):
-    serializer_class = LobbyParticipantsSerializer
-
-    def get_object(self):
-        ban_yourself(self.kwargs['user_id'], self.request.user.id)
-        lobby = get_lobby(self.kwargs['code'])
-        get_lobby_participant(lobby, self.request.user.id, True)
-        return get_ban_participants(lobby, self.kwargs['user_id'])
-
-    def perform_destroy(self, instance):
-        banned(instance, self.request)
-        super().destroy(instance)
-
 
 lobby_view = LobbyView.as_view()
 lobby_participants_view = LobbyParticipantsView.as_view()
-lobby_ban_view = LobbyBanView.as_view()
