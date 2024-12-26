@@ -10,7 +10,6 @@ import redis
 
 from sse.events import publish_event
 from users.auth import get_user
-from sse.events import ping
 
 
 redis_client = redis.StrictRedis(host='event-queue')
@@ -45,11 +44,11 @@ class SSEView(APIView):
                 while True:
                     message = pubsub.get_message(ignore_subscribe_messages=True)
                     if message:
-                        print(f'MESSAGE {_user.id}', flush=True)
-                        yield 'data: ' + message['data'].decode('utf-8') + ENDLINE
-
+                        event, data = message['data'].decode('utf-8').split(':', 1)
                     else:
-                        yield 'event: PING\ndata: ' + ping.dumps() + ENDLINE
+                        data = 'PING'
+                        event = 'ping'
+                    yield f'event: {event}\ndata: {data}\n\n'
                     time.sleep(1)
             except GeneratorExit:
                 pass

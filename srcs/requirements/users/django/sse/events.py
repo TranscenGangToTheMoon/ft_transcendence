@@ -123,8 +123,6 @@ tournament_seeding = Event(Service.TOURNAMENT, EventCode.TOURNAMENT_SEEDING) # t
 tournament_match_end = Event(Service.TOURNAMENT, EventCode.TOURNAMENT_MATCH_END, '{winner} win against {looser}.')
 tournament_finish = Event(Service.TOURNAMENT, EventCode.TOURNAMENT_FINISH, 'The tournament {name} is now over. Well done to {winner}} for his victory!')
 
-ping = Event(Service.AUTH, EventCode.PING, 'ping')
-
 # 'update-status': {'type': SSEType.event, 'db_field': None, 'message': None, 'target': 'update status user view', 'required-data': ['user_id', 'new status']}, # todo handle update status
 
 redis_client = redis.StrictRedis(host='event-queue')
@@ -138,6 +136,6 @@ def publish_event(user_id, event_code: EventCode, data=None):
 
     print('EVENT', event, type(event), flush=True)
     try:
-        redis_client.publish(channel, event.dumps(data))
+        redis_client.publish(channel, event.code.value + ':' + event.dumps(data))
     except redis.exceptions.ConnectionError:
         raise ServiceUnavailable('event-queue')
