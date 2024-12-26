@@ -50,7 +50,7 @@ def verify_place(user, model):
     if model.participants.filter(user_id=user['id']).exists():
         raise ResourceExists(MessagesException.ResourceExists.JOIN.format(obj=name))
 
-    if is_banned(model.code, user['id']) and are_users_blocked(user['id'], get_place_creator()):
+    if is_baned(model.code, user['id']) or are_users_blocked(user['id'], get_place_creator()):
         raise NotFound(MessagesException.NotFound.NOT_FOUND.format(obj=name.title()))
 
     if isinstance(model, Tournament) and model.is_started:
