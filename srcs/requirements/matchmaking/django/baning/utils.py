@@ -26,7 +26,7 @@ def banned(participant: LobbyParticipants | TournamentParticipants, request):
         ban_code = EventCode.TOURNAMENT_BAN
         leave_code = EventCode.TOURNAMENT_LEAVE
     create_sse_event(participant.user_id, ban_code)
-    send_sse_event(leave_code, participant, request=request)
+    send_sse_event(leave_code, participant)
 
 
 def ban_yourself(user_id, ban_user_id):
