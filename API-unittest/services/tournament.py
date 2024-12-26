@@ -38,9 +38,9 @@ def search_tournament(user, query, data=None):
     )
 
 
-def kick_user(user, user_kick, code):
+def ban_user(user, user_ban, code):
     return make_request(
-        endpoint=f'play/tournament/{code}/kick/{user_kick["id"]}/',
+        endpoint=f'play/tournament/{code}/ban/{user_ban["id"]}/',
         token=user['token'],
         method='DELETE',
     )

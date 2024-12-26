@@ -7,6 +7,7 @@ from lib_transcendence.sse_events import EventCode
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied, NotFound, APIException
 
+from baning.models import Baned
 from blocking.utils import are_users_blocked
 from lobby.models import Lobby, LobbyParticipants
 from play.models import Players
@@ -38,7 +39,7 @@ def get_tournament_participant(tournament, user_id, creator_check=False, from_pl
     return get_participant(TournamentParticipants, tournament, user_id, creator_check, from_place)
 
 
-def get_kick_participants(model, user_id):
+def get_ban_participants(model, user_id):
     try:
         return model.participants.get(user_id=user_id)
     except (LobbyParticipants.DoesNotExist, TournamentParticipants.DoesNotExist):
@@ -84,7 +85,7 @@ def verify_place(user, model, request):
     if model.participants.filter(user_id=user['id']).exists():
         raise ResourceExists(MessagesException.ResourceExists.JOIN.format(obj=model.str_name))
 
-    if are_users_blocked(user['id'], get_place_creator()):
+    if is_banned(model.code, user['id']) and are_users_blocked(user['id'], get_place_creator()):
         raise NotFound(MessagesException.NotFound.NOT_FOUND.format(obj=model.str_name.title())) # todo rename -> default
 
     if model.str_name == GameMode.tournament and model.is_started:
@@ -94,6 +95,12 @@ def verify_place(user, model, request):
 
     if model.is_full:
         raise PermissionDenied(MessagesException.PermissionDenied.IS_FULL.format(obj=model.str_name.title()))
+
+
+def get_place_model(participant: LobbyParticipants | TournamentParticipants): # todo user everywhere and delete str_name
+    if isinstance(participant, LobbyParticipants):
+        return participant.lobby
+    return participant.tournament
 
 
 # -------------------- GET PARTICIPANT ------------------------------------------------------------------------------- #
@@ -109,10 +116,10 @@ def get_participants(self, obj, add_fields: list[str] = None):
     return results
 
 
-# -------------------- KICK ------------------------------------------------------------------------------------------ #
-def kick_yourself(user_id, kick_user_id):
-    if user_id == kick_user_id:
-        raise PermissionDenied(MessagesException.PermissionDenied.KICK_YOURSELF)
+# -------------------- BAN ------------------------------------------------------------------------------------------ #
+def ban_yourself(user_id, ban_user_id):
+    if user_id == ban_user_id:
+        raise PermissionDenied(MessagesException.PermissionDenied.BAN_YOURSELF)
 
 
 # -------------------- VERIFY USER ----------------------------------------------------------------------------------- #
@@ -162,3 +169,25 @@ def send_sse_event(event: EventCode, instance: LobbyParticipants | TournamentPar
             user_instance = retrieve_users(instance.user_id, request)
             data.update(user_instance[0])
         create_sse_event(other_members, event, data=data)
+
+
+# -------------------- BANING ---------------------------------------------------------------------------------------- #
+def is_banned(code: str, user_id: int) -> bool:
+    try:
+        Baned.objects.get(code=code, user_id=user_id)
+        return True
+    except Baned.DoesNotExist:
+        return False
+
+
+def banned(participant: LobbyParticipants | TournamentParticipants, request):
+    place = get_place_model(participant)
+    Baned.objects.create(code=place.code, user_id=participant.user_id)
+    if isinstance(participant, LobbyParticipants):
+        ban_code = EventCode.LOBBY_BAN
+        leave_code = EventCode.LOBBY_LEAVE
+    else:
+        ban_code = EventCode.TOURNAMENT_BAN
+        leave_code = EventCode.TOURNAMENT_LEAVE
+    create_sse_event(participant.user_id, ban_code)
+    send_sse_event(leave_code, participant, request=request)

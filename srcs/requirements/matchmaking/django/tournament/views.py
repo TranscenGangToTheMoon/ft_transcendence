@@ -14,7 +14,7 @@ from rest_framework.response import Response
 from blocking.models import Blocked
 from blocking.utils import create_player_instance, delete_player_instance
 from matchmaking.create_match import create_tournament_match
-from matchmaking.utils import get_tournament_participant, get_tournament, get_kick_participants, kick_yourself
+from matchmaking.utils import get_tournament_participant, get_tournament, get_ban_participants, ban_yourself
 from tournament.models import Tournaments, TournamentParticipants
 from tournament.serializers import TournamentSerializer, TournamentStageSerializer, TournamentParticipantsSerializer, \
     TournamentSearchSerializer
@@ -78,18 +78,18 @@ class TournamentParticipantsView(SerializerAuthContext, generics.ListCreateAPIVi
         return Response(serializer_participant.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class TournamentKickView(generics.DestroyAPIView):
+class TournamentBanView(generics.DestroyAPIView):
     serializer_class = TournamentParticipantsSerializer
 
     def get_object(self):
-        kick_yourself(self.kwargs['user_id'], self.request.user.id)
+        ban_yourself(self.kwargs['user_id'], self.request.user.id)
         tournament = get_tournament(code=self.kwargs.get('code'))
         get_tournament_participant(tournament, self.request.user.id, True)
 
         if tournament.is_started:
-            raise PermissionDenied(MessagesException.PermissionDenied.KICK_AFTER_START)
+            raise PermissionDenied(MessagesException.PermissionDenied.BAN_AFTER_START)
 
-        return get_kick_participants(tournament, self.kwargs['user_id'])
+        return get_ban_participants(tournament, self.kwargs['user_id'])
 
 
 class TournamentResultMatchView(generics.CreateAPIView):
@@ -146,5 +146,5 @@ class TournamentResultMatchView(generics.CreateAPIView):
 tournament_view = TournamentView.as_view()
 tournament_search_view = TournamentSearchView.as_view()
 tournament_participants_view = TournamentParticipantsView.as_view()
-tournament_kick_view = TournamentKickView.as_view()
+tournament_ban_view = TournamentBanView.as_view()
 tournament_result_match_view = TournamentResultMatchView.as_view()

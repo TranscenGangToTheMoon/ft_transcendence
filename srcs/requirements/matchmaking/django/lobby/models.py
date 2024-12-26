@@ -2,6 +2,7 @@ from django.db import models
 from lib_transcendence.game import GameMode
 from lib_transcendence.Lobby import MatchType, Teams
 
+from baning.models import Baned
 from blocking.utils import delete_player_instance
 
 
@@ -44,6 +45,11 @@ class Lobby(models.Model):
     def set_ready_to_play(self, value: bool):
         self.ready_to_play = value
         self.save()
+
+    def delete(self, using=None, keep_parents=False):
+        code = self.code
+        super().delete(using=using, keep_parents=keep_parents)
+        Baned.objecs.filter(code=code).delete()
 
     def __str__(self):
         name = f'{self.code}/{self.game_mode} ({self.participants.count()}/{self.max_participants})'

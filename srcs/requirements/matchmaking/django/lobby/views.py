@@ -8,7 +8,8 @@ from rest_framework.response import Response
 
 from lobby.models import Lobby, LobbyParticipants
 from lobby.serializers import LobbySerializer, LobbyParticipantsSerializer
-from matchmaking.utils import get_lobby, get_lobby_participant, get_kick_participants, kick_yourself, send_sse_event
+from matchmaking.utils import get_lobby, get_lobby_participant, get_ban_participants, ban_yourself, send_sse_event, \
+    banned
 
 
 class LobbyView(generics.CreateAPIView, generics.RetrieveUpdateAPIView):
@@ -54,16 +55,20 @@ class LobbyParticipantsView(SerializerAuthContext, generics.ListCreateAPIView, g
         super().perform_destroy(instance)
 
 
-class LobbyKickView(generics.DestroyAPIView):
+class LobbyBanView(generics.DestroyAPIView):
     serializer_class = LobbyParticipantsSerializer
 
     def get_object(self):
-        kick_yourself(self.kwargs['user_id'], self.request.user.id)
+        ban_yourself(self.kwargs['user_id'], self.request.user.id)
         lobby = get_lobby(self.kwargs['code'])
         get_lobby_participant(lobby, self.request.user.id, True)
-        return get_kick_participants(lobby, self.kwargs['user_id'])
+        return get_ban_participants(lobby, self.kwargs['user_id'])
+
+    def perform_destroy(self, instance):
+        banned(instance, self.request)
+        super().destroy(instance)
 
 
 lobby_view = LobbyView.as_view()
 lobby_participants_view = LobbyParticipantsView.as_view()
-lobby_kick_view = LobbyKickView.as_view()
+lobby_ban_view = LobbyBanView.as_view()

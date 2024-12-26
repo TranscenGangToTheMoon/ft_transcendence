@@ -27,9 +27,9 @@ def join_lobby(user, code, method: Literal['GET', 'POST', 'PATCH', 'DELETE'] = '
     )
 
 
-def kick_user(user, user_kick, code):
+def ban_user(user, user_ban, code):
     return make_request(
-        endpoint=f'play/lobby/{code}/kick/{user_kick["id"]}/',
+        endpoint=f'play/lobby/{code}/ban/{user_ban["id"]}/',
         token=user['token'],
         method='DELETE',
     )

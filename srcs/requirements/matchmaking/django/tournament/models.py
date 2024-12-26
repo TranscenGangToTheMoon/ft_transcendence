@@ -5,6 +5,7 @@ import time
 from django.db import models
 from lib_transcendence.Tournament import Tournament
 
+from baning.models import Baned
 from blocking.utils import delete_player_instance
 from matchmaking.create_match import create_tournament_match
 
@@ -59,6 +60,11 @@ class Tournaments(models.Model):
     @property
     def n_stage(self):
         return int(log2(self.size))
+
+    def delete(self, using=None, keep_parents=False):
+        code = self.code
+        super().delete(using=using, keep_parents=keep_parents)
+        Baned.objecs.filter(code=code).delete()
 
     def __str__(self):
         if self.private:

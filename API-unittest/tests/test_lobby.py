@@ -1,7 +1,7 @@
 import unittest
 
 from services.blocked import blocked_user, unblocked_user
-from services.lobby import create_lobby, join_lobby, kick_user
+from services.lobby import create_lobby, join_lobby, ban_user
 from utils.my_unittest import UnitTest
 
 
@@ -88,7 +88,7 @@ class Test02_ErrorJoinLobby(UnitTest):
         user1['thread'].join()
         user2['thread'].join()
 
-    def test_008_blocked_user_kick_user(self):
+    def test_008_blocked_user_ban_user(self):
         user1 = self.user_sse()
         user2 = self.user_sse(get_me=True)
 
@@ -150,39 +150,39 @@ class Test02_ErrorJoinLobby(UnitTest):
         user2['thread'].join()
 
 
-class Test03_KickLobby(UnitTest):
+class Test03_BanLobby(UnitTest):
 
-    def test_001_kick_lobby(self):
+    def test_001_ban_lobby(self):
         user1 = self.user_sse()
         user2 = self.user_sse()
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
 
         self.assertResponse(join_lobby(user2, code), 201)
-        self.assertResponse(kick_user(user1, user2, code), 204)
+        self.assertResponse(ban_user(user1, user2, code), 204)
 
         response = self.assertResponse(join_lobby(user1, code, 'GET'), 200)
         self.assertEqual(1, len(response))
         user1['thread'].join()
         user2['thread'].join()
 
-    def test_002_user_kick_not_join_lobby(self):
+    def test_002_user_ban_not_join_lobby(self):
         user1 = self.user_sse()
         user2 = self.user_sse()
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
 
-        self.assertResponse(kick_user(user2, user1, code), 403, {'detail': 'You do not belong to this lobby.'})
+        self.assertResponse(ban_user(user2, user1, code), 403, {'detail': 'You do not belong to this lobby.'})
         user1['thread'].join()
         user2['thread'].join()
 
-    def test_003_user_kicked_not_join_lobby(self):
+    def test_003_user_baned_not_join_lobby(self):
         user1 = self.user_sse()
         user2 = self.user_sse()
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
 
-        self.assertResponse(kick_user(user1, user2, code), 404, {'detail': 'This user does not belong to this lobby.'})
+        self.assertResponse(ban_user(user1, user2, code), 404, {'detail': 'This user does not belong to this lobby.'})
         user1['thread'].join()
         user2['thread'].join()
 
@@ -190,7 +190,7 @@ class Test03_KickLobby(UnitTest):
         user1 = self.user_sse()
         user2 = self.user_sse()
 
-        self.assertResponse(kick_user(user1, user2, '123456'), 403, {'detail': 'You do not belong to this lobby.'})
+        self.assertResponse(ban_user(user1, user2, '123456'), 403, {'detail': 'You do not belong to this lobby.'})
         user1['thread'].join()
         user2['thread'].join()
 
@@ -201,7 +201,7 @@ class Test03_KickLobby(UnitTest):
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
 
         self.assertResponse(join_lobby(user2, code), 201)
-        self.assertResponse(kick_user(user2, user1, code), 403, {'detail': 'Only creator can update this lobby.'})
+        self.assertResponse(ban_user(user2, user1, code), 403, {'detail': 'Only creator can update this lobby.'})
         user1['thread'].join()
         user2['thread'].join()
 
@@ -209,7 +209,7 @@ class Test03_KickLobby(UnitTest):
         user1 = self.user_sse()
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
-        self.assertResponse(kick_user(user1, {'id': 123456789}, code), 404, {'detail': 'This user does not belong to this lobby.'})
+        self.assertResponse(ban_user(user1, {'id': 123456789}, code), 404, {'detail': 'This user does not belong to this lobby.'})
         user1['thread'].join()
 
 
