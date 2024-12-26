@@ -5,7 +5,6 @@ from lib_transcendence.exceptions import MessagesException
 
 from baning.models import Baned
 from lobby.models import LobbyParticipants
-from matchmaking.utils.sse import send_sse_event
 from tournament.models import TournamentParticipants
 
 
@@ -21,12 +20,9 @@ def banned(participant: LobbyParticipants | TournamentParticipants):
     Baned.objects.create(code=participant.place.code, baned_user_id=participant.user_id)
     if isinstance(participant, LobbyParticipants):
         ban_code = EventCode.LOBBY_BAN
-        leave_code = EventCode.LOBBY_LEAVE
     else:
         ban_code = EventCode.TOURNAMENT_BAN
-        leave_code = EventCode.TOURNAMENT_LEAVE
     create_sse_event(participant.user_id, ban_code)
-    send_sse_event(leave_code, participant)
 
 
 def ban_yourself(user_id, ban_user_id):
