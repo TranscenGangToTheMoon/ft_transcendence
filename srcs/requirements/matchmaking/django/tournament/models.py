@@ -98,6 +98,7 @@ class TournamentParticipants(models.Model):
     # todo add delete method and inform players that xxx leave the tournament
     # todo cans leave the tournament if started
 
+    @property
     def place(self):
         return self.tournament
 

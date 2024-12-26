@@ -71,6 +71,7 @@ class LobbyParticipants(models.Model):
 
     team = models.CharField(default=None, null=True)
 
+    @property
     def place(self):
         return self.lobby
 
