@@ -1,11 +1,7 @@
 from django.db import models
-from threading import Thread
 from lib_transcendence.game import GameMode
 
 from blocking.utils import delete_player_instance
-
-
-# import matchmaking #cant import some function from matchmaking (circular import)
 
 
 class Players(models.Model):
