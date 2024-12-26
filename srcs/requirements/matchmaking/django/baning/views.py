@@ -19,7 +19,7 @@ class LobbyBanView(generics.DestroyAPIView):
         return get_participants_for_baning(lobby, self.kwargs['user_id'])
 
     def perform_destroy(self, instance):
-        banned(instance, self.request)
+        banned(instance)
         super().destroy(instance)
 
 

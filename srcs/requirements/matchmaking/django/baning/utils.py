@@ -17,7 +17,7 @@ def is_banned(code: str, user_id: int) -> bool:
         return False
 
 
-def banned(participant: LobbyParticipants | TournamentParticipants, request):
+def banned(participant: LobbyParticipants | TournamentParticipants):
     Baned.objects.create(code=participant.place.code, baned_user_id=participant.user_id)
     if isinstance(participant, LobbyParticipants):
         ban_code = EventCode.LOBBY_BAN
