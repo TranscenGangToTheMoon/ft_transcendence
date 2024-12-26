@@ -4,7 +4,7 @@ from lib_transcendence.Lobby import MatchType, Teams
 from lib_transcendence.sse_events import EventCode
 from lib_transcendence.services import create_sse_event
 
-from baning.models import Baned
+from baning.models import delete_baned
 from blocking.utils import delete_player_instance
 from matchmaking.utils.sse import send_sse_event
 
@@ -50,9 +50,8 @@ class Lobby(models.Model):
         self.save()
 
     def delete(self, using=None, keep_parents=False):
-        code = self.code
+        delete_baned(self.code)
         super().delete(using=using, keep_parents=keep_parents)
-        Baned.objecs.filter(code=code).delete()
 
     def __str__(self):
         name = f'{self.code}/{self.game_mode} ({self.participants.count()}/{self.max_participants})'

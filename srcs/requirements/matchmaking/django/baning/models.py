@@ -7,3 +7,7 @@ class Baned(models.Model):
 
     def __str__(self):
         return f'{self.baned_user_id} baned in {self.code}'
+
+
+def delete_baned(code: str):
+    Baned.objects.filter(code=code).delete()
