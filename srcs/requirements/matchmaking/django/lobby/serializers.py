@@ -165,7 +165,7 @@ class LobbyParticipantsSerializer(serializers.ModelSerializer):
             elif self.instance.lobby.is_team_full(validated_data['team']):
                 raise PermissionDenied(MessagesException.PermissionDenied.TEAM_IS_FULL)
         result = super().update(instance, validated_data)
-        send_sse_event(EventCode.LOBBY_UPDATE, result, {'id': result.user_id, **validated_data})
+        send_sse_event(EventCode.LOBBY_UPDATE, result, validated_data)
         if instance.lobby.is_ready:
             instance.lobby.set_ready_to_play(True)
         elif instance.lobby.ready_to_play:

@@ -59,7 +59,8 @@ def request_auth(token, endpoint: Literal['update/', 'verify/', 'delete/'], meth
 def create_sse_event(
         users: list[int] | int,
         event_code: EventCode,
-        data: dict | None = None
+        data: dict | None = None,
+        kwargs: dict | None = None,
 ):
     sse_data = {
         'users_id': [users] if isinstance(users, int) else users,
@@ -68,6 +69,9 @@ def create_sse_event(
 
     if data is not None:
         sse_data['data'] = data
+
+    if kwargs is not None:
+        sse_data['kwargs'] = kwargs
 
     return request_service('users', endpoints.Users.event, 'POST', sse_data)
 
