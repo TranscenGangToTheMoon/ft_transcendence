@@ -75,19 +75,21 @@ class LobbyParticipants(models.Model):
         return self.lobby
 
     def delete(self, using=None, keep_parents=False):
-        # todo inform other players that xxx leave the lobby
         creator = self.creator
         lobby = self.lobby
         delete_player_instance(self.user_id)
+        send_sse_event(EventCode.LOBBY_LEAVE, self)
         super().delete(using=using, keep_parents=keep_parents)
-        participants = lobby.participants.filter(is_guest=False)
-        if not participants.exists():
-            lobby.delete()
-            # todo close websocket connection
-        elif creator:
-            first_join = participants.order_by('join_at').first()
-            first_join.creator = True
-            first_join.save()
+        if creator:
+            first_join = lobby.participants.filter(is_guest=False).order_by('join_at').first()
+            if first_join is None:
+                for user_left in lobby.participants.all():
+                    create_sse_event(user_left.user_id, EventCode.LOBBY_BAN)
+                lobby.delete()
+            else:
+                first_join.creator = True
+                first_join.save()
+                send_sse_event(EventCode.LOBBY_UPDATE, first_join, {'id': first_join.user_id, 'creator': True}, exclude_myself=False)
 
     def __str__(self):
         name = f'{self.lobby.code}/{self.lobby.game_mode} {self.user_id}'
