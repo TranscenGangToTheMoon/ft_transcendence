@@ -20,7 +20,7 @@ class LobbyBanView(generics.DestroyAPIView):
 
     def perform_destroy(self, instance):
         banned(instance)
-        super().destroy(instance)
+        super().perform_destroy(instance)
 
 
 class TournamentBanView(generics.DestroyAPIView):
