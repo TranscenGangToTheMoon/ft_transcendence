@@ -10,7 +10,7 @@ from blocking.utils import delete_player_instance
 from matchmaking.create_match import create_tournament_match
 
 
-class Tournaments(models.Model):
+class Tournament(models.Model):
     code = models.CharField(max_length=4, unique=True, editable=False)
     name = models.CharField(max_length=50, unique=True)
     size = models.IntegerField(default=16)
@@ -78,7 +78,7 @@ class Tournaments(models.Model):
 
 
 class TournamentStage(models.Model):
-    tournament = models.ForeignKey(Tournaments, on_delete=models.CASCADE, related_name='stages')
+    tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE, related_name='stages')
     label = models.CharField(max_length=50)
     stage = models.IntegerField(default=1)
 
@@ -88,7 +88,7 @@ class TournamentStage(models.Model):
 
 class TournamentParticipants(models.Model):
     user_id = models.IntegerField()
-    tournament = models.ForeignKey(Tournaments, on_delete=models.CASCADE, related_name='participants')
+    tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE, related_name='participants')
     stage = models.ForeignKey(TournamentStage, on_delete=models.CASCADE, default=None, null=True, related_name='participants')
     seeding = models.IntegerField(default=None, null=True) #todo make
     index = models.IntegerField(default=None, null=True) #todo make

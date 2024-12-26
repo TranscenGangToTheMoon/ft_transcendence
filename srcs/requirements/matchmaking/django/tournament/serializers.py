@@ -8,14 +8,14 @@ from blocking.utils import create_player_instance
 from matchmaking.utils.participant import get_participants
 from matchmaking.utils.place import get_tournament, verify_place
 from matchmaking.utils.user import verify_user
-from tournament.models import Tournaments, TournamentStage, TournamentParticipants
+from tournament.models import Tournament, TournamentStage, TournamentParticipants
 
 
 class TournamentSerializer(serializers.ModelSerializer):
     participants = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
-        model = Tournaments
+        model = Tournament
         fields = [
             'id',
             'code',
@@ -56,7 +56,7 @@ class TournamentSerializer(serializers.ModelSerializer):
 
         verify_user(user['id'], True)
 
-        validated_data['code'] = generate_code(Tournaments)
+        validated_data['code'] = generate_code(Tournament)
         validated_data['created_by'] = user['id']
         validated_data['created_by_username'] = user['username']
         result = super().create(validated_data)
@@ -121,7 +121,7 @@ class TournamentSearchSerializer(serializers.ModelSerializer):
     created_by = serializers.CharField(source='created_by_username')
 
     class Meta:
-        model = Tournaments
+        model = Tournament
         fields = [
             'name',
             'code',

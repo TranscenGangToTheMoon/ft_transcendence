@@ -6,7 +6,7 @@ from baning.utils import is_banned
 from blocking.utils import are_users_blocked
 from lobby.models import Lobby, LobbyParticipants
 from matchmaking.utils.user import verify_user
-from tournament.models import Tournaments, TournamentParticipants
+from tournament.models import Tournament, TournamentParticipants
 
 
 def get_place(model, create, **kwargs):
@@ -32,14 +32,14 @@ def get_lobby(code, create=False):
 
 
 def get_tournament(create=False, **kwargs):
-    return get_place(Tournaments, create, **kwargs)
+    return get_place(Tournament, create, **kwargs)
 
 
 def verify_place(user, model):
     name = type(model).__name__
 
     def get_place_creator():
-        if isinstance(model, Tournaments):
+        if isinstance(model, Tournament):
             return model.created_by
         else:
             try:
@@ -53,7 +53,7 @@ def verify_place(user, model):
     if is_banned(model.code, user['id']) and are_users_blocked(user['id'], get_place_creator()):
         raise NotFound(MessagesException.NotFound.NOT_FOUND.format(obj=name.title()))
 
-    if isinstance(model, Tournaments) and model.is_started:
+    if isinstance(model, Tournament) and model.is_started:
         raise PermissionDenied(MessagesException.PermissionDenied.TOURNAMENT_ALREADY_STARTED)
 
     verify_user(user['id'])

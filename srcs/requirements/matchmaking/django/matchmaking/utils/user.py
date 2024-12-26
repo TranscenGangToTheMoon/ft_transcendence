@@ -6,7 +6,7 @@ from rest_framework.exceptions import APIException, NotFound
 
 from lobby.models import LobbyParticipants
 from play.models import Players
-from tournament.models import TournamentParticipants, Tournaments
+from tournament.models import TournamentParticipants, Tournament
 
 
 def verify_user(user_id, created_tournament=False):
@@ -18,7 +18,7 @@ def verify_user(user_id, created_tournament=False):
             raise PermissionDenied(MessagesException.PermissionDenied.CAN_CREATE_MORE_THAN_ONE_TOURNAMENT)
         participant.delete()
     except TournamentParticipants.DoesNotExist:
-        if created_tournament and Tournaments.objects.filter(created_by=user_id).exists():
+        if created_tournament and Tournament.objects.filter(created_by=user_id).exists():
             raise PermissionDenied(MessagesException.PermissionDenied.CAN_CREATE_MORE_THAN_ONE_TOURNAMENT)
 
     try:

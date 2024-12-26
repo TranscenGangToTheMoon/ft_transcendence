@@ -16,18 +16,17 @@ from blocking.utils import create_player_instance, delete_player_instance
 from matchmaking.create_match import create_tournament_match
 from matchmaking.utils.participant import get_tournament_participant
 from matchmaking.utils.place import get_tournament
-from tournament.models import Tournaments, TournamentParticipants
+from tournament.models import Tournament, TournamentParticipants
 from tournament.serializers import TournamentSerializer, TournamentStageSerializer, TournamentParticipantsSerializer, \
     TournamentSearchSerializer
 
 
 class TournamentView(generics.CreateAPIView, generics.RetrieveAPIView):
-    queryset = Tournaments.objects.all()
     serializer_class = TournamentSerializer
 
     def get_object(self):
         try:
-            return Tournaments.objects.get(id=get_tournament_participant(None, self.request.user.id, from_place=True).tournament_id)
+            return Tournament.objects.get(id=get_tournament_participant(None, self.request.user.id, from_place=True).tournament_id)
         except TournamentParticipants.DoesNotExist:
             return NotFound(MessagesException.NotFound.TOURNAMENT)
 
@@ -50,7 +49,7 @@ class TournamentSearchView(generics.ListAPIView):
         query = self.request.data.get('q')
         if query is None:
             raise serializers.ValidationError({'q': [MessagesException.ValidationError.FIELD_REQUIRED]})
-        results = Tournaments.objects.filter(Q(private=False) | Q(created_by=self.request.user.id), name__icontains=query)
+        results = Tournament.objects.filter(Q(private=False) | Q(created_by=self.request.user.id), name__icontains=query)
         exclude_blocked = get_blocked_users('user_id') + get_blocked_users('blocked_user_id')
         return results.exclude(created_by__in=exclude_blocked)
 
@@ -80,7 +79,6 @@ class TournamentParticipantsView(SerializerAuthContext, generics.ListCreateAPIVi
 
 
 class TournamentResultMatchView(generics.CreateAPIView):
-    queryset = Tournaments.objects.all()
     permission_classes = [AllowAny]
 
     def create(self, request, *args, **kwargs):
