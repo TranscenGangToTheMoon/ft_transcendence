@@ -3,7 +3,7 @@ class ConnectedUsers:
 		self.users_sid = {}
 		self.users_id = {}
 
-	def add_user(self, id, sid, username, chat_id, chat_with_id):
+	def add_user(self, id, sid, username, chat_id, chat_with_id=None):
 		self.users_sid[sid] = {
 			'user_id': id,
 			'username': username,
@@ -34,7 +34,7 @@ class ConnectedUsers:
 
 	def is_chat_with_connected_with_him(self, sid):
 		user = self.users_sid.get(sid)
-		if user:
+		if user and user['chat_with_id']:
 			searched_user =  self.users_id.get(user['chat_with_id'])
 			if searched_user and searched_user['chat_id'] == user['chat_id']:
 				return True

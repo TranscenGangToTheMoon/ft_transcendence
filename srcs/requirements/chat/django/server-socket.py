@@ -32,26 +32,15 @@ usersConnected = ConnectedUsers()
 @sio.event
 async def connect(sid, environ, auth):
     print(f"Client attempting to connect : {sid}")
-    # token = environ.get('HTTP_TOKEN')
-    # chatId = environ.get('HTTP_CHATID')
     token = auth.get('token')
     chatId = auth.get('chatId')
-    user = None
-    chat = None
+    apiAnswer = None
     if token and chatId:
         try:
             print(f"Trying to authentificate : {sid}")
-            user = auth_verify(token)
-            await sio.emit('debug', user, to=sid)
+            apiAnswer = request_chat(endpoint_chat.fchat.format(chat_id=chatId), 'GET', None, token)
             print(f"Connection successeeded {sid}")
-        except AuthenticationFailed:
-            print(f"Authentification failed : {sid}")
-            raise ConnectionRefusedError({"error": 401, "message": "Invalid token"})
-        except APIException:
-            raise ConnectionRefusedError({"error": 500, "message": "error"})
-        try:
-            chat = request_chat(endpoint_chat.fchat.format(chat_id=chatId), 'GET', None, token)
-            await sio.emit('debug', chat, to=sid)
+            await sio.emit('debug', apiAnswer, to=sid)
             await sio.enter_room(sid, str(chatId))
         except AuthenticationFailed:
             print(f"Authentification failed : {sid}")
@@ -61,8 +50,8 @@ async def connect(sid, environ, auth):
             raise ConnectionRefusedError({"error": 403, "message": "Permission denied"})
         except APIException:
             raise ConnectionRefusedError({"error": 500, "message": "error"})
-        if user and chat:
-            usersConnected.add_user(user['id'], sid, user['username'], chatId, chat['chat_with'].get('id'))
+        if apiAnswer: #and apiAnswer['chat_type'] == "private_message"
+            usersConnected.add_user(apiAnswer['id'], sid, apiAnswer['username'], chatId, apiAnswer['chat_with'].get('id'))
     else:
         print(f"Connection failed : {sid}")
         raise ConnectionRefusedError({"error": 400, "message": "Missing args"})
@@ -78,6 +67,7 @@ async def disconnect(sid):
 @sio.event
 async def message(sid, data):
     chatId = usersConnected.get_chat_id(sid)
+    username = userConnected.get_username(sid)
     content = data.get('content')
     token = data.get('token')
     print(f"New message from {sid}: {data}")
@@ -98,14 +88,14 @@ async def message(sid, data):
             )
         await sio.emit(
             'message',
-            {'author':usersConnected.get_username(sid), 'content': content},
+            {'author':usersname, 'content': content},
             room=str(chatId)
         )
         print(f"Message saved and sent from {sid}: {data}")
     except PermissionDenied as e:
         await sio.emit(
             'error',
-            {'error': 403, 'message': 'Invalid token'},
+            {'error': 403, 'message': 'Permission Denied'},
             to=sid
         )
         print(f"Error: {e}")
@@ -127,6 +117,25 @@ async def message(sid, data):
             to=sid
         )
         await sio.disconnect(sid)
+
+async def message_lobby(sid, data):
+    chatId = usersConnected.get_chat_id(sid)
+    username = usersConnected.get_username(sid)
+    content = data.get('content')
+    print(f"New message from {sid}: {data}")
+    if (content is None):
+        await sio.emit(
+            'error',
+            {'error': 400, 'message': 'Invalid message format'},
+            to=sid
+        )
+        return
+    await sio.emit(
+        'message',
+        {'author':username, 'content': content},
+        room=str(chatId)
+    )
+    print(f"Message saved and sent from {sid}: {data}")
 
 
 
