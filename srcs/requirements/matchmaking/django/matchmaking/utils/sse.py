@@ -2,11 +2,8 @@ from lib_transcendence.services import create_sse_event
 from lib_transcendence.users import retrieve_users
 from lib_transcendence.sse_events import EventCode
 
-from lobby.models import LobbyParticipants
-from tournament.models import TournamentParticipants
 
-
-def send_sse_event(event: EventCode, instance: LobbyParticipants | TournamentParticipants, data=None, request=None, exclude_myself=True):
+def send_sse_event(event: EventCode, instance, data=None, request=None, exclude_myself=True):
     if data is None:
         data = {}
     members = instance.place.participants
