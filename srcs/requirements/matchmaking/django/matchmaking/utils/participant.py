@@ -20,7 +20,11 @@ def get_participants(self, obj, add_fields: list[str] = None):
 
 
 def get_participant(model, obj, user_id, creator_check, from_place):
-    name = type(model).__name__
+    if isinstance(model, TournamentParticipants):
+        name = 'tournament'
+    else:
+        name = 'lobby'
+
     kwargs = {'user_id': user_id}
     if obj is not None:
         kwargs[name] = obj.id
@@ -42,3 +46,6 @@ def get_lobby_participant(lobby, user_id, creator_check=False, from_place=False)
 
 def get_tournament_participant(tournament, user_id, creator_check=False, from_place=False):
     return get_participant(TournamentParticipants, tournament, user_id, creator_check, from_place)
+
+
+# todo add event for delete friend, and delete friend request
