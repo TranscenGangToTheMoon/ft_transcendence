@@ -37,7 +37,7 @@ def make_request(endpoint, method: Literal['GET', 'POST', 'DELETE', 'PATCH', 'PU
 
     try:
         result = r.json()
-        print('JSON =>', result)
+        print('JSON =>', result, end='\n\n', flush=True)
         return RequestResult(r.status_code, result)
     except json.decoder.JSONDecodeError:
         pass
