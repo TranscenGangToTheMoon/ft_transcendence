@@ -76,8 +76,6 @@ class Tournaments(models.Model):
             name += ' STARTED'
         return name
 
-    str_name = 'tournament'
-
 
 class TournamentStage(models.Model):
     tournament = models.ForeignKey(Tournaments, on_delete=models.CASCADE, related_name='stages')
@@ -139,5 +137,3 @@ class TournamentParticipants(models.Model):
         if self.stage is not None:
             name += ' ' + self.stage.label
         return name
-
-    str_name = 'tournament'
