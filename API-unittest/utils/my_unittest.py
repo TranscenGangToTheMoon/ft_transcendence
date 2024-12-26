@@ -93,13 +93,13 @@ class UnitTest(unittest.TestCase):
                         if line:
                             event, data = re.findall(r'event: ([a-z\-]+)\ndata: (.+)\n\n', line)[0]
                             timeout_count += 1
+                            if (tests is None and timeout_count > timeout) or timeout_count > 30: # todo remove later
+                                return assert_tests()
                             if event == 'ping':
                                 continue
                             data = json.loads(data)
                             if ignore_connection_message and data['event_code'] == 'connection-success':
                                 continue
-                            if tests is None and timeout_count > timeout: # todo remove later
-                                return assert_tests()
                             if 'username' in user:
                                 value = user['username']
                             elif 'id' in user:
