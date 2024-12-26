@@ -13,7 +13,7 @@ class Test01_Friend(UnitTest):
         user1 = self.new_user()
         user2 = self.new_user()
 
-        thread1 = self.connect_to_sse(user1, [{'service': 'friends', 'event_code': 'accept-friend-requests'}], 3)
+        thread1 = self.connect_to_sse(user1, ['accept-friend-requests'])
         self.assertFriendResponse(create_friendship(user1, user2))
         thread1.join()
 
@@ -84,7 +84,7 @@ class Test02_FriendRequest(UnitTest):
         user1 = self.new_user()
         user2 = self.new_user()
 
-        thread1 = self.connect_to_sse(user2, [{'service': 'friends', 'event_code': 'receive-friend-requests'}], 3)
+        thread1 = self.connect_to_sse(user2, ['receive-friend-request'])
         friend_request_id = self.assertResponse(friend_requests(user1, user2), 201, get_field=True)
 
         self.assertResponse(get_friend_requests_received(user2), 200, count=1)
