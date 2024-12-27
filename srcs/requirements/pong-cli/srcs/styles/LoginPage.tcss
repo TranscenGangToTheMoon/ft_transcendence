@@ -1,19 +1,20 @@
 Screen {
-    /*border: blue;*/
-    align: center middle;
+    border: blue;
 }
 
 #AuthenticationBox {
-    align: center middle;
-    content-align: center middle;
+    /*align: center middle;*/
+    /*content-align: center middle;*/
     width: 52;
     height: auto;
     border: green;
     padding: 0;
 }
 
-AuthenticationPage {
-    /*border: purple;*/
+LoginPage {
+    align: center middle;
+    /*content-align: center middle;*/
+    border: purple;
     width: auto;
 }
 

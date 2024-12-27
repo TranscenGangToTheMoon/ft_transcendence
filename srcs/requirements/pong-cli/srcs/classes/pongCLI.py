@@ -1,4 +1,5 @@
 from textual.app import App, ComposeResult
+from textual.screen import Screen
 from textual.widgets import Header, Footer, Button, Input, Static
 from textual.containers import VerticalGroup, HorizontalGroup, Container, Horizontal, Vertical
 from .user import User
@@ -9,12 +10,14 @@ class Page(Enum):
     MainPage = 2
     GamePage = 3
 
-class AuthenticationPage(VerticalGroup):
+class LoginPage(Screen):
     def __init__(self, user):
         super().__init__()
         self.user = user
 
     def compose(self) -> ComposeResult:
+        yield Header()
+        yield Footer()
         with Vertical(id="AuthenticationBox"):
             yield Input(placeholder="Server", id="server", value="https://localhost:4443")
             yield Input(placeholder="Username", id="username", value="xcharra1234")
@@ -40,7 +43,7 @@ class AuthenticationPage(VerticalGroup):
             self.user.password = self.query_one("#password").value
             try:
                 self.user.loginUser()
-                #change page
+                self.app.push_screen(MainPage(self.user))
                 self.query_one("#status").update(f"Status: login succeed!")
                 #exit loop
             except Exception as error:
@@ -58,7 +61,7 @@ class AuthenticationPage(VerticalGroup):
             self.user.password = self.query_one("#password").value
             try:
                 self.user.registerUser()
-                #change page
+                self.app.push_screen(MainPage(self.user))
                 self.query_one("#status").update(f"Status: register succeed!")
                 #exit loop
             except Exception as error:
@@ -74,7 +77,7 @@ class AuthenticationPage(VerticalGroup):
             self.user.server = self.query_one("#server").value
             try:
                 self.user.guestUser()
-                #change page
+                self.app.push_screen(MainPage(self.user))
                 self.query_one("#status").update(f"Status: GuestUp succeed!")
                 #exit loop
             except Exception as error:
@@ -85,24 +88,47 @@ class AuthenticationPage(VerticalGroup):
         else:
             self.query_one("#status").update(f"Empty fields")
 
+class MainPage(Screen):
+    def __init__(self, user):
+        super().__init__()
+        self.user = user
+
+    def compose(self) -> ComposeResult:
+        yield Header()
+        yield Footer()
+        yield Static("Main page")
+
+class GamePage(Screen):
+    def __init__(self, user):
+        super().__init__()
+        self.user = user
+
+    def compose(self) -> ComposeResult:
+        yield Header()
+        yield Footer()
+        yield Static("Game page")
+
+# diff on login and main page with Screen css ! Why ?
 class PongCLI(App):
-    CSS_PATH = "../styles/AuthenticationPage.tcss"
+    CSS_PATH = "../styles/LoginPage.tcss"
+    SCREENS = {}
+
     BINDINGS = [("d", "toggle_dark", "Toggle dark mode")]
 
     def __init__(self, user) -> None:
         super().__init__()
         self.user: User = user
 
-    def compose(self) -> ComposeResult:
-        yield Header()
-        yield Footer()
-        yield AuthenticationPage(self.user)
-
-    def changePage(self, page):
-        match page:
-            case Page.LoginPage:
-                yield AuthenticationPage(self.user)
-            case Page.MainPage:
-                yield Static("MainPage")
-            case Page.GamePage:
-                yield Static("GamePage")
+    def on_mount(self) -> None:
+        self.push_screen(LoginPage(self.user))
+    # def compose(self) -> ComposeResult:
+    #     yield LoginPage(self.user)
+    #
+    # def changePage(self, page):
+    #     match page:
+    #         case Page.LoginPage:
+    #             yield LoginPage(self.user)
+    #         case Page.MainPage:
+    #             yield Static("MainPage")
+    #         case Page.GamePage:
+    #             yield Static("GamePage")
