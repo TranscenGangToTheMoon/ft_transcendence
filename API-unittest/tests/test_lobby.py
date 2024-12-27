@@ -319,7 +319,7 @@ class Test05_UpdateParticipantLobby(UnitTest):
 
     def test_001_set_ready_to_true(self):
         user1 = self.user_sse(['lobby-join'])
-        user2 = self.user_sse(['lobby-update'])
+        user2 = self.user_sse(['lobby-update-participant'])
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
 
