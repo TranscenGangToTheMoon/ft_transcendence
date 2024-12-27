@@ -16,7 +16,8 @@ from users.models import Users
 # todo when create match return teams id not list
 
 def get_username(user_id):
-    print('USER ID', user_id, flush=True)
+    if isinstance(user_id, str):
+        return user_id
     try:
         return Users.objects.get(id=user_id).username
     except Users.DoesNotExist:
