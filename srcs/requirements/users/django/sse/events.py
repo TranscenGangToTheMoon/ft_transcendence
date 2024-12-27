@@ -2,6 +2,7 @@ import json
 from enum import Enum
 
 import redis
+from django.db.models import QuerySet
 from lib_transcendence.exceptions import MessagesException, ServiceUnavailable
 from lib_transcendence.sse_events import EventCode
 from rest_framework.exceptions import ParseError
@@ -143,14 +144,22 @@ tournament_finish = Event(Service.TOURNAMENT, EventCode.TOURNAMENT_FINISH, 'The 
 redis_client = redis.StrictRedis(host='event-queue')
 
 
-def publish_event(user_id, event_code: EventCode, data=None, kwargs=None):
-    channel = f'events:user_{user_id}'
+def publish_event(users: Users | QuerySet[Users] | list[Users], event_code: EventCode, data=None, kwargs=None):
     event = globals().get(event_code.value.replace('-', '_'))
     if event is None:
         raise ParseError({'event_code': [MessagesException.ValidationError.INVALID_EVENT_CODE]}) # todo handle error
 
-    print('EVENT', event, data, flush=True)
-    try:
-        redis_client.publish(channel, event.code.value + ':' + event.dumps(data, kwargs))
-    except redis.exceptions.ConnectionError:
-        raise ServiceUnavailable('event-queue')
+    if isinstance(users, Users):
+        users = [users]
+    elif isinstance(users, QuerySet):
+        users = list(users)
+
+    for user in users:
+        if user.is_online:
+            channel = f'events:user_{user.id}'
+
+            print('EVENT', event, data, flush=True)
+            try:
+                redis_client.publish(channel, event.code.value + ':' + event.dumps(data, kwargs))
+            except redis.exceptions.ConnectionError:
+                raise ServiceUnavailable('event-queue')
