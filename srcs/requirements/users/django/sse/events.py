@@ -58,11 +58,10 @@ class Target:
         self.method = method
         self.display_name = display_name
         self.display_icon = display_icon
-        # todo handle url format
 
-    def get_dict(self, **kwargs):
+    def dumps(self, data):
         return {
-            'url': self.url.format(**kwargs),
+            'url': self.url.format(**data),
             'type': self.type.name,
             'method': self.method,
             'display_name': self.display_name,
@@ -85,8 +84,6 @@ class Event:
         else:
             self.type = SSEType.NOTIFICATION
         self.target = target
-        # self.data = data todo handle for each
-        # todo handle url format
 
     def dumps(self, data=None, kwargs=None):
         if self.fmessage is None:
@@ -103,7 +100,7 @@ class Event:
             'event_code': self.code.value,
             'type': self.type.value,
             'message': message,
-            'target': None,# todo handle if self.target is None else [t.get_dict() for t in self.target],
+            'target': None if self.target is None else [t.dumps(data) for t in self.target],
             'data': data,
         }
         return json.dumps(result)
@@ -113,8 +110,8 @@ connection_success = Event(Service.AUTH, EventCode.CONNECTION_SUCCESS, 'Connecti
 
 send_message = Event(Service.CHAT, EventCode.SEND_MESSAGE, '{username}: {message}', Target('/chat/{id}/')) # todo format
 
-accept_friend_request = Event(Service.FRIENDS, EventCode.ACCEPT_FRIEND_REQUEST, '{username} has accepted your friend request.', type=SSEType.NOTIFICATION) # todo format
-receive_friend_request = Event(Service.FRIENDS, EventCode.RECEIVE_FRIEND_REQUEST, '{username} wants to be friends with you.', [Target('/api/users/me/friend_requests/{id}/', 'POST', display_icon='/icon/accept.png'), Target('/api/users/me/friend_requests/{id}/', 'DELETE', display_icon='/icon/decline.png')]) # todo format
+accept_friend_request = Event(Service.FRIENDS, EventCode.ACCEPT_FRIEND_REQUEST, '{username} has accepted your friend request.', type=SSEType.NOTIFICATION)
+receive_friend_request = Event(Service.FRIENDS, EventCode.RECEIVE_FRIEND_REQUEST, '{username} wants to be friends with you.', [Target('/api/users/me/friend_requests/{id}/', 'POST', display_icon='/icon/accept.png'), Target('/api/users/me/friend_requests/{id}/', 'DELETE', display_icon='/icon/decline.png')])
 reject_friend_request = Event(Service.FRIENDS, EventCode.REJECT_FRIEND_REQUEST)
 cancel_friend_request = Event(Service.FRIENDS, EventCode.CANCEL_FRIEND_REQUEST)
 delete_friend = Event(Service.FRIENDS, EventCode.DELETE_FRIEND)
