@@ -59,12 +59,14 @@ class MessagesException:
         INVALID_SERVICE = 'Invalid service'
         INVALID_EVENT_CODE = 'Invalid event code'
 
-    class NotAuthenticated:
-        PASSWORD_CONFIRMATION_REQUIRED = 'Password confirmation is required to delete the account.'
+    class Authentication:
+        NOT_CONNECTED_SSE = {'detail': 'You need to be connected to SSE to access this resource.', 'code': 'sse_connection_required'}
+        AUTHENTICATION_FAILED = {'detail': 'Incorrect authentication credentials.', 'code': 'authentication_failed'}
+        NOT_AUTHENTICATED = {'detail': 'Authentication credentials were not provided.', 'code': 'not_authenticated'}
+        USER_NOT_FOUND = {'detail': 'User not found.', 'code': 'user_not_found'}
 
-    class AuthenticationFailed:
+        PASSWORD_CONFIRMATION_REQUIRED = 'Password confirmation is required to delete the account.'
         INCORRECT_PASSWORD = 'Incorrect password.'
-        NOT_CONNECTED_SSE = 'You need to be connected to SSE to access this resource'
 
     class PermissionDenied:
         _GUEST_CANNOT_CREATE = 'Guest users cannot create {obj}.'
@@ -83,11 +85,12 @@ class MessagesException:
         NOT_BELONG_LOBBY = NOT_BELONG.format(obj='lobby')
         NOT_BELONG_TOURNAMENT = NOT_BELONG.format(obj='tournament')
         NOT_BELONG_BLOCKED = 'This blocked user entry does not belong to you.'
+        USER_NOT_BELONG = 'This user does not belong to this {obj}.'
 
         ONLY_CREATE_PRIVATE_MESSAGES = 'You can only create private messages.'
 
         CANNOT_CHAT_YOURSELF = 'You cannot chat with yourself.'
-        KICK_YOURSELF = 'You cannot kick yourself.'
+        BAN_YOURSELF = 'You cannot ban yourself.'
         BLOCK_YOURSELF = 'You cannot block yourself.'
         SEND_FRIEND_REQUEST_YOURSELF = 'You cannot send a friend request to yourself.'
         FRIEND_YOURSELF = 'You cannot be friends with yourself.'
@@ -106,7 +109,7 @@ class MessagesException:
         NOT_CREATOR = 'Only creator can update this {obj}.'
 
         CAN_CREATE_MORE_THAN_ONE_TOURNAMENT = 'You cannot create more than one tournament at the same time.'
-        KICK_AFTER_START = 'You cannot kick user after the tournament start.'
+        BAN_AFTER_START = 'You cannot ban user after the tournament start.'
 
         BLOCKED_USER = 'You blocked this user.'
 

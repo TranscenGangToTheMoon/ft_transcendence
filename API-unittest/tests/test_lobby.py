@@ -1,7 +1,7 @@
 import unittest
 
 from services.blocked import blocked_user, unblocked_user
-from services.lobby import create_lobby, join_lobby, kick_user
+from services.lobby import create_lobby, join_lobby, ban_user
 from utils.my_unittest import UnitTest
 
 
@@ -14,14 +14,45 @@ class Test01_JoinLobby(UnitTest):
         user1['thread'].join()
 
     def test_002_join_lobby(self):
-        user1 = self.user_sse(['lobby-join'])
-        user2 = self.user_sse()
+        user1 = self.user_sse(['lobby-join', 'lobby-join'])
+        user2 = self.user_sse(['lobby-join'])
+        user3 = self.user_sse()
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
 
         self.assertResponse(join_lobby(user2, code), 201)
+        self.assertResponse(join_lobby(user3, code), 201)
         user1['thread'].join()
         user2['thread'].join()
+        user3['thread'].join()
+
+    def test_003_join_two_lobby(self):
+        user1 = self.user_sse(['lobby-join', 'lobby-leave'])
+        user2 = self.user_sse()
+        user3 = self.user_sse(['lobby-join'])
+
+        code1 = self.assertResponse(create_lobby(user1), 201, get_field='code')
+        code2 = self.assertResponse(create_lobby(user3), 201, get_field='code')
+        self.assertResponse(join_lobby(user2, code1), 201)
+        self.assertResponse(join_lobby(user2, code1, method='DELETE'), 204)
+        self.assertResponse(join_lobby(user2, code2), 201)
+        user1['thread'].join()
+        user2['thread'].join()
+        user3['thread'].join()
+
+    def test_003_join_two_lobby(self):
+        user1 = self.user_sse(['lobby-join', 'lobby-leave'])
+        user2 = self.user_sse()
+        user3 = self.user_sse(['lobby-join'])
+
+        code1 = self.assertResponse(create_lobby(user1), 201, get_field='code')
+        code2 = self.assertResponse(create_lobby(user3), 201, get_field='code')
+        self.assertResponse(join_lobby(user2, code1), 201)
+        self.assertResponse(join_lobby(user2, code1, method='DELETE'), 204)
+        self.assertResponse(join_lobby(user2, code2), 201)
+        user1['thread'].join()
+        user2['thread'].join()
+        user3['thread'].join()
 
 
 class Test02_ErrorJoinLobby(UnitTest):
@@ -33,7 +64,7 @@ class Test02_ErrorJoinLobby(UnitTest):
         user1['thread'].join()
 
     def test_002_already_join(self):
-        user1 = self.user_sse()
+        user1 = self.user_sse(['lobby-join'])
         user2 = self.user_sse()
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
@@ -45,15 +76,15 @@ class Test02_ErrorJoinLobby(UnitTest):
         user2['thread'].join()
 
     def test_003_lobby_is_full(self):
-        user1 = self.user_sse()
-        user2 = self.user_sse()
+        user1 = self.user_sse(['lobby-join', 'lobby-join'])
+        user2 = self.user_sse(['lobby-join'])
+        user3 = self.user_sse()
+        user4 = self.user_sse()
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
-        for _ in range(2):
-            user_tmp = self.user_sse()
-            self.assertResponse(join_lobby(user_tmp, code), 201)
-
-        self.assertResponse(join_lobby(user2, code), 403, {'detail': 'Lobby is full.'})
+        self.assertResponse(join_lobby(user2, code), 201)
+        self.assertResponse(join_lobby(user3, code), 201)
+        self.assertResponse(join_lobby(user4, code), 403, {'detail': 'Lobby is full.'})
         user1['thread'].join()
         user2['thread'].join()
 
@@ -85,8 +116,8 @@ class Test02_ErrorJoinLobby(UnitTest):
         user1['thread'].join()
         user2['thread'].join()
 
-    def test_008_blocked_user_kick_user(self):
-        user1 = self.user_sse()
+    def test_008_blocked_user_ban_user(self):
+        user1 = self.user_sse(['lobby-join', 'lobby-leave'])
         user2 = self.user_sse(get_me=True)
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
@@ -103,9 +134,9 @@ class Test02_ErrorJoinLobby(UnitTest):
         user2['thread'].join()
 
     def test_009_blocked_user_not_creator(self):
-        user1 = self.user_sse()
-        user2 = self.user_sse()
-        user3 = self.user_sse()
+        user1 = self.user_sse(['lobby-join', 'lobby-join'])
+        user2 = self.user_sse(['lobby-join'])
+        user3 = self.user_sse(get_me=True)
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
 
@@ -120,8 +151,8 @@ class Test02_ErrorJoinLobby(UnitTest):
         user3['thread'].join()
 
     def test_010_blocked_then_unblock(self):
-        user1 = self.user_sse()
-        user2 = self.user_sse()
+        user1 = self.user_sse(['lobby-join', 'lobby-leave'])
+        user2 = self.user_sse(get_me=True)
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
 
@@ -141,64 +172,65 @@ class Test02_ErrorJoinLobby(UnitTest):
         user1 = self.new_user()
         user2 = self.user_sse()
 
-        self.assertResponse(create_lobby(user1), 401, {'detail': 'You need to be connected to SSE to access this resource'})
+        self.assertResponse(create_lobby(user1), 401, {'code': 'sse_connection_required', 'detail': 'You need to be connected to SSE to access this resource.'})
         code = self.assertResponse(create_lobby(user2), 201, get_field='code')
-        self.assertResponse(join_lobby(user1, code), 401, {'detail': 'You need to be connected to SSE to access this resource'})
+        self.assertResponse(join_lobby(user1, code), 401, {'code': 'sse_connection_required', 'detail': 'You need to be connected to SSE to access this resource.'})
         user2['thread'].join()
 
 
-class Test03_KickLobby(UnitTest):
+class Test03_BanLobby(UnitTest):
 
-    def test_001_kick_lobby(self):
-        user1 = self.user_sse()
-        user2 = self.user_sse()
+    def test_001_ban_lobby(self):
+        user1 = self.user_sse(['lobby-join', 'lobby-leave'])
+        user2 = self.user_sse(['lobby-ban'], get_me=True)
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
 
         self.assertResponse(join_lobby(user2, code), 201)
-        self.assertResponse(kick_user(user1, user2, code), 204)
+        self.assertResponse(ban_user(user1, user2, code), 204)
 
+        self.assertResponse(join_lobby(user2, code), 404, {'detail': 'Lobby not found.'})
         response = self.assertResponse(join_lobby(user1, code, 'GET'), 200)
         self.assertEqual(1, len(response))
         user1['thread'].join()
         user2['thread'].join()
 
-    def test_002_user_kick_not_join_lobby(self):
-        user1 = self.user_sse()
+    def test_002_user_ban_not_join_lobby(self):
+        user1 = self.user_sse(get_me=True)
         user2 = self.user_sse()
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
 
-        self.assertResponse(kick_user(user2, user1, code), 403, {'detail': 'You do not belong to this lobby.'})
+        self.assertResponse(ban_user(user2, user1, code), 403, {'detail': 'You do not belong to this lobby.'})
         user1['thread'].join()
         user2['thread'].join()
 
-    def test_003_user_kicked_not_join_lobby(self):
+    def test_003_user_baned_not_join_lobby(self):
         user1 = self.user_sse()
-        user2 = self.user_sse()
+        user2 = self.user_sse(get_me=True)
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
 
-        self.assertResponse(kick_user(user1, user2, code), 404, {'detail': 'This user does not belong to this lobby.'})
+        self.assertResponse(ban_user(user1, user2, code), 403, {'detail': 'This user does not belong to this lobby.'})
         user1['thread'].join()
         user2['thread'].join()
 
     def test_004_invalid_lobby(self):
         user1 = self.user_sse()
-        user2 = self.user_sse()
+        user2 = self.user_sse(get_me=True)
 
-        self.assertResponse(kick_user(user1, user2, '123456'), 403, {'detail': 'You do not belong to this lobby.'})
+        self.assertResponse(ban_user(user1, user2, '123456'), 403, {'detail': 'You do not belong to this lobby.'})
         user1['thread'].join()
         user2['thread'].join()
 
     def test_005_not_creator(self):
-        user1 = self.user_sse()
+        user1 = self.user_sse(['lobby-join'], get_me=True)
         user2 = self.user_sse()
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
 
         self.assertResponse(join_lobby(user2, code), 201)
-        self.assertResponse(kick_user(user2, user1, code), 403, {'detail': 'Only creator can update this lobby.'})
+        self.assertResponse(ban_user(user2, user1, code), 403, {'detail': 'Only creator can update this lobby.'})
         user1['thread'].join()
         user2['thread'].join()
 
@@ -206,14 +238,14 @@ class Test03_KickLobby(UnitTest):
         user1 = self.user_sse()
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
-        self.assertResponse(kick_user(user1, {'id': 123456789}, code), 404, {'detail': 'This user does not belong to this lobby.'})
+        self.assertResponse(ban_user(user1, {'id': 123456789}, code), 403, {'detail': 'This user does not belong to this lobby.'})
         user1['thread'].join()
 
 
 class Test04_UpdateLobby(UnitTest):
 
     def test_001_update_lobby(self):
-        user1 = self.user_sse()
+        user1 = self.user_sse() # todo make test and send sse event
 
         self.assertResponse(create_lobby(user1, data={'game_mode': 'custom_game'}), 201, get_field='code')
         self.assertEqual('3v3', self.assertResponse(create_lobby(user1, {'match_type': '3v3'}, 'PATCH'), 200, get_field='match_type'))
@@ -228,7 +260,7 @@ class Test04_UpdateLobby(UnitTest):
         user1['thread'].join()
 
     def test_003_update_not_creator(self):
-        user1 = self.user_sse()
+        user1 = self.user_sse(['lobby-join'])
         user2 = self.user_sse()
 
         code = self.assertResponse(create_lobby(user1, data={'game_mode': 'custom_game'}), 201, get_field='code')
@@ -253,8 +285,8 @@ class Test04_UpdateLobby(UnitTest):
         user1['thread'].join()
 
     def test_006_update_match_type_when_full(self):
-        user1 = self.user_sse()
-        users = [self.user_sse() for _ in range(5)]
+        user1 = self.user_sse(['lobby-join', 'lobby-join', 'lobby-join', 'lobby-join', 'lobby-join'])
+        users = [self.user_sse(['lobby-join'] * (4 - i), get_me=True) for i in range(5)]
 
         code = self.assertResponse(create_lobby(user1, data={'game_mode': 'custom_game'}), 201, get_field='code')
 
@@ -286,13 +318,15 @@ class Test04_UpdateLobby(UnitTest):
 class Test05_UpdateParticipantLobby(UnitTest):
 
     def test_001_set_ready_to_true(self):
-        user1 = self.user_sse()
+        user1 = self.user_sse(['lobby-join'])
+        user2 = self.user_sse(['lobby-update-participant'])
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
 
-        response = self.assertResponse(join_lobby(user1, code, data={'is_ready': True}), 200)
-        self.assertTrue(response['is_ready'])
+        self.assertResponse(join_lobby(user2, code), 201)
+        self.assertTrue(self.assertResponse(join_lobby(user1, code, data={'is_ready': True}), 200, get_field='is_ready'))
         user1['thread'].join()
+        user2['thread'].join()
 
     def test_002_change_team(self):
         user1 = self.user_sse()
@@ -321,7 +355,7 @@ class Test05_UpdateParticipantLobby(UnitTest):
         user1['thread'].join()
 
     def test_005_change_team_full(self):
-        user1 = self.user_sse()
+        user1 = self.user_sse(['lobby-join'])
         user2 = self.user_sse()
 
         code = self.assertResponse(create_lobby(user1, data={'game_mode': 'custom_game'}), 201, get_field='code')
@@ -334,18 +368,26 @@ class Test05_UpdateParticipantLobby(UnitTest):
 class Test06_LeaveLobby(UnitTest):
 
     def test_001_leave_lobby(self):
-        user1 = self.user_sse()
+        user1 = self.user_sse(['lobby-join', 'lobby-join', 'lobby-leave', 'lobby-leave'])
+        user2 = self.user_sse(['lobby-join', 'lobby-leave'])
+        user3 = self.user_sse()
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
+        self.assertResponse(join_lobby(user2, code), 201)
+        self.assertResponse(join_lobby(user3, code), 201)
 
+        self.assertResponse(join_lobby(user3, code, 'DELETE'), 204)
+        self.assertResponse(join_lobby(user2, code, 'DELETE'), 204)
         self.assertResponse(join_lobby(user1, code, 'DELETE'), 204)
         self.assertResponse(join_lobby(user1, code, 'GET'), 403, {'detail': 'You do not belong to this lobby.'})
         self.assertResponse(create_lobby(user1, method='GET'), 404, {'detail': 'You do not belong to any lobby.'})
         user1['thread'].join()
+        user2['thread'].join()
+        user3['thread'].join()
 
     def test_002_leave_lobby_then_other_member_became_creator(self):
-        user1 = self.user_sse()
-        user2 = self.user_sse()
+        user1 = self.user_sse(['lobby-join'])
+        user2 = self.user_sse(['lobby-leave', 'lobby-update-participant'])
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
 
@@ -359,17 +401,21 @@ class Test06_LeaveLobby(UnitTest):
         user2['thread'].join()
 
     def test_003_guest_join_leave_lobby_then_destroy_lobby(self):
-        user1 = self.user_sse()
-        user2 = self.guest_user()
+        user1 = self.user_sse(['lobby-join', 'lobby-join'])
+        user2 = self.guest_user(connect_sse=True, tests_sse=['lobby-join', 'lobby-leave', 'lobby-destroy'])
+        user3 = self.guest_user(connect_sse=True, tests_sse=['lobby-leave', 'lobby-destroy'])
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
-
         self.assertResponse(join_lobby(user2, code), 201)
+        self.assertResponse(join_lobby(user3, code), 201)
         self.assertResponse(join_lobby(user1, code, 'DELETE'), 204)
         self.assertResponse(join_lobby(user2, code, 'GET'), 403, {'detail': 'You do not belong to this lobby.'})
+        self.assertResponse(join_lobby(user3, code, 'GET'), 403, {'detail': 'You do not belong to this lobby.'})
         self.assertResponse(create_lobby(user2, method='GET'), 404, {'detail': 'You do not belong to any lobby.'})
+        self.assertResponse(create_lobby(user3, method='GET'), 404, {'detail': 'You do not belong to any lobby.'})
         user1['thread'].join()
         user2['thread'].join()
+        user3['thread'].join()
 
     def test_004_leave_lobby_does_not_exist(self):
         user1 = self.user_sse()
@@ -387,7 +433,7 @@ class Test06_LeaveLobby(UnitTest):
         user2['thread'].join()
 
     def test_006_leave_lobby_not_creator(self):
-        user1 = self.user_sse()
+        user1 = self.user_sse(['lobby-join', 'lobby-leave'])
         user2 = self.user_sse()
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
@@ -419,7 +465,7 @@ class Test07_GetLobby(UnitTest):
         user1['thread'].join()
 
     def test_002_get_lobby_participant(self):
-        user1 = self.user_sse()
+        user1 = self.user_sse(['lobby-join'])
         user2 = self.user_sse()
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')

@@ -30,6 +30,7 @@ class Users(models.Model):
     def connect(self):
         print(f'User {self.id} connected', flush=True)
         self.is_online = True
+        self.last_online = self.last_online # todo check if work
         self.save()
 
     def disconnect(self):

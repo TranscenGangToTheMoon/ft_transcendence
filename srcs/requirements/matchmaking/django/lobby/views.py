@@ -2,14 +2,15 @@ from lib_transcendence.game import GameMode
 from lib_transcendence.exceptions import MessagesException
 from lib_transcendence.serializer import SerializerAuthContext
 from lib_transcendence.sse_events import EventCode
-from lib_transcendence.services import create_sse_event
 from rest_framework import generics, status
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 
 from lobby.models import Lobby, LobbyParticipants
 from lobby.serializers import LobbySerializer, LobbyParticipantsSerializer
-from matchmaking.utils import get_lobby, get_lobby_participant, get_kick_participants, kick_yourself
+from matchmaking.utils.participant import get_lobby_participant
+from matchmaking.utils.place import get_lobby
+from matchmaking.utils.sse import send_sse_event
 
 
 class LobbyView(generics.CreateAPIView, generics.RetrieveUpdateAPIView):
@@ -48,21 +49,8 @@ class LobbyParticipantsView(SerializerAuthContext, generics.ListCreateAPIView, g
 
     def perform_create(self, serializer):
         super().perform_create(serializer)
-
-        other_members = list(LobbyParticipants.objects.filter(lobby_id=serializer.instance.lobby_id).exclude(id=serializer.instance.id).values_list('user_id', flat=True))
-        create_sse_event(other_members, EventCode.LOBBY_JOIN, data=serializer.data)
-
-
-class LobbyKickView(generics.DestroyAPIView):
-    serializer_class = LobbyParticipantsSerializer
-
-    def get_object(self):
-        kick_yourself(self.kwargs['user_id'], self.request.user.id)
-        lobby = get_lobby(self.kwargs['code'])
-        get_lobby_participant(lobby, self.request.user.id, True)
-        return get_kick_participants(lobby, self.kwargs['user_id'])
+        send_sse_event(EventCode.LOBBY_JOIN, serializer.instance, serializer.data, self.request)
 
 
 lobby_view = LobbyView.as_view()
 lobby_participants_view = LobbyParticipantsView.as_view()
-lobby_kick_view = LobbyKickView.as_view()

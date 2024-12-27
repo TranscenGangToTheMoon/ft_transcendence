@@ -8,9 +8,6 @@ from services.tournament import join_tournament, create_tournament
 from utils.my_unittest import UnitTest
 
 
-# todo  si pas connecter tu peux pas jouer matchmaking
-
-
 class Test01_Play(UnitTest):
 
     def test_001_play_duel(self):
@@ -83,6 +80,11 @@ class Test02_PlayError(UnitTest):
         user1 = self.user_sse()
 
         self.assertResponse(play(user1, method='DELETE'), 404, {'detail': 'You are not currently playing.'})
+
+    def test_007_not_connected_sse(self):
+        user1 = self.new_user()
+
+        self.assertResponse(play(user1), 401, {'code': 'sse_connection_required', 'detail': 'You need to be connected to SSE to access this resource.'})
 
 
 if __name__ == '__main__':

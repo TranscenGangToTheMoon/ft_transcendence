@@ -26,7 +26,7 @@ class FriendRequestsListCreateView(generics.ListCreateAPIView, FriendRequestsMix
 
         receiver = serializer.instance.receiver
         if receiver.is_online:
-            publish_event(receiver.id, EventCode.RECEIVE_FRIEND_REQUEST, data=serializer.data)
+            publish_event(receiver.id, EventCode.RECEIVE_FRIEND_REQUEST, data={**serializer.data}, kwargs={'username': serializer.data['sender']['username']})
 
 
 class FriendRequestsReceiveListView(generics.ListAPIView, FriendRequestsMixin):

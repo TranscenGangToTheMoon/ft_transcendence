@@ -3,6 +3,7 @@ from typing import Literal
 from lib_transcendence import endpoints
 from lib_transcendence.request import request_service
 from lib_transcendence.sse_events import EventCode
+from lib_transcendence.exceptions import MessagesException
 from rest_framework.exceptions import NotAuthenticated
 
 
@@ -10,7 +11,7 @@ def get_auth_token(request):
     token = request.headers.get('Authorization')
     if token is not None:
         return token
-    raise NotAuthenticated()
+    raise NotAuthenticated(MessagesException.Authentication.NOT_AUTHENTICATED)
 
 
 def request_users(endpoint: Literal['users/me/', 'validate/chat/', 'blocked/<>/'], method: Literal['GET', 'POST', 'PUT', 'PATCH', 'DELETE'] = 'GET', request=None, data=None, token=None):
@@ -50,7 +51,7 @@ def request_chat(endpoint: str, method: Literal['GET', 'PATCH', 'DELETE'] = 'PAT
 
 def request_auth(token, endpoint: Literal['update/', 'verify/', 'delete/'], method: Literal['GET', 'PUT', 'PATCH', 'DELETE'], data=None):
     if token is None:
-        raise NotAuthenticated()
+        raise NotAuthenticated(MessagesException.Authentication.NOT_AUTHENTICATED)
 
     return request_service('auth', endpoint, method, data, token)
 
@@ -58,7 +59,8 @@ def request_auth(token, endpoint: Literal['update/', 'verify/', 'delete/'], meth
 def create_sse_event(
         users: list[int] | int,
         event_code: EventCode,
-        data: dict | None = None
+        data: dict | None = None,
+        kwargs: dict | None = None,
 ):
     sse_data = {
         'users_id': [users] if isinstance(users, int) else users,
@@ -67,6 +69,9 @@ def create_sse_event(
 
     if data is not None:
         sse_data['data'] = data
+
+    if kwargs is not None:
+        sse_data['kwargs'] = kwargs
 
     return request_service('users', endpoints.Users.event, 'POST', sse_data)
 

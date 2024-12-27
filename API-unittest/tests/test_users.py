@@ -69,60 +69,60 @@ class Test03_DeleteUser(UnitTest):
         user1 = self.new_user()
 
         self.assertResponse(me(user1, method='DELETE', password=True), 204)
-        self.assertResponse(me(user1), 401, {'detail': 'Incorrect authentication credentials.'})
+        self.assertResponse(me(user1), 401, {'code': 'user_not_found', 'detail': 'User not found.'})
 
     def test_002_delete_not_get_me(self):
         user1 = self.new_user()
 
         self.assertResponse(me(user1, method='DELETE', password=True), 204)
-        self.assertResponse(me(user1), 401, {'detail': 'Incorrect authentication credentials.'})
+        self.assertResponse(me(user1), 401, {'code': 'user_not_found', 'detail': 'User not found.'})
 
     def test_003_already_delete(self):
         user1 = self.new_user()
 
         self.assertResponse(me(user1, method='DELETE', password=True), 204)
-        self.assertResponse(me(user1, method='DELETE', password=True), 401, {'detail': 'Incorrect authentication credentials.'})
+        self.assertResponse(me(user1, method='DELETE', password=True), 401, {'code': 'user_not_found', 'detail': 'User not found.'})
 
     def test_004_request_after_delete(self):
         user1 = self.new_user()
 
         self.assertResponse(me(user1, method='DELETE', password=True), 204)
-        self.assertResponse(create_lobby(user1), 401, {'detail': 'Incorrect authentication credentials.'})
+        self.assertResponse(create_lobby(user1), 401, {'code': 'user_not_found', 'detail': 'User not found.'})
 
     def test_005_user_in_lobby(self):
-        user1 = self.new_user()
-        user2 = self.new_user()
+        user1 = self.user_sse()
+        user2 = self.user_sse()
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
         self.assertResponse(me(user1, method='DELETE', password=True), 204)
-        self.assertResponse(create_lobby(user1, method='GET'), 401, {'detail': 'Incorrect authentication credentials.'})
+        self.assertResponse(create_lobby(user1, method='GET'), 401, {'code': 'user_not_found', 'detail': 'User not found.'})
         self.assertResponse(join_lobby(user2, code), 404, {'detail': 'Lobby not found.'})
 
     def test_006_user_in_game(self):
-        user1 = self.new_user()
-        user2 = self.new_user()
+        user1 = self.new_user(get_me=True)
+        user2 = self.new_user(get_me=True)
 
         self.assertResponse(create_game(user1, user2), 201)
         self.assertResponse(me(user1, method='DELETE', password=True), 204)
         # todo make when have game
 
     def test_007_user_in_tournament(self):
-        user1 = self.new_user()
-        user2 = self.new_user()
-        user3 = self.new_user()
+        user1 = self.user_sse()
+        user2 = self.user_sse()
+        user3 = self.user_sse()
         name = rnstr()
 
         code = self.assertResponse(create_tournament(user1, {'name': 'Delete User ' + name}), 201, get_field='code')
         self.assertResponse(search_tournament(user2, name), 200, count=1)
         self.assertResponse(me(user1, method='DELETE', password=True), 204)
-        self.assertResponse(create_tournament(user1, method='GET'), 401, {'detail': 'Incorrect authentication credentials.'})
+        self.assertResponse(create_tournament(user1, method='GET'), 401, {'code': 'user_not_found', 'detail': 'User not found.'})
         self.assertResponse(search_tournament(user2, name), 200, count=0)
         self.assertResponse(join_tournament(user3, code), 404)
 
     def test_008_user_in_start_tournament(self):
-        user1 = self.new_user()
-        user2 = self.new_user()
-        user3 = self.new_user()
+        user1 = self.user_sse()
+        user2 = self.user_sse()
+        user3 = self.user_sse()
         name = rnstr()
 
         code = self.assertResponse(create_tournament(user1, {'name': 'Delete User ' + name}), 201, get_field='code')
@@ -145,10 +145,10 @@ class Test03_DeleteUser(UnitTest):
         self.assertResponse(request_chat_id(user2, chat_id), 403, {'detail': 'You do not belong to this chat.'})
 
     def test_010_play_duel(self):
-        user2 = self.new_user()
+        user2 = self.user_sse(get_me=True)
 
         while True:
-            user1 = self.new_user()
+            user1 = self.user_sse(get_me=True)
 
             self.assertResponse(play(user1), 201)
             time.sleep(1)
@@ -161,10 +161,10 @@ class Test03_DeleteUser(UnitTest):
         self.assertResponse(is_in_game(user2), 404, {'detail': 'This user is not in a game.'})
 
     def test_012_play_ranked(self):
-        user2 = self.new_user()
+        user2 = self.user_sse(get_me=True)
 
         while True:
-            user1 = self.new_user()
+            user1 = self.user_sse(get_me=True)
 
             self.assertResponse(play(user1, 'ranked'), 201)
             time.sleep(1)
@@ -203,7 +203,7 @@ class Test03_DeleteUser(UnitTest):
         self.assertResponse(get_friends(user3), 200, count=0)
 
     def test_015_blocked(self):
-        user1 = self.new_user()
+        user1 = self.new_user(get_me=True)
         user2 = self.new_user()
 
         self.assertResponse(blocked_user(user2, user1['id']), 201)

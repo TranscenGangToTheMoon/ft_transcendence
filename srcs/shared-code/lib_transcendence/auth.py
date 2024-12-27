@@ -27,14 +27,19 @@ class AbstractAuthentication(ABC, BaseAuthentication):
         token = request.headers.get('Authorization')
 
         if not token:
-            raise NotAuthenticated()
+            token = 'Bearer ' + request.query_params.get('token', None)
+            if not token:
+                raise NotAuthenticated(MessagesException.Authentication.NOT_AUTHENTICATED)
 
         try:
             json_data = self.auth_request(token)
         except AuthenticationFailed as e:
+            if e.detail['code'] == MessagesException.Authentication.USER_NOT_FOUND['code']:
+                raise AuthenticationFailed(MessagesException.Authentication.USER_NOT_FOUND)
+            print('CACA ==================', e.detail, e, flush=True)
             raise e
         if json_data is None:
-            raise AuthenticationFailed()
+            raise AuthenticationFailed(MessagesException.Authentication.AUTHENTICATION_FAILED)
 
         request.data['auth_user'] = json_data
         auth_user = get_user_from_auth(json_data)
