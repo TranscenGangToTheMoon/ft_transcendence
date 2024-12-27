@@ -139,6 +139,8 @@ services:
     depends_on:
       users-db:
         condition: service_healthy
+      event-queue:
+        condition: service_healthy
     restart: on-failure
     ports:
       - "8005:8000"
@@ -153,7 +155,19 @@ services:
       POSTGRES_HOST: ${POSTGRES_USERS_HOST}
     networks:
       - transcendence-network
+      - redis-network
       - users-network
+
+##### ========== Event-queue ============================================= #####
+  event-queue:
+    image: redis:alpine
+    networks:
+        - redis-network
+    healthcheck:
+      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 ##### ========== Database ================================================ #####
   auth-db:
@@ -230,6 +244,11 @@ networks:
 ##### ========== Global network ========================================== #####
   transcendence-network:
     name: transcendence-network
+    driver: bridge
+
+##### ========== Event-queue network ===================================== #####
+  redis-network:
+    name: redis-network
     driver: bridge
 
 ##### ========== DB to Django networks =================================== #####

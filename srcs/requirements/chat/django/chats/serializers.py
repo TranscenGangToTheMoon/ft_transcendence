@@ -57,7 +57,7 @@ class ChatsSerializer(serializers.ModelSerializer):
         if request is None:
             raise serializers.ValidationError(MessagesException.ValidationError.REQUEST_REQUIRED)
         chat_with = obj.participants.exclude(user_id=get_auth_user(request)['id']).first()
-        chat_with_user = retrieve_users(chat_with.user_id, request)
+        chat_with_user = retrieve_users(chat_with.user_id)
         if len(chat_with_user) != 1:
             raise NotFound(MessagesException.NotFound.USER)
         return chat_with_user[0]

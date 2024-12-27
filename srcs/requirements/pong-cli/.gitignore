@@ -1,6 +1,0 @@
-/lib/*
-*.o
-*.d
-/build/*
-ft_transcendence.crt
-pong-cli

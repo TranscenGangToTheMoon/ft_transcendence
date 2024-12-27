@@ -1,3 +1,10 @@
+{
+    log {
+        output stdout
+        level debug
+    }
+}
+
 :443 {
 	tls /run/secrets/ssl.crt /run/secrets/ssl.key
 

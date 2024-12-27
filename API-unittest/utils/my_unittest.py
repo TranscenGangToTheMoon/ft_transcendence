@@ -1,12 +1,52 @@
+import json
+import re
+import time
 import unittest
+from threading import Thread
+
+import httpx
+
+from services.auth import register, create_guest
+from services.user import me
+from utils.generate_random import rnstr
 
 
 class UnitTest(unittest.TestCase):
+    def new_user(self, username=None, password=None, get_me=False, connect_sse=False, tests_sse: list[str] = None):
+        if username is None:
+            username = 'user-' + rnstr(10)
+        if password is None:
+            password = 'password-' + rnstr(15)
+        _new_user = {'username': username, 'password': password}
+        token = self.assertResponse(register(_new_user['username'], password), 201)
+        _new_user['token'] = token['access']
+        _new_user['refresh'] = token['refresh']
+        if get_me:
+            _new_user['id'] = self.assertResponse(me(_new_user), 200, get_field=True)
+        if connect_sse:
+            _new_user['thread'] = self.connect_to_sse(_new_user, tests_sse)
+        return _new_user
 
-    def assertResponse(self, response, status_code, json=None, count=None, get_field=None, get_user=False):
+    def user_sse(self, tests: list[str] = None, get_me=False):
+        return self.new_user(connect_sse=True, tests_sse=tests, get_me=get_me)
+
+    def guest_user(self, get_me=False, connect_sse=False, tests_sse: list[str] = None):
+        _new_user = {}
+        token = self.assertResponse(create_guest(), 201)
+        _new_user['token'] = token['access']
+        _new_user['refresh'] = token['refresh']
+        if get_me:
+            response = self.assertResponse(me(_new_user), 200)
+            _new_user['id'] = response['id']
+            _new_user['username'] = response['username']
+        if connect_sse:
+            _new_user['thread'] = self.connect_to_sse(_new_user, tests_sse)
+        return _new_user
+
+    def assertResponse(self, response, status_code, json_assertion=None, count=None, get_field=None, get_user=False):
         self.assertEqual(status_code, response.status_code)
-        if json is not None:
-            self.assertEqual(json, response.json)
+        if json_assertion is not None:
+            self.assertEqual(json_assertion, response.json)
         if count is not None:
             self.assertEqual(count, response.json['count'])
         if get_user:
@@ -17,9 +57,58 @@ class UnitTest(unittest.TestCase):
             return response.json[get_field]
         return response.json
 
-    def assertFriendResponse(self, responses, status_code=201, json=None):
+    def assertFriendResponse(self, responses, status_code=201, json_assertion=None):
         self.assertEqual(201, responses[0].status_code)
         self.assertEqual(status_code, responses[1].status_code)
-        if json is not None:
-            self.assertEqual(json, responses[1].json)
+        if json_assertion is not None:
+            self.assertEqual(json_assertion, responses[1].json)
         return responses[1].json['id']
+
+    def connect_to_sse(self, user, tests: list[str] = None, timeout=10, status_code=200, ignore_connection_message=True, thread=True):
+        if thread:
+            thread = Thread(target=self._thread_connect_to_sse, args=(user, tests, timeout, status_code, ignore_connection_message))
+            thread.start()
+            time.sleep(0.5)
+            return thread
+        else:
+            self._thread_connect_to_sse(user, tests, timeout, status_code, ignore_connection_message)
+
+    def _thread_connect_to_sse(self, user, tests, timeout, status_code, ignore_connection_message):
+        def assert_tests():
+            if tests is not None:
+                self.assertEqual(i, len(tests))
+
+        i = 0
+        timeout_count = 0
+
+        with httpx.Client(verify=False) as client:
+            headers = {
+                'Authorization': f'Bearer {user["token"]}',
+                'Content-Type': 'text/event-stream',
+            }
+            with client.stream('GET', 'https://localhost:4443/sse/users/', headers=headers) as response:
+                self.assertEqual(status_code, response.status_code)
+                if status_code == 200:
+                    for line in response.iter_text():
+                        if line:
+                            event, data = re.findall(r'event: ([a-z\-]+)\ndata: (.+)\n\n', line)[0]
+                            timeout_count += 1
+                            if (tests is None and timeout_count > timeout) or timeout_count > 30: # todo remove later
+                                return assert_tests()
+                            if event == 'ping':
+                                continue
+                            data = json.loads(data)
+                            if ignore_connection_message and data['event_code'] == 'connection-success':
+                                continue
+                            if 'username' in user:
+                                value = user['username']
+                            elif 'id' in user:
+                                value = user['id']
+                            else:
+                                value = ''
+                            print(f"SSE RECEIVED {value}: {data}", flush=True)
+                            self.assertEqual(tests[i], data['event_code'])
+                            i += 1
+                            if i == len(tests):
+                                return
+        assert_tests()

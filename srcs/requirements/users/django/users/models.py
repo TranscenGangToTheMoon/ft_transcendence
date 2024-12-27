@@ -27,6 +27,17 @@ class Users(models.Model):
     current_rank = models.IntegerField(default=None, null=True)
     highest_rank = models.IntegerField(default=None, null=True)
 
+    def connect(self):
+        print(f'User {self.id} connected', flush=True)
+        self.is_online = True
+        self.last_online = self.last_online # todo check if work
+        self.save()
+
+    def disconnect(self):
+        print(f'User {self.id} disconnect', flush=True)
+        self.is_online = False
+        self.save()
+
     def __str__(self):
         return f'{self.id} {self.username}'
 

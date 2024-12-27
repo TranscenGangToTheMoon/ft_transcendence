@@ -1,14 +1,11 @@
 from typing import Literal
 
-from utils.credentials import new_user
 from utils.request import make_request
 
 
-def create_lobby(user=None, data=None, method: Literal['GET', 'POST', 'PATCH', 'DELETE'] = 'POST'):
+def create_lobby(user, data=None, method: Literal['GET', 'POST', 'PATCH', 'DELETE'] = 'POST'):
     if data is None:
         data = {'game_mode': 'clash'}
-    if user is None:
-        user = new_user()
     return make_request(
         endpoint='play/lobby/',
         method=method,
@@ -17,9 +14,7 @@ def create_lobby(user=None, data=None, method: Literal['GET', 'POST', 'PATCH', '
     )
 
 
-def join_lobby(code, user=None, method: Literal['GET', 'POST', 'PATCH', 'DELETE'] = 'POST', data=None):
-    if user is None:
-        user = new_user()
+def join_lobby(user, code, method: Literal['GET', 'POST', 'PATCH', 'DELETE'] = 'POST', data=None):
     if data is None:
         data = {}
     else:
@@ -32,9 +27,9 @@ def join_lobby(code, user=None, method: Literal['GET', 'POST', 'PATCH', 'DELETE'
     )
 
 
-def kick_user(user, user_kick, code):
+def ban_user(user, user_ban, code):
     return make_request(
-        endpoint=f'play/lobby/{code}/kick/{user_kick["id"]}/',
+        endpoint=f'play/lobby/{code}/ban/{user_ban["id"]}/',
         token=user['token'],
         method='DELETE',
     )

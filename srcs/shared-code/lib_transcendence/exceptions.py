@@ -12,6 +12,7 @@ class MessagesException:
         NOT_FOUND = '{obj} not found.'
         CREATOR = NOT_FOUND.format(obj='Creator')
         USER = NOT_FOUND.format(obj='User')
+        USERS = NOT_FOUND.format(obj='Users')
         FRIEND_REQUEST = NOT_FOUND.format(obj='Friend request')
         FRIENDSHIP = NOT_FOUND.format(obj='Friendship')
         TOURNAMENT = NOT_FOUND.format(obj='Tournament')
@@ -55,10 +56,16 @@ class MessagesException:
         TOURNAMENT_MAX_SIZE = 'Tournament size must be less than or equal than 32.'
         TOURNAMENT_MIN_SIZE = 'Tournament size must be greater or equal than 4.'
 
-    class NotAuthenticated:
-        PASSWORD_CONFIRMATION_REQUIRED = 'Password confirmation is required to delete the account.'
+        INVALID_SERVICE = 'Invalid service'
+        INVALID_EVENT_CODE = 'Invalid event code'
 
-    class AuthentificationFailed:
+    class Authentication:
+        NOT_CONNECTED_SSE = {'detail': 'You need to be connected to SSE to access this resource.', 'code': 'sse_connection_required'}
+        AUTHENTICATION_FAILED = {'detail': 'Incorrect authentication credentials.', 'code': 'authentication_failed'}
+        NOT_AUTHENTICATED = {'detail': 'Authentication credentials were not provided.', 'code': 'not_authenticated'}
+        USER_NOT_FOUND = {'detail': 'User not found.', 'code': 'user_not_found'}
+
+        PASSWORD_CONFIRMATION_REQUIRED = 'Password confirmation is required to delete the account.'
         INCORRECT_PASSWORD = 'Incorrect password.'
 
     class PermissionDenied:
@@ -78,11 +85,12 @@ class MessagesException:
         NOT_BELONG_LOBBY = NOT_BELONG.format(obj='lobby')
         NOT_BELONG_TOURNAMENT = NOT_BELONG.format(obj='tournament')
         NOT_BELONG_BLOCKED = 'This blocked user entry does not belong to you.'
+        USER_NOT_BELONG = 'This user does not belong to this {obj}.'
 
         ONLY_CREATE_PRIVATE_MESSAGES = 'You can only create private messages.'
 
         CANNOT_CHAT_YOURSELF = 'You cannot chat with yourself.'
-        KICK_YOURSELF = 'You cannot kick yourself.'
+        BAN_YOURSELF = 'You cannot ban yourself.'
         BLOCK_YOURSELF = 'You cannot block yourself.'
         SEND_FRIEND_REQUEST_YOURSELF = 'You cannot send a friend request to yourself.'
         FRIEND_YOURSELF = 'You cannot be friends with yourself.'
@@ -101,7 +109,7 @@ class MessagesException:
         NOT_CREATOR = 'Only creator can update this {obj}.'
 
         CAN_CREATE_MORE_THAN_ONE_TOURNAMENT = 'You cannot create more than one tournament at the same time.'
-        KICK_AFTER_START = 'You cannot kick user after the tournament start.'
+        BAN_AFTER_START = 'You cannot ban user after the tournament start.'
 
         BLOCKED_USER = 'You blocked this user.'
 
@@ -127,6 +135,7 @@ class MessagesException:
         FRIEND = 'You are already friends with this user.'
         FRIEND_REQUEST_SENT = 'You have already sent a friend request to this user.'
         FRIEND_REQUEST_RECEIVED = 'You have already received a friend request from this user.'
+        SSE = 'You are already connected to SSE.'
 
         JOIN = 'You already joined this {obj}.'
 
@@ -145,7 +154,7 @@ class ServiceUnavailable(APIException):
     default_detail = MessagesException.ServiceUnavailable.SERVICE_UNAVAILABLE
     default_code = 'service_unavailable'
 
-    def __init__(self, service: Literal['auth', 'chat', 'game', 'matchmaking', 'users']):
+    def __init__(self, service: Literal['auth', 'chat', 'game', 'matchmaking', 'event-queue', 'users']):
         self.detail = ServiceUnavailable.default_detail.format(service=service)
 
 

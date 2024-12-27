@@ -1,15 +1,12 @@
 from typing import Literal
 
-from utils.credentials import new_user
 from utils.generate_random import rnstr
 from utils.request import make_request
 
 
-def create_tournament(user=None, data=None, method: Literal['GET', 'POST', 'PATCH', 'DELETE'] = 'POST'):
+def create_tournament(user, data=None, method: Literal['GET', 'POST', 'PATCH', 'DELETE'] = 'POST'):
     if data is None:
         data = {'name': 'Tournoi ' + rnstr(), 'size': 4}
-    if user is None:
-        user = new_user()
     return make_request(
         endpoint='play/tournament/',
         method=method,
@@ -18,9 +15,7 @@ def create_tournament(user=None, data=None, method: Literal['GET', 'POST', 'PATC
     )
 
 
-def join_tournament(code, user=None, method: Literal['GET', 'POST', 'PATCH', 'DELETE'] = 'POST', data=None):
-    if user is None:
-        user = new_user()
+def join_tournament(user, code, method: Literal['GET', 'POST', 'PATCH', 'DELETE'] = 'POST', data=None):
     if data is None:
         data = {}
     else:
@@ -33,22 +28,19 @@ def join_tournament(code, user=None, method: Literal['GET', 'POST', 'PATCH', 'DE
     )
 
 
-def search_tournament(query=None, user=None, data=None):
-    if user is None:
-        user = new_user()
+def search_tournament(user, query, data=None):
     if data is None:
         data = {'q': query}
     return make_request(
         endpoint='play/tournament/search/',
-        method='GET',
         token=user['token'],
         data=data,
     )
 
 
-def kick_user(user, user_kick, code):
+def ban_user(user, user_ban, code):
     return make_request(
-        endpoint=f'play/tournament/{code}/kick/{user_kick["id"]}/',
+        endpoint=f'play/tournament/{code}/ban/{user_ban["id"]}/',
         token=user['token'],
         method='DELETE',
     )
