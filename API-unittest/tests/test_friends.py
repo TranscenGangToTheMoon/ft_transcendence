@@ -172,14 +172,26 @@ class Test02_FriendRequest(UnitTest):
         user4['thread'].join()
 
     def test_011_cancel_friend_request(self):
-        user1 = self.new_user()
+        user1 = self.user_sse(['receive-friend-request', 'cancel-friend-request', 'receive-friend-request', 'cancel-friend-request', 'receive-friend-request', 'cancel-friend-request'], get_me=True)
         user2 = self.new_user()
+        user3 = self.new_user()
+        user4 = self.new_user()
 
-        friend_request_id = self.assertResponse(friend_requests(user1, user2), 201, get_field=True)
-
-        self.assertResponse(friend_request(friend_request_id, user1, 'DELETE'), 204)
+        friend_request_id = self.assertResponse(friend_requests(user2, user1), 201, get_field=True)
+        self.assertResponse(friend_request(friend_request_id, user2, 'DELETE'), 204)
         self.assertResponse(friend_request(friend_request_id, user1, 'GET'), 404, {'detail': 'Friend request not found.'})
         self.assertResponse(friend_request(friend_request_id, user2, 'GET'), 404, {'detail': 'Friend request not found.'})
+
+        friend_request_id = self.assertResponse(friend_requests(user3, user1), 201, get_field=True)
+        self.assertResponse(blocked_user(user3, user1['id']), 201)
+        self.assertResponse(friend_request(friend_request_id, user1, 'GET'), 404, {'detail': 'Friend request not found.'})
+        self.assertResponse(friend_request(friend_request_id, user2, 'GET'), 404, {'detail': 'Friend request not found.'})
+
+        friend_request_id = self.assertResponse(friend_requests(user4, user1), 201, get_field=True)
+        self.assertResponse(me(user4, 'DELETE', password=True), 204)
+        self.assertResponse(friend_request(friend_request_id, user1, 'GET'), 404, {'detail': 'Friend request not found.'})
+
+        user1['thread'].join()
 
     def test_012_delete_friend_request_after_became_friend(self):
         user1 = self.new_user()
