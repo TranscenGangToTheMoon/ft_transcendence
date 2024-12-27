@@ -1,7 +1,13 @@
 from enum import Enum
 
-
-# todo when kick lobby, tournamnet
+# todo handle lobby-update
+# todo make ban tournament
+#  - handle sse event
+#   * send leave to other members
+#   * send ban to members that ban
+#  - save all ban users in a tournament
+#  - delete when tournament is delete
+#  - check if time a user wants to join
 class EventCode(Enum):
     CONNECTION_SUCCESS = 'connection-success'
     SEND_MESSAGE = 'send-message'
