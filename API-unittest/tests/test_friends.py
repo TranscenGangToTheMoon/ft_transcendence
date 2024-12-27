@@ -7,8 +7,16 @@ from services.user import me
 from utils.my_unittest import UnitTest
 
 
-# todo test notif delete friend + block + user delete
+# todo test delete friend + block + user delete
+# todo test target
 # todo handle close connection when delete user
+# todo delai events
+# todo remake notification field notifications: {
+#   friend : 4,
+#   chat : 12,
+#   ...
+# }
+# todo sort friend request by last update
 
 class Test01_Friend(UnitTest):
 
@@ -80,12 +88,32 @@ class Test01_Friend(UnitTest):
         self.assertResponse(friend(user3, friendship_id, 'DELETE'), 404, {'detail': 'Friendship not found.'})
         self.assertResponse(friend(user1, friendship_id), 200)
 
+    def test_008_delete_friend_sse(self):
+        user1 = self.user_sse(['accept-friend-request', 'delete-friend', 'accept-friend-request', 'delete-friend', 'accept-friend-request', 'delete-friend'], get_me=True)
+        user2 = self.new_user()
+        user3 = self.new_user()
+        user4 = self.new_user()
+
+        friendship_id = self.assertFriendResponse(create_friendship(user1, user2))
+        self.assertResponse(friend(user2, friendship_id, 'DELETE'), 204)
+        self.assertResponse(friend(user1, friendship_id), 404, {'detail': 'Friendship not found.'})
+
+        friendship_id = self.assertFriendResponse(create_friendship(user1, user3))
+        self.assertResponse(blocked_user(user3, user1['id']), 201)
+        self.assertResponse(friend(user1, friendship_id), 404, {'detail': 'Friendship not found.'})
+
+        friendship_id = self.assertFriendResponse(create_friendship(user1, user4))
+        self.assertResponse(me(user4, 'DELETE', password=True), 204)
+        self.assertResponse(friend(user1, friendship_id), 404, {'detail': 'Friendship not found.'})
+
+        user1['thread'].join()
+
 
 class Test02_FriendRequest(UnitTest):
 
     def test_001_friend_request(self):
         user1 = self.new_user()
-        user2 = self.user_sse(['receive-friend-request'])
+        user2 = self.user_sse(['receiveaccept-friend-request'])
 
         friend_request_id = self.assertResponse(friend_requests(user1, user2), 201, get_field=True)
 
