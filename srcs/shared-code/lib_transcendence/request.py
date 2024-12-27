@@ -15,7 +15,7 @@ def request_service(service: Literal['auth', 'chat', 'game', 'matchmaking', 'use
         headers['Authorization'] = token
 
     try:
-        print(method, f'[{service}] => /{endpoint}' + ('' if data is None else data), flush=True)
+        print(method, f'[{service}] => /{endpoint}' + ('' if data is None else f' - {data}'), flush=True)
         response = requests.request(
             method=method,
             url=f'http://{service}:8000/{endpoint}',
