@@ -260,7 +260,7 @@ class Test04_UpdateLobby(UnitTest):
         user1['thread'].join()
 
     def test_003_update_not_creator(self):
-        user1 = self.user_sse()
+        user1 = self.user_sse(['lobby-join'])
         user2 = self.user_sse()
 
         code = self.assertResponse(create_lobby(user1, data={'game_mode': 'custom_game'}), 201, get_field='code')
