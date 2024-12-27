@@ -224,6 +224,18 @@ async function loadFriendList(){
     }
 }
 
+async function addFriendRequest(result){
+    const friendRequestTitleDiv = document.getElementById('friendRequestsTitle');
+    friendRequestTitleDiv.innerText = 'friend requests:';
+    const friendRequestsDiv = document.getElementById('friendRequests');
+    const requestDiv = document.createElement('div');
+    requestDiv.id = result.id;
+    if (document.getElementById(result.id)) return;
+    friendRequestsDiv.appendChild(requestDiv);
+    await loadContent('/friends/friendRequestBlock.html', `${requestDiv.id}`);
+    requestDiv.querySelector('.senderUsername').innerText = result.sender.username;
+}
+
 async function loadReceivedFriendRequests(){
     let data;
     try {
@@ -288,4 +300,4 @@ async function  initFriendModal(){
     await loadSentFriendRequests();
 }
 
-initFriendModal();
+// initFriendModal();

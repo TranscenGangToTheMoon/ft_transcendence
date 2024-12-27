@@ -8,6 +8,10 @@
     user-select: none;
 }
 
+.friend-badges, .all-badges{
+    display: flex;
+}
+
 .toast-container {
     right: 20px;
 }
@@ -16,4 +20,25 @@
     margin-left: 30px;
     display: flex;
     justify-content: space-between;
+}
+
+.toast-header img {
+    width: 20px;
+    height: 20px;
+}
+
+.indicator {
+    background: red;
+    color: white;
+    border-radius: 50%;  /* Makes it perfectly round */
+    width: 12px;
+    height: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: bold;
+    /* position: absolute; */
+    -ms-transform: translateY(50%);
+    transform: translateY(50%);
 }

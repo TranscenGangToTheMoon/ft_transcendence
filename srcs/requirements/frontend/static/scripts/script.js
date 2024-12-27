@@ -12,6 +12,8 @@ var displayedNotifications = 0;
 window.baseAPIUrl = baseAPIUrl;
 window.userInformations = userInformations;
 var pathName = window.location.pathname;
+var badgesDivs = {};
+var notificationQueue = [];
 
 window.pathName = pathName;
 
@@ -250,15 +252,6 @@ async function handleRoute() {
     await loadContent(page);
 }
 
-// UNCOMMENT FOR LINKS TO WORK WITHOUT CUSTOM JS
-// document.addEventListener('click', event => {
-    //     if (event.target.matches('[data-link]')) {
-        //         event.preventDefault();
-        //         await navigateTo(event.target.href);
-        //     }
-        // });
-
-
 let lastState = 0;
 if (!localStorage.getItem('currentState'))
     localStorage.setItem('currentState', 0);
@@ -355,9 +348,65 @@ async function fetchUserInfos(forced=false) {
         try {
             let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/users/me`);
             userInformations = data;
+            userInformations.notifications = {'friend' : userInformations.friend_notifications}
+            displayBadges();
         }
         catch (error) {
             console.log(error);
+        }
+    }
+}
+
+function displayBadges(){
+    if (userInformations.notifications){
+        setTimeout(() => {
+            console.log(userInformations.notifications)
+            let totalNotifications = 0;
+            for (let type in userInformations.notifications){
+                if (!userInformations.notifications[type] || type === 'all') continue;
+                totalNotifications += userInformations.notifications[type];
+                for (let badgeDiv of badgesDivs[type]){
+                    addNotificationIndicator(badgeDiv, userInformations.notifications[type]);
+                }
+            }
+            console.log(totalNotifications);
+            userInformations.notifications['all'] = totalNotifications;
+            if (!totalNotifications) return;
+            for (let allBadgesDiv of badgesDivs['all']){
+                addNotificationIndicator(allBadgesDiv, totalNotifications);
+            }
+        }, 70);
+    }
+}
+
+function removeBadges(type){
+    let toDelete = 0;
+    userInformations.notifications[type] = 0;
+    for (let badgeDiv of badgesDivs[type]){
+        let indicator = badgeDiv.querySelector(`.indicator`);
+        if (indicator){
+            toDelete = parseInt(indicator.innerText);
+            console.log(toDelete);
+            if (isNaN(toDelete))
+                toDelete = 0;
+            indicator.remove();
+        }
+    }
+    if (toDelete){
+        userInformations.notifications['all'] -= toDelete;
+        if (!userInformations.notifications['all']){
+            for (let badgeDiv of badgesDivs['all']){
+                let indicator = badgeDiv.querySelector(`.indicator`);
+                if (indicator)
+                    indicator.remove();
+            }
+        }
+        else {
+            for (let allBadgesDiv of badgesDivs['all']){
+                let indicator = allBadgesDiv.querySelector(`.indicator`);
+                if (indicator)
+                    indicator.innerText = userInformations.notifications['all'];
+            }
         }
     }
 }
@@ -431,7 +480,39 @@ document.getElementById('home').addEventListener('click', async event => {
         await navigateTo('/');
 })
 
+function addNotificationIndicator(div, number){
+    if (!div.querySelector('.indicator')){
+        const indicator = document.createElement('div');
+        indicator.classList.add('indicator');
+        indicator.innerText = number;
+        div.appendChild(indicator);
+    }
+    else {
+        div.querySelector('.indicator').innerText = number;
+    }
+}
 
+function addSSEListeners(){
+    sse.addEventListener('receive-friend-request', async event => {
+        event = JSON.parse(event.data);
+        console.log(event);
+        await displayNotification(undefined, 'friend request', event.message, event => {
+            const friendListModal = new bootstrap.Modal(document.getElementById('friendListModal'));
+            friendListModal.show();
+        });
+        userInformations.notifications['friend'] += 1;
+        displayBadges();
+        addFriendRequest(event.data);
+    });
+
+    sse.addEventListener('accept-friend-request', async event => {
+        event = JSON.parse(event.data);
+        console.log(event);
+        await displayNotification(undefined, 'friend request', event.message);
+        addNotificationIndicator(document.getElementById('dropdownMenuButton'));
+        addNotificationIndicator(document.getElementById('pMenuFriends'));
+    })
+}
 
 function initSSE(){
     sse = new EventSource(`/sse/users/?token=${getAccessToken()}`);
@@ -453,6 +534,24 @@ function initSSE(){
         console.log(error);
         displayMainAlert('Error', 'Unable to connect to Server Sent Events. Note that several services will be unaivailable.');
     }
+
+    addSSEListeners();
+}
+
+function addFriendListListener(){
+    document.getElementById('friendListModal').addEventListener('show.bs.modal', async event => {
+        initFriendModal();
+    }, {once: true})
+    document.getElementById('friendListModal').addEventListener('show.bs.modal', async event => {
+        removeBadges('friend');
+    }, {once: true})
+}
+
+function getBadgesDivs(){
+    badgesDivs['all'] = document.querySelectorAll('.all-badges');
+    badgesDivs['friend'] = document.querySelectorAll('.friend-badges');
+    badgesDivs['chat'] = document.querySelectorAll('.chat-badges');
+    console.log(badgesDivs);
 }
 
 async function  indexInit(auto=true) {
@@ -479,12 +578,13 @@ async function  indexInit(auto=true) {
             return navigateTo('/');
         }
         await loadUserProfile();
+        getBadgesDivs();
     }
     else{
         await fetchUserInfos();
         initSSE();
-        if (!userInformations?.is_guest)
-            await loadFriendListModal()
+        await loadFriendListModal();
+        addFriendListListener();
         let currentState = getCurrentState();
         console.log(`added ${window.location.pathname} to history with state ${currentState}`)
         history.replaceState({state: currentState}, '', window.location.pathname);
@@ -494,28 +594,42 @@ async function  indexInit(auto=true) {
     }
 }
 
-// document.getElementById('notifTrigger').addEventListener('click', async event => {
-//     event.preventDefault();
-//     if (displayedNotifications >= MAX_DISPLAYED_NOTIFICATIONS) {
-//         return ;
-//     }
-//     const toastContainer = document.getElementById('toastContainer');
+async function displayNotification(icon=undefined, title=undefined, body=undefined, mainListener=undefined){
 
-//     await loadContent('/notification.html', 'toastContainer', true);
-//     const notification = document.getElementById('notification');
-//     notification.id = `notification${notificationIdentifier}`;
-//     const toastInstance = new bootstrap.Toast(notification);
-//     toastInstance.show();
-//     notificationIdentifier++;
-//     displayedNotifications++;
-//     setTimeout(() => {
-//         toastInstance.hide();
-//         setTimeout (() => {
-//             displayedNotifications--;
-//             toastContainer.removeChild(document.getElementById(notification.id));
-//         }, 500);
-//     }, 5000);
-// })
+    if (displayedNotifications >= MAX_DISPLAYED_NOTIFICATIONS) {
+        notificationQueue.push([icon, title, body, mainListener]);
+        return;
+    }
+    const toastContainer = document.getElementById('toastContainer');
+
+    await loadContent('/notification.html', 'toastContainer', true);
+    const notification = document.getElementById('notification');
+    notification.id = `notification${notificationIdentifier}`;
+    if (icon)
+        notification.querySelector('img').src = icon;
+    if (title)
+        notification.querySelector('strong').innerText = title;
+    if (body)
+        notification.querySelector('.toast-body').innerText = body;
+    if (mainListener)
+        notification.addEventListener('click', mainListener, {once: true});
+    const toastInstance = new bootstrap.Toast(notification);
+    toastInstance.show();
+    notificationIdentifier++;
+    displayedNotifications++;
+    setTimeout(() => {
+        toastInstance.hide();
+        setTimeout (() => {
+            displayedNotifications--;
+            toastContainer.removeChild(document.getElementById(notification.id));
+            if (notificationQueue.length){
+                let notif= notificationQueue.shift();
+                console.log(notificationQueue);
+                displayNotification(notif[0], notif[1], notif[2], notif[3]);
+            }
+        }, 500);
+    }, 5000);
+}
 
 window.indexInit = indexInit;
 window.loadUserProfile = loadUserProfile;
