@@ -10,12 +10,12 @@ from utils.my_unittest import UnitTest
 class Test01_Friend(UnitTest):
 
     def test_001_friend(self):
-        user1 = self.new_user()
-        user2 = self.new_user()
+        user1 = self.user_sse(['accept-friend-request'])
+        user2 = self.user_sse(['receive-friend-request'])
 
-        thread1 = self.connect_to_sse(user1, ['accept-friend-requests'])
         self.assertFriendResponse(create_friendship(user1, user2))
-        thread1.join()
+        user1['thread'].join()
+        user2['thread'].join()
 
     def test_002_friend_without_friend_request(self):
         user1 = self.new_user()
