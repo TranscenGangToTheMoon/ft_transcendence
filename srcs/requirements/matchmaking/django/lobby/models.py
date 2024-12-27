@@ -84,7 +84,7 @@ class LobbyParticipants(models.Model):
             first_join = lobby.participants.filter(is_guest=False).order_by('join_at').first()
             if first_join is None:
                 for user_left in lobby.participants.all():
-                    create_sse_event(user_left.user_id, EventCode.LOBBY_BAN)
+                    create_sse_event(user_left.user_id, EventCode.LOBBY_DESTROY)
                 lobby.delete()
             else:
                 first_join.creator = True
