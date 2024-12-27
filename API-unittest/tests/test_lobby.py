@@ -238,7 +238,7 @@ class Test03_BanLobby(UnitTest):
         user1 = self.user_sse()
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
-        self.assertResponse(ban_user(user1, {'id': 123456789}, code), 404, {'detail': 'This user does not belong to this lobby.'})
+        self.assertResponse(ban_user(user1, {'id': 123456789}, code), 403, {'detail': 'This user does not belong to this lobby.'})
         user1['thread'].join()
 
 
