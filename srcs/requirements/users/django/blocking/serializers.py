@@ -1,4 +1,5 @@
 from lib_transcendence.exceptions import MessagesException, ResourceExists
+from lib_transcendence.sse_events import EventCode
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
 
@@ -44,9 +45,14 @@ class BlockedSerializer(serializers.ModelSerializer):
             publish_event(friendship.friends.all(), EventCode.DELETE_FRIEND, {'id': friendship.id})
             friendship.delete()
 
-        user.friend_requests_sent.filter(receiver=blocked_user).delete()
-
-        blocked_user.friend_requests_sent.filter(receiver=user).delete()
+        for user1, user2 in ((user, blocked_user), (blocked_user, user)):
+            try:
+                instance = user1.friend_requests_sent.get(receiver=user2)
+                publish_event(user1, EventCode.REJECT_FRIEND_REQUEST, {'id': instance.id})
+                publish_event(user2, EventCode.CANCEL_FRIEND_REQUEST, {'id': instance.id})
+                instance.delete()
+            except user1.friend_requests_sent.DoesNotExist:
+                pass
 
         validated_data['user'] = user
         validated_data['blocked'] = blocked_user
