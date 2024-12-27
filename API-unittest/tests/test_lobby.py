@@ -433,7 +433,7 @@ class Test06_LeaveLobby(UnitTest):
         user2['thread'].join()
 
     def test_006_leave_lobby_not_creator(self):
-        user1 = self.user_sse()
+        user1 = self.user_sse(['lobby-join', 'lobby-leave'])
         user2 = self.user_sse()
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
