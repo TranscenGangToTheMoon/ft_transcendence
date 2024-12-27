@@ -125,7 +125,9 @@ invite_tournament = Event(Service.INVITE, EventCode.INVITE_TOURNAMENT, '{usernam
 lobby_join = Event(Service.LOBBY, EventCode.LOBBY_JOIN, '{username} have joined the lobby.') # todo format
 lobby_leave = Event(Service.LOBBY, EventCode.LOBBY_LEAVE, '{username} have left the lobby.') # todo format
 lobby_update = Event(Service.LOBBY, EventCode.LOBBY_UPDATE)
-lobby_ban = Event(Service.LOBBY, EventCode.LOBBY_BAN, 'You have been banned from the lobby.')
+lobby_update_participant = Event(Service.LOBBY, EventCode.LOBBY_UPDATE_PARTICIPANT)
+lobby_ban = Event(Service.LOBBY, EventCode.LOBBY_BAN, 'You have been baned from the lobby.')
+lobby_destroy = Event(Service.LOBBY, EventCode.LOBBY_DESTROY, 'The lobby has been destroyed.')
 
 tournament_join = Event(Service.TOURNAMENT, EventCode.TOURNAMENT_JOIN, '{username} have joined the tournament.') # todo format
 tournament_leave = Event(Service.TOURNAMENT, EventCode.TOURNAMENT_LEAVE, '{username} have left the tournament.') # todo format

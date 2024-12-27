@@ -15,6 +15,8 @@ class EventCode(Enum):
     LOBBY_JOIN = 'lobby-join'
     LOBBY_LEAVE = 'lobby-leave'
     LOBBY_UPDATE = 'lobby-update'
+    LOBBY_UPDATE_PARTICIPANT = 'lobby-update-participant'
+    LOBBY_DESTROY = 'lobby-destroy'
     LOBBY_BAN = 'lobby-ban'
     TOURNAMENT_JOIN = 'tournament-join'
     TOURNAMENT_LEAVE = 'tournament-leave'
