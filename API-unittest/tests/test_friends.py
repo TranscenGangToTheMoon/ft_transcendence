@@ -7,6 +7,9 @@ from services.user import me
 from utils.my_unittest import UnitTest
 
 
+# todo test notif delete friend + block + user delete
+# todo handle close connection when delete user
+
 class Test01_Friend(UnitTest):
 
     def test_001_friend(self):
@@ -228,13 +231,15 @@ class Test02_FriendRequest(UnitTest):
 
         self.assertEqual(0, self.assertResponse(me(user1), 200, get_field='friend_notifications'))
 
-        self.assertResponse(friend_requests(user2, user1), 201)
+        friend_request_id = self.assertResponse(friend_requests(user2, user1), 201, get_field=True)
         for _ in range(n):
             user_tmp = self.new_user()
             self.assertResponse(friend_requests(user_tmp, receiver=user1), 201)
 
         self.assertResponse(get_friend_requests_received(user2), 200)
         self.assertEqual(n + 1, self.assertResponse(me(user1), 200, get_field='friend_notifications'))
+        self.assertResponse(friend_request(friend_request_id, user2, 'DELETE'), 204)
+        self.assertEqual(n, self.assertResponse(me(user1), 200, get_field='friend_notifications'))
         self.assertResponse(get_friend_requests_received(user1), 200)
         self.assertEqual(0, self.assertResponse(me(user1), 200, get_field='friend_notifications'))
 
