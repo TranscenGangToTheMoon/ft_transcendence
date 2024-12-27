@@ -68,6 +68,7 @@ urlpatterns = [
 # todo demande de game only if connected
 # todo normaliser les vecteurs
 
+# todo handle friends fields
 # todo make endpoint for user stats, xp, trophies (when match ended, or when tournament ended)
 # - pas de stat (custom_game)
 # - stat tournoi gagne
