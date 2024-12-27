@@ -1,6 +1,5 @@
 from enum import Enum
 
-# todo handle lobby-update
 # todo make ban tournament
 #  - handle sse event
 #   * send leave to other members
