@@ -89,7 +89,7 @@ class LobbyParticipants(models.Model):
             else:
                 first_join.creator = True
                 first_join.save()
-                send_sse_event(EventCode.LOBBY_UPDATE, first_join, {'creator': True}, exclude_myself=False)
+                send_sse_event(EventCode.LOBBY_UPDATE_PARTICIPANT, first_join, {'creator': True}, exclude_myself=False)
 
     def __str__(self):
         name = f'{self.lobby.code}/{self.lobby.game_mode} {self.user_id}'

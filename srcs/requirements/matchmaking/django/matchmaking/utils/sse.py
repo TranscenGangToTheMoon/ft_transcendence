@@ -11,7 +11,7 @@ def send_sse_event(event: EventCode, instance, data=None, exclude_myself=True):
         members = members.exclude(id=instance.id)
     other_members = list(members.values_list('user_id', flat=True))
     if other_members:
-        if event == EventCode.LOBBY_UPDATE:
+        if event == EventCode.LOBBY_UPDATE_PARTICIPANT:
             data['id'] = instance.user_id
         else:
             kwargs['username'] = instance.id
