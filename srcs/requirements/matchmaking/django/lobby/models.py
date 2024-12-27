@@ -74,17 +74,19 @@ class LobbyParticipants(models.Model):
     def place(self):
         return self.lobby
 
-    def delete(self, using=None, keep_parents=False):
+    def delete(self, using=None, keep_parents=False, destroy_lobby=False):
         creator = self.creator
         lobby = self.lobby
         delete_player_instance(self.user_id)
-        send_sse_event(EventCode.LOBBY_LEAVE, self)
+        if not destroy_lobby:
+            send_sse_event(EventCode.LOBBY_LEAVE, self)
         super().delete(using=using, keep_parents=keep_parents)
         if creator:
             first_join = lobby.participants.filter(is_guest=False).order_by('join_at').first()
             if first_join is None:
                 for user_left in lobby.participants.all():
                     create_sse_event(user_left.user_id, EventCode.LOBBY_DESTROY)
+                    user_left.delete(destroy_lobby=True)
                 lobby.delete()
             else:
                 first_join.creator = True
