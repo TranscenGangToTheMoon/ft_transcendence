@@ -76,15 +76,15 @@ class Test02_ErrorJoinLobby(UnitTest):
         user2['thread'].join()
 
     def test_003_lobby_is_full(self):
-        user1 = self.user_sse()
-        user2 = self.user_sse()
+        user1 = self.user_sse(['lobby-join', 'lobby-join'])
+        user2 = self.user_sse(['lobby-join'])
+        user3 = self.user_sse()
+        user4 = self.user_sse()
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
-        for _ in range(2):
-            user_tmp = self.user_sse()
-            self.assertResponse(join_lobby(user_tmp, code), 201)
-
-        self.assertResponse(join_lobby(user2, code), 403, {'detail': 'Lobby is full.'})
+        self.assertResponse(join_lobby(user2, code), 201)
+        self.assertResponse(join_lobby(user3, code), 201)
+        self.assertResponse(join_lobby(user4, code), 403, {'detail': 'Lobby is full.'})
         user1['thread'].join()
         user2['thread'].join()
 
