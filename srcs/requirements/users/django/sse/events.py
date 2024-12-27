@@ -115,6 +115,9 @@ send_message = Event(Service.CHAT, EventCode.SEND_MESSAGE, '{username}: {message
 
 accept_friend_request = Event(Service.FRIENDS, EventCode.ACCEPT_FRIEND_REQUEST, '{username} has accepted your friend request.', type=SSEType.NOTIFICATION) # todo format
 receive_friend_request = Event(Service.FRIENDS, EventCode.RECEIVE_FRIEND_REQUEST, '{username} wants to be friends with you.', [Target('/api/users/me/friend_requests/{id}/', 'POST', display_icon='/icon/accept.png'), Target('/api/users/me/friend_requests/{id}/', 'DELETE', display_icon='/icon/decline.png')]) # todo format
+reject_friend_request = Event(Service.FRIENDS, EventCode.REJECT_FRIEND_REQUEST)
+cancel_friend_request = Event(Service.FRIENDS, EventCode.CANCEL_FRIEND_REQUEST)
+delete_friend = Event(Service.FRIENDS, EventCode.DELETE_FRIEND)
 
 game_start = Event(Service.GAME, EventCode.GAME_START, 'You play in a game.', Target('/ws/game/{code}/', type=UrlType.WS)) # todo check how work # todo format
 
