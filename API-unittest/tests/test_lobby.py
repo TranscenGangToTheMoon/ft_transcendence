@@ -117,7 +117,7 @@ class Test02_ErrorJoinLobby(UnitTest):
         user2['thread'].join()
 
     def test_008_blocked_user_ban_user(self):
-        user1 = self.user_sse()
+        user1 = self.user_sse(['lobby-join', 'lobby-leave'])
         user2 = self.user_sse(get_me=True)
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
