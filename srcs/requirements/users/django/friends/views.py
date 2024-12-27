@@ -15,7 +15,7 @@ class FriendsMixin(generics.GenericAPIView):
 
 class FriendsView(generics.ListAPIView, FriendsMixin):
     def filter_queryset(self, queryset):
-        return queryset.filter(friends=self.request.user.id)
+        return queryset.filter(friends=self.request.user.id).order_by('-last_updated')
 
 
 class FriendView(generics.RetrieveDestroyAPIView, FriendsMixin):

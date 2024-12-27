@@ -10,6 +10,7 @@ class Friends(models.Model):
     user1_win = models.PositiveIntegerField(default=0)  # todo remake
     matches_played_together = models.PositiveIntegerField(default=0)
     matches_won_together = models.PositiveIntegerField(default=0)
+    last_updated = models.DateTimeField(auto_now=True)
 
     def play_against(self, winner: Users):
         if winner.id == self.user1_win:
