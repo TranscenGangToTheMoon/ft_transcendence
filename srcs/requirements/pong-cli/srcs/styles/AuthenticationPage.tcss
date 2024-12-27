@@ -6,22 +6,23 @@ Screen {
 #AuthenticationBox {
     align: center middle;
     content-align: center middle;
-    width: 60;
+    width: 52;
     height: auto;
     border: green;
     padding: 0;
 }
 
 AuthenticationPage {
-    border: purple;
+    /*border: purple;*/
     width: auto;
 }
 
 #ButtonBox {
-    height: 7;
+    height: 3;
     width: auto;
-    # border: yellow;
-    align: center middle;
+    /*border: yellow;*/
+    /*align: center middle;*/
+    /*content-align: center middle;*/
     padding: 0;
     margin: 0;
 }

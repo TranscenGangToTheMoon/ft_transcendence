@@ -1,47 +1,54 @@
 from classes.user import User
-from classes.requestsWrapper import RequestsWrapper
-from classes.app import PongCLI
-
-SSL_CRT = "ft_transcendence.crt"
+from classes.pongCLI import PongCLI
+import time
+SSL_CRT = "./ft_transcendence.crt"
 SERVER = "https://localhost:4443"
+
 def main():
-    app = PongCLI()
+    user = User()
+    user.SSLCertificate = SSL_CRT
+    # crt = open(SSL_CRT, "r").read()
+    # print(crt)
+    # time.sleep(1)
+    app = PongCLI(user)
     app.run()
 
 
 if __name__ == '__main__':
     main()
 
+# def main():
+#     url = "https://localhost:4443/"
+#     headers = {
+#         "Content-Type": "application/json",
+#         "User-Agent": "pong-CLI",
+#     }
+#     test = User()
+#
+#     test.server = SERVER
+#     test.SSLCertificate = SSL_CRT
+#     test.username = "xcharra1234"
+#     test.password = "!@#$(90-9875trgfvcmntr"
+#     try:
+#         print("Try login\n")
+#         test.loginUser()
+#         print("Login successful\n")
+#     except Exception as error:
+#         if (test.response.status_code >= 300):
+#             print(error)
+#         if (test.response.status_code == 401):
+#             try:
+#                 print("Try register\n")
+#                 test.registerUser()
+#                 print("Register successful\n")
+#             except Exception as errorr:
+#                 print(errorr)
+#         elif (test.response.status_code >= 300):
+#             print(test.response)
 
-    # url = "https://localhost:4443/"
-    # headers = {
-    #     "Content-Type": "application/json",
-    #     "User-Agent": "pong-CLI",
-    # }
-    # test = User()
-    # curl = RequestsWrapper()
-    #
-    # curl.server = SERVER
-    # curl.SSLCertificate = SSL_CRT
-    #
-    # test.username = "xcharra123"
-    # test.password = "!@#$(90-9875trgfvcmntr"
-    # try:
-    #     print("Try login\n")
-    #     test.loginUser(curl)
-    #     print("Login successful\n")
-    # except Exception as error:
-    #     if (curl.response.status_code >= 300):
-    #         print(error)
-    #     if (curl.response.status_code == 401):
-    #         try:
-    #             print("Try register\n")
-    #             test.registerUser(curl)
-    #             print("Register successful\n")
-    #         except Exception as errorr:
-    #             print(errorr)
-    #     elif (curl.response.status_code >= 300):
-    #         print(curl.response)
+
+
+
 # def connect():
 #     print("Connecté au serveur!", flush=True)
 #
@@ -50,7 +57,7 @@ if __name__ == '__main__':
 #
 # def my_event(data):
 #     print(f"Événement reçu : {data}")
-
+#
 # ssl_context = ssl.create_default_context()
 # ssl_context.load_verify_locations("ft_transcendence.crt")
 #
@@ -68,21 +75,21 @@ if __name__ == '__main__':
 # print(crt)
 # data = {"username": "test", "password": "test"}
 # data_str = json.dumps(data)
-
-
+#
+#
 # try:
 #     print("Try guest\n")
-#     test.guestUser(curl)
+#     test.guestUser()
 #     print("Guest successful\n")
 #     print("Try register guest\n")
-#     test.registerGuestUser(curl)
+#     test.registerGuestUser()
 #     print("Register guest successful\n")
-#     print(curl.headers)
+#     print(test.headers)
 # except Exception as error:
 #     print(error)
-
-
-
+#
+#
+#
 # response = requests.post(url, data='', verify=SSL_CRT, headers=headers)
 # print(response.text)
 
