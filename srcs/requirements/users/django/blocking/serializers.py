@@ -5,6 +5,7 @@ from rest_framework.exceptions import PermissionDenied
 
 from blocking.models import BlockedUsers
 from friends.utils import get_friendship
+from friend_requests.models import FriendRequests
 from sse.events import publish_event
 from users.auth import get_user, get_valid_user
 from users.serializers_utils import SmallUsersSerializer
@@ -51,7 +52,7 @@ class BlockedSerializer(serializers.ModelSerializer):
                 publish_event(user1, EventCode.REJECT_FRIEND_REQUEST, {'id': instance.id})
                 publish_event(user2, EventCode.CANCEL_FRIEND_REQUEST, {'id': instance.id})
                 instance.delete()
-            except user1.friend_requests_sent.DoesNotExist:
+            except FriendRequests.DoesNotExist:
                 pass
 
         validated_data['user'] = user
