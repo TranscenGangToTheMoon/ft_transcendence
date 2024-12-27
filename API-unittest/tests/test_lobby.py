@@ -134,9 +134,9 @@ class Test02_ErrorJoinLobby(UnitTest):
         user2['thread'].join()
 
     def test_009_blocked_user_not_creator(self):
-        user1 = self.user_sse()
-        user2 = self.user_sse()
-        user3 = self.user_sse()
+        user1 = self.user_sse(['lobby-join', 'lobby-join'])
+        user2 = self.user_sse(['lobby-join'])
+        user3 = self.user_sse(get_me=True)
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
 
