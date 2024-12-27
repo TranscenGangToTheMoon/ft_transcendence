@@ -13,7 +13,7 @@ from matchmaking.utils.place import get_lobby
 from matchmaking.utils.sse import send_sse_event
 
 
-class LobbyView(generics.CreateAPIView, generics.RetrieveUpdateAPIView):
+class LobbyView(SerializerAuthContext, generics.CreateAPIView, generics.RetrieveUpdateAPIView):
     queryset = Lobby.objects.all()
     serializer_class = LobbySerializer
 
