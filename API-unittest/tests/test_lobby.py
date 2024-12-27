@@ -355,7 +355,7 @@ class Test05_UpdateParticipantLobby(UnitTest):
         user1['thread'].join()
 
     def test_005_change_team_full(self):
-        user1 = self.user_sse()
+        user1 = self.user_sse(['lobby-join'])
         user2 = self.user_sse()
 
         code = self.assertResponse(create_lobby(user1, data={'game_mode': 'custom_game'}), 201, get_field='code')
