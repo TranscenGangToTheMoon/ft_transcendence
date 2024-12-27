@@ -285,34 +285,34 @@ class Test04_UpdateLobby(UnitTest):
         user1['thread'].join()
 
     def test_006_update_match_type_when_full(self):
-        user1 = self.user_sse(['lobby-join', 'lobby-join', 'lobby-join', 'lobby-join', 'lobby-join'])
-        users = [self.user_sse(['lobby-join'] * (4 - i), get_me=True) for i in range(5)]
+        users = {}
+        teams = ['Team A', 'Team A', 'Team A', 'Team B', 'Team B', 'Team B']
+        after_teams = ['Team A', 'Spectator', 'Spectator', 'Team B', 'Spectator', 'Spectator']
+        for i in range(6):
+            response = self.user_sse((['lobby-join'] * (5 - i)) + (['lobby-update-participant'] * 4) + (['lobby-update'] * int(bool(i))), get_me=True)
+            response['team'] = teams[i]
+            response['after_team'] = after_teams[i]
+            users[response['id']] = response
+        user1 = list(users.values())[0]
 
         code = self.assertResponse(create_lobby(user1, data={'game_mode': 'custom_game'}), 201, get_field='code')
-
         response = self.assertResponse(create_lobby(user1, data={'match_type': '3v3'}, method='PATCH'), 200)
         self.assertEqual('3v3', response['match_type'])
 
-        teams = ['Team A', 'Team A', 'Team B', 'Team B', 'Team B']
-        for i in range(5):
-            response = self.assertResponse(join_lobby(users[i], code), 201)
-            for user in response['participants']:
-                if user['id'] == users[i]['id']:
-                    self.assertEqual(teams[i], user['team'])
-                    break
+        for u in list(users.values())[1:]:
+            self.assertResponse(join_lobby(u, code), 201)
+
+        response = self.assertResponse(join_lobby(user1, code, 'GET'), 200)
+        for user in response:
+            self.assertEqual(user['team'], users[user['id']]['team'])
 
         response = self.assertResponse(create_lobby(user1, data={'match_type': '1v1'}, method='PATCH'), 200)
         self.assertEqual('1v1', response['match_type'])
 
-        teams = ['Spectator', 'Spectator', 'Team B', 'Spectator', 'Spectator']
-        for i in range(5):
-            response = self.assertResponse(join_lobby(users[i], code, method='GET'), 200)
-            for user in response:
-                if user['id'] == users[i]['id']:
-                    self.assertEqual(teams[i], user['team'])
-                    break
-        user1['thread'].join()
-        [u['thread'].join() for u in users]
+        response = self.assertResponse(join_lobby(user1, code, 'GET'), 200)
+        for n, user in enumerate(response):
+            self.assertEqual(user['team'], users[user['id']]['after_team'])
+        [u['thread'].join() for u in users.values()]
 
 
 class Test05_UpdateParticipantLobby(UnitTest):
