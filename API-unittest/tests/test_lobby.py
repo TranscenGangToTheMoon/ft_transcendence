@@ -401,17 +401,21 @@ class Test06_LeaveLobby(UnitTest):
         user2['thread'].join()
 
     def test_003_guest_join_leave_lobby_then_destroy_lobby(self):
-        user1 = self.user_sse()
-        user2 = self.guest_user()
+        user1 = self.user_sse(['lobby-join', 'lobby-join'])
+        user2 = self.guest_user(connect_sse=True, tests_sse=['lobby-join', 'lobby-leave', 'lobby-destroy'])
+        user3 = self.guest_user(connect_sse=True, tests_sse=['lobby-leave', 'lobby-destroy'])
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
-
         self.assertResponse(join_lobby(user2, code), 201)
+        self.assertResponse(join_lobby(user3, code), 201)
         self.assertResponse(join_lobby(user1, code, 'DELETE'), 204)
         self.assertResponse(join_lobby(user2, code, 'GET'), 403, {'detail': 'You do not belong to this lobby.'})
+        self.assertResponse(join_lobby(user3, code, 'GET'), 403, {'detail': 'You do not belong to this lobby.'})
         self.assertResponse(create_lobby(user2, method='GET'), 404, {'detail': 'You do not belong to any lobby.'})
+        self.assertResponse(create_lobby(user3, method='GET'), 404, {'detail': 'You do not belong to any lobby.'})
         user1['thread'].join()
         user2['thread'].join()
+        user3['thread'].join()
 
     def test_004_leave_lobby_does_not_exist(self):
         user1 = self.user_sse()
