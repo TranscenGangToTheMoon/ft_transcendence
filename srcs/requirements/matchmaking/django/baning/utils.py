@@ -22,7 +22,7 @@ def banned(participant: LobbyParticipants | TournamentParticipants):
         ban_code = EventCode.LOBBY_BAN
     else:
         ban_code = EventCode.TOURNAMENT_BAN
-    create_sse_event(participant.user_id, ban_code)
+    create_sse_event(participant.user_id, ban_code, kwargs={'username': participant.user_id})
 
 
 def ban_yourself(user_id, ban_user_id):
