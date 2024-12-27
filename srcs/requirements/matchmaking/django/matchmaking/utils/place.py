@@ -10,7 +10,7 @@ from tournament.models import Tournament, TournamentParticipants
 
 
 def get_place(model, create, **kwargs):
-    name = type(model).__name__
+    name = model.__name__
     allowed_keys = ('id', 'code')
 
     key = list(kwargs)[0]
@@ -18,13 +18,13 @@ def get_place(model, create, **kwargs):
 
     value = kwargs[key]
     if value is None:
-        raise serializers.ValidationError({key: [MessagesException.ValidationError.REQUIRED.format(obj=f'{name.title()} {key}')]})
+        raise serializers.ValidationError({key: [MessagesException.ValidationError.REQUIRED.format(obj=f'{name} {key}')]})
     try:
         return model.objects.get(**kwargs)
     except model.DoesNotExist:
         if create:
-            raise NotFound(MessagesException.NotFound.NOT_FOUND.format(obj=name.title()))
-        raise PermissionDenied(MessagesException.PermissionDenied.NOT_BELONG.format(obj=name))
+            raise NotFound(MessagesException.NotFound.NOT_FOUND.format(obj=name))
+        raise PermissionDenied(MessagesException.PermissionDenied.NOT_BELONG.format(obj=name.lower()))
 
 
 def get_lobby(code, create=False):
@@ -48,7 +48,7 @@ def verify_place(user, model):
                 raise NotFound(MessagesException.NotFound.CREATOR)
 
     if model.participants.filter(user_id=user['id']).exists():
-        raise ResourceExists(MessagesException.ResourceExists.JOIN.format(obj=name))
+        raise ResourceExists(MessagesException.ResourceExists.JOIN.format(obj=name.lower()))
 
     if is_baned(model.code, user['id']) or are_users_blocked(user['id'], get_place_creator()):
         raise NotFound(MessagesException.NotFound.NOT_FOUND.format(obj=name.title()))
