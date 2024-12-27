@@ -285,8 +285,8 @@ class Test04_UpdateLobby(UnitTest):
         user1['thread'].join()
 
     def test_006_update_match_type_when_full(self):
-        user1 = self.user_sse()
-        users = [self.user_sse() for _ in range(5)]
+        user1 = self.user_sse(['lobby-join', 'lobby-join', 'lobby-join', 'lobby-join', 'lobby-join'])
+        users = [self.user_sse(['lobby-join'] * (4 - i), get_me=True) for i in range(5)]
 
         code = self.assertResponse(create_lobby(user1, data={'game_mode': 'custom_game'}), 201, get_field='code')
 
