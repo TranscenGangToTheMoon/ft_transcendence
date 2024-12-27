@@ -64,7 +64,7 @@ class Test02_ErrorJoinLobby(UnitTest):
         user1['thread'].join()
 
     def test_002_already_join(self):
-        user1 = self.user_sse()
+        user1 = self.user_sse(['lobby-join'])
         user2 = self.user_sse()
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
