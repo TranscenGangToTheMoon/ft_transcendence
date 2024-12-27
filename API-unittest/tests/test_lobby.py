@@ -196,7 +196,7 @@ class Test03_BanLobby(UnitTest):
         user2['thread'].join()
 
     def test_002_user_ban_not_join_lobby(self):
-        user1 = self.user_sse()
+        user1 = self.user_sse(get_me=True)
         user2 = self.user_sse()
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
