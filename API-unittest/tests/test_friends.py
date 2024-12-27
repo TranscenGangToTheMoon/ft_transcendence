@@ -82,16 +82,15 @@ class Test02_FriendRequest(UnitTest):
 
     def test_001_friend_request(self):
         user1 = self.new_user()
-        user2 = self.new_user()
+        user2 = self.user_sse(['receive-friend-request'])
 
-        thread1 = self.connect_to_sse(user2, ['receive-friend-request'])
         friend_request_id = self.assertResponse(friend_requests(user1, user2), 201, get_field=True)
 
         self.assertResponse(get_friend_requests_received(user2), 200, count=1)
         self.assertResponse(friend_requests(user1, method='GET'), 200, count=1)
         self.assertResponse(friend_request(friend_request_id, user1, method='GET'), 200)
         self.assertResponse(friend_request(friend_request_id, user2, method='GET'), 200)
-        thread1.join()
+        user2['thread'].join()
 
     def test_002_user_does_not_exist(self):
         user1 = self.new_user()
