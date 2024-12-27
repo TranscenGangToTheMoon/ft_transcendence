@@ -44,8 +44,9 @@ class TournamentSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(MessagesException.ValidationError.TOURNAMENT_MIN_SIZE)
         return value
 
-    def get_participants(self, obj):
-        return get_participants(self, obj)
+    @staticmethod
+    def get_participants(obj):
+        return get_participants(obj)
 
     def create(self, validated_data):
         request = self.context.get('request')

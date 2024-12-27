@@ -1,13 +1,12 @@
-from django.core.exceptions import PermissionDenied
+from rest_framework.exceptions import NotFound, PermissionDenied
 from lib_transcendence.users import retrieve_users
 from lib_transcendence.exceptions import MessagesException
-from rest_framework.exceptions import NotFound
 
 from lobby.models import LobbyParticipants
 from tournament.models import TournamentParticipants
 
 
-def get_participants(self, obj, add_fields: list[str] = None):
+def get_participants(obj, add_fields: list[str] = None):
     fields = ['user_id', 'creator', 'join_at']
     if add_fields is not None:
         fields.extend(add_fields)

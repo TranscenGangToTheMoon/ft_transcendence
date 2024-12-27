@@ -63,11 +63,12 @@ class LobbySerializer(serializers.ModelSerializer):
     def validate_match_type(value):
         return MatchType.validate(value)
 
-    def get_participants(self, obj):
+    @staticmethod
+    def get_participants(obj):
         fields = ['is_ready']
         if obj.game_mode == GameMode.custom_game:
             fields.extend(['team'])
-        return get_participants(self, obj, fields)
+        return get_participants(obj, fields)
 
     @staticmethod
     def get_is_full(obj):
