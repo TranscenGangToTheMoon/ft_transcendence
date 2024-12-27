@@ -245,7 +245,7 @@ class Test03_BanLobby(UnitTest):
 class Test04_UpdateLobby(UnitTest):
 
     def test_001_update_lobby(self):
-        user1 = self.user_sse()
+        user1 = self.user_sse() # todo make test and send sse event
 
         self.assertResponse(create_lobby(user1, data={'game_mode': 'custom_game'}), 201, get_field='code')
         self.assertEqual('3v3', self.assertResponse(create_lobby(user1, {'match_type': '3v3'}, 'PATCH'), 200, get_field='match_type'))
