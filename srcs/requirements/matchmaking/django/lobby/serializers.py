@@ -3,6 +3,7 @@ from lib_transcendence.game import GameMode
 from lib_transcendence.Lobby import MatchType, Teams
 from lib_transcendence.auth import get_auth_user
 from lib_transcendence.generate import generate_code
+from lib_transcendence.services import create_sse_event
 from lib_transcendence.sse_events import EventCode
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
@@ -108,7 +109,11 @@ class LobbySerializer(serializers.ModelSerializer):
                     p.team = Teams.spectator
                     p.save()
 
-        return super().update(instance, validated_data)
+        result = super().update(instance, validated_data)
+        other_members = list(participants.exclude(user_id=self.context['auth_user']['id']).values_list('user_id', flat=True))
+        if other_members:
+            create_sse_event(other_members, EventCode.LOBBY_UPDATE, validated_data)
+        return result
 
 
 class LobbyParticipantsSerializer(serializers.ModelSerializer):
