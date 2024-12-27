@@ -23,7 +23,7 @@ class FriendRequestsListCreateView(generics.ListCreateAPIView, FriendRequestsMix
 
     def perform_create(self, serializer):
         super().perform_create(serializer)
-        publish_event(serializer.instance.receiver, EventCode.RECEIVE_FRIEND_REQUEST, data={**serializer.data}, kwargs={'username': serializer.data['sender']['username']})
+        publish_event(serializer.instance.receiver, EventCode.RECEIVE_FRIEND_REQUEST, data=serializer.data, kwargs={'username': serializer.data['sender']['username']})
 
 
 class FriendRequestsReceiveListView(generics.ListAPIView, FriendRequestsMixin):
