@@ -7,7 +7,6 @@ from services.user import me
 from utils.my_unittest import UnitTest
 
 
-# todo test delete friend + block + user delete
 # todo test target
 # todo handle close connection when delete user
 # todo delai events
