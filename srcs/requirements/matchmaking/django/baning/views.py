@@ -2,7 +2,7 @@ from django.core.exceptions import PermissionDenied
 from rest_framework import generics
 from lib_transcendence.exceptions import MessagesException
 
-from baning.utils import ban_yourself, get_participants_for_baning, banned
+from baning.utils import ban_yourself, get_participants_for_baning, baned
 from lobby.serializers import LobbyParticipantsSerializer
 from matchmaking.utils.participant import get_lobby_participant, get_tournament_participant
 from matchmaking.utils.place import get_lobby, get_tournament
@@ -19,7 +19,7 @@ class LobbyBanView(generics.DestroyAPIView):
         return get_participants_for_baning(lobby, self.kwargs['user_id'])
 
     def perform_destroy(self, instance):
-        banned(instance)
+        baned(instance)
         super().perform_destroy(instance)
 
 

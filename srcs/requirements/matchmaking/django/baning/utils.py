@@ -16,7 +16,7 @@ def is_baned(code: str, user_id: int) -> bool:
         return False
 
 
-def banned(participant: LobbyParticipants | TournamentParticipants):
+def baned(participant: LobbyParticipants | TournamentParticipants):
     Baned.objects.create(code=participant.place.code, baned_user_id=participant.user_id)
     if isinstance(participant, LobbyParticipants):
         ban_code = EventCode.LOBBY_BAN
@@ -34,4 +34,4 @@ def get_participants_for_baning(model, user_id):
     try:
         return model.participants.get(user_id=user_id)
     except (LobbyParticipants.DoesNotExist, TournamentParticipants.DoesNotExist):
-        raise PermissionDenied(MessagesException.PermissionDenied.NOT_BELONG.format(obj=type(model).__name__))
+        raise PermissionDenied(MessagesException.PermissionDenied.USER_NOT_BELONG.format(obj=type(model).__name__.lower()))
