@@ -172,9 +172,9 @@ class Test02_ErrorJoinLobby(UnitTest):
         user1 = self.new_user()
         user2 = self.user_sse()
 
-        self.assertResponse(create_lobby(user1), 401, {'detail': 'You need to be connected to SSE to access this resource'})
+        self.assertResponse(create_lobby(user1), 401, {'code': 'sse_connection_required', 'detail': 'You need to be connected to SSE to access this resource.'})
         code = self.assertResponse(create_lobby(user2), 201, get_field='code')
-        self.assertResponse(join_lobby(user1, code), 401, {'detail': 'You need to be connected to SSE to access this resource'})
+        self.assertResponse(join_lobby(user1, code), 401, {'code': 'sse_connection_required', 'detail': 'You need to be connected to SSE to access this resource.'})
         user2['thread'].join()
 
 
