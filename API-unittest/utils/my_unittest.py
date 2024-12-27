@@ -30,7 +30,7 @@ class UnitTest(unittest.TestCase):
     def user_sse(self, tests: list[str] = None, get_me=False):
         return self.new_user(connect_sse=True, tests_sse=tests, get_me=get_me)
 
-    def guest_user(self, get_me=False, connect_sse=False):
+    def guest_user(self, get_me=False, connect_sse=False, tests_sse: list[str] = None):
         _new_user = {}
         token = self.assertResponse(create_guest(), 201)
         _new_user['token'] = token['access']
@@ -40,7 +40,7 @@ class UnitTest(unittest.TestCase):
             _new_user['id'] = response['id']
             _new_user['username'] = response['username']
         if connect_sse:
-            _new_user['thread'] = self.connect_to_sse(_new_user)
+            _new_user['thread'] = self.connect_to_sse(_new_user, tests_sse)
         return _new_user
 
     def assertResponse(self, response, status_code, json_assertion=None, count=None, get_field=None, get_user=False):
