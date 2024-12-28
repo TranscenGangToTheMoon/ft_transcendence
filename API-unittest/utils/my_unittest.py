@@ -64,9 +64,10 @@ class UnitTest(unittest.TestCase):
             self.assertEqual(json_assertion, responses[1].json)
         return responses[1].json['id']
 
-    def connect_to_sse(self, user, tests: list[str] = None, timeout=50, status_code=200, ignore_connection_message=True):
+    def connect_to_sse(self, user, tests: list[str] = None, timeout=30, status_code=200, ignore_connection_message=True):
         thread = Thread(target=self._thread_connect_to_sse, args=(user, tests, timeout, status_code, ignore_connection_message))
         thread.start()
+        time.sleep(0.5)
         return thread
 
     def _thread_connect_to_sse(self, user, tests, timeout, status_code, ignore_connection_message):
@@ -89,7 +90,7 @@ class UnitTest(unittest.TestCase):
                         if line:
                             event, data = re.findall(r'event: ([a-z\-]+)\ndata: (.+)\n\n', line)[0]
                             timeout_count += 1
-                            if (tests is None and timeout_count > timeout) or timeout_count > 30 or event == 'connection-close': # todo remove later
+                            if (tests is None and timeout_count > timeout) or timeout_count > 50 or event == 'connection-close': # todo remove later
                                 return assert_tests()
                             if event == 'ping':
                                 continue
