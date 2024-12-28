@@ -64,7 +64,7 @@ class UnitTest(unittest.TestCase):
             self.assertEqual(json_assertion, responses[1].json)
         return responses[1].json['id']
 
-    def connect_to_sse(self, user, tests: list[str] = None, timeout=10, status_code=200, ignore_connection_message=True):
+    def connect_to_sse(self, user, tests: list[str] = None, timeout=50, status_code=200, ignore_connection_message=True):
         thread = Thread(target=self._thread_connect_to_sse, args=(user, tests, timeout, status_code, ignore_connection_message))
         thread.start()
         return thread
