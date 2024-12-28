@@ -7,16 +7,6 @@ from services.user import me
 from utils.my_unittest import UnitTest
 
 
-# todo test target
-# todo handle close connection when delete user
-# todo delai events
-# todo remake notification field notifications: {
-#   friend : 4,
-#   chat : 12,
-#   ...
-# }
-# todo sort friend request by last update
-
 class Test01_Friend(UnitTest):
 
     def test_001_friend(self):
@@ -256,7 +246,7 @@ class Test02_FriendRequest(UnitTest):
         user2 = self.new_user()
         n = 4
 
-        self.assertEqual(0, self.assertResponse(me(user1), 200, get_field='friend_notifications'))
+        self.assertEqual(0, self.assertResponse(me(user1), 200, get_field='notifications')['friend_requests'])
 
         friend_request_id = self.assertResponse(friend_requests(user2, user1), 201, get_field=True)
         for _ in range(n):
@@ -264,11 +254,11 @@ class Test02_FriendRequest(UnitTest):
             self.assertResponse(friend_requests(user_tmp, receiver=user1), 201)
 
         self.assertResponse(get_friend_requests_received(user2), 200)
-        self.assertEqual(n + 1, self.assertResponse(me(user1), 200, get_field='friend_notifications'))
+        self.assertEqual(n + 1, self.assertResponse(me(user1), 200, get_field='notifications')['friend_requests'])
         self.assertResponse(friend_request(friend_request_id, user2, 'DELETE'), 204)
-        self.assertEqual(n, self.assertResponse(me(user1), 200, get_field='friend_notifications'))
+        self.assertEqual(n, self.assertResponse(me(user1), 200, get_field='notifications')['friend_requests'])
         self.assertResponse(get_friend_requests_received(user1), 200)
-        self.assertEqual(0, self.assertResponse(me(user1), 200, get_field='friend_notifications'))
+        self.assertEqual(0, self.assertResponse(me(user1), 200, get_field='notifications')['friend_requests'])
 
     def test_017_new_field(self):
         user1 = self.new_user()
