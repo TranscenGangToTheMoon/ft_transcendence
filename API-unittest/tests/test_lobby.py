@@ -151,7 +151,7 @@ class Test02_ErrorJoinLobby(UnitTest):
         user3['thread'].join()
 
     def test_010_blocked_then_unblock(self):
-        user1 = self.user_sse(['lobby-join', 'lobby-leave'])
+        user1 = self.user_sse(['lobby-join', 'lobby-leave', 'lobby-join'])
         user2 = self.user_sse(get_me=True)
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
