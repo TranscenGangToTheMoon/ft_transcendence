@@ -162,7 +162,6 @@ class Game:
                 racket.blockGlide = False
 
     def update(self):
-        self.frames += 1
         for racket in self.rackets:
             racket.update(self.ball.size, self.canvas.y)
         if (self.last_update == 0):
@@ -239,6 +238,7 @@ class Game:
         print('finishing game', flush=True)
         self.finished = True
         self.match.model.finish_match(reason)
+        time.sleep(1)
         self.send_finish(reason, winner)
         time.sleep(1)
         self.disconnect_players()

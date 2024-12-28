@@ -7,6 +7,7 @@
         paddleHeight: 200,
         ballSize: 20,
         maxBallSpeed: 630,
+        maxPaddleSpeed: 300,
         animationDuration: 800,
         font: "48px Arial",
         fontColor: "white",
@@ -266,16 +267,18 @@
     }
 
     function moveUp(paddle){
-        if (!paddle.blockGlide || paddle.y - 5 > config.ballSize)
-            paddle.y -= 5;
-        else if (paddle.y - 5 <= config.ballSize)
+    	delta = maxBallSpeed * Performance.now() - state.lastFrame
+        if (!paddle.blockGlide || paddle.y - delta > config.ballSize)
+            paddle.y -= delta;
+        else if (paddle.y - delta <= config.ballSize)
             paddle.y = config.ballSize;
     }
 
     function moveDown(paddle){
-        if (!paddle.blockGlide || paddle.y + config.paddleHeight + 5 < config.canvasHeight - config.ballSize)
-            paddle.y += 5;
-        else if (paddle.y + config.paddleHeight + 5 >= config.canvasHeight - config.ballSize)
+    	delta = maxBallSpeed * Performance.now() - state.lastFrame
+        if (!paddle.blockGlide || paddle.y + config.paddleHeight + delta < config.canvasHeight - config.ballSize)
+            paddle.y += delta;
+        else if (paddle.y + config.paddleHeight + delta >= config.canvasHeight - config.ballSize)
             paddle.y = config.canvasHeight - config.ballSize - config.paddleHeight;
     }
 
