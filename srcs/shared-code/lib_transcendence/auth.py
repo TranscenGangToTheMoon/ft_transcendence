@@ -1,12 +1,13 @@
+from abc import ABC, abstractmethod
+
 from lib_transcendence.endpoints import Auth
 from lib_transcendence.exceptions import MessagesException
-from lib_transcendence.services import request_users, request_auth, get_auth_token
+from lib_transcendence.services import request_auth, get_auth_token
 from rest_framework import serializers
 from rest_framework.authentication import BaseAuthentication
-from rest_framework.exceptions import ParseError, AuthenticationFailed
+from rest_framework.exceptions import AuthenticationFailed, NotAuthenticated
 
 
-# todo delete user after request
 def get_user_from_auth(user_data):
     from django.contrib.auth.models import User
 
@@ -17,21 +18,40 @@ def get_user_from_auth(user_data):
     return user
 
 
-class Authentication(BaseAuthentication):
-    def authenticate(self, request):
-        if type(request.data) is not dict:
-            raise ParseError(MessagesException.ValidationError.REQUEST_DATA_REQUIRED)
-        try:
-            json_data = auth_verify(request=request)
-        except AuthenticationFailed:
-            raise AuthenticationFailed()
-        request.data['auth_user'] = json_data
-        user = get_user_from_auth(json_data)
+class AbstractAuthentication(ABC, BaseAuthentication):
+    @abstractmethod
+    def auth_request(self, token):
+        pass
 
-        return user, None
+    def authenticate(self, request):
+        token = request.headers.get('Authorization')
+
+        if not token:
+            token = 'Bearer ' + request.query_params.get('token', None)
+            if not token:
+                raise NotAuthenticated(MessagesException.Authentication.NOT_AUTHENTICATED)
+
+        try:
+            json_data = self.auth_request(token)
+        except AuthenticationFailed as e:
+            if e.detail['code'] == MessagesException.Authentication.USER_NOT_FOUND['code']:
+                raise AuthenticationFailed(MessagesException.Authentication.USER_NOT_FOUND)
+            print('CACA ==================', e.detail, e, flush=True)
+            raise e
+        if json_data is None:
+            raise AuthenticationFailed(MessagesException.Authentication.AUTHENTICATION_FAILED)
+
+        request.data['auth_user'] = json_data
+        auth_user = get_user_from_auth(json_data)
+        return auth_user, token
 
     def authenticate_header(self, request):
         return 'Bearer realm="api"'
+
+
+class Authentication(AbstractAuthentication):
+    def auth_request(self, token):
+        return auth_verify(token)
 
 
 def get_auth_user(request=None):

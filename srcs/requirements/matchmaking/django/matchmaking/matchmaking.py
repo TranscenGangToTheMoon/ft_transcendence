@@ -1,16 +1,8 @@
 from .create_match import create_match
-from datetime import datetime, timezone, timedelta
-from django.http import response
+from datetime import datetime, timezone
 from lib_transcendence.game import GameMode
-from math import sqrt
-from play.models import Players
-from rest_framework import status
 from rest_framework.exceptions import APIException
-from threading import Thread
-from time import sleep
-from typing import Literal
-import os
-import sys
+
 
 def launch_dual_game(players):
 	player1 = players[0]
@@ -24,6 +16,7 @@ def launch_dual_game(players):
 
 	#print('Normal Game created=============')
 
+
 def get_optimal_rank_range(player):
 	waiting_time = datetime.now(timezone.utc) - player.join_at
 	optimal_range = waiting_time.total_seconds() / 15
@@ -31,8 +24,10 @@ def get_optimal_rank_range(player):
 		return 5
 	return optimal_range
 
+
 def order_by_rank_difference(players_query_set, base_rank):
 	return sorted(players_query_set, key=lambda x: abs(x.trophies - base_rank))
+
 
 def search_ranked_players(ranked_players):
 	for player in ranked_players:
@@ -41,15 +36,14 @@ def search_ranked_players(ranked_players):
 		potential_mates = order_by_rank_difference(
 			ranked_players
 			.exclude(user_id=player.user_id)
-			.filter(trophies__range=(player.trophies, int(optimal_range))),
-		player.trophies)
+			.filter(trophies__range=(player.trophies, int(optimal_range))), player.trophies)
 
 		mate = potential_mates[0] if potential_mates else None
-		if (mate is not None):
+		if mate is not None:
 			try:
-				post_match(player, mate, GameMode.ranked)
+				# post_match(player, mate, GameMode.ranked)
 				return True
-			except(APIException):
+			except APIException:
 				pass
 	return False
 

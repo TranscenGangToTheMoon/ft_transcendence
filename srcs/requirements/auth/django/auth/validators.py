@@ -24,27 +24,30 @@ def validate_username(value, check_exists=True, only_check_exists=False):
         if any(char not in valid_charset for char in value):
             raise serializers.ValidationError(MessagesException.ValidationError.INVALIDE_CHAR)
     if (check_exists or only_check_exists) and User.objects.filter(username__iexact=value).exists():
-        raise serializers.ValidationError(MessagesException.ValidationError.USERNAME_ALREAY_EXISTS)
+        exception_msg = MessagesException.ValidationError.USERNAME_ALREAY_EXISTS
+        if only_check_exists:
+            exception_msg = {'username': [exception_msg]}
+        raise serializers.ValidationError(exception_msg)
     return value
 
 
 def set_password(password, user, remove_instance=False, check_previous_password=False, old_username=None):
     if password is None:
         return
-    # try:
-        # if check_previous_password and user.check_password(password):
-        #     raise ValidationError(MessagesException.ValidationError.SAME_PASSWORD)
-        # if len(password) > 50:
-        #     raise ValidationError(MessagesException.ValidationError.PASSWORD_SHORTER_THAN_50_CHAR)
-        # if any(char not in valid_password_charset for char in password):
-        #     raise ValidationError(MessagesException.ValidationError.INVALIDE_CHAR)
-    #     validate_password(password, user)
-    # except ValidationError as e:
-    #     if remove_instance:
-    #         user.delete()
-    #     if old_username:
-    #         user.username = old_username
-    #         user.save()
-    #     raise serializers.ValidationError({'password': e.messages})
+    try:
+        if check_previous_password and user.check_password(password):
+            raise ValidationError(MessagesException.ValidationError.SAME_PASSWORD)
+        if len(password) > 50:
+            raise ValidationError(MessagesException.ValidationError.PASSWORD_SHORTER_THAN_50_CHAR)
+        if any(char not in valid_password_charset for char in password):
+            raise ValidationError(MessagesException.ValidationError.INVALIDE_CHAR)
+        validate_password(password, user)
+    except ValidationError as e:
+        if remove_instance:
+            user.delete()
+        if old_username:
+            user.username = old_username
+            user.save()
+        raise serializers.ValidationError({'password': e.messages})
     user.set_password(password)
     user.save()

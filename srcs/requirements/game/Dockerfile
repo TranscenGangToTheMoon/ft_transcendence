@@ -9,7 +9,7 @@ RUN apt-get upgrade -y
 COPY init.d /init.d
 # COPY shared-code /shared
 
-RUN pip install -r /init.d/requirements.txt
+RUN pip install --no-cache-dir -r /init.d/requirements.txt
 RUN chmod u+x /init.d/entrypoint.sh
 
 WORKDIR /code

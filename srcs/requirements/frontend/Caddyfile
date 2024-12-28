@@ -1,3 +1,10 @@
+{
+    log {
+        output stdout
+        level debug
+    }
+}
+
 :443 {
 	tls /run/secrets/ssl.crt /run/secrets/ssl.key
 
@@ -9,8 +16,13 @@
 		file_server
 	}
 
-	handle /ws/game/* {
+	handle /ws/* {
+		handle /ws/chat/* {
+			reverse_proxy http://chat:8010
+		}
+		handle /ws/game/* {
 		reverse_proxy http://game:5500
+		}
 	}
 
 	handle /sse/* {
@@ -55,16 +67,7 @@
 			respond @notJSON "Unsupported Media Type" 415
 			reverse_proxy http://users:8000
 		}
-		# route /* {
+
 		respond "ft_transcendence : api not found" 404 #must serv a 404.html
-		# }
 	}
-	# route /* {
-	# 	respond "ft_transcendence : page not found" 404
-	# }
-	# tls self_signed
-	# @http { # doesn't work
-	# 	protocol http
-	# }
-	# redir @http https://{host}{uri}
 }

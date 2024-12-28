@@ -1,40 +1,19 @@
-import httpx
-import pyperclip
+from typing_extensions import Literal
 
-from utils.credentials import new_user
 from utils.request import make_request
+import time
 
-
-def notification(user_to, message):
+def events(user_to=None, users=None, data=None, service: Literal['chat'] = 'chat', event_code: Literal['send-message'] = 'send-message'):
+    time.sleep(1)
+    if users is None:
+        users = []
+    if user_to is not None:
+        users.append(user_to['id'])
+    else:
+        users.append(1)
     return make_request(
-        endpoint='notification/',
+        endpoint='private/users/events/',
         method='POST',
-        data={'user_to': user_to['id'], 'message': message},
+        data={'users_id': users, 'data': data, 'event_code': event_code, 'service': service},
         port=8005,
-        token=user_to['token'],
     )
-
-
-def connect_to_sse(user=None):
-    sse_url = "https://localhost:4443/sse/users/"
-    print('start sse on', sse_url)
-    if user is None:
-        user = new_user()
-
-    with httpx.Client(verify=False) as client:
-        with client.stream("GET", sse_url, headers={'Authorization': f'Bearer {user["token"]}'}) as response:
-            if response.status_code == 200:
-                print("Connected to SSE server.")
-                for line in response.iter_text():
-                    if line.strip():
-                        print(f"Received: {line.strip()}")
-            else:
-                print(f"Failed to connect: {response.status_code}")
-
-
-if __name__ == "__main__":
-    user1 = new_user()
-
-    print(user1['username'], user1['password'])
-    pyperclip.copy(user1['username'] + ' ' + user1['password'])
-    connect_to_sse(user1)

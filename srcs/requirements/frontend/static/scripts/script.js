@@ -192,6 +192,7 @@ function loadCSS(cssHref, toUpdate=true) {
 
 async function loadContent(url, container='content', append=false) {
     const contentDiv = document.getElementById(container);
+    console.log(url, container)
     try {
         const response = await fetch(url);
         if (!response.ok) {
@@ -237,7 +238,7 @@ async function handleRoute() {
         '/': '/homePage.html',
         '/profile' : 'profile.html',
         '/lobby' : '/lobby.html',
-        '/chat' : '/testChat.html',
+        '/chat' : '/chatTemplates/chat.html',
 
         '/game/ranked' : '/game/game.html',
         '/game/duel' : '/game/game.html',
@@ -472,28 +473,28 @@ async function  indexInit(auto=true) {
     }
 }
 
-document.getElementById('notifTrigger').addEventListener('click', async event => {
-    event.preventDefault();
-    if (displayedNotifications >= MAX_DISPLAYED_NOTIFICATIONS) {
-        return ;
-    }
-    const toastContainer = document.getElementById('toastContainer');
+// document.getElementById('notifTrigger').addEventListener('click', async event => {
+//     event.preventDefault();
+//     if (displayedNotifications >= MAX_DISPLAYED_NOTIFICATIONS) {
+//         return ;
+//     }
+//     const toastContainer = document.getElementById('toastContainer');
 
-    await loadContent('/notification.html', 'toastContainer', true);
-    const notification = document.getElementById('notification');
-    notification.id = `notification${notificationIdentifier}`;
-    const toastInstance = new bootstrap.Toast(notification);
-    toastInstance.show();
-    notificationIdentifier++;
-    displayedNotifications++;
-    setTimeout(() => {
-        toastInstance.hide();
-        setTimeout (() => {
-            displayedNotifications--;
-            toastContainer.removeChild(document.getElementById(notification.id));
-        }, 500);
-    }, 5000);
-})
+//     await loadContent('/notification.html', 'toastContainer', true);
+//     const notification = document.getElementById('notification');
+//     notification.id = `notification${notificationIdentifier}`;
+//     const toastInstance = new bootstrap.Toast(notification);
+//     toastInstance.show();
+//     notificationIdentifier++;
+//     displayedNotifications++;
+//     setTimeout(() => {
+//         toastInstance.hide();
+//         setTimeout (() => {
+//             displayedNotifications--;
+//             toastContainer.removeChild(document.getElementById(notification.id));
+//         }, 500);
+//     }, 5000);
+// })
 
 window.indexInit = indexInit;
 window.loadUserProfile = loadUserProfile;

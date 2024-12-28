@@ -1,15 +1,18 @@
 from lib_transcendence.exceptions import MessagesException, ResourceExists
 from lib_transcendence.game import GameMode
-from lib_transcendence.game import Bo
 from lib_transcendence.Lobby import MatchType, Teams
 from lib_transcendence.auth import get_auth_user
 from lib_transcendence.generate import generate_code
+from lib_transcendence.sse_events import EventCode
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
 
 from blocking.utils import create_player_instance
 from lobby.models import Lobby, LobbyParticipants
-from matchmaking.utils import verify_user, get_lobby, verify_place, get_participants
+from matchmaking.utils.participant import get_participants
+from matchmaking.utils.place import get_lobby, verify_place
+from matchmaking.utils.sse import send_sse_event
+from matchmaking.utils.user import verify_user
 
 
 class LobbyGetParticipantsSerializer(serializers.ModelSerializer):
@@ -61,14 +64,11 @@ class LobbySerializer(serializers.ModelSerializer):
         return MatchType.validate(value)
 
     @staticmethod
-    def validate_bo(value):
-        return Bo.validate(value)
-
-    def get_participants(self, obj):
+    def get_participants(obj):
         fields = ['is_ready']
         if obj.game_mode == GameMode.custom_game:
             fields.extend(['team'])
-        return get_participants(self, obj, fields)
+        return get_participants(obj, fields)
 
     @staticmethod
     def get_is_full(obj):
@@ -145,7 +145,7 @@ class LobbyParticipantsSerializer(serializers.ModelSerializer):
         user = self.context['auth_user']
         lobby = get_lobby(self.context.get('code'), True)
 
-        verify_place(user, lobby, self.context.get('request'))
+        verify_place(user, lobby)
 
         validated_data['lobby'] = lobby
         validated_data['user_id'] = user['id']
@@ -156,7 +156,6 @@ class LobbyParticipantsSerializer(serializers.ModelSerializer):
                     validated_data['team'] = t
                     break
         return super().create(validated_data)
-        #todo websocket: send to chat that user 'xxx' join team
 
     def update(self, instance, validated_data):
         if 'team' in validated_data:
@@ -167,8 +166,9 @@ class LobbyParticipantsSerializer(serializers.ModelSerializer):
             elif self.instance.lobby.is_team_full(validated_data['team']):
                 raise PermissionDenied(MessagesException.PermissionDenied.TEAM_IS_FULL)
         result = super().update(instance, validated_data)
-        # todo websocket: send that lobby thas x change team
+        send_sse_event(EventCode.LOBBY_UPDATE_PARTICIPANT, result, validated_data)
         if instance.lobby.is_ready:
-            # todo websocket: send that lobby is ready and start game
-            pass
+            instance.lobby.set_ready_to_play(True)
+        elif instance.lobby.ready_to_play:
+            instance.lobby.set_ready_to_play(False)
         return result

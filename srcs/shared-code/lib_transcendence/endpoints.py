@@ -26,7 +26,8 @@ class Chat:
     _fchat_id_message = '{chat_id}/messages/'
 
     chats = _base_chat
-    chat = chats + _chat_id + '/'
+    fchat = chats + '{chat_id}/'
+    chat = fchat.format(chat_id=_chat_id)
     fmessages = chats + _fchat_id_message
     messages = fmessages.format(chat_id=_chat_id)
     fmessage = _base_private_chat + _fchat_id_message
@@ -55,12 +56,12 @@ class Matchmaking:
 
     lobby = _base_matchmaking + 'lobby/'
     lobby_participant = lobby + '<str:code>/'
-    lobby_kick = lobby_participant + f'kick/{_user_id}/'
+    lobby_ban = lobby_participant + f'ban/{_user_id}/'
 
     tournament = _base_matchmaking + 'tournament/'
     tournament_search = tournament + 'search/'
     tournament_participant = tournament + '<str:code>/'
-    tournament_kick = tournament + f'<str:code>/kick/{_user_id}/'
+    tournament_ban = tournament + f'<str:code>/ban/{_user_id}/'
 
     tournament_result_match = _base_private_matchmaking + 'tournament/result-match/'
 
@@ -83,8 +84,7 @@ class Users:
     blocked_user = blocked + '<int:blocking_id>/'
 
     sse = base_sse + 'users/'
-    notification = _base_private_users + 'notification/'
-    event = _base_private_users + 'event/'
+    event = _base_private_users + 'events/'
 
     fchat = _base_private_users + 'chat/{user1_id}/{username2}/'
     chat = fchat.format(user1_id='<int:user1_id>', username2='<str:username2>')

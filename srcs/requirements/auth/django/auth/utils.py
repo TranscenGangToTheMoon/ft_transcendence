@@ -1,4 +1,5 @@
 from lib_transcendence import endpoints
+from lib_transcendence.exceptions import ServiceUnavailable
 from lib_transcendence.services import request_users
 from rest_framework.exceptions import APIException
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -16,6 +17,6 @@ def create_user_get_token(user, create=True):
     except APIException:
         if create:
             user.delete()
-        raise APIException
+        raise ServiceUnavailable('users')
 
     return token
