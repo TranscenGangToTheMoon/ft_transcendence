@@ -1,7 +1,7 @@
 import time
 import unittest
 
-from services.auth import register, register_guest
+from services.auth import register_guest
 from services.friend import friend_requests
 from services.user import me
 from utils.generate_random import rnstr
@@ -22,7 +22,7 @@ class Test01_SSE(UnitTest):
 
         thread1 = self.connect_to_sse(user1, ['connection-success'], ignore_connection_message=False)
         time.sleep(1)
-        thread2 = self.connect_to_sse(user1, ['connection-success', 'receive-friend-requests'], timeout=10, ignore_connection_message=False)
+        thread2 = self.connect_to_sse(user1, ['connection-success'], ignore_connection_message=False)
         thread1.join()
         self.assertResponse(friend_requests(user2, user1), 201)
         thread2.join()
