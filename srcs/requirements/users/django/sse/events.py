@@ -161,6 +161,6 @@ def publish_event(users: Users | QuerySet[Users] | list[Users], event_code: Even
 
             print('EVENT', event, data, flush=True)
             try:
-                redis_client.publish('_channel', event.code.value + ':' + event.dumps(data, kwargs))
+                redis_client.publish(channel, event.code.value + ':' + event.dumps(data, kwargs))
             except redis.exceptions.ConnectionError:
                 raise ServiceUnavailable('event-queue')
