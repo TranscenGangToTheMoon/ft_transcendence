@@ -12,7 +12,7 @@ class CreateMatchView(generics.CreateAPIView):
     def perform_create(self, serializer):
         super().perform_create(serializer)
         match = serializer.instance
-        r = requests.post('http://localhost:5500/create-game', data={'match_code': match.code})
+        r = requests.post('http://localhost:5500/create-game', data={'match_id': match.id})
         self.status_code = r.status_code
 
 
