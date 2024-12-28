@@ -47,6 +47,12 @@ class Test01_SSE(UnitTest):
         self.assertEqual(username, response['username'])
         thread1.join()
 
+    def test_006_delete_user(self):
+        user1 = self.user_sse()
+
+        self.assertResponse(me(user1, 'DELETE', password=True), 204)
+        user1['thread'].join()
+
 #todo message d'erreur qui finit pas un point
 #todo test invalid parameters, fogrt, not good type, etc..., not users.
 # class Test02_EventsEndpoint(UnitTest):
