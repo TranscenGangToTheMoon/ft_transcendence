@@ -274,7 +274,7 @@ class Test02_FriendRequest(UnitTest):
     def test_018_no_friend_request(self):
         user1 = self.new_user()
 
-        self.assertEqual(0, self.assertResponse(me(user1), 200, get_field='friend_notifications'))
+        self.assertEqual(0, self.assertResponse(me(user1), 200, get_field='notifications')['friend_requests'])
 
 
 if __name__ == '__main__':
