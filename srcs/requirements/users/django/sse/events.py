@@ -107,6 +107,7 @@ class Event:
 
 
 connection_success = Event(Service.AUTH, EventCode.CONNECTION_SUCCESS, 'Connection has been successfully established.')
+connection_close = Event(Service.AUTH, EventCode.CONNECTION_CLOSE)
 
 send_message = Event(Service.CHAT, EventCode.SEND_MESSAGE, '{username}: {message}', Target('/chat/{id}/')) # todo format
 
@@ -160,6 +161,6 @@ def publish_event(users: Users | QuerySet[Users] | list[Users], event_code: Even
 
             print('EVENT', event, data, flush=True)
             try:
-                redis_client.publish(channel, event.code.value + ':' + event.dumps(data, kwargs))
+                redis_client.publish('_channel', event.code.value + ':' + event.dumps(data, kwargs))
             except redis.exceptions.ConnectionError:
                 raise ServiceUnavailable('event-queue')
