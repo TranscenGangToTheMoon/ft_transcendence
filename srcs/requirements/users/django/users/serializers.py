@@ -12,7 +12,7 @@ from users.models import Users
 
 class UsersMeSerializer(serializers.ModelSerializer):
     accept_friend_request = serializers.BooleanField()
-    friend_notifications = serializers.SerializerMethodField(read_only=True)
+    notifications = serializers.SerializerMethodField(read_only=True)
     password = serializers.CharField(write_only=True)
 
     class Meta:
@@ -28,8 +28,7 @@ class UsersMeSerializer(serializers.ModelSerializer):
             'trophies',
             'current_rank',
             'created_at',
-            'friend_notifications',
-            # 'chat_notifications',
+            'notifications',
             'is_online',
             'password',
 
@@ -42,8 +41,7 @@ class UsersMeSerializer(serializers.ModelSerializer):
             'trophies',
             'current_rank',
             'created_at',
-            'friend_notifications',
-            # 'chat_notifications', # todo handle
+            'notifications',
             'is_online',
         ]
 
@@ -52,8 +50,11 @@ class UsersMeSerializer(serializers.ModelSerializer):
         return AcceptChat.validate(value)
 
     @staticmethod
-    def get_friend_notifications(obj):
-        return FriendRequests.objects.filter(receiver=obj, new=True).count()
+    def get_notifications(obj):
+        return {
+            'friend_requests': obj.friend_requests_received.filter(new=True).count(),
+            'chats': 0, # todo handle chat
+        }
 
     def update(self, instance, validated_data):
         if instance.is_guest and any([k != 'username' for k in validated_data]):

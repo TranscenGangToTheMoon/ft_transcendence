@@ -85,11 +85,12 @@ class MessagesException:
         NOT_BELONG_LOBBY = NOT_BELONG.format(obj='lobby')
         NOT_BELONG_TOURNAMENT = NOT_BELONG.format(obj='tournament')
         NOT_BELONG_BLOCKED = 'This blocked user entry does not belong to you.'
+        USER_NOT_BELONG = 'This user does not belong to this {obj}.'
 
         ONLY_CREATE_PRIVATE_MESSAGES = 'You can only create private messages.'
 
         CANNOT_CHAT_YOURSELF = 'You cannot chat with yourself.'
-        KICK_YOURSELF = 'You cannot kick yourself.'
+        BAN_YOURSELF = 'You cannot ban yourself.'
         BLOCK_YOURSELF = 'You cannot block yourself.'
         SEND_FRIEND_REQUEST_YOURSELF = 'You cannot send a friend request to yourself.'
         FRIEND_YOURSELF = 'You cannot be friends with yourself.'
@@ -108,7 +109,7 @@ class MessagesException:
         NOT_CREATOR = 'Only creator can update this {obj}.'
 
         CAN_CREATE_MORE_THAN_ONE_TOURNAMENT = 'You cannot create more than one tournament at the same time.'
-        KICK_AFTER_START = 'You cannot kick user after the tournament start.'
+        BAN_AFTER_START = 'You cannot ban user after the tournament start.'
 
         BLOCKED_USER = 'You blocked this user.'
 

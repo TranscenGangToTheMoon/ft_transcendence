@@ -51,16 +51,18 @@ class Test01_GetUsers(UnitTest):
 class Test02_UserMe(UnitTest):
 
     def test_001_get_me(self):
-        user1 = self.new_user(connect_sse=True)
+        user1 = self.user_sse()
 
         response = self.assertResponse(me(user1), 200)
-        self.assertDictEqual(response, {'id': response['id'], 'username': user1['username'], 'is_guest': False, 'created_at': response['created_at'], 'profile_picture': None, 'accept_friend_request': True, 'accept_chat_from': 'friends_only', 'coins': 100, 'trophies': 0, 'current_rank': None, 'friend_notifications': 0, 'is_online': True})
+        self.assertDictEqual(response, {'id': response['id'], 'username': user1['username'], 'is_guest': False, 'created_at': response['created_at'], 'profile_picture': None, 'accept_friend_request': True, 'accept_chat_from': 'friends_only', 'coins': 100, 'trophies': 0, 'current_rank': None, 'notifications': {'friend_requests': 0, 'chats': 0}, 'is_online': True})
+        user1['thread'].join()
 
     def test_002_get_me_guest(self):
         user1 = self.guest_user(connect_sse=True)
 
         response = self.assertResponse(me(user1), 200)
-        self.assertDictEqual(response, {'id': response['id'], 'username': response['username'], 'is_guest': True, 'created_at': response['created_at'], 'profile_picture': None, 'accept_friend_request': True, 'accept_chat_from': 'friends_only', 'coins': 100, 'trophies': 0, 'current_rank': None, 'friend_notifications': 0, 'is_online': True})
+        self.assertDictEqual(response, {'id': response['id'], 'username': response['username'], 'is_guest': True, 'created_at': response['created_at'], 'profile_picture': None, 'accept_friend_request': True, 'accept_chat_from': 'friends_only', 'coins': 100, 'trophies': 0, 'current_rank': None, 'notifications': {'friend_requests': 0, 'chats': 0}, 'is_online': True})
+        user1['thread'].join()
 
 
 class Test03_DeleteUser(UnitTest):

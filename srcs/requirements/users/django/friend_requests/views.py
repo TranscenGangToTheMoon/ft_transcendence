@@ -23,10 +23,7 @@ class FriendRequestsListCreateView(generics.ListCreateAPIView, FriendRequestsMix
 
     def perform_create(self, serializer):
         super().perform_create(serializer)
-
-        receiver = serializer.instance.receiver
-        if receiver.is_online:
-            publish_event(receiver.id, EventCode.RECEIVE_FRIEND_REQUEST, data={'username': serializer.data['sender']['username'], **serializer.data}) # todo remake with field format
+        publish_event(serializer.instance.receiver, EventCode.RECEIVE_FRIEND_REQUEST, data=serializer.data, kwargs={'username': serializer.data['sender']['username']})
 
 
 class FriendRequestsReceiveListView(generics.ListAPIView, FriendRequestsMixin):
@@ -57,8 +54,18 @@ class FriendRequestView(SerializerKwargsContext, generics.CreateAPIView, generic
         super().perform_create(serializer)
 
         sender_friend_request = serializer.instance.friends.exclude(id=self.request.user.id).first()
-        if sender_friend_request.is_online:
-            publish_event(sender_friend_request.id, EventCode.ACCEPT_FRIEND_REQUEST, data=serializer.data)
+        publish_event(sender_friend_request, EventCode.ACCEPT_FRIEND_REQUEST, data=serializer.data)
+
+    def perform_destroy(self, instance):
+        user_id = self.request.user.id
+        if instance.sender.id == user_id:
+            code = EventCode.CANCEL_FRIEND_REQUEST
+            sse_user = instance.receiver
+        else:
+            code = EventCode.REJECT_FRIEND_REQUEST
+            sse_user = instance.sender
+        publish_event(sse_user, code, data={'id': instance.id})
+        super().perform_destroy(instance)
 
 
 friend_requests_list_create_view = FriendRequestsListCreateView.as_view()

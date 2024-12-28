@@ -5,15 +5,17 @@ from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
 
 from blocking.utils import create_player_instance
-from matchmaking.utils import verify_user, get_tournament, verify_place, get_participants
-from tournament.models import Tournaments, TournamentStage, TournamentParticipants
+from matchmaking.utils.participant import get_participants
+from matchmaking.utils.place import get_tournament, verify_place
+from matchmaking.utils.user import verify_user
+from tournament.models import Tournament, TournamentStage, TournamentParticipants
 
 
 class TournamentSerializer(serializers.ModelSerializer):
     participants = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
-        model = Tournaments
+        model = Tournament
         fields = [
             'id',
             'code',
@@ -42,8 +44,9 @@ class TournamentSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(MessagesException.ValidationError.TOURNAMENT_MIN_SIZE)
         return value
 
-    def get_participants(self, obj):
-        return get_participants(self, obj)
+    @staticmethod
+    def get_participants(obj):
+        return get_participants(obj)
 
     def create(self, validated_data):
         request = self.context.get('request')
@@ -54,7 +57,7 @@ class TournamentSerializer(serializers.ModelSerializer):
 
         verify_user(user['id'], True)
 
-        validated_data['code'] = generate_code(Tournaments)
+        validated_data['code'] = generate_code(Tournament)
         validated_data['created_by'] = user['id']
         validated_data['created_by_username'] = user['username']
         result = super().create(validated_data)
@@ -97,7 +100,7 @@ class TournamentParticipantsSerializer(serializers.ModelSerializer):
         user = self.context['auth_user']
         tournament = get_tournament(create=True, code=self.context.get('code'))
 
-        verify_place(user, tournament, self.context.get('request'))
+        verify_place(user, tournament)
 
         if tournament.created_by == user['id']:
             validated_data['creator'] = True
@@ -119,7 +122,7 @@ class TournamentSearchSerializer(serializers.ModelSerializer):
     created_by = serializers.CharField(source='created_by_username')
 
     class Meta:
-        model = Tournaments
+        model = Tournament
         fields = [
             'name',
             'code',

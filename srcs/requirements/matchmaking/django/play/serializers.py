@@ -5,7 +5,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
 
 from blocking.utils import create_player_instance
-from matchmaking.utils import verify_user
+from matchmaking.utils.user import verify_user
 from play.models import Players
 
 

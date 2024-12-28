@@ -8,10 +8,12 @@ from rest_framework.response import Response
 
 from lobby.models import Lobby, LobbyParticipants
 from lobby.serializers import LobbySerializer, LobbyParticipantsSerializer
-from matchmaking.utils import get_lobby, get_lobby_participant, get_kick_participants, kick_yourself, send_sse_event
+from matchmaking.utils.participant import get_lobby_participant
+from matchmaking.utils.place import get_lobby
+from matchmaking.utils.sse import send_sse_event
 
 
-class LobbyView(generics.CreateAPIView, generics.RetrieveUpdateAPIView):
+class LobbyView(SerializerAuthContext, generics.CreateAPIView, generics.RetrieveUpdateAPIView):
     queryset = Lobby.objects.all()
     serializer_class = LobbySerializer
 
@@ -49,21 +51,6 @@ class LobbyParticipantsView(SerializerAuthContext, generics.ListCreateAPIView, g
         super().perform_create(serializer)
         send_sse_event(EventCode.LOBBY_JOIN, serializer.instance, serializer.data, self.request)
 
-    def perform_destroy(self, instance):
-        send_sse_event(EventCode.LOBBY_LEAVE, instance, request=self.request)
-        super().perform_destroy(instance)
-
-
-class LobbyKickView(generics.DestroyAPIView):
-    serializer_class = LobbyParticipantsSerializer
-
-    def get_object(self):
-        kick_yourself(self.kwargs['user_id'], self.request.user.id)
-        lobby = get_lobby(self.kwargs['code'])
-        get_lobby_participant(lobby, self.request.user.id, True)
-        return get_kick_participants(lobby, self.kwargs['user_id'])
-
 
 lobby_view = LobbyView.as_view()
 lobby_participants_view = LobbyParticipantsView.as_view()
-lobby_kick_view = LobbyKickView.as_view()

@@ -5,11 +5,12 @@ import time
 from django.db import models
 from lib_transcendence.Tournament import Tournament
 
+from baning.models import Baned
 from blocking.utils import delete_player_instance
 from matchmaking.create_match import create_tournament_match
 
 
-class Tournaments(models.Model):
+class Tournament(models.Model):
     code = models.CharField(max_length=4, unique=True, editable=False)
     name = models.CharField(max_length=50, unique=True)
     size = models.IntegerField(default=16)
@@ -60,6 +61,11 @@ class Tournaments(models.Model):
     def n_stage(self):
         return int(log2(self.size))
 
+    def delete(self, using=None, keep_parents=False):
+        code = self.code
+        super().delete(using=using, keep_parents=keep_parents)
+        Baned.objecs.filter(code=code).delete()
+
     def __str__(self):
         if self.private:
             name = '*'
@@ -70,11 +76,9 @@ class Tournaments(models.Model):
             name += ' STARTED'
         return name
 
-    str_name = 'tournament'
-
 
 class TournamentStage(models.Model):
-    tournament = models.ForeignKey(Tournaments, on_delete=models.CASCADE, related_name='stages')
+    tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE, related_name='stages')
     label = models.CharField(max_length=50)
     stage = models.IntegerField(default=1)
 
@@ -84,7 +88,7 @@ class TournamentStage(models.Model):
 
 class TournamentParticipants(models.Model):
     user_id = models.IntegerField()
-    tournament = models.ForeignKey(Tournaments, on_delete=models.CASCADE, related_name='participants')
+    tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE, related_name='participants')
     stage = models.ForeignKey(TournamentStage, on_delete=models.CASCADE, default=None, null=True, related_name='participants')
     seeding = models.IntegerField(default=None, null=True) #todo make
     index = models.IntegerField(default=None, null=True) #todo make
@@ -93,6 +97,10 @@ class TournamentParticipants(models.Model):
     join_at = models.DateTimeField(auto_now_add=True)
     # todo add delete method and inform players that xxx leave the tournament
     # todo cans leave the tournament if started
+
+    @property
+    def place(self):
+        return self.tournament
 
     def delete(self, using=None, keep_parents=False):
         tournament = self.tournament
@@ -103,9 +111,6 @@ class TournamentParticipants(models.Model):
             super().delete(using=using, keep_parents=keep_parents)
             if tournament.participants.count() == 0:
                 tournament.delete()
-
-    def get_location_id(self):
-        return self.tournament.id
 
     def eliminate(self):
         self.still_in = False
@@ -133,5 +138,3 @@ class TournamentParticipants(models.Model):
         if self.stage is not None:
             name += ' ' + self.stage.label
         return name
-
-    str_name = 'tournament'

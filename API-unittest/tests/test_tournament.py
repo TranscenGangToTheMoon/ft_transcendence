@@ -1,7 +1,7 @@
 import unittest
 
 from services.blocked import blocked_user, unblocked_user
-from services.tournament import create_tournament, join_tournament, kick_user, search_tournament
+from services.tournament import create_tournament, join_tournament, ban_user, search_tournament
 from utils.generate_random import rnstr
 from utils.my_unittest import UnitTest
 
@@ -84,7 +84,7 @@ class Test02_ErrorTournament(UnitTest):
         self.assertResponse(blocked_user(user1, user2['id']), 201)
         self.assertResponse(join_tournament(user2, code), 404, {'detail': 'Tournament not found.'})
 
-    def test_008_blocked_user_kick_user(self):
+    def test_008_blocked_user_ban_user(self):
         user1 = self.user_sse()
         user2 = self.user_sse()
 
@@ -145,41 +145,41 @@ class Test02_ErrorTournament(UnitTest):
         self.assertResponse(join_tournament(user2, code), 201)
 
 
-class Test03_KickTournament(UnitTest):
+class Test03_BanTournament(UnitTest):
 
-    def test_001_kick_tournament(self):
+    def test_001_ban_tournament(self):
         user1 = self.user_sse()
         user2 = self.user_sse()
 
         code = self.assertResponse(create_tournament(user1), 201, get_field='code')
 
         self.assertResponse(join_tournament(user2, code), 201)
-        self.assertResponse(kick_user(user1, user2, code), 204)
+        self.assertResponse(ban_user(user1, user2, code), 204)
 
         response = self.assertResponse(join_tournament(user1, code, 'GET'), 200)
         self.assertEqual(1, len(response))
 
-    def test_002_user_kick_not_join_tournament(self):
+    def test_002_user_ban_not_join_tournament(self):
         user1 = self.user_sse()
         user2 = self.user_sse()
 
         code = self.assertResponse(create_tournament(user1), 201, get_field='code')
 
-        self.assertResponse(kick_user(user2, user1, code), 403, {'detail': 'You do not belong to this tournament.'})
+        self.assertResponse(ban_user(user2, user1, code), 403, {'detail': 'You do not belong to this tournament.'})
 
-    def test_003_user_kicked_not_join_tournament(self):
+    def test_003_user_baned_not_join_tournament(self):
         user1 = self.user_sse()
         user2 = self.user_sse()
 
         code = self.assertResponse(create_tournament(user1), 201, get_field='code')
 
-        self.assertResponse(kick_user(user1, user2, code), 404, {'detail': 'This user does not belong to this tournament.'})
+        self.assertResponse(ban_user(user1, user2, code), 404, {'detail': 'This user does not belong to this tournament.'})
 
     def test_004_invalid_tournament(self):
         user1 = self.user_sse()
         user2 = self.user_sse()
 
-        self.assertResponse(kick_user(user1, user2, '123456'), 403, {'detail': 'You do not belong to this tournament.'})
+        self.assertResponse(ban_user(user1, user2, '123456'), 403, {'detail': 'You do not belong to this tournament.'})
 
     def test_005_not_creator(self):
         user1 = self.user_sse()
@@ -188,14 +188,14 @@ class Test03_KickTournament(UnitTest):
         code = self.assertResponse(create_tournament(user1), 201, get_field='code')
 
         self.assertResponse(join_tournament(user2, code), 201)
-        self.assertResponse(kick_user(user2, user1, code), 403, {'detail': 'Only creator can update this tournament.'})
+        self.assertResponse(ban_user(user2, user1, code), 403, {'detail': 'Only creator can update this tournament.'})
 
     def test_006_users_does_exist(self):
         user1 = self.user_sse()
 
         code = self.assertResponse(create_tournament(user1), 201, get_field='code')
 
-        self.assertResponse(kick_user(user1, {'id': 123456789}, code), 404, {'detail': 'This user does not belong to this tournament.'})
+        self.assertResponse(ban_user(user1, {'id': 123456789}, code), 404, {'detail': 'This user does not belong to this tournament.'})
 
 
 class Test04_UpdateTournament(UnitTest):

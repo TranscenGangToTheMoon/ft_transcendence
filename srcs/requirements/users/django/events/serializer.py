@@ -11,6 +11,7 @@ class EventSerializer(serializers.Serializer):
     users_id = serializers.ListField(child=serializers.IntegerField())
     event_code = serializers.CharField(max_length=30)
     data = serializers.DictField(required=False)
+    kwargs = serializers.DictField(required=False)
 
     @staticmethod
     def validate_users_id(value):
@@ -34,9 +35,12 @@ class EventSerializer(serializers.Serializer):
         return value
 
     def create(self, validated_data):
+        one_user = len(validated_data['users_id']) == 1
+        users_id = []
         for user_id in validated_data['users_id']:
-            if not get_user(id=user_id).is_online:
+            user = get_user(id=user_id)
+            if not user.is_online and one_user:
                 raise NotFound(MessagesException.NotFound.USER)
-            publish_event(user_id, EventCode(validated_data['event_code']), validated_data.get('data'))
-
+            users_id.append(user)
+        publish_event(users_id, EventCode(validated_data['event_code']), validated_data.get('data'), validated_data.get('kwargs'))
         return validated_data

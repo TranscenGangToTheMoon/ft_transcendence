@@ -1,8 +1,12 @@
 from django.db import models
 from lib_transcendence.game import GameMode
 from lib_transcendence.Lobby import MatchType, Teams
+from lib_transcendence.sse_events import EventCode
+from lib_transcendence.services import create_sse_event
 
+from baning.models import delete_baned
 from blocking.utils import delete_player_instance
+from matchmaking.utils.sse import send_sse_event
 
 
 class Lobby(models.Model):
@@ -45,13 +49,15 @@ class Lobby(models.Model):
         self.ready_to_play = value
         self.save()
 
+    def delete(self, using=None, keep_parents=False):
+        delete_baned(self.code)
+        super().delete(using=using, keep_parents=keep_parents)
+
     def __str__(self):
         name = f'{self.code}/{self.game_mode} ({self.participants.count()}/{self.max_participants})'
         if self.game_mode == GameMode.custom_game:
             name += ' {' + self.match_type + '}'
         return name
-
-    str_name = 'lobby'
 
 
 class LobbyParticipants(models.Model):
@@ -64,23 +70,28 @@ class LobbyParticipants(models.Model):
 
     team = models.CharField(default=None, null=True)
 
-    def get_location_id(self):
-        return self.lobby.id
+    @property
+    def place(self):
+        return self.lobby
 
-    def delete(self, using=None, keep_parents=False):
-        # todo inform other players that xxx leave the lobby
+    def delete(self, using=None, keep_parents=False, destroy_lobby=False):
         creator = self.creator
         lobby = self.lobby
         delete_player_instance(self.user_id)
+        if not destroy_lobby:
+            send_sse_event(EventCode.LOBBY_LEAVE, self)
         super().delete(using=using, keep_parents=keep_parents)
-        participants = lobby.participants.filter(is_guest=False)
-        if not participants.exists():
-            lobby.delete()
-            # todo close websocket connection
-        elif creator:
-            first_join = participants.order_by('join_at').first()
-            first_join.creator = True
-            first_join.save()
+        if creator:
+            first_join = lobby.participants.filter(is_guest=False).order_by('join_at').first()
+            if first_join is None:
+                for user_left in lobby.participants.all():
+                    create_sse_event(user_left.user_id, EventCode.LOBBY_DESTROY)
+                    user_left.delete(destroy_lobby=True)
+                lobby.delete()
+            else:
+                first_join.creator = True
+                first_join.save()
+                send_sse_event(EventCode.LOBBY_UPDATE_PARTICIPANT, first_join, {'creator': True}, exclude_myself=False)
 
     def __str__(self):
         name = f'{self.lobby.code}/{self.lobby.game_mode} {self.user_id}'
@@ -91,5 +102,3 @@ class LobbyParticipants(models.Model):
         if self.team is not None:
             name += f" '{self.team}'"
         return name
-
-    str_name = 'lobby'

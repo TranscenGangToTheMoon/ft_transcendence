@@ -1,11 +1,7 @@
 from django.db import models
-from threading import Thread
 from lib_transcendence.game import GameMode
 
 from blocking.utils import delete_player_instance
-
-
-# import matchmaking #cant import some function from matchmaking (circular import)
 
 
 class Players(models.Model):
@@ -15,8 +11,8 @@ class Players(models.Model):
     join_at = models.DateTimeField(auto_now_add=True)
 
     @staticmethod
-    def tag(new_players):
-        from matchmaking.matchmaking import launch_dual_game, search_ranked_players
+    def tag():
+        from matchmaking.matchmaking import launch_dual_game
         #print('tag')
         players = Players.objects.all()
         #print('in normal game = ', players.filter(game_mode=GameMode.duel).count())
