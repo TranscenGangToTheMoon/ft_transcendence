@@ -162,11 +162,11 @@ class Game:
                 racket.blockGlide = False
 
     def update(self):
-        for racket in self.rackets:
-            racket.update(self.ball.size, self.canvas.y)
         if (self.last_update == 0):
             self.last_update = time.perf_counter()
         time_delta = (time.perf_counter() - self.last_update)
+        for racket in self.rackets:
+            racket.update(self.ball.size, self.canvas.y, time_delta)
         self.last_update = time.perf_counter()
         self.ball.position.x += self.ball.speed_x * time_delta
         self.ball.position.y += self.ball.speed_y * time_delta
