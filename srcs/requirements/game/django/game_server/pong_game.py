@@ -68,7 +68,7 @@ class Game:
 
         # TODO -> set all variables from .env
         self.max_bounce_angle = 2 * (math.pi / 5)
-        self.max_ball_speed = 15
+        self.max_ball_speed = 630
         self.speed_increment = 1
         self.ball = self.create_ball(self.canvas)
         self.rackets = self.create_rackets(self.match, self.canvas)
@@ -138,7 +138,7 @@ class Game:
             self.ball.direction_x = -self.ball.direction_x
             self.ball.increment_speed(self.max_ball_speed, self.speed_increment)
             self.calculateNewBallDirection(racket.position.y)
-        # self.send_game_state()
+        self.send_game_state()
 
     def handle_racket_collision(self, racket):
         ball_is_right_from_racket = self.ball.position.x < racket.position.x + racket.width and self.ball.position.x > racket.position.x
@@ -163,13 +163,11 @@ class Game:
 
     def update(self):
         self.frames += 1
-        print(self.frames, flush=True)
         for racket in self.rackets:
-            racket.update()
+            racket.update(self.ball.size, self.canvas.y)
         if (self.last_update == 0):
             self.last_update = time.perf_counter()
         time_delta = (time.perf_counter() - self.last_update)
-        print('time_delta', time_delta, flush=True)
         self.last_update = time.perf_counter()
         self.ball.position.x += self.ball.speed_x * time_delta
         self.ball.position.y += self.ball.speed_y * time_delta
@@ -177,7 +175,6 @@ class Game:
         self.handle_goal()
         for racket in self.rackets:
             self.handle_racket_collision(racket);
-        self.send_game_state()
 
     def wait_for_players(self, timeout: float):
         print(time.time(), "wait_for_players()", flush=True)
@@ -193,19 +190,18 @@ class Game:
 
     def play(self):
         start_time = time.perf_counter()
+        self.send_start_countdown()
         effective_start_time = start_time + 2
         last_frame_time = start_time
         self.last_update = 0
-        self.send_start_game()
         while time.perf_counter() < effective_start_time:
             time.sleep(1 / 120)
-        self.send_game_state()
+        self.send_start_game()
         while not self.finished:
             if self.game_timeout is not None and (time.perf_counter() - start_time < self.game_timeout * 60):
                 self.finish('game timed out')
                 break
             self.update()
-            print(self.get_game_state(1), flush=True)
             elapsed_time = time.perf_counter() - last_frame_time
             time_to_wait = (1 / 60) - elapsed_time
             if time_to_wait > 0:
@@ -222,7 +218,7 @@ class Game:
         try:
             self.wait_for_players(timeout)
             print(time.time(), "all players are connected", flush=True)
-        except self.PlayerTimeout as e: # TODO -> change exception to be more precise
+        except self.PlayerTimeout as e:
             print(e, flush=True)
             self.finish('game timed out, not all players connected to server')
             print('game canceled', flush=True)
@@ -250,46 +246,56 @@ class Game:
 
     def reset_game_state(self):
         print('reset_game_state', flush=True)
-        self.ball.position = Position(int(self.canvas.x / 2 - (self.ball.size / 2)), int(self.canvas.y / 2 - self.ball.size / 2))
-        self.ball.direction_x, self.ball.direction_y = get_random_direction()
-        self.ball.speed = Game.default_ball_speed
-        self.ball.speed_x = self.ball.direction_x * self.ball.speed
-        self.ball.speed_y = self.ball.direction_y * self.ball.speed
+        self.ball = self.create_ball(self.canvas)
         for racket in self.rackets:
+            racket.position.y = int(self.canvas.y - racket.height) // 2
             racket.velocity = 0
             racket.block_glide = False
 
     def score(self, team):
         from game_server.server import Server
-        print('score', flush=True)
-        last_touch: Player | None = self.ball.last_racket_touched
+        last_touch = self.ball.last_racket_touched
         if last_touch is not None:
             last_touch.csc += 1
         team.score += 1
-        self.send_goal(team)
+        print('score:', self.match.teams[0].score, self.match.teams[1].score, flush=True)
+        self.send_score(team)
         for team in self.match.teams:
             if (team.score == 3):
                 self.finish('game is over')
                 return
         self.reset_game_state()
         self.send_game_state()
+        start_time = time.perf_counter()
+        print(start_time, flush=True)
+        self.send_start_countdown()
+        effective_start_time = start_time + 2
+        while time.perf_counter() < effective_start_time:
+            time.sleep(1 / 120)
+        print('sending start', time.perf_counter(), flush=True)
         self.send_start_game()
-        time.sleep(2)
+        self.last_update = 0
 
 ################--------senders--------################
 
-    def send_goal(self, scorer_team):
+    def send_score(self, scorer_team):
         from game_server.server import Server
         Server.emit('score', data={'team_a': self.match.teams[0].score, 'team_b': self.match.teams[1].score}, room=str(self.match.id))
 
     def send_finish(self, reason: str | None = None, winner: str | None = None):
-        from game_server.server import Server
-        Server.emit('game_over', data={'reason': reason, 'winner': winner}, room=str(self.match.id))
+        # from game_server.server import Server
+        # Server.emit('game_over', data={'reason': reason, 'winner': winner}, room=str(self.match.id))
+        pass
 
     def send_start_game(self):
         from game_server.server import Server
         Server.emit('start_game', room=str(self.match.id))
         print('emitted start_game', flush=True)
+
+    def send_start_countdown(self):
+        from game_server.server import Server
+        Server.emit('start_countdown', room=str(self.match.id))
+        print('emitted start_countdown', flush=True)
 
     def send_canvas(self):
         from game_server.server import Server

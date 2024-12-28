@@ -35,6 +35,7 @@
     }
 
     const state = {
+    	team: '',
         isGameActive: false,
         isCountDownActive: false,
         isGamePaused: false,
@@ -113,8 +114,8 @@
         state.isGameActive = true;
         state.cancelAnimation = false;
         console.log('game started');
+		state.isCountDownActive = false;
 
-        startCountdown();
         function gameLoop(timestamp) {
             if (!state.isGameActive) return;
             state.last_frame_time = Date.now()
@@ -126,7 +127,7 @@
         }
         requestAnimationFrame(gameLoop);
     }
-
+``
     function resetGame(){
         state.playerScore = 0;
         state.enemyScore = 0;
@@ -189,7 +190,14 @@
     }
 
     function startCountdown() {
+	    state.isGameActive = true;
+	    state.cancelAnimation = false;
+	    console.log('CD started');
         state.isCountDownActive = true;
+
+        for (racket in state.paddles) {
+        	racket.y = (config.canvasHeight + config.paddleHeight) / 2
+        }
 
         function step() {
             state.countDown.currentStep--;
@@ -258,16 +266,16 @@
     }
 
     function moveUp(paddle){
-        if (!paddle.blockGlide || paddle.y - 10 > config.ballSize)
-            paddle.y -= 10;
-        else if (paddle.y - 10 <= config.ballSize)
+        if (!paddle.blockGlide || paddle.y - 5 > config.ballSize)
+            paddle.y -= 5;
+        else if (paddle.y - 5 <= config.ballSize)
             paddle.y = config.ballSize;
     }
 
     function moveDown(paddle){
-        if (!paddle.blockGlide || paddle.y + config.paddleHeight + 10 < config.canvasHeight - config.ballSize)
-            paddle.y += 10;
-        else if (paddle.y + config.paddleHeight + 10 >= config.canvasHeight - config.ballSize)
+        if (!paddle.blockGlide || paddle.y + config.paddleHeight + 5 < config.canvasHeight - config.ballSize)
+            paddle.y += 5;
+        else if (paddle.y + config.paddleHeight + 5 >= config.canvasHeight - config.ballSize)
             paddle.y = config.canvasHeight - config.ballSize - config.paddleHeight;
     }
 
@@ -312,7 +320,7 @@
         for (let paddle in state.paddles){
             paddle = state.paddles[paddle];
             if (paddle.speed === 1 && paddle.y + config.paddleHeight < config.canvasHeight)
-                  moveDown(paddle);
+                moveDown(paddle);
             else if (paddle.speed === -1 && paddle.y > 0)
                 moveUp(paddle);
         }
@@ -486,10 +494,10 @@
     }
 
     function updateGameState(timestamp) {
-    		if (state.lastFrame == 0)
-		        state.lastFrame = timestamp;
-				let deltaTime = (timestamp - state.lastFrame) / 1000;  // Convert to seconds
-				state.lastFrame = timestamp;
+    	if (state.lastFrame == 0)
+    		state.lastFrame = timestamp;
+    	let deltaTime = (timestamp - state.lastFrame) / 1000;  // Convert to seconds
+    	state.lastFrame = timestamp;
         handleUserInput();
         if (state.isGamePaused)
             return;
@@ -500,14 +508,17 @@
         }
 
         if (state.ball.y < 0 || state.ball.y + config.ballSize >= config.canvasHeight){
-            if (state.ball.y < 0)
-                state.ball.y = 0;
+            if (state.ball.y < 0) {
+	            state.ball.y = - state.ball.y
+	            state.ball.speedY = - state.ball.speedY
+            }
             else
-                state.ball.y = config.canvasHeight - config.ballSize;
+	            state.ball.y -= (state.ball.y + config.ballSize) - config.canvasHeight
+	            state.ball.speedY = - state.ball.speedY
             state.ball.speedY = -state.ball.speedY;
         }
 
-        handleGoal();
+        // handleGoal();
         for (let paddle in state.paddles){
             handlePaddleCollision(state.paddles[paddle]);
         }
@@ -539,13 +550,13 @@
         }
     }
 
-    window.PongGame = {startGame, stopGame, pauseGame, resumeGame, state, config, moveUp, moveDown};
+    window.PongGame = {startGame, startCountdown, stopGame, pauseGame, resumeGame, state, config, moveUp, moveDown, handleGameOver};
 })();
 
 
 function initSocket(){
 	const host = window.location.origin;
-  let socket = io(host, {
+	let socket = io(host, {
       transports: ["websocket"],
       path: "/ws/game/",
       auth : {
@@ -561,6 +572,10 @@ function initSocket(){
     socket.on('start_game', event => {
         console.log('received start_game');
         window.PongGame.startGame();
+    })
+    socket.on('start_countdown', event => {
+        console.log('received start_countdown');
+        window.PongGame.startCountdown();
     })
     socket.on('game_state', event => {
 	    window.PongGame.state.ball.y = event.position_y;
@@ -591,16 +606,24 @@ function initSocket(){
     })
     socket.on('score', event => {
     	if (window.PongGame.config.team == 'team_a') {
-        	window.PongGame.state.playerScore = event[window.PongGame.config.team_a]
-        	window.PongGame.state.playerScore = event[window.PongGame.config.team_b]
+			window.PongGame.state.playerScore = event.team_a;
+			window.PongGame.state.enemyScore = event.team_b;
      	}
      	else {
-        	window.PongGame.state.playerScore = event[window.PongGame.config.team_b]
-        	window.PongGame.state.playerScore = event[window.PongGame.config.team_a]
+			window.PongGame.state.playerScore = event.team_b;
+			window.PongGame.state.enemyScore = event.team_a;
+      	}
+  		window.PongGame.stopGame()
+     	if (event.team_a == window.PongGame.config.winningScore|| event.team_b == window.PongGame.config.winningScore) {
+      		window.PongGame.handleGameOver()
       	}
     })
+    socket.on('game_over', event => {
+		console.log('game_over');
+		window.PongGame.handleGameOver()
+    })
     socket.on('team_id', event => {
-    	window.PongGame.config.team = event.team
+		window.PongGame.state.team = event.team;
     })
 }
 

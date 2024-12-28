@@ -26,5 +26,14 @@ class Racket:
         self.velocity = 0
         self.position.y = y
 
-    def update(self):
-        self.position.y += self.velocity
+    def update(self, ball_size, canvas_height):
+        self.position.y += self.velocity * 5
+        if self.block_glide:
+            if self.position.y + self.height + ball_size < canvas_height:
+                self.position.y = canvas_height - self.height - ball_size
+            elif self.position.y - ball_size > 0:
+                self.position.y = ball_size
+        if self.position.y < 0:
+            self.position.y = 0
+        elif self.position.y + self.height > canvas_height:
+            self.position.y = canvas_height - self.height
