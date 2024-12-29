@@ -33,6 +33,9 @@ class Chat:
     fmessage = _base_private_chat + _fchat_id_message
     message = fmessage.format(chat_id=_chat_id)
 
+    fnotifications = _base_private_chat + 'notifications/{user_id}/'
+    notifications = fnotifications.format(user_id=_user_id)
+
 
 class Game:
     _base_game = base_api + 'game/'
