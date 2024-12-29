@@ -35,15 +35,11 @@ urlpatterns = [
 ]
 
 # todo 1. make all unit test work
+# todo 2. handle sse disconnection (send request matchmaking and set online at false) only if last connection
+# todo 3. fix permision denied guest
+# todo 4. finish all sse event (except for tournament)
 
-# todo make sse
-#   - update user status (connected, disconnected, ...)
-#   - if disconnected, send to matchmaking (to leave lobby, tournament, ...)
-# todo handle download all data
-# todo token pb (@Florian1215 je sais pas pourquoi mais quand je fais un make re puis que je me log avec chrome sur un user, ca log aussi tous les autres navigateurs sur cet user en mode le nouveau token de celui qui se log est le meme que celui qui est pas log sur l'autre navigateur)
-# todo handle abandon when finish game
-# todo handle local possiblitie user in custom_game
-# todo surcharge __str__ for all models
+# todo 1. make ss tournament events
 
 
 # todo CHAT
@@ -54,9 +50,7 @@ urlpatterns = [
 #   - send chat_id in lobby
 #   - send chat_id in tournament
 
-
-# todo handle nb spectact game
-# todo fix permision denied guest
+# todo handle abandon when finish game
 
 # todo game -> {type: game, 'code')
 # todo event -> FINISH GAME (args, abandon)
@@ -64,9 +58,7 @@ urlpatterns = [
 # todo lobby -> {type: event, 'tournoi', 'id', 'status'}
 # todo lobby -> connect chat
 # todo tournoi -> connect chat
-# todo dans user serializer nb message 1 message, 1 notif dans friend
-# todo demande de game only if connected
-# todo normaliser les vecteurs
+
 
 # todo handle friends fields
 # todo make endpoint for user stats, xp, trophies (when match ended, or when tournament ended)
@@ -100,25 +92,21 @@ urlpatterns = [
 # - delete coin
 # - delete xp
 
-# todo make endpoint for online status
+
 # todo fix github issue
-# todo delete chat after finish tournament
-# todo delete chat after finish lobby
+# todo make seeding tournament
+# todo ajouter password field pour change password
 
-# todo handle local user
 
-# custom game
-# - bo et 1v1 | 3v3 (rien a changer)
+# ----------------------
+# todo handle download all data
 
-# - Tournoi pas de seeding
 
-# - get message, mark as read
-# - faire inbox notif
-# - stocker tous le temps passe sur le site (when SSE)
-
-# - ajouter password field pour change password
+# --- poubell a idee ---
+# todo handle nb spectact game
 
 # --- before push ---
 # todo type all python code (make variable)
 # todo check norm (sort line all import)
+# todo delete __str__ for all models
 # todo check problem
