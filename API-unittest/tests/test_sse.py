@@ -3,6 +3,7 @@ import unittest
 
 from services.auth import register_guest
 from services.friend import friend_requests
+from services.lobby import create_lobby, join_lobby
 from services.user import me
 from utils.generate_random import rnstr
 from utils.my_unittest import UnitTest
@@ -83,6 +84,16 @@ class Test03_SSEConnectionClose(UnitTest):
         response = self.assertResponse(friend_requests(user2, user1), 201)
         self.assertNotEqual('online', response['receiver']['status'])
         self.assertNotEqual(last_online, response['receiver']['status'])
+        user2['thread'].join()
+
+    def test_002_leave_lobby_when_disconnect(self):
+        user1 = self.user_sse(['lobby-join'])
+        user2 = self.user_sse(['lobby-leave', 'lobby-update-participant'])
+
+        code = self.assertResponse(create_lobby(user1), 201, get_field='code')
+        self.assertResponse(join_lobby(user2, code), 201)
+        user1['thread'].join()
+        time.sleep(1)
         user2['thread'].join()
 
 
