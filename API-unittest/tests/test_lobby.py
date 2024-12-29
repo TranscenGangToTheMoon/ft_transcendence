@@ -245,11 +245,14 @@ class Test03_BanLobby(UnitTest):
 class Test04_UpdateLobby(UnitTest):
 
     def test_001_update_lobby(self):
-        user1 = self.user_sse(['lobby-update'])
+        user1 = self.user_sse(['lobby-join'])
+        user2 = self.user_sse(['lobby-update'])
 
-        self.assertResponse(create_lobby(user1, data={'game_mode': 'custom_game'}), 201, get_field='code')
+        code = self.assertResponse(create_lobby(user1, data={'game_mode': 'custom_game'}), 201, get_field='code')
+        self.assertResponse(join_lobby(user2, code), 201)
         self.assertEqual('3v3', self.assertResponse(create_lobby(user1, {'match_type': '3v3'}, 'PATCH'), 200, get_field='match_type'))
         user1['thread'].join()
+        user2['thread'].join()
 
     def test_002_invalid_match_type(self):
         user1 = self.user_sse()
