@@ -35,7 +35,6 @@ urlpatterns = [
 ]
 
 # todo 1. make all unit test work
-# todo 3. handle chat notification
 
 # todo make sse
 #   - update user status (connected, disconnected, ...)
