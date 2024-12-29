@@ -1,13 +1,13 @@
 from datetime import datetime, timezone
-import math
 from game_server.match import Match, Player, finish_match
 from game_server.pong_ball import Ball
 from game_server.pong_position import Position
 from game_server.pong_racket import Racket
 from typing import List
+import math
 import os
-import time
 import random
+import time
 
 
 def get_random_direction():
@@ -171,9 +171,9 @@ class Game:
         self.ball.position.x += self.ball.speed_x * time_delta
         self.ball.position.y += self.ball.speed_y * time_delta
         self.handle_wall_bounce()
-        self.handle_goal()
         for racket in self.rackets:
             self.handle_racket_collision(racket);
+        self.handle_goal()
 
     def wait_for_players(self, timeout: float):
         print(time.time(), "wait_for_players()", flush=True)
@@ -262,7 +262,7 @@ class Game:
         self.send_score(team)
         for team in self.match.teams:
             if (team.score == 3):
-                self.finish('game is over')
+                self.finish('game is over', 'team_a' if team == self.match.teams[0] else 'team_b')
                 return
         self.reset_game_state()
         self.send_game_state()

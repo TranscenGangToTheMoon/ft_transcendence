@@ -7,7 +7,7 @@
         paddleHeight: 200,
         ballSize: 20,
         maxBallSpeed: 630,
-        maxPaddleSpeed: 300,
+        maxPaddleSpeed: 350,
         animationDuration: 800,
         font: "48px Arial",
         fontColor: "white",
@@ -74,6 +74,7 @@
         },
         keys: {},
         cancelAnimation: false,
+        deltaTime: 0,
     };
 
     const canvas = document.getElementById("gameCanvas");
@@ -128,7 +129,7 @@
         }
         requestAnimationFrame(gameLoop);
     }
-``
+
     function resetGame(){
         state.playerScore = 0;
         state.enemyScore = 0;
@@ -267,7 +268,7 @@
     }
 
     function moveUp(paddle){
-    	delta = maxBallSpeed * Performance.now() - state.lastFrame
+    	delta = state.deltaTime * config.maxPaddleSpeed
         if (!paddle.blockGlide || paddle.y - delta > config.ballSize)
             paddle.y -= delta;
         else if (paddle.y - delta <= config.ballSize)
@@ -275,7 +276,7 @@
     }
 
     function moveDown(paddle){
-    	delta = maxBallSpeed * Performance.now() - state.lastFrame
+    	delta = state.deltaTime * config.maxPaddleSpeed
         if (!paddle.blockGlide || paddle.y + config.paddleHeight + delta < config.canvasHeight - config.ballSize)
             paddle.y += delta;
         else if (paddle.y + config.paddleHeight + delta >= config.canvasHeight - config.ballSize)
@@ -499,15 +500,15 @@
     function updateGameState(timestamp) {
     	if (state.lastFrame == 0)
     		state.lastFrame = timestamp;
-    	let deltaTime = (timestamp - state.lastFrame) / 1000;  // Convert to seconds
+    	state.deltaTime = (timestamp - state.lastFrame) / 1000;  // Convert to seconds
     	state.lastFrame = timestamp;
         handleUserInput();
         if (state.isGamePaused)
             return;
 
         if (!state.isCountDownActive){
-            state.ball.x += state.ball.speedX * deltaTime;
-            state.ball.y += state.ball.speedY * deltaTime;
+            state.ball.x += state.ball.speedX * state.deltaTime;
+            state.ball.y += state.ball.speedY * state.deltaTime;
         }
 
         if (state.ball.y < 0 || state.ball.y + config.ballSize >= config.canvasHeight){

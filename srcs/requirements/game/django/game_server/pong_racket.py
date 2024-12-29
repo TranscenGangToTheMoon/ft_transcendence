@@ -15,7 +15,7 @@ class Racket:
         self.height = Racket.height
         self.width = Racket.width
         self.block_glide = False
-        self.max_speed = 300
+        self.max_speed = 350
 
     def move_up(self):
         self.velocity = -1

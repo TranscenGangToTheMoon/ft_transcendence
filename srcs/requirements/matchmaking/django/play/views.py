@@ -18,7 +18,7 @@ class PlayMixin(generics.CreateAPIView, generics.DestroyAPIView):
 
     def perform_create(self, serializer):
         new_player = super().perform_create(serializer)
-        Players.tag(new_player)
+        Players.tag()
 
 
 class DuelView(PlayMixin):
