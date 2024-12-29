@@ -39,7 +39,7 @@ class MessagesSerializer(serializers.ModelSerializer):
         validated_data['chat_id'] = chat_id
         validated_data['author'] = user_id
 
-        for user in ChatParticipants.objects.filter(chat_id=chat_id, view_chat=False):
+        for user in chat.participants.filter(view_chat=False):
             user.set_view_chat()
 
         return super().create(validated_data)
