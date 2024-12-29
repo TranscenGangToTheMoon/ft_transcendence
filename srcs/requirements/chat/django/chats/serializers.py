@@ -28,6 +28,7 @@ class ChatPaticipantsSerializer(serializers.ModelSerializer):
 class ChatsSerializer(serializers.ModelSerializer):
     username = serializers.CharField(write_only=True)
     chat_with = serializers.SerializerMethodField(read_only=True)
+    unread_messages = serializers.SerializerMethodField(read_only=True)
     last_message = MessagesSerializer(source='messages.last', read_only=True)
     type = serializers.CharField()
     view_chat = serializers.BooleanField(required=False)
@@ -35,14 +36,15 @@ class ChatsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Chats
         fields = [
+            'username',
             'id',
             'type',
             'chat_with',
             'last_message',
             'created_at',
             'last_updated',
-            'username',
             'view_chat',
+            'unread_messages',
         ]
         read_only_fields = [
             'id',
@@ -50,6 +52,7 @@ class ChatsSerializer(serializers.ModelSerializer):
             'last_message',
             'created_at',
             'last_updated',
+            'unread_messages',
         ]
 
     def get_chat_with(self, obj):
@@ -70,6 +73,12 @@ class ChatsSerializer(serializers.ModelSerializer):
             return obj.participants.get(user_id=get_auth_user(request)['id']).view_chat
         except ChatParticipants.DoesNotExist:
             return False
+
+    def get_unread_messages(self, obj):
+        request = self.context.get('request')
+        if request is None:
+            raise serializers.ValidationError(MessagesException.ValidationError.REQUEST_REQUIRED)
+        return obj.messages.exclude(author=get_auth_user(request)['id']).filter(is_read=False).count()
 
     def validate_type(self, value):
         request = self.context.get('request')
