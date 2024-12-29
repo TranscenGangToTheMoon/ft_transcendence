@@ -146,7 +146,7 @@ redis_client = redis.StrictRedis(host='event-queue')
 def publish_event(users: Users | QuerySet[Users] | list[Users], event_code: EventCode, data=None, kwargs=None):
     event = globals().get(event_code.value.replace('-', '_'))
     if event is None:
-        raise ParseError({'event_code': [MessagesException.ValidationError.INVALID_EVENT_CODE]}) # todo handle error
+        raise ParseError({'event_code': [MessagesException.ValidationError.INVALID_EVENT_CODE]})
 
     if isinstance(users, Users):
         users = [users]
