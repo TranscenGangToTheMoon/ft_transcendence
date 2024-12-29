@@ -106,8 +106,7 @@ class Event:
         return json.dumps(result)
 
 
-connection_success = Event(Service.AUTH, EventCode.CONNECTION_SUCCESS, 'Connection has been successfully established.')
-connection_close = Event(Service.AUTH, EventCode.CONNECTION_CLOSE)
+delete_user = Event(Service.AUTH, EventCode.DELETE_USER)
 
 send_message = Event(Service.CHAT, EventCode.SEND_MESSAGE, '{username}: {message}', Target('/chat/{id}/')) # todo format
 

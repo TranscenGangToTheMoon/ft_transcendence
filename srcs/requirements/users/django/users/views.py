@@ -52,7 +52,7 @@ class UsersMeView(generics.RetrieveUpdateDestroyAPIView):
         except APIException:
             pass
 
-        publish_event(user, EventCode.CONNECTION_CLOSE)
+        publish_event(user, EventCode.DELETE_USER)
         return super().destroy(request, *args, **kwargs)
 
 

@@ -1,7 +1,9 @@
+from lib_transcendence import endpoints
 from lib_transcendence.Chat import AcceptChat
 from lib_transcendence.exceptions import MessagesException
+from lib_transcendence.services import request_chat
 from rest_framework import serializers
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import PermissionDenied, APIException
 
 from friend_requests.models import FriendRequests
 from friends.serializers import FriendsSerializer
@@ -51,9 +53,13 @@ class UsersMeSerializer(serializers.ModelSerializer):
 
     @staticmethod
     def get_notifications(obj):
+        try:
+            chat_notifications = request_chat(endpoints.Chat.fnotifications.format(user_id=obj.id), 'GET')['notifications']
+        except APIException:
+            chat_notifications = 0
         return {
             'friend_requests': obj.friend_requests_received.filter(new=True).count(),
-            'chats': 0, # todo handle chat
+            'chats': chat_notifications,
         }
 
     def update(self, instance, validated_data):

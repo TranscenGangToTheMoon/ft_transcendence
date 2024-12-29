@@ -4,6 +4,7 @@ from django.http import StreamingHttpResponse
 from lib_transcendence.exceptions import MessagesException, ServiceUnavailable, ResourceExists
 from lib_transcendence.sse_events import EventCode
 from rest_framework import renderers
+from rest_framework.exceptions import NotFound
 from rest_framework.views import APIView
 
 import redis
@@ -32,7 +33,6 @@ class SSEView(APIView):
 
     @staticmethod
     def get(request, *args, **kwargs):
-        print('REQUEST', request, flush=True)
         # todo when serveur up set all is_connected False
 
         def event_stream(_user_id, _channel):
@@ -41,23 +41,25 @@ class SSEView(APIView):
                     message = pubsub.get_message(ignore_subscribe_messages=True)
                     if message:
                         event, data = message['data'].decode('utf-8').split(':', 1)
-                        if event == EventCode.CONNECTION_CLOSE.value:
+                        if event == EventCode.DELETE_USER.value:
                             raise ConnectionClose
                     else:
                         data = 'PING'
                         event = 'ping'
                     yield f'event: {event}\ndata: {data}\n\n'
                     time.sleep(0.1)
-            except GeneratorExit:
+            except (GeneratorExit, ConnectionClose) as e:
                 pubsub.close()
-                if redis_client.get(_channel) is None: # todo didn't work
-                    get_user(id=_user_id).disconnect()
-            except ConnectionClose:
-                pass
+                if e == GeneratorExit:
+                    try:
+                        result = redis_client.pubsub_numsub(_channel)[0][1]
+                        if not result:
+                            get_user(id=_user_id).disconnect()
+                    except (IndexError, NotFound):
+                        pass
 
         user = get_user(request)
         user.connect()
-        publish_event(user, EventCode.CONNECTION_SUCCESS) # todo useless
         user_id = user.id
         del user
 

@@ -43,5 +43,20 @@ class ChatView(SerializerAuthContext, generics.RetrieveDestroyAPIView):
         return super().destroy(request, *args, **kwargs)
 
 
+class GetChatNotifications(generics.RetrieveAPIView):
+    authentication_classes = []
+
+    def retrieve(self, request, *args, **kwargs):
+        user_id = self.kwargs['user_id']
+        count = 0
+
+        for chat in Chats.objects.filter(participants__user_id=user_id):
+            if chat.messages.exclude(author=user_id).filter(is_read=False).exists():
+                count += 1
+
+        return Response({'notifications': count})
+
+
 chats_view = ChatsView.as_view()
 chat_view = ChatView.as_view()
+get_chat_notifications_view = GetChatNotifications.as_view()
