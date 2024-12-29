@@ -102,7 +102,7 @@ class Test02_FriendRequest(UnitTest):
 
     def test_001_friend_request(self):
         user1 = self.new_user()
-        user2 = self.user_sse(['receiveaccept-friend-request'])
+        user2 = self.user_sse(['receive-friend-request'])
 
         friend_request_id = self.assertResponse(friend_requests(user1, user2), 201, get_field=True)
 
