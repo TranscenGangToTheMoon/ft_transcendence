@@ -8,7 +8,7 @@
 		@trailing path_regexp trailing ^(/.+)/$
 		@excludeSSE path /sse/*
 		redir @trailing {re.trailing.1} permanent
-		try_files {path} /index.html		
+		try_files {path} /index.html
 		file_server
 	}
 
@@ -16,7 +16,9 @@
 		handle /ws/chat/* {
 			reverse_proxy http://chat:8010
 		}
+		handle /ws/game/* {
 		reverse_proxy http://game:5500
+		}
 	}
 
 	handle /sse/* {

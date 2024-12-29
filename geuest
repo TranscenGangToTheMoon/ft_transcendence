@@ -1,0 +1,11 @@
+Guest :
+	- 3v3
+		- pas creer le lobby
+		- ne peut pas devenir hote
+		- pas de creation direct file d'attente
+	- duel
+	- tournament :
+		-rejoindre pas creer
+		
+	-ranked X
+	- game history V 
