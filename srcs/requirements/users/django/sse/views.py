@@ -50,7 +50,7 @@ class SSEView(APIView):
                     time.sleep(0.1)
             except (GeneratorExit, ConnectionClose) as e:
                 pubsub.close()
-                if e == GeneratorExit:
+                if isinstance(e, GeneratorExit):
                     try:
                         result = redis_client.pubsub_numsub(_channel)[0][1]
                         if not result:
