@@ -24,7 +24,7 @@ class UnitTest(unittest.TestCase):
         if get_me:
             _new_user['id'] = self.assertResponse(me(_new_user), 200, get_field=True)
         if connect_sse:
-            _new_user['thread'] = self.connect_to_sse(_new_user, tests_sse, still_connected=still_connected)
+            self.connect_to_sse(_new_user, tests_sse, still_connected=still_connected)
         return _new_user
 
     def user_sse(self, tests: list[str] = None, get_me=False, still_connected=False):
@@ -40,7 +40,7 @@ class UnitTest(unittest.TestCase):
             _new_user['id'] = response['id']
             _new_user['username'] = response['username']
         if connect_sse:
-            _new_user['thread'] = self.connect_to_sse(_new_user, tests_sse, still_connected=still_connected)
+            self.connect_to_sse(_new_user, tests_sse, still_connected=still_connected)
         return _new_user
 
     def assertResponse(self, response, status_code, json_assertion=None, count=None, get_field=None, get_user=False):
@@ -65,10 +65,10 @@ class UnitTest(unittest.TestCase):
         return responses[1].json['id']
 
     def connect_to_sse(self, user, tests: list[str] = None, timeout=50, status_code=200, still_connected=False):
-        thread = Thread(target=self._thread_connect_to_sse, args=(user, tests, timeout, status_code, still_connected))
-        thread.start()
+        user['thread'] = Thread(target=self._thread_connect_to_sse, args=(user, tests, timeout, status_code, still_connected))
+        user['thread'].start()
         time.sleep(0.5)
-        return thread
+        return user['thread']
 
     def _thread_connect_to_sse(self, user, tests, timeout, status_code, still_connected):
         if tests is None:
@@ -106,7 +106,7 @@ class UnitTest(unittest.TestCase):
                             print(f"SSE RECEIVED {value}: {data}", flush=True)
                             user['thread_assertion'].append(data['event_code'])
                             user['thread_result'] += 1
-                            if user['thread_result'] == len(tests) and not still_connected:
+                            if (tests is not None and user['thread_result'] == len(tests)) and not still_connected:
                                 return
 
     def assertThread(self, user):
@@ -115,3 +115,4 @@ class UnitTest(unittest.TestCase):
             user['thread_tests'] = []
         self.assertListEqual(user['thread_tests'], user['thread_assertion'])
         self.assertEqual(user['expected_thread_result'], user['thread_result'])
+        time.sleep(0.5)
