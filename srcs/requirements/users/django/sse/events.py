@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 from enum import Enum
 
 import redis
@@ -15,6 +16,13 @@ from users.models import Users
 # todo when retrieve many user, handle friend field
 # todo when create match return user instance not only id
 # todo when create match return teams id not list
+
+
+def datetime_serializer(obj):
+    if isinstance(obj, datetime):
+        return obj.isoformat()
+    raise TypeError
+
 
 def get_username(user_id):
     if isinstance(user_id, str):
@@ -103,7 +111,7 @@ class Event:
             'target': None if self.target is None else [t.dumps(data) for t in self.target],
             'data': data,
         }
-        return json.dumps(result)
+        return json.dumps(result, default=datetime_serializer)
 
 
 delete_user = Event(Service.AUTH, EventCode.DELETE_USER)
