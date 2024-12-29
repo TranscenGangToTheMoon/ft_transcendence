@@ -134,7 +134,7 @@ class Test02_ErrorJoinLobby(UnitTest):
         user2['thread'].join()
 
     def test_009_blocked_user_not_creator(self):
-        user1 = self.user_sse(['lobby-join', 'lobby-join'])
+        user1 = self.user_sse(['lobby-join', 'lobby-join'], still_connected=True)
         user2 = self.user_sse(['lobby-join'])
         user3 = self.user_sse(get_me=True)
 
@@ -151,7 +151,7 @@ class Test02_ErrorJoinLobby(UnitTest):
         user3['thread'].join()
 
     def test_010_blocked_then_unblock(self):
-        user1 = self.user_sse(['lobby-join', 'lobby-leave'])
+        user1 = self.user_sse(['lobby-join', 'lobby-leave', 'lobby-join'])
         user2 = self.user_sse(get_me=True)
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
@@ -245,11 +245,14 @@ class Test03_BanLobby(UnitTest):
 class Test04_UpdateLobby(UnitTest):
 
     def test_001_update_lobby(self):
-        user1 = self.user_sse(['lobby-update'])
+        user1 = self.user_sse(['lobby-join'])
+        user2 = self.user_sse(['lobby-update'])
 
-        self.assertResponse(create_lobby(user1, data={'game_mode': 'custom_game'}), 201, get_field='code')
+        code = self.assertResponse(create_lobby(user1, data={'game_mode': 'custom_game'}), 201, get_field='code')
+        self.assertResponse(join_lobby(user2, code), 201)
         self.assertEqual('3v3', self.assertResponse(create_lobby(user1, {'match_type': '3v3'}, 'PATCH'), 200, get_field='match_type'))
         user1['thread'].join()
+        user2['thread'].join()
 
     def test_002_invalid_match_type(self):
         user1 = self.user_sse()
@@ -368,7 +371,7 @@ class Test05_UpdateParticipantLobby(UnitTest):
 class Test06_LeaveLobby(UnitTest):
 
     def test_001_leave_lobby(self):
-        user1 = self.user_sse(['lobby-join', 'lobby-join', 'lobby-leave', 'lobby-leave'])
+        user1 = self.user_sse(['lobby-join', 'lobby-join', 'lobby-leave', 'lobby-leave'], still_connected=True)
         user2 = self.user_sse(['lobby-join', 'lobby-leave'])
         user3 = self.user_sse()
 
@@ -402,8 +405,8 @@ class Test06_LeaveLobby(UnitTest):
 
     def test_003_guest_join_leave_lobby_then_destroy_lobby(self):
         user1 = self.user_sse(['lobby-join', 'lobby-join'])
-        user2 = self.guest_user(connect_sse=True, tests_sse=['lobby-join', 'lobby-leave', 'lobby-destroy'])
-        user3 = self.guest_user(connect_sse=True, tests_sse=['lobby-leave', 'lobby-destroy'])
+        user2 = self.guest_user(connect_sse=True, tests_sse=['lobby-join', 'lobby-leave', 'lobby-destroy'], still_connected=True)
+        user3 = self.guest_user(connect_sse=True, tests_sse=['lobby-leave', 'lobby-destroy'], still_connected=True)
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
         self.assertResponse(join_lobby(user2, code), 201)

@@ -38,14 +38,15 @@ class Test01_SSE(UnitTest):
         thread1.join()
 
     def test_005_guest_then_register(self):
-        user1 = self.guest_user()
+        user1 = self.guest_user(get_me=True)
         username = 'sse-register-' + rnstr()
+
         thread1 = self.connect_to_sse(user1, tests=['connection-success'], ignore_connection_message=False)
         user1['username'] = self.assertResponse(register_guest(user1, username=username), 200, get_field='username')
+        thread1.join()
         response = self.assertResponse(me(user1), 200)
         self.assertFalse(response['is_guest'])
         self.assertEqual(username, response['username'])
-        thread1.join()
 
     def test_006_delete_user(self):
         user1 = self.user_sse()

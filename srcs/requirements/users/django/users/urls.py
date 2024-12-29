@@ -34,11 +34,12 @@ urlpatterns = [
     path(UsersManagement.manage_user, manage_user_view),
 ]
 
+# todo 1. make all unit test work
+# todo 3. handle chat notification
+
 # todo make sse
 #   - update user status (connected, disconnected, ...)
 #   - if disconnected, send to matchmaking (to leave lobby, tournament, ...)
-#   - make function for create event
-#   - make function for create notification
 # todo handle download all data
 # todo token pb (@Florian1215 je sais pas pourquoi mais quand je fais un make re puis que je me log avec chrome sur un user, ca log aussi tous les autres navigateurs sur cet user en mode le nouveau token de celui qui se log est le meme que celui qui est pas log sur l'autre navigateur)
 # todo handle abandon when finish game

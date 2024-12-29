@@ -15,15 +15,7 @@ class EventSerializer(serializers.Serializer):
 
     @staticmethod
     def validate_users_id(value):
-        result = []
-        users = set(value)
-        for user_id in users:
-            try:
-                if get_user(id=user_id).is_online:
-                    result.append(user_id)
-            except APIException:
-                pass
-
+        result = list(set(value))
         if not result:
             raise NotFound(MessagesException.NotFound.USERS)
         return result

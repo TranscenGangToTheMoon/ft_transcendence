@@ -10,15 +10,7 @@ class Messages(models.Model):
     author = models.IntegerField()
     content = models.TextField()
     sent_at = models.DateTimeField(auto_now_add=True)
-    read_at = models.DateTimeField(blank=True, null=True)
-
-    @property
-    def is_read(self):
-        return self.read_at is not None
-
-    def mark_as_read(self):
-        self.read_at = datetime.now()
-        self.save()
+    is_read = models.BooleanField(default=False)
 
     def __str__(self):
         return f'{self.author}: {self.content}'
