@@ -76,6 +76,8 @@ class UnitTest(unittest.TestCase):
         else:
             user['expected_thread_result'] = len(tests)
         user['thread_result'] = 0
+        user['thread_tests'] = tests
+        user['thread_assertion'] = []
         timeout_count = 0
 
         with httpx.Client(verify=False) as client:
@@ -102,11 +104,13 @@ class UnitTest(unittest.TestCase):
                             else:
                                 value = ''
                             print(f"SSE RECEIVED {value}: {data}", flush=True)
-                            self.assertEqual(tests[user['thread_result']], data['event_code'])
+                            user['thread_assertion'].append(data['event_code'])
                             user['thread_result'] += 1
                             if user['thread_result'] == len(tests) and not still_connected:
                                 return
 
     def assertThread(self, user):
         user['thread'].join()
+        if user['thread_tests'] is not None:
+            self.assertListEqual(user['thread_tests'], user['thread_assertion'])
         self.assertEqual(user['expected_thread_result'], user['thread_result'])
