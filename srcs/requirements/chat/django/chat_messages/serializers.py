@@ -16,13 +16,12 @@ class MessagesSerializer(serializers.ModelSerializer):
             'author',
             'content',
             'sent_at',
-            'read_at',
+            'is_read',
         ]
         read_only_fields = [
             'id',
             'author',
             'chat_id',
-            'read_at',
         ]
 
     def create(self, validated_data):
