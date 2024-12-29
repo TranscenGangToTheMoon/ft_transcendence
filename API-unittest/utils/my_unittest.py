@@ -12,7 +12,7 @@ from utils.generate_random import rnstr
 
 
 class UnitTest(unittest.TestCase):
-    def new_user(self, username=None, password=None, get_me=False, connect_sse=False, tests_sse: list[str] = None):
+    def new_user(self, username=None, password=None, get_me=False, connect_sse=False, tests_sse: list[str] = None, still_connected=False):
         if username is None:
             username = 'user-' + rnstr(10)
         if password is None:
@@ -24,13 +24,13 @@ class UnitTest(unittest.TestCase):
         if get_me:
             _new_user['id'] = self.assertResponse(me(_new_user), 200, get_field=True)
         if connect_sse:
-            _new_user['thread'] = self.connect_to_sse(_new_user, tests_sse)
+            _new_user['thread'] = self.connect_to_sse(_new_user, tests_sse, still_connected=still_connected)
         return _new_user
 
-    def user_sse(self, tests: list[str] = None, get_me=False):
-        return self.new_user(connect_sse=True, tests_sse=tests, get_me=get_me)
+    def user_sse(self, tests: list[str] = None, get_me=False, still_connected=False):
+        return self.new_user(connect_sse=True, tests_sse=tests, get_me=get_me, still_connected=still_connected)
 
-    def guest_user(self, get_me=False, connect_sse=False, tests_sse: list[str] = None):
+    def guest_user(self, get_me=False, connect_sse=False, tests_sse: list[str] = None, still_connected=False):
         _new_user = {}
         token = self.assertResponse(create_guest(), 201)
         _new_user['token'] = token['access']
@@ -40,7 +40,7 @@ class UnitTest(unittest.TestCase):
             _new_user['id'] = response['id']
             _new_user['username'] = response['username']
         if connect_sse:
-            _new_user['thread'] = self.connect_to_sse(_new_user, tests_sse)
+            _new_user['thread'] = self.connect_to_sse(_new_user, tests_sse, still_connected=still_connected)
         return _new_user
 
     def assertResponse(self, response, status_code, json_assertion=None, count=None, get_field=None, get_user=False):
@@ -64,13 +64,13 @@ class UnitTest(unittest.TestCase):
             self.assertEqual(json_assertion, responses[1].json)
         return responses[1].json['id']
 
-    def connect_to_sse(self, user, tests: list[str] = None, timeout=50, status_code=200, ignore_connection_message=True):
-        thread = Thread(target=self._thread_connect_to_sse, args=(user, tests, timeout, status_code, ignore_connection_message))
+    def connect_to_sse(self, user, tests: list[str] = None, timeout=50, status_code=200, ignore_connection_message=True, still_connected=False):
+        thread = Thread(target=self._thread_connect_to_sse, args=(user, tests, timeout, status_code, ignore_connection_message, still_connected))
         thread.start()
         time.sleep(0.5)
         return thread
 
-    def _thread_connect_to_sse(self, user, tests, timeout, status_code, ignore_connection_message):
+    def _thread_connect_to_sse(self, user, tests, timeout, status_code, ignore_connection_message, still_connected):
         def assert_tests():
             if tests is not None:
                 self.assertEqual(i, len(tests))
@@ -106,6 +106,6 @@ class UnitTest(unittest.TestCase):
                             print(f"SSE RECEIVED {value}: {data}", flush=True)
                             self.assertEqual(tests[i], data['event_code'])
                             i += 1
-                            if i == len(tests):
+                            if i == len(tests) and not still_connected:
                                 return
         assert_tests()

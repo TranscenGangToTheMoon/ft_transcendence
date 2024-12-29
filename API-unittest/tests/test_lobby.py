@@ -371,7 +371,7 @@ class Test05_UpdateParticipantLobby(UnitTest):
 class Test06_LeaveLobby(UnitTest):
 
     def test_001_leave_lobby(self):
-        user1 = self.user_sse(['lobby-join', 'lobby-join', 'lobby-leave', 'lobby-leave'])
+        user1 = self.user_sse(['lobby-join', 'lobby-join', 'lobby-leave', 'lobby-leave'], still_connected=True)
         user2 = self.user_sse(['lobby-join', 'lobby-leave'])
         user3 = self.user_sse()
 
@@ -405,8 +405,8 @@ class Test06_LeaveLobby(UnitTest):
 
     def test_003_guest_join_leave_lobby_then_destroy_lobby(self):
         user1 = self.user_sse(['lobby-join', 'lobby-join'])
-        user2 = self.guest_user(connect_sse=True, tests_sse=['lobby-join', 'lobby-leave', 'lobby-destroy'])
-        user3 = self.guest_user(connect_sse=True, tests_sse=['lobby-leave', 'lobby-destroy'])
+        user2 = self.guest_user(connect_sse=True, tests_sse=['lobby-join', 'lobby-leave', 'lobby-destroy'], still_connected=True)
+        user3 = self.guest_user(connect_sse=True, tests_sse=['lobby-leave', 'lobby-destroy'], still_connected=True)
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
         self.assertResponse(join_lobby(user2, code), 201)
