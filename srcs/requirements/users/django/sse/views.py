@@ -41,7 +41,7 @@ class SSEView(APIView):
                     message = pubsub.get_message(ignore_subscribe_messages=True)
                     if message:
                         event, data = message['data'].decode('utf-8').split(':', 1)
-                        if event == EventCode.CONNECTION_CLOSE.value:
+                        if event == EventCode.DELETE_USER.value:
                             raise ConnectionClose
                     else:
                         data = 'PING'
