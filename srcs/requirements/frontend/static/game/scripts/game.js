@@ -362,8 +362,8 @@
         }
     }
 
-    function handleGoal(){
-        if (state.ball.x + config.ballSize <= 0 || state.ball.x >= canvas.width){
+    function handleGoal() {
+        if (state.ball.x + config.ballSize <= 0 || state.ball.x >= canvas.width) {
 			if (state.ball.x + config.ballSize <= 0){
                 state.playerScore++;
             }
