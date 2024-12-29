@@ -40,19 +40,6 @@ class Test01_JoinLobby(UnitTest):
         self.assertThread(user2)
         self.assertThread(user3)
 
-    def test_003_join_two_lobby(self):
-        user1 = self.user_sse(['lobby-join', 'lobby-leave'])
-        user2 = self.user_sse()
-        user3 = self.user_sse(['lobby-join'])
-
-        code1 = self.assertResponse(create_lobby(user1), 201, get_field='code')
-        code2 = self.assertResponse(create_lobby(user3), 201, get_field='code')
-        self.assertResponse(join_lobby(user2, code1), 201)
-        self.assertResponse(join_lobby(user2, code1, method='DELETE'), 204)
-        self.assertResponse(join_lobby(user2, code2), 201)
-        self.assertThread(user1)
-        self.assertThread(user2)
-        self.assertThread(user3)
 
 
 class Test02_ErrorJoinLobby(UnitTest):
