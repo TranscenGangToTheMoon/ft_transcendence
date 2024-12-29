@@ -34,7 +34,6 @@ urlpatterns = [
     path(UsersManagement.manage_user, manage_user_view),
 ]
 
-# todo 1. handle sse disconnection (send request matchmaking and set online at false) only if last connection
 # todo 2. fix permision denied guest
 # todo 3. finish all sse event (except for tournament)
 # todo 4. merge new main
