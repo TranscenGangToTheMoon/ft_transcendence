@@ -3,6 +3,7 @@ import unittest
 from services.blocked import blocked_user, unblocked_user
 from services.chat import accept_chat, create_chat, create_message, request_chat_id
 from services.friend import create_friendship, friend_requests
+from services.user import me
 from utils.generate_random import rnstr
 from utils.my_unittest import UnitTest
 
@@ -314,6 +315,17 @@ class Test04_Messages(UnitTest):
         self.assertEqual(2, self.assertResponse(request_chat_id(user2, chat_id), 200, get_field='unread_messages'))
         self.assertResponse(create_message(user2, chat_id, 'did you receive new notification ?'), 201)
         self.assertEqual(1, self.assertResponse(request_chat_id(user1, chat_id), 200, get_field='unread_messages'))
+
+    def test_009_chat_notifications(self):
+        user1 = self.new_user()
+        user2 = self.new_user()
+        user3 = self.new_user()
+
+        self.send_message(user1, user2)
+        chat_id = self.send_message(user1, user3)
+        self.assertEqual(2, self.assertResponse(me(user1), 200, get_field='notifications')['chats'])
+        self.assertResponse(create_message(user1, chat_id, method='GET'), 200)
+        self.assertEqual(1, self.assertResponse(me(user1), 200, get_field='notifications')['chats'])
 
 
 if __name__ == '__main__':
