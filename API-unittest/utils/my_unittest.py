@@ -71,7 +71,10 @@ class UnitTest(unittest.TestCase):
         return thread
 
     def _thread_connect_to_sse(self, user, tests, timeout, status_code, still_connected):
-        user['expected_thread_result'] = len(tests)
+        if tests is None:
+            user['expected_thread_result'] = 0
+        else:
+            user['expected_thread_result'] = len(tests)
         user['thread_result'] = 0
         timeout_count = 0
 
