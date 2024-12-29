@@ -276,6 +276,16 @@ class Test02_FriendRequest(UnitTest):
 
         self.assertEqual(0, self.assertResponse(me(user1), 200, get_field='notifications')['friend_requests'])
 
+    def test_019_friend_request_offline_then_connect_when_cancel_friend_request(self):
+        user1 = self.new_user()
+        user2 = self.new_user()
+
+        friend_request_id = self.assertResponse(friend_requests(user2, user1), 201, get_field=True)
+        self.connect_to_sse(user1, ['cancel-friend-request'])
+        self.assertEqual(1, self.assertResponse(me(user1), 200, get_field='notifications')['friend_requests'])
+        self.assertResponse(friend_request(friend_request_id, user2, method='DELETE'), 204)
+        self.assertThread(user1)
+
 
 if __name__ == '__main__':
     unittest.main()
