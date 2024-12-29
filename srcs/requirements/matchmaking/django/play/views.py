@@ -17,8 +17,8 @@ class PlayMixin(generics.CreateAPIView, generics.DestroyAPIView):
             raise NotFound(MessagesException.NotFound.NOT_PLAYING)
 
     def perform_create(self, serializer):
-        new_player = super().perform_create(serializer)
-        Players.tag(new_player)
+        super().perform_create(serializer)
+        Players.tag()
 
 
 class DuelView(PlayMixin):
