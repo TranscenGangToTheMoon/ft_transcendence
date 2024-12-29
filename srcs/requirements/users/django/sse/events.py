@@ -65,7 +65,7 @@ class Target:
             'type': self.type.name,
             'method': self.method,
             'display_name': self.display_name,
-            'display_icon': self.display_icon,
+            'display_icon': None if self.display_icon is None else f'/assets/{self.display_icon}',
         }
 
 
