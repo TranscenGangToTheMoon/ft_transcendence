@@ -13,16 +13,16 @@ class Test01_SSE(UnitTest):
     def test_001_connection_success(self):
         user1 = self.new_user()
 
-        thread1 = self.connect_to_sse(user1, tests=['connection-success'], ignore_connection_message=False)
+        thread1 = self.connect_to_sse(user1)
         thread1.join()
 
     def test_002_connect_twice(self):
         user1 = self.new_user(get_me=True)
         user2 = self.new_user()
 
-        thread1 = self.connect_to_sse(user1, ['connection-success'], ignore_connection_message=False)
+        thread1 = self.connect_to_sse(user1)
         time.sleep(1)
-        thread2 = self.connect_to_sse(user1, ['connection-success'], ignore_connection_message=False)
+        thread2 = self.connect_to_sse(user1, ['receive-friend-request'])
         thread1.join()
         self.assertResponse(friend_requests(user2, user1), 201)
         thread2.join()
@@ -31,17 +31,17 @@ class Test01_SSE(UnitTest):
         thread1 = self.connect_to_sse({'token': 'invalid_token'}, status_code=401)
         thread1.join()
 
-    def test_004_connection_success_guest(self):
+    def test_004_guest_connection_success(self):
         user1 = self.guest_user()
 
-        thread1 = self.connect_to_sse(user1, tests=['connection-success'], ignore_connection_message=False)
+        thread1 = self.connect_to_sse(user1)
         thread1.join()
 
     def test_005_guest_then_register(self):
         user1 = self.guest_user(get_me=True)
         username = 'sse-register-' + rnstr()
 
-        thread1 = self.connect_to_sse(user1, tests=['connection-success'], ignore_connection_message=False)
+        thread1 = self.connect_to_sse(user1)
         user1['username'] = self.assertResponse(register_guest(user1, username=username), 200, get_field='username')
         thread1.join()
         response = self.assertResponse(me(user1), 200)

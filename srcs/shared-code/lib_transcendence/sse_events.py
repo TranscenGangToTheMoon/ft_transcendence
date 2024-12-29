@@ -8,7 +8,6 @@ from enum import Enum
 #  - delete when tournament is delete
 #  - check if time a user wants to join
 class EventCode(Enum):
-    CONNECTION_SUCCESS = 'connection-success'
     CONNECTION_CLOSE = 'connection-close'
     SEND_MESSAGE = 'send-message'
     ACCEPT_FRIEND_REQUEST = 'accept-friend-request'

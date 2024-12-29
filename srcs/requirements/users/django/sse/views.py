@@ -57,7 +57,6 @@ class SSEView(APIView):
 
         user = get_user(request)
         user.connect()
-        publish_event(user, EventCode.CONNECTION_SUCCESS) # todo useless
         user_id = user.id
         del user
 

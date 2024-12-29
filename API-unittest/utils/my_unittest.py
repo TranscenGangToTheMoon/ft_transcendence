@@ -64,13 +64,13 @@ class UnitTest(unittest.TestCase):
             self.assertEqual(json_assertion, responses[1].json)
         return responses[1].json['id']
 
-    def connect_to_sse(self, user, tests: list[str] = None, timeout=50, status_code=200, ignore_connection_message=True, still_connected=False):
-        thread = Thread(target=self._thread_connect_to_sse, args=(user, tests, timeout, status_code, ignore_connection_message, still_connected))
+    def connect_to_sse(self, user, tests: list[str] = None, timeout=50, status_code=200, still_connected=False):
+        thread = Thread(target=self._thread_connect_to_sse, args=(user, tests, timeout, status_code, still_connected))
         thread.start()
         time.sleep(0.5)
         return thread
 
-    def _thread_connect_to_sse(self, user, tests, timeout, status_code, ignore_connection_message, still_connected):
+    def _thread_connect_to_sse(self, user, tests, timeout, status_code, still_connected):
         def assert_tests():
             if tests is not None:
                 self.assertEqual(i, len(tests))
@@ -90,13 +90,11 @@ class UnitTest(unittest.TestCase):
                         if line:
                             event, data = re.findall(r'event: ([a-z\-]+)\ndata: (.+)\n\n', line)[0]
                             timeout_count += 1
-                            if (tests is None and timeout_count > timeout) or timeout_count > 100 or event == 'connection-close': # todo remove later
+                            if (tests is None and timeout_count > timeout) or timeout_count > 100 or event == 'delete-user': # todo remove later
                                 return assert_tests()
                             if event == 'ping':
                                 continue
                             data = json.loads(data)
-                            if ignore_connection_message and event == 'connection-success':
-                                continue
                             if 'username' in user:
                                 value = user['username']
                             elif 'id' in user:
