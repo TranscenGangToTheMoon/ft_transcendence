@@ -14,17 +14,17 @@ class Test01_JoinLobby(UnitTest):
         self.assertThread(user1)
 
     def test_002_join_lobby(self):
-        user1 = self.user_sse(['lobby-join', 'lobby-join'])
-        user2 = self.user_sse(['lobby-join'])
+        user1 = self.user_sse(['lobby-join', 'lobby-join', 'lobby-leave', 'lobby-leave'])
+        user2 = self.user_sse(['lobby-join', 'lobby-leave'])
         user3 = self.user_sse()
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
 
         self.assertResponse(join_lobby(user2, code), 201)
         self.assertResponse(join_lobby(user3, code), 201)
-        self.assertThread(user1)
-        self.assertThread(user2)
         self.assertThread(user3)
+        self.assertThread(user2)
+        self.assertThread(user1)
 
     def test_003_join_two_lobby(self):
         user1 = self.user_sse(['lobby-join', 'lobby-leave'])
