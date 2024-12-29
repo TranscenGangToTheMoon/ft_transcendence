@@ -111,6 +111,7 @@ class UnitTest(unittest.TestCase):
 
     def assertThread(self, user):
         user['thread'].join()
-        if user['thread_tests'] is not None:
-            self.assertListEqual(user['thread_tests'], user['thread_assertion'])
+        if user['thread_tests'] is None:
+            user['thread_tests'] = []
+        self.assertListEqual(user['thread_tests'], user['thread_assertion'])
         self.assertEqual(user['expected_thread_result'], user['thread_result'])
