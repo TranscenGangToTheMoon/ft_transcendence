@@ -139,7 +139,6 @@ tournament_seeding = Event(Service.TOURNAMENT, EventCode.TOURNAMENT_SEEDING) # t
 tournament_match_end = Event(Service.TOURNAMENT, EventCode.TOURNAMENT_MATCH_END, '{winner} win against {looser}.') # todo format
 tournament_finish = Event(Service.TOURNAMENT, EventCode.TOURNAMENT_FINISH, 'The tournament {name} is now over. Well done to {winner}} for his victory!') # todo format
 
-# 'update-status': {'type': SSEType.event, 'db_field': None, 'message': None, 'target': 'update status user view', 'required-data': ['user_id', 'new status']}, # todo handle update status
 
 redis_client = redis.StrictRedis(host='event-queue')
 
@@ -158,7 +157,6 @@ def publish_event(users: Users | QuerySet[Users] | list[Users], event_code: Even
         if user.is_online:
             channel = f'events:user_{user.id}'
 
-            print('EVENT', event, data, flush=True)
             try:
                 redis_client.publish(channel, event.code.value + ':' + event.dumps(data, kwargs))
             except redis.exceptions.ConnectionError:
