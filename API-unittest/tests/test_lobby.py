@@ -41,7 +41,6 @@ class Test01_JoinLobby(UnitTest):
         self.assertThread(user3)
 
 
-
 class Test02_ErrorJoinLobby(UnitTest):
 
     def test_001_lobby_does_not_exist(self):
