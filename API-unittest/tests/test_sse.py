@@ -70,5 +70,21 @@ class Test01_SSE(UnitTest):
 #         self.assertResponse(events(users=users, data={'caca': 'pipi'}), 201)
 
 
+class Test03_SSEConnectionClose(UnitTest):
+
+    def test_001_last_online(self):
+        user1 = self.user_sse()
+        user2 = self.user_sse()
+
+        last_online = self.assertResponse(me(user1), 200, get_field='last_online')
+        time.sleep(0.5)
+        user1['thread'].join()
+        time.sleep(0.5)
+        response = self.assertResponse(friend_requests(user2, user1), 201)
+        self.assertNotEqual('online', response['receiver']['status'])
+        self.assertNotEqual(last_online, response['receiver']['status'])
+        user2['thread'].join()
+
+
 if __name__ == '__main__':
     unittest.main()
