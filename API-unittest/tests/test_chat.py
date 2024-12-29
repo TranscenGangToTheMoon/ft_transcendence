@@ -302,6 +302,19 @@ class Test04_Messages(UnitTest):
         response = self.assertResponse(create_chat(user1, method='GET'), 200)
         self.assertEqual(chat_id, response['results'][0]['id'])
 
+    def test_008_message_notifications(self):
+        user1 = self.new_user()
+        user2 = self.new_user()
+
+        chat_id = self.send_message(user1, user2)
+        self.assertEqual(3, self.assertResponse(request_chat_id(user1, chat_id), 200, get_field='unread_messages'))
+        self.assertEqual(2, self.assertResponse(request_chat_id(user2, chat_id), 200, get_field='unread_messages'))
+        self.assertResponse(create_message(user1, chat_id, method='GET'), 200)
+        self.assertEqual(0, self.assertResponse(request_chat_id(user1, chat_id), 200, get_field='unread_messages'))
+        self.assertEqual(2, self.assertResponse(request_chat_id(user2, chat_id), 200, get_field='unread_messages'))
+        self.assertResponse(create_message(user2, chat_id, 'did you receive new notification ?'), 201)
+        self.assertEqual(1, self.assertResponse(request_chat_id(user1, chat_id), 200, get_field='unread_messages'))
+
 
 if __name__ == '__main__':
     unittest.main()
