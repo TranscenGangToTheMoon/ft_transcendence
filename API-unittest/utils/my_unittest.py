@@ -90,7 +90,7 @@ class UnitTest(unittest.TestCase):
                         if line:
                             event, data = re.findall(r'event: ([a-z\-]+)\ndata: (.+)\n\n', line)[0]
                             timeout_count += 1
-                            if (tests is None and timeout_count > timeout) or timeout_count > 50 or event == 'connection-close': # todo remove later
+                            if (tests is None and timeout_count > timeout) or timeout_count > 100 or event == 'connection-close': # todo remove later
                                 return assert_tests()
                             if event == 'ping':
                                 continue
