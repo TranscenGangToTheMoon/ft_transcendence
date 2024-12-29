@@ -12,39 +12,34 @@ from utils.my_unittest import UnitTest
 class Test01_SSE(UnitTest):
 
     def test_001_connection_success(self):
-        user1 = self.new_user()
+        user1 = self.user_sse()
 
-        thread1 = self.connect_to_sse(user1)
-        thread1.join()
+        self.assertThread(user1)
 
-    def test_002_connect_twice(self):
-        user1 = self.new_user(get_me=True)
-        user2 = self.new_user()
+    def test_002_guest_connection_success(self):
+        user1 = self.guest_user(connect_sse=True)
 
-        thread1 = self.connect_to_sse(user1)
+        self.assertThread(user1)
+
+    def test_003_connect_twice(self):
+        user1 = self.user_sse(get_me=True)
         time.sleep(1)
-        thread2 = self.connect_to_sse(user1, ['receive-friend-request'])
-        thread1.join()
-        self.assertResponse(friend_requests(user2, user1), 201)
-        thread2.join()
+        user2 = self.user_sse(['receive-friend-request'])
 
-    def test_003_invalid_token(self):
+        self.assertThread(user1)
+        self.assertResponse(friend_requests(user2, user1), 201)
+        self.assertThread(user2)
+
+    def test_004_invalid_token(self):
         thread1 = self.connect_to_sse({'token': 'invalid_token'}, status_code=401)
         thread1.join()
 
-    def test_004_guest_connection_success(self):
-        user1 = self.guest_user()
-
-        thread1 = self.connect_to_sse(user1)
-        thread1.join()
-
     def test_005_guest_then_register(self):
-        user1 = self.guest_user(get_me=True)
+        user1 = self.guest_user(connect_sse=True, get_me=True)
         username = 'sse-register-' + rnstr()
 
-        thread1 = self.connect_to_sse(user1)
         user1['username'] = self.assertResponse(register_guest(user1, username=username), 200, get_field='username')
-        thread1.join()
+        self.assertThread(user1)
         response = self.assertResponse(me(user1), 200)
         self.assertFalse(response['is_guest'])
         self.assertEqual(username, response['username'])
@@ -53,7 +48,7 @@ class Test01_SSE(UnitTest):
         user1 = self.user_sse()
 
         self.assertResponse(me(user1, 'DELETE', password=True), 204)
-        user1['thread'].join()
+        self.assertThread(user1)
 
 #todo message d'erreur qui finit pas un point
 #todo test invalid parameters, fogrt, not good type, etc..., not users.
@@ -79,12 +74,12 @@ class Test03_SSEConnectionClose(UnitTest):
 
         last_online = self.assertResponse(me(user1), 200, get_field='last_online')
         time.sleep(0.5)
-        user1['thread'].join()
+        self.assertThread(user1)
         time.sleep(0.5)
         response = self.assertResponse(friend_requests(user2, user1), 201)
         self.assertNotEqual('online', response['receiver']['status'])
         self.assertNotEqual(last_online, response['receiver']['status'])
-        user2['thread'].join()
+        self.assertThread(user2)
 
     def test_002_leave_lobby_when_disconnect(self):
         user1 = self.user_sse(['lobby-join'])
@@ -92,9 +87,9 @@ class Test03_SSEConnectionClose(UnitTest):
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
         self.assertResponse(join_lobby(user2, code), 201)
-        user1['thread'].join()
+        self.assertThread(user1)
         time.sleep(1)
-        user2['thread'].join()
+        self.assertThread(user2)
 
 
 if __name__ == '__main__':

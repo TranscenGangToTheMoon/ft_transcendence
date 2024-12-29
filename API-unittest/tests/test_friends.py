@@ -14,8 +14,8 @@ class Test01_Friend(UnitTest):
         user2 = self.user_sse(['receive-friend-request'])
 
         self.assertFriendResponse(create_friendship(user1, user2))
-        user1['thread'].join()
-        user2['thread'].join()
+        self.assertThread(user1)
+        self.assertThread(user2)
 
     def test_002_friend_without_friend_request(self):
         user1 = self.new_user()
@@ -95,7 +95,7 @@ class Test01_Friend(UnitTest):
         self.assertResponse(me(user4, 'DELETE', password=True), 204)
         self.assertResponse(friend(user1, friendship_id), 404, {'detail': 'Friendship not found.'})
 
-        user1['thread'].join()
+        self.assertThread(user1)
 
 
 class Test02_FriendRequest(UnitTest):
@@ -110,7 +110,7 @@ class Test02_FriendRequest(UnitTest):
         self.assertResponse(friend_requests(user1, method='GET'), 200, count=1)
         self.assertResponse(friend_request(friend_request_id, user1, method='GET'), 200)
         self.assertResponse(friend_request(friend_request_id, user2, method='GET'), 200)
-        user2['thread'].join()
+        self.assertThread(user2)
 
     def test_002_user_does_not_exist(self):
         user1 = self.new_user()
@@ -186,9 +186,9 @@ class Test02_FriendRequest(UnitTest):
         self.assertResponse(me(user4, 'DELETE', password=True), 204)
         self.assertResponse(friend_request(friend_request_id, user1, 'GET'), 404, {'detail': 'Friend request not found.'})
 
-        user1['thread'].join()
-        user2['thread'].join()
-        user3['thread'].join()
+        self.assertThread(user1)
+        self.assertThread(user2)
+        self.assertThread(user3)
         user4['thread'].join()
 
     def test_011_cancel_friend_request(self):
@@ -211,7 +211,7 @@ class Test02_FriendRequest(UnitTest):
         self.assertResponse(me(user4, 'DELETE', password=True), 204)
         self.assertResponse(friend_request(friend_request_id, user1, 'GET'), 404, {'detail': 'Friend request not found.'})
 
-        user1['thread'].join()
+        self.assertThread(user1)
 
     def test_012_delete_friend_request_after_became_friend(self):
         user1 = self.new_user()

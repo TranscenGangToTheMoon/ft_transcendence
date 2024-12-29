@@ -71,11 +71,8 @@ class UnitTest(unittest.TestCase):
         return thread
 
     def _thread_connect_to_sse(self, user, tests, timeout, status_code, still_connected):
-        def assert_tests():
-            if tests is not None:
-                self.assertEqual(i, len(tests))
-
-        i = 0
+        user['expected_thread_result'] = len(tests)
+        user['thread_result'] = 0
         timeout_count = 0
 
         with httpx.Client(verify=False) as client:
@@ -91,7 +88,7 @@ class UnitTest(unittest.TestCase):
                             event, data = re.findall(r'event: ([a-z\-]+)\ndata: (.+)\n\n', line)[0]
                             timeout_count += 1
                             if (tests is None and timeout_count > timeout) or timeout_count > 100 or event == 'delete-user': # todo remove later
-                                return assert_tests()
+                                return
                             if event == 'ping':
                                 continue
                             data = json.loads(data)
@@ -102,8 +99,11 @@ class UnitTest(unittest.TestCase):
                             else:
                                 value = ''
                             print(f"SSE RECEIVED {value}: {data}", flush=True)
-                            self.assertEqual(tests[i], data['event_code'])
-                            i += 1
-                            if i == len(tests) and not still_connected:
+                            self.assertEqual(tests[user['thread_result']], data['event_code'])
+                            user['thread_result'] += 1
+                            if user['thread_result'] == len(tests) and not still_connected:
                                 return
-        assert_tests()
+
+    def assertThread(self, user):
+        user['thread'].join()
+        self.assertEqual(user['expected_thread_result'], user['thread_result'])
