@@ -1,16 +1,11 @@
 from classes.user import User
 from classes.pongCLI import PongCLI
 import time
-SSL_CRT = "./ft_transcendence.crt"
+
 SERVER = "https://localhost:4443"
 
 def main():
-    user = User()
-    user.SSLCertificate = SSL_CRT
-    # crt = open(SSL_CRT, "r").read()
-    # print(crt)
-    # time.sleep(1)
-    app = PongCLI(user)
+    app = PongCLI()
     app.run()
 
 
