@@ -1,8 +1,14 @@
-Screen {
+LoginPage {
     border: blue;
+    width:auto;
+    align-vertical: middle;
+    align-horizontal: center;
+    /*align: center bottom;*/
 }
 
 #AuthenticationBox {
+    align-vertical: middle;
+    align-horizontal: center;
     /*align: center middle;*/
     /*content-align: center middle;*/
     width: 52;
@@ -11,21 +17,15 @@ Screen {
     padding: 0;
 }
 
-LoginPage {
-    align: center middle;
-    /*content-align: center middle;*/
-    border: purple;
-    width: auto;
-}
 
 #ButtonBox {
     height: 3;
-    width: auto;
+    /*width: auto;*/
     /*border: yellow;*/
     /*align: center middle;*/
     /*content-align: center middle;*/
-    padding: 0;
-    margin: 0;
+    /*padding: 0;*/
+    /*margin: 0;*/
 }
 
 Input {
