@@ -549,6 +549,17 @@ class Test08_InviteLobby(UnitTest):
         self.assertThread(user2)
         self.assertThread(user1)
 
+    def test_008_not_in_lobby(self):
+        user1 = self.user_sse()
+        user2 = self.user_sse()
+        user3 = self.user_sse(get_me=True)
+
+        code = self.assertResponse(create_lobby(user1), 201, get_field='code')
+        self.assertResponse(invite_user(user2, user3, code), 403, {'detail': 'You do not belong to this lobby.'})
+        self.assertThread(user3)
+        self.assertThread(user2)
+        self.assertThread(user1)
+
 
 if __name__ == '__main__':
     unittest.main()
