@@ -60,4 +60,6 @@ def get_auth_user(request=None):
 def auth_verify(token=None, request=None):
     if request is not None:
         token = get_auth_token(request)
+    elif token is None:
+        raise NotAuthenticated(MessagesException.Authentication.NOT_AUTHENTICATED)
     return request_auth(token, Auth.verify, method='GET')
