@@ -619,6 +619,32 @@ async function  indexInit(auto=true) {
     }
 }
 
+function handleFriendRequestNotification(target, img, notification, toastContainer, toastInstance){
+    img.addEventListener('click', async event => {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        event.stopPropagation();
+        try {
+            let data = await apiRequest(getAccessToken(), target.url, target.method);
+            if (target.url.includes('friend_request')){
+                userInformations.notifications['friend_requests'] -= 1;
+                if (userInformations.notifications['friend_requests'])
+                    displayBadges();
+                else
+                    removeBadges('friend_requests');
+                removeFriendRequest(target.url.match(/\/(\d+)\/?$/)[1]);
+                if (target.method === 'POST')
+                    addFriend(data);
+            }
+        }
+        catch(error){
+            console.log(error);
+        }
+        notification.clicked = true;
+        dismissNotification(notification, toastInstance, toastContainer);
+    })
+}
+
 async function addTargets(notification, targets, toastInstance, toastContainer){
     console.log(targets);
     const notificationBody = notification.querySelector('.toast-body');
@@ -631,18 +657,11 @@ async function addTargets(notification, targets, toastInstance, toastContainer){
         notificationBody.appendChild(img);
         
         if (target.type === 'API') {
-            img.addEventListener('click', event => {
-                event.preventDefault();
-                event.stopImmediatePropagation();
-                event.stopPropagation();
-                try {
-                    apiRequest(getAccessToken(), target.url, target.method);
-                } catch (error) {
-                    console.log(error);
-                }
-                notification.clicked = true;
-                dismissNotification(notification, toastInstance, toastContainer);
-            });
+            handleFriendRequestNotification(target, img, notification, toastContainer, toastInstance);
+            // img.addEventListener('click', event => {
+            //     notification.clicked = true;
+            //     dismissNotification(notification, toastInstance, toastContainer);
+            // });
         }
     });
 }
