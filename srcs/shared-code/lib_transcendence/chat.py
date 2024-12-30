@@ -34,3 +34,7 @@ class AcceptChat:
 
     def __str__(self):
         return 'Chat status'
+
+
+def post_messages(chat_id: int, content: str, token: str):
+    return request_service('chat', endpoints.Chat.fmessage.format(chat_id=chat_id), 'POST', {'content': content}, token)

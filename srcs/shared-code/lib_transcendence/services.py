@@ -75,6 +75,3 @@ def create_sse_event( # todo better handle error
 
     return request_service('users', endpoints.Users.event, 'POST', sse_data)
 
-
-def post_messages(chat_id: int, content: str, token: str):
-    return request_service('chat', endpoints.Chat.fmessage.format(chat_id=chat_id), 'POST', {'content': content}, token)
