@@ -8,16 +8,16 @@ from utils.my_unittest import UnitTest
 class Test01_AreBlocked(UnitTest):
 
     def test_001_blocked(self):
-        user1 = self.new_user(get_me=True)
-        user2 = self.new_user(get_me=True)
+        user1 = self.new_user()
+        user2 = self.new_user()
 
         self.assertResponse(blocked_user(user1, user2['id']), 201)
         self.assertResponse(are_blocked(user1['id'], user2['id']), 200)
         self.assertResponse(are_blocked(user2['id'], user1['id']), 200)
 
     def test_002_not_blocked(self):
-        user1 = self.new_user(get_me=True)
-        user2 = self.new_user(get_me=True)
+        user1 = self.new_user()
+        user2 = self.new_user()
 
         self.assertResponse(are_blocked(user1['id'], user2['id']), 404, {'detail': 'Not found.'})
         self.assertResponse(are_blocked(user2['id'], user1['id']), 404, {'detail': 'Not found.'})
@@ -30,13 +30,13 @@ class Test02_Blocked(UnitTest):
 
         n = randint(1, 10)
         for _ in range(n):
-            user_tmp = self.new_user(get_me=True)
+            user_tmp = self.new_user()
             self.assertResponse(blocked_user(user1, user_tmp['id']), 201)
         self.assertResponse(blocked_user(user1, method='GET'), 200, count=n)
 
     def test_002_unblocked(self):
         user1 = self.new_user()
-        user2 = self.new_user(get_me=True)
+        user2 = self.new_user()
 
         block_id = self.assertResponse(blocked_user(user1, user2['id']), 201, get_field=True)
         self.assertResponse(blocked_user(user1, method='GET'), 200, count=1)
@@ -48,7 +48,7 @@ class Test03_BlockedError(UnitTest):
 
     def test_001_already_blocked(self):
         user1 = self.new_user()
-        user2 = self.new_user(get_me=True)
+        user2 = self.new_user()
 
         self.assertResponse(blocked_user(user1, user2['id']), 201)
         self.assertResponse(blocked_user(user1, user2['id']), 409, {'detail': 'You are already blocked this user.'})
@@ -59,21 +59,21 @@ class Test03_BlockedError(UnitTest):
         self.assertResponse(blocked_user(user1, 123456), 404, {'detail': 'User not found.'})
 
     def test_003_blocked_user_that_block_us(self):
-        user1 = self.new_user(get_me=True)
-        user2 = self.new_user(get_me=True)
+        user1 = self.new_user()
+        user2 = self.new_user()
 
         self.assertResponse(blocked_user(user1, user2['id']), 201)
         self.assertResponse(blocked_user(user2, user1['id']), 404, {'detail': 'User not found.'})
 
     def test_004_blocked_guest(self):
         user1 = self.new_user()
-        user2 = self.guest_user(get_me=True)
+        user2 = self.guest_user()
 
         self.assertResponse(blocked_user(user1, user2['id']), 404, {'detail': 'User not found.'})
 
     def test_005_blocked_by_guest(self):
         user1 = self.guest_user()
-        user2 = self.new_user(get_me=True)
+        user2 = self.new_user()
 
         self.assertResponse(blocked_user(user1, user2['id']), 403, {'detail': 'Guest users cannot blocked users.'})
 
@@ -84,7 +84,7 @@ class Test03_BlockedError(UnitTest):
 
     def test_007_unblock_not_self_instance(self):
         user1 = self.new_user()
-        user2 = self.new_user(get_me=True)
+        user2 = self.new_user()
         user3 = self.new_user()
 
         block_id = self.assertResponse(blocked_user(user1, user2['id']), 201, get_field=True)

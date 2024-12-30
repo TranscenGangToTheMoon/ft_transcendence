@@ -28,8 +28,8 @@ class Test01_Play(UnitTest):
 class Test02_PlayError(UnitTest):
 
     def test_001_already_in_game(self):
-        user1 = self.user_sse(get_me=True)
-        user2 = self.user_sse(get_me=True)
+        user1 = self.user_sse()
+        user2 = self.user_sse()
 
         self.assertResponse(create_game(user1, user2), 201)
         self.assertResponse(play(user1), 409, {'detail': 'You are already in a game.'})
@@ -46,7 +46,7 @@ class Test02_PlayError(UnitTest):
         self.assertResponse(play(user1), 409, {'detail': 'You are already in a tournament.'})
 
     def test_003_guest_cannot_play_ranked(self):
-        user1 = self.guest_user(connect_sse=True)
+        user1 = self.guest_user()
 
         self.assertResponse(play(user1, 'ranked'), 403, {'detail': 'Guest users cannot play ranked games.'})
 
@@ -70,7 +70,7 @@ class Test02_PlayError(UnitTest):
 
     def test_006_delete(self):
         while True:
-            user1 = self.user_sse(get_me=True)
+            user1 = self.user_sse()
 
             self.assertResponse(play(user1), 201)
             time.sleep(1)

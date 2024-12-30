@@ -54,7 +54,7 @@ class Test02_CreateChatError(UnitTest):
 
     def test_005_blocked_by_user(self):
         user1 = self.new_user()
-        user2 = self.new_user(get_me=True)
+        user2 = self.new_user()
 
         self.assertResponse(blocked_user(user1, user2['id']), 201)
         self.assertResponse(create_chat(user2, user1['username']), 404, {'detail': 'User not found.'})
@@ -82,7 +82,7 @@ class Test02_CreateChatError(UnitTest):
 
     def test_009_blocked_user_trying_request(self):
         user1 = self.new_user()
-        user2 = self.new_user(get_me=True)
+        user2 = self.new_user()
 
         self.assertResponse(blocked_user(user1, user2['id']), 201)
         self.assertResponse(friend_requests(user1, user2), 403, {'detail': 'You blocked this user.'})
@@ -90,7 +90,7 @@ class Test02_CreateChatError(UnitTest):
     def test_010_chat_with_guest(self):
         user1 = self.new_user()
 
-        self.assertResponse(create_chat(user1, self.guest_user(get_me=True)['username']), 404, {'detail': 'User not found.'})
+        self.assertResponse(create_chat(user1, self.guest_user()['username']), 404, {'detail': 'User not found.'})
 
     def test_011_guest_create_chat(self):
         user1 = self.new_user()
@@ -138,7 +138,7 @@ class Test03_GetChat(UnitTest):
 
     def test_004_blocked_chat(self):
         user1 = self.new_user()
-        user2 = self.new_user(get_me=True)
+        user2 = self.new_user()
 
         self.assertResponse(accept_chat(user2), 200)
         chat_id = self.assertResponse(create_chat(user1, user2['username']), 201, get_field=True)
@@ -250,7 +250,7 @@ class Test04_Messages(UnitTest):
 
     def test_005_chat_blocked(self):
         user1 = self.new_user()
-        user2 = self.new_user(get_me=True)
+        user2 = self.new_user()
 
         chat_id = self.send_message(user1, user2)
 

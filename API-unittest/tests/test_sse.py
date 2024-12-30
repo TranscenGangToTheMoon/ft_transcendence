@@ -17,12 +17,12 @@ class Test01_SSE(UnitTest):
         self.assertThread(user1)
 
     def test_002_guest_connection_success(self):
-        user1 = self.guest_user(connect_sse=True)
+        user1 = self.guest_user()
 
         self.assertThread(user1)
 
     def test_003_connect_twice(self):
-        user1 = self.new_user(get_me=True)
+        user1 = self.new_user()
         user2 = self.new_user()
         user3 = self.new_user()
 
@@ -41,7 +41,7 @@ class Test01_SSE(UnitTest):
         thread1.join()
 
     def test_005_guest_then_register(self):
-        user1 = self.guest_user(connect_sse=True, get_me=True)
+        user1 = self.guest_user()
         username = 'sse-register-' + rnstr()
 
         self.assertResponse(register_guest(user1, username=username), 200)

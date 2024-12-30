@@ -425,7 +425,7 @@ class Test07_GetTournament(UnitTest):
 
     def test_007_search_tournaments_blocked_by_creator_tournament(self):
         user1 = self.user_sse()
-        user2 = self.user_sse(get_me=True)
+        user2 = self.user_sse()
         user3 = self.user_sse()
         name = rnstr()
 
@@ -440,7 +440,7 @@ class Test07_GetTournament(UnitTest):
         self.assertThread(user1)
 
     def test_008_search_tournaments_blocked_by_user_tournament(self):
-        user1 = self.user_sse(get_me=True)
+        user1 = self.user_sse()
         user2 = self.user_sse()
         user3 = self.user_sse()
         name = rnstr()

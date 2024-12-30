@@ -24,20 +24,20 @@ class Test01_GetUsers(UnitTest):
 
     def test_001_get_user(self):
         user1 = self.new_user()
-        user2 = self.new_user(get_me=True)
+        user2 = self.new_user()
 
         self.assertResponse(get_user(user1, user2['id']), 200)
 
     def test_002_get_blocked_by_user(self):
-        user1 = self.new_user(get_me=True)
-        user2 = self.new_user(get_me=True)
+        user1 = self.new_user()
+        user2 = self.new_user()
 
         self.assertResponse(blocked_user(user2, user1['id']), 201)
         self.assertResponse(get_user(user1, user2['id']), 404, {'detail': 'User not found.'})
 
     def test_003_get_blocked_user(self):
         user1 = self.new_user()
-        user2 = self.new_user(get_me=True)
+        user2 = self.new_user()
 
         self.assertResponse(blocked_user(user1, user2['id']), 201)
         self.assertResponse(get_user(user1, user2['id']), 403, {'detail': 'You blocked this user.'})
@@ -58,7 +58,7 @@ class Test02_UserMe(UnitTest):
         self.assertThread(user1)
 
     def test_002_get_me_guest(self):
-        user1 = self.guest_user(connect_sse=True)
+        user1 = self.guest_user()
 
         response = self.assertResponse(me(user1), 200)
         self.assertDictEqual(response, {'id': response['id'], 'username': response['username'], 'is_guest': True, 'created_at': response['created_at'], 'profile_picture': None, 'accept_friend_request': True, 'accept_chat_from': 'friends_only', 'coins': 100, 'trophies': 0, 'current_rank': None, 'notifications': {'friend_requests': 0, 'chats': 0}, 'is_online': True, 'last_online': response['last_online']})
@@ -101,8 +101,8 @@ class Test03_DeleteUser(UnitTest):
         self.assertResponse(join_lobby(user2, code), 404, {'detail': 'Lobby not found.'})
 
     def test_006_user_in_game(self):
-        user1 = self.new_user(get_me=True)
-        user2 = self.new_user(get_me=True)
+        user1 = self.new_user()
+        user2 = self.new_user()
 
         self.assertResponse(create_game(user1, user2), 201)
         self.assertResponse(me(user1, method='DELETE', password=True), 204)
@@ -147,10 +147,10 @@ class Test03_DeleteUser(UnitTest):
         self.assertResponse(request_chat_id(user2, chat_id), 403, {'detail': 'You do not belong to this chat.'})
 
     def test_010_play_duel(self):
-        user2 = self.user_sse(get_me=True)
+        user2 = self.user_sse()
 
         while True:
-            user1 = self.user_sse(get_me=True)
+            user1 = self.user_sse()
 
             self.assertResponse(play(user1), 201)
             time.sleep(1)
@@ -163,10 +163,10 @@ class Test03_DeleteUser(UnitTest):
         self.assertResponse(is_in_game(user2), 404, {'detail': 'This user is not in a game.'})
 
     def test_012_play_ranked(self):
-        user2 = self.user_sse(get_me=True)
+        user2 = self.user_sse()
 
         while True:
-            user1 = self.user_sse(get_me=True)
+            user1 = self.user_sse()
 
             self.assertResponse(play(user1, 'ranked'), 201)
             time.sleep(1)
@@ -205,7 +205,7 @@ class Test03_DeleteUser(UnitTest):
         self.assertResponse(get_friends(user3), 200, count=0)
 
     def test_015_blocked(self):
-        user1 = self.new_user(get_me=True)
+        user1 = self.new_user()
         user2 = self.new_user()
 
         self.assertResponse(blocked_user(user2, user1['id']), 201)
@@ -256,7 +256,7 @@ class Test05_RenameUser(UnitTest):
                 break
 
     def test_003_rename_blocked_user(self):
-        user1 = self.new_user(get_me=True)
+        user1 = self.new_user()
         user2 = self.new_user()
         new_username = user1['username'] + '_new'
 

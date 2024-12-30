@@ -12,7 +12,7 @@ from utils.generate_random import rnstr
 
 
 class UnitTest(unittest.TestCase):
-    def new_user(self, username=None, password=None, get_me=False, connect_sse=False, tests_sse: list[str] = None, still_connected=False):
+    def new_user(self, username=None, password=None, tests_sse: list[str] = None, still_connected=False):
         if username is None:
             username = 'user-' + rnstr(10)
         if password is None:
@@ -21,26 +21,22 @@ class UnitTest(unittest.TestCase):
         token = self.assertResponse(register(_new_user['username'], password), 201)
         _new_user['token'] = token['access']
         _new_user['refresh'] = token['refresh']
-        if get_me:
-            _new_user['id'] = self.assertResponse(me(_new_user), 200, get_field=True)
-        if connect_sse:
-            self.connect_to_sse(_new_user, tests_sse, still_connected=still_connected)
+        _new_user['id'] = self.assertResponse(me(_new_user), 200, get_field=True)
+        self.connect_to_sse(_new_user, tests_sse, still_connected=still_connected)
         return _new_user
 
-    def user_sse(self, tests: list[str] = None, get_me=False, still_connected=False):
-        return self.new_user(connect_sse=True, tests_sse=tests, get_me=get_me, still_connected=still_connected)
+    def user_sse(self, tests: list[str] = None, still_connected=False):
+        return self.new_user(tests_sse=tests, still_connected=still_connected)
 
-    def guest_user(self, get_me=False, connect_sse=False, tests_sse: list[str] = None, still_connected=False):
+    def guest_user(self, tests_sse: list[str] = None, still_connected=False):
         _new_user = {}
         token = self.assertResponse(create_guest(), 201)
         _new_user['token'] = token['access']
         _new_user['refresh'] = token['refresh']
-        if get_me or connect_sse:
-            response = self.assertResponse(me(_new_user), 200)
-            _new_user['id'] = response['id']
-            _new_user['username'] = response['username']
-        if connect_sse:
-            self.connect_to_sse(_new_user, tests_sse, still_connected=still_connected)
+        response = self.assertResponse(me(_new_user), 200)
+        _new_user['id'] = response['id']
+        _new_user['username'] = response['username']
+        self.connect_to_sse(_new_user, tests_sse, still_connected=still_connected)
         return _new_user
 
     def assertResponse(self, response, status_code, json_assertion=None, count=None, get_field=None, get_user=False):
