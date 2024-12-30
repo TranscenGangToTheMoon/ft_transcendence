@@ -126,10 +126,10 @@ delete_friend = Event(Service.FRIENDS, EventCode.DELETE_FRIEND)
 
 game_start = Event(Service.GAME, EventCode.GAME_START, 'You play in a game.', Target('/ws/game/{code}/', type=UrlType.WS)) # todo check how work # todo format
 
-invite_1v1 = Event(Service.INVITE, EventCode.INVITE_1V1, '{username} has challenged you to a game.', Target('/api/play/lobby/{code}/', 'POST', display_name='join')) # todo format
-invite_clash = Event(Service.INVITE, EventCode.INVITE_CLASH, '{username} inviting you to join a clash game.', Target('/api/play/lobby/{code}/', 'POST', display_name='join')) # todo format
-invite_custom_game = Event(Service.INVITE, EventCode.INVITE_CUSTOM_GAME, '{username} inviting you to join a custom game.', Target('/api/play/lobby/{code}/', 'POST', display_name='join')) # todo format
-invite_tournament = Event(Service.INVITE, EventCode.INVITE_TOURNAMENT, '{username} inviting you to join his tournament.', Target('/api/play/tournament/{code}/', 'POST', display_name='join')) # todo format
+invite_1v1 = Event(Service.INVITE, EventCode.INVITE_1V1, '{username} has challenged you to a game.', Target('/lobby/{code}/', display_name='join'))
+invite_3v3 = Event(Service.INVITE, EventCode.INVITE_3V3, '{username} inviting you to join an epic 3v3 friendly battle.', Target('/lobby/{code}/', display_name='join'))
+invite_clash = Event(Service.INVITE, EventCode.INVITE_CLASH, '{username} inviting you to join a clash game.', Target('/lobby/{code}/', display_name='join'))
+invite_tournament = Event(Service.INVITE, EventCode.INVITE_TOURNAMENT, '{username} inviting you to join his tournament.', Target('/tournament/{code}/', display_name='join'))
 
 lobby_join = Event(Service.LOBBY, EventCode.LOBBY_JOIN, '{username} have joined the lobby.')
 lobby_leave = Event(Service.LOBBY, EventCode.LOBBY_LEAVE, '{username} have left the lobby.')

@@ -9,7 +9,7 @@ from matchmaking.utils.user import verify_user
 from tournament.models import Tournament, TournamentParticipants
 
 
-def get_place(model, create, **kwargs):
+def get_place(model, create=False, **kwargs):
     name = model.__name__
     allowed_keys = ('id', 'code')
 

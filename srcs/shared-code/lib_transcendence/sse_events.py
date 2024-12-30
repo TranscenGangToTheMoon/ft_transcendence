@@ -3,7 +3,7 @@ from enum import Enum
 from lib_transcendence.exceptions import MessagesException, ServiceUnavailable
 from lib_transcendence.request import request_service
 from lib_transcendence import endpoints
-from rest_framework.exceptions import APIException
+from rest_framework.exceptions import APIException, NotFound
 
 
 # todo make ban tournament
@@ -23,8 +23,8 @@ class EventCode(Enum):
     DELETE_FRIEND = 'delete-friend'
     GAME_START = 'game-start'
     INVITE_1V1 = 'invite-1v1'
+    INVITE_3V3 = 'invite-3v3'
     INVITE_CLASH = 'invite-clash'
-    INVITE_CUSTOM_GAME = 'invite-custom-game'
     INVITE_TOURNAMENT = 'invite-tournament'
     LOBBY_JOIN = 'lobby-join'
     LOBBY_LEAVE = 'lobby-leave'
@@ -62,5 +62,7 @@ def create_sse_event(
 
     try:
         return request_service('users', endpoints.Users.event, 'POST', sse_data)
+    except NotFound as e:
+        raise e
     except APIException:
         raise ServiceUnavailable(MessagesException.ServiceUnavailable.SSE)

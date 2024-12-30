@@ -55,8 +55,10 @@ class MessagesException:
         TOURNAMENT_MAX_SIZE = 'Tournament size must be less than or equal than 32.'
         TOURNAMENT_MIN_SIZE = 'Tournament size must be greater or equal than 4.'
 
-        INVALID_SERVICE = 'Invalid service'
-        INVALID_EVENT_CODE = 'Invalid event code'
+        INVALID_SERVICE = 'Invalid service.'
+        INVALID_EVENT_CODE = 'Invalid event code.'
+
+        DATA = 'Data must be a dictionary.'
 
     class Authentication:
         NOT_CONNECTED_SSE = {'detail': 'You need to be connected to SSE to access this resource.', 'code': 'sse_connection_required'}
@@ -90,6 +92,7 @@ class MessagesException:
 
         CANNOT_CHAT_YOURSELF = 'You cannot chat with yourself.'
         BAN_YOURSELF = 'You cannot ban yourself.'
+        INVITE_YOURSELF = 'You cannot invite yourself.'
         BLOCK_YOURSELF = 'You cannot block yourself.'
         SEND_FRIEND_REQUEST_YOURSELF = 'You cannot send a friend request to yourself.'
         FRIEND_YOURSELF = 'You cannot be friends with yourself.'
@@ -108,7 +111,10 @@ class MessagesException:
         NOT_CREATOR = 'Only creator can update this {obj}.'
 
         CAN_CREATE_MORE_THAN_ONE_TOURNAMENT = 'You cannot create more than one tournament at the same time.'
-        BAN_AFTER_START = 'You cannot ban user after the tournament start.'
+
+        _AFTER_START = 'You cannot {obj} after the tournament start.'
+        BAN_AFTER_START = _AFTER_START.format(obj='ban')
+        INVITE_AFTER_START = _AFTER_START.format(obj='invite')
 
         BLOCKED_USER = 'You blocked this user.'
 
@@ -118,6 +124,8 @@ class MessagesException:
         _NOT_ACCEPT = 'This user does not accept {obj}.'
         NOT_ACCEPT_CHAT = _NOT_ACCEPT.format(obj='new chat')
         NOT_ACCEPT_FRIEND_REQUEST = _NOT_ACCEPT.format(obj='friend requests')
+
+        INVITE_NOT_FRIEND = 'You can only invite friends.'
 
     class Conflict:
         DEFAULT = 'Conflict.'
@@ -135,6 +143,7 @@ class MessagesException:
         FRIEND_REQUEST_SENT = 'You have already sent a friend request to this user.'
         FRIEND_REQUEST_RECEIVED = 'You have already received a friend request from this user.'
         SSE = 'You are already connected to SSE.'
+        USER = 'This user is already in this {obj}.'
 
         JOIN = 'You already joined this {obj}.'
 
@@ -156,7 +165,10 @@ class ServiceUnavailable(APIException):
     default_code = 'service_unavailable'
 
     def __init__(self, service: Literal['auth', 'chat', 'game', 'matchmaking', 'event-queue', 'users']):
-        self.detail = ServiceUnavailable.default_detail.format(service=service)
+        if service in ['auth', 'chat', 'game', 'matchmaking', 'event-queue', 'users']:
+            self.detail = ServiceUnavailable.default_detail.format(service=service)
+        else:
+            self.detail = service
 
 
 class ResourceExists(APIException):

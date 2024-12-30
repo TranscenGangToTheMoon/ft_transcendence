@@ -8,7 +8,7 @@ from friends.views import friends_view, friend_view
 from events.views import events_view
 from sse.views import sse_view
 from users.views import users_me_view, retrieve_user_view, retrieve_users_view, manage_user_view
-from validate.views import validate_chat_view, are_blocked_view
+from validate.views import validate_chat_view, are_friends_view
 
 urlpatterns = [
     path(Users.me, users_me_view),
@@ -29,7 +29,7 @@ urlpatterns = [
     path(Users.event, events_view),
 
     path(Users.chat, validate_chat_view),
-    path(Users.are_blocked, are_blocked_view),
+    path(Users.are_friends, are_friends_view),
 
     path(UsersManagement.manage_user, manage_user_view),
 ]
