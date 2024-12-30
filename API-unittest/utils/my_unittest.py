@@ -12,7 +12,7 @@ from utils.generate_random import rnstr
 
 
 class UnitTest(unittest.TestCase):
-    def new_user(self, tests_sse: list[str] = None, username=None, password=None, guest=False):
+    def user(self, tests_sse: list[str] = None, username=None, password=None, guest=False):
         _new_user = {}
 
         if guest:
@@ -94,12 +94,12 @@ class UnitTest(unittest.TestCase):
                         user['thread_assertion'].append(data['event_code'])
                         user['thread_result'] += 1
 
-    def assertThread(self, user):
-        user['thread_finish'] = True
-        user['thread'].join()
-        print(f"SSE DISCONNECTING {user['username']}...\n", flush=True)
-        if user['thread_tests'] is None:
-            user['thread_tests'] = []
-        self.assertListEqual(user['thread_tests'], user['thread_assertion'])
-        self.assertEqual(user['expected_thread_result'], user['thread_result'])
-        time.sleep(0.5)
+    def assertThread(self, *users):
+        for user in users:
+            user['thread_finish'] = True
+            user['thread'].join()
+            print(f"SSE DISCONNECTING {user['username']}...\n", flush=True)
+            if user['thread_tests'] is None:
+                user['thread_tests'] = []
+            self.assertListEqual(user['thread_tests'], user['thread_assertion'])
+            self.assertEqual(user['expected_thread_result'], user['thread_result'])

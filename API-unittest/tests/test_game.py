@@ -7,22 +7,22 @@ from utils.my_unittest import UnitTest
 class Test01_Game(UnitTest):
 
     def test_001_create_game(self):
-        user1 = self.new_user()
-        user2 = self.new_user()
+        user1 = self.user()
+        user2 = self.user()
 
         self.assertResponse(create_game(user1, user2), 201)
 
     def test_002_already_in_game(self):
-        user1 = self.new_user()
-        user2 = self.new_user()
+        user1 = self.user()
+        user2 = self.user()
 
         self.assertResponse(is_in_game(user1), 404)
         self.assertResponse(create_game(user1, user2), 201)
         self.assertResponse(is_in_game(user1), 200)
 
     def test_003_invalid_game_mode(self):
-        user1 = self.new_user()
-        user2 = self.new_user()
+        user1 = self.user()
+        user2 = self.user()
 
         self.assertResponse(create_game(user1, user2, game_mode='caca'), 400)
 
