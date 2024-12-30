@@ -29,11 +29,11 @@ class UsersMeView(generics.RetrieveUpdateDestroyAPIView):
         auth_delete(self.request.headers.get('Authorization'), {'password': password})
 
         user = self.get_object()
-        friendship = Friends.objects.filter(friends__id=user.id)
-        for friendship in Friends.objects.filter(friends__id=user.id):
+        friendships = Friends.objects.filter(friends__id=user.id)
+        for friendship in friendships:
             other_user = friendship.friends.exclude(id=user.id).first()
             publish_event(other_user, EventCode.DELETE_FRIEND, {'id': friendship.id})
-        friendship.delete()
+        friendships.delete()
 
         for friend_request_received in user.friend_requests_received.all():
             publish_event(friend_request_received.sender, EventCode.REJECT_FRIEND_REQUEST, {'id': friend_request_received.id})
