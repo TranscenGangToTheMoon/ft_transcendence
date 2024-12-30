@@ -1,7 +1,8 @@
 import unittest
 
 from services.blocked import blocked_user, unblocked_user
-from services.lobby import create_lobby, join_lobby, ban_user
+from services.friend import create_friendship
+from services.lobby import create_lobby, join_lobby, ban_user, invite_user
 from utils.my_unittest import UnitTest
 
 
@@ -479,8 +480,16 @@ class Test07_GetLobby(UnitTest):
 
 class Test08_InviteLobby(UnitTest):
 
-    def test_001_invite(self):
-        user1 = self.user_sse()
+    def test_001_invite_clash(self):
+        user1 = self.user_sse(['accept-friend-request'], still_connected=True)
+        user2 = self.user_sse(['receive-friend-request', 'invite-clash'], get_me=True)
+
+        self.assertFriendResponse(create_friendship(user1, user2))
+        code = self.assertResponse(create_lobby(user1), 201, get_field='code')
+        self.assertResponse(invite_user(user1, user2, code), 201)
+        self.assertThread(user2)
+        self.assertThread(user1)
+
 
         self.assertResponse(create_lobby(user1), 201)
         self.assertResponse(join_lobby(user1, '123456', 'POST'), 404, {'detail': 'Lobby not found.'})
