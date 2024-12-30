@@ -144,6 +144,7 @@ class MessagesException:
 
     class ServiceUnavailable:
         SERVICE_UNAVAILABLE = 'Failed to connect to {service} service.'
+        SSE = 'Failed to create SSE event.'
 
     class ValueError:
         RANGE_VALUE = 'Range lookup requires a tuple of two int.'

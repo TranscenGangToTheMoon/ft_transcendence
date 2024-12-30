@@ -1,5 +1,8 @@
 from enum import Enum
 
+from lib_transcendence.exceptions import ServiceUnavailable
+
+
 # todo make ban tournament
 #  - handle sse event
 #   * send leave to other members
@@ -57,5 +60,4 @@ def create_sse_event( # todo better handle error
     try:
         return request_service('users', endpoints.Users.event, 'POST', sse_data)
     except APIException:
-        raise MessagesException.ServiceUnavailable.EVENT
-
+        raise ServiceUnavailable(MessagesException.ServiceUnavailable.SSE)
