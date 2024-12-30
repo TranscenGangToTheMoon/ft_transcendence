@@ -168,7 +168,7 @@ class Test02_ErrorJoinLobby(UnitTest):
 class Test03_BanLobby(UnitTest):
 
     def test_001_ban_lobby(self):
-        user1 = self.user_sse(['lobby-join', 'lobby-leave'], still_connected=True)
+        user1 = self.user_sse(['lobby-join', 'lobby-leave'])
         user2 = self.user_sse(['lobby-ban'])
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
@@ -359,7 +359,7 @@ class Test05_UpdateParticipantLobby(UnitTest):
 class Test06_LeaveLobby(UnitTest):
 
     def test_001_leave_lobby(self):
-        user1 = self.user_sse(['lobby-join', 'lobby-join', 'lobby-leave', 'lobby-leave'], still_connected=True)
+        user1 = self.user_sse(['lobby-join', 'lobby-join', 'lobby-leave', 'lobby-leave'])
         user2 = self.user_sse(['lobby-join', 'lobby-leave'])
         user3 = self.user_sse()
 
@@ -393,8 +393,8 @@ class Test06_LeaveLobby(UnitTest):
 
     def test_003_guest_join_leave_lobby_then_destroy_lobby(self):
         user1 = self.user_sse(['lobby-join', 'lobby-join'])
-        user2 = self.guest_user(tests_sse=['lobby-join', 'lobby-leave', 'lobby-destroy'], still_connected=True)
-        user3 = self.guest_user(tests_sse=['lobby-leave', 'lobby-destroy'], still_connected=True)
+        user2 = self.guest_user(tests_sse=['lobby-join', 'lobby-leave', 'lobby-destroy'])
+        user3 = self.guest_user(tests_sse=['lobby-leave', 'lobby-destroy'])
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
         self.assertResponse(join_lobby(user2, code), 201)
@@ -482,7 +482,7 @@ class Test07_GetLobby(UnitTest):
 class Test08_InviteLobby(UnitTest):
 
     def test_001_invite_clash(self):
-        user1 = self.user_sse(['accept-friend-request'], still_connected=True)
+        user1 = self.user_sse(['accept-friend-request'])
         user2 = self.user_sse(['receive-friend-request', 'invite-clash'])
 
         self.assertFriendResponse(create_friendship(user1, user2))
@@ -492,7 +492,7 @@ class Test08_InviteLobby(UnitTest):
         self.assertThread(user1)
 
     def test_002_invite_custom_1v1(self):
-        user1 = self.user_sse(['accept-friend-request'], still_connected=True)
+        user1 = self.user_sse(['accept-friend-request'])
         user2 = self.user_sse(['receive-friend-request', 'invite-1v1'])
 
         self.assertFriendResponse(create_friendship(user1, user2))
@@ -502,7 +502,7 @@ class Test08_InviteLobby(UnitTest):
         self.assertThread(user1)
 
     def test_003_invite_custom_3v3(self):
-        user1 = self.user_sse(['accept-friend-request'], still_connected=True)
+        user1 = self.user_sse(['accept-friend-request'])
         user2 = self.user_sse(['receive-friend-request', 'invite-3v3'])
 
         self.assertFriendResponse(create_friendship(user1, user2))
@@ -520,7 +520,7 @@ class Test08_InviteLobby(UnitTest):
         self.assertThread(user1)
 
     def test_005_not_friend(self):
-        user1 = self.user_sse(still_connected=True)
+        user1 = self.user_sse()
         user2 = self.user_sse()
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
@@ -529,7 +529,7 @@ class Test08_InviteLobby(UnitTest):
         self.assertThread(user1)
 
     def test_006_not_creator(self):
-        user1 = self.user_sse(['lobby-join', 'lobby-leave'], still_connected=True)
+        user1 = self.user_sse(['lobby-join', 'lobby-leave'])
         user2 = self.user_sse()
         user3 = self.user_sse()
 
@@ -541,7 +541,7 @@ class Test08_InviteLobby(UnitTest):
         self.assertThread(user1)
 
     def test_007_user_already_in_lobby(self):
-        user1 = self.user_sse(['lobby-join', 'lobby-leave'], still_connected=True)
+        user1 = self.user_sse(['lobby-join', 'lobby-leave'])
         user2 = self.user_sse()
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
