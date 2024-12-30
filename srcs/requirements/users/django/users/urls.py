@@ -34,12 +34,13 @@ urlpatterns = [
     path(UsersManagement.manage_user, manage_user_view),
 ]
 
-# todo 2. fix permision denied guest
-# todo 3. finish all sse event (except for tournament)
 # todo 4. merge new main
 # todo 5. make all unit test work
 
-# todo 1. make ss tournament events
+# todo 1. make sse event chat
+# todo 2. make sse event game
+# todo 2. make sse tournament events
+# todo 3. fix permision denied guest
 
 
 # todo CHAT
