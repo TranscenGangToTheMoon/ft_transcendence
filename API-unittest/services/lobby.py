@@ -3,9 +3,9 @@ from typing import Literal
 from utils.request import make_request
 
 
-def create_lobby(user, data=None, method: Literal['GET', 'POST', 'PATCH', 'DELETE'] = 'POST'):
+def create_lobby(user, data=None, method: Literal['GET', 'POST', 'PATCH', 'DELETE'] = 'POST', game_mode='clash'):
     if data is None:
-        data = {'game_mode': 'clash'}
+        data = {'game_mode': game_mode}
     return make_request(
         endpoint='play/lobby/',
         method=method,

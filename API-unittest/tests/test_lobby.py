@@ -83,7 +83,7 @@ class Test02_ErrorJoinLobby(UnitTest):
     def test_005_invalid_game_mode(self):
         user1 = self.user_sse()
 
-        self.assertResponse(create_lobby(user1, data={'game_mode': 'sdfsdf'}), 400, {'game_mode': ["Game mode must be 'clash' or 'custom_game'."]})
+        self.assertResponse(create_lobby(user1, game_mode='sdfsdf'), 400, {'game_mode': ["Game mode must be 'clash' or 'custom_game'."]})
         self.assertThread(user1)
 
     def test_006_no_game_mode(self):
@@ -235,7 +235,7 @@ class Test04_UpdateLobby(UnitTest):
         user1 = self.user_sse(['lobby-join'])
         user2 = self.user_sse(['lobby-update'])
 
-        code = self.assertResponse(create_lobby(user1, data={'game_mode': 'custom_game'}), 201, get_field='code')
+        code = self.assertResponse(create_lobby(user1, game_mode='custom_game'), 201, get_field='code')
         self.assertResponse(join_lobby(user2, code), 201)
         self.assertEqual('3v3', self.assertResponse(create_lobby(user1, {'match_type': '3v3'}, 'PATCH'), 200, get_field='match_type'))
         self.assertThread(user1)
@@ -244,7 +244,7 @@ class Test04_UpdateLobby(UnitTest):
     def test_002_invalid_match_type(self):
         user1 = self.user_sse()
 
-        self.assertResponse(create_lobby(user1, data={'game_mode': 'custom_game'}), 201)
+        self.assertResponse(create_lobby(user1, game_mode='custom_game'), 201)
         self.assertResponse(create_lobby(user1, data={'match_type': 42}, method='PATCH'), 400, {'match_type': ["Match type must be '1v1' or '3v3'."]})
         self.assertResponse(create_lobby(user1, data={'match_type': 'cac'}, method='PATCH'), 400, {'match_type': ["Match type must be '1v1' or '3v3'."]})
         self.assertThread(user1)
@@ -253,7 +253,7 @@ class Test04_UpdateLobby(UnitTest):
         user1 = self.user_sse(['lobby-join', 'lobby-leave'])
         user2 = self.user_sse()
 
-        code = self.assertResponse(create_lobby(user1, data={'game_mode': 'custom_game'}), 201, get_field='code')
+        code = self.assertResponse(create_lobby(user1, game_mode='custom_game'), 201, get_field='code')
 
         self.assertResponse(join_lobby(user2, code), 201)
         self.assertResponse(create_lobby(user2, data={'match_type': '3v3'}, method='PATCH'), 403, {'detail': 'Only creator can update this lobby.'})
@@ -270,8 +270,8 @@ class Test04_UpdateLobby(UnitTest):
     def test_005_update_game_mode(self):
         user1 = self.user_sse()
 
-        self.assertResponse(create_lobby(user1, data={'game_mode': 'custom_game'}), 201)
-        self.assertResponse(create_lobby(user1, data={'game_mode': 'clash'}, method='PATCH'), 403, {'detail': 'You cannot update game mode.'})
+        self.assertResponse(create_lobby(user1, game_mode='custom_game'), 201)
+        self.assertResponse(create_lobby(user1, method='PATCH'), 403, {'detail': 'You cannot update game mode.'})
         self.assertThread(user1)
 
     def test_006_update_match_type_when_full(self):
@@ -285,7 +285,7 @@ class Test04_UpdateLobby(UnitTest):
             users[response['id']] = response
         user1 = list(users.values())[0]
 
-        code = self.assertResponse(create_lobby(user1, data={'game_mode': 'custom_game'}), 201, get_field='code')
+        code = self.assertResponse(create_lobby(user1, game_mode='custom_game'), 201, get_field='code')
         response = self.assertResponse(create_lobby(user1, data={'match_type': '3v3'}, method='PATCH'), 200)
         self.assertEqual('3v3', response['match_type'])
 
@@ -321,7 +321,7 @@ class Test05_UpdateParticipantLobby(UnitTest):
     def test_002_change_team(self):
         user1 = self.user_sse()
 
-        code = self.assertResponse(create_lobby(user1, data={'game_mode': 'custom_game'}), 201, get_field='code')
+        code = self.assertResponse(create_lobby(user1, game_mode='custom_game'), 201, get_field='code')
 
         response = self.assertResponse(join_lobby(user1, code, data={'team': 'Team B'}), 200)
         self.assertEqual('Team B', response['team'])
@@ -333,14 +333,14 @@ class Test05_UpdateParticipantLobby(UnitTest):
     def test_003_change_invalid_team(self):
         user1 = self.user_sse()
 
-        code = self.assertResponse(create_lobby(user1, data={'game_mode': 'custom_game'}), 201, get_field='code')
+        code = self.assertResponse(create_lobby(user1, game_mode='custom_game'), 201, get_field='code')
         self.assertResponse(join_lobby(user1, code, data={'team': 'Team caca'}), 400, {'team': ["Match type must be 'Team A', 'Team B' or 'Spectator'."]})
         self.assertThread(user1)
 
     def test_004_change_team_already_in(self):
         user1 = self.user_sse()
 
-        code = self.assertResponse(create_lobby(user1, data={'game_mode': 'custom_game'}), 201, get_field='code')
+        code = self.assertResponse(create_lobby(user1, game_mode='custom_game'), 201, get_field='code')
         self.assertResponse(join_lobby(user1, code, data={'team': 'Team A'}), 409, {'detail': 'You are already in this team.'})
         self.assertThread(user1)
 
@@ -348,7 +348,7 @@ class Test05_UpdateParticipantLobby(UnitTest):
         user1 = self.user_sse(['lobby-join'])
         user2 = self.user_sse()
 
-        code = self.assertResponse(create_lobby(user1, data={'game_mode': 'custom_game'}), 201, get_field='code')
+        code = self.assertResponse(create_lobby(user1, game_mode='custom_game'), 201, get_field='code')
 
         self.assertResponse(join_lobby(user2, code), 201)
         self.assertResponse(join_lobby(user2, code, method='PATCH', data={'team': 'Team A'}), 403, {'detail': 'Team is full.'})
