@@ -19,7 +19,7 @@ def validate_user_id(value, return_user=False):
         raise Conflict(MessagesException.Conflict.USER_ALREADY_IN_GAME)
     except Players.DoesNotExist:
         if return_user:
-            raise NotFound(MessagesException.NotFound.USER_NOT_IN_GAME)
+            raise NotFound(MessagesException.NotFound.NOT_BELONG_GAME)
 
 
 def validate_teams(value):

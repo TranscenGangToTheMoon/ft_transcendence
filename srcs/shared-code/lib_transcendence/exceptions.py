@@ -7,8 +7,6 @@ from rest_framework.exceptions import APIException
 
 class MessagesException:
     class NotFound:
-        USER_NOT_IN_GAME = 'This user is not in a game.'
-
         NOT_FOUND = '{obj} not found.'
         CREATOR = NOT_FOUND.format(obj='Creator')
         USER = NOT_FOUND.format(obj='User')
