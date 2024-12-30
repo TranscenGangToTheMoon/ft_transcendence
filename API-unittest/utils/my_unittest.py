@@ -35,7 +35,7 @@ class UnitTest(unittest.TestCase):
         token = self.assertResponse(create_guest(), 201)
         _new_user['token'] = token['access']
         _new_user['refresh'] = token['refresh']
-        if get_me:
+        if get_me or connect_sse:
             response = self.assertResponse(me(_new_user), 200)
             _new_user['id'] = response['id']
             _new_user['username'] = response['username']
