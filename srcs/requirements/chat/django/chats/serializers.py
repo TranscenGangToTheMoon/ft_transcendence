@@ -1,5 +1,5 @@
 from lib_transcendence import endpoints
-from lib_transcendence.Chat import ChatType
+from lib_transcendence.chat import ChatType
 from lib_transcendence.auth import get_auth_user
 from lib_transcendence.exceptions import MessagesException, ResourceExists
 from lib_transcendence.services import request_users

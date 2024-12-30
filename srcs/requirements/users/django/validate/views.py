@@ -1,4 +1,4 @@
-from lib_transcendence.Chat import AcceptChat
+from lib_transcendence.chat import AcceptChat
 from lib_transcendence.exceptions import MessagesException
 from rest_framework import generics
 from rest_framework.exceptions import PermissionDenied, NotFound

@@ -1,6 +1,6 @@
 from django.db import models
 from lib_transcendence import endpoints
-from lib_transcendence.Chat import AcceptChat
+from lib_transcendence.chat import AcceptChat
 from lib_transcendence.services import request_matchmaking
 from rest_framework.exceptions import APIException
 
