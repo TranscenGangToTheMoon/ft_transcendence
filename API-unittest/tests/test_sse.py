@@ -22,13 +22,19 @@ class Test01_SSE(UnitTest):
         self.assertThread(user1)
 
     def test_003_connect_twice(self):
-        user1 = self.user_sse(get_me=True)
-        time.sleep(1)
-        user2 = self.user_sse(['receive-friend-request'])
+        user1 = self.new_user(get_me=True)
+        user2 = self.new_user()
+        user3 = self.new_user()
 
-        self.assertThread(user1)
+        user1_bis = user1.copy()
+        self.connect_to_sse(user1, ['receive-friend-request'])
+        time.sleep(1)
+        self.connect_to_sse(user1_bis, ['receive-friend-request', 'receive-friend-request'])
+
         self.assertResponse(friend_requests(user2, user1), 201)
-        self.assertThread(user2)
+        self.assertThread(user1)
+        self.assertResponse(friend_requests(user3, user1), 201)
+        self.assertThread(user1_bis)
 
     def test_004_invalid_token(self):
         thread1 = self.connect_to_sse({'token': 'invalid_token'}, status_code=401)
