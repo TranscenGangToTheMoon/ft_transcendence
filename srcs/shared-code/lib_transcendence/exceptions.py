@@ -20,6 +20,7 @@ class MessagesException:
 
         NOT_BELONG = 'You do not belong to any {obj}.'
         NOT_BELONG_TOURNAMENT = NOT_BELONG.format(obj='tournament')
+        NOT_BELONG_GAME = NOT_BELONG.format(obj='game')
 
         NOT_PLAYING = 'You are not currently playing.'
 
