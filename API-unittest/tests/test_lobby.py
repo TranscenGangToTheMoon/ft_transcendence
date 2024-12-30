@@ -486,7 +486,7 @@ class Test08_InviteLobby(UnitTest):
 
         self.assertFriendResponse(create_friendship(user1, user2))
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
-        self.assertResponse(invite_user(user1, user2, code), 201)
+        self.assertResponse(invite_user(user1, user2, code), 204)
         self.assertThread(user2)
         self.assertThread(user1)
 
