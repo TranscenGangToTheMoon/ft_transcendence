@@ -518,11 +518,13 @@ class Test08_InviteLobby(UnitTest):
         self.assertResponse(invite_user(user1, user1, code), 403, {'detail': 'You cannot invite yourself.'})
         self.assertThread(user1)
 
-    def test_003_not_friend_then_friend(self):
-        user1 = self.user_sse()
+    def test_005_not_friend(self):
+        user1 = self.user_sse(still_connected=True)
+        user2 = self.user_sse(get_me=True)
 
-        self.assertResponse(create_lobby(user1), 201)
-        self.assertResponse(join_lobby(user1, '123456', 'POST'), 404, {'detail': 'Lobby not found.'})
+        code = self.assertResponse(create_lobby(user1), 201, get_field='code')
+        self.assertResponse(invite_user(user1, user2, code), 403, {'detail': 'You can only invite friends.'})
+        self.assertThread(user2)
         self.assertThread(user1)
 
     def test_004_friend_then_block(self):
