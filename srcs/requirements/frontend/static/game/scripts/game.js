@@ -43,7 +43,6 @@
         lastFrame: 0,
         playerScore: 0,
         enemyScore: 0,
-        gameIsReady: false,
         ball: {
             x: config.canvasWidth / 2 - config.ballSize / 2,
             y: config.canvasHeight / 2 - config.ballSize / 2,
@@ -118,7 +117,6 @@
         state.cancelAnimation = false;
         console.log('game started');
 		state.isCountDownActive = false;
-		state.gameIsReady = true;
 
         function gameLoop(timestamp) {
             if (!state.isGameActive) return;
@@ -198,7 +196,6 @@
 	    state.cancelAnimation = false;
 	    console.log('CD started');
         state.isCountDownActive = true;
-		state.gameIsReady = false;
 
         for (racket in state.paddles) {
         	racket.y = (config.canvasHeight + config.paddleHeight) / 2
@@ -210,10 +207,6 @@
                 state.isCountDownActive = false;
                 state.countDown.currentStep = config.countDown.steps;
                 return;
-            }
-            if (state.gameIsReady == true) {
-            	state.isCountDownActive = false;
-				return;
             }
             if (state.countDown.currentStep >= 0) {
                 drawCountdown();
@@ -580,7 +573,6 @@ function initSocket(){
     });
     socket.on('start_game', event => {
         console.log('received start_game');
-		state.gameIsReady = true;
         window.PongGame.startGame();
     })
     socket.on('start_countdown', event => {
