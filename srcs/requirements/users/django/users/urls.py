@@ -34,8 +34,6 @@ urlpatterns = [
     path(UsersManagement.manage_user, manage_user_view),
 ]
 
-# todo 1. make sse event chat
-# todo 2. make sse event game
 # todo 3. make sse event invite
 # todo 4. make sse tournament events
 # todo 5. fix permision denied guest
