@@ -35,3 +35,27 @@ class EventCode(Enum):
     TOURNAMENT_SEEDING = 'tournament-seeding'
     TOURNAMENT_MATCH_END = 'tournament-match-end'
     TOURNAMENT_FINISH = 'tournament-finish'
+
+
+def create_sse_event( # todo better handle error
+        users: list[int] | int,
+        event_code: EventCode,
+        data: dict,
+        kwargs: dict | None = None,
+):
+    sse_data = {
+        'users_id': [users] if isinstance(users, int) else users,
+        'event_code': event_code.value,
+    }
+
+    if data is not None:
+        sse_data['data'] = data
+
+    if kwargs is not None:
+        sse_data['kwargs'] = kwargs
+
+    try:
+        return request_service('users', endpoints.Users.event, 'POST', sse_data)
+    except APIException:
+        raise MessagesException.ServiceUnavailable.EVENT
+
