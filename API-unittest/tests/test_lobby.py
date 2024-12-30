@@ -528,13 +528,14 @@ class Test08_InviteLobby(UnitTest):
         self.assertThread(user1)
 
     def test_006_not_creator(self):
-        user1 = self.user_sse(['join-lobby'], still_connected=True)
+        user1 = self.user_sse(['lobby-join', 'lobby-leave'], still_connected=True)
         user2 = self.user_sse()
         user3 = self.user_sse(get_me=True)
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
         self.assertResponse(join_lobby(user2, code), 201)
         self.assertResponse(invite_user(user2, user3, code), 403, {'detail': 'Only creator can update this lobby.'})
+        self.assertThread(user3)
         self.assertThread(user2)
         self.assertThread(user1)
 
