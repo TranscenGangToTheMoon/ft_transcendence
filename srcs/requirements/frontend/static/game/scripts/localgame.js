@@ -117,14 +117,15 @@
         state.cancelAnimation = false;
         console.log('game started');
 		state.isCountDownActive = false;
-		state.lastFrame = 0;
 
         function gameLoop(timestamp) {
-            if (state.isGameActive) {
-	            updateGameState(timestamp);
-	            drawGame();
-				requestAnimationFrame(gameLoop);
-            }
+            if (!state.isGameActive) return;
+            state.last_frame_time = Date.now()
+            updateGameState(timestamp);
+            if (!state.isGamePaused)
+                drawGame();
+
+            requestAnimationFrame(gameLoop);
         }
         requestAnimationFrame(gameLoop);
     }
@@ -143,7 +144,34 @@
         state.paddles.right.y = state.paddles.left.y;
     }
 
+    function pauseGame(onlyPause=true) {
+        if (state.isCountDownActive || !state.isGameActive) return;
+        if (state.isGamePaused && !onlyPause) return resumeGame(true);
+        console.log('game paused')
+        state.keys[' '] = false;
+        state.isGamePaused = true;
+
+        ctx.globalAlpha = 0.5;
+        ctx.fillStyle = "black";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.globalAlpha = 1.0;
+
+        ctx.fillStyle = "white";
+        ctx.font = "72px Arial";
+        ctx.fillText("Paused", canvas.width / 2, canvas.height / 2);
+        ctx.font = config.font;
+    }
+
+    function resumeGame(fromPause=false){
+        console.log('game resumed');
+        if (fromPause)
+            state.keys[' '] = false;
+        state.isGamePaused = false;
+    }
+
     function stopGame(animate=false) {
+        console.log('game ended');
         state.isGameActive = false;
         if (animate){
             animatePaddlesToMiddle()
@@ -176,17 +204,17 @@
         function step() {
             state.countDown.currentStep--;
             if (!state.isGameActive){
+                state.isCountDownActive = false;
                 state.countDown.currentStep = config.countDown.steps;
-                ctx.clearRect(0, 0, config.canvasWidth, config.canvasHeight);
                 return;
             }
             if (state.countDown.currentStep >= 0) {
-	            ctx.clearRect(0, 0, config.canvasWidth, config.canvasHeight);
                 drawCountdown();
                 setTimeout(step, config.countDown.delay / (config.countDown.steps + 1));
             }
             else{
                 state.countDown.currentStep = config.countDown.steps;
+                state.isCountDownActive = false;
 				stopGame();
             }
         }
@@ -303,6 +331,39 @@
         }
     }
 
+    function handleUserInput(){
+        if (state.keys['d']) config.displayDemo ? config.displayDemo = false : config.displayDemo = true;
+        if (state.keys[' '])
+            pauseGame(false);
+        if (state.isGamePaused) return;
+        // console.log(state.paddles.right.speed);
+        handlePaddleInput();
+        if (state.keys["w"] && state.paddles.left.y > 0){
+            if (!state.paddles.left.blockGlide || state.paddles.left.y - 10 > config.ballSize)
+                state.paddles.left.y -= 10;
+            else if (state.paddles.left.y - 10 <= config.ballSize)
+                state.paddles.left.y = config.ballSize;
+        }
+        if (state.keys["s"] && state.paddles.left.y < config.canvasHeight - config.paddleHeight){
+            if (!state.paddles.left.blockGlide || state.paddles.left.y + config.paddleHeight + 10 < config.canvasHeight - config.ballSize)
+                state.paddles.left.y += 10;
+            else if (state.paddles.left.y + config.paddleHeight + 10 >= config.canvasHeight - config.ballSize)
+                state.paddles.left.y = config.canvasHeight - config.ballSize - config.paddleHeight;
+        }
+        if (state.keys["o"] && state.paddles.leftRight.y > 0){
+            if (!state.paddles.leftRight.blockGlide || state.paddles.leftRight.y - 10 > config.ballSize)
+                state.paddles.leftRight.y -= 10;
+            else if (state.paddles.leftRight.y - 10 <= config.ballSize)
+                state.paddles.leftRight.y = config.ballSize;
+        }
+        if (state.keys["l"] && state.paddles.leftRight.y < config.canvasHeight - config.paddleHeight){
+            if (!state.paddles.leftRight.blockGlide || state.paddles.leftRight.y + config.paddleHeight + 10 < config.canvasHeight - config.ballSize)
+                state.paddles.leftRight.y += 10;
+            else if (state.paddles.leftRight.y + config.paddleHeight + 10 >= config.canvasHeight - config.ballSize)
+                state.paddles.leftRight.y = config.canvasHeight - config.ballSize - config.paddleHeight;
+        }
+    }
+
     function handleGoal() {
         if (state.ball.x + config.ballSize <= 0 || state.ball.x >= canvas.width) {
 			if (state.ball.x + config.ballSize <= 0){
@@ -396,6 +457,31 @@
         }
     }
 
+    function displayDemo() {
+        if (state.ball.x < config.canvasWidth/2){
+            let newPaddleLeftY = (state.ball.y + config.ballSize / 2) - config.paddleHeight / 2;
+            if (newPaddleLeftY > state.paddles.left.y && newPaddleLeftY - state.paddles.left.y < 5)
+                return;
+            if (newPaddleLeftY < state.paddles.left.y && state.paddles.left.y - newPaddleLeftY < 5)
+                return;
+            let yIncr = (newPaddleLeftY > state.paddles.left.y) ? 10 : -10;
+            state.paddles.left.y += yIncr;
+            if (state.paddles.left.y < 0) state.paddles.left.y = 0;
+            if (state.paddles.left.y > config.canvasHeight - config.paddleHeight) state.paddles.left.y = config.canvasHeight - config.paddleHeight;
+        }
+        else{
+            let newPaddleRight = (state.ball.y + config.ballSize / 2) - config.paddleHeight / 2;
+            if (newPaddleRight > state.paddles.right.y && newPaddleRight - state.paddles.right.y < 5)
+                return;
+            if (newPaddleRight < state.paddles.right.y && state.paddles.right.y - newPaddleRight < 5)
+                return;
+            let yIncr = (newPaddleRight > state.paddles.right.y) ? 10 : -10;
+            state.paddles.right.y += yIncr;
+            if (state.paddles.right.y < 0) state.paddles.right.y = 0;
+            if (state.paddles.right.y > config.canvasHeight - config.paddleHeight) state.paddles.right.y = config.canvasHeight - config.paddleHeight;
+        }
+    }
+
     function handleGameOver(){
         if (state.playerScore >= config.winningScore || state.enemyScore >= config.winningScore){
             if (config.displayDemo){
@@ -417,8 +503,9 @@
     		state.lastFrame = timestamp;
     	state.deltaTime = (timestamp - state.lastFrame) / 1000;  // Convert to seconds
     	state.lastFrame = timestamp;
-
-        handlePaddleInput();
+        handleUserInput();
+        if (state.isGamePaused)
+            return;
 
         if (!state.isCountDownActive){
             state.ball.x += state.ball.speedX * state.deltaTime;
@@ -432,9 +519,16 @@
 	            state.ball.y -= (state.ball.y + config.ballSize) - config.canvasHeight
             state.ball.speedY = -state.ball.speedY
         }
+
+        // handleGoal();
         for (let paddle in state.paddles){
             handlePaddleCollision(state.paddles[paddle]);
         }
+
+        if (config.displayDemo)
+            displayDemo();
+
+		handleGameOver();
     }
 
     function drawPaddles(){

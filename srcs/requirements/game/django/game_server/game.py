@@ -4,6 +4,8 @@ from game_server.pong_ball import Ball
 from game_server.pong_position import Position
 from game_server.pong_racket import Racket
 from typing import List
+from lib_transcendence.services import create_sse_event
+from lib_transcendence.sse_events import EventCode
 import math
 import os
 import random
@@ -213,6 +215,9 @@ class Game:
         except KeyError:
             timeout = 5
         timeout = 60.
+        for team in self.match.teams:
+            for player in team.players:
+                create_sse_event(player.user_id, EventCode.GAME_START, {'match_id': self.match.id})
         try:
             self.wait_for_players(timeout)
             print(time.time(), "all players are connected", flush=True)
