@@ -34,7 +34,6 @@ class AbstractAuthentication(ABC, BaseAuthentication):
         except AuthenticationFailed as e:
             if e.detail['code'] == MessagesException.Authentication.USER_NOT_FOUND['code']:
                 raise AuthenticationFailed(MessagesException.Authentication.USER_NOT_FOUND)
-            print('CACA ==================', e.detail, e, flush=True)
             raise e
         if json_data is None:
             raise AuthenticationFailed(MessagesException.Authentication.AUTHENTICATION_FAILED)
