@@ -45,7 +45,8 @@ document.getElementById("loginButton").addEventListener('click', event => {
                 await fetchUserInfos(true);
                 loadUserProfile();
                 handleRoute();
-                addFriendListListener();
+                if (document.getElementById('friendListModal').clicked)
+                    addFriendListListener();
                 return;
             }
             if (data.username) {

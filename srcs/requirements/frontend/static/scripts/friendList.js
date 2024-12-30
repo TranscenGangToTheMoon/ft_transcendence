@@ -224,6 +224,24 @@ async function loadFriendList(){
     }
 }
 
+function addFriend(friendInstance){
+    const friendDiv = document.getElementById('knownFriends');
+    friendDiv.innerText = '';
+    const friend1 = friendInstance.friends[0].username;
+    const friend2 = friendInstance.friends[1].username;
+    friendDiv.innerHTML += `<div class="friendRequestBlock knownFriend" id="friend${friendInstance.id}">\
+            <div>${friend1 === userInformations.username ? friend2 : friend1}</div>\
+            <button class='deleteFriend'>delete X</button></div>\n`;
+}
+
+function removeFriend(friendInstance){
+    console.log(friendInstance);
+    document.getElementById(`friend${friendInstance.id}`).remove();
+    const friendListDiv = document.getElementById('knownFriends');
+    if (!friendListDiv.querySelector('div'))
+        friendListDiv.innerText = "You don't have any friends";
+}
+
 async function addFriendRequest(result){
     const friendRequestTitleDiv = document.getElementById('friendRequestsTitle');
     friendRequestTitleDiv.innerText = 'friend requests:';
@@ -234,6 +252,11 @@ async function addFriendRequest(result){
     friendRequestsDiv.appendChild(requestDiv);
     await loadContent('/friends/friendRequestBlock.html', `${requestDiv.id}`);
     requestDiv.querySelector('.senderUsername').innerText = result.sender.username;
+}
+
+async function removeFriendRequest(id){
+    const friendRequestsDiv = document.getElementById(id);
+    friendRequestsDiv.remove();
 }
 
 async function loadReceivedFriendRequests(){
@@ -250,12 +273,10 @@ async function loadReceivedFriendRequests(){
     const friendRequestTitleDiv = document.getElementById('friendRequestsTitle');
     if (data.count === 0){
         friendRequestTitleDiv.innerText = 'no pending friend requests';
-        document.getElementById('innerFriendRequests-tab').innerText = 'Friend Requests';
     }
     else if (data.count){
         friendRequestsDiv.innerHTML = "";
         friendRequestTitleDiv.innerText = 'friend requests:';
-        document.getElementById('innerFriendRequests-tab').innerText = `Friend Requests (${data.count})`;
         for (result of data.results){
             const requestDiv = document.createElement('div');
             requestDiv.id = result.id;
@@ -296,8 +317,20 @@ async function loadSentFriendRequests(){
 
 async function  initFriendModal(){
     await loadFriendList();
-    await loadReceivedFriendRequests();
-    await loadSentFriendRequests();
+    const friendRequestsTab = document.getElementById('innerFriendRequests-tab');
+    if (friendRequestsTab.classList.contains('active')){
+        await loadReceivedFriendRequests();
+        await loadSentFriendRequests();
+        friendRequestsTab.clicked = true;
+    }
+    else if (friendRequestsTab.clicked){
+        friendRequestsTab.clicked = false;
+        friendRequestsTab.addEventListener('click', async ()=>{
+            this.clicked = true;
+            await loadReceivedFriendRequests();
+            await loadSentFriendRequests();
+        }, {once:true});
+    }
 }
 
 // initFriendModal();

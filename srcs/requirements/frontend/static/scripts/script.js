@@ -348,7 +348,7 @@ async function fetchUserInfos(forced=false) {
         try {
             let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/users/me`);
             userInformations = data;
-            userInformations.notifications = {'friend' : userInformations.friend_notifications}
+            console.log(userInformations);
             displayBadges();
         }
         catch (error) {
@@ -493,32 +493,61 @@ function addNotificationIndicator(div, number){
 }
 
 function addSSEListeners(){
+    console.log(document.getElementById('friendListModal'));
+    
     sse.addEventListener('receive-friend-request', async event => {
+        const isModalShown = bootstrap.Modal.getInstance(document.getElementById('friendListModal'))._isShown;
+        const isTabActive = document.getElementById('innerFriendRequests-tab').classList.contains('active');
         event = JSON.parse(event.data);
         console.log(event);
-        await displayNotification(undefined, 'friend request', event.message, event => {
-            const friendListModal = new bootstrap.Modal(document.getElementById('friendListModal'));
-            friendListModal.show();
-        });
-        userInformations.notifications['friend'] += 1;
-        displayBadges();
+        if (!isModalShown || !isTabActive) {
+            await displayNotification(undefined, 'friend request', event.message, event => {
+                const friendListModal = new bootstrap.Modal(document.getElementById('friendListModal'));
+                friendListModal.show();
+            }, event.target);
+            userInformations.notifications['friend_requests'] += 1;
+            displayBadges();
+        }
         addFriendRequest(event.data);
     });
 
     sse.addEventListener('accept-friend-request', async event => {
         event = JSON.parse(event.data);
         console.log(event);
-        await displayNotification(undefined, 'friend request', event.message);
-        addNotificationIndicator(document.getElementById('dropdownMenuButton'));
-        addNotificationIndicator(document.getElementById('pMenuFriends'));
+        if (!(bootstrap.Modal.getInstance(document.getElementById('friendListModal'))._isShown))
+            await displayNotification(undefined, 'friend request', event.message);
+        removeFriendRequest(event.data.id);
+        addFriend(event.data);
+    })
+
+    sse.addEventListener('cancel-friend-request', async event => {
+        event = JSON.parse(event.data);
+        if (userInformations.notifications['friend_requests'])
+            userInformations.notifications['friend_requests'] -= 1;
+        if (!userInformations.notifications['friend_requests'])
+            removeBadges('friend_requests');
+        else    
+            displayBadges();
+        removeFriendRequest(event.data.id);
+    })
+
+    sse.addEventListener('reject-friend-request', async event => {
+        event = JSON.parse(event.data);
+        removeFriendRequest(event.data.id);
+        console.log(event);
+    })
+
+    sse.addEventListener('delete-friend', event => {
+        event = JSON.parse(event.data);
+        removeFriend(event.data);
     })
 }
 
 function initSSE(){
     sse = new EventSource(`/sse/users/?token=${getAccessToken()}`);
 
-    sse.onopen = connection => {
-        console.log(connection);
+    sse.onopen = () => {
+        console.log('SSE connection initialized');
     }
 
     sse.onmessage = event => {
@@ -542,36 +571,27 @@ function initSSE(){
 }
 
 function addFriendListListener(){
-    document.getElementById('friendListModal').addEventListener('show.bs.modal', async event => {
+    document.getElementById('friendListModal').addEventListener('show.bs.modal', async function() {
+        this.clicked = true;
         initFriendModal();
     }, {once: true})
-    document.getElementById('friendListModal').addEventListener('show.bs.modal', async event => {
-        removeBadges('friend');
-    }, {once: true})
+    document.getElementById('friendListModal').addEventListener('show.bs.modal', () => {
+        if (document.getElementById('innerFriendRequests-tab').classList.contains('active'))
+            removeBadges('friend_requests');
+    })
+    document.getElementById('innerFriendRequests-tab').addEventListener('click', () => {
+        removeBadges('friend_requests');
+    })
 }
 
 function getBadgesDivs(){
     badgesDivs['all'] = document.querySelectorAll('.all-badges');
-    badgesDivs['friend'] = document.querySelectorAll('.friend-badges');
+    badgesDivs['friend_requests'] = document.querySelectorAll('.friend-badges');
     badgesDivs['chat'] = document.querySelectorAll('.chat-badges');
-    console.log(badgesDivs);
 }
 
 async function  indexInit(auto=true) {
     if (!auto){
-        // setTimeout(()=> {
-        //     const backdrops = document.querySelectorAll('.modal-backdrop');
-        //     for (let backdrop of backdrops){
-        //         console.log(backdrop, 'removed');
-        //         backdrop.remove;
-        //     }
-        // }, 500);
-        // await fetchUserInfos(true);
-        // if (window.location.pathname === '/login'){
-        //     document.getElementById('profileMenu').innerHTML = "";
-        // }
-        // else{
-            // }
         if (userInformations.code === 'user_not_found'){
             console.log('user was deleted from database, switching to guest mode');
             displayMainAlert("Unable to retrieve your account/guest profile","We're sorry your account has been permanently deleted and cannot be recovered.");
@@ -587,6 +607,7 @@ async function  indexInit(auto=true) {
         await fetchUserInfos();
         initSSE();
         await loadFriendListModal();
+        document.getElementById('innerFriendRequests-tab').clicked = true;
         addFriendListListener();
         let currentState = getCurrentState();
         console.log(`added ${window.location.pathname} to history with state ${currentState}`)
@@ -597,7 +618,33 @@ async function  indexInit(auto=true) {
     }
 }
 
-async function displayNotification(icon=undefined, title=undefined, body=undefined, mainListener=undefined){
+async function addTargets(notification, targets){
+    console.log(targets);
+    const notificationBody = notification.querySelector('.toast-body');
+    Object.entries(targets).forEach(([i, target]) => {
+        const img = document.createElement('img');
+        img.id = `notif${notification.id}-target${i}`;
+        img.className = 'notif-img';
+        img.src = '/assets/imageNotFound.png';
+        
+        notificationBody.appendChild(img);
+        
+        if (target.type === 'API') {
+            img.addEventListener('click', event => {
+                event.preventDefault();
+                event.stopImmediatePropagation();
+                event.stopPropagation();
+                try {
+                    apiRequest(getAccessToken(), target.url, target.method);
+                } catch (error) {
+                    console.log(error);
+                }
+            });
+        }
+    });
+}
+
+async function displayNotification(icon=undefined, title=undefined, body=undefined, mainListener=undefined, target=undefined){
 
     if (displayedNotifications >= MAX_DISPLAYED_NOTIFICATIONS) {
         notificationQueue.push([icon, title, body, mainListener]);
@@ -616,6 +663,9 @@ async function displayNotification(icon=undefined, title=undefined, body=undefin
         notification.querySelector('.toast-body').innerText = body;
     if (mainListener)
         notification.addEventListener('click', mainListener, {once: true});
+    if (target)
+        addTargets(notification, target);
+        // console.log(target);
     const toastInstance = new bootstrap.Toast(notification);
     toastInstance.show();
     notificationIdentifier++;
@@ -631,7 +681,7 @@ async function displayNotification(icon=undefined, title=undefined, body=undefin
                 displayNotification(notif[0], notif[1], notif[2], notif[3]);
             }
         }, 500);
-    }, 5000);
+    }, 15000);
 }
 
 window.indexInit = indexInit;

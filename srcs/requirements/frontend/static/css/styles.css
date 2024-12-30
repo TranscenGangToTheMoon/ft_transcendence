@@ -16,6 +16,15 @@
     right: 20px;
 }
 
+.toast-body {
+    display: flex;
+}
+
+.notif-img {
+    width: 30px;
+    height: 30px;
+}
+
 .friendRequestBlock {
     margin-left: 30px;
     display: flex;
