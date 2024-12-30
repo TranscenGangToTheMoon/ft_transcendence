@@ -79,14 +79,8 @@ class UnitTest(unittest.TestCase):
         user['thread_tests'] = tests
         user['thread_assertion'] = []
         timeout_count = 0
-        if 'username' in user:
-            value = user['username']
-        elif 'id' in user:
-            value = user['id']
-        else:
-            value = ''
 
-        print(f'SSE CONNECTING {value}...\n', flush=True)
+        print(f"SSE CONNECTING {user['username']}...\n", flush=True)
         with httpx.Client(verify=False) as client:
             headers = {
                 'Authorization': f'Bearer {user["token"]}',
@@ -105,7 +99,7 @@ class UnitTest(unittest.TestCase):
                                 continue
                             data = json.loads(data)
 
-                            print(f"SSE RECEIVED {value}: {data}", flush=True)
+                            print(f"SSE RECEIVED {user['username']}: {data}", flush=True)
                             user['thread_assertion'].append(data['event_code'])
                             user['thread_result'] += 1
                             if (tests is not None and user['thread_result'] == len(tests)) and not still_connected:
@@ -113,6 +107,7 @@ class UnitTest(unittest.TestCase):
 
     def assertThread(self, user):
         user['thread'].join()
+        print(f"SSE DISCONNECTING {user['username']}...\n", flush=True)
         if user['thread_tests'] is None:
             user['thread_tests'] = []
         self.assertListEqual(user['thread_tests'], user['thread_assertion'])
