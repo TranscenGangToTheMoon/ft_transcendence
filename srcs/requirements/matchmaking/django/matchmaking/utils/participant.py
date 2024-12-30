@@ -19,7 +19,7 @@ def get_participants(obj, add_fields: list[str] = None):
 
 
 def get_participant(model, obj, user_id, creator_check, from_place):
-    if isinstance(model, TournamentParticipants):
+    if model is TournamentParticipants:
         name = 'tournament'
     else:
         name = 'lobby'
