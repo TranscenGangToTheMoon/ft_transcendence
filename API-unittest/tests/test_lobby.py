@@ -500,7 +500,17 @@ class Test08_InviteLobby(UnitTest):
         self.assertThread(user2)
         self.assertThread(user1)
 
-    def test_002_invite_yourself(self):
+    def test_003_invite_custom_3v3(self):
+        user1 = self.user_sse(['accept-friend-request'], still_connected=True)
+        user2 = self.user_sse(['receive-friend-request', 'invite-3v3'], get_me=True)
+
+        self.assertFriendResponse(create_friendship(user1, user2))
+        code = self.assertResponse(create_lobby(user1, game_mode='custom_game'), 201, get_field='code')
+        self.assertResponse(create_lobby(user1, {'match_type': '3v3'}, method='PATCH'), 200)
+        self.assertResponse(invite_user(user1, user2, code), 204)
+        self.assertThread(user2)
+        self.assertThread(user1)
+
         user1 = self.user_sse()
 
         self.assertResponse(create_lobby(user1), 201)
