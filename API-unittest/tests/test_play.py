@@ -11,9 +11,13 @@ from utils.my_unittest import UnitTest
 class Test01_Play(UnitTest):
 
     def test_001_play_duel(self):
-        user1 = self.user_sse()
+        user1 = self.user_sse(['game-start'])
+        user2 = self.user_sse(['game-start'])
 
         self.assertResponse(play(user1), 201)
+        self.assertResponse(play(user2), 201)
+        self.assertThread(user1)
+        self.assertThread(user2)
 
     def test_002_play_ranked(self):
         user1 = self.user_sse()
