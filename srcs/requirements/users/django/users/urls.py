@@ -34,12 +34,14 @@ urlpatterns = [
     path(UsersManagement.manage_user, manage_user_view),
 ]
 
-# todo 1. make all unit test work
-# todo 2. handle sse disconnection (send request matchmaking and set online at false) only if last connection
-# todo 3. fix permision denied guest
-# todo 4. finish all sse event (except for tournament)
+# todo 4. merge new main
+# todo 5. make all unit test work
 
-# todo 1. make ss tournament events
+# todo 1. make sse event chat
+# todo 2. make sse event game
+# todo 3. make sse event invite
+# todo 4. make sse tournament events
+# todo 5. fix permision denied guest
 
 
 # todo CHAT

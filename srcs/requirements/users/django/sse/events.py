@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 from enum import Enum
 
 import redis
@@ -15,6 +16,13 @@ from users.models import Users
 # todo when retrieve many user, handle friend field
 # todo when create match return user instance not only id
 # todo when create match return teams id not list
+
+
+def datetime_serializer(obj):
+    if isinstance(obj, datetime):
+        return obj.isoformat()
+    raise TypeError
+
 
 def get_username(user_id):
     if isinstance(user_id, str):
@@ -65,7 +73,7 @@ class Target:
             'type': self.type.name,
             'method': self.method,
             'display_name': self.display_name,
-            'display_icon': self.display_icon,
+            'display_icon': None if self.display_icon is None else f'/assets/{self.display_icon}',
         }
 
 
@@ -103,7 +111,7 @@ class Event:
             'target': None if self.target is None else [t.dumps(data) for t in self.target],
             'data': data,
         }
-        return json.dumps(result)
+        return json.dumps(result, default=datetime_serializer)
 
 
 delete_user = Event(Service.AUTH, EventCode.DELETE_USER)
@@ -139,7 +147,6 @@ tournament_seeding = Event(Service.TOURNAMENT, EventCode.TOURNAMENT_SEEDING) # t
 tournament_match_end = Event(Service.TOURNAMENT, EventCode.TOURNAMENT_MATCH_END, '{winner} win against {looser}.') # todo format
 tournament_finish = Event(Service.TOURNAMENT, EventCode.TOURNAMENT_FINISH, 'The tournament {name} is now over. Well done to {winner}} for his victory!') # todo format
 
-# 'update-status': {'type': SSEType.event, 'db_field': None, 'message': None, 'target': 'update status user view', 'required-data': ['user_id', 'new status']}, # todo handle update status
 
 redis_client = redis.StrictRedis(host='event-queue')
 
@@ -147,7 +154,7 @@ redis_client = redis.StrictRedis(host='event-queue')
 def publish_event(users: Users | QuerySet[Users] | list[Users], event_code: EventCode, data=None, kwargs=None):
     event = globals().get(event_code.value.replace('-', '_'))
     if event is None:
-        raise ParseError({'event_code': [MessagesException.ValidationError.INVALID_EVENT_CODE]}) # todo handle error
+        raise ParseError({'event_code': [MessagesException.ValidationError.INVALID_EVENT_CODE]})
 
     if isinstance(users, Users):
         users = [users]
@@ -158,7 +165,6 @@ def publish_event(users: Users | QuerySet[Users] | list[Users], event_code: Even
         if user.is_online:
             channel = f'events:user_{user.id}'
 
-            print('EVENT', event, data, flush=True)
             try:
                 redis_client.publish(channel, event.code.value + ':' + event.dumps(data, kwargs))
             except redis.exceptions.ConnectionError:

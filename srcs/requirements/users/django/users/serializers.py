@@ -5,7 +5,6 @@ from lib_transcendence.services import request_chat
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied, APIException
 
-from friend_requests.models import FriendRequests
 from friends.serializers import FriendsSerializer
 from friends.utils import get_friendship
 from users.auth import auth_update
@@ -32,6 +31,7 @@ class UsersMeSerializer(serializers.ModelSerializer):
             'created_at',
             'notifications',
             'is_online',
+            'last_online',
             'password',
 
         ]
@@ -45,6 +45,7 @@ class UsersMeSerializer(serializers.ModelSerializer):
             'created_at',
             'notifications',
             'is_online',
+            'last_online',
         ]
 
     @staticmethod

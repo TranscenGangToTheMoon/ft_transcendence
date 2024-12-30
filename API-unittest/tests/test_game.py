@@ -52,4 +52,3 @@ class Test01_Game(UnitTest):
 
 if __name__ == '__main__':
     unittest.main()
-#todo handle sse failed test
