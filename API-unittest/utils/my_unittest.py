@@ -12,25 +12,21 @@ from utils.generate_random import rnstr
 
 
 class UnitTest(unittest.TestCase):
-    def new_user(self, username=None, password=None, tests_sse: list[str] = None):
-        if username is None:
-            username = 'user-' + rnstr(10)
-        if password is None:
-            password = 'password-' + rnstr(15)
-        _new_user = {'username': username, 'password': password}
-        token = self.assertResponse(register(_new_user['username'], password), 201)
-        _new_user['token'] = token['access']
-        _new_user['refresh'] = token['refresh']
-        _new_user['id'] = self.assertResponse(me(_new_user), 200, get_field=True)
-        self.connect_to_sse(_new_user, tests_sse)
-        return _new_user
-
-    def user_sse(self, tests: list[str] = None):
-        return self.new_user(tests_sse=tests)
-
-    def guest_user(self, tests_sse: list[str] = None):
+    def new_user(self, tests_sse: list[str] = None, username=None, password=None, guest=False):
         _new_user = {}
-        token = self.assertResponse(create_guest(), 201)
+
+        if guest:
+            response = create_guest()
+        else:
+            if username is None:
+                username = 'user-' + rnstr(10)
+            if password is None:
+                password = 'password-' + rnstr(15)
+            _new_user['username'] = username
+            _new_user['password'] = password
+            response = register(_new_user['username'], password)
+
+        token = self.assertResponse(response, 201)
         _new_user['token'] = token['access']
         _new_user['refresh'] = token['refresh']
         response = self.assertResponse(me(_new_user), 200)
