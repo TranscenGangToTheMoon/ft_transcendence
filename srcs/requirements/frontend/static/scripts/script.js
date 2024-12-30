@@ -204,7 +204,7 @@ async function loadContent(url, container='content', append=false) {
         if(!append)
             contentDiv.innerHTML = html;
         else
-            contentDiv.innerHTML += `\n${html}`;
+            contentDiv.insertAdjacentHTML('beforeend', `\n${html}`);
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = html;
         const script = tempDiv.querySelector('[script]');
@@ -496,7 +496,8 @@ function addSSEListeners(){
     console.log(document.getElementById('friendListModal'));
     
     sse.addEventListener('receive-friend-request', async event => {
-        const isModalShown = bootstrap.Modal.getInstance(document.getElementById('friendListModal'))._isShown;
+        const friendListModal = bootstrap.Modal.getInstance(document.getElementById('friendListModal'));
+        const isModalShown = friendListModal ? friendListModal._isShown : friendListModal;
         const isTabActive = document.getElementById('innerFriendRequests-tab').classList.contains('active');
         event = JSON.parse(event.data);
         console.log(event);
@@ -618,14 +619,14 @@ async function  indexInit(auto=true) {
     }
 }
 
-async function addTargets(notification, targets){
+async function addTargets(notification, targets, toastInstance, toastContainer){
     console.log(targets);
     const notificationBody = notification.querySelector('.toast-body');
     Object.entries(targets).forEach(([i, target]) => {
         const img = document.createElement('img');
         img.id = `notif${notification.id}-target${i}`;
         img.className = 'notif-img';
-        img.src = '/assets/imageNotFound.png';
+        img.src = `/assets${target.display_icon}`;
         
         notificationBody.appendChild(img);
         
@@ -639,9 +640,24 @@ async function addTargets(notification, targets){
                 } catch (error) {
                     console.log(error);
                 }
+                notification.clicked = true;
+                dismissNotification(notification, toastInstance, toastContainer);
             });
         }
     });
+}
+
+function dismissNotification(notification, toastInstance, toastContainer){
+    toastInstance.hide();
+    setTimeout (() => {
+        displayedNotifications--;
+        toastContainer.removeChild(document.getElementById(notification.id));
+        if (notificationQueue.length){
+            let notif= notificationQueue.shift();
+            console.log(notificationQueue);
+            displayNotification(notif[0], notif[1], notif[2], notif[3]);
+        }
+    }, 500);
 }
 
 async function displayNotification(icon=undefined, title=undefined, body=undefined, mainListener=undefined, target=undefined){
@@ -662,26 +678,23 @@ async function displayNotification(icon=undefined, title=undefined, body=undefin
     if (body)
         notification.querySelector('.toast-body').innerText = body;
     if (mainListener)
-        notification.addEventListener('click', mainListener, {once: true});
-    if (target)
-        addTargets(notification, target);
-        // console.log(target);
+        notification.addEventListener('click', event => {
+            mainListener(event);
+            notification.clicked = true;
+            dismissNotification(notificationIdentifier, toastInstance, toastContainer);
+        }, {once: true});
     const toastInstance = new bootstrap.Toast(notification);
+    if (target)
+        addTargets(notification, target, toastInstance, toastContainer);
+        // console.log(target);
     toastInstance.show();
     notificationIdentifier++;
     displayedNotifications++;
     setTimeout(() => {
-        toastInstance.hide();
-        setTimeout (() => {
-            displayedNotifications--;
-            toastContainer.removeChild(document.getElementById(notification.id));
-            if (notificationQueue.length){
-                let notif= notificationQueue.shift();
-                console.log(notificationQueue);
-                displayNotification(notif[0], notif[1], notif[2], notif[3]);
-            }
-        }, 500);
-    }, 15000);
+        if (!notification.clicked){
+            dismissNotification(notification, toastInstance, toastContainer)
+        }
+    }, 5000);
 }
 
 window.indexInit = indexInit;
