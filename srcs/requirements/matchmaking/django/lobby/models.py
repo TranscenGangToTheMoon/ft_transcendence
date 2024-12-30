@@ -1,8 +1,7 @@
 from django.db import models
 from lib_transcendence.game import GameMode
 from lib_transcendence.Lobby import MatchType, Teams
-from lib_transcendence.sse_events import EventCode
-from lib_transcendence.services import create_sse_event
+from lib_transcendence.sse_events import EventCode, create_sse_event
 
 from baning.models import delete_baned
 from blocking.utils import delete_player_instance

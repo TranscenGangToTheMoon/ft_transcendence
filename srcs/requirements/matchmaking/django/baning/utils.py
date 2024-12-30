@@ -1,6 +1,5 @@
 from django.core.exceptions import PermissionDenied
-from lib_transcendence.services import create_sse_event
-from lib_transcendence.sse_events import EventCode
+from lib_transcendence.sse_events import EventCode, create_sse_event
 from lib_transcendence.exceptions import MessagesException
 
 from baning.models import Baned

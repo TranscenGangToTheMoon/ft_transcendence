@@ -40,7 +40,7 @@ class EventCode(Enum):
     TOURNAMENT_FINISH = 'tournament-finish'
 
 
-def create_sse_event( # todo better handle error
+def create_sse_event(
         users: list[int] | int,
         event_code: EventCode,
         data: dict,
