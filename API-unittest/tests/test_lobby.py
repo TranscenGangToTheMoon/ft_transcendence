@@ -527,18 +527,15 @@ class Test08_InviteLobby(UnitTest):
         self.assertThread(user2)
         self.assertThread(user1)
 
-    def test_004_friend_then_block(self):
-        user1 = self.user_sse()
+    def test_006_not_creator(self):
+        user1 = self.user_sse(['join-lobby'], still_connected=True)
+        user2 = self.user_sse()
+        user3 = self.user_sse(get_me=True)
 
-        self.assertResponse(create_lobby(user1), 201)
-        self.assertResponse(join_lobby(user1, '123456', 'POST'), 404, {'detail': 'Lobby not found.'})
-        self.assertThread(user1)
-
-    def test_005_not_creator(self):
-        user1 = self.user_sse()
-
-        self.assertResponse(create_lobby(user1), 201)
-        self.assertResponse(join_lobby(user1, '123456', 'POST'), 404, {'detail': 'Lobby not found.'})
+        code = self.assertResponse(create_lobby(user1), 201, get_field='code')
+        self.assertResponse(join_lobby(user2, code), 201)
+        self.assertResponse(invite_user(user2, user3, code), 403, {'detail': 'Only creator can update this lobby.'})
+        self.assertThread(user2)
         self.assertThread(user1)
 
     def test_006_user_already_in_lobby(self):
