@@ -62,6 +62,7 @@ class UnitTest(unittest.TestCase):
         self.assertEqual(status_code, responses[1].status_code)
         if json_assertion is not None:
             self.assertEqual(json_assertion, responses[1].json)
+        self.assertEqual(responses[0].json['id'], responses[1].json['id'])
         return responses[1].json['id']
 
     def connect_to_sse(self, user, tests: list[str] = None, timeout=50, status_code=200, still_connected=False):
