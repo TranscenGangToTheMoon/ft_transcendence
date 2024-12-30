@@ -6,12 +6,12 @@ async function decrementFriendRequests(sent){
         else await getMoreFriendRequests();
         // console.log(nextFriendRequest);
     }
-    let old = document.getElementById('innerFriendRequests-tab').innerText.match(/\((.*?)\)/);
-    old = parseInt(old[1]);
-    if (old < 2)
-        document.getElementById('innerFriendRequests-tab').innerText = `Friend Requests`;
-    else 
-        document.getElementById('innerFriendRequests-tab').innerText = `Friend Requests (${old - 1})`;
+    // let old = document.getElementById('innerFriendRequests-tab').innerText.match(/\((.*?)\)/);
+    // old = parseInt(old[1]);
+    // if (old < 2)
+    //     document.getElementById('innerFriendRequests-tab').innerText = `Friend Requests`;
+    // else 
+    //     document.getElementById('innerFriendRequests-tab').innerText = `Friend Requests (${old - 1})`;
 }
 
 async function acceptFriendRequest(id){

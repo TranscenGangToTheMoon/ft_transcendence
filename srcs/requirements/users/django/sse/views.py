@@ -6,6 +6,7 @@ from lib_transcendence.sse_events import EventCode
 from rest_framework import renderers
 from rest_framework.exceptions import NotFound
 from rest_framework.views import APIView
+
 import redis
 
 from sse.events import publish_event
@@ -26,7 +27,6 @@ class EventStreamRenderer(renderers.BaseRenderer):
 
     def render(self, data, accepted_media_type=None, renderer_context=None):
         return data
-
 
 class SSEView(APIView):
     renderer_classes = [EventStreamRenderer]
@@ -73,6 +73,5 @@ class SSEView(APIView):
         response = StreamingHttpResponse(event_stream(user_id, channel), content_type='text/event-stream')
         response['Cache-Control'] = 'no-cache'
         return response
-
 
 sse_view = SSEView.as_view()

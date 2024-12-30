@@ -44,12 +44,10 @@ document.getElementById("loginButton").addEventListener('click', event => {
                 localStorage.setItem('refresh', data.refresh);
                 await fetchUserInfos(true);
                 loadUserProfile();
-                if (window.location.pathname.includes('login'))
-                    await navigateTo('/');
-                else
-                    handleRoute();
-                await loadFriendListModal();
-                return;//todo redirect to uri
+                handleRoute();
+                if (document.getElementById('friendListModal').clicked)
+                    addFriendListListener();
+                return;
             }
             if (data.username) {
                 document.getElementById('container').innerText = data.username[0];
