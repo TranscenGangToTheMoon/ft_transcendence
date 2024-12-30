@@ -34,10 +34,10 @@ urlpatterns = [
     path(UsersManagement.manage_user, manage_user_view),
 ]
 
-# todo 3. make sse event invite
-# todo 4. make sse tournament events
-# todo 5. fix permision denied guest
+# todo 1. fix permision denied guest
+# todo 2. test when connected to SSE and rename user and make requestto users service
 
+# todo 1. make sse tournament events
 
 # todo CHAT
 #   - create chat when lobby is created
