@@ -23,9 +23,8 @@ class Game:
     @staticmethod
     def create_ball(canvas: Position):
         direction_x, direction_y = get_random_direction()
-        ball_speed = Game.default_ball_speed
         ball_size = 20
-        return Ball(Position(int(canvas.x / 2 - (ball_size / 2)), int(canvas.y / 2 - (ball_size / 2))), direction_x, direction_y, ball_speed, ball_size)
+        return Ball(Position(int(canvas.x / 2 - (ball_size / 2)), int(canvas.y / 2 - (ball_size / 2))), direction_x, direction_y, Game.default_ball_speed, ball_size)
 
     @staticmethod
     def create_rackets(match, canvas) -> List[Racket]:
@@ -69,7 +68,7 @@ class Game:
         # TODO -> set all variables from .env
         self.max_bounce_angle = 2 * (math.pi / 5)
         self.max_ball_speed = 630
-        self.speed_increment = 1
+        self.speed_increment = 30
         self.ball = self.create_ball(self.canvas)
         self.rackets = self.create_rackets(self.match, self.canvas)
 
@@ -267,12 +266,10 @@ class Game:
         self.reset_game_state()
         self.send_game_state()
         start_time = time.perf_counter()
-        print(start_time, flush=True)
         self.send_start_countdown()
         effective_start_time = start_time + 2
         while time.perf_counter() < effective_start_time:
             time.sleep(1 / 120)
-        print('sending start', time.perf_counter(), flush=True)
         self.send_start_game()
         self.last_update = 0
 
@@ -280,12 +277,14 @@ class Game:
 
     def send_score(self, scorer_team):
         from game_server.server import Server
-        Server.emit('score', data={'team_a': self.match.teams[0].score, 'team_b': self.match.teams[1].score}, room=str(self.match.id))
+        Server.emit('score', data={
+            'team_a': self.match.teams[0].score,
+            'team_b': self.match.teams[1].score,
+        }, room=str(self.match.id))
 
     def send_finish(self, reason: str | None = None, winner: str | None = None):
-        # from game_server.server import Server
-        # Server.emit('game_over', data={'reason': reason, 'winner': winner}, room=str(self.match.id))
-        pass
+        from game_server.server import Server
+        Server.emit('game_over', data={'reason': reason, 'winner': winner}, room=str(self.match.id))
 
     def send_start_game(self):
         from game_server.server import Server

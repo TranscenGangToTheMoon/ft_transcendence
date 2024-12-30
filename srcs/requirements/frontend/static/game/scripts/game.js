@@ -7,12 +7,12 @@
         paddleHeight: 200,
         ballSize: 20,
         maxBallSpeed: 630,
-        maxPaddleSpeed: 350,
+        maxPaddleSpeed: 500,
         animationDuration: 800,
         font: "48px Arial",
         fontColor: "white",
         defaultBallSpeed : 240,
-        ballSpeedIncrement: 1,
+        ballSpeedIncrement: 30,
         winningScore: 3,
         enemyScore : {},
         playerScore : {},
@@ -43,6 +43,7 @@
         lastFrame: 0,
         playerScore: 0,
         enemyScore: 0,
+        gameIsReady: false,
         ball: {
             x: config.canvasWidth / 2 - config.ballSize / 2,
             y: config.canvasHeight / 2 - config.ballSize / 2,
@@ -117,6 +118,7 @@
         state.cancelAnimation = false;
         console.log('game started');
 		state.isCountDownActive = false;
+		state.gameIsReady = true;
 
         function gameLoop(timestamp) {
             if (!state.isGameActive) return;
@@ -196,6 +198,7 @@
 	    state.cancelAnimation = false;
 	    console.log('CD started');
         state.isCountDownActive = true;
+		state.gameIsReady = false;
 
         for (racket in state.paddles) {
         	racket.y = (config.canvasHeight + config.paddleHeight) / 2
@@ -208,6 +211,10 @@
                 state.countDown.currentStep = config.countDown.steps;
                 return;
             }
+            if (state.gameIsReady == true) {
+            	state.isCountDownActive = false;
+				return;
+            }
             if (state.countDown.currentStep >= 0) {
                 drawCountdown();
                 setTimeout(step, config.countDown.delay / (config.countDown.steps + 1));
@@ -215,6 +222,7 @@
             else{
                 state.countDown.currentStep = config.countDown.steps;
                 state.isCountDownActive = false;
+				stopGame();
             }
         }
 
@@ -512,14 +520,11 @@
         }
 
         if (state.ball.y < 0 || state.ball.y + config.ballSize >= config.canvasHeight){
-            if (state.ball.y < 0) {
-	            state.ball.y = - state.ball.y
-	            state.ball.speedY = - state.ball.speedY
-            }
+            if (state.ball.y < 0)
+	            state.ball.y = -state.ball.y
             else
 	            state.ball.y -= (state.ball.y + config.ballSize) - config.canvasHeight
-	            state.ball.speedY = - state.ball.speedY
-            state.ball.speedY = -state.ball.speedY;
+            state.ball.speedY = -state.ball.speedY
         }
 
         // handleGoal();
@@ -554,7 +559,7 @@
         }
     }
 
-    window.PongGame = {startGame, startCountdown, stopGame, pauseGame, resumeGame, state, config, moveUp, moveDown, handleGameOver};
+    window.PongGame = {startGame, startCountdown, stopGame, pauseGame, resumeGame, state, config, moveUp, moveDown, handleGameOver, resetGame};
 })();
 
 
@@ -575,6 +580,7 @@ function initSocket(){
     });
     socket.on('start_game', event => {
         console.log('received start_game');
+		state.gameIsReady = true;
         window.PongGame.startGame();
     })
     socket.on('start_countdown', event => {
@@ -587,9 +593,6 @@ function initSocket(){
 	    window.PongGame.state.ball.speedX = event.direction_x;
 	    window.PongGame.state.ball.speedY = event.direction_y;
 	    window.PongGame.state.ball.speed = event.speed;
-	    console.log(window.PongGame.state.ball.speedX);
-	    console.log(window.PongGame.state.ball.speedY);
-	    console.log(window.PongGame.state.ball.speed);
     })
     socket.on('connect_error', (error)=> {
         console.log('error', error);
@@ -603,12 +606,19 @@ function initSocket(){
         window.PongGame.state.paddles.left.speed = 1;
     })
     socket.on('stop_moving', event => {
-        console.log(event);
         console.log('received stop_moving')
         window.PongGame.state.paddles.left.speed = 0;
-        window.PongGame.state.paddles.left.y = event.position;
+        if (event.player == userInformations.id)
+	        window.PongGame.state.paddles.right.y = event.position;
+		else
+	        window.PongGame.state.paddles.left.y = event.position;
     })
     socket.on('score', event => {
+		window.PongGame.stopGame();
+		window.PongGame.resetGame();
+		for (paddle in window.PongGame.state.paddles) {
+			window.PongGame.state.paddles[paddle].y = (window.PongGame.config.canvasHeight - window.PongGame.config.paddleHeight) / 2;
+		}
     	if (window.PongGame.config.team == 'team_a') {
 			window.PongGame.state.playerScore = event.team_a;
 			window.PongGame.state.enemyScore = event.team_b;
@@ -617,8 +627,8 @@ function initSocket(){
 			window.PongGame.state.playerScore = event.team_b;
 			window.PongGame.state.enemyScore = event.team_a;
       	}
-  		window.PongGame.stopGame()
-     	if (event.team_a == window.PongGame.config.winningScore|| event.team_b == window.PongGame.config.winningScore) {
+     	if (event.team_a == window.PongGame.config.winningScore || event.team_b == window.PongGame.config.winningScore)
+      	{
       		window.PongGame.handleGameOver()
       	}
     })

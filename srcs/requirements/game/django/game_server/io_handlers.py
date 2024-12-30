@@ -56,13 +56,12 @@ async def stop_moving(sid, data):
     from game_server.server import Server
     player = Server._clients[sid]
     position = data['position']
+    position = player.racket.stop_moving(position)
     await Server._sio.emit(
         'stop_moving',
         data={'player': player.user_id, 'position': position},
-        room=str(player.match_id),
-        skip_sid=sid
+        room=str(player.match_id)
     )
-    player.racket.stop_moving(position)
 
 
 async def disconnect(sid):
