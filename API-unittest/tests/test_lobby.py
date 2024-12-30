@@ -539,11 +539,14 @@ class Test08_InviteLobby(UnitTest):
         self.assertThread(user2)
         self.assertThread(user1)
 
-    def test_006_user_already_in_lobby(self):
-        user1 = self.user_sse()
+    def test_007_user_already_in_lobby(self):
+        user1 = self.user_sse(['lobby-join', 'lobby-leave'], still_connected=True)
+        user2 = self.user_sse(get_me=True)
 
-        self.assertResponse(create_lobby(user1), 201)
-        self.assertResponse(join_lobby(user1, '123456', 'POST'), 404, {'detail': 'Lobby not found.'})
+        code = self.assertResponse(create_lobby(user1), 201, get_field='code')
+        self.assertResponse(join_lobby(user2, code), 201)
+        self.assertResponse(invite_user(user1, user2, code), 409, {'detail': 'This user is already in this lobby.'})
+        self.assertThread(user2)
         self.assertThread(user1)
 
 
