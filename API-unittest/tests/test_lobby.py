@@ -490,9 +490,14 @@ class Test08_InviteLobby(UnitTest):
         self.assertThread(user2)
         self.assertThread(user1)
 
+    def test_002_invite_custom_1v1(self):
+        user1 = self.user_sse(['accept-friend-request'], still_connected=True)
+        user2 = self.user_sse(['receive-friend-request', 'invite-1v1'], get_me=True)
 
-        self.assertResponse(create_lobby(user1), 201)
-        self.assertResponse(join_lobby(user1, '123456', 'POST'), 404, {'detail': 'Lobby not found.'})
+        self.assertFriendResponse(create_friendship(user1, user2))
+        code = self.assertResponse(create_lobby(user1, game_mode='custom_game'), 201, get_field='code')
+        self.assertResponse(invite_user(user1, user2, code), 204)
+        self.assertThread(user2)
         self.assertThread(user1)
 
     def test_002_invite_yourself(self):
