@@ -92,7 +92,7 @@ class UnitTest(unittest.TestCase):
                 if status_code == 200:
                     for line in response.iter_text():
                         if line:
-                            event, data = re.findall(r'event: ([a-z\-]+)\ndata: (.+)\n\n', line)[0]
+                            event, data = re.findall(r'event: ([a-z0-9\-]+)\ndata: (.+)\n\n', line)[0]
                             timeout_count += 1
                             if (tests is None and timeout_count > timeout) or timeout_count > 100 or event == 'delete-user': # todo remove later
                                 return
