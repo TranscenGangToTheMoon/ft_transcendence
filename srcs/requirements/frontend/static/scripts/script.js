@@ -626,7 +626,7 @@ async function addTargets(notification, targets, toastInstance, toastContainer){
         const img = document.createElement('img');
         img.id = `notif${notification.id}-target${i}`;
         img.className = 'notif-img';
-        img.src = `/assets${target.display_icon}`;
+        img.src = target.display_icon;
         
         notificationBody.appendChild(img);
         
