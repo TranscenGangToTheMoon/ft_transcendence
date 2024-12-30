@@ -1,7 +1,7 @@
 from lib_transcendence.game import GameMode
 from lib_transcendence.generate import generate_code
 from lib_transcendence.exceptions import MessagesException, Conflict
-from lib_transcendence.request import request_service
+from lib_transcendence.users import retrieve_users
 from rest_framework import serializers
 from rest_framework.exceptions import NotFound
 
@@ -42,6 +42,8 @@ def validate_teams(value):
 
 class MatchSerializer(serializers.ModelSerializer):
     teams = serializers.JSONField(write_only=True, validators=[validate_teams])
+    team_a = serializers.SerializerMethodField(read_only=True)
+    team_b = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Matches
@@ -49,12 +51,19 @@ class MatchSerializer(serializers.ModelSerializer):
         read_only_fields = [
             'id',
             'created_at',
-            'port',
+            'team_a',
+            'team_b',
         ]
 
     @staticmethod
     def validate_game_mode(value):
         return GameMode.validate(value)
+
+    def get_team_a(self, value):
+        return retrieve_users(self.validated_data['teams'][0])
+
+    def get_team_b(self, value):
+        return retrieve_users(self.validated_data['teams'][1])
 
     def create(self, validated_data):
         if validated_data['game_mode'] == GameMode.tournament:
