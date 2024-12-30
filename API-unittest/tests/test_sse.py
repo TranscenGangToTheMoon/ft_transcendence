@@ -44,7 +44,8 @@ class Test01_SSE(UnitTest):
         user1 = self.guest_user(connect_sse=True, get_me=True)
         username = 'sse-register-' + rnstr()
 
-        user1['username'] = self.assertResponse(register_guest(user1, username=username), 200, get_field='username')
+        self.assertResponse(register_guest(user1, username=username), 200)
+        user1['username'] = username
         self.assertThread(user1)
         response = self.assertResponse(me(user1), 200)
         self.assertFalse(response['is_guest'])
