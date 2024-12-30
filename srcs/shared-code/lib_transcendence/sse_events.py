@@ -1,6 +1,5 @@
 from enum import Enum
 
-# todo handle lobby-update
 # todo make ban tournament
 #  - handle sse event
 #   * send leave to other members
@@ -9,10 +8,13 @@ from enum import Enum
 #  - delete when tournament is delete
 #  - check if time a user wants to join
 class EventCode(Enum):
-    CONNECTION_SUCCESS = 'connection-success'
+    DELETE_USER = 'delete-user'
     SEND_MESSAGE = 'send-message'
     ACCEPT_FRIEND_REQUEST = 'accept-friend-request'
     RECEIVE_FRIEND_REQUEST = 'receive-friend-request'
+    REJECT_FRIEND_REQUEST = 'reject-friend-request'
+    CANCEL_FRIEND_REQUEST = 'cancel-friend-request'
+    DELETE_FRIEND = 'delete-friend'
     GAME_START = 'game-start'
     INVITE_1V1 = 'invite-1v1'
     INVITE_CLASH = 'invite-clash'

@@ -11,10 +11,7 @@ from rest_framework.exceptions import AuthenticationFailed, NotAuthenticated
 def get_user_from_auth(user_data):
     from django.contrib.auth.models import User
 
-    user, created = User.objects.get_or_create(id=user_data['id'])
-    if user.username != user_data['username']:
-        user.username = user_data['username']
-        user.save()
+    user, created = User.objects.get_or_create(id=user_data['id'], username=user_data['username'])
     return user
 
 
@@ -27,9 +24,10 @@ class AbstractAuthentication(ABC, BaseAuthentication):
         token = request.headers.get('Authorization')
 
         if not token:
-            token = 'Bearer ' + request.query_params.get('token', None)
+            token = request.query_params.get('token', None)
             if not token:
                 raise NotAuthenticated(MessagesException.Authentication.NOT_AUTHENTICATED)
+            token = 'Bearer ' + token
 
         try:
             json_data = self.auth_request(token)

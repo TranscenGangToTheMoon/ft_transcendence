@@ -36,6 +36,11 @@ document.getElementById('customGame').addEventListener('click', async event => {
     }
 })
 
+document.getElementById('chat').addEventListener('click', async ()=> {
+    if (!userInformations.is_guest)
+        await navigateTo('/chat');
+})
+
 async function homePageInit() {
     await indexInit(false);
 }

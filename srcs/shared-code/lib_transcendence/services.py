@@ -56,7 +56,7 @@ def request_auth(token, endpoint: Literal['update/', 'verify/', 'delete/'], meth
     return request_service('auth', endpoint, method, data, token)
 
 
-def create_sse_event(
+def create_sse_event( # todo better handle error
         users: list[int] | int,
         event_code: EventCode,
         data: dict | None = None,

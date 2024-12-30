@@ -3,6 +3,7 @@ from lib_transcendence.game import GameMode
 from lib_transcendence.Lobby import MatchType, Teams
 from lib_transcendence.auth import get_auth_user
 from lib_transcendence.generate import generate_code
+from lib_transcendence.services import create_sse_event
 from lib_transcendence.sse_events import EventCode
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
@@ -100,15 +101,24 @@ class LobbySerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         if 'game_mode' in validated_data:
             raise PermissionDenied(MessagesException.PermissionDenied.CANNOT_UPDATE_GAME_MODE)
-        if validated_data.get('match_type') == MatchType.m1v1 and instance.match_type == MatchType.m3v3:
-            participants = instance.participants
 
+        participants = instance.participants.all()
+        if validated_data.get('match_type') == MatchType.m1v1 and instance.match_type == MatchType.m3v3:
             for team in Teams.play:
                 for p in participants.filter(team=team)[1:]:
+                    participant_data = {'team': Teams.spectator}
                     p.team = Teams.spectator
+                    if p.is_ready:
+                        p.is_ready = False
+                        participant_data['is_ready'] = False
                     p.save()
+                    send_sse_event(EventCode.LOBBY_UPDATE_PARTICIPANT, p, participant_data, exclude_myself=False)
 
-        return super().update(instance, validated_data)
+        result = super().update(instance, validated_data)
+        other_members = list(participants.exclude(user_id=self.context['auth_user']['id']).values_list('user_id', flat=True))
+        if other_members:
+            create_sse_event(other_members, EventCode.LOBBY_UPDATE, validated_data)
+        return result
 
 
 class LobbyParticipantsSerializer(serializers.ModelSerializer):

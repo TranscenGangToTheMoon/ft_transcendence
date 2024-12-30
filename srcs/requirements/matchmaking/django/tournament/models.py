@@ -3,14 +3,15 @@ from math import log2
 import time
 
 from django.db import models
-from lib_transcendence.Tournament import Tournament
 
-from baning.models import Baned
+from baning.models import delete_baned
 from blocking.utils import delete_player_instance
 from matchmaking.create_match import create_tournament_match
 
 
 class Tournament(models.Model):
+    stage_labels = {0: 'final', 1: 'semi-final', 2: 'quarter-final', 3: 'round of 16'}
+
     code = models.CharField(max_length=4, unique=True, editable=False)
     name = models.CharField(max_length=50, unique=True)
     size = models.IntegerField(default=16)
@@ -53,6 +54,10 @@ class Tournament(models.Model):
                 participants[i].win()
             index += 1
 
+    @staticmethod
+    def get_label(n_stage, previous_stage=1):
+        return Tournament.stage_labels[n_stage - previous_stage]
+
     @property
     def is_full(self):
         return self.participants.count() == self.size
@@ -62,9 +67,8 @@ class Tournament(models.Model):
         return int(log2(self.size))
 
     def delete(self, using=None, keep_parents=False):
-        code = self.code
+        delete_baned(self.code)
         super().delete(using=using, keep_parents=keep_parents)
-        Baned.objecs.filter(code=code).delete()
 
     def __str__(self):
         if self.private:
