@@ -79,7 +79,14 @@ class UnitTest(unittest.TestCase):
         user['thread_tests'] = tests
         user['thread_assertion'] = []
         timeout_count = 0
+        if 'username' in user:
+            value = user['username']
+        elif 'id' in user:
+            value = user['id']
+        else:
+            value = ''
 
+        print(f'SSE CONNECTING {value}...\n', flush=True)
         with httpx.Client(verify=False) as client:
             headers = {
                 'Authorization': f'Bearer {user["token"]}',
@@ -97,12 +104,7 @@ class UnitTest(unittest.TestCase):
                             if event == 'ping':
                                 continue
                             data = json.loads(data)
-                            if 'username' in user:
-                                value = user['username']
-                            elif 'id' in user:
-                                value = user['id']
-                            else:
-                                value = ''
+
                             print(f"SSE RECEIVED {value}: {data}", flush=True)
                             user['thread_assertion'].append(data['event_code'])
                             user['thread_result'] += 1
