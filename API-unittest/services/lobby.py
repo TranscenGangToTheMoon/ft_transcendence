@@ -33,3 +33,11 @@ def ban_user(user, user_ban, code):
         token=user['token'],
         method='DELETE',
     )
+
+
+def invite_user(user, user_invite, code, service: Literal['lobby', 'tournament'] = 'lobby'):
+    return make_request(
+        endpoint=f'play/{service}/{code}/invite/{user_invite["id"]}/',
+        token=user['token'],
+        method='POST',
+    )
