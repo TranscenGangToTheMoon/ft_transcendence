@@ -36,6 +36,7 @@ urlpatterns = [
 
 # todo 1. fix permision denied guest
 # todo 2. test when connected to SSE and rename user and make requestto users service
+# todo 3. fix unit test
 
 # todo 1. make sse tournament events
 
