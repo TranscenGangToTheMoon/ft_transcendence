@@ -5,38 +5,12 @@ from textual.app import App, ComposeResult
 from textual.screen import Screen
 from textual.widgets import Header, Footer, Button, Input, Static
 from textual.containers import VerticalGroup, HorizontalGroup, Container, Horizontal, Vertical
+from textual.worker import Worker, WorkerState
+from textual import work
 import requests
-import httpx
 from classes.user import User
 from enum import Enum
-import re
 
-didzer = re.compile(r'event: ([a-z\-]+)\ndata: (.+)\n\n')
-
-# def SSE():
-#     with httpx.Client(verify=User.SSLCertificate) as client:
-#         headers = {
-#             'Content-Type': 'text/event-stream',
-#             'Authorization': f'Bearer {User.accessToken}',
-#         }
-#         try: #server down url ==prout
-#             with client.stream('GET', f"{User.server}/sse/users/", headers=headers) as response:
-#                 if (response.status_code == 200):
-#                     for line in response.iter_text():
-#                         try:
-#                             events = didzer.findall(line)
-#                             for event, data in events:
-#                                 if event == interessant:# game start
-#                                     dataJSON =json.loads(data)
-#                                     #send id ws
-#                                     with #mutex lock
-#                                         #User.gameWaitingForMe = true
-#                         except (IndexError, ValueError) as error:
-#                             continue
-#                 elif (response.status_code >= 400):
-#                     raise (Exception("SSE connection prout!"))
-#         except Exception as error:
-#             print(error)
 
 class Page(Enum):
     LoginPage = 1
@@ -75,8 +49,8 @@ class LoginPage(Screen):
             try:
                 User.loginUser()
                 # User
-                # copnnect sse
                 self.query_one("#status").update(f"Status: login succeed!")
+                self.app.startSSE() #maybe is okay bc I add this method to my App
                 self.app.push_screen(MainPage())
                 #exit loop
             except Exception as error:
@@ -158,6 +132,10 @@ class GamePage(Screen):
         yield Footer()
         yield Static("Game page")
 
+import re
+import json
+import httpx
+
 # diff on login and main page with Screen css ! Why ?
 class PongCLI(App):
     CSS_PATH = [
@@ -173,10 +151,54 @@ class PongCLI(App):
 
     def __init__(self) -> None:
         super().__init__()
+        self.regex = re.compile(r'event: ([a-z\-]+)\ndata: (.+)\n\n')
+        self.connected = False
 
+    @property
+    def isConnected(self):
+        return (self.connected)
 
     def on_mount(self) -> None:
         self.push_screen(LoginPage())
+
+    @work(exclusive=True)
+    async def startSSE(self):
+        if (not self.isConnected):
+            # self.SSE = self.run_worker(SSEWorker)
+            self.connected = True
+            with httpx.AsyncClient(verify=User.SSLCertificate) as client:
+                headers = {
+                    'Content-Type': 'text/event-stream',
+                    'Authorization': f'Bearer {User.accessToken}',
+                }
+
+                try:
+                    async with client.stream('GET', f"{User.server}/sse/users/", headers=headers) as response:
+                        if (response.status_code >= 400):
+                            raise (Exception(f"({response.status_code}) SSE connection prout! {response.text}"))
+
+                        # if (response.status_code == 200):
+                        async for line in response.aiter_text():
+                            if self.is_cancelled:
+                                break
+
+                            try:
+                                events = self.regex.findall(line)
+                                for event, data in events:
+                                    if event == "game-start":# game start
+                                        dataJson = json.loads(data)
+                                        # await self.(self.GameStart(dataJson))
+                                        self.log()
+                                        # methode to send information to GameScreen / App
+
+                            except (IndexError, ValueError) as error:
+                                continue
+                finally:
+                    self.connected = False
+
+    def on_worker_state_changed(self, event: Worker.StateChanged) -> None:
+        """Called when the worker state changes."""
+        self.log(event)
     # def compose(self) -> ComposeResult:
     #     yield LoginPage(User)
     #
