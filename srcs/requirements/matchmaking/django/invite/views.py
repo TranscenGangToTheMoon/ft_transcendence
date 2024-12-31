@@ -32,7 +32,6 @@ class InviteMixin(generics.CreateAPIView):
         elif place.game_mode == GameMode.clash:
             event = EventCode.INVITE_CLASH
         elif place.match_type == MatchType.m1v1:
-            print('COUCOU', flush=True)
             event = EventCode.INVITE_1V1
         else:
             event = EventCode.INVITE_3V3
