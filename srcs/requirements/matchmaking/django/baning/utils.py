@@ -1,6 +1,7 @@
 from django.core.exceptions import PermissionDenied
 from lib_transcendence.sse_events import EventCode, create_sse_event
 from lib_transcendence.exceptions import MessagesException
+from rest_framework.exceptions import NotFound
 
 from baning.models import Banned
 from lobby.models import LobbyParticipants
@@ -34,4 +35,4 @@ def get_participants_for_baning(model, user_id):
     try:
         return model.participants.get(user_id=user_id)
     except (LobbyParticipants.DoesNotExist, TournamentParticipants.DoesNotExist):
-        raise PermissionDenied(MessagesException.PermissionDenied.USER_NOT_BELONG.format(obj=type(model).__name__.lower()))
+        raise NotFound(MessagesException.PermissionDenied.USER_NOT_BELONG.format(obj=type(model).__name__.lower()))
