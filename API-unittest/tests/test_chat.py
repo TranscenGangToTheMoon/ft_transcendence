@@ -19,8 +19,8 @@ class Test01_CreateChat(UnitTest):
         self.assertThread(user1, user2)
 
     def test_002_accept_chat_from_friend_only(self):
-        user1 = self.user()
-        user2 = self.user()
+        user1 = self.user(['accept-friend-request'])
+        user2 = self.user(['receive-friend-request'])
 
         self.assertFriendResponse(create_friendship(user1, user2))
         self.assertResponse(create_chat(user1, user2['username']), 201)
@@ -73,8 +73,8 @@ class Test02_CreateChatError(UnitTest):
         self.assertThread(user1)
 
     def test_007_accept_chat_from_none(self):
-        user1 = self.user()
-        user2 = self.user()
+        user1 = self.user(['accept-friend-request'])
+        user2 = self.user(['receive-friend-request'])
 
         self.assertResponse(accept_chat(user2, 'none'), 200)
         self.assertFriendResponse(create_friendship(user1, user2))
@@ -82,8 +82,8 @@ class Test02_CreateChatError(UnitTest):
         self.assertThread(user1, user2)
 
     def test_008_already_chat_with(self):
-        user1 = self.user()
-        user2 = self.user()
+        user1 = self.user(['accept-friend-request'])
+        user2 = self.user(['receive-friend-request'])
 
         self.assertFriendResponse(create_friendship(user1, user2))
         self.assertResponse(create_chat(user1, user2['username']), 201)
@@ -127,11 +127,12 @@ class Test03_GetChat(UnitTest):
             self.assertResponse(create_chat(user1, tmp_user['username']), 201)
 
         self.assertResponse(create_chat(user1, method='GET'), 200, count=ct)
-        [self.assertThread(u) for u in users]
-        self.assertThread(user1)
+        self.assertThread(user1, *users)
 
     def test_002_search_chats(self):
         user1 = self.user()
+        user2 = self.user(username='caca' + rnstr())
+
         name = 'chat-user'
         users = [self.user(username=name + rnstr()) for _ in range(5)]
 
@@ -139,16 +140,13 @@ class Test03_GetChat(UnitTest):
             self.assertResponse(accept_chat(tmp_user), 200)
             self.assertResponse(create_chat(user1, tmp_user['username']), 201)
 
-        tmp_user = self.user(username='caca' + rnstr())
-        self.assertResponse(accept_chat(tmp_user), 200)
-        self.assertResponse(create_chat(user1, tmp_user['username']), 201)
+        self.assertResponse(accept_chat(user2), 200)
+        self.assertResponse(create_chat(user1, user2['username']), 201)
 
-        self.assertResponse(create_chat(user1, method='GET', data={'q': 'caca'}), 200, count=1)
+        self.assertResponse(create_chat(user1, method='GET', query='caca'), 200, count=1)
 
-        self.assertResponse(create_chat(user1, method='GET', data={'q': name}), 200, count=5)
-        [self.assertThread(u) for u in users]
-        self.assertThread(tmp_user)
-        self.assertThread(user1)
+        self.assertResponse(create_chat(user1, method='GET', query=name), 200, count=5)
+        self.assertThread(user1, user2, *users)
 
     def test_003_search_chats_none(self):
         user1 = self.user()
@@ -205,34 +203,10 @@ class Test03_GetChat(UnitTest):
         self.assertResponse(request_chat_id(user2, chat_id), 200)
         self.assertThread(user1, user2)
 
-    def test_008_search_chats_in_url(self):
-        user1 = self.user()
-        name = 'chat-user'
-        users = [self.user(username=name + rnstr()) for _ in range(5)]
-
-        for tmp_user in users:
-            self.assertResponse(accept_chat(tmp_user), 200)
-            self.assertResponse(create_chat(user1, tmp_user['username']), 201)
-
-        tmp_user = self.user('caca' + rnstr())
-        self.assertResponse(accept_chat(tmp_user), 200)
-        self.assertResponse(create_chat(user1, tmp_user['username']), 201)
-
-        self.assertResponse(create_chat(user1, method='GET', query='caca'), 200, count=1)
-
-        self.assertResponse(create_chat(user1, method='GET', query=name), 200, count=5)
-        self.assertThread(user1)
-        [self.assertThread(u) for u in users]
-
 
 class Test04_Messages(UnitTest):
 
-    def send_message(self, user1=None, user2=None):
-        if user1 is None:
-            user1 = self.user()
-        if user2 is None:
-            user2 = self.user()
-
+    def send_message(self, user1, user2):
         self.assertResponse(accept_chat(user2), 200)
 
         chat_id = self.assertResponse(create_chat(user1, user2['username']), 201, get_field=True)
@@ -246,19 +220,21 @@ class Test04_Messages(UnitTest):
 
     def test_001_send_messages(self):
         user1 = self.user()
+        user2 = self.user()
 
-        chat_id = self.send_message(user1)
+        chat_id = self.send_message(user1, user2)
         response = self.assertResponse(request_chat_id(user1, chat_id), 200)
         self.assertEqual('and u ?', response['last_message']['content'])
-        self.assertThread(user1)
+        self.assertThread(user1, user2)
 
     def test_002_get_messages(self):
         user1 = self.user()
+        user2 = self.user()
 
-        chat_id = self.send_message(user1)
+        chat_id = self.send_message(user1, user2)
 
         self.assertResponse(create_message(user1, chat_id, method='GET'), 200, count=5)
-        self.assertThread(user1)
+        self.assertThread(user1, user2)
 
     def test_003_send_chat_does_not_exist(self):
         user1 = self.user()
@@ -316,17 +292,13 @@ class Test04_Messages(UnitTest):
 
     def test_007_get_chat_sort_by_last_update(self):
         user1 = self.user()
-        user2 = self.user()
+        users = [self.user() for _ in range(5)]
         chat_id = None
         tmp_chat_id = None
 
-        for i in range(5):
-            if i == 0:
-                tmp_user = user2
-            else:
-                tmp_user = self.user()
+        for tmp_user in users:
             tmp_chat_id = self.send_message(user1, tmp_user)
-            if i == 0:
+            if chat_id is None:
                 chat_id = tmp_chat_id
 
         response = self.assertResponse(create_chat(user1, method='GET'), 200, count=5)
@@ -334,7 +306,7 @@ class Test04_Messages(UnitTest):
         self.assertResponse(create_message(user1, chat_id, 'Hey !'), 201)
         response = self.assertResponse(create_chat(user1, method='GET'), 200)
         self.assertEqual(chat_id, response['results'][0]['id'])
-        self.assertThread(user2, user1)
+        self.assertThread(user1, *users)
 
     def test_008_message_notifications(self):
         user1 = self.user()
