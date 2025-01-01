@@ -97,6 +97,7 @@ class UnitTest(unittest.TestCase):
         print(f"SSE DISCONNECTING {user['username']}...\n", flush=True)
 
     def assertThread(self, *users):
+        time.sleep(0.1)
         for user in users:
             user['thread_finish'] = True
             user['thread'].join()
