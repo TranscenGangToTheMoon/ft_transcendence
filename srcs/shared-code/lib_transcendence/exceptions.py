@@ -70,16 +70,10 @@ class MessagesException:
         INCORRECT_PASSWORD = 'Incorrect password.'
 
     class PermissionDenied:
-        _GUEST_CANNOT_CREATE = 'Guest users cannot create {obj}.'
-        GUEST_CANNOT_CREATE_LOBBY = _GUEST_CANNOT_CREATE.format(obj='lobby')
-        GUEST_CANNOT_CREATE_TOURNAMENT = _GUEST_CANNOT_CREATE.format(obj='tournament')
-        GUEST_USERS_NOT_ALLOWED = 'Guest users are not allowed to change their password.'
-        GUEST_CANNOT_PLAY_RANKED = 'Guest users cannot play ranked games.'
+        GUEST = 'Guest users cannot perform this action.'
         GUEST_UPDATE_USERNAME = 'Guest users can only update their username.'
-        GUEST_CANNOT_FRIEND_REQUEST = 'Guest users cannot make friend request.'
         GUEST_REQUIRED = 'You must be a guest user.' # todo useless
-        GUEST_BLOCK = 'Guest users cannot blocked users.'
-        GUEST_CREATE_CHAT = 'Guest users cannot create chat.'
+        ALREADY_AUTHENTICATED = 'You are already authenticated.'
 
         NOT_BELONG = 'You do not belong to this {obj}.'
         NOT_BELONG_TO_CHAT = NOT_BELONG.format(obj='chat')
