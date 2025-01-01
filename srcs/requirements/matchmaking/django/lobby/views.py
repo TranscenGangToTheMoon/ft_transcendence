@@ -7,7 +7,7 @@ from rest_framework import generics, status
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 
-from lobby.models import Lobby, LobbyParticipants
+from lobby.models import LobbyParticipants
 from lobby.serializers import LobbySerializer, LobbyParticipantsSerializer
 from matchmaking.utils.participant import get_lobby_participant
 from matchmaking.utils.place import get_lobby
@@ -31,14 +31,14 @@ class LobbyParticipantsView(SerializerAuthContext, generics.ListCreateAPIView, g
     pagination_class = None
 
     def filter_queryset(self, queryset):
-        lobby = get_lobby(self.kwargs.get('code'))
+        lobby = get_lobby(self.kwargs['code'])
         queryset = queryset.filter(lobby_id=lobby.id)
         if not queryset.filter(user_id=self.request.user.id).exists():
             raise PermissionDenied(MessagesException.PermissionDenied.NOT_BELONG_LOBBY)
         return queryset
 
     def get_object(self):
-        return get_lobby_participant(get_lobby(self.kwargs.get('code')), self.request.user.id)
+        return get_lobby_participant(get_lobby(self.kwargs['code']), self.request.user.id)
 
     def create(self, request, *args, **kwargs):
         serializer_participant = LobbyParticipantsSerializer(data=request.data, context=self.get_serializer_context())
