@@ -75,7 +75,7 @@ class Test02_ErrorJoinLobby(UnitTest):
     def test_004_guest_create_lobby(self):
         user1 = self.user(guest=True)
 
-        self.assertResponse(create_lobby(user1), 403, {'detail': 'Guest users cannot create lobby.'})
+        self.assertResponse(create_lobby(user1), 403, {'detail': 'Guest users cannot perform this action.'})
 
     def test_005_invalid_game_mode(self):
         user1 = self.user()

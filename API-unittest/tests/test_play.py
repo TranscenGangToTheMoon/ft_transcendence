@@ -48,7 +48,7 @@ class Test02_PlayError(UnitTest):
     def test_003_guest_cannot_play_ranked(self):
         user1 = self.user(guest=True)
 
-        self.assertResponse(play(user1, 'ranked'), 403, {'detail': 'Guest users cannot play ranked games.'})
+        self.assertResponse(play(user1, 'ranked'), 403, {'detail': 'Guest users cannot perform this action.'})
 
     def test_004_user_in_lobby(self):
         user1 = self.user()

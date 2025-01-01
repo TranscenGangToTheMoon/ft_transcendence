@@ -74,7 +74,7 @@ class Test02_ErrorTournament(UnitTest):
     def test_005_guest_create_tournament(self):
         user1 = self.user(guest=True)
 
-        self.assertResponse(create_tournament(user1), 403, {'detail': 'Guest users cannot create tournament.'})
+        self.assertResponse(create_tournament(user1), 403, {'detail': 'Guest users cannot perform this action.'})
         self.assertThread(user1)
 
     def test_006_no_name(self):

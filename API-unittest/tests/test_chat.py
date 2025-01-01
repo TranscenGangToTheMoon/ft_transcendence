@@ -118,7 +118,7 @@ class Test02_CreateChatError(UnitTest):
         user2 = self.user(guest=True)
 
         self.assertResponse(accept_chat(user1, 'none'), 200)
-        self.assertResponse(create_chat(user2, user1['username']), 403, {'detail': 'Guest users cannot create chat.'})
+        self.assertResponse(create_chat(user2, user1['username']), 403, {'detail': 'Guest users cannot perform this action.'})
         self.assertThread(user1)
         self.assertThread(user2)
 

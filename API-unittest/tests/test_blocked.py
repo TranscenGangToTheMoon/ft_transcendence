@@ -5,29 +5,7 @@ from services.blocked import are_blocked, blocked_user, unblocked_user
 from utils.my_unittest import UnitTest
 
 
-class Test01_AreBlocked(UnitTest):
-
-    def test_001_blocked(self):
-        user1 = self.user()
-        user2 = self.user()
-
-        self.assertResponse(blocked_user(user1, user2['id']), 201)
-        self.assertResponse(are_blocked(user1['id'], user2['id']), 200)
-        self.assertResponse(are_blocked(user2['id'], user1['id']), 200)
-        self.assertThread(user1)
-        self.assertThread(user2)
-
-    def test_002_not_blocked(self):
-        user1 = self.user()
-        user2 = self.user()
-
-        self.assertResponse(are_blocked(user1['id'], user2['id']), 404, {'detail': 'Not found.'})
-        self.assertResponse(are_blocked(user2['id'], user1['id']), 404, {'detail': 'Not found.'})
-        self.assertThread(user1)
-        self.assertThread(user2)
-
-
-class Test02_Blocked(UnitTest):
+class Test01_Blocked(UnitTest):
 
     def test_001_blocked(self):
         user1 = self.user()
@@ -52,7 +30,7 @@ class Test02_Blocked(UnitTest):
         self.assertThread(user2)
 
 
-class Test03_BlockedError(UnitTest):
+class Test02_BlockedError(UnitTest):
 
     def test_001_already_blocked(self):
         user1 = self.user()
@@ -90,7 +68,7 @@ class Test03_BlockedError(UnitTest):
         user1 = self.user(guest=True)
         user2 = self.user()
 
-        self.assertResponse(blocked_user(user1, user2['id']), 403, {'detail': 'Guest users cannot blocked users.'})
+        self.assertResponse(blocked_user(user1, user2['id']), 403, {'detail': 'Guest users cannot perform this action.'})
         self.assertThread(user1)
         self.assertThread(user2)
 

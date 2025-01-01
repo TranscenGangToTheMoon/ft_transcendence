@@ -241,7 +241,7 @@ class Test02_FriendRequest(UnitTest):
         user1 = self.user(guest=True)
         user2 = self.user()
 
-        self.assertResponse(friend_requests(user1, user2), 403, {'detail': 'Guest users cannot make friend request.'})
+        self.assertResponse(friend_requests(user1, user2), 403, {'detail': 'Guest users cannot perform this action.'})
 
     def test_015_guest_user_receive_friend_request(self):
         user1 = self.user()
