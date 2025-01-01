@@ -12,7 +12,7 @@ from utils.generate_random import rnstr
 
 
 class UnitTest(unittest.TestCase):
-    def user(self, tests_sse: list[str] = None, username=None, password=None, guest=False):
+    def user(self, tests_sse: list[str] = None, username=None, password=None, guest=False, not_sse=False):
         _new_user = {}
 
         if guest:
@@ -32,7 +32,8 @@ class UnitTest(unittest.TestCase):
         response = self.assertResponse(me(_new_user), 200)
         _new_user['id'] = response['id']
         _new_user['username'] = response['username']
-        self.connect_to_sse(_new_user, tests_sse)
+        if not not_sse:
+            self.connect_to_sse(_new_user, tests_sse)
         return _new_user
 
     def assertResponse(self, response, status_code, json_assertion=None, count=None, get_field=None, get_user=False):
