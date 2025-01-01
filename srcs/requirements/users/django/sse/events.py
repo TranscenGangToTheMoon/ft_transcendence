@@ -135,17 +135,18 @@ lobby_join = Event(Service.LOBBY, EventCode.LOBBY_JOIN, '{username} have joined 
 lobby_leave = Event(Service.LOBBY, EventCode.LOBBY_LEAVE, '{username} have left the lobby.')
 lobby_update = Event(Service.LOBBY, EventCode.LOBBY_UPDATE)
 lobby_update_participant = Event(Service.LOBBY, EventCode.LOBBY_UPDATE_PARTICIPANT)
-lobby_ban = Event(Service.LOBBY, EventCode.LOBBY_BAN, 'You have been baned from the lobby.')
+lobby_banned = Event(Service.LOBBY, EventCode.LOBBY_BANNED, 'You have been banned from this lobby.')
 lobby_destroy = Event(Service.LOBBY, EventCode.LOBBY_DESTROY, 'The lobby has been destroyed.')
 
 tournament_join = Event(Service.TOURNAMENT, EventCode.TOURNAMENT_JOIN, '{username} have joined the tournament.') # todo format
 tournament_leave = Event(Service.TOURNAMENT, EventCode.TOURNAMENT_LEAVE, '{username} have left the tournament.') # todo format
+tournament_banned = Event(Service.TOURNAMENT, EventCode.TOURNAMENT_BANNED, 'You have been banned from this tournament.')
 tournament_start_3 = Event(Service.TOURNAMENT, EventCode.TOURNAMENT_START_3, 'Tournament {name} start in 3 seconds.') # todo format
 tournament_start_20 = Event(Service.TOURNAMENT, EventCode.TOURNAMENT_START_20, 'Tournament {name} start in 20 seconds.') # todo format
 tournament_start_cancel = Event(Service.TOURNAMENT, EventCode.TOURNAMENT_START_CANCEL)
 tournament_seeding = Event(Service.TOURNAMENT, EventCode.TOURNAMENT_SEEDING) # todo send all game (who play against who)
 tournament_match_end = Event(Service.TOURNAMENT, EventCode.TOURNAMENT_MATCH_END, '{winner} win against {looser}.') # todo format
-tournament_finish = Event(Service.TOURNAMENT, EventCode.TOURNAMENT_FINISH, 'The tournament {name} is now over. Well done to {winner}} for his victory!') # todo format
+tournament_finish = Event(Service.TOURNAMENT, EventCode.TOURNAMENT_FINISH, 'The tournament {name} is now over. Well done to {username} for his victory!', Target('/history/tournament/{id}/', display_name='view')) # todo format
 
 
 redis_client = redis.StrictRedis(host='event-queue')

@@ -60,13 +60,13 @@ class Matchmaking:
     lobby = _base_matchmaking + 'lobby/'
     lobby_participant = lobby + '<str:code>/'
     lobby_invite = lobby_participant + f'invite/{_user_id}/'
-    lobby_ban = lobby_participant + f'ban/{_user_id}/'
+    lobby_banned = lobby_participant + f'banned/{_user_id}/'
 
     tournament = _base_matchmaking + 'tournament/'
     tournament_search = tournament + 'search/'
     tournament_participant = tournament + '<str:code>/'
     tournament_invite = tournament_participant + f'invite/{_user_id}/'
-    tournament_ban = tournament_participant + f'ban/{_user_id}/'
+    tournament_banned = tournament_participant + f'ban/{_user_id}/'
 
     tournament_result_match = _base_private_matchmaking + 'tournament/result-match/'
 

@@ -16,13 +16,13 @@ urlpatterns = [
     path(Matchmaking.lobby, lobby_view),
     path(Matchmaking.lobby_participant, lobby_participants_view),
     path(Matchmaking.lobby_invite, lobby_invite_view),
-    path(Matchmaking.lobby_ban, lobby_ban_view),
+    path(Matchmaking.lobby_banned, lobby_ban_view),
 
     path(Matchmaking.tournament, tournament_view),
     path(Matchmaking.tournament_search, tournament_search_view),
     path(Matchmaking.tournament_participant, tournament_participants_view),
     path(Matchmaking.tournament_invite, tournament_invite_view),
-    path(Matchmaking.tournament_ban, tournament_ban_view),
+    path(Matchmaking.tournament_banned, tournament_ban_view),
 
     path(Matchmaking.tournament_result_match, tournament_result_match_view),
 

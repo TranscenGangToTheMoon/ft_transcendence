@@ -4,7 +4,7 @@ import time
 
 from django.db import models
 
-from baning.models import delete_baned
+from baning.models import delete_banned
 from blocking.utils import delete_player_instance
 from matchmaking.create_match import create_tournament_match
 
@@ -67,7 +67,7 @@ class Tournament(models.Model):
         return int(log2(self.size))
 
     def delete(self, using=None, keep_parents=False):
-        delete_baned(self.code)
+        delete_banned(self.code)
         super().delete(using=using, keep_parents=keep_parents)
 
     def __str__(self):

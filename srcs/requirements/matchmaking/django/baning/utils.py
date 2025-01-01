@@ -2,26 +2,27 @@ from django.core.exceptions import PermissionDenied
 from lib_transcendence.sse_events import EventCode, create_sse_event
 from lib_transcendence.exceptions import MessagesException
 
-from baning.models import Baned
+from baning.models import Banned
 from lobby.models import LobbyParticipants
 from tournament.models import TournamentParticipants
 
 
-def is_baned(code: str, user_id: int) -> bool:
+def is_banned(code: str, user_id: int) -> bool:
     try:
-        Baned.objects.get(code=code, baned_user_id=user_id)
+        Banned.objects.get(code=code, banned_user_id=user_id)
         return True
-    except Baned.DoesNotExist:
+    except Banned.DoesNotExist:
         return False
 
 
-def baned(participant: LobbyParticipants | TournamentParticipants):
-    Baned.objects.create(code=participant.place.code, baned_user_id=participant.user_id)
-    if isinstance(participant, LobbyParticipants):
-        ban_code = EventCode.LOBBY_BAN
+def banned(banned_participants: LobbyParticipants | TournamentParticipants, create_ban: bool = True):
+    if create_ban:
+        Banned.objects.create(code=banned_participants.place.code, banned_user_id=banned_participants.user_id)
+    if isinstance(banned_participants, LobbyParticipants):
+        ban_code = EventCode.LOBBY_BANNED
     else:
-        ban_code = EventCode.TOURNAMENT_BAN
-    create_sse_event(participant.user_id, ban_code, kwargs={'username': participant.user_id})
+        ban_code = EventCode.TOURNAMENT_BANNED
+    create_sse_event(banned_participants.user_id, ban_code)
 
 
 def ban_yourself(user_id, ban_user_id):

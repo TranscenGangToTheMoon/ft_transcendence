@@ -2,7 +2,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import NotFound, PermissionDenied
 from lib_transcendence.exceptions import MessagesException, ResourceExists
 
-from baning.utils import is_baned
+from baning.utils import is_banned
 from blocking.utils import are_users_blocked
 from lobby.models import Lobby, LobbyParticipants
 from matchmaking.utils.user import verify_user
@@ -50,7 +50,7 @@ def verify_place(user, model):
     if model.participants.filter(user_id=user['id']).exists():
         raise ResourceExists(MessagesException.ResourceExists.JOIN.format(obj=name.lower()))
 
-    if is_baned(model.code, user['id']) or are_users_blocked(user['id'], get_place_creator()):
+    if is_banned(model.code, user['id']) or are_users_blocked(user['id'], get_place_creator()):
         raise NotFound(MessagesException.NotFound.NOT_FOUND.format(obj=name.title()))
 
     if isinstance(model, Tournament) and model.is_started:

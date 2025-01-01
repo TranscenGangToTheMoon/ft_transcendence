@@ -3,16 +3,23 @@ from rest_framework import generics
 from lib_transcendence.exceptions import MessagesException
 from lib_transcendence.permissions import NotGuest
 
-from baning.utils import ban_yourself, get_participants_for_baning, baned
+from baning.utils import ban_yourself, get_participants_for_baning, banned
 from lobby.serializers import LobbyParticipantsSerializer
 from matchmaking.utils.participant import get_lobby_participant, get_tournament_participant
 from matchmaking.utils.place import get_lobby, get_tournament
 from tournament.serializers import TournamentParticipantsSerializer
 
 
-class LobbyBanView(generics.DestroyAPIView):
-    serializer_class = LobbyParticipantsSerializer
+class BanMixin(generics.DestroyAPIView):
     permission_classes = [NotGuest]
+
+    def perform_destroy(self, instance):
+        banned(instance)
+        super().perform_destroy(instance)
+
+
+class LobbyBanView(BanMixin):
+    serializer_class = LobbyParticipantsSerializer
 
     def get_object(self):
         ban_yourself(self.kwargs['user_id'], self.request.user.id)
@@ -20,14 +27,9 @@ class LobbyBanView(generics.DestroyAPIView):
         get_lobby_participant(lobby, self.request.user.id, True)
         return get_participants_for_baning(lobby, self.kwargs['user_id'])
 
-    def perform_destroy(self, instance):
-        baned(instance)
-        super().perform_destroy(instance)
 
-
-class TournamentBanView(generics.DestroyAPIView):
+class TournamentBanView(BanMixin):
     serializer_class = TournamentParticipantsSerializer
-    permission_classes = [NotGuest]
 
     def get_object(self):
         ban_yourself(self.kwargs['user_id'], self.request.user.id)
