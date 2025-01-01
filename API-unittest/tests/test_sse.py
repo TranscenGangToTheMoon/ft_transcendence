@@ -22,7 +22,7 @@ class Test01_SSE(UnitTest):
         self.assertThread(user1)
 
     def test_003_connect_twice(self):
-        user1 = self.user()
+        user1 = self.user(sse=False)
         user2 = self.user()
         user3 = self.user()
 
@@ -32,9 +32,9 @@ class Test01_SSE(UnitTest):
         self.connect_to_sse(user1_bis, ['receive-friend-request', 'receive-friend-request'])
 
         self.assertResponse(friend_requests(user2, user1), 201)
-        self.assertThread(user1)
+        self.assertThread(user1, user2)
         self.assertResponse(friend_requests(user3, user1), 201)
-        self.assertThread(user1_bis)
+        self.assertThread(user1_bis, user3)
 
     def test_004_invalid_token(self):
         thread1 = self.connect_to_sse({'token': 'invalid_token'}, status_code=401)
