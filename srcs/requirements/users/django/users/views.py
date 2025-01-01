@@ -58,7 +58,7 @@ class UsersMeView(generics.RetrieveUpdateDestroyAPIView):
         return super().destroy(request, *args, **kwargs)
 
 
-class RetrieveUserView(generics.RetrieveAPIView):
+class RetrieveUserView(generics.RetrieveAPIView): # todo delete
     queryset = Users.objects.all()
     serializer_class = UsersSerializer
 

@@ -34,11 +34,11 @@ urlpatterns = [
     path(UsersManagement.manage_user, manage_user_view),
 ]
 
-# todo 1. fix permision denied guest
-# todo 2. test when connected to SSE and rename user and make requestto users service
-# todo 3. fix unit test
-
 # todo 1. make sse tournament events
+#  make start
+#  make seeding tournament
+#  make index
+#  make finish
 
 # todo CHAT
 #   - create chat when lobby is created
@@ -48,17 +48,11 @@ urlpatterns = [
 #   - send chat_id in lobby
 #   - send chat_id in tournament
 
-# todo handle abandon when finish game
-
-# todo game -> {type: game, 'code')
-# todo event -> FINISH GAME (args, abandon)
-# todo chat -> {type: notification, 'message'}
-# todo lobby -> {type: event, 'tournoi', 'id', 'status'}
-# todo lobby -> connect chat
-# todo tournoi -> connect chat
+# todo Game
+#  make endpoint for finish game (handle abandon)
+#  make endpoint for update score
 
 
-# todo handle friends fields
 # todo make endpoint for user stats, xp, trophies (when match ended, or when tournament ended)
 # - pas de stat (custom_game)
 # - stat tournoi gagne
@@ -92,16 +86,9 @@ urlpatterns = [
 
 
 # todo fix github issue
-# todo make seeding tournament
 # todo ajouter password field pour change password
-
-
-# ----------------------
 # todo handle download all data
 
-
-# --- poubell a idee ---
-# todo handle nb spectact game
 
 # --- before push ---
 # todo type all python code (make variable)
