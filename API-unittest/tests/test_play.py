@@ -22,32 +22,36 @@ class Test01_Play(UnitTest):
         user1 = self.user()
 
         self.assertResponse(play(user1, game_mode='ranked'), 201)
+        self.assertThread(user1)
 
 
 class Test02_PlayError(UnitTest):
 
     def test_001_already_in_game(self):
-        user1 = self.user()
-        user2 = self.user()
+        user1 = self.user(['game-start'])
+        user2 = self.user(['game-start'])
 
         self.assertResponse(create_game(user1, user2), 201)
         self.assertResponse(play(user1), 409, {'detail': 'You are already in a game.'})
+        self.assertThread(user1, user2)
 
     def test_002_already_in_tournament(self):
-        user1 = self.user()
+        user1 = self.user(['game-start'])
+        users = [self.user(['game-start']) for _ in range(3)]
 
         code = self.assertResponse(create_tournament(user1), 201, get_field='code')
 
-        for i in range(3):
-            user_tmp = self.user()
+        for user_tmp in users:
             self.assertResponse(join_tournament(user_tmp, code), 201)
 
         self.assertResponse(play(user1), 409, {'detail': 'You are already in a tournament.'})
+        self.assertThread(user1, *users)
 
     def test_003_guest_cannot_play_ranked(self):
         user1 = self.user(guest=True)
 
         self.assertResponse(play(user1, 'ranked'), 403, {'detail': 'Guest users cannot perform this action.'})
+        self.assertThread(user1)
 
     def test_004_user_in_lobby(self):
         user1 = self.user()
@@ -57,6 +61,7 @@ class Test02_PlayError(UnitTest):
         self.assertResponse(play(user1), 201)
         self.assertResponse(create_lobby(user1, method='GET'), 404, {'detail': 'You do not belong to any lobby.'})
         self.assertResponse(join_lobby(user1, code, 'GET'), 403, {'detail': 'You do not belong to this lobby.'})
+        self.assertThread(user1)
 
     def test_005_user_in_tournament(self):
         user1 = self.user()
@@ -66,6 +71,7 @@ class Test02_PlayError(UnitTest):
         self.assertResponse(play(user1), 201)
         self.assertResponse(create_tournament(user1, method='GET'), 404, {'detail': 'You do not belong to any tournament.'})
         self.assertResponse(join_tournament(user1, code, 'GET'), 403, {'detail': 'You do not belong to this tournament.'})
+        self.assertThread(user1)
 
     def test_006_delete(self):
         while True:
@@ -76,16 +82,19 @@ class Test02_PlayError(UnitTest):
             response = is_in_game(user1)
             if response.status_code == 404:
                 break
+            self.assertThread(user1)
 
         self.assertResponse(play(user1, method='DELETE'), 204)
+        self.assertThread(user1)
 
     def test_006_delete_not_play(self):
         user1 = self.user()
 
         self.assertResponse(play(user1, method='DELETE'), 404, {'detail': 'You are not currently playing.'})
+        self.assertThread(user1)
 
     def test_007_not_connected_sse(self):
-        user1 = self.user()
+        user1 = self.user(sse=False)
 
         self.assertResponse(play(user1), 401, {'code': 'sse_connection_required', 'detail': 'You need to be connected to SSE to access this resource.'})
 
