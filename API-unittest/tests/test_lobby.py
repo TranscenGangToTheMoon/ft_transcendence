@@ -147,7 +147,7 @@ class Test02_ErrorJoinLobby(UnitTest):
         self.assertThread(user1, user2)
 
     def test_011_join_lobby_without_sse(self):
-        user1 = self.user(not_sse=True)
+        user1 = self.user(sse=True)
         user2 = self.user()
 
         self.assertResponse(create_lobby(user1), 401, {'code': 'sse_connection_required', 'detail': 'You need to be connected to SSE to access this resource.'})

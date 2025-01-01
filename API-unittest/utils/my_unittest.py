@@ -12,7 +12,7 @@ from utils.generate_random import rnstr
 
 
 class UnitTest(unittest.TestCase):
-    def user(self, tests_sse: list[str] = None, username=None, password=None, guest=False, not_sse=False):
+    def user(self, tests_sse: list[str] = None, username=None, password=None, guest=False, sse=True):
         _new_user = {}
 
         if guest:
@@ -32,7 +32,7 @@ class UnitTest(unittest.TestCase):
         response = self.assertResponse(me(_new_user), 200)
         _new_user['id'] = response['id']
         _new_user['username'] = response['username']
-        if not not_sse:
+        if not sse:
             self.connect_to_sse(_new_user, tests_sse)
         return _new_user
 
@@ -85,23 +85,25 @@ class UnitTest(unittest.TestCase):
                     for line in response.iter_text():
                         if user['thread_finish']:
                             break
-                        event, data = re.findall(r'event: ([a-z0-9\-]+)\ndata: (.+)\n\n', line)[0]
-                        if event == 'delete-user':
-                            break
-                        if event == 'ping':
-                            continue
-                        data = json.loads(data)
-                        print(f"SSE RECEIVED {user['username']}: {data}", flush=True)
-                        user['thread_assertion'].append(data['event_code'])
-                        user['thread_result'] += 1
+                        for event, data in re.findall(r'event: ([a-z0-9\-]+)\ndata: (.+)\n\n', line):
+                            if event == 'delete-user':
+                                break
+                            if event == 'ping':
+                                continue
+                            data = json.loads(data)
+                            print(f"SSE RECEIVED {user['username']}: {data}", flush=True)
+                            user['thread_assertion'].append(data['event_code'])
+                            user['thread_result'] += 1
         print(f"SSE DISCONNECTING {user['username']}...\n", flush=True)
 
     def assertThread(self, *users):
         time.sleep(0.1)
         for user in users:
             user['thread_finish'] = True
+        for user in users:
             user['thread'].join()
             if user['thread_tests'] is None:
                 user['thread_tests'] = []
+            print('testing', user['username'], flush=True)
             self.assertListEqual(user['thread_tests'], user['thread_assertion'])
             self.assertEqual(user['expected_thread_result'], user['thread_result'])
