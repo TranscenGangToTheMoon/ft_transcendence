@@ -16,8 +16,7 @@ class Test01_Play(UnitTest):
 
         self.assertResponse(play(user1), 201)
         self.assertResponse(play(user2), 201)
-        self.assertThread(user1)
-        self.assertThread(user2)
+        self.assertThread(user1, user2)
 
     def test_002_play_ranked(self):
         user1 = self.user()

@@ -15,8 +15,7 @@ class Test01_Blocked(UnitTest):
         for user_tmp in users:
             self.assertResponse(blocked_user(user1, user_tmp['id']), 201)
         self.assertResponse(blocked_user(user1, method='GET'), 200, count=n)
-        [self.assertThread(user_tmp) for user_tmp in users]
-        self.assertThread(user1)
+        self.assertThread(user1, *users)
 
     def test_002_unblocked(self):
         user1 = self.user()
@@ -26,8 +25,7 @@ class Test01_Blocked(UnitTest):
         self.assertResponse(blocked_user(user1, method='GET'), 200, count=1)
         self.assertResponse(unblocked_user(user1, block_id), 204)
         self.assertResponse(blocked_user(user1, method='GET'), 200, count=0)
-        self.assertThread(user1)
-        self.assertThread(user2)
+        self.assertThread(user1, user2)
 
 
 class Test02_BlockedError(UnitTest):
@@ -38,8 +36,7 @@ class Test02_BlockedError(UnitTest):
 
         self.assertResponse(blocked_user(user1, user2['id']), 201)
         self.assertResponse(blocked_user(user1, user2['id']), 409, {'detail': 'You are already blocked this user.'})
-        self.assertThread(user1)
-        self.assertThread(user2)
+        self.assertThread(user1, user2)
 
     def test_002_blocked_not_existing_user(self):
         user1 = self.user()
@@ -53,24 +50,21 @@ class Test02_BlockedError(UnitTest):
 
         self.assertResponse(blocked_user(user1, user2['id']), 201)
         self.assertResponse(blocked_user(user2, user1['id']), 404, {'detail': 'User not found.'})
-        self.assertThread(user1)
-        self.assertThread(user2)
+        self.assertThread(user1, user2)
 
     def test_004_blocked_guest(self):
         user1 = self.user()
         user2 = self.user(guest=True)
 
         self.assertResponse(blocked_user(user1, user2['id']), 404, {'detail': 'User not found.'})
-        self.assertThread(user1)
-        self.assertThread(user2)
+        self.assertThread(user1, user2)
 
     def test_005_blocked_by_guest(self):
         user1 = self.user(guest=True)
         user2 = self.user()
 
         self.assertResponse(blocked_user(user1, user2['id']), 403, {'detail': 'Guest users cannot perform this action.'})
-        self.assertThread(user1)
-        self.assertThread(user2)
+        self.assertThread(user1, user2)
 
     def test_006_unblock_doest_not_exist(self):
         user1 = self.user()
@@ -85,9 +79,7 @@ class Test02_BlockedError(UnitTest):
 
         block_id = self.assertResponse(blocked_user(user1, user2['id']), 201, get_field=True)
         self.assertResponse(unblocked_user(user3, block_id), 403, {'detail': 'This blocked user entry does not belong to you.'})
-        self.assertThread(user1)
-        self.assertThread(user2)
-        self.assertThread(user3)
+        self.assertThread(user1, user2, user3)
 
 
 if __name__ == '__main__':

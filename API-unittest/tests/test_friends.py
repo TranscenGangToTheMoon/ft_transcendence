@@ -14,8 +14,7 @@ class Test01_Friend(UnitTest):
         user2 = self.user(['receive-friend-request'])
 
         self.assertFriendResponse(create_friendship(user1, user2))
-        self.assertThread(user1)
-        self.assertThread(user2)
+        self.assertThread(user1, user2)
 
     def test_002_friend_without_friend_request(self):
         user1 = self.user()
@@ -192,8 +191,7 @@ class Test02_FriendRequest(UnitTest):
         self.assertResponse(me(user4, 'DELETE', password=True), 204)
         self.assertResponse(friend_request(friend_request_id, user1, 'GET'), 404, {'detail': 'Friend request not found.'})
 
-        self.assertThread(user1)
-        self.assertThread(user2)
+        self.assertThread(user1, user2)
         self.assertThread(user3)
         user4['thread'].join()
 

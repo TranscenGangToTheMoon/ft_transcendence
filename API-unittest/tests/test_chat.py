@@ -16,8 +16,7 @@ class Test01_CreateChat(UnitTest):
 
         self.assertResponse(accept_chat(user2), 200)
         self.assertResponse(create_chat(user1, user2['username']), 201)
-        self.assertThread(user1)
-        self.assertThread(user2)
+        self.assertThread(user1, user2)
 
     def test_002_accept_chat_from_friend_only(self):
         user1 = self.user()
@@ -25,8 +24,7 @@ class Test01_CreateChat(UnitTest):
 
         self.assertFriendResponse(create_friendship(user1, user2))
         self.assertResponse(create_chat(user1, user2['username']), 201)
-        self.assertThread(user1)
-        self.assertThread(user2)
+        self.assertThread(user1, user2)
 
 
 class Test02_CreateChatError(UnitTest):
@@ -43,8 +41,7 @@ class Test02_CreateChatError(UnitTest):
 
         self.assertResponse(accept_chat(user2), 200)
         self.assertResponse(create_chat(user1, data={'username': user2['username'], 'type': 'caca'}), 400, {'type': ["Chat type must be 'private_message', 'lobby', 'tournament' or 'custom_game'."]})
-        self.assertThread(user1)
-        self.assertThread(user2)
+        self.assertThread(user1, user2)
 
     def test_003_type_not_allowed(self):
         user1 = self.user()
@@ -52,16 +49,14 @@ class Test02_CreateChatError(UnitTest):
 
         self.assertResponse(accept_chat(user2), 200)
         self.assertResponse(create_chat(user1, data={'username': user2['username'], 'type': 'tournament'}), 403, {'detail': 'You can only create private messages.'})
-        self.assertThread(user1)
-        self.assertThread(user2)
+        self.assertThread(user1, user2)
 
     def test_004_does_not_accept_chat(self):
         user1 = self.user()
         user2 = self.user()
 
         self.assertResponse(create_chat(user1, user2['username']), 403, {'detail': 'This user does not accept new chat.'})
-        self.assertThread(user1)
-        self.assertThread(user2)
+        self.assertThread(user1, user2)
 
     def test_005_blocked_by_user(self):
         user1 = self.user()
@@ -69,8 +64,7 @@ class Test02_CreateChatError(UnitTest):
 
         self.assertResponse(blocked_user(user1, user2['id']), 201)
         self.assertResponse(create_chat(user2, user1['username']), 404, {'detail': 'User not found.'})
-        self.assertThread(user1)
-        self.assertThread(user2)
+        self.assertThread(user1, user2)
 
     def test_006_chat_with_myself(self):
         user1 = self.user()
@@ -85,8 +79,7 @@ class Test02_CreateChatError(UnitTest):
         self.assertResponse(accept_chat(user2, 'none'), 200)
         self.assertFriendResponse(create_friendship(user1, user2))
         self.assertResponse(create_chat(user1, user2['username']), 403, {'detail': 'This user does not accept new chat.'})
-        self.assertThread(user1)
-        self.assertThread(user2)
+        self.assertThread(user1, user2)
 
     def test_008_already_chat_with(self):
         user1 = self.user()
@@ -95,8 +88,7 @@ class Test02_CreateChatError(UnitTest):
         self.assertFriendResponse(create_friendship(user1, user2))
         self.assertResponse(create_chat(user1, user2['username']), 201)
         self.assertResponse(create_chat(user1, user2['username']), 409, {'detail': 'You are already chat with this user.'})
-        self.assertThread(user1)
-        self.assertThread(user2)
+        self.assertThread(user1, user2)
 
     def test_009_blocked_user_trying_request(self):
         user1 = self.user()
@@ -104,8 +96,7 @@ class Test02_CreateChatError(UnitTest):
 
         self.assertResponse(blocked_user(user1, user2['id']), 201)
         self.assertResponse(friend_requests(user1, user2), 403, {'detail': 'You blocked this user.'})
-        self.assertThread(user1)
-        self.assertThread(user2)
+        self.assertThread(user1, user2)
 
     def test_010_chat_with_guest(self):
         user1 = self.user()
@@ -119,8 +110,7 @@ class Test02_CreateChatError(UnitTest):
 
         self.assertResponse(accept_chat(user1, 'none'), 200)
         self.assertResponse(create_chat(user2, user1['username']), 403, {'detail': 'Guest users cannot perform this action.'})
-        self.assertThread(user1)
-        self.assertThread(user2)
+        self.assertThread(user1, user2)
 
 
 class Test03_GetChat(UnitTest):
@@ -177,8 +167,7 @@ class Test03_GetChat(UnitTest):
 
         self.assertResponse(request_chat_id(user1, chat_id), 403, {'detail': 'You do not belong to this chat.'})
         self.assertResponse(request_chat_id(user2, chat_id), 403, {'detail': 'You do not belong to this chat.'})
-        self.assertThread(user1)
-        self.assertThread(user2)
+        self.assertThread(user1, user2)
 
     def test_005_get_chat_not_belong(self):
         user1 = self.user()
@@ -203,8 +192,7 @@ class Test03_GetChat(UnitTest):
         self.assertResponse(create_chat(user2, method='GET'), 200, count=1)
         self.assertResponse(request_chat_id(user1, chat_id), 200)
         self.assertResponse(create_chat(user1, method='GET'), 200, count=1)
-        self.assertThread(user1)
-        self.assertThread(user2)
+        self.assertThread(user1, user2)
 
     def test_007_delete_chat(self):
         user1 = self.user()
@@ -215,8 +203,7 @@ class Test03_GetChat(UnitTest):
 
         self.assertResponse(request_chat_id(user1, chat_id, method='DELETE'), 204)
         self.assertResponse(request_chat_id(user2, chat_id), 200)
-        self.assertThread(user1)
-        self.assertThread(user2)
+        self.assertThread(user1, user2)
 
     def test_008_search_chats_in_url(self):
         user1 = self.user()
@@ -306,8 +293,7 @@ class Test04_Messages(UnitTest):
         self.assertResponse(unblocked_user(user1, block_id), 204)
         self.assertResponse(create_message(user1, chat_id, 'thank for unblocking me ;))'), 201)
         self.assertResponse(request_chat_id(user1, chat_id), 200)
-        self.assertThread(user1)
-        self.assertThread(user2)
+        self.assertThread(user1, user2)
 
     def test_006_do_not_view_chat(self):
         user1 = self.user()
@@ -326,8 +312,7 @@ class Test04_Messages(UnitTest):
 
         self.assertResponse(create_chat(user1, method='GET'), 200, count=1)
         self.assertResponse(create_message(user1, chat_id, 'Fine and u?'), 201)
-        self.assertThread(user1)
-        self.assertThread(user2)
+        self.assertThread(user1, user2)
 
     def test_007_get_chat_sort_by_last_update(self):
         user1 = self.user()
@@ -363,8 +348,7 @@ class Test04_Messages(UnitTest):
         self.assertEqual(2, self.assertResponse(request_chat_id(user2, chat_id), 200, get_field='unread_messages'))
         self.assertResponse(create_message(user2, chat_id, 'did you receive new notification ?'), 201)
         self.assertEqual(1, self.assertResponse(request_chat_id(user1, chat_id), 200, get_field='unread_messages'))
-        self.assertThread(user1)
-        self.assertThread(user2)
+        self.assertThread(user1, user2)
 
     def test_009_chat_notifications(self):
         user1 = self.user()
