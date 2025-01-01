@@ -46,7 +46,7 @@ class EventCode(Enum):
 def create_sse_event(
         users: list[int] | int,
         event_code: EventCode,
-        data: dict,
+        data: dict | None = None,
         kwargs: dict | None = None,
 ):
     sse_data = {
