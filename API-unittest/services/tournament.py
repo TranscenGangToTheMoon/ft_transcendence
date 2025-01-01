@@ -42,7 +42,7 @@ def search_tournament(user, query, data=None):
 
 def ban_user(user, user_ban, code):
     return make_request(
-        endpoint=f'play/tournament/{code}/ban/{user_ban["id"]}/',
+        endpoint=f'play/tournament/{code}/banned/{user_ban["id"]}/',
         token=user['token'],
         method='DELETE',
     )
