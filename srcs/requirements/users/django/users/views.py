@@ -2,6 +2,7 @@ from rest_framework import generics
 from rest_framework.exceptions import NotAuthenticated, NotFound, APIException
 from lib_transcendence.exceptions import MessagesException
 from lib_transcendence import endpoints
+from lib_transcendence.permissions import GuestCannotDestroy
 from lib_transcendence.services import request_matchmaking, request_chat
 from lib_transcendence.sse_events import EventCode
 
