@@ -41,9 +41,7 @@ def validate_teams(value):
 
 
 class MatchSerializer(serializers.ModelSerializer):
-    teams = serializers.JSONField(write_only=True, validators=[validate_teams])
-    team_a = serializers.SerializerMethodField(read_only=True)
-    team_b = serializers.SerializerMethodField(read_only=True)
+    teams = serializers.JSONField(validators=[validate_teams])
 
     class Meta:
         model = Matches
@@ -51,19 +49,19 @@ class MatchSerializer(serializers.ModelSerializer):
         read_only_fields = [
             'id',
             'created_at',
-            'team_a',
-            'team_b',
         ]
 
     @staticmethod
     def validate_game_mode(value):
         return GameMode.validate(value)
 
-    def get_team_a(self, value):
-        return retrieve_users(self.validated_data['teams'][0])
-
-    def get_team_b(self, value):
-        return retrieve_users(self.validated_data['teams'][1])
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['teams'] = {
+            'team_a': retrieve_users(list(instance.teams.first().players.all().values_list('user_id', flat=True))),
+            'team_b': retrieve_users(list(instance.teams.last().players.all().values_list('user_id', flat=True))),
+        }
+        return representation
 
     def create(self, validated_data):
         if validated_data['game_mode'] == GameMode.tournament:
