@@ -36,8 +36,8 @@ class Test02_PlayError(UnitTest):
         self.assertThread(user1, user2)
 
     def test_002_already_in_tournament(self):
-        user1 = self.user(['game-start'])
-        users = [self.user(['game-start']) for _ in range(3)]
+        user1 = self.user(['tournament-join', 'tournament-join', 'tournament-join', 'game-start'])
+        users = [self.user(['tournament-join'] * (2 - i)) for i in range(3)]
 
         code = self.assertResponse(create_tournament(user1), 201, get_field='code')
 
@@ -54,7 +54,7 @@ class Test02_PlayError(UnitTest):
         self.assertThread(user1)
 
     def test_004_user_in_lobby(self):
-        user1 = self.user()
+        user1 = self.user(['game-start'])
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
 

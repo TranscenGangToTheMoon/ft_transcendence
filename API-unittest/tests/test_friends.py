@@ -291,7 +291,7 @@ class Test02_FriendRequest(UnitTest):
         self.assertThread(user1)
 
     def test_019_friend_request_offline_then_connect_when_cancel_friend_request(self):
-        user1 = self.user(sse=True)
+        user1 = self.user(sse=False)
         user2 = self.user()
 
         friend_request_id = self.assertResponse(friend_requests(user2, user1), 201, get_field=True)

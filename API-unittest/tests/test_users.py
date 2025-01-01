@@ -133,8 +133,8 @@ class Test03_DeleteUser(UnitTest):
         self.assertThread(user1, user2, user3)
 
     def test_008_user_in_start_tournament(self):
-        user1 = self.user()
-        user2 = self.user()
+        user1 = self.user(['tournament-join'])
+        user2 = self.user(['tournament-leave'])
         user3 = self.user()
         name = rnstr()
 
