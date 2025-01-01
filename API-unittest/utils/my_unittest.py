@@ -73,6 +73,8 @@ class UnitTest(unittest.TestCase):
         user['thread_tests'] = tests
         user['thread_assertion'] = []
         user['thread_finish'] = False
+        if 'username' not in user:
+            user['username'] = 'unknown'
         print(f"SSE CONNECTING {user['username']}...\n", flush=True)
         with httpx.Client(verify=False) as client:
             headers = {
