@@ -1,4 +1,3 @@
-import time
 import unittest
 
 from services.blocked import blocked_user, unblocked_user
@@ -98,9 +97,9 @@ class Test02_ErrorJoinLobby(UnitTest):
         self.assertResponse(join_lobby(user2, code), 404, {'detail': 'Lobby not found.'})
         self.assertThread(user1, user2)
 
-    def test_008_blocked_user_ban_user(self):
+    def test_008_blocked_user(self):
         user1 = self.user(['lobby-join', 'lobby-leave'])
-        user2 = self.user()
+        user2 = self.user(['lobby-banned'])
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
 
@@ -147,7 +146,7 @@ class Test02_ErrorJoinLobby(UnitTest):
         self.assertThread(user1, user2)
 
     def test_011_join_lobby_without_sse(self):
-        user1 = self.user(sse=True)
+        user1 = self.user(sse=False)
         user2 = self.user()
 
         self.assertResponse(create_lobby(user1), 401, {'code': 'sse_connection_required', 'detail': 'You need to be connected to SSE to access this resource.'})
@@ -160,7 +159,7 @@ class Test03_BanLobby(UnitTest):
 
     def test_001_ban_lobby(self):
         user1 = self.user(['lobby-join', 'lobby-leave'])
-        user2 = self.user(['lobby-ban'])
+        user2 = self.user(['lobby-banned'])
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
 
@@ -178,16 +177,16 @@ class Test03_BanLobby(UnitTest):
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
 
-        self.assertResponse(ban_user(user1, user2, code), 403, {'detail': 'This user does not belong to this lobby.'})
+        self.assertResponse(ban_user(user1, user2, code), 404, {'detail': 'This user does not belong to this lobby.'})
         self.assertThread(user1, user2)
 
-    def test_003_user_baned_not_join_lobby(self):
+    def test_003_user_banned_not_join_lobby(self):
         user1 = self.user()
         user2 = self.user()
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
 
-        self.assertResponse(ban_user(user1, user2, code), 403, {'detail': 'This user does not belong to this lobby.'})
+        self.assertResponse(ban_user(user1, user2, code), 404, {'detail': 'This user does not belong to this lobby.'})
         self.assertThread(user1, user2)
 
     def test_004_invalid_lobby(self):

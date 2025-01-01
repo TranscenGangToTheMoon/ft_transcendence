@@ -35,9 +35,9 @@ def ban_user(user, user_ban, code, service: Literal['lobby', 'tournament'] = 'lo
     )
 
 
-def invite_user(user, user_invite, code, service: Literal['lobby', 'tournament'] = 'lobby'):
+def invite_user(user, user_invite, code):
     return make_request(
-        endpoint=f'play/{service}/{code}/invite/{user_invite["id"]}/',
+        endpoint=f'play/lobby/{code}/invite/{user_invite["id"]}/',
         token=user['token'],
         method='POST',
     )
