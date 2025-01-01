@@ -59,11 +59,14 @@ def create_guest():
 
 
 def login(username=None, password=None, data=None):
-    if data is None:
-        data = {
-            'username': username,
-            'password': password
-        }
+    if username is None:
+        username = data['username']
+    if password is None:
+        password = data['password']
+    data = {
+        'username': username,
+        'password': password
+    }
     return make_request(
         endpoint='auth/login/',
         method='POST',
