@@ -1,10 +1,16 @@
+from datetime import datetime, timezone
+from typing import Literal
+
+from lib_transcendence import endpoints
 from lib_transcendence.auth import get_auth_user
 from lib_transcendence.exceptions import MessagesException
 from lib_transcendence.generate import generate_code
+from lib_transcendence.services import request_game
+from lib_transcendence.sse_events import create_sse_event, EventCode
 from rest_framework import serializers
-from rest_framework.exceptions import PermissionDenied
 
 from blocking.utils import create_player_instance
+from matchmaking.create_match import create_tournament_match
 from matchmaking.utils.participant import get_participants
 from matchmaking.utils.place import get_tournament, verify_place
 from matchmaking.utils.user import verify_user
