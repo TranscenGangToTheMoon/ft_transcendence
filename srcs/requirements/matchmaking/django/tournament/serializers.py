@@ -109,15 +109,7 @@ class TournamentParticipantsSerializer(serializers.ModelSerializer):
             validated_data['creator'] = True
         validated_data['user_id'] = user['id']
         validated_data['tournament'] = tournament
-        result = super().create(validated_data)
-        # todo websocket: send to tournament chat that user 'xxx' join team
-
-        if tournament.size == tournament.participants.count():
-            tournament.start()
-        # if tournament.start_at is None and int(tournament.size * (80 / 100)) < tournament.participants.count(): todo make
-        #     Thread(target=tournament.start_timer).start()
-
-        return result
+        return super().create(validated_data)
 
 
 class TournamentSearchSerializer(serializers.ModelSerializer):
