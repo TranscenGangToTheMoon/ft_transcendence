@@ -1,5 +1,6 @@
 from lib_transcendence.game import GameMode
 from lib_transcendence.exceptions import MessagesException
+from lib_transcendence.permissions import GuestCannotCreate
 from lib_transcendence.serializer import SerializerAuthContext
 from lib_transcendence.sse_events import EventCode
 from rest_framework import generics, status
@@ -14,8 +15,8 @@ from matchmaking.utils.sse import send_sse_event
 
 
 class LobbyView(SerializerAuthContext, generics.CreateAPIView, generics.RetrieveUpdateAPIView):
-    queryset = Lobby.objects.all()
     serializer_class = LobbySerializer
+    permission_classes = [GuestCannotCreate]
 
     def get_object(self):
         participant = get_lobby_participant(None, self.request.user.id, self.request.method != 'GET', True)

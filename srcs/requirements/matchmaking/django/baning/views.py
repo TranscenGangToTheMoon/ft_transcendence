@@ -1,6 +1,7 @@
 from django.core.exceptions import PermissionDenied
 from rest_framework import generics
 from lib_transcendence.exceptions import MessagesException
+from lib_transcendence.permissions import NotGuest
 
 from baning.utils import ban_yourself, get_participants_for_baning, baned
 from lobby.serializers import LobbyParticipantsSerializer
@@ -11,6 +12,7 @@ from tournament.serializers import TournamentParticipantsSerializer
 
 class LobbyBanView(generics.DestroyAPIView):
     serializer_class = LobbyParticipantsSerializer
+    permission_classes = [NotGuest]
 
     def get_object(self):
         ban_yourself(self.kwargs['user_id'], self.request.user.id)
@@ -25,6 +27,7 @@ class LobbyBanView(generics.DestroyAPIView):
 
 class TournamentBanView(generics.DestroyAPIView):
     serializer_class = TournamentParticipantsSerializer
+    permission_classes = [NotGuest]
 
     def get_object(self):
         ban_yourself(self.kwargs['user_id'], self.request.user.id)

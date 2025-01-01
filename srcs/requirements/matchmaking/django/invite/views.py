@@ -5,6 +5,7 @@ from lib_transcendence.game import GameMode
 from lib_transcendence.sse_events import create_sse_event, EventCode
 from rest_framework import generics, status
 from lib_transcendence.exceptions import MessagesException
+from lib_transcendence.permissions import NotGuest
 from rest_framework.response import Response
 
 from invite.utils import invite_yourself, validate_participants_for_inviting
@@ -15,6 +16,8 @@ from tournament.models import Tournament, TournamentParticipants
 
 
 class InviteMixin(generics.CreateAPIView):
+    permission_classes = [NotGuest]
+
     place: ModelBase
     participant: ModelBase
 

@@ -1,3 +1,4 @@
+from lib_transcendence.permissions import NotGuest
 from lib_transcendence.sse_events import EventCode
 from lib_transcendence.exceptions import MessagesException
 from rest_framework import generics
@@ -11,6 +12,7 @@ from sse.events import publish_event
 class FriendsMixin(generics.GenericAPIView):
     queryset = Friends.objects.all()
     serializer_class = FriendsSerializer
+    permission_classes = [NotGuest]
 
 
 class FriendsView(generics.ListAPIView, FriendsMixin):

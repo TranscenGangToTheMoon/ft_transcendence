@@ -14,6 +14,7 @@ from users.serializers import UsersSerializer, UsersMeSerializer, ManageUserSeri
 
 class UsersMeView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = UsersMeSerializer
+    permission_classes = [GuestCannotDestroy]
 
     def get_object(self):
         try:

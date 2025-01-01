@@ -1,5 +1,6 @@
 from lib_transcendence.game import GameMode
 from lib_transcendence.exceptions import MessagesException
+from lib_transcendence.permissions import NotGuest
 from rest_framework import generics
 from rest_framework.exceptions import NotFound
 
@@ -28,6 +29,8 @@ class DuelView(PlayMixin):
 
 
 class RankedView(PlayMixin):
+    permission_classes = [NotGuest]
+
     def create(self, request, *args, **kwargs):
         request.data['game_mode'] = GameMode.ranked
         return super().create(request, *args, **kwargs)

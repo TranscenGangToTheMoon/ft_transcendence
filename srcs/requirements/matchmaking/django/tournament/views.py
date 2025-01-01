@@ -3,6 +3,7 @@ from typing import Literal
 
 from django.db.models import Q
 from lib_transcendence.exceptions import MessagesException
+from lib_transcendence.permissions import GuestCannotCreate
 from lib_transcendence.serializer import SerializerAuthContext
 from lib_transcendence.services import request_game
 from lib_transcendence import endpoints
@@ -23,6 +24,7 @@ from tournament.serializers import TournamentSerializer, TournamentStageSerializ
 
 class TournamentView(generics.CreateAPIView, generics.RetrieveAPIView):
     serializer_class = TournamentSerializer
+    permission_classes = [GuestCannotCreate]
 
     def get_object(self):
         try:
