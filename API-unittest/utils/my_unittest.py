@@ -93,12 +93,12 @@ class UnitTest(unittest.TestCase):
                         print(f"SSE RECEIVED {user['username']}: {data}", flush=True)
                         user['thread_assertion'].append(data['event_code'])
                         user['thread_result'] += 1
+        print(f"SSE DISCONNECTING {user['username']}...\n", flush=True)
 
     def assertThread(self, *users):
         for user in users:
             user['thread_finish'] = True
             user['thread'].join()
-            print(f"SSE DISCONNECTING {user['username']}...\n", flush=True)
             if user['thread_tests'] is None:
                 user['thread_tests'] = []
             self.assertListEqual(user['thread_tests'], user['thread_assertion'])
