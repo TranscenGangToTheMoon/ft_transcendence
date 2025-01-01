@@ -121,7 +121,7 @@ class Test02_Guest(UnitTest):
     def test_006_register_guest_try_play_ranked(self):
         user1 = self.user(guest=True)
 
-        self.assertResponse(play(user1, 'ranked'), 403, {'detail': 'Guest users cannot play ranked games.'})
+        self.assertResponse(play(user1, 'ranked'), 403, {'detail': 'Guest users cannot perform this action.'})
         user = self.assertResponse(register_guest(guest=user1), 200, get_user=True)
         self.assertResponse(play(user, 'ranked'), 201)
         self.assertThread(user1)
@@ -131,8 +131,7 @@ class Test02_Guest(UnitTest):
         user2 = self.user(guest=True)
 
         self.assertResponse(register_guest(username=user1['username'], guest=user2), 400)
-        self.assertThread(user1)
-        self.assertThread(user2)
+        self.assertThread(user1, user2)
 
 
 class Test03_Login(UnitTest):
