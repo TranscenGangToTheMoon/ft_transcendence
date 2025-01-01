@@ -78,9 +78,6 @@ class LobbySerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         user = get_auth_user(request)
 
-        if user['is_guest']:
-            raise PermissionDenied(MessagesException.PermissionDenied.GUEST_CANNOT_CREATE_LOBBY)
-
         verify_user(user['id'])
 
         validated_data['code'] = generate_code(Lobby)

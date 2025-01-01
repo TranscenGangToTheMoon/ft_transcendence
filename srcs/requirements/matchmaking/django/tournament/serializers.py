@@ -52,9 +52,6 @@ class TournamentSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         user = get_auth_user(request)
 
-        if user['is_guest']:
-            raise PermissionDenied(MessagesException.PermissionDenied.GUEST_CANNOT_CREATE_TOURNAMENT)
-
         verify_user(user['id'], True)
 
         validated_data['code'] = generate_code(Tournament)
