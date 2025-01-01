@@ -4,9 +4,11 @@ from utils.generate_random import rnstr
 from utils.request import make_request
 
 
-def create_tournament(user, data=None, method: Literal['GET', 'POST', 'PATCH', 'DELETE'] = 'POST'):
+def create_tournament(user, data=None, method: Literal['GET', 'POST', 'PATCH', 'DELETE'] = 'POST', private=None):
     if data is None:
         data = {'name': 'Tournoi ' + rnstr(), 'size': 4}
+    if private is not None:
+        data['private'] = private
     return make_request(
         endpoint='play/tournament/',
         method=method,
