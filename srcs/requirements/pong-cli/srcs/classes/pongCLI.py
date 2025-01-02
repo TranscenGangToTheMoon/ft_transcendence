@@ -1,12 +1,14 @@
 import json
+from http.client import responses
 from operator import truediv
 
 from textual.app import App, ComposeResult
 from textual.screen import Screen
-from textual.widgets import Header, Footer, Button, Input, Static
+from textual.widgets import Header, Footer, Button, Input, Static, Rule, LoadingIndicator
 from textual.containers import VerticalGroup, HorizontalGroup, Container, Horizontal, Vertical
 from textual.worker import Worker, WorkerState
-from textual import work
+from textual import work, events
+from textual import log
 import requests
 from classes.user import User
 from enum import Enum
@@ -18,6 +20,8 @@ class Page(Enum):
     GamePage = 3
 
 class LoginPage(Screen):
+    SUB_TITLE = "Login Page"
+
     # def __init__(self):
 
     def compose(self) -> ComposeResult:
@@ -69,6 +73,7 @@ class LoginPage(Screen):
             try:
                 User.registerUser()
                 self.query_one("#status").update(f"Status: register succeed!")
+                self.app.startSSE() #maybe is okay bc I add this method to my App
                 self.app.push_screen(MainPage())
                 #exit loop
             except Exception as error:
@@ -96,41 +101,65 @@ class LoginPage(Screen):
             self.query_one("#status").update(f"Empty fields")
 
 class MainPage(Screen):
+    SUB_TITLE = "Main Page"
 
     def compose(self) -> ComposeResult:
         yield Header()
-        response = None
+        yield Footer()
+
+        yield self.userMeStatic()
+        yield Rule()
+        yield Button("Duel", id="duel", variant="primary")
+        # change this button Widget.loading to true to transform it into loading bar whne it pressed and requete made
+        yield Static("POST /api/play/duel/", id="duelResult")
+        yield Rule()
+        yield Button("Cancel Duel", id="cancelDuelGame", variant="error")
+        yield Static("DELETE /api/play/duel/", id="cancelDuelResult")
+        yield Rule()
+
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        if (event.button.id == "duel"):
+            self.duelAction()
+        elif (event.button.id == "cancelDuelGame"):
+            self.cancelDuelAction()
+
+    def duelAction(self):
         try:
-            response = requests.get(url=f"{User.server}/api/users/me/", data="", headers=User.headers, verify=User.SSLCertificate)
+            response = requests.post(url=f"{User.server}/api/play/duel/", data="", headers=User.headers, verify=User.SSLCertificate)
+            if (response.status_code >= 400):
+                raise (Exception(f"({response.status_code}) Error: {response.text}"))
+            self.query_one("#duelResult").update(f"({response.status_code}) POST /api/play/duel/ : {response.text}")
         except Exception as error:
-            yield Static(f"({response.status_code}) /api/users/me/ Error: {error}")
-        yield Static("Main page")
-        yield Static(f"/api/users/me/ : {response.text}")
-        yield Static("API users me results", id="status")
-        yield Button("Dual", id="dualGame", variant="primary")
-        yield Static("API play duel results", id="status2")
+            self.query_one("#duelResult").update(f"POST /api/play/duel/ Error: {error}")
+
+    def cancelDuelAction(self):
+        try:
+            response = requests.delete(url=f"{User.server}/api/play/duel/", data="", headers=User.headers, verify=User.SSLCertificate)
+            if (response.status_code >= 400): #if 404 c'est que j'ai join le match maius oas recu le event SSE
+                raise (Exception(f"({response.status_code}) Error: {response.text}"))
+            elif (response.status_code == 204):
+                self.query_one("#cancelDuelResult").update(f"({response.status_code}) DELETE /api/play/duel/ : Duel deleted")
+        except Exception as error:
+            self.query_one("#cancelDuelResult").update(f"DELETE /api/play/duel/ Error: {error}")
+
+    def userMeStatic(self) -> Static:
+        try:
+            response = requests.get(url=f"{User.server}/api/users/me/", data={}, headers=User.headers, verify=User.SSLCertificate)
+            return Static(f"({response.status_code}) GET /api/users/me/ : {response.text}")
+        except Exception as error:
+            return Static(f"GET /api/users/me/ Error: {error}")
+
+class GamePage(Screen):
+    SUB_TITLE = "Game Page"
+
+    def compose(self) -> ComposeResult:
+        yield Header()
+        yield Button("Exit Button", id="exitAction")
         yield Footer()
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
-        if (event.button.id == "dualGame"):
-            self.dualGameAction()
-
-    def dualGameAction(self):
-        response = None
-        try:
-            response = requests.post(url=f"{User.server}/api/play/duel/", data="", headers=User.headers, verify=User.SSLCertificate)
-        except Exception as error:
-            self.query_one("#status2").update(f"({response.status_code}) Error: {error}")
-        self.query_one("#status2").update(f"/api/play/duel/ : {response.text}")
-        # while (gameWaitingForMe == false and notCancel)
-            # spinner
-
-class GamePage(Screen):
-
-    def compose(self) -> ComposeResult:
-        yield Header()
-        yield Footer()
-        yield Static("Game page")
+        if (event.button.id == "exitAction"):
+            self.dismiss()
 
 import re
 import json
@@ -138,6 +167,8 @@ import httpx
 
 # diff on login and main page with Screen css ! Why ?
 class PongCLI(App):
+    SUB_TITLE = "Login Page"
+
     CSS_PATH = [
         "../styles/LoginPage.tcss",
         "../styles/MainPage.tcss",
@@ -163,10 +194,10 @@ class PongCLI(App):
 
     @work(exclusive=True)
     async def startSSE(self):
+        log("Start SSE")
         if (not self.isConnected):
-            # self.SSE = self.run_worker(SSEWorker)
             self.connected = True
-            with httpx.AsyncClient(verify=User.SSLCertificate) as client:
+            async with httpx.AsyncClient(verify=User.SSLCertificate) as client:
                 headers = {
                     'Content-Type': 'text/event-stream',
                     'Authorization': f'Bearer {User.accessToken}',
@@ -177,20 +208,17 @@ class PongCLI(App):
                         if (response.status_code >= 400):
                             raise (Exception(f"({response.status_code}) SSE connection prout! {response.text}"))
 
-                        # if (response.status_code == 200):
                         async for line in response.aiter_text():
-                            if self.is_cancelled:
-                                break
-
+                            # if self.is_cancelled:
+                            #     break
+                            # log("Prout")
                             try:
                                 events = self.regex.findall(line)
                                 for event, data in events:
                                     if event == "game-start":# game start
                                         dataJson = json.loads(data)
-                                        # await self.(self.GameStart(dataJson))
-                                        self.log()
-                                        # methode to send information to GameScreen / App
-
+                                        log(f"{dataJson}")
+                                        await self.push_screen(GamePage()) #maybe it's a solution
                             except (IndexError, ValueError) as error:
                                 continue
                 finally:
