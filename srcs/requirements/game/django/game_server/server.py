@@ -24,14 +24,6 @@ class Server:
     _loop: asyncio.AbstractEventLoop
 
     @staticmethod
-    def clear_database():
-        time.sleep(2)
-        matches = fetch_matches()
-        for match in matches:
-            if match.finished == False:
-                match.finish_match()
-
-    @staticmethod
     def serve():
         Server._sio = socketio.AsyncServer(async_mode='aiohttp', cors_allowed_origins='*', logger=False)
         Server._app = web.Application()
@@ -47,8 +39,6 @@ class Server:
         Server._loop_lock = Lock()
         Server._sio_lock = Lock()
         port = 5500
-        '''setting all matches in DB as finished'''
-        Server.clear_database()
         print(f"SocketIO server running on port {port}", flush=True)
         web.run_app(Server._app, host='0.0.0.0', port=port, loop=Server._loop)
 
