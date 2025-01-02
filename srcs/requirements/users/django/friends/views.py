@@ -17,7 +17,16 @@ class FriendsMixin(generics.GenericAPIView):
 
 class FriendsView(generics.ListAPIView, FriendsMixin):
     def filter_queryset(self, queryset):
-        return queryset.filter(friends=self.request.user.id)
+        kwargs = {'friends': self.request.user.id}
+        online = self.request.query_params.get('online')
+        print('online', online, type(online), flush=True)
+        if online in ('true', 'false'):
+
+            print('online', online, flush=True)
+            online = online == 'true'
+            kwargs['friends__is_online'] = online
+        print('kwargs', kwargs, flush=True)
+        return queryset.filter(**kwargs)
 
 
 class FriendView(generics.RetrieveDestroyAPIView, FriendsMixin):
