@@ -8,7 +8,7 @@ from friends.views import friends_view, friend_view
 from events.views import events_view
 from sse.views import sse_view
 from users.views import users_me_view, retrieve_user_view, retrieve_users_view, manage_user_view
-from validate.views import validate_chat_view, are_blocked_view
+from validate.views import validate_chat_view, are_friends_view
 
 urlpatterns = [
     path(Users.me, users_me_view),
@@ -29,22 +29,16 @@ urlpatterns = [
     path(Users.event, events_view),
 
     path(Users.chat, validate_chat_view),
-    path(Users.are_blocked, are_blocked_view),
+    path(Users.are_friends, are_friends_view),
 
     path(UsersManagement.manage_user, manage_user_view),
 ]
 
-# todo make sse
-#   - update user status (connected, disconnected, ...)
-#   - if disconnected, send to matchmaking (to leave lobby, tournament, ...)
-#   - make function for create event
-#   - make function for create notification
-# todo handle download all data
-# todo token pb (@Florian1215 je sais pas pourquoi mais quand je fais un make re puis que je me log avec chrome sur un user, ca log aussi tous les autres navigateurs sur cet user en mode le nouveau token de celui qui se log est le meme que celui qui est pas log sur l'autre navigateur)
-# todo handle abandon when finish game
-# todo handle local possiblitie user in custom_game
-# todo surcharge __str__ for all models
-
+# todo 1. make sse tournament events
+#  make start
+#  make seeding tournament
+#  make index
+#  make finish
 
 # todo CHAT
 #   - create chat when lobby is created
@@ -54,19 +48,10 @@ urlpatterns = [
 #   - send chat_id in lobby
 #   - send chat_id in tournament
 
+# todo Game
+#  make endpoint for finish game (handle abandon)
+#  make endpoint for update score
 
-# todo handle nb spectact game
-# todo fix permision denied guest
-
-# todo game -> {type: game, 'code')
-# todo event -> FINISH GAME (args, abandon)
-# todo chat -> {type: notification, 'message'}
-# todo lobby -> {type: event, 'tournoi', 'id', 'status'}
-# todo lobby -> connect chat
-# todo tournoi -> connect chat
-# todo dans user serializer nb message 1 message, 1 notif dans friend
-# todo demande de game only if connected
-# todo normaliser les vecteurs
 
 # todo make endpoint for user stats, xp, trophies (when match ended, or when tournament ended)
 # - pas de stat (custom_game)
@@ -99,25 +84,14 @@ urlpatterns = [
 # - delete coin
 # - delete xp
 
-# todo make endpoint for online status
+
 # todo fix github issue
-# todo delete chat after finish tournament
-# todo delete chat after finish lobby
+# todo ajouter password field pour change password
+# todo handle download all data
 
-# todo handle local user
-
-# custom game
-# - bo et 1v1 | 3v3 (rien a changer)
-
-# - Tournoi pas de seeding
-
-# - get message, mark as read
-# - faire inbox notif
-# - stocker tous le temps passe sur le site (when SSE)
-
-# - ajouter password field pour change password
 
 # --- before push ---
 # todo type all python code (make variable)
 # todo check norm (sort line all import)
+# todo delete __str__ for all models
 # todo check problem

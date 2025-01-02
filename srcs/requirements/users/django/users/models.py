@@ -1,5 +1,8 @@
 from django.db import models
-from lib_transcendence.Chat import AcceptChat
+from lib_transcendence import endpoints
+from lib_transcendence.chat import AcceptChat
+from lib_transcendence.services import request_matchmaking
+from rest_framework.exceptions import APIException
 
 from profile_pictures.models import ProfilePictures
 
@@ -35,6 +38,12 @@ class Users(models.Model):
 
     def disconnect(self):
         print(f'User {self.id} disconnect', flush=True)
+
+        try:
+            request_matchmaking(endpoints.UsersManagement.fdelete_user.format(user_id=self.id), 'DELETE')
+        except APIException:
+            pass
+
         self.is_online = False
         self.save()
 

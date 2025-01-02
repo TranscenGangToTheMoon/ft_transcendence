@@ -1,6 +1,8 @@
+import itertools
+
 from lib_transcendence.auth import Authentication
+from lib_transcendence.sse_events import create_sse_event, EventCode
 from rest_framework import generics
-import requests
 
 from matches.models import Matches
 from matches.serializers import MatchSerializer, validate_user_id
@@ -10,10 +12,9 @@ class CreateMatchView(generics.CreateAPIView):
     serializer_class = MatchSerializer
 
     def perform_create(self, serializer):
+        users = list(itertools.chain.from_iterable(serializer.validated_data['teams']))
         super().perform_create(serializer)
-        match = serializer.instance
-        r = requests.post('http://localhost:5500/create-game', data={'match_code': match.code})
-        self.status_code = r.status_code
+        create_sse_event(users, EventCode.GAME_START, serializer.data)
 
 
 class ListMatchesView(generics.ListAPIView):

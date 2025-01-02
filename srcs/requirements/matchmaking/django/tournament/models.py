@@ -3,14 +3,17 @@ from math import log2
 import time
 
 from django.db import models
-from lib_transcendence.Tournament import Tournament
+from lib_transcendence.sse_events import EventCode
 
-from baning.models import Baned
+from baning.models import delete_banned
 from blocking.utils import delete_player_instance
 from matchmaking.create_match import create_tournament_match
+from matchmaking.utils.sse import send_sse_event
 
 
 class Tournament(models.Model):
+    stage_labels = {0: 'final', 1: 'semi-final', 2: 'quarter-final', 3: 'round of 16'}
+
     code = models.CharField(max_length=4, unique=True, editable=False)
     name = models.CharField(max_length=50, unique=True)
     size = models.IntegerField(default=16)
@@ -53,6 +56,10 @@ class Tournament(models.Model):
                 participants[i].win()
             index += 1
 
+    @staticmethod
+    def get_label(n_stage, previous_stage=1):
+        return Tournament.stage_labels[n_stage - previous_stage]
+
     @property
     def is_full(self):
         return self.participants.count() == self.size
@@ -62,9 +69,8 @@ class Tournament(models.Model):
         return int(log2(self.size))
 
     def delete(self, using=None, keep_parents=False):
-        code = self.code
+        delete_banned(self.code)
         super().delete(using=using, keep_parents=keep_parents)
-        Baned.objecs.filter(code=code).delete()
 
     def __str__(self):
         if self.private:
@@ -95,7 +101,6 @@ class TournamentParticipants(models.Model):
     still_in = models.BooleanField(default=True)
     creator = models.BooleanField(default=False)
     join_at = models.DateTimeField(auto_now_add=True)
-    # todo add delete method and inform players that xxx leave the tournament
     # todo cans leave the tournament if started
 
     @property
@@ -104,12 +109,15 @@ class TournamentParticipants(models.Model):
 
     def delete(self, using=None, keep_parents=False):
         tournament = self.tournament
+        last_member = tournament.participants.count() == 1
         if tournament.is_started:
-            self.eliminate()
+            self.eliminate() # todo remake ?
         else:
             delete_player_instance(self.user_id)
+            if not last_member:
+                send_sse_event(EventCode.TOURNAMENT_LEAVE, self)
             super().delete(using=using, keep_parents=keep_parents)
-            if tournament.participants.count() == 0:
+            if last_member:
                 tournament.delete()
 
     def eliminate(self):

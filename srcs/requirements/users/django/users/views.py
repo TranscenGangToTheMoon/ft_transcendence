@@ -2,9 +2,12 @@ from rest_framework import generics
 from rest_framework.exceptions import NotAuthenticated, NotFound, APIException
 from lib_transcendence.exceptions import MessagesException
 from lib_transcendence import endpoints
+from lib_transcendence.permissions import GuestCannotDestroy
 from lib_transcendence.services import request_matchmaking, request_chat
+from lib_transcendence.sse_events import EventCode
 
 from friends.models import Friends
+from sse.events import publish_event
 from users.auth import auth_delete, get_valid_user, get_user
 from users.models import Users
 from users.serializers import UsersSerializer, UsersMeSerializer, ManageUserSerializer
@@ -12,6 +15,7 @@ from users.serializers import UsersSerializer, UsersMeSerializer, ManageUserSeri
 
 class UsersMeView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = UsersMeSerializer
+    permission_classes = [GuestCannotDestroy]
 
     def get_object(self):
         try:
@@ -22,13 +26,24 @@ class UsersMeView(generics.RetrieveUpdateDestroyAPIView):
     def destroy(self, request, *args, **kwargs):
         password = self.request.data.get('password')
         if password is None:
-            raise NotAuthenticated({'password': MessagesException.NotAuthenticated.PASSWORD_CONFIRMATION_REQUIRED})
+            raise NotAuthenticated({'password': MessagesException.Authentication.PASSWORD_CONFIRMATION_REQUIRED})
 
         auth_delete(self.request.headers.get('Authorization'), {'password': password})
 
-        Friends.objects.filter(friends__id=self.request.user.id).delete()
+        user = self.get_object()
+        friendships = Friends.objects.filter(friends__id=user.id)
+        for friendship in friendships:
+            other_user = friendship.friends.exclude(id=user.id).first()
+            publish_event(other_user, EventCode.DELETE_FRIEND, {'id': friendship.id})
+        friendships.delete()
 
-        endpoint = endpoints.UsersManagement.fdelete_user.format(user_id=self.request.user.id)
+        for friend_request_received in user.friend_requests_received.all():
+            publish_event(friend_request_received.sender, EventCode.REJECT_FRIEND_REQUEST, {'id': friend_request_received.id})
+
+        for friend_request_sent in user.friend_requests_sent.all():
+            publish_event(friend_request_sent.receiver, EventCode.CANCEL_FRIEND_REQUEST, {'id': friend_request_sent.id})
+
+        endpoint = endpoints.UsersManagement.fdelete_user.format(user_id=user.id)
         try:
             request_matchmaking(endpoint, 'DELETE')
         except APIException:
@@ -39,10 +54,11 @@ class UsersMeView(generics.RetrieveUpdateDestroyAPIView):
         except APIException:
             pass
 
+        publish_event(user, EventCode.DELETE_USER)
         return super().destroy(request, *args, **kwargs)
 
 
-class RetrieveUserView(generics.RetrieveAPIView):
+class RetrieveUserView(generics.RetrieveAPIView): # todo delete
     queryset = Users.objects.all()
     serializer_class = UsersSerializer
 

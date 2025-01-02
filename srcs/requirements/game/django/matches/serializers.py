@@ -1,7 +1,7 @@
 from lib_transcendence.game import GameMode
 from lib_transcendence.generate import generate_code
 from lib_transcendence.exceptions import MessagesException, Conflict
-from lib_transcendence.request import request_service
+from lib_transcendence.users import retrieve_users
 from rest_framework import serializers
 from rest_framework.exceptions import NotFound
 
@@ -19,7 +19,7 @@ def validate_user_id(value, return_user=False):
         raise Conflict(MessagesException.Conflict.USER_ALREADY_IN_GAME)
     except Players.DoesNotExist:
         if return_user:
-            raise NotFound(MessagesException.NotFound.USER_NOT_IN_GAME)
+            raise NotFound(MessagesException.NotFound.NOT_BELONG_GAME)
 
 
 def validate_teams(value):
@@ -41,7 +41,7 @@ def validate_teams(value):
 
 
 class MatchSerializer(serializers.ModelSerializer):
-    teams = serializers.JSONField(write_only=True, validators=[validate_teams])
+    teams = serializers.JSONField(validators=[validate_teams])
 
     class Meta:
         model = Matches
@@ -49,12 +49,19 @@ class MatchSerializer(serializers.ModelSerializer):
         read_only_fields = [
             'id',
             'created_at',
-            'port',
         ]
 
     @staticmethod
     def validate_game_mode(value):
         return GameMode.validate(value)
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['teams'] = {
+            'team_a': retrieve_users(list(instance.teams.first().players.all().values_list('user_id', flat=True))),
+            'team_b': retrieve_users(list(instance.teams.last().players.all().values_list('user_id', flat=True))),
+        }
+        return representation
 
     def create(self, validated_data):
         if validated_data['game_mode'] == GameMode.tournament:

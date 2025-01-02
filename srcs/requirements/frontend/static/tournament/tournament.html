@@ -1,0 +1,76 @@
+
+<style>
+	#chatSection {
+		display: flex;
+		min-height:100%;
+	}
+	#chatsListView {
+		padding: 5px;
+		border-right: 1px solid #ccc;
+		background-color: #f7f7f7;
+		width: 20%;
+		min-height:90vh;
+		overflow-y: auto;
+	}
+	#chatsList {
+		padding: 5px;
+	}
+	#chatListElement{
+		border-bottom: 1px solid #ccc;
+		border-top: 1px solid #ccc;
+		padding: 5px;
+	}
+	#chatListElementTarget {
+		font-weight: bold;
+	}
+	#chatListElementMessagePreview { 
+		color: #606060;
+	}
+	#chatView {
+		width: 80%;
+		height: 90vh;
+		overflow-y: auto;
+	}
+	#chatTitle {
+		display: flex;
+		padding: 5px;
+		border-bottom: 1px solid #ccc;
+		width: 100%;
+	}
+	#messages {
+		padding: 5px;
+		width: 100%;
+		height: 80vh;
+		overflow-y: auto;
+	}
+	#sendMessageForm {
+		border-top: 1px solid #ccc;
+		padding: 5px;
+		width: 100%;
+		height: 5%;
+	}
+
+</style>
+
+<div id="chatSection" style="display:flex;">
+	<div id="chatsListView">
+		<form id="searchChatForm">
+			<input id="searchUser" placeholder="tournament name" type="text">
+			<button type="submit">Join tournament</button>
+		</form>
+		<div id="chatsList"></div>
+	</div>
+	<div id="chatView" style="display:none">
+		<div id="chatTitle">
+			<div id="chatName"><p>User test</p></div>
+			<button id="endChat">End Chat</button>
+		</div>
+		<div id="messages"></div>
+		<form id="sendMessageForm">
+			<input autocomplete="off" id="message" placeholder="Enter message" type="text">
+			<button type="submit">Send </button>
+		</form>
+	</div>
+</div>
+
+<div script="/tournament/scripts/tournament.js"></div>

@@ -18,7 +18,7 @@ class UpdateUserView(generics.UpdateAPIView):
         data = request.data
         password = data.get('password')
         if password is not None and is_guest(request):
-            raise PermissionDenied(MessagesException.PermissionDenied.GUEST_USERS_NOT_ALLOWED)
+            raise PermissionDenied(MessagesException.PermissionDenied.GUEST_UPDATE_USERNAME)
         return super().update(request, *args, **kwargs)
 
 
