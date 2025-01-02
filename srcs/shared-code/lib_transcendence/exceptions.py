@@ -72,7 +72,7 @@ class MessagesException:
     class PermissionDenied:
         GUEST = 'Guest users cannot perform this action.'
         GUEST_UPDATE_USERNAME = 'Guest users can only update their username.'
-        GUEST_REQUIRED = 'You must be a guest user.' # todo useless
+        GUEST_REQUIRED = 'You must be a guest user.'
         ALREADY_AUTHENTICATED = 'You are already authenticated.'
 
         NOT_BELONG = 'You do not belong to this {obj}.'
