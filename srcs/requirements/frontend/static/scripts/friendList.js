@@ -111,7 +111,7 @@ async function getMoreFriendRequests() {
             requestDiv.id = result.id;
             friendRequestsDiv.appendChild(requestDiv);
             await loadContent('/friends/friendRequestBlock.html', `${requestDiv.id}`);
-            requestDiv.querySelector(`.senderUsername`).innerText = result.sender.username;
+            requestDiv.querySelector(`.senderUsernae`).innerText = result.sender.username;
         }
     }
     catch (error) {

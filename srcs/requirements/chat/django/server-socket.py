@@ -34,13 +34,16 @@ async def connect(sid, environ, auth):
     print(f"Client attempting to connect : {sid}")
     token = auth.get('token')
     chatId = auth.get('chatId')
-    apiAnswer = None
+    user = None
+    chat = None
     if token and chatId:
         try:
             print(f"Trying to authentificate : {sid}")
-            apiAnswer = request_chat(endpoint_chat.fchat.format(chat_id=chatId), 'GET', None, token)
+            user = auth_verify(token)
+            chat = request_chat(endpoint_chat.fchat.format(chat_id=chatId), 'GET', None, token)
             print(f"Connection successeeded {sid}")
-            await sio.emit('debug', apiAnswer, to=sid)
+            await sio.emit('debug', user, to=sid)
+            await sio.emit('debug', chat, to=sid)
             await sio.enter_room(sid, str(chatId))
         except AuthenticationFailed:
             print(f"Authentification failed : {sid}")
@@ -50,8 +53,10 @@ async def connect(sid, environ, auth):
             raise ConnectionRefusedError({"error": 403, "message": "Permission denied"})
         except APIException:
             raise ConnectionRefusedError({"error": 500, "message": "error"})
-        if apiAnswer: #and apiAnswer['chat_type'] == "private_message"
-            usersConnected.add_user(apiAnswer['id'], sid, apiAnswer['username'], chatId, apiAnswer['chat_with'].get('id'))
+        if user and chat and chat['type'] == "private_message":
+            usersConnected.add_user(user['id'], sid, chatId, chat['chat_with'].get('id'))
+        else:
+            usersConnected.add_user(user['id'], sid, chatId)
     else:
         print(f"Connection failed : {sid}")
         raise ConnectionRefusedError({"error": 400, "message": "Missing args"})
@@ -67,7 +72,6 @@ async def disconnect(sid):
 @sio.event
 async def message(sid, data):
     chatId = usersConnected.get_chat_id(sid)
-    username = userConnected.get_username(sid)
     content = data.get('content')
     token = data.get('token')
     print(f"New message from {sid}: {data}")
@@ -80,6 +84,11 @@ async def message(sid, data):
         return
     try:
         answerAPI = await sync_to_async(post_messages, thread_sensitive=False)(chatId, content, token)
+        await sio.emit(
+            'debug',
+            answerAPI,
+            to=sid
+        )
         if usersConnected.is_chat_with_connected_with_him(sid) == False:
             await sio.emit(
                 'debug',
@@ -88,7 +97,7 @@ async def message(sid, data):
             )
         await sio.emit(
             'message',
-            {'author':usersname, 'content': content},
+            {'author':answerAPI['author'], 'content': content},
             room=str(chatId)
         )
         print(f"Message saved and sent from {sid}: {data}")
@@ -120,7 +129,7 @@ async def message(sid, data):
 
 async def message_lobby(sid, data):
     chatId = usersConnected.get_chat_id(sid)
-    username = usersConnected.get_username(sid)
+    user = usersConnected.get_userId(sid)
     content = data.get('content')
     print(f"New message from {sid}: {data}")
     if (content is None):
@@ -132,7 +141,7 @@ async def message_lobby(sid, data):
         return
     await sio.emit(
         'message',
-        {'author':username, 'content': content},
+        {'author':user, 'content': content},
         room=str(chatId)
     )
     print(f"Message saved and sent from {sid}: {data}")

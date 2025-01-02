@@ -37,19 +37,20 @@
 		border-bottom: 1px solid #ccc;
 		width: 100%;
 	}
-	#chatUserCard {
+	.chatUserCard {
 		padding: 5px;
 		border: 1px solid #ccc;
 	}
-	#chatUserCardHeader {
+	.chatUserCardHeader {
 		display: flex;
 		justify-content: space-between;
 	}
 	#messages {
 		padding: 5px;
 		width: 100%;
-		height: 80vh;
+		height: 20vh;
 		overflow-y: auto;
+		flex-direction: column-reverse;
 	}
 	#sendMessageForm {
 		border-top: 1px solid #ccc;
@@ -73,7 +74,7 @@
 			<div id="chatName"><p>User test</p></div>
 			<button id="endChat">End Chat</button>
 		</div>
-		<div id="messages"></div>
+		<div id="messages" class="overflow-auto"></div>
 		<form id="sendMessageForm">
 			<input autocomplete="off" id="message" placeholder="Enter message" type="text">
 			<button type="submit">Send </button>
