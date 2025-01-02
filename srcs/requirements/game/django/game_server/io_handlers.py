@@ -13,7 +13,7 @@ from game_server.match import Match
 async def connect(sid, environ, auth):
     from game_server.server import Server
     token = auth.get('token')
-    print('token: ', token, flush=True)
+    token = 'Bearer ' + token
     try:
         user_data = auth_verify(token)
     except APIException as e:
