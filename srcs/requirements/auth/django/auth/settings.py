@@ -34,22 +34,6 @@ ALLOWED_HOSTS = [
     '*'
 ]
 
-# LOGGING = {
-#     'version': 1,
-#     'disable_existing_loggers': False,
-#     'handlers': {
-#         'console': {
-#             'class': 'logging.StreamHandler',
-#         },
-#     },
-#     'root': {
-#         'handlers': ['console'],
-#         'level': 'DEBUG',
-#     },
-# }
-
-# Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -162,5 +146,4 @@ SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ['Bearer'],
     'ACCESS_TOKEN_LIFETIME': timedelta(hours=3),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
-    'UPDATE_LAST_LOGIN': True,
 }
