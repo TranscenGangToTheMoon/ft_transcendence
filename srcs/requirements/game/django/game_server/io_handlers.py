@@ -1,3 +1,4 @@
+import asyncio
 from lib_transcendence.auth import auth_verify
 from logging import info, debug, error
 from lib_transcendence.exceptions import MessagesException, ServiceUnavailable
@@ -12,6 +13,7 @@ from game_server.match import Match
 # TODO -> change this to use the Server class
 async def connect(sid, environ, auth):
     from game_server.server import Server
+    print('trying to connect', flush=True)
     token = auth.get('token')
     if token is None:
         raise ConnectionRefusedError(MessagesException.Authentication.NOT_AUTHENTICATED)
@@ -30,7 +32,7 @@ async def connect(sid, environ, auth):
     game_id = game_data['id']
     if not Server.does_game_exist(game_id):
         match = Match(game_data)
-        Thread(target=Server.launch_game, args=(match, )).start()
+        Server.create_game(match)
     player = Server.get_player(id)
     player.socket_id = sid
     Server._clients[sid] = player

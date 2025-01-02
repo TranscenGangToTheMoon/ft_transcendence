@@ -1,11 +1,10 @@
 from aiohttp import web
 from game_server import io_handlers
 from game_server import requests_handlers
-from game_server.match import fetch_match
-from game_server.match import Player, fetch_matches, finish_match
+from game_server.match import Player, fetch_matches
 from game_server.game import Game
 from game_server.pong_position import Position
-from threading import Lock
+from threading import Lock, Thread
 from typing import Dict
 import logging
 import asyncio
@@ -55,7 +54,7 @@ class Server:
     @staticmethod
     def delete_game(match_id) -> None:
         with Server._games_lock:
-            if Server._games[match_id].match.model.finished == False:
+            if Server._games[match_id].finished == False:
                 Server._games[match_id].finish()
             Server._games.pop(match_id)
 
@@ -76,10 +75,10 @@ class Server:
             return match_id in Server._games
 
     @staticmethod
-    def launch_game(match):
+    def create_game(match):
         game = Game(Server._sio, match, Position(800, 600))
-        Server.push_game(match[id], game)
-        Server._games[match[id]].launch()
+        Server.push_game(match.id, game)
+        Thread(target=Server._games[match.id].launch).start()
 
     @staticmethod
     def emit(event: str, data=None, room=None, to=None, skip_sid=None):
@@ -94,4 +93,4 @@ class Server:
                     for player in team.players:
                         if player.user_id == user_id:
                             return player
-            raise Exception(f'No player with id {user_id} is awaited on this server')
+        raise Exception(f'No player with id {user_id} is awaited on this server')

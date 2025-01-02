@@ -1,11 +1,11 @@
 from datetime import datetime, timezone
+
+import requests
 from game_server.match import Match, Player, finish_match
 from game_server.pong_ball import Ball
 from game_server.pong_position import Position
 from game_server.pong_racket import Racket
 from typing import List
-from lib_transcendence.services import create_sse_event
-from lib_transcendence.sse_events import EventCode
 import math
 import os
 import random
@@ -235,7 +235,7 @@ class Game:
         from game_server.server import Server
         print('finishing game', flush=True)
         self.finished = True
-        self.match.model.finish_match(reason)
+        finish_match(self.match.id) #might not work
         time.sleep(1)
         self.send_finish(reason, winner)
         time.sleep(1)
@@ -256,6 +256,7 @@ class Game:
         if last_touch is not None:
             last_touch.csc += 1
         team.score += 1
+        # todo -> add score via API
         print('score:', self.match.teams[0].score, self.match.teams[1].score, flush=True)
         self.send_score(team)
         for team in self.match.teams:
