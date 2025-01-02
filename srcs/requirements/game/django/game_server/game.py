@@ -210,14 +210,8 @@ class Game:
 
     def launch(self):
         from game_server.server import Server
-        try:
-            timeout = int(os.environ['GAME_PLAYER_CONNECT_TIMEOUT'])
-        except KeyError:
-            timeout = 5
+        timeout = os.environ.get('GAME_PLAYER_CONNECT_TIMEOUT', 5)
         timeout = 60.
-        for team in self.match.teams:
-            for player in team.players:
-                create_sse_event(player.user_id, EventCode.GAME_START, {'match_id': self.match.id})
         try:
             self.wait_for_players(timeout)
             print(time.time(), "all players are connected", flush=True)

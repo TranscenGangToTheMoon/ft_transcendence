@@ -425,13 +425,12 @@
             state.ball.y += state.ball.speedY * state.deltaTime;
         }
 
-        if (state.ball.y < 0 || state.ball.y + config.ballSize >= config.canvasHeight){
-            if (state.ball.y < 0)
-	            state.ball.y = -state.ball.y
-            else
-	            state.ball.y -= (state.ball.y + config.ballSize) - config.canvasHeight
-            state.ball.speedY = -state.ball.speedY
-        }
+		if (state.ball.y < 0)
+			state.ball.y = -state.ball.y;
+		if (state.ball.y + config.ballSize > config.canvasHeight)
+			state.ball.y -= (state.ball.y + config.ballSize) - config.canvasHeight;
+		state.ball.speedY = -state.ball.speedY;
+
         for (let paddle in state.paddles){
             handlePaddleCollision(state.paddles[paddle]);
         }
@@ -458,18 +457,20 @@
         }
     }
 
-    window.PongGame = {startGame, startCountdown, stopGame, pauseGame, resumeGame, state, config, moveUp, moveDown, handleGameOver, resetGame};
+    window.PongGame = {startGame, startCountdown, stopGame, state, config, moveUp, moveDown, handleGameOver, resetGame};
 })();
 
 
 function initSocket(){
 	const host = window.location.origin;
+	const token = getAccessToken();
+	console.log('token: ', token);
 	let socket = io(host, {
       transports: ["websocket"],
       path: "/ws/game/",
       auth : {
           "id": userInformations.id,
-          "token": 'kk',
+          "token": token,
       },
 	});
     window.socket = socket;

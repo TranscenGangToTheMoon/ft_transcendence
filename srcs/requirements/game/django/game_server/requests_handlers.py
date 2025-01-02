@@ -8,6 +8,5 @@ async def create_game(request: web.Request):
     if request.remote == '127.0.0.1':
         data = await request.post()
         match_id = data['match_id']
-        print('launching match ', match_id, flush=True)
         Thread(target=Server.launch_game, args=(match_id,)).start()
     return web.Response()
