@@ -11,13 +11,6 @@ from rest_framework.exceptions import ParseError
 from users.models import Users
 
 
-# todo reset to 0 notfication when sended
-# todo handle notification for chat
-# todo when retrieve many user, handle friend field
-# todo when create match return user instance not only id
-# todo when create match return teams id not list
-
-
 def datetime_serializer(obj):
     if isinstance(obj, datetime):
         return obj.isoformat()
@@ -116,7 +109,7 @@ class Event:
 
 delete_user = Event(Service.AUTH, EventCode.DELETE_USER)
 
-send_message = Event(Service.CHAT, EventCode.SEND_MESSAGE, '{username}: {message}', Target('/chat/{id}/')) # todo format
+send_message = Event(Service.CHAT, EventCode.SEND_MESSAGE, '{username}: {message}', Target('/chat/{chat_id}/'))
 
 accept_friend_request = Event(Service.FRIENDS, EventCode.ACCEPT_FRIEND_REQUEST, '{username} has accepted your friend request.', type=SSEType.NOTIFICATION)
 receive_friend_request = Event(Service.FRIENDS, EventCode.RECEIVE_FRIEND_REQUEST, '{username} wants to be friends with you.', [Target('/api/users/me/friend_requests/{id}/', 'POST', display_icon='/icon/accept.png'), Target('/api/users/me/friend_requests/{id}/', 'DELETE', display_icon='/icon/decline.png')])
@@ -138,8 +131,8 @@ lobby_update_participant = Event(Service.LOBBY, EventCode.LOBBY_UPDATE_PARTICIPA
 lobby_banned = Event(Service.LOBBY, EventCode.LOBBY_BANNED, 'You have been banned from this lobby.')
 lobby_destroy = Event(Service.LOBBY, EventCode.LOBBY_DESTROY, 'The lobby has been destroyed.')
 
-tournament_join = Event(Service.TOURNAMENT, EventCode.TOURNAMENT_JOIN, '{username} have joined the tournament.') # todo format
-tournament_leave = Event(Service.TOURNAMENT, EventCode.TOURNAMENT_LEAVE, '{username} have left the tournament.') # todo format
+tournament_join = Event(Service.TOURNAMENT, EventCode.TOURNAMENT_JOIN, '{username} have joined the tournament.')
+tournament_leave = Event(Service.TOURNAMENT, EventCode.TOURNAMENT_LEAVE, '{username} have left the tournament.')
 tournament_banned = Event(Service.TOURNAMENT, EventCode.TOURNAMENT_BANNED, 'You have been banned from this tournament.')
 tournament_start_3 = Event(Service.TOURNAMENT, EventCode.TOURNAMENT_START_3, 'Tournament {name} start in 3 seconds.') # todo format
 tournament_start_20 = Event(Service.TOURNAMENT, EventCode.TOURNAMENT_START_20, 'Tournament {name} start in 20 seconds.') # todo format
