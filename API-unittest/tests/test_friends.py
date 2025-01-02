@@ -1,3 +1,4 @@
+import time
 import unittest
 
 from services.blocked import blocked_user
@@ -33,7 +34,7 @@ class Test01_Friend(UnitTest):
         self.assertThread(user1, *users)
 
     def test_004_get_friends_is_online(self):
-        user1 = self.user(['accept-friend-request'] * 11)
+        user1 = self.user(['accept-friend-request'] * 5)
         user2 = self.user(['receive-friend-request'])
         users_online = [self.user(['receive-friend-request']) for _ in range(2)]
         users = [self.user(['receive-friend-request']) for _ in range(2)]
@@ -45,10 +46,12 @@ class Test01_Friend(UnitTest):
             self.assertFriendResponse(create_friendship(user1, user_tmp))
 
         self.assertThread(*users)
+        time.sleep(1)
         self.assertResponse(get_friends(user1), 200, count=5)
         self.assertResponse(get_friends(user1, online='caca'), 200, count=5)
         self.assertResponse(get_friends(user1, online='true'), 200, count=3)
         self.assertThread(user2)
+        time.sleep(1)
         self.assertResponse(get_friends(user1, online='true'), 200, count=2)
         self.assertResponse(get_friends(user1, online='false'), 200, count=3)
         self.assertThread(user1, *users_online)
