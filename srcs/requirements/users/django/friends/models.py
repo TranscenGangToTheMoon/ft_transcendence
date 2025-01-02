@@ -14,8 +14,10 @@ class Friends(models.Model):
     matches_won_together = models.PositiveIntegerField(default=0)
 
     def play_against(self, winner: Users):
-        if winner.id == self.user1_win:
-            self.user1_win += 1
+        if winner == self.user_1:
+            self.user1_wins += 1
+        else:
+            self.user2_wins += 1
         self.matches_play_against += 1
         self.save()
 

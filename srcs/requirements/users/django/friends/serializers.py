@@ -32,7 +32,6 @@ class FriendsSerializer(serializers.ModelSerializer):
             'me_win',
             'friends_since',
             'matches_play_against',
-            'user1_win',
             'matches_played_together',
             'matches_won_together',
         ]
