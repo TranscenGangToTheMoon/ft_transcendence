@@ -3,8 +3,7 @@ from lib_transcendence.game import GameMode
 from lib_transcendence.Lobby import MatchType, Teams
 from lib_transcendence.auth import get_auth_user
 from lib_transcendence.generate import generate_code
-from lib_transcendence.services import create_sse_event
-from lib_transcendence.sse_events import EventCode
+from lib_transcendence.sse_events import EventCode, create_sse_event
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
 
@@ -78,9 +77,6 @@ class LobbySerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         request = self.context.get('request')
         user = get_auth_user(request)
-
-        if user['is_guest']:
-            raise PermissionDenied(MessagesException.PermissionDenied.GUEST_CANNOT_CREATE_LOBBY)
 
         verify_user(user['id'])
 

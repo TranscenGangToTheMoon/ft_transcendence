@@ -23,42 +23,46 @@ from utils.my_unittest import UnitTest
 class Test01_GetUsers(UnitTest):
 
     def test_001_get_user(self):
-        user1 = self.new_user()
-        user2 = self.new_user(get_me=True)
+        user1 = self.user()
+        user2 = self.user()
 
         self.assertResponse(get_user(user1, user2['id']), 200)
+        self.assertThread(user1, user2)
 
     def test_002_get_blocked_by_user(self):
-        user1 = self.new_user(get_me=True)
-        user2 = self.new_user(get_me=True)
+        user1 = self.user()
+        user2 = self.user()
 
         self.assertResponse(blocked_user(user2, user1['id']), 201)
         self.assertResponse(get_user(user1, user2['id']), 404, {'detail': 'User not found.'})
+        self.assertThread(user1, user2)
 
     def test_003_get_blocked_user(self):
-        user1 = self.new_user()
-        user2 = self.new_user(get_me=True)
+        user1 = self.user()
+        user2 = self.user()
 
         self.assertResponse(blocked_user(user1, user2['id']), 201)
         self.assertResponse(get_user(user1, user2['id']), 403, {'detail': 'You blocked this user.'})
+        self.assertThread(user1, user2)
 
     def test_004_get_user_doest_not_exist(self):
-        user1 = self.new_user()
+        user1 = self.user()
 
         self.assertResponse(get_user(user1, user2_id=123456), 404, {'detail': 'User not found.'})
+        self.assertThread(user1)
 
 
 class Test02_UserMe(UnitTest):
 
     def test_001_get_me(self):
-        user1 = self.user_sse()
+        user1 = self.user()
 
         response = self.assertResponse(me(user1), 200)
         self.assertDictEqual(response, {'id': response['id'], 'username': user1['username'], 'is_guest': False, 'created_at': response['created_at'], 'profile_picture': None, 'accept_friend_request': True, 'accept_chat_from': 'friends_only', 'coins': 100, 'trophies': 0, 'current_rank': None, 'notifications': {'friend_requests': 0, 'chats': 0}, 'is_online': True, 'last_online': response['last_online']})
         self.assertThread(user1)
 
     def test_002_get_me_guest(self):
-        user1 = self.guest_user(connect_sse=True)
+        user1 = self.user(guest=True)
 
         response = self.assertResponse(me(user1), 200)
         self.assertDictEqual(response, {'id': response['id'], 'username': response['username'], 'is_guest': True, 'created_at': response['created_at'], 'profile_picture': None, 'accept_friend_request': True, 'accept_chat_from': 'friends_only', 'coins': 100, 'trophies': 0, 'current_rank': None, 'notifications': {'friend_requests': 0, 'chats': 0}, 'is_online': True, 'last_online': response['last_online']})
@@ -68,50 +72,56 @@ class Test02_UserMe(UnitTest):
 class Test03_DeleteUser(UnitTest):
 
     def test_001_delete(self):
-        user1 = self.new_user()
+        user1 = self.user()
 
         self.assertResponse(me(user1, method='DELETE', password=True), 204)
         self.assertResponse(me(user1), 401, {'code': 'user_not_found', 'detail': 'User not found.'})
+        self.assertThread(user1)
 
     def test_002_delete_not_get_me(self):
-        user1 = self.new_user()
+        user1 = self.user()
 
         self.assertResponse(me(user1, method='DELETE', password=True), 204)
         self.assertResponse(me(user1), 401, {'code': 'user_not_found', 'detail': 'User not found.'})
+        self.assertThread(user1)
 
     def test_003_already_delete(self):
-        user1 = self.new_user()
+        user1 = self.user()
 
         self.assertResponse(me(user1, method='DELETE', password=True), 204)
         self.assertResponse(me(user1, method='DELETE', password=True), 401, {'code': 'user_not_found', 'detail': 'User not found.'})
+        self.assertThread(user1)
 
     def test_004_request_after_delete(self):
-        user1 = self.new_user()
+        user1 = self.user()
 
         self.assertResponse(me(user1, method='DELETE', password=True), 204)
         self.assertResponse(create_lobby(user1), 401, {'code': 'user_not_found', 'detail': 'User not found.'})
+        self.assertThread(user1)
 
     def test_005_user_in_lobby(self):
-        user1 = self.user_sse()
-        user2 = self.user_sse()
+        user1 = self.user()
+        user2 = self.user()
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
         self.assertResponse(me(user1, method='DELETE', password=True), 204)
         self.assertResponse(create_lobby(user1, method='GET'), 401, {'code': 'user_not_found', 'detail': 'User not found.'})
         self.assertResponse(join_lobby(user2, code), 404, {'detail': 'Lobby not found.'})
+        self.assertThread(user1, user2)
 
     def test_006_user_in_game(self):
-        user1 = self.new_user(get_me=True)
-        user2 = self.new_user(get_me=True)
+        user1 = self.user(['game-start'])
+        user2 = self.user(['game-start'])
 
         self.assertResponse(create_game(user1, user2), 201)
         self.assertResponse(me(user1, method='DELETE', password=True), 204)
         # todo make when have game
+        self.assertThread(user1, user2)
 
     def test_007_user_in_tournament(self):
-        user1 = self.user_sse()
-        user2 = self.user_sse()
-        user3 = self.user_sse()
+        user1 = self.user()
+        user2 = self.user()
+        user3 = self.user()
         name = rnstr()
 
         code = self.assertResponse(create_tournament(user1, {'name': 'Delete User ' + name}), 201, get_field='code')
@@ -120,11 +130,12 @@ class Test03_DeleteUser(UnitTest):
         self.assertResponse(create_tournament(user1, method='GET'), 401, {'code': 'user_not_found', 'detail': 'User not found.'})
         self.assertResponse(search_tournament(user2, name), 200, count=0)
         self.assertResponse(join_tournament(user3, code), 404)
+        self.assertThread(user1, user2, user3)
 
     def test_008_user_in_start_tournament(self):
-        user1 = self.user_sse()
-        user2 = self.user_sse()
-        user3 = self.user_sse()
+        user1 = self.user(['tournament-join'])
+        user2 = self.user(['tournament-leave'])
+        user3 = self.user()
         name = rnstr()
 
         code = self.assertResponse(create_tournament(user1, {'name': 'Delete User ' + name}), 201, get_field='code')
@@ -135,63 +146,71 @@ class Test03_DeleteUser(UnitTest):
         response = self.assertResponse(search_tournament(user3, name), 200, count=1)
         self.assertEqual(1, response['results'][0]['n_participants'])
         # todo make when tournament work
+        self.assertThread(user1, user2, user3)
 
     def test_009_chat_with(self):
-        user1 = self.new_user()
-        user2 = self.new_user()
+        user1 = self.user()
+        user2 = self.user()
 
         self.assertResponse(accept_chat(user2), 200)
         chat_id = self.assertResponse(create_chat(user1, user2['username']), 201, get_field=True)
         self.assertResponse(request_chat_id(user2, chat_id), 200)
         self.assertResponse(me(user1, method='DELETE', password=True), 204)
         self.assertResponse(request_chat_id(user2, chat_id), 403, {'detail': 'You do not belong to this chat.'})
+        self.assertThread(user1, user2)
 
     def test_010_play_duel(self):
-        user2 = self.user_sse(get_me=True)
+        user2 = self.user()
 
         while True:
-            user1 = self.user_sse(get_me=True)
+            user1 = self.user()
 
             self.assertResponse(play(user1), 201)
             time.sleep(1)
             response = is_in_game(user1)
             if response.status_code == 404:
                 break
+            user1['thread_tests'] = ['game-start']
+            self.assertThread(user1)
         self.assertResponse(me(user1, method='DELETE', password=True), 204)
         self.assertResponse(play(user2), 201)
         time.sleep(1)
-        self.assertResponse(is_in_game(user2), 404, {'detail': 'This user is not in a game.'})
+        self.assertResponse(is_in_game(user2), 404, {'detail': 'You do not belong to any game.'})
+        self.assertThread(user1, user2)
 
     def test_012_play_ranked(self):
-        user2 = self.user_sse(get_me=True)
+        user2 = self.user()
 
         while True:
-            user1 = self.user_sse(get_me=True)
+            user1 = self.user()
 
             self.assertResponse(play(user1, 'ranked'), 201)
             time.sleep(1)
             response = is_in_game(user1)
             if response.status_code == 404:
                 break
+            self.assertThread(user1)
         self.assertResponse(me(user1, method='DELETE', password=True), 204)
         self.assertResponse(play(user2, 'ranked'), 201)
         time.sleep(1)
-        self.assertResponse(is_in_game(user2), 404, {'detail': 'This user is not in a game.'})
+        self.assertResponse(is_in_game(user2), 404, {'detail': 'You do not belong to any game.'})
+        self.assertThread(user1, user2)
 
     def test_013_friend_request(self):
-        user1 = self.new_user()
-        user2 = self.new_user()
+        user1 = self.user()
+        user2 = self.user(['receive-friend-request', 'cancel-friend-request'])
 
         friend_request_id = self.assertResponse(friend_requests(user1, user2), 201, get_field=True)
         self.assertResponse(get_friend_requests_received(user2), 200, count=1)
         self.assertResponse(me(user1, method='DELETE', password=True), 204)
         self.assertResponse(friend_request(friend_request_id, user2, 'GET'), 404)
         self.assertResponse(get_friend_requests_received(user2), 200, count=0)
+        self.assertThread(user1, user2)
 
     def test_014_friend(self):
-        user1 = self.new_user()
-        user2 = self.new_user()
-        user3 = self.new_user()
+        user1 = self.user(['accept-friend-request', 'accept-friend-request'])
+        user2 = self.user(['receive-friend-request', 'delete-friend'])
+        user3 = self.user(['receive-friend-request', 'delete-friend'])
 
         id = self.assertFriendResponse(create_friendship(user1, user2))
         self.assertFriendResponse(create_friendship(user1, user3))
@@ -203,48 +222,54 @@ class Test03_DeleteUser(UnitTest):
         self.assertResponse(friend(user2, id), 404, {'detail': 'Friendship not found.'})
         self.assertResponse(get_friends(user2), 200, count=0)
         self.assertResponse(get_friends(user3), 200, count=0)
+        self.assertThread(user1, user2, user3)
 
     def test_015_blocked(self):
-        user1 = self.new_user(get_me=True)
-        user2 = self.new_user()
+        user1 = self.user()
+        user2 = self.user()
 
         self.assertResponse(blocked_user(user2, user1['id']), 201)
         self.assertResponse(blocked_user(user2, user1['id'], method='GET'), 200, count=1)
         self.assertResponse(me(user1, method='DELETE', password=True), 204)
         self.assertResponse(blocked_user(user2, user1['id'], method='GET'), 200, count=0)
+        self.assertThread(user1, user2)
 
 
 class Test04_UpdateUserMe(UnitTest):
 
     def test_001_update_password(self):
-        user1 = self.new_user()
+        user1 = self.user()
         old_password = user1['password']
 
         self.assertResponse(me(user1, method='PATCH', data={'password': 'new_password'}), 200)
         self.assertResponse(login(user1['username'], 'new_password'), 200)
         self.assertResponse(login(user1['username'], old_password), 401, {'detail': 'No active account found with the given credentials'})
+        self.assertThread(user1)
 
     def test_002_update_password_same_as_before(self):
-        user1 = self.new_user()
+        user1 = self.user()
+        print(user1)
 
         self.assertResponse(me(user1, method='PATCH', data={'password': user1['password']}), 400, {'password': ['Password is the same as the old one.']})
         self.assertResponse(login(data=user1), 200)
+        self.assertThread(user1)
 
 
 class Test05_RenameUser(UnitTest):
 
     def test_001_rename_user(self):
-        user1 = self.new_user()
+        user1 = self.user()
         old_username = user1['username']
         new_username = old_username + '_new'
 
         self.assertResponse(me(user1, method='PATCH', data={'username': new_username}), 200)
         self.assertResponse(login(new_username, user1['password']), 200)
         self.assertResponse(login(old_username, user1['password']), 401, {'detail': 'No active account found with the given credentials'})
+        self.assertThread(user1)
 
     def test_002_rename_user_friend(self):
-        user1 = self.new_user()
-        user2 = self.new_user()
+        user1 = self.user(['accept-friend-request'])
+        user2 = self.user(['receive-friend-request'])
         new_username = user1['username'] + '_new'
 
         id = self.assertFriendResponse(create_friendship(user1, user2))
@@ -254,10 +279,11 @@ class Test05_RenameUser(UnitTest):
             if f['id'] == user1['id']:
                 self.assertEqual(new_username, f['username'])
                 break
+        self.assertThread(user1, user2)
 
     def test_003_rename_blocked_user(self):
-        user1 = self.new_user(get_me=True)
-        user2 = self.new_user()
+        user1 = self.user()
+        user2 = self.user()
         new_username = user1['username'] + '_new'
 
         self.assertResponse(blocked_user(user2, user1['id']), 201)
@@ -265,11 +291,12 @@ class Test05_RenameUser(UnitTest):
 
         response = self.assertResponse(blocked_user(user2, method='GET'), 200, count=1)
         self.assertEqual(response['results'][0]['blocked']['username'], new_username)
+        self.assertThread(user1, user2)
 
     def test_004_rename_chat(self):
         old_username = 'rename-chat-' + rnstr()
-        user1 = self.new_user(username=old_username)
-        user2 = self.new_user()
+        user1 = self.user(username=old_username)
+        user2 = self.user()
         new_username = 'new-username-' + rnstr()
 
         self.assertResponse(accept_chat(user2), 200)
@@ -278,6 +305,15 @@ class Test05_RenameUser(UnitTest):
 
         self.assertResponse(create_chat(user2, method='GET', data={'q': old_username}), 200, count=0)
         self.assertResponse(create_chat(user2, method='GET', data={'q': new_username}), 200, count=1)
+        self.assertThread(user1, user2)
+
+    def test_005_rename_sse(self):
+        user1 = self.user()
+        new_username = 'rename-sse-' + rnstr()
+
+        self.assertResponse(me(user1, method='PATCH', data={'username': new_username}), 200)
+        self.assertResponse(me(user1), 200)
+        self.assertThread(user1)
 
 
 if __name__ == '__main__':

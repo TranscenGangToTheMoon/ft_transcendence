@@ -8,7 +8,7 @@ from friends.views import friends_view, friend_view
 from events.views import events_view
 from sse.views import sse_view
 from users.views import users_me_view, retrieve_user_view, retrieve_users_view, manage_user_view
-from validate.views import validate_chat_view, are_blocked_view
+from validate.views import validate_chat_view, are_friends_view
 
 urlpatterns = [
     path(Users.me, users_me_view),
@@ -29,17 +29,16 @@ urlpatterns = [
     path(Users.event, events_view),
 
     path(Users.chat, validate_chat_view),
-    path(Users.are_blocked, are_blocked_view),
+    path(Users.are_friends, are_friends_view),
 
     path(UsersManagement.manage_user, manage_user_view),
 ]
 
-# todo 1. make sse event chat
-# todo 2. make sse event game
-# todo 3. make sse event invite
-# todo 4. make sse tournament events
-# todo 5. fix permision denied guest
-
+# todo 1. make sse tournament events
+#  make start
+#  make seeding tournament
+#  make index
+#  make finish
 
 # todo CHAT
 #   - create chat when lobby is created
@@ -49,17 +48,11 @@ urlpatterns = [
 #   - send chat_id in lobby
 #   - send chat_id in tournament
 
-# todo handle abandon when finish game
-
-# todo game -> {type: game, 'code')
-# todo event -> FINISH GAME (args, abandon)
-# todo chat -> {type: notification, 'message'}
-# todo lobby -> {type: event, 'tournoi', 'id', 'status'}
-# todo lobby -> connect chat
-# todo tournoi -> connect chat
+# todo Game
+#  make endpoint for finish game (handle abandon)
+#  make endpoint for update score
 
 
-# todo handle friends fields
 # todo make endpoint for user stats, xp, trophies (when match ended, or when tournament ended)
 # - pas de stat (custom_game)
 # - stat tournoi gagne
@@ -93,16 +86,9 @@ urlpatterns = [
 
 
 # todo fix github issue
-# todo make seeding tournament
 # todo ajouter password field pour change password
-
-
-# ----------------------
 # todo handle download all data
 
-
-# --- poubell a idee ---
-# todo handle nb spectact game
 
 # --- before push ---
 # todo type all python code (make variable)

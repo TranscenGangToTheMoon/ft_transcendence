@@ -1,5 +1,6 @@
 from django.db.models import Q
 from lib_transcendence.exceptions import MessagesException
+from lib_transcendence.permissions import NotGuest
 from lib_transcendence.serializer import SerializerKwargsContext
 from lib_transcendence.sse_events import EventCode
 from rest_framework import generics
@@ -14,6 +15,7 @@ from sse.events import publish_event
 class FriendRequestsMixin(generics.GenericAPIView):
     queryset = FriendRequests.objects.all()
     serializer_class = FriendRequestsSerializer
+    permission_classes = [NotGuest]
 
 
 class FriendRequestsListCreateView(generics.ListCreateAPIView, FriendRequestsMixin):

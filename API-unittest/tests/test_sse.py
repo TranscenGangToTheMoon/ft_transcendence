@@ -12,19 +12,19 @@ from utils.my_unittest import UnitTest
 class Test01_SSE(UnitTest):
 
     def test_001_connection_success(self):
-        user1 = self.user_sse()
+        user1 = self.user()
 
         self.assertThread(user1)
 
     def test_002_guest_connection_success(self):
-        user1 = self.guest_user(connect_sse=True)
+        user1 = self.user(guest=True)
 
         self.assertThread(user1)
 
     def test_003_connect_twice(self):
-        user1 = self.new_user(get_me=True)
-        user2 = self.new_user()
-        user3 = self.new_user()
+        user1 = self.user(sse=False)
+        user2 = self.user()
+        user3 = self.user()
 
         user1_bis = user1.copy()
         self.connect_to_sse(user1, ['receive-friend-request'])
@@ -32,16 +32,16 @@ class Test01_SSE(UnitTest):
         self.connect_to_sse(user1_bis, ['receive-friend-request', 'receive-friend-request'])
 
         self.assertResponse(friend_requests(user2, user1), 201)
-        self.assertThread(user1)
+        self.assertThread(user1, user2)
         self.assertResponse(friend_requests(user3, user1), 201)
-        self.assertThread(user1_bis)
+        self.assertThread(user1_bis, user3)
 
     def test_004_invalid_token(self):
         thread1 = self.connect_to_sse({'token': 'invalid_token'}, status_code=401)
         thread1.join()
 
     def test_005_guest_then_register(self):
-        user1 = self.guest_user(connect_sse=True, get_me=True)
+        user1 = self.user(guest=True)
         username = 'sse-register-' + rnstr()
 
         self.assertResponse(register_guest(user1, username=username), 200)
@@ -52,7 +52,7 @@ class Test01_SSE(UnitTest):
         self.assertEqual(username, response['username'])
 
     def test_006_delete_user(self):
-        user1 = self.user_sse()
+        user1 = self.user()
 
         self.assertResponse(me(user1, 'DELETE', password=True), 204)
         self.assertThread(user1)
@@ -76,8 +76,8 @@ class Test01_SSE(UnitTest):
 class Test03_SSEConnectionClose(UnitTest):
 
     def test_001_last_online(self):
-        user1 = self.user_sse()
-        user2 = self.user_sse()
+        user1 = self.user()
+        user2 = self.user()
 
         last_online = self.assertResponse(me(user1), 200, get_field='last_online')
         time.sleep(0.5)
@@ -89,8 +89,8 @@ class Test03_SSEConnectionClose(UnitTest):
         self.assertThread(user2)
 
     def test_002_leave_lobby_when_disconnect(self):
-        user1 = self.user_sse(['lobby-join'])
-        user2 = self.user_sse(['lobby-leave', 'lobby-update-participant'])
+        user1 = self.user(['lobby-join'])
+        user2 = self.user(['lobby-leave', 'lobby-update-participant'])
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
         self.assertResponse(join_lobby(user2, code), 201)

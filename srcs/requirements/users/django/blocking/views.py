@@ -1,9 +1,11 @@
 from lib_transcendence.exceptions import MessagesException
+from lib_transcendence.permissions import NotGuest
 from rest_framework import generics
 from rest_framework.exceptions import PermissionDenied
 
 from blocking.models import BlockedUsers
 from blocking.serializers import BlockedSerializer
+
 
 
 class BlockedMixin(generics.GenericAPIView):
@@ -12,11 +14,15 @@ class BlockedMixin(generics.GenericAPIView):
 
 
 class BlockedView(generics.ListCreateAPIView, BlockedMixin):
+    permission_classes = [NotGuest]
+
     def filter_queryset(self, queryset):
         return queryset.filter(user_id=self.request.user.id)
 
 
 class DeleteBlockedView(generics.DestroyAPIView, BlockedMixin):
+    permission_classes = [NotGuest]
+
     def get_object(self):
         try:
             return self.get_queryset().get(id=self.kwargs['blocking_id'], user_id=self.request.user.id)
