@@ -1,4 +1,5 @@
 import asyncio
+from typing import Any, Dict
 from lib_transcendence.auth import auth_verify
 from logging import info, debug, error
 from lib_transcendence.exceptions import MessagesException, ServiceUnavailable
@@ -22,12 +23,16 @@ async def connect(sid, environ, auth):
         user_data = auth_verify(token)
     except APIException as e:
         raise ConnectionRefusedError(e.detail)
+    if user_data is None:
+        raise ConnectionRefusedError(MessagesException.Authentication.NOT_AUTHENTICATED)
     id = user_data['id']
     try:
         game_data = request_game(endpoints.Game.fmatch_user.format(user_id=id), 'GET')
     except NotFound as e:
         raise ConnectionRefusedError(e.detail)
     except APIException as e:
+        raise ConnectionRefusedError(MessagesException.ServiceUnavailable.game)
+    if game_data is None:
         raise ConnectionRefusedError(MessagesException.ServiceUnavailable.game)
     game_id = game_data['id']
     if not Server.does_game_exist(game_id):

@@ -1,6 +1,5 @@
 from aiohttp import web
 from game_server import io_handlers
-from game_server import requests_handlers
 from game_server.match import Player, fetch_matches
 from game_server.game import Game
 from game_server.pong_position import Position
@@ -35,7 +34,6 @@ class Server:
         Server._sio = socketio.AsyncServer(async_mode='aiohttp', cors_allowed_origins='*', logger=False)
         Server._app = web.Application()
         Server._loop = asyncio.get_event_loop()
-        Server._app.add_routes([web.post('/create-game', requests_handlers.create_game)])
         Server._sio.attach(Server._app, socketio_path='/ws/game/') #TODO -> change with '/ws/game/'
         Server._sio.on('connect', handler=io_handlers.connect)
         Server._sio.on('disconnect', handler=io_handlers.disconnect)
