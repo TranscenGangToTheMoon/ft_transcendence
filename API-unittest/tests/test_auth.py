@@ -1,6 +1,6 @@
 import unittest
 
-from services.auth import register, register_guest, login, create_guest
+from services.auth import register, register_guest, login, create_guest, verify
 from services.play import play
 from services.user import me
 from utils.generate_random import rnstr
@@ -153,6 +153,35 @@ class Test03_Login(UnitTest):
 
     def test_004_missing_field(self):
         self.assertResponse(login(data={}), 400, {'username': ['This field is required.'], 'password': ['This field is required.']})
+
+
+class Test04_verify(UnitTest):
+
+    def test_001_verify(self):
+        user1 = self.user()
+
+        respone = self.assertResponse(verify(user1['token']), 200)
+        self.assertDictEqual({'id': user1['id'], 'username': user1['username'], 'is_guest': user1['is_guest']}, respone)
+        self.assertThread(user1)
+
+    def test_002_invalid_token(self):
+        user1 = self.user()
+
+        self.assertResponse(verify('12345798'), 401)
+        self.assertResponse(verify(user1['token'], ''), 401)
+        self.assertResponse(verify(user1['token'], 'Token '), 401)
+        self.assertThread(user1)
+
+    def test_003_no_token(self):
+        self.assertResponse(verify(None), 401)
+        self.assertResponse(verify(''), 401)
+
+    def test_004_delete_user(self):
+        user1 = self.user()
+
+        self.assertResponse(me(user1, 'DELETE', password=True), 204)
+        self.assertThread(user1)
+        self.assertResponse(verify(user1['token']), 401)
 
 
 if __name__ == '__main__':
