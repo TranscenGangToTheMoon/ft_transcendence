@@ -59,12 +59,14 @@ class Matchmaking:
 
     lobby = _base_matchmaking + 'lobby/'
     lobby_participant = lobby + '<str:code>/'
-    lobby_ban = lobby_participant + f'ban/{_user_id}/'
+    lobby_invite = lobby_participant + f'invite/{_user_id}/'
+    lobby_banned = lobby_participant + f'banned/{_user_id}/'
 
     tournament = _base_matchmaking + 'tournament/'
     tournament_search = tournament + 'search/'
     tournament_participant = tournament + '<str:code>/'
-    tournament_ban = tournament + f'<str:code>/ban/{_user_id}/'
+    tournament_invite = tournament_participant + f'invite/{_user_id}/'
+    tournament_banned = tournament_participant + f'ban/{_user_id}/'
 
     tournament_result_match = _base_private_matchmaking + 'tournament/result-match/'
 
@@ -91,8 +93,8 @@ class Users:
 
     fchat = _base_private_users + 'chat/{user1_id}/{username2}/'
     chat = fchat.format(user1_id='<int:user1_id>', username2='<str:username2>')
-    fare_blocked = _base_private_users + 'blocked/{user1_id}/{user2_id}/'
-    are_blocked = fare_blocked.format(user1_id='<int:user1_id>', user2_id='<int:user2_id>')
+    fare_friends = _base_private_users + 'friends/{user1_id}/{user2_id}/'
+    are_friends = fare_friends.format(user1_id='<int:user1_id>', user2_id='<int:user2_id>')
 
 
 class UsersManagement:

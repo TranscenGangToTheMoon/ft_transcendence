@@ -2,6 +2,7 @@ from rest_framework import generics
 from rest_framework.exceptions import NotAuthenticated, NotFound, APIException
 from lib_transcendence.exceptions import MessagesException
 from lib_transcendence import endpoints
+from lib_transcendence.permissions import GuestCannotDestroy
 from lib_transcendence.services import request_matchmaking, request_chat
 from lib_transcendence.sse_events import EventCode
 
@@ -14,6 +15,7 @@ from users.serializers import UsersSerializer, UsersMeSerializer, ManageUserSeri
 
 class UsersMeView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = UsersMeSerializer
+    permission_classes = [GuestCannotDestroy]
 
     def get_object(self):
         try:
@@ -56,7 +58,7 @@ class UsersMeView(generics.RetrieveUpdateDestroyAPIView):
         return super().destroy(request, *args, **kwargs)
 
 
-class RetrieveUserView(generics.RetrieveAPIView):
+class RetrieveUserView(generics.RetrieveAPIView): # todo delete
     queryset = Users.objects.all()
     serializer_class = UsersSerializer
 

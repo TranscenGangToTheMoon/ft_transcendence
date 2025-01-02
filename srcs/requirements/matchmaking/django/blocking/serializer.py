@@ -4,6 +4,7 @@ from lib_transcendence.exceptions import MessagesException
 from rest_framework import serializers
 from rest_framework.exceptions import NotFound
 
+from baning.utils import banned
 from blocking.models import Blocked
 from lobby.models import LobbyParticipants
 from play.models import Players
@@ -37,6 +38,7 @@ class BlockedSerializer(serializers.ModelSerializer):
             blocked_user = get_user_from_model(validated_data['blocked_user_id'], model)
             if blocked_user is not None:
                 if user.place.id == blocked_user.place.id and user.creator:
+                    banned(blocked_user, False)
                     blocked_user.delete()
 
         return super().create(validated_data)

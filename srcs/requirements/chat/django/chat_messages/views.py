@@ -1,4 +1,5 @@
 from rest_framework import generics
+from lib_transcendence.permissions import NotGuest
 from lib_transcendence.serializer import SerializerAuthContext
 from rest_framework.response import Response
 
@@ -10,6 +11,7 @@ from chat_messages.utils import get_chat_participants
 class RetrieveMessagesView(SerializerAuthContext, generics.ListAPIView):
     queryset = Messages.objects.all().order_by('-sent_at')
     serializer_class = MessagesSerializer
+    permission_classes = [NotGuest]
 
     def filter_queryset(self, queryset):
         chat_id = self.kwargs['chat_id']

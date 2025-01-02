@@ -1,15 +1,21 @@
-from rest_framework import permissions
+from rest_framework.permissions import BasePermission
+from rest_framework.exceptions import PermissionDenied
+from lib_transcendence.exceptions import MessagesException
 
 from guest.group import is_guest
 
 
-class IsNotAuthenticated(permissions.BasePermission):
+class IsNotAuthenticated(BasePermission):
 
     def has_permission(self, request, view):
-        return not request.user.is_authenticated
+        if request.user.is_authenticated:
+            raise PermissionDenied(MessagesException.PermissionDenied.ALREADY_AUTHENTICATED)
+        return True
 
 
-class IsGuest(permissions.BasePermission):
+class IsGuest(BasePermission):
 
     def has_permission(self, request, view):
-        return is_guest(request)
+        if not is_guest(request):
+            raise PermissionDenied(MessagesException.PermissionDenied.GUEST_REQUIRED)
+        return True

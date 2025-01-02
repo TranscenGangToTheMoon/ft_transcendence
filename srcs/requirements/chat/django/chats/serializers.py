@@ -1,5 +1,5 @@
 from lib_transcendence import endpoints
-from lib_transcendence.Chat import ChatType
+from lib_transcendence.chat import ChatType
 from lib_transcendence.auth import get_auth_user
 from lib_transcendence.exceptions import MessagesException, ResourceExists
 from lib_transcendence.services import request_users
@@ -71,9 +71,6 @@ class ChatsSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         request = self.context.get('request')
         user = get_auth_user(request)
-
-        if user['is_guest']:
-            raise PermissionDenied(MessagesException.PermissionDenied.GUEST_CREATE_CHAT)
 
         username = validated_data.pop('username')
         if username == user['username']:

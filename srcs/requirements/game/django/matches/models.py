@@ -10,7 +10,6 @@ class Matches(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     game_duration = models.DurationField(default=timedelta(minutes=3))
     finished = models.BooleanField(default=False)
-    port = models.IntegerField(null=True, default=None)
     tournament_id = models.IntegerField(null=True)
     tournament_stage_id = models.IntegerField(null=True)
 

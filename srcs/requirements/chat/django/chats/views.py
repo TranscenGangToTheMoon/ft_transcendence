@@ -1,6 +1,7 @@
-from lib_transcendence.Chat import ChatType
+from lib_transcendence.chat import ChatType
 from lib_transcendence.serializer import SerializerAuthContext
 from lib_transcendence.utils import get_host
+from lib_transcendence.permissions import NotGuest
 from rest_framework import generics, status
 from rest_framework.response import Response
 
@@ -11,6 +12,7 @@ from chats.serializers import ChatsSerializer
 
 class ChatsView(generics.ListCreateAPIView):
     serializer_class = ChatsSerializer
+    permission_classes = [NotGuest]
 
     def get_queryset(self):
         query = self.request.data.pop('q', None)
@@ -26,6 +28,7 @@ class ChatsView(generics.ListCreateAPIView):
 
 
 class ChatView(SerializerAuthContext, generics.RetrieveDestroyAPIView):
+    permission_classes = [NotGuest]
     serializer_class = ChatsSerializer
     lookup_field = 'chat_id'
 

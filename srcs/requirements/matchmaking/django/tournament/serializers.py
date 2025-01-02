@@ -1,10 +1,16 @@
+from datetime import datetime, timezone
+from typing import Literal
+
+from lib_transcendence import endpoints
 from lib_transcendence.auth import get_auth_user
 from lib_transcendence.exceptions import MessagesException
 from lib_transcendence.generate import generate_code
+from lib_transcendence.services import request_game
+from lib_transcendence.sse_events import create_sse_event, EventCode
 from rest_framework import serializers
-from rest_framework.exceptions import PermissionDenied
 
 from blocking.utils import create_player_instance
+from matchmaking.create_match import create_tournament_match
 from matchmaking.utils.participant import get_participants
 from matchmaking.utils.place import get_tournament, verify_place
 from matchmaking.utils.user import verify_user
@@ -51,9 +57,6 @@ class TournamentSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         request = self.context.get('request')
         user = get_auth_user(request)
-
-        if user['is_guest']:
-            raise PermissionDenied(MessagesException.PermissionDenied.GUEST_CANNOT_CREATE_TOURNAMENT)
 
         verify_user(user['id'], True)
 
@@ -106,15 +109,7 @@ class TournamentParticipantsSerializer(serializers.ModelSerializer):
             validated_data['creator'] = True
         validated_data['user_id'] = user['id']
         validated_data['tournament'] = tournament
-        result = super().create(validated_data)
-        # todo websocket: send to tournament chat that user 'xxx' join team
-
-        if tournament.size == tournament.participants.count():
-            tournament.start()
-        # if tournament.start_at is None and int(tournament.size * (80 / 100)) < tournament.participants.count(): todo make
-        #     Thread(target=tournament.start_timer).start()
-
-        return result
+        return super().create(validated_data)
 
 
 class TournamentSearchSerializer(serializers.ModelSerializer):
@@ -135,3 +130,58 @@ class TournamentSearchSerializer(serializers.ModelSerializer):
     @staticmethod
     def get_n_participants(obj):
         return obj.participants.count()
+
+
+class TournamentResultMatchSerializer(serializers.Serializer):
+    tournament_id = serializers.IntegerField()
+    game_id = serializers.IntegerField()
+    winner = serializers.IntegerField()
+    loser = serializers.IntegerField()
+
+    def validate_tournament_id(self, value):
+        self.context['tournament'] = get_tournament(id=value)
+        return value
+
+    def validate_user(self, value, field: Literal['winner', 'looser']):
+        try:
+            self.context[field] = self.context['tournament'].participants.get(user_id=value)
+        except TournamentParticipants.DoesNotExist:
+            raise serializers.ValidationError(MessagesException.NotFound.USER)
+        return value
+
+    def validate_winner(self, value):
+        return self.validate_user(value, 'winner')
+
+    def validate_looser(self, value):
+        return self.validate_user(value, 'looser')
+
+    def create(self, validated_data):
+        tournament = self.context['tournament']
+        participants = list(tournament.participants.all().values_list('user_id', flat=True))
+        create_sse_event(participants, EventCode.TOURNAMENT_MATCH_FINISH, validated_data)
+        current_stage = self.context['winner'].stage
+        finished = self.context['winner'].win()
+        self.context['looser'].eliminate()
+
+        if finished is not None:
+            data = TournamentSerializer(tournament).data
+            data['finish_at'] = datetime.now(timezone.utc)
+            data['stages'] = TournamentStageSerializer(tournament.stages.all(), many=True).data
+            request_game(endpoints.Game.tournaments, data=data)
+            tournament.delete()
+            create_sse_event(participants, EventCode.TOURNAMENT_FINISH, {'id': tournament.id, 'name': tournament.name}, {'name': tournament.name, 'username': [validated_data['winner']]})
+        else:
+            if not current_stage.participants.filter(still_in=True).exists():
+                participants = tournament.participants.filter(still_in=True).order_by('index')
+                ct = participants.count()
+
+                for i in range(0, ct, 2):
+                    create_tournament_match(
+                        tournament.id,
+                        participants[i].stage.id,
+                        [
+                            [participants[i].user_id],
+                            [participants[i + 1].user_id]
+                        ]
+                    )
+        return super().create(validated_data)

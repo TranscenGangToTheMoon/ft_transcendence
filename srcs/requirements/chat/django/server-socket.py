@@ -8,7 +8,7 @@ from aiohttp import web
 from asgiref.sync import async_to_sync, sync_to_async
 from connectedUsers import ConnectedUsers
 from lib_transcendence.auth import auth_verify
-from lib_transcendence.services import post_messages
+from lib_transcendence.chat import post_messages
 from lib_transcendence.services import request_chat
 from lib_transcendence.endpoints import Chat as endpoint_chat
 from rest_framework.exceptions import APIException

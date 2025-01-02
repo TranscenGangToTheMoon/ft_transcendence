@@ -5,7 +5,7 @@ from lib_transcendence.exceptions import MessagesException
 from lib_transcendence.services import request_auth, get_auth_token
 from rest_framework import serializers
 from rest_framework.authentication import BaseAuthentication
-from rest_framework.exceptions import AuthenticationFailed, NotAuthenticated
+from rest_framework.exceptions import AuthenticationFailed, NotAuthenticated, ParseError
 
 
 def get_user_from_auth(user_data):
@@ -21,6 +21,9 @@ class AbstractAuthentication(ABC, BaseAuthentication):
         pass
 
     def authenticate(self, request):
+        if not isinstance(request.data, dict):
+            raise ParseError(MessagesException.ValidationError.DATA)
+
         token = request.headers.get('Authorization')
 
         if not token:
@@ -34,7 +37,6 @@ class AbstractAuthentication(ABC, BaseAuthentication):
         except AuthenticationFailed as e:
             if e.detail['code'] == MessagesException.Authentication.USER_NOT_FOUND['code']:
                 raise AuthenticationFailed(MessagesException.Authentication.USER_NOT_FOUND)
-            print('CACA ==================', e.detail, e, flush=True)
             raise e
         if json_data is None:
             raise AuthenticationFailed(MessagesException.Authentication.AUTHENTICATION_FAILED)
@@ -61,4 +63,6 @@ def get_auth_user(request=None):
 def auth_verify(token=None, request=None):
     if request is not None:
         token = get_auth_token(request)
+    elif token is None:
+        raise NotAuthenticated(MessagesException.Authentication.NOT_AUTHENTICATED)
     return request_auth(token, Auth.verify, method='GET')

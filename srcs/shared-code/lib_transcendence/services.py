@@ -56,25 +56,5 @@ def request_auth(token, endpoint: Literal['update/', 'verify/', 'delete/'], meth
     return request_service('auth', endpoint, method, data, token)
 
 
-def create_sse_event( # todo better handle error
-        users: list[int] | int,
-        event_code: EventCode,
-        data: dict | None = None,
-        kwargs: dict | None = None,
-):
-    sse_data = {
-        'users_id': [users] if isinstance(users, int) else users,
-        'event_code': event_code.value,
-    }
-
-    if data is not None:
-        sse_data['data'] = data
-
-    if kwargs is not None:
-        sse_data['kwargs'] = kwargs
-
-    return request_service('users', endpoints.Users.event, 'POST', sse_data)
 
 
-def post_messages(chat_id: int, content: str, token: str):
-    return request_service('chat', endpoints.Chat.fmessage.format(chat_id=chat_id), 'POST', {'content': content}, token)

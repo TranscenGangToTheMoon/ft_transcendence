@@ -1,11 +1,10 @@
-from datetime import datetime, timezone
 from typing import Literal
 
 from django.db.models import Q
 from lib_transcendence.exceptions import MessagesException
+from lib_transcendence.permissions import GuestCannotCreate
 from lib_transcendence.serializer import SerializerAuthContext
-from lib_transcendence.services import request_game
-from lib_transcendence import endpoints
+from lib_transcendence.sse_events import EventCode
 from rest_framework import generics, serializers, status
 from rest_framework.exceptions import PermissionDenied, NotFound
 from rest_framework.permissions import AllowAny
@@ -13,16 +12,16 @@ from rest_framework.response import Response
 
 from blocking.models import Blocked
 from blocking.utils import create_player_instance, delete_player_instance
-from matchmaking.create_match import create_tournament_match
 from matchmaking.utils.participant import get_tournament_participant
 from matchmaking.utils.place import get_tournament
+from matchmaking.utils.sse import send_sse_event
 from tournament.models import Tournament, TournamentParticipants
-from tournament.serializers import TournamentSerializer, TournamentStageSerializer, TournamentParticipantsSerializer, \
-    TournamentSearchSerializer
+from tournament.serializers import TournamentSerializer, TournamentParticipantsSerializer, TournamentSearchSerializer, TournamentResultMatchSerializer
 
 
 class TournamentView(generics.CreateAPIView, generics.RetrieveAPIView):
     serializer_class = TournamentSerializer
+    permission_classes = [GuestCannotCreate]
 
     def get_object(self):
         try:
@@ -60,72 +59,36 @@ class TournamentParticipantsView(SerializerAuthContext, generics.ListCreateAPIVi
     pagination_class = None
 
     def filter_queryset(self, queryset):
-        tournament = get_tournament(code=self.kwargs.get('code'))
+        tournament = get_tournament(code=self.kwargs['code'])
         queryset = queryset.filter(tournament_id=tournament.id)
         if not queryset.filter(user_id=self.request.user.id).exists():
             raise PermissionDenied(MessagesException.PermissionDenied.NOT_BELONG_TOURNAMENT)
         return queryset
 
     def get_object(self):
-        return get_tournament_participant(get_tournament(code=self.kwargs.get('code')), self.request.user.id)
+        return get_tournament_participant(get_tournament(code=self.kwargs['code']), self.request.user.id)
 
     def create(self, request, *args, **kwargs):
         serializer_participant = TournamentParticipantsSerializer(data=request.data, context=self.get_serializer_context())
         if serializer_participant.is_valid():
-            instance = serializer_participant.save()
-            serializer_tournament = TournamentSerializer(instance.tournament, context=self.get_serializer_context())
+            self.perform_create(serializer_participant)
+            serializer_tournament = TournamentSerializer(serializer_participant.instance.tournament, context=self.get_serializer_context())
             return Response(serializer_tournament.data, status=status.HTTP_201_CREATED)
         return Response(serializer_participant.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def perform_create(self, serializer):
+        super().perform_create(serializer)
+        send_sse_event(EventCode.TOURNAMENT_JOIN, serializer.instance, serializer.data, self.request)
+
+        # if tournament.size == tournament.participants.count():
+        #     tournament.start() # todo make
+        # if tournament.start_at is None and int(tournament.size * (80 / 100)) < tournament.participants.count(): todo make
+        #     Thread(target=tournament.start_timer).start()
 
 
 class TournamentResultMatchView(generics.CreateAPIView):
     permission_classes = [AllowAny]
-
-    def create(self, request, *args, **kwargs):
-        tournament = get_tournament(id=request.data.get('tournament_id'))
-
-        current_stage = None
-        finished = None
-        for player in ('winner', 'loser'):
-            # todo websocket: send to chat tournament that 'xxx' win the game
-            user_id = request.data.get(player)
-            if user_id is None:
-                raise serializers.ValidationError(MessagesException.ValidationError.REQUIRED.format(player.title()))
-            try:
-                participant = tournament.participants.get(user_id=user_id)
-                if current_stage is None:
-                    current_stage = participant.stage
-                if player == 'winner':
-                    finished = participant.win()
-                else:
-                    participant.eliminate()
-            except TournamentParticipants.DoesNotExist:
-                raise NotFound(MessagesException.NotFound.USER)
-
-        if finished is not None:
-            data = TournamentSerializer(tournament).data
-            data['finish_at'] = datetime.now(timezone.utc)
-            data['stages'] = TournamentStageSerializer(tournament.stages.all(), many=True).data
-            request_game(endpoints.Game.tournaments, data=data)
-            tournament.delete()
-            # todo websocket: send to chat tournament that 'xxx' win the tournament
-            return Response(f'The tournament is over, and player {finished} is the winner!', status=200) # todo remake
-
-        if not current_stage.participants.filter(still_in=True).exists():
-            participants = tournament.participants.filter(still_in=True).order_by('index')
-            ct = participants.count()
-
-            for i in range(0, ct, 2):
-                create_tournament_match(
-                    tournament.id,
-                    participants[i].stage.id,
-                    [
-                        [participants[i].user_id],
-                        [participants[i + 1].user_id]
-                    ]
-                )
-
-        return Response('The match result has been successfully recorded.', status=201) # todo remake
+    serializers_class = TournamentResultMatchSerializer
 
 
 tournament_view = TournamentView.as_view()

@@ -1,10 +1,9 @@
 from django.db import models
 from lib_transcendence.game import GameMode
 from lib_transcendence.Lobby import MatchType, Teams
-from lib_transcendence.sse_events import EventCode
-from lib_transcendence.services import create_sse_event
+from lib_transcendence.sse_events import EventCode, create_sse_event
 
-from baning.models import delete_baned
+from baning.models import delete_banned
 from blocking.utils import delete_player_instance
 from matchmaking.utils.sse import send_sse_event
 
@@ -50,7 +49,7 @@ class Lobby(models.Model):
         self.save()
 
     def delete(self, using=None, keep_parents=False):
-        delete_baned(self.code)
+        delete_banned(self.code)
         super().delete(using=using, keep_parents=keep_parents)
 
     def __str__(self):

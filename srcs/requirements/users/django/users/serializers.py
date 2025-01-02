@@ -1,5 +1,5 @@
 from lib_transcendence import endpoints
-from lib_transcendence.Chat import AcceptChat
+from lib_transcendence.chat import AcceptChat
 from lib_transcendence.exceptions import MessagesException
 from lib_transcendence.services import request_chat
 from rest_framework import serializers
