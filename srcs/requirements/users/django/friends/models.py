@@ -4,10 +4,12 @@ from users.models import Users
 
 
 class Friends(models.Model):
-    friends = models.ManyToManyField(Users, symmetrical=False)
+    user_1 = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='friend_1')
+    user_2 = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='friend_2')
     friends_since = models.DateTimeField(auto_now_add=True)
     matches_play_against = models.PositiveIntegerField(default=0)
-    user1_win = models.PositiveIntegerField(default=0)  # todo remake
+    user1_win = models.PositiveIntegerField(default=0)
+    user2_win = models.PositiveIntegerField(default=0)
     matches_played_together = models.PositiveIntegerField(default=0)
     matches_won_together = models.PositiveIntegerField(default=0)
 
@@ -22,6 +24,3 @@ class Friends(models.Model):
             self.matches_won_together += 1
         self.matches_played_together += 1
         self.save()
-
-    def __str__(self):
-        return f'{self.id} {" - ".join([user.username for user in self.friends.all()])}'

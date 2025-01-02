@@ -54,9 +54,7 @@ class FriendRequestView(SerializerKwargsContext, generics.CreateAPIView, generic
 
     def perform_create(self, serializer):
         super().perform_create(serializer)
-
-        sender_friend_request = serializer.instance.friends.exclude(id=self.request.user.id).first()
-        publish_event(sender_friend_request, EventCode.ACCEPT_FRIEND_REQUEST, data=serializer.data)
+        publish_event(serializer.instance.user_1, EventCode.ACCEPT_FRIEND_REQUEST, data=serializer.data)
 
     def perform_destroy(self, instance):
         user_id = self.request.user.id
