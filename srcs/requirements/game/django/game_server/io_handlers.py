@@ -13,6 +13,8 @@ from game_server.match import Match
 async def connect(sid, environ, auth):
     from game_server.server import Server
     token = auth.get('token')
+    if token is None:
+        raise ConnectionRefusedError(MessagesException.Authentication.NOT_AUTHENTICATED)
     token = 'Bearer ' + token
     try:
         user_data = auth_verify(token)
