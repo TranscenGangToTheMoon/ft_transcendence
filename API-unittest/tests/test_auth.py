@@ -1,14 +1,11 @@
 import unittest
 
-from services.auth import register, register_guest, login, create_guest, verify
+from services.auth import register, register_guest, login, create_guest, verify, refresh
 from services.play import play
 from services.user import me
 from utils.generate_random import rnstr
 from utils.my_unittest import UnitTest
 
-
-# todo test refresh
-# todo test verify
 
 class Test01_Register(UnitTest):
 
@@ -155,7 +152,7 @@ class Test03_Login(UnitTest):
         self.assertResponse(login(data={}), 400, {'username': ['This field is required.'], 'password': ['This field is required.']})
 
 
-class Test04_verify(UnitTest):
+class Test04_Verify(UnitTest):
 
     def test_001_verify(self):
         user1 = self.user()
@@ -182,6 +179,20 @@ class Test04_verify(UnitTest):
         self.assertResponse(me(user1, 'DELETE', password=True), 204)
         self.assertThread(user1)
         self.assertResponse(verify(user1['token']), 401)
+
+
+class Test05_Refresh(UnitTest):
+
+    def test_001_refresh(self):
+        user1 = self.user()
+
+        response = self.assertResponse(refresh(user1['refresh']), 200)
+        user1['token'] = response['access']
+        self.assertResponse(me(user1), 200)
+        self.assertThread(user1)
+
+    def test_002_refresh_invalid_token(self):
+        self.assertResponse(refresh('12345798'), 401)
 
 
 if __name__ == '__main__':

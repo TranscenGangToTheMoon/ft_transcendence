@@ -82,3 +82,14 @@ def verify(token, token_type='Bearer '):
         token=token,
         token_type=token_type,
     )
+
+
+def refresh(token, data=None):
+    if data is None:
+        data = {'refresh': token}
+    return make_request(
+        endpoint='auth/refresh/',
+        method='POST',
+        token=token,
+        data=data,
+    )
