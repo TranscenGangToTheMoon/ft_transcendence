@@ -1,7 +1,7 @@
 from lib_transcendence.sse_events import EventCode, create_sse_event
 from lib_transcendence.users import retrieve_users
 
-
+# todo send online friends endpoint
 def send_sse_event(event: EventCode, instance, data=None, exclude_myself=True):
     if data is None:
         data = {}
