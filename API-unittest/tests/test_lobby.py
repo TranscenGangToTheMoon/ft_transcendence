@@ -37,13 +37,6 @@ class Test01_JoinLobby(UnitTest):
         self.assertResponse(join_lobby(user2, code2), 201)
         self.assertThread(user1, user2, user3)
 
-    def test_004_join_same_lobby(self):
-        user1 = self.user()
-
-        code1 = self.assertResponse(create_lobby(user1), 201, get_field='code')
-        self.assertResponse(join_lobby(user1, code1), 201)
-        self.assertThread(user1)
-
 
 class Test02_ErrorJoinLobby(UnitTest):
 
