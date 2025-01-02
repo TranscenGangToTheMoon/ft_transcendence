@@ -28,7 +28,6 @@ def make_request(endpoint, method: Literal['GET', 'POST', 'DELETE', 'PATCH', 'PU
         headers=headers,
         data=data,
         verify=False,
-        # verify='../../secrets/ssl.crt', todo
     )
 
     print(f'{method} {endpoint} => {r.status_code} - {data}', flush=True)

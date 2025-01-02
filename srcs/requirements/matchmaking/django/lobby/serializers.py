@@ -93,7 +93,7 @@ class LobbySerializer(serializers.ModelSerializer):
             creator.team = Teams.a
             creator.save()
         return result
-# todo add all venv var in .venv
+
     def update(self, instance, validated_data):
         if 'game_mode' in validated_data:
             raise PermissionDenied(MessagesException.PermissionDenied.CANNOT_UPDATE_GAME_MODE)
