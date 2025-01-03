@@ -17,7 +17,7 @@
 			reverse_proxy http://chat:8010
 		}
 		handle /ws/game/* {
-		reverse_proxy http://game:5500
+			reverse_proxy http://game:5500
 		}
 	}
 

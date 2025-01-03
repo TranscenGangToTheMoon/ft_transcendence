@@ -1,32 +1,103 @@
-# Game Server and Game Server Launcher Docs
+# Game Server Docs
 
-## Game Server Launcher
+# Game Server
 
-The Game Server Launcher is an automated program ran from a django view matching a PUT request on /api/match
-This means a PUT request on .../api/match with the corresponding API informations provided will make the code run
+## Basic working
+The matchmaking service is always waiting for a new player, it handles a queue for each game modes and forms teams for each match it creates.
 
-When the view is requested, the Django server will create a subprocess and run a Game Server with forwarded stdout, it will then read stdout from this subprocess until it gets an output matching the regex ```r'^Port:\s(\d+)\n?'```\
-Getting the right output makes the django server stopping listening to the subprocess meaning that the server is started and doesn't need being monitored anymore, it'll make its life by itself
-Once the django server got the port (on success of the subprocess to bind a port), it can push it to another service that remains always connected with the client to give it the information that a port has been binded for that specific game and it can now begin a direct socketIO connection to the all-new Game Server.
+Once it has created a match it sends it to the game service that will create the instance of a match in it's own database and then send a request to the game server that is also a aiohttp/socketIO server.
 
-## Game Server
+The game server then creates it's own instance of a match in its cache and launches a dedicated thread to this match.
+The thread can now wait for players for `GAME_PLAYER_CONNECT_TIMEOUT` seconds.
 
-### Basic working
+Once all players are connected it launches a countdown for 2 seconds and start the first point. Every point in the game will be the same operation as it.
 
-The Game Server starts automatically after a match has been processed by django, it will bind an available port on the server between ```GAME_SERVER_MIN_PORT``` and ```GAME_SERVER_MAX_PORT```.\
-Once the port is bind, the server will wait for player connecting and start a game once every player is connected.\
-To connect, a player needs to have a valid authentication token that lets it play the game (he must be part of the match) if he's not authenticated as a player in that game, the server will only send him informations about the game and consider he's just spectating.\
-The server will not listen any information coming from a viewer.\
-If the user is authenticated as a player for this match then the server will listen to every input from that client and update the game in subconsequently
+And the game finshed, there is a winner! It's time to disconnect form the server. All clients will automatically be disconnected by the server and the match instance updated is saved in database, with funny informations such as 'against is own camp scores' or 'number of hits'
 
-The Game Server will send every client via SocketIO all informations and update on the running game but only listen for inputs from authenticated players for this game
+## connect via SocketIO
 
-As the server is on the same container as the django server and written in the same language (python), it can use the Django ORM to communicate with the DataBase, really easing the communication between those independant servers.
+Once the game has been registered on the game server, the server-sent events service will inform all clients, they can connect to the socketIO server, it will automatically start the game once all players have join.
 
-### connect via SocketIO
+Here's a sample code to connect to the server:
+```javascript
+const host = window.location.origin;
+let socket = io(host, {
+    transports: ["websocket"],
+    path: "/ws/game/",
+    auth : {
+        "id": userInformations.id,
+        "token": '<token>',
+        "match-code": '<match-code>', //only if you want to spectate
+    },
+});
+//This comes from the javascript code included in the frontend
+```
 
-### authenticate as player
+## authenticate as player
+As you connect, you need to provide your aothentication token
 
-### send input update
+If the id the client provided is registered as a player in a running game, it'll be accepted as a player and get player privileges
 
-### receive game update
+If the id the client provided is not registered as a player or there is no id field in auth, then the server will check for a match to spectate with the match code the client provided, if there is no match-code in the auth token, the connection will be refused.
+You'll understand that everyone can spectate every online matches from the moment they have the valid match-code
+
+## send input update
+If the client is registered as a player, it'll have all players privileges from the server view. Meaning the client can send move_up, move_down, and stop_moving socketIO events and the server will listen for it
+
+`move_up` : the client is moving up from now, it sends a `move_up` event that tells the server its racket is moving up.
+```javascript
+socket.emit('move_up');
+```
+`move_down` : the client is moving down from now, it sends a `move_down` event that tells the server its racket is moving down.
+```javascript
+socket.emit('move_down');
+```
+`stop_moving` : the client stopped moving, it sends a stop_moving event that tells the server it stopped moving and at what y coordinate the racket is.
+```javascript
+socket.emit('stop_moving', {'position': myRacket.y}
+```
+
+## receive game update
+Once all players have connected to the game server, it will send the basic informations such as, what team you are (`'team_a'` or `'team_b'`) or the canvas size, needed by the client to match coordinates of the server or do approximations.
+
+Here's how to handle it on JS:
+```javascript
+socket.on('team_id', event => {
+	team = event.team;
+})
+socket.on('canvas', event => {
+	canvas.height = event.canvas_height;
+	canvas.width = event.canvas_width;
+})
+```
+
+Every client successfully connected to the sockerIO game server will receive new events for the game they joined
+The client needs to handle the same events it sends but in every events the server sends will be one more field designating the client that moved so it can retreive the right racket to update.
+
+Here's a sample code form the JS web client we provide:
+```javascript
+socket.on('move_up', event => {
+    console.log('move_up received');
+    rackets[event.id].speed = -1;
+})
+socket.on('move_down', event => {
+    console.log('move_down received');
+    rackets[event.id].speed = 1;
+})
+socket.on('stop_moving', event => {
+    console.log('received stop_moving')
+    rackets[event.id].speed = 0;
+    rackets[event.id].y = event.position;
+})
+```
+
+The server will also send some game update every time the ball hits something, here is how to handle it in JS:
+```javascript
+socket.on('game_state', event => {
+    ball.y = event.position_y;
+    ball.x = event.position_x;
+    ball.speedX = event.speed_x;
+    ball.speedY = event.speed_y;
+    ball.speed = event.speed;
+})
+```
