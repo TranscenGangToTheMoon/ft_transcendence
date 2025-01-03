@@ -509,6 +509,23 @@ class Test08_InviteTournament(UnitTest):
         self.assertThread(user1, user2, user3)
 
 
+class Test09_StartTournament(UnitTest):
+
+    def test_001_start_tournament_full(self):
+        user1 = self.user(['tournament-join'] * 3 + ['tournament-start'])
+        user2 = self.user(['tournament-join'] * 2 + ['tournament-start'])
+        user3 = self.user(['tournament-join'] + ['tournament-start'])
+        user4 = self.user(['tournament-start'])
+
+        code = self.assertResponse(create_tournament(user1), 201, get_field='code')
+        self.assertResponse(join_tournament(user2, code), 201)
+        self.assertResponse(join_tournament(user3, code), 201)
+        self.assertResponse(join_tournament(user4, code), 201)
+
+        respone = self.assertResponse(create_tournament(user1, method='GET'), 200)
+        self.assertThread(user1, user2, user3, user4)
+
+
 # todo test start after make it
 # todo test leave tournament after start
 # todo test stage
