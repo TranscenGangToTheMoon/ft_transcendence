@@ -10,6 +10,7 @@ class ConnectedUsers:
 			'chat_with_id': chat_with_id,
 		}
 		self.users_id[id] = {
+			'sid': sid,
 			'chat_id': chat_id,
 		}
 
@@ -17,6 +18,17 @@ class ConnectedUsers:
 		user = self.users_sid.pop(sid, None)
 		if user:
 			self.users_id.pop(user['user_id'], None)
+
+	def is_user_connected(self, id):
+		if self.users_id.get(id):
+			return True
+		return False
+
+	def get_user_sid(self, id):
+		user = self.users_id.get(id)
+		if user:
+			return user['sid']
+		return None
 
 	def get_chat_id(self, sid):
 		user = self.users_sid.get(sid)

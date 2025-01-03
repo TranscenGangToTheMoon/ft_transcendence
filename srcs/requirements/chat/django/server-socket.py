@@ -40,6 +40,9 @@ async def connect(sid, environ, auth):
         try:
             print(f"Trying to authentificate : {sid}")
             user = auth_verify(token)
+            if (usersConnected.is_user_connected(user['id'])):
+                print(f"User already connected : {sid}")
+                await sio.disconnect(usersConnected.get_user_sid(user['id']))
             chat = request_chat(endpoint_chat.fchat.format(chat_id=chatId), 'GET', None, token)
             print(f"Connection successeeded {sid}")
             await sio.emit('debug', user, to=sid)

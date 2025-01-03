@@ -75,7 +75,7 @@ async function connect(token, chatData) {
 		console.log(error);
 		return false;
 	}
-	let socket = await io("wss://localhost:4443", {
+	let socket = await io("/", {
 		path: "/ws/chat/",
 		transports: ['websocket'],
 		auth: {
@@ -102,8 +102,6 @@ function closeChat()
 	catch (error) {
 		console.log(error);
 	}
-	document.getElementById('chatView').style.display = 'none';
-	document.getElementById('messages').innerHTML = "";
 }
 
 
@@ -152,7 +150,7 @@ function setupSocketListeners(chatData)
 		console.log('You\'ve got some issues mate');
 		if (data.error === 401){
 			console.log('reattempting connection');
-			connect(await refreshToken(), chatData.chatId);
+			await connect(await refreshToken(), chatData.chatId);
 		}
 		else {
 			lastClick = undefined;
@@ -162,6 +160,9 @@ function setupSocketListeners(chatData)
 	
 	socket.on("disconnect", () => {
 		console.log("Disconnected from the server");
+		lastClick = undefined;
+		document.getElementById('chatView').style.display = 'none';
+		document.getElementById('messages').innerHTML = "";
 	});
 	
 	socket.on("message", (data) => {
@@ -231,11 +232,9 @@ async function createUserCard(chatData) {
 		e.preventDefault();
 		try {
 			const response = await apiRequest(getAccessToken(), `${baseAPIUrl}/chat/${chatData.chatId}/`, 'DELETE');
-			console.log('Delete chat view');
-			console.log(response);
 			document.getElementById('chatListElement' + chatData.target).remove();
 			lastClick = undefined;
-			console.log('Chat deleted', lastClick);
+			console.log('Chat view deleted', lastClick);
 		}catch(error){
 			console.log(error);
 		}
@@ -243,16 +242,15 @@ async function createUserCard(chatData) {
 	chatUserCard.addEventListener('click', async e => {
 		if (lastClick === e.target.closest('#chatListElement' + chatData.target)) return;
 		if (e.target === chatUserCard.querySelector('.chatUserCardButtonDeleteChat')) return;
-		console.log("lastClickBefore: ",lastClick);
-		console.log("lastClickActual: ",e.target);
-		lastClick = e.target.closest('#chatListElement' + chatData.target);
 		console.log("lastClickAfter: ",lastClick);
-		connect(getAccessToken(), chatData);
+		await connect(getAccessToken(), chatData);
+		lastClick = e.target.closest('#chatListElement' + chatData.target);
 	});
 }
 
-async function getMoreChats(chatData){
+async function getMoreChats(){
 	if (!nextChatsRequest) return;
+	if (nextChatsRequest.substring(0, 5) === "https") return;
 	nextChatsRequest = `${nextChatsRequest.substring(0, 4)}s${nextChatsRequest.substring(4)}`
 	try {
 		let apiAnswer = await apiRequest(getAccessToken(), nextChatsRequest);
@@ -284,6 +282,8 @@ async function selectChatMenu(filter='') {
 				data = parsChatRequest(element);
 				await createUserCard(data);
 			});
+			nextChatsRequest = apiAnswer.next;
+			console.log('chats fouuuuuuuuuuuuuuuuuuuuuuuuuuuuund', nextChatsRequest);
 		}
 		else {
 			console.log('no chats found');
@@ -297,21 +297,23 @@ async function selectChatMenu(filter='') {
 async function startChat(username) {
 	try{
 		const apiAnswer = await apiRequest(getAccessToken(), `${baseAPIUrl}/chat/?q=${username}`);
+		let chatData = undefined;
 		if (apiAnswer.count === 0)
 		{
 			console.log('Chat doesn\'t exist: creating chat');
 			const newchat = await apiRequest(getAccessToken(), `${baseAPIUrl}/chat/`, 'POST', undefined, undefined, {'username': username, 'type':"private_message"});
 			console.log(newchat);
-			let chatData = parsChatRequest(newchat);
-			createUserCard(chatData);
-			connect(getAccessToken(), chatData);
+			chatData = parsChatRequest(newchat);
+			await connect(getAccessToken(), chatData);
 		}
 		else {
 			console.log('Chat already exist: loading chat');
-			let chatData = parsChatRequest(apiAnswer.results[0]);
-			connect(getAccessToken(), chatData);
+			chatData = parsChatRequest(apiAnswer.results[0]);
+			await connect(getAccessToken(), chatData);
 		}
 		lastClick = document.getElementById("chatListElement" + chatData.target);
+		document.getElementById('searchChatForm').reset();
+		selectChatMenu();
 		console.log('Chat started', lastClick);
 	}
 	catch(error) {
@@ -366,9 +368,9 @@ document.addEventListener('scroll', async event => {
 		const clientHeight = chatsListBox.clientHeight;
 		const scrollTop = chatsListBox.scrollTop;
 		const scrollPercentage = (scrollTop / (scrollHeight - clientHeight)) * 100;
-		if (scrollPercentage >= 75 && !loading) {
+		if (scrollPercentage >= 85 && !loading) {
 			loading = true;
-			await getMoreChats(chatData);
+			await getMoreChats();
 			loading = false;
 		}
 		console.log('scrolling in chatsList');
