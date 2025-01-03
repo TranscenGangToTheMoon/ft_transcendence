@@ -108,7 +108,7 @@ async function getMoreFriendRequests() {
         nextFriendRequest = data.next;
         for (result of data.results){
             const requestDiv = document.createElement('div');
-            requestDiv.id = result.id;
+            requestDiv.id = `fr${result.id}`;
             friendRequestsDiv.appendChild(requestDiv);
             await loadContent('/friends/friendRequestBlock.html', `${requestDiv.id}`);
             requestDiv.querySelector(`.senderUsernae`).innerText = result.sender.username;
@@ -148,7 +148,7 @@ async function getMoreSentFriendRequests() {
         nextSentFriendRequest = data.next;
         for (result of data.results){
             const requestDiv = document.createElement('div');
-            requestDiv.id = result.id;
+            requestDiv.id = `fr${result.id}`;
             friendRequestsDiv.appendChild(requestDiv);
             await loadContent(`/friends/sentFriendRequestBlock.html`, `${requestDiv.id}`);
             requestDiv.querySelector(`.receiverUsername`).innerText = result.receiver.username;
@@ -224,6 +224,46 @@ async function loadFriendList(){
     }
 }
 
+function addFriend(friendInstance){
+    const friendDiv = document.getElementById('knownFriends');
+    friendDiv.innerText = '';
+    const friend1 = friendInstance.friends[0].username;
+    const friend2 = friendInstance.friends[1].username;
+    friendDiv.innerHTML += `<div class="friendRequestBlock knownFriend" id="friend${friendInstance.id}">\
+            <div>${friend1 === userInformations.username ? friend2 : friend1}</div>\
+            <button class='deleteFriend'>delete X</button></div>\n`;
+}
+
+function removeFriend(friendInstance){
+    console.log(friendInstance);
+    document.getElementById(`friend${friendInstance.id}`).remove();
+    const friendListDiv = document.getElementById('knownFriends');
+    if (!friendListDiv.querySelector('div'))
+        friendListDiv.innerText = "You don't have any friends";
+}
+
+async function addFriendRequest(result){
+    const friendRequestTitleDiv = document.getElementById('friendRequestsTitle');
+    friendRequestTitleDiv.innerText = 'friend requests:';
+    const friendRequestsDiv = document.getElementById('friendRequests');
+    const requestDiv = document.createElement('div');
+    requestDiv.id = `fr${result.id}`;
+    if (document.getElementById(result.id)) return;
+    friendRequestsDiv.appendChild(requestDiv);
+    await loadContent('/friends/friendRequestBlock.html', `${requestDiv.id}`);
+    requestDiv.querySelector('.senderUsername').innerText = result.sender.username;
+}
+
+async function removeFriendRequest(id){
+    // const friendRequestsDiv = document.getElementById('friendRequests');
+    // console.log(friendRequestsDiv);
+    // console.log(`#fr${id}`, friendRequestsDiv.querySelector(`#fr${id}`));
+    const friendRequestDiv = document.getElementById(`fr${id}`);
+    console.log(friendRequestDiv);
+    if (friendRequestDiv)
+        friendRequestDiv.remove();
+}
+
 async function loadReceivedFriendRequests(){
     let data;
     try {
@@ -238,15 +278,13 @@ async function loadReceivedFriendRequests(){
     const friendRequestTitleDiv = document.getElementById('friendRequestsTitle');
     if (data.count === 0){
         friendRequestTitleDiv.innerText = 'no pending friend requests';
-        document.getElementById('innerFriendRequests-tab').innerText = 'Friend Requests';
     }
     else if (data.count){
         friendRequestsDiv.innerHTML = "";
         friendRequestTitleDiv.innerText = 'friend requests:';
-        document.getElementById('innerFriendRequests-tab').innerText = `Friend Requests (${data.count})`;
         for (result of data.results){
             const requestDiv = document.createElement('div');
-            requestDiv.id = result.id;
+            requestDiv.id = `fr${result.id}`;
             friendRequestsDiv.appendChild(requestDiv);
             await loadContent('/friends/friendRequestBlock.html', `${requestDiv.id}`);
             requestDiv.querySelector('.senderUsername').innerText = result.sender.username;
@@ -274,7 +312,7 @@ async function loadSentFriendRequests(){
         requestsDivTitle.innerText = "sent friend requests:";
         for (result of data.results){
             const requestDiv = document.createElement('div');
-            requestDiv.id = result.id;
+            requestDiv.id = `fr${result.id}`;
             requestsDiv.appendChild(requestDiv);
             await loadContent('/friends/sentFriendRequestBlock.html', `${requestDiv.id}`);
             requestDiv.querySelector('.receiverUsername').innerText = result.receiver.username;
@@ -284,8 +322,20 @@ async function loadSentFriendRequests(){
 
 async function  initFriendModal(){
     await loadFriendList();
-    await loadReceivedFriendRequests();
-    await loadSentFriendRequests();
+    const friendRequestsTab = document.getElementById('innerFriendRequests-tab');
+    if (friendRequestsTab.classList.contains('active')){
+        await loadReceivedFriendRequests();
+        await loadSentFriendRequests();
+        friendRequestsTab.clicked = true;
+    }
+    else if (friendRequestsTab.clicked){
+        friendRequestsTab.clicked = false;
+        friendRequestsTab.addEventListener('click', async ()=>{
+            this.clicked = true;
+            await loadReceivedFriendRequests();
+            await loadSentFriendRequests();
+        }, {once:true});
+    }
 }
 
-initFriendModal();
+// initFriendModal();

@@ -1,7 +1,9 @@
 import json
+from datetime import datetime
 from enum import Enum
 
 import redis
+from django.db.models import QuerySet
 from lib_transcendence.exceptions import MessagesException, ServiceUnavailable
 from lib_transcendence.sse_events import EventCode
 from rest_framework.exceptions import ParseError
@@ -14,6 +16,13 @@ from users.models import Users
 # todo when retrieve many user, handle friend field
 # todo when create match return user instance not only id
 # todo when create match return teams id not list
+
+
+def datetime_serializer(obj):
+    if isinstance(obj, datetime):
+        return obj.isoformat()
+    raise TypeError
+
 
 def get_username(user_id):
     if isinstance(user_id, str):
@@ -57,15 +66,14 @@ class Target:
         self.method = method
         self.display_name = display_name
         self.display_icon = display_icon
-        # todo handle url format
 
-    def get_dict(self, **kwargs):
+    def dumps(self, data):
         return {
-            'url': self.url.format(**kwargs),
+            'url': self.url.format(**data),
             'type': self.type.name,
             'method': self.method,
             'display_name': self.display_name,
-            'display_icon': self.display_icon,
+            'display_icon': None if self.display_icon is None else f'/assets/{self.display_icon}',
         }
 
 
@@ -84,8 +92,6 @@ class Event:
         else:
             self.type = SSEType.NOTIFICATION
         self.target = target
-        # self.data = data todo handle for each
-        # todo handle url format
 
     def dumps(self, data=None, kwargs=None):
         if self.fmessage is None:
@@ -102,55 +108,65 @@ class Event:
             'event_code': self.code.value,
             'type': self.type.value,
             'message': message,
-            'target': None,# todo handle if self.target is None else [t.get_dict() for t in self.target],
+            'target': None if self.target is None else [t.dumps(data) for t in self.target],
             'data': data,
         }
-        return json.dumps(result)
+        return json.dumps(result, default=datetime_serializer)
 
 
-connection_success = Event(Service.AUTH, EventCode.CONNECTION_SUCCESS, 'Connection has been successfully established.')
+delete_user = Event(Service.AUTH, EventCode.DELETE_USER)
 
 send_message = Event(Service.CHAT, EventCode.SEND_MESSAGE, '{username}: {message}', Target('/chat/{id}/')) # todo format
 
-accept_friend_request = Event(Service.FRIENDS, EventCode.ACCEPT_FRIEND_REQUEST, '{username} has accepted your friend request.', type=SSEType.NOTIFICATION) # todo format
-receive_friend_request = Event(Service.FRIENDS, EventCode.RECEIVE_FRIEND_REQUEST, '{username} wants to be friends with you.', [Target('/api/users/me/friend_requests/{id}/', 'POST', display_icon='/icon/accept.png'), Target('/api/users/me/friend_requests/{id}/', 'DELETE', display_icon='/icon/decline.png')]) # todo format
+accept_friend_request = Event(Service.FRIENDS, EventCode.ACCEPT_FRIEND_REQUEST, '{username} has accepted your friend request.', type=SSEType.NOTIFICATION)
+receive_friend_request = Event(Service.FRIENDS, EventCode.RECEIVE_FRIEND_REQUEST, '{username} wants to be friends with you.', [Target('/api/users/me/friend_requests/{id}/', 'POST', display_icon='/icon/accept.png'), Target('/api/users/me/friend_requests/{id}/', 'DELETE', display_icon='/icon/decline.png')])
+reject_friend_request = Event(Service.FRIENDS, EventCode.REJECT_FRIEND_REQUEST)
+cancel_friend_request = Event(Service.FRIENDS, EventCode.CANCEL_FRIEND_REQUEST)
+delete_friend = Event(Service.FRIENDS, EventCode.DELETE_FRIEND)
 
-game_start = Event(Service.GAME, EventCode.GAME_START, 'You play in a game.', Target('/ws/game/{code}/', type=UrlType.WS)) # todo check how work # todo format
+game_start = Event(Service.GAME, EventCode.GAME_START, 'You play in a game.', Target('/ws/game/', type=UrlType.WS))
 
-invite_1v1 = Event(Service.INVITE, EventCode.INVITE_1V1, '{username} has challenged you to a game.', Target('/api/play/lobby/{code}/', 'POST', display_name='join')) # todo format
-invite_clash = Event(Service.INVITE, EventCode.INVITE_CLASH, '{username} inviting you to join a clash game.', Target('/api/play/lobby/{code}/', 'POST', display_name='join')) # todo format
-invite_custom_game = Event(Service.INVITE, EventCode.INVITE_CUSTOM_GAME, '{username} inviting you to join a custom game.', Target('/api/play/lobby/{code}/', 'POST', display_name='join')) # todo format
-invite_tournament = Event(Service.INVITE, EventCode.INVITE_TOURNAMENT, '{username} inviting you to join his tournament.', Target('/api/play/tournament/{code}/', 'POST', display_name='join')) # todo format
+invite_1v1 = Event(Service.INVITE, EventCode.INVITE_1V1, '{username} has challenged you to a game.', Target('/lobby/{code}/', display_name='join'))
+invite_3v3 = Event(Service.INVITE, EventCode.INVITE_3V3, '{username} inviting you to join an epic 3v3 friendly battle.', Target('/lobby/{code}/', display_name='join'))
+invite_clash = Event(Service.INVITE, EventCode.INVITE_CLASH, '{username} inviting you to join a clash game.', Target('/lobby/{code}/', display_name='join'))
+invite_tournament = Event(Service.INVITE, EventCode.INVITE_TOURNAMENT, '{username} inviting you to join his tournament.', Target('/tournament/{code}/', display_name='join'))
 
 lobby_join = Event(Service.LOBBY, EventCode.LOBBY_JOIN, '{username} have joined the lobby.')
 lobby_leave = Event(Service.LOBBY, EventCode.LOBBY_LEAVE, '{username} have left the lobby.')
 lobby_update = Event(Service.LOBBY, EventCode.LOBBY_UPDATE)
 lobby_update_participant = Event(Service.LOBBY, EventCode.LOBBY_UPDATE_PARTICIPANT)
-lobby_ban = Event(Service.LOBBY, EventCode.LOBBY_BAN, 'You have been baned from the lobby.')
+lobby_banned = Event(Service.LOBBY, EventCode.LOBBY_BANNED, 'You have been banned from this lobby.')
 lobby_destroy = Event(Service.LOBBY, EventCode.LOBBY_DESTROY, 'The lobby has been destroyed.')
 
 tournament_join = Event(Service.TOURNAMENT, EventCode.TOURNAMENT_JOIN, '{username} have joined the tournament.') # todo format
 tournament_leave = Event(Service.TOURNAMENT, EventCode.TOURNAMENT_LEAVE, '{username} have left the tournament.') # todo format
+tournament_banned = Event(Service.TOURNAMENT, EventCode.TOURNAMENT_BANNED, 'You have been banned from this tournament.')
 tournament_start_3 = Event(Service.TOURNAMENT, EventCode.TOURNAMENT_START_3, 'Tournament {name} start in 3 seconds.') # todo format
 tournament_start_20 = Event(Service.TOURNAMENT, EventCode.TOURNAMENT_START_20, 'Tournament {name} start in 20 seconds.') # todo format
 tournament_start_cancel = Event(Service.TOURNAMENT, EventCode.TOURNAMENT_START_CANCEL)
 tournament_seeding = Event(Service.TOURNAMENT, EventCode.TOURNAMENT_SEEDING) # todo send all game (who play against who)
-tournament_match_end = Event(Service.TOURNAMENT, EventCode.TOURNAMENT_MATCH_END, '{winner} win against {looser}.') # todo format
-tournament_finish = Event(Service.TOURNAMENT, EventCode.TOURNAMENT_FINISH, 'The tournament {name} is now over. Well done to {winner}} for his victory!') # todo format
+tournament_match_finish = Event(Service.TOURNAMENT, EventCode.TOURNAMENT_MATCH_FINISH, '{winner} win against {looser}.') # todo format
+tournament_finish = Event(Service.TOURNAMENT, EventCode.TOURNAMENT_FINISH, 'The tournament {name} is now over. Well done to {username} for his victory!', Target('/history/tournament/{id}/', display_name='view')) # todo format
 
-# 'update-status': {'type': SSEType.event, 'db_field': None, 'message': None, 'target': 'update status user view', 'required-data': ['user_id', 'new status']}, # todo handle update status
 
 redis_client = redis.StrictRedis(host='event-queue')
 
 
-def publish_event(user_id, event_code: EventCode, data=None, kwargs=None):
-    channel = f'events:user_{user_id}'
+def publish_event(users: Users | QuerySet[Users] | list[Users], event_code: EventCode, data=None, kwargs=None):
     event = globals().get(event_code.value.replace('-', '_'))
     if event is None:
-        raise ParseError({'event_code': [MessagesException.ValidationError.INVALID_EVENT_CODE]}) # todo handle error
+        raise ParseError({'event_code': [MessagesException.ValidationError.INVALID_EVENT_CODE]})
 
-    print('EVENT', event, data, flush=True)
-    try:
-        redis_client.publish(channel, event.code.value + ':' + event.dumps(data, kwargs))
-    except redis.exceptions.ConnectionError:
-        raise ServiceUnavailable('event-queue')
+    if isinstance(users, Users):
+        users = [users]
+    elif isinstance(users, QuerySet):
+        users = list(users)
+
+    for user in users:
+        if user.is_online:
+            channel = f'events:user_{user.id}'
+
+            try:
+                redis_client.publish(channel, event.code.value + ':' + event.dumps(data, kwargs))
+            except redis.exceptions.ConnectionError:
+                raise ServiceUnavailable('event-queue')

@@ -1,9 +1,4 @@
-{
-    log {
-        output stdout
-        level debug
-    }
-}
+
 
 :443 {
 	tls /run/secrets/ssl.crt /run/secrets/ssl.key
@@ -11,8 +6,9 @@
 	root * /var/www/html
 	handle {
 		@trailing path_regexp trailing ^(/.+)/$
+		@excludeSSE path /sse/*
 		redir @trailing {re.trailing.1} permanent
-		try_files {path} /index.html		
+		try_files {path} /index.html
 		file_server
 	}
 
@@ -20,20 +16,27 @@
 		handle /ws/chat/* {
 			reverse_proxy http://chat:8010
 		}
+		handle /ws/game/* {
 		reverse_proxy http://game:5500
+		}
 	}
 
 	handle /sse/* {
-		@notEventStream {
-			not header Content-Type text/event-stream
-		}
+    header {
+        Cache-Control "no-cache"
+        Connection "keep-alive"
+        Content-Type "text/event-stream"
+    }
 
-		handle /sse/users/* {
-			respond @notEventStream "Unsupported Media Type" 415
-			reverse_proxy http://users:8000
-		}
-
-	}
+    handle /sse/users/* {
+        reverse_proxy http://users:8000 {
+            header_up Accept "text/event-stream"
+            header_up Connection "keep-alive"
+            header_up Cache-Control "no-cache"
+			header_down Connection "keep-alive"
+        }
+    }
+}
 
 	handle /api/* {
 		# API route to micro-services

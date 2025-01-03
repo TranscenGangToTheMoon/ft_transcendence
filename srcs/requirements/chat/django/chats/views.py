@@ -1,6 +1,7 @@
-from lib_transcendence.Chat import ChatType
+from lib_transcendence.chat import ChatType
 from lib_transcendence.serializer import SerializerAuthContext
 from lib_transcendence.utils import get_host
+from lib_transcendence.permissions import NotGuest
 from rest_framework import generics, status
 from rest_framework.response import Response
 
@@ -11,6 +12,7 @@ from chats.serializers import ChatsSerializer
 
 class ChatsView(generics.ListCreateAPIView):
     serializer_class = ChatsSerializer
+    permission_classes = [NotGuest]
 
     def get_queryset(self):
         query = self.request.query_params.get('q', None)
@@ -26,6 +28,7 @@ class ChatsView(generics.ListCreateAPIView):
 
 
 class ChatView(SerializerAuthContext, generics.RetrieveDestroyAPIView):
+    permission_classes = [NotGuest]
     serializer_class = ChatsSerializer
     lookup_field = 'chat_id'
 
@@ -43,5 +46,20 @@ class ChatView(SerializerAuthContext, generics.RetrieveDestroyAPIView):
         return super().destroy(request, *args, **kwargs)
 
 
+class GetChatNotifications(generics.RetrieveAPIView):
+    authentication_classes = []
+
+    def retrieve(self, request, *args, **kwargs):
+        user_id = self.kwargs['user_id']
+        count = 0
+
+        for chat in Chats.objects.filter(participants__user_id=user_id):
+            if chat.messages.exclude(author=user_id).filter(is_read=False).exists():
+                count += 1
+
+        return Response({'notifications': count})
+
+
 chats_view = ChatsView.as_view()
 chat_view = ChatView.as_view()
+get_chat_notifications_view = GetChatNotifications.as_view()

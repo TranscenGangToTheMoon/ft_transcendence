@@ -12,35 +12,28 @@ from utils.generate_random import rnstr
 
 
 class UnitTest(unittest.TestCase):
-    def new_user(self, username=None, password=None, get_me=False, connect_sse=False, tests_sse: list[str] = None):
-        if username is None:
-            username = 'user-' + rnstr(10)
-        if password is None:
-            password = 'password-' + rnstr(15)
-        _new_user = {'username': username, 'password': password}
-        token = self.assertResponse(register(_new_user['username'], password), 201)
-        _new_user['token'] = token['access']
-        _new_user['refresh'] = token['refresh']
-        if get_me:
-            _new_user['id'] = self.assertResponse(me(_new_user), 200, get_field=True)
-        if connect_sse:
-            _new_user['thread'] = self.connect_to_sse(_new_user, tests_sse)
-        return _new_user
-
-    def user_sse(self, tests: list[str] = None, get_me=False):
-        return self.new_user(connect_sse=True, tests_sse=tests, get_me=get_me)
-
-    def guest_user(self, get_me=False, connect_sse=False, tests_sse: list[str] = None):
+    def user(self, tests_sse: list[str] = None, username=None, password=None, guest=False, sse=True):
         _new_user = {}
-        token = self.assertResponse(create_guest(), 201)
+
+        if guest:
+            response = create_guest()
+        else:
+            if username is None:
+                username = 'user-' + rnstr(10)
+            if password is None:
+                password = 'password-' + rnstr(15)
+            _new_user['username'] = username
+            _new_user['password'] = password
+            response = register(_new_user['username'], password)
+
+        token = self.assertResponse(response, 201)
         _new_user['token'] = token['access']
         _new_user['refresh'] = token['refresh']
-        if get_me:
-            response = self.assertResponse(me(_new_user), 200)
-            _new_user['id'] = response['id']
-            _new_user['username'] = response['username']
-        if connect_sse:
-            _new_user['thread'] = self.connect_to_sse(_new_user, tests_sse)
+        response = self.assertResponse(me(_new_user), 200)
+        _new_user['id'] = response['id']
+        _new_user['username'] = response['username']
+        if sse:
+            self.connect_to_sse(_new_user, tests_sse)
         return _new_user
 
     def assertResponse(self, response, status_code, json_assertion=None, count=None, get_field=None, get_user=False):
@@ -62,25 +55,27 @@ class UnitTest(unittest.TestCase):
         self.assertEqual(status_code, responses[1].status_code)
         if json_assertion is not None:
             self.assertEqual(json_assertion, responses[1].json)
+        self.assertEqual(responses[0].json['id'], responses[1].json['id'])
         return responses[1].json['id']
 
-    def connect_to_sse(self, user, tests: list[str] = None, timeout=10, status_code=200, ignore_connection_message=True, thread=True):
-        if thread:
-            thread = Thread(target=self._thread_connect_to_sse, args=(user, tests, timeout, status_code, ignore_connection_message))
-            thread.start()
-            time.sleep(0.5)
-            return thread
+    def connect_to_sse(self, user, tests: list[str] = None, status_code=200):
+        user['thread'] = Thread(target=self._thread_connect_to_sse, args=(user, tests, status_code))
+        user['thread'].start()
+        time.sleep(0.5)
+        return user['thread']
+
+    def _thread_connect_to_sse(self, user, tests, status_code):
+        if tests is None:
+            user['expected_thread_result'] = 0
         else:
-            self._thread_connect_to_sse(user, tests, timeout, status_code, ignore_connection_message)
-
-    def _thread_connect_to_sse(self, user, tests, timeout, status_code, ignore_connection_message):
-        def assert_tests():
-            if tests is not None:
-                self.assertEqual(i, len(tests))
-
-        i = 0
-        timeout_count = 0
-
+            user['expected_thread_result'] = len(tests)
+        user['thread_result'] = 0
+        user['thread_tests'] = tests
+        user['thread_assertion'] = []
+        user['thread_finish'] = False
+        if 'username' not in user:
+            user['username'] = 'unknown'
+        print(f"SSE CONNECTING {user['username']}...\n", flush=True)
         with httpx.Client(verify=False) as client:
             headers = {
                 'Authorization': f'Bearer {user["token"]}',
@@ -90,25 +85,27 @@ class UnitTest(unittest.TestCase):
                 self.assertEqual(status_code, response.status_code)
                 if status_code == 200:
                     for line in response.iter_text():
-                        if line:
-                            event, data = re.findall(r'event: ([a-z\-]+)\ndata: (.+)\n\n', line)[0]
-                            timeout_count += 1
-                            if (tests is None and timeout_count > timeout) or timeout_count > 30: # todo remove later
-                                return assert_tests()
+                        if user['thread_finish']:
+                            break
+                        for event, data in re.findall(r'event: ([a-z0-9\-]+)\ndata: (.+)\n\n', line):
+                            if event == 'delete-user':
+                                break
                             if event == 'ping':
                                 continue
                             data = json.loads(data)
-                            if ignore_connection_message and data['event_code'] == 'connection-success':
-                                continue
-                            if 'username' in user:
-                                value = user['username']
-                            elif 'id' in user:
-                                value = user['id']
-                            else:
-                                value = ''
-                            print(f"SSE RECEIVED {value}: {data}", flush=True)
-                            self.assertEqual(tests[i], data['event_code'])
-                            i += 1
-                            if i == len(tests):
-                                return
-        assert_tests()
+                            print(f"SSE RECEIVED {user['username']}: {data}", flush=True)
+                            user['thread_assertion'].append(data['event_code'])
+                            user['thread_result'] += 1
+        print(f"SSE DISCONNECTING {user['username']}...\n", flush=True)
+
+    def assertThread(self, *users):
+        time.sleep(0.1)
+        for user in users:
+            user['thread_finish'] = True
+        for user in users:
+            user['thread'].join()
+            if user['thread_tests'] is None:
+                user['thread_tests'] = []
+            print('testing', user['username'], flush=True)
+            self.assertListEqual(user['thread_tests'], user['thread_assertion'])
+            self.assertEqual(user['expected_thread_result'], user['thread_result'])

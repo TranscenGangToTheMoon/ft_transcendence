@@ -32,9 +32,6 @@ class PlayersSerializer(serializers.ModelSerializer):
 
         verify_user(user['id'])
 
-        if user['is_guest'] and validated_data.get('game_mode') == GameMode.ranked:
-            raise PermissionDenied(MessagesException.PermissionDenied.GUEST_CANNOT_PLAY_RANKED)
-
         validated_data['user_id'] = user['id']
         validated_data['trophies'] = user['trophies']
         return create_player_instance(request, Players, **validated_data)

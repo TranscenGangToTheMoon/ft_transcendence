@@ -12,6 +12,8 @@ def launch_dual_game(players):
 	#print('made request for: ', player1.user_id, ' ', player1.trophies, ' ', player2.user_id, ' ', player2.trophies, flush=True)
 	player1.delete()
 	player2.delete()
+
+
 	#print('Normal Game created=============')
 
 

@@ -2,7 +2,7 @@ from rest_framework.exceptions import NotFound, PermissionDenied
 from lib_transcendence.users import retrieve_users
 from lib_transcendence.exceptions import MessagesException
 
-from lobby.models import LobbyParticipants
+from lobby.models import LobbyParticipants, Lobby
 from tournament.models import TournamentParticipants
 
 
@@ -18,8 +18,8 @@ def get_participants(obj, add_fields: list[str] = None):
     return results
 
 
-def get_participant(model, obj, user_id, creator_check, from_place):
-    if isinstance(model, TournamentParticipants):
+def get_participant(model, obj, user_id, creator_check=False, from_place=False):
+    if model is TournamentParticipants:
         name = 'tournament'
     else:
         name = 'lobby'

@@ -4,13 +4,19 @@ const MAX_DISPLAYED_NOTIFICATIONS = 3;
 const MAX_DISPLAYED_FRIENDS = 12;
 const MAX_DISPLAYED_FRIEND_REQUESTS = 5;
 const MAX_DISPLAYED_BLOCKED_USERS = 10;
+const DEBOUNCE_TIME = 100;
+const eventTimestamps = new Map();
 const baseAPIUrl = "/api"
 let userInformations = undefined;
+var sse;
 var notificationIdentifier = 0;
 var displayedNotifications = 0;
 window.baseAPIUrl = baseAPIUrl;
 window.userInformations = userInformations;
 var pathName = window.location.pathname;
+var badgesDivs = {};
+var notificationQueue = [];
+const SSEListeners = new Map();
 
 window.pathName = pathName;
 
@@ -190,9 +196,10 @@ function loadCSS(cssHref, toUpdate=true) {
     // console.log(`Style ${cssHref} loaded.`)
 }
 
-async function loadContent(url, container='content', append=false) {
-    const contentDiv = document.getElementById(container);
-    console.log(url, container)
+async function loadContent(url, containerId='content', append=false, container=undefined) {
+    let contentDiv = document.getElementById(containerId);
+    if (container)
+        contentDiv = container;
     try {
         const response = await fetch(url);
         if (!response.ok) {
@@ -202,7 +209,7 @@ async function loadContent(url, container='content', append=false) {
         if(!append)
             contentDiv.innerHTML = html;
         else
-        contentDiv.innerHTML += `\n${html}`;
+            contentDiv.insertAdjacentHTML('beforeend', `\n${html}`);
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = html;
         const script = tempDiv.querySelector('[script]');
@@ -250,15 +257,6 @@ async function handleRoute() {
     await loadContent(page);
 }
 
-// UNCOMMENT FOR LINKS TO WORK WITHOUT CUSTOM JS
-// document.addEventListener('click', event => {
-    //     if (event.target.matches('[data-link]')) {
-        //         event.preventDefault();
-        //         await navigateTo(event.target.href);
-        //     }
-        // });
-
-
 let lastState = 0;
 if (!localStorage.getItem('currentState'))
     localStorage.setItem('currentState', 0);
@@ -273,9 +271,22 @@ function getCurrentState(){
     return localStorage.getItem('currentState');
 }
 
+async function handleSSEListenerRemoval(url){
+    if (window.pathName.includes('/lobby') && !url.includes('/lobby')){
+        removeSSEListeners('lobby');
+        try {
+            await apiRequest(getAccessToken(), `${baseAPIUrl}/play/lobby/${code}/`, 'DELETE');
+        }
+        catch (error){
+            console.log(error);
+        }
+    }
+}
+
 async function navigateTo(url, doNavigate=true){
     let currentState = getCurrentState();
     lastState = currentState;
+    await handleSSEListenerRemoval(url);
     history.pushState({state: currentState}, '', url);
     console.log(`added ${url} to history with state : ${currentState}`);
     pathName = window.location.pathname;
@@ -355,9 +366,65 @@ async function fetchUserInfos(forced=false) {
         try {
             let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/users/me`);
             userInformations = data;
+            console.log(userInformations);
+            displayBadges();
         }
         catch (error) {
             console.log(error);
+        }
+    }
+}
+
+function displayBadges(){
+    if (userInformations.notifications){
+        setTimeout(() => {
+            console.log(userInformations.notifications)
+            let totalNotifications = 0;
+            for (let type in userInformations.notifications){
+                if (!userInformations.notifications[type] || type === 'all') continue;
+                totalNotifications += userInformations.notifications[type];
+                for (let badgeDiv of badgesDivs[type]){
+                    addNotificationIndicator(badgeDiv, userInformations.notifications[type]);
+                }
+            }
+            console.log(totalNotifications);
+            userInformations.notifications['all'] = totalNotifications;
+            if (!totalNotifications) return;
+            for (let allBadgesDiv of badgesDivs['all']){
+                addNotificationIndicator(allBadgesDiv, totalNotifications);
+            }
+        }, 70);
+    }
+}
+
+function removeBadges(type){
+    let toDelete = 0;
+    userInformations.notifications[type] = 0;
+    for (let badgeDiv of badgesDivs[type]){
+        let indicator = badgeDiv.querySelector(`.indicator`);
+        if (indicator){
+            toDelete = parseInt(indicator.innerText);
+            console.log(toDelete);
+            if (isNaN(toDelete))
+                toDelete = 0;
+            indicator.remove();
+        }
+    }
+    if (toDelete){
+        userInformations.notifications['all'] -= toDelete;
+        if (!userInformations.notifications['all']){
+            for (let badgeDiv of badgesDivs['all']){
+                let indicator = badgeDiv.querySelector(`.indicator`);
+                if (indicator)
+                    indicator.remove();
+            }
+        }
+        else {
+            for (let allBadgesDiv of badgesDivs['all']){
+                let indicator = allBadgesDiv.querySelector(`.indicator`);
+                if (indicator)
+                    indicator.innerText = userInformations.notifications['all'];
+            }
         }
     }
 }
@@ -384,6 +451,21 @@ function displayConfirmModal(confirmTitle, confirmContent) {
     //     document.getElementById('confirmModalClose').focus();
     // })
     confirmModal.show();
+}
+
+function checkEventDuplication(data){
+    const now = Date.now();
+
+    const lastTimeStamp = eventTimestamps.get(data.event_code);
+    // console.log(lastTimeStamp);f
+    if (lastTimeStamp && (now - lastTimeStamp < DEBOUNCE_TIME)){
+        console.log('skip', data);
+        return 0;
+    }
+
+    eventTimestamps.set(data.event_code, now);
+    // console.log('cala',eventTimestamps.get(data));
+    return 1;
 }
 
 window.displayMainAlert = displayMainAlert;
@@ -431,70 +513,253 @@ document.getElementById('home').addEventListener('click', async event => {
         await navigateTo('/');
 })
 
+function addNotificationIndicator(div, number){
+    if (!div.querySelector('.indicator')){
+        const indicator = document.createElement('div');
+        indicator.classList.add('indicator');
+        indicator.innerText = number;
+        div.appendChild(indicator);
+    }
+    else {
+        div.querySelector('.indicator').innerText = number;
+    }
+}
+
+function removeSSEListeners(type){
+    for (const [key, value] of SSEListeners) {
+        if (key.includes(type)) {
+            sse.removeEventListener(key, value);
+            SSEListeners.delete(key);
+            console.log('removed sse listener:', key);
+        }
+    }
+}
+
+function addSSEListeners(){
+    console.log(document.getElementById('friendListModal'));
+    
+    sse.addEventListener('receive-friend-request', async event => {
+        const friendListModal = bootstrap.Modal.getInstance(document.getElementById('friendListModal'));
+        const isModalShown = friendListModal ? friendListModal._isShown : friendListModal;
+        const isTabActive = document.getElementById('innerFriendRequests-tab').classList.contains('active');
+        event = JSON.parse(event.data);
+        console.log(event);
+        if (!isModalShown || !isTabActive) {
+            await displayNotification(undefined, 'friend request', event.message, event => {
+                const friendListModal = new bootstrap.Modal(document.getElementById('friendListModal'));
+                friendListModal.show();
+                document.getElementById('innerFriendRequests-tab').click();
+            }, event.target);
+            userInformations.notifications['friend_requests'] += 1;
+            displayBadges();
+        }
+        addFriendRequest(event.data);
+    });
+
+    sse.addEventListener('accept-friend-request', async event => {
+        event = JSON.parse(event.data);
+        console.log(event);
+        if (!(bootstrap.Modal.getInstance(document.getElementById('friendListModal'))._isShown))
+            await displayNotification(undefined, 'friend request', event.message);
+        removeFriendRequest(event.data.id);
+        addFriend(event.data);
+    })
+
+    sse.addEventListener('cancel-friend-request', async event => {
+        event = JSON.parse(event.data);
+        if (userInformations.notifications['friend_requests'])
+            userInformations.notifications['friend_requests'] -= 1;
+        if (!userInformations.notifications['friend_requests'])
+            removeBadges('friend_requests');
+        else    
+            displayBadges();
+        removeFriendRequest(event.data.id);
+    })
+
+    sse.addEventListener('reject-friend-request', async event => {
+        event = JSON.parse(event.data);
+        removeFriendRequest(event.data.id);
+        console.log(event);
+    })
+
+    sse.addEventListener('delete-friend', event => {
+        event = JSON.parse(event.data);
+        removeFriend(event.data);
+    })
+}
+
 function initSSE(){
-    console.log('SERVER SENT EVENT INITIALIZATION HERE');
+    sse = new EventSource(`/sse/users/?token=${getAccessToken()}`);
+
+    sse.onopen = () => {
+        console.log('SSE connection initialized');
+    }
+
+    sse.onmessage = event => {
+        let data = JSON.parse(event.data);
+        console.log(data);
+    }
+
+    // sse.addEventListener('ping', event => {
+    //     console.log(event);
+    // })
+
+    sse.onerror = async error => {
+        console.log(error);
+        const shownModal = document.querySelector('.modal.show[aria-modal="true"]');
+        if (shownModal)
+            return;
+        displayMainAlert('Error', 'Unable to connect to Server Sent Events. Note that several services will be unaivailable.');
+    }
+
+    addSSEListeners();
+}
+
+function addFriendListListener(){
+    document.getElementById('friendListModal').addEventListener('show.bs.modal', async function() {
+        this.clicked = true;
+        initFriendModal();
+    }, {once: true})
+    document.getElementById('friendListModal').addEventListener('show.bs.modal', () => {
+        if (document.getElementById('innerFriendRequests-tab').classList.contains('active'))
+            removeBadges('friend_requests');
+    })
+    document.getElementById('innerFriendRequests-tab').addEventListener('click', () => {
+        removeBadges('friend_requests');
+    })
+}
+
+function getBadgesDivs(){
+    badgesDivs['all'] = document.querySelectorAll('.all-badges');
+    badgesDivs['friend_requests'] = document.querySelectorAll('.friend-badges');
+    badgesDivs['chat'] = document.querySelectorAll('.chat-badges');
 }
 
 async function  indexInit(auto=true) {
     if (!auto){
-        // setTimeout(()=> {
-        //     const backdrops = document.querySelectorAll('.modal-backdrop');
-        //     for (let backdrop of backdrops){
-        //         console.log(backdrop, 'removed');
-        //         backdrop.remove;
-        //     }
-        // }, 500);
-        // await fetchUserInfos(true);
-        // if (window.location.pathname === '/login'){
-        //     document.getElementById('profileMenu').innerHTML = "";
-        // }
-        // else{
-            // }
-        if (userInformations.detail === 'Incorrect authentication credentials.'){
+        if (userInformations.code === 'user_not_found'){
             console.log('user was deleted from database, switching to guest mode');
             displayMainAlert("Unable to retrieve your account/guest profile","We're sorry your account has been permanently deleted and cannot be recovered.");
             await generateToken();
             await fetchUserInfos(true);
+            initSSE();
             return navigateTo('/');
         }
         await loadUserProfile();
+        getBadgesDivs();
     }
     else{
         await fetchUserInfos();
-        if (!userInformations?.is_guest)
-            await loadFriendListModal()
+        initSSE();
+        await loadFriendListModal();
+        document.getElementById('innerFriendRequests-tab').clicked = true;
+        addFriendListListener();
         let currentState = getCurrentState();
         console.log(`added ${window.location.pathname} to history with state ${currentState}`)
         history.replaceState({state: currentState}, '', window.location.pathname);
         incrementCurrentState();
         loadCSS('/css/styles.css', false);
-        initSSE();
         handleRoute();
     }
 }
 
-// document.getElementById('notifTrigger').addEventListener('click', async event => {
-//     event.preventDefault();
-//     if (displayedNotifications >= MAX_DISPLAYED_NOTIFICATIONS) {
-//         return ;
-//     }
-//     const toastContainer = document.getElementById('toastContainer');
+function handleFriendRequestNotification(target, img, notification, toastContainer, toastInstance){
+    img.addEventListener('click', async event => {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        event.stopPropagation();
+        try {
+            let data = await apiRequest(getAccessToken(), target.url, target.method);
+            if (target.url.includes('friend_request')){
+                userInformations.notifications['friend_requests'] -= 1;
+                if (userInformations.notifications['friend_requests'])
+                    displayBadges();
+                else
+                    removeBadges('friend_requests');
+                removeFriendRequest(target.url.match(/\/(\d+)\/?$/)[1]);
+                if (target.method === 'POST')
+                    addFriend(data);
+            }
+        }
+        catch(error){
+            console.log(error);
+        }
+        notification.clicked = true;
+        dismissNotification(notification, toastInstance, toastContainer);
+    })
+}
 
-//     await loadContent('/notification.html', 'toastContainer', true);
-//     const notification = document.getElementById('notification');
-//     notification.id = `notification${notificationIdentifier}`;
-//     const toastInstance = new bootstrap.Toast(notification);
-//     toastInstance.show();
-//     notificationIdentifier++;
-//     displayedNotifications++;
-//     setTimeout(() => {
-//         toastInstance.hide();
-//         setTimeout (() => {
-//             displayedNotifications--;
-//             toastContainer.removeChild(document.getElementById(notification.id));
-//         }, 500);
-//     }, 5000);
-// })
+async function addTargets(notification, targets, toastInstance, toastContainer){
+    console.log(targets);
+    const notificationBody = notification.querySelector('.toast-body');
+    Object.entries(targets).forEach(([i, target]) => {
+        const img = document.createElement('img');
+        img.id = `notif${notification.id}-target${i}`;
+        img.className = 'notif-img';
+        img.src = target.display_icon;
+        
+        notificationBody.appendChild(img);
+        
+        if (target.type === 'API') {
+            handleFriendRequestNotification(target, img, notification, toastContainer, toastInstance);
+            // img.addEventListener('click', event => {
+            //     notification.clicked = true;
+            //     dismissNotification(notification, toastInstance, toastContainer);
+            // });
+        }
+    });
+}
+
+function dismissNotification(notification, toastInstance, toastContainer){
+    toastInstance.hide();
+    setTimeout (() => {
+        displayedNotifications--;
+        console.log(notification);
+        toastContainer.removeChild(document.getElementById(notification.id));
+        if (notificationQueue.length){
+            let notif= notificationQueue.shift();
+            console.log(notificationQueue);
+            displayNotification(notif[0], notif[1], notif[2], notif[3]);
+        }
+    }, 500);
+}
+
+async function displayNotification(icon=undefined, title=undefined, body=undefined, mainListener=undefined, target=undefined){
+
+    if (displayedNotifications >= MAX_DISPLAYED_NOTIFICATIONS) {
+        notificationQueue.push([icon, title, body, mainListener]);
+        return;
+    }
+    const toastContainer = document.getElementById('toastContainer');
+
+    await loadContent('/notification.html', 'toastContainer', true);
+    const notification = document.getElementById('notification');
+    notification.id = `notification${notificationIdentifier}`;
+    if (icon)
+        notification.querySelector('img').src = icon;
+    if (title)
+        notification.querySelector('strong').innerText = title;
+    if (body)
+        notification.querySelector('.toast-body').innerText = body;
+    if (mainListener)
+        notification.addEventListener('click', event => {
+            if (event.target.classList.contains('btn-close')) return;
+            mainListener(event);
+            notification.clicked = true;
+            dismissNotification(notification, toastInstance, toastContainer);
+        }, {once: true});
+    const toastInstance = new bootstrap.Toast(notification);
+    if (target)
+        addTargets(notification, target, toastInstance, toastContainer);
+    toastInstance.show();
+    notificationIdentifier++;
+    displayedNotifications++;
+    setTimeout(() => {
+        if (!notification.clicked){
+            dismissNotification(notification, toastInstance, toastContainer)
+        }
+    }, 5000);
+}
 
 window.indexInit = indexInit;
 window.loadUserProfile = loadUserProfile;

@@ -6,12 +6,13 @@
         paddleWidth: 30,
         paddleHeight: 200,
         ballSize: 20,
-        maxBallSpeed: 15,
+        maxBallSpeed: 630,
+        maxPaddleSpeed: 300,
         animationDuration: 800,
         font: "48px Arial",
         fontColor: "white",
-        defaultBallSpeed : 2,
-        ballSpeedIncrement: 0,
+        defaultBallSpeed : 240,
+        ballSpeedIncrement: 1,
         winningScore: 3,
         enemyScore : {},
         playerScore : {},
@@ -20,7 +21,8 @@
             delay : 2000,
         },
         maxBounceAngle : 2 * (Math.PI / 5),
-        displayDemo: false
+        displayDemo: false,
+        team: '',
     };
 
     config.enemyScore = {
@@ -34,9 +36,11 @@
     }
 
     const state = {
+    	team: '',
         isGameActive: false,
         isCountDownActive: false,
         isGamePaused: false,
+        lastFrame: 0,
         playerScore: 0,
         enemyScore: 0,
         ball: {
@@ -111,20 +115,20 @@
         state.isGameActive = true;
         state.cancelAnimation = false;
         console.log('game started');
+		state.isCountDownActive = false;
 
-        startCountdown();
-        function gameLoop() {
+        function gameLoop(timestamp) {
             if (!state.isGameActive) return;
-
-            updateGameState();
+            state.last_frame_time = Date.now()
+            updateGameState(timestamp);
             if (!state.isGamePaused)
                 drawGame();
 
             requestAnimationFrame(gameLoop);
         }
-        gameLoop();
+        requestAnimationFrame(gameLoop);
     }
-
+``
     function resetGame(){
         state.playerScore = 0;
         state.enemyScore = 0;
@@ -187,7 +191,14 @@
     }
 
     function startCountdown() {
+	    state.isGameActive = true;
+	    state.cancelAnimation = false;
+	    console.log('CD started');
         state.isCountDownActive = true;
+
+        for (racket in state.paddles) {
+        	racket.y = (config.canvasHeight + config.paddleHeight) / 2
+        }
 
         function step() {
             state.countDown.currentStep--;
@@ -256,16 +267,18 @@
     }
 
     function moveUp(paddle){
-        if (!paddle.blockGlide || paddle.y - 10 > config.ballSize)
-            paddle.y -= 10;
-        else if (paddle.y - 10 <= config.ballSize)
+    	delta = maxBallSpeed * Performance.now() - state.lastFrame
+        if (!paddle.blockGlide || paddle.y - delta > config.ballSize)
+            paddle.y -= delta;
+        else if (paddle.y - delta <= config.ballSize)
             paddle.y = config.ballSize;
     }
 
     function moveDown(paddle){
-        if (!paddle.blockGlide || paddle.y + config.paddleHeight + 10 < config.canvasHeight - config.ballSize)
-            paddle.y += 10;
-        else if (paddle.y + config.paddleHeight + 10 >= config.canvasHeight - config.ballSize)
+    	delta = maxBallSpeed * Performance.now() - state.lastFrame
+        if (!paddle.blockGlide || paddle.y + config.paddleHeight + delta < config.canvasHeight - config.ballSize)
+            paddle.y += delta;
+        else if (paddle.y + config.paddleHeight + delta >= config.canvasHeight - config.ballSize)
             paddle.y = config.canvasHeight - config.ballSize - config.paddleHeight;
     }
 
@@ -283,16 +296,18 @@
         if (state.keys["ArrowUp"] && state.paddles.right.speed != -1){
             if (typeof socket !== 'undefined'){
                 if (state.paddles.right.speed === 1){
-                    socket.emit('stop_moving'); console.log('emitting stop_moving');
+                		socket.emit('stop_moving', {'position': state.paddles.right.y});
+                  	console.log('emitting stop_moving');
                 }
-                socket.emit('move_up');  console.log('emitting move_up')
+                socket.emit('move_up');
+                console.log('emitting move_up')
             }
             state.paddles.right.speed = -1;
         }
         if (state.keys["ArrowDown"] && state.paddles.right.speed != 1){
             if (typeof window.socket !== 'undefined'){
                 if (state.paddles.right.speed === -1){
-                    socket.emit('stop_moving');console.log('emitting move_stop');
+                    socket.emit('stop_moving', {'position': state.paddles.right.y}); console.log('emitting move_stop');
                 }
                 socket.emit('move_down'); console.log('emitting move_down')
             }
@@ -308,7 +323,7 @@
         for (let paddle in state.paddles){
             paddle = state.paddles[paddle];
             if (paddle.speed === 1 && paddle.y + config.paddleHeight < config.canvasHeight)
-                  moveDown(paddle);
+                moveDown(paddle);
             else if (paddle.speed === -1 && paddle.y > 0)
                 moveUp(paddle);
         }
@@ -351,8 +366,6 @@
         if (state.ball.x + config.ballSize <= 0 || state.ball.x >= canvas.width){
 			if (state.ball.x + config.ballSize <= 0){
                 state.playerScore++;
-                if (typeof socket !== 'undefined')
-                    socket.emit('goal');
             }
 			else state.enemyScore++;
 			resetBall();
@@ -375,6 +388,8 @@
 
     function incrementBallSpeed(){
         state.ball.speed += config.ballSpeedIncrement;
+        if (state.ball.speed > config.maxBallSpeed)
+            state.ball.speed = config.maxBallSpeed;
     }
 
     function calculateImpactPosition(ballY, paddleY, paddleHeight) {
@@ -386,8 +401,6 @@
         const impactPosition = calculateImpactPosition(state.ball.y + config.ballSize/2, paddleY, config.paddleHeight);
         console.log(impactPosition);
         const bounceAngle = impactPosition * config.maxBounceAngle;
-
-        //ADD SPEED INFLUENCE HERE
 
         const speed = state.ball.speed;
         console.log(bounceAngle);
@@ -410,19 +423,17 @@
         }
         else{
             state.ball.speedX = -state.ball.speedX;
-            if (state.ball.speed < config.maxBallSpeed)
-                incrementBallSpeed();
+            incrementBallSpeed();
             calculateNewBallDirection(paddle.y);
         }
     }
 
     function handlePaddleCollision(paddle){
-        if (((state.ball.x < paddle.x + config.paddleWidth &&
-            state.ball.x > paddle.x ) ||
-            (state.ball.x + config.ballSize > paddle.x &&
-            state.ball.x + config.ballSize < paddle.x + config.paddleWidth))&&
-			state.ball.y + config.ballSize > paddle.y &&
-			state.ball.y < paddle.y + config.paddleHeight){
+        var ball_is_right_from_racket = state.ball.x < paddle.x + config.paddleWidth && state.ball.x > paddle.x;
+        var ball_is_left_from_racket = state.ball.x + config.ballSize > paddle.x && state.ball.x + config.ballSize < paddle.x + config.paddleWidth;
+        var is_ball_y_in_paddle_range = state.ball.y + config.ballSize > paddle.y && state.ball.y < paddle.y + config.paddleHeight;
+
+        if ((ball_is_left_from_racket || ball_is_right_from_racket) && is_ball_y_in_paddle_range){
             handlePaddleBounce(paddle);
             if (!paddle.blockGlide){
                 if (state.ball.x + config.ballSize > paddle.x &&
@@ -435,12 +446,13 @@
                 }
             }
         }
-        else if (state.ball.x < paddle.x + config.paddleWidth &&
-                 state.ball.x + config.ballSize > paddle.x
-        )
-            paddle.blockGlide = true;
-        else
-            paddle.blockGlide = false;
+        else {
+            let is_ball_x_in_paddle_range = state.ball.x < paddle.x + config.paddleWidth && state.ball.x + config.ballSize > paddle.x
+            if (is_ball_x_in_paddle_range)
+                paddle.blockGlide = true;
+            else
+                paddle.blockGlide = false;
+        }
     }
 
     function displayDemo() {
@@ -484,25 +496,32 @@
         }
     }
 
-    function updateGameState() {
+    function updateGameState(timestamp) {
+    	if (state.lastFrame == 0)
+    		state.lastFrame = timestamp;
+    	let deltaTime = (timestamp - state.lastFrame) / 1000;  // Convert to seconds
+    	state.lastFrame = timestamp;
         handleUserInput();
         if (state.isGamePaused)
             return;
 
         if (!state.isCountDownActive){
-            state.ball.x += state.ball.speedX;
-            state.ball.y += state.ball.speedY;
+            state.ball.x += state.ball.speedX * deltaTime;
+            state.ball.y += state.ball.speedY * deltaTime;
         }
 
         if (state.ball.y < 0 || state.ball.y + config.ballSize >= config.canvasHeight){
-            if (state.ball.y < 0)
-                state.ball.y = 0;
+            if (state.ball.y < 0) {
+	            state.ball.y = - state.ball.y
+	            state.ball.speedY = - state.ball.speedY
+            }
             else
-                state.ball.y = config.canvasHeight - config.ballSize;
+	            state.ball.y -= (state.ball.y + config.ballSize) - config.canvasHeight
+	            state.ball.speedY = - state.ball.speedY
             state.ball.speedY = -state.ball.speedY;
         }
 
-        handleGoal();
+        // handleGoal();
         for (let paddle in state.paddles){
             handlePaddleCollision(state.paddles[paddle]);
         }
@@ -534,39 +553,42 @@
         }
     }
 
-    window.PongGame = {startGame, stopGame, pauseGame, resumeGame, state, config, moveUp, moveDown};
+    window.PongGame = {startGame, startCountdown, stopGame, pauseGame, resumeGame, state, config, moveUp, moveDown, handleGameOver};
 })();
 
 
 function initSocket(){
-    let socket = io("wss://localhost:4443/", {
-        transports: ["websocket"],
-        path: "/ws/",
-        auth : {
-            "id": userInformations.id,
-            "token": 'kk',
-        },
+	const host = window.location.origin;
+	let socket = io(host, {
+      transports: ["websocket"],
+      path: "/ws/game/",
+      auth : {
+          "id": userInformations.id,
+          "token": 'kk',
+      },
 	});
     window.socket = socket;
     console.log(socket)
 	socket.on('connect', () => {
-        console.log('Connecté au serveur Socket.IO !');
-
-        // Envoie un message au serveur
-        console.log('envoi message')
-        socket.emit('message', 'Bonjour depuis le frontend !');
-        console.log('envoi join_room')
-        socket.emit('join_room')
+        console.log('Connected to socketIO server!');
     });
     socket.on('start_game', event => {
-        console.log(event);
-        window.PongGame.state.ball.y = event.position_y - window.PongGame.config.ballSize / 2;
-        window.PongGame.state.ball.x = event.position_x - window.PongGame.config.ballSize / 2;
-        window.PongGame.state.ball.speedX = event.direction_x * window.PongGame.config.defaultBallSpeed;
-        window.PongGame.state.ball.speedY = (-event.direction_y) * window.PongGame.config.defaultBallSpeed;
-        console.log(window.PongGame.state.ball.speedX);
-        console.log(window.PongGame.state.ball.speedY);
+        console.log('received start_game');
         window.PongGame.startGame();
+    })
+    socket.on('start_countdown', event => {
+        console.log('received start_countdown');
+        window.PongGame.startCountdown();
+    })
+    socket.on('game_state', event => {
+	    window.PongGame.state.ball.y = event.position_y;
+	    window.PongGame.state.ball.x = event.position_x;
+	    window.PongGame.state.ball.speedX = event.direction_x;
+	    window.PongGame.state.ball.speedY = event.direction_y;
+	    window.PongGame.state.ball.speed = event.speed;
+	    console.log(window.PongGame.state.ball.speedX);
+	    console.log(window.PongGame.state.ball.speedY);
+	    console.log(window.PongGame.state.ball.speed);
     })
     socket.on('connect_error', (error)=> {
         console.log('error', error);
@@ -585,11 +607,26 @@ function initSocket(){
         window.PongGame.state.paddles.left.speed = 0;
         window.PongGame.state.paddles.left.y = event.position;
     })
-    socket.on('goal', event => {
-        window.PongGame.state.ball.y = event.position_y;
-        window.PongGame.state.ball.x = event.position_x;
-        window.PongGame.state.ball.speedX = event.direction_x * window.PongGame.config.defaultBallSpeed;
-        window.PongGame.state.ball.speedY = (-event.direction_y) * window.PongGame.config.defaultBallSpeed;
+    socket.on('score', event => {
+    	if (window.PongGame.config.team == 'team_a') {
+			window.PongGame.state.playerScore = event.team_a;
+			window.PongGame.state.enemyScore = event.team_b;
+     	}
+     	else {
+			window.PongGame.state.playerScore = event.team_b;
+			window.PongGame.state.enemyScore = event.team_a;
+      	}
+  		window.PongGame.stopGame()
+     	if (event.team_a == window.PongGame.config.winningScore|| event.team_b == window.PongGame.config.winningScore) {
+      		window.PongGame.handleGameOver()
+      	}
+    })
+    socket.on('game_over', event => {
+		console.log('game_over');
+		window.PongGame.handleGameOver()
+    })
+    socket.on('team_id', event => {
+		window.PongGame.state.team = event.team;
     })
 }
 
@@ -625,6 +662,7 @@ function checkGameAuthorization(){
 
 async function initGame(){
     await indexInit(false);
+    if (window.location.pathname === '/') return;
     try {
         checkGameAuthorization();
         try {
@@ -637,7 +675,8 @@ async function initGame(){
         // window.PongGame.startGame();
     }
     catch (unauthorized){
-        displayMainAlert("Error", `You don't have permission to play in ${unauthorized}`);
+        if (!document.getElementById('alertModal').classList.contains('show'))
+            displayMainAlert("Error", `You don't have permission to play in ${unauthorized}`);
         await navigateTo('/');
     }
 }

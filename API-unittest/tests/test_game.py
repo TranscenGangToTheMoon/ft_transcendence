@@ -7,24 +7,27 @@ from utils.my_unittest import UnitTest
 class Test01_Game(UnitTest):
 
     def test_001_create_game(self):
-        user1 = self.new_user(get_me=True)
-        user2 = self.new_user(get_me=True)
+        user1 = self.user(['game-start'])
+        user2 = self.user(['game-start'])
 
         self.assertResponse(create_game(user1, user2), 201)
+        self.assertThread(user1, user2)
 
     def test_002_already_in_game(self):
-        user1 = self.new_user(get_me=True)
-        user2 = self.new_user(get_me=True)
+        user1 = self.user(['game-start'])
+        user2 = self.user(['game-start'])
 
         self.assertResponse(is_in_game(user1), 404)
         self.assertResponse(create_game(user1, user2), 201)
         self.assertResponse(is_in_game(user1), 200)
+        self.assertThread(user1, user2)
 
     def test_003_invalid_game_mode(self):
-        user1 = self.new_user(get_me=True)
-        user2 = self.new_user(get_me=True)
+        user1 = self.user()
+        user2 = self.user()
 
         self.assertResponse(create_game(user1, user2, game_mode='caca'), 400)
+        self.assertThread(user1, user2)
 
     def test_004_no_game_mode(self):
         self.assertResponse(create_game(data={'teams': [[1], [2]]}), 400, {'game_mode': ['This field is required.']})
