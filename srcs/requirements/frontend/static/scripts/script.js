@@ -381,9 +381,7 @@ function removeSSEListeners(type){
     }
 }
 
-function addSSEListeners(){
-    console.log(document.getElementById('friendListModal'));
-    
+function addFriendSSEListeners(){
     sse.addEventListener('receive-friend-request', async event => {
         const friendListModal = bootstrap.Modal.getInstance(document.getElementById('friendListModal'));
         const isModalShown = friendListModal ? friendListModal._isShown : friendListModal;
@@ -432,6 +430,36 @@ function addSSEListeners(){
         event = JSON.parse(event.data);
         removeFriend(event.data);
     })
+}
+
+function addInviteSSEListeners(){
+    sse.addEventListener('invite-clash', event => {
+        event = JSON.parse(event.data);
+        console.log(event);
+    })
+
+    sse.addEventListener('invite-custom-game', event => {
+        event = JSON.parse(event.data);
+        console.log(event);
+    })
+
+    sse.addEventListener('invite-1v1', event => {
+        event = JSON.parse(event.data);
+        console.log(event);
+    })
+
+    sse.addEventListener('invite-tournament', event => {
+        event = JSON.parse(event.data);
+        console.log(event);
+    })
+
+}
+
+function addSSEListeners(){
+
+    addFriendSSEListeners();
+    addInviteSSEListeners();
+    
 }
 
 function initSSE(){
