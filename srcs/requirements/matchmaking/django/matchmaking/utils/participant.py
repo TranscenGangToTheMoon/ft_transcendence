@@ -45,6 +45,3 @@ def get_lobby_participant(lobby, user_id, creator_check=False, from_place=False)
 
 def get_tournament_participant(tournament, user_id, creator_check=False, from_place=False):
     return get_participant(TournamentParticipants, tournament, user_id, creator_check, from_place)
-
-
-# todo add event for delete friend, and delete friend request

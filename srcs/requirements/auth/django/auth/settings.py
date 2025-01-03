@@ -34,22 +34,6 @@ ALLOWED_HOSTS = [
     '*'
 ]
 
-# LOGGING = {
-#     'version': 1,
-#     'disable_existing_loggers': False,
-#     'handlers': {
-#         'console': {
-#             'class': 'logging.StreamHandler',
-#         },
-#     },
-#     'root': {
-#         'handlers': ['console'],
-#         'level': 'DEBUG',
-#     },
-# }
-
-# Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -154,7 +138,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'auth.utils.Authentication',
     ],
 }
 
@@ -162,5 +146,4 @@ SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ['Bearer'],
     'ACCESS_TOKEN_LIFETIME': timedelta(hours=3),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
-    'UPDATE_LAST_LOGIN': True,
 }

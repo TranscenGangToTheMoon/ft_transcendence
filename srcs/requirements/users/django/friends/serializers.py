@@ -9,28 +9,48 @@ from users.serializers_utils import SmallUsersSerializer
 
 
 class FriendsSerializer(serializers.ModelSerializer):
-    friends = SmallUsersSerializer(many=True, read_only=True)
+    friend = serializers.ModelSerializer(read_only=True)
+    friend_win = serializers.ModelSerializer(read_only=True)
+    me_win = serializers.ModelSerializer(read_only=True)
 
     class Meta:
         model = Friends
         fields = [
             'id',
-            'friends',
+            'friend',
+            'friend_win',
+            'me_win',
             'friends_since',
             'matches_play_against',
-            'user1_win',
             'matches_played_together',
             'matches_won_together',
         ]
         read_only_fields = [
             'id',
-            'friends',
+            'friend',
+            'friend_win',
+            'me_win',
             'friends_since',
             'matches_play_against',
-            'user1_win',
             'matches_played_together',
             'matches_won_together',
         ]
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        request = self.context.get('request')
+        if request is None:
+            raise serializers.ValidationError(MessagesException.ValidationError.REQUEST_REQUIRED)
+        if instance.user_1.id == request.user.id:
+            data['friend_win'] = instance.user2_win
+            data['me_win'] = instance.user1_win
+            friend = instance.user_2
+        else:
+            data['friend_win'] = instance.user1_win
+            data['me_win'] = instance.user2_win
+            friend = instance.user_1
+        data['friend'] = SmallUsersSerializer(friend).data
+        return data
 
     def create(self, validated_data):
         user_accept = get_user(self.context.get('request'))
@@ -46,6 +66,7 @@ class FriendsSerializer(serializers.ModelSerializer):
             raise NotFound(MessagesException.NotFound.FRIEND_REQUEST)
 
         validated_data['id'] = fr_id
+        validated_data['user_1'] = friend_request.sender
+        validated_data['user_2'] = user_accept
         result = super().create(validated_data)
-        result.friends.add(user_accept, friend_request.sender)
         return result

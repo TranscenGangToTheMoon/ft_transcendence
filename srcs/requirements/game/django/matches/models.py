@@ -19,12 +19,6 @@ class Matches(models.Model):
             return None
         return self.teams.get(score=max(self.teams.all().values_list('score', flat=True)))
 
-    @property
-    def finish_str(self):
-        if self.finished:
-            return f'finished: {self.finish_reason}'
-        return ''
-
     def finish_match(self, reason: str | None = None):
         if self.finished:
             return
@@ -42,9 +36,6 @@ class Matches(models.Model):
     def set_port(self, port: int):
         self.port = port
         self.save()
-
-    def __str__(self):
-        return f'Match {self.id} {self.finish_str}- [{"], [".join([str(teams) for teams in self.teams.all()])}]'
 
 
 class Teams(models.Model):

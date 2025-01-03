@@ -32,6 +32,7 @@ class UnitTest(unittest.TestCase):
         response = self.assertResponse(me(_new_user), 200)
         _new_user['id'] = response['id']
         _new_user['username'] = response['username']
+        _new_user['is_guest'] = response['is_guest']
         if sse:
             self.connect_to_sse(_new_user, tests_sse)
         return _new_user

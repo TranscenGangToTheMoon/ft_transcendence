@@ -73,3 +73,23 @@ def login(username=None, password=None, data=None):
         method='POST',
         data=data,
     )
+
+
+def verify(token, token_type='Bearer '):
+    return make_request(
+        endpoint='private/auth/verify/',
+        port=8001,
+        token=token,
+        token_type=token_type,
+    )
+
+
+def refresh(token, data=None):
+    if data is None:
+        data = {'refresh': token}
+    return make_request(
+        endpoint='auth/refresh/',
+        method='POST',
+        token=token,
+        data=data,
+    )
