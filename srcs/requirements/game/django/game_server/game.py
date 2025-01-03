@@ -166,6 +166,7 @@ class Game:
 
     def update(self):
         if (self.last_update == 0):
+            self.send_game_state()
             self.last_update = time.perf_counter()
         time_delta = time.perf_counter() - self.last_update
         self.last_update = time.perf_counter()
@@ -237,7 +238,7 @@ class Game:
         from game_server.server import Server
         print('finishing game', flush=True)
         self.finished = True
-        finish_match(self.match.id) #might not work
+        finish_match(self.match.id, reason) #might not work
         time.sleep(1)
         self.send_finish(reason, winner)
         time.sleep(1)

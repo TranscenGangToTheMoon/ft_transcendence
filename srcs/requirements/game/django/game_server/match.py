@@ -42,5 +42,8 @@ def fetch_matches():
     print('fetching matches', flush=True)
     return Matches.objects.filter(finished=False)
 
-def finish_match(match_id):
-    r = requests.post(f'http://localhost:8000/matches/{match_id}/finish_match')
+def finish_match(match_id, reason=None):
+    # todo -> change to use API when it's ready
+    # r = requests.post(f'http://localhost:8000/matches/{match_id}/finish_match')
+    match = Matches.objects.get(id=match_id)
+    match.finish_match(reason)
