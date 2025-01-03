@@ -11,8 +11,19 @@
         <input type="text" id="joinCode" placeholder="code">
         <button id="joinLobby">Join</button>
         <div class="inputError" id="joinLobbyError"></div>
-        <button id="inviteFriends">Invite friends</button>
-        <div id="feedback" style="display: none;">Link copied to clipboard</div>
+        <div class="dropdown">
+            <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+              Invite Friends
+            </button>
+            <div id="feedback" style="display: none;">Link copied to clipboard</div>
+            <ul class="dropdown-menu">
+              <li><button class="dropdown-item" id="copyLink">Copy Invite Link</button></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><h6 class="dropdown-header">Online Friends</h6></li>
+              <li><button class="dropdown-item">Friend 1</button></li>
+              <li><button class="dropdown-item">Friend 2</button></li>
+            </ul>
+          </div>
     </form>
     <div id="lobbyOptions">
         <div id="teamSelector">

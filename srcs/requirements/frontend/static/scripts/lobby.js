@@ -24,7 +24,7 @@ document.getElementById('leaveLobby').addEventListener('click', async () => {
 })
 
 
-document.getElementById("inviteFriends").addEventListener("click", event => {
+document.getElementById("copyLink").addEventListener("click", event => {
     event.preventDefault();
     const currentURL = window.location.href;
 
