@@ -3,9 +3,9 @@ from typing import Literal
 from utils.request import make_request
 
 
-def create_lobby(user, data=None, method: Literal['GET', 'POST', 'PATCH', 'DELETE'] = 'POST'):
+def create_lobby(user, data=None, method: Literal['GET', 'POST', 'PATCH', 'DELETE'] = 'POST', game_mode='clash'):
     if data is None:
-        data = {'game_mode': 'clash'}
+        data = {'game_mode': game_mode}
     return make_request(
         endpoint='play/lobby/',
         method=method,
@@ -29,7 +29,15 @@ def join_lobby(user, code, method: Literal['GET', 'POST', 'PATCH', 'DELETE'] = '
 
 def ban_user(user, user_ban, code):
     return make_request(
-        endpoint=f'play/lobby/{code}/ban/{user_ban["id"]}/',
+        endpoint=f'play/lobby/{code}/banned/{user_ban["id"]}/',
         token=user['token'],
         method='DELETE',
+    )
+
+
+def invite_user(user, user_invite, code):
+    return make_request(
+        endpoint=f'play/lobby/{code}/invite/{user_invite["id"]}/',
+        token=user['token'],
+        method='POST',
     )

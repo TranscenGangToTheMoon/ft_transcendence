@@ -116,7 +116,7 @@
     background-color: #f8f9fa !important;
 }
 
-img {
+.player img {
     -webkit-user-drag : none;
     pointer-events: none;
 }
@@ -129,4 +129,4 @@ img {
     background-color: white;
     border: 1px solid #ccc;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-  }
+}

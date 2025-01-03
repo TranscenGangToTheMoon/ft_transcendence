@@ -17,7 +17,7 @@ async function decrementFriendRequests(sent){
 async function acceptFriendRequest(id){
     try {
         let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/users/me/friend_requests/${id}/`, 'POST');
-        document.getElementById(`${id}`).remove();
+        document.getElementById(`fr${id}`).remove();
         nextFriendRequest = decrementOffset(nextFriendRequest);
         await decrementFriendRequests();
         await loadFriendList();
@@ -30,7 +30,7 @@ async function acceptFriendRequest(id){
 async function declineFriendRequest(id, sent=false){
     try {
         let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/users/me/friend_requests/${id}/`, 'DELETE');
-        document.getElementById(`${id}`).remove();
+        document.getElementById(`fr${id}`).remove();
         if (!sent){
             nextFriendRequest = decrementOffset(nextFriendRequest);
             decrementFriendRequests();
@@ -53,8 +53,9 @@ async function declineFriendRequest(id, sent=false){
             declineButton.addEventListener('click', async function (event){
                 let sent = false;
                 if (this.classList.contains('sent')) sent = true;
-                await declineFriendRequest(declineButton.parentElement.parentElement.parentElement.id, sent);
-                console.log('declined friend request: ', declineButton.parentElement.parentElement.parentElement.id);
+                let id = declineButton.parentElement.parentElement.parentElement.id;
+                await declineFriendRequest(id.substring(2), sent);
+                console.log('declined friend request: ', id.substring(2));
             })
         }
         declineButton.listened = true;
@@ -65,8 +66,9 @@ async function declineFriendRequest(id, sent=false){
     for (let acceptButton of acceptButtons){
         if (!acceptButton.listened){
             acceptButton.addEventListener('click', async event => {
-                await acceptFriendRequest(acceptButton.parentElement.parentElement.parentElement.id);
-                console.log('accepted friend request: ', acceptButton.parentElement.parentElement.parentElement.id);
+                let id = acceptButton.parentElement.parentElement.parentElement.id
+                await acceptFriendRequest(id.substring(2));
+                console.log('accepted friend request: ', id.substring(2));
             })
         }
         acceptButton.listened = true;
