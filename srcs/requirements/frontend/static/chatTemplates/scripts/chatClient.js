@@ -97,6 +97,9 @@ function closeChat()
 		console.log("Closing the connection to the server...");
 		socket.off();
 		socket.disconnect();
+		lastClick = undefined;
+		document.getElementById('chatView').style.display = 'none';
+		document.getElementById('messages').innerHTML = "";
 		socket = null;
 	}
 	catch (error) {
