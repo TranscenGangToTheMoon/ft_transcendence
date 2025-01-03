@@ -1,28 +1,17 @@
-import json
-from http.client import responses
-from operator import truediv
-
 from textual.app import App, ComposeResult
 from textual.screen import Screen
 from textual.widgets import Header, Footer, Button, Input, Static, Rule, LoadingIndicator
 from textual.containers import VerticalGroup, HorizontalGroup, Container, Horizontal, Vertical
 from textual.worker import Worker, WorkerState
+from textual.geometry import Region, Offset
 from textual import work, events
 from textual import log
 import requests
 from classes.user import User
-from enum import Enum
-
-
-class Page(Enum):
-    LoginPage = 1
-    MainPage = 2
-    GamePage = 3
 
 class LoginPage(Screen):
     SUB_TITLE = "Login Page"
-
-    # def __init__(self):
+    CSS_PATH = "../styles/LoginPage.tcss"
 
     def compose(self) -> ComposeResult:
         yield Header()
@@ -102,6 +91,7 @@ class LoginPage(Screen):
 
 class MainPage(Screen):
     SUB_TITLE = "Main Page"
+    CSS_PATH = "../styles/MainPage.tcss"
 
     def compose(self) -> ComposeResult:
         yield Header()
@@ -110,7 +100,7 @@ class MainPage(Screen):
         yield self.userMeStatic()
         yield Rule()
         yield Button("Duel", id="duel", variant="primary")
-        # change this button Widget.loading to true to transform it into loading bar whne it pressed and requete made
+        # change this button Widget.loading to true to transform it into loading bar when it pressed and requete made
         yield Static("POST /api/play/duel/", id="duelResult")
         yield Rule()
         yield Button("Cancel Duel", id="cancelDuelGame", variant="error")
@@ -149,11 +139,77 @@ class MainPage(Screen):
         except Exception as error:
             return Static(f"GET /api/users/me/ Error: {error}")
 
+from textual.widget import Widget
+from rich.console import Console
+
+class Playground(Widget):
+    def __init__(self):
+        super().__init__()
+        self.styles.width = 115
+        self.styles.height = 40
+        log("Playground:")
+        log(self.offset)
+        log(self.region)
+
+    def render(self):
+        return "                                                      █\n" * self.region.width
+
+    def on_mount(self):
+        console = Console()
+        screen_width = console.width
+        screen_height = console.height
+
+        log("=======")
+        log(self.region.width)
+        log(self.region.height)
+        log(self.styles.width)
+        log(self.styles.height)
+        log("=======")
+        x_offset = (screen_width - int(self.styles.width.value)) // 2
+        y_offset = (screen_height - int(self.styles.height.value)) // 2
+        # x_offset = (screen_width - self.region.width) // 2
+        # y_offset = (screen_height - self.region.height) // 2
+
+        log(x_offset)
+        log(y_offset)
+        self.styles.offset = Offset(x_offset, y_offset)
+        self.styles.background = "blue"
+        # self.styles.border = ("solid", "white")
+
+    # def on_resize(self, event: events.Resize):
+    #     pass
+
+class PaddleLeft(Widget):
+    def __init__(self):
+        super().__init__()
+
+        self.offset = Offset(14, 0)
+        # self.region = Region(0, 0, 4, 13)
+        self.terrain_width = 4
+        self.terrain_height = 13
+        # log("Paddle Left:")
+        # log(self.offset)
+        # log(self.region)
+
+    def render(self):
+        return "█" * self.terrain_height * self.terrain_width
+
+    def on_mount(self):
+        self.styles.width = str(self.terrain_width)
+        self.styles.height = str(self.terrain_height)
+
+        # self.styles.offset = Offset(14, 0)
+        self.styles.background = "white"
+
 class GamePage(Screen):
     SUB_TITLE = "Game Page"
+    CSS_PATH = "../styles/GamePage.tcss"
+
 
     def compose(self) -> ComposeResult:
         yield Header()
+        with Playground():
+            yield PaddleLeft()
         yield Button("Exit Button", id="exitAction")
         yield Footer()
 
@@ -167,13 +223,6 @@ import httpx
 
 # diff on login and main page with Screen css ! Why ?
 class PongCLI(App):
-    SUB_TITLE = "Login Page"
-
-    CSS_PATH = [
-        "../styles/LoginPage.tcss",
-        "../styles/MainPage.tcss",
-        "../styles/GamePage.tcss",
-    ]
     SCREENS = {
         # "loginPage": LoginPage,
     }
@@ -190,7 +239,8 @@ class PongCLI(App):
         return (self.connected)
 
     def on_mount(self) -> None:
-        self.push_screen(LoginPage())
+        self.push_screen(GamePage())
+        # self.push_screen(LoginPage())
 
     @work(exclusive=True)
     async def startSSE(self):
@@ -209,16 +259,19 @@ class PongCLI(App):
                             raise (Exception(f"({response.status_code}) SSE connection prout! {response.text}"))
 
                         async for line in response.aiter_text():
-                            # if self.is_cancelled:
+                            # if (self.is_cancelled):
                             #     break
                             # log("Prout")
                             try:
                                 events = self.regex.findall(line)
                                 for event, data in events:
-                                    if event == "game-start":# game start
+                                    dataJson = None
+                                    if (event == "game-start"):# game start
                                         dataJson = json.loads(data)
                                         log(f"{dataJson}")
                                         await self.push_screen(GamePage()) #maybe it's a solution
+                                    elif (event != "game-start" and event != "ping"):
+                                        log(f"{event}: {dataJson}")
                             except (IndexError, ValueError) as error:
                                 continue
                 finally:

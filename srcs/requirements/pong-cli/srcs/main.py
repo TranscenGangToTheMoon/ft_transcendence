@@ -63,7 +63,10 @@ import re
 #             print(User.response)
 
 
+import os
 def main():
+    os.system('clear')
+    os.system('printf "\\e[8;60;150t"')
     app = PongCLI()
     app.run()
 
