@@ -4,6 +4,8 @@ const MAX_DISPLAYED_NOTIFICATIONS = 3;
 const MAX_DISPLAYED_FRIENDS = 12;
 const MAX_DISPLAYED_FRIEND_REQUESTS = 5;
 const MAX_DISPLAYED_BLOCKED_USERS = 10;
+const DEBOUNCE_TIME = 100;
+const eventTimestamps = new Map();
 const baseAPIUrl = "/api"
 let userInformations = undefined;
 var sse;
@@ -14,6 +16,7 @@ window.userInformations = userInformations;
 var pathName = window.location.pathname;
 var badgesDivs = {};
 var notificationQueue = [];
+const SSEListeners = new Map();
 
 window.pathName = pathName;
 
@@ -193,8 +196,10 @@ function loadCSS(cssHref, toUpdate=true) {
     // console.log(`Style ${cssHref} loaded.`)
 }
 
-async function loadContent(url, container='content', append=false) {
-    const contentDiv = document.getElementById(container);
+async function loadContent(url, containerId='content', append=false, container=undefined) {
+    let contentDiv = document.getElementById(containerId);
+    if (container)
+        contentDiv = container;
     try {
         const response = await fetch(url);
         if (!response.ok) {
@@ -266,9 +271,22 @@ function getCurrentState(){
     return localStorage.getItem('currentState');
 }
 
+async function handleSSEListenerRemoval(url){
+    if (window.pathName.includes('/lobby') && !url.includes('/lobby')){
+        removeSSEListeners('lobby');
+        try {
+            await apiRequest(getAccessToken(), `${baseAPIUrl}/play/lobby/${code}/`, 'DELETE');
+        }
+        catch (error){
+            console.log(error);
+        }
+    }
+}
+
 async function navigateTo(url, doNavigate=true){
     let currentState = getCurrentState();
     lastState = currentState;
+    await handleSSEListenerRemoval(url);
     history.pushState({state: currentState}, '', url);
     console.log(`added ${url} to history with state : ${currentState}`);
     pathName = window.location.pathname;
@@ -435,6 +453,21 @@ function displayConfirmModal(confirmTitle, confirmContent) {
     confirmModal.show();
 }
 
+function checkEventDuplication(data){
+    const now = Date.now();
+
+    const lastTimeStamp = eventTimestamps.get(data.event_code);
+    // console.log(lastTimeStamp);f
+    if (lastTimeStamp && (now - lastTimeStamp < DEBOUNCE_TIME)){
+        console.log('skip', data);
+        return 0;
+    }
+
+    eventTimestamps.set(data.event_code, now);
+    // console.log('cala',eventTimestamps.get(data));
+    return 1;
+}
+
 window.displayMainAlert = displayMainAlert;
 
 // ========================== INDEX SCRIPT ==========================
@@ -492,6 +525,16 @@ function addNotificationIndicator(div, number){
     }
 }
 
+function removeSSEListeners(type){
+    for (const [key, value] of SSEListeners) {
+        if (key.includes(type)) {
+            sse.removeEventListener(key, value);
+            SSEListeners.delete(key);
+            console.log('removed sse listener:', key);
+        }
+    }
+}
+
 function addSSEListeners(){
     console.log(document.getElementById('friendListModal'));
     
@@ -505,6 +548,7 @@ function addSSEListeners(){
             await displayNotification(undefined, 'friend request', event.message, event => {
                 const friendListModal = new bootstrap.Modal(document.getElementById('friendListModal'));
                 friendListModal.show();
+                document.getElementById('innerFriendRequests-tab').click();
             }, event.target);
             userInformations.notifications['friend_requests'] += 1;
             displayBadges();
@@ -670,6 +714,7 @@ function dismissNotification(notification, toastInstance, toastContainer){
     toastInstance.hide();
     setTimeout (() => {
         displayedNotifications--;
+        console.log(notification);
         toastContainer.removeChild(document.getElementById(notification.id));
         if (notificationQueue.length){
             let notif= notificationQueue.shift();
@@ -698,14 +743,14 @@ async function displayNotification(icon=undefined, title=undefined, body=undefin
         notification.querySelector('.toast-body').innerText = body;
     if (mainListener)
         notification.addEventListener('click', event => {
+            if (event.target.classList.contains('btn-close')) return;
             mainListener(event);
             notification.clicked = true;
-            dismissNotification(notificationIdentifier, toastInstance, toastContainer);
+            dismissNotification(notification, toastInstance, toastContainer);
         }, {once: true});
     const toastInstance = new bootstrap.Toast(notification);
     if (target)
         addTargets(notification, target, toastInstance, toastContainer);
-        // console.log(target);
     toastInstance.show();
     notificationIdentifier++;
     displayedNotifications++;
