@@ -15,12 +15,12 @@ class ChatsView(generics.ListCreateAPIView):
     permission_classes = [NotGuest]
 
     def get_queryset(self):
-        query = self.request.data.pop('q', None)
+        query = self.request.query_params.get('q', None)
+        if query == '':
+            query = None
         kwars = {'user_id': self.request.user.id}
         if query is None:
-            query = self.request.query_params.get('q', None)
-            if query is None:
-                kwars['view_chat'] = True
+            kwars['view_chat'] = True
         join_chats = ChatParticipants.objects.filter(**kwars).values_list('chat_id', flat=True)
         if query is not None:
             join_chats = ChatParticipants.objects.exclude(user_id=self.request.user.id).filter(chat_id__in=join_chats, username__icontains=query).values_list('chat_id', flat=True)
@@ -34,7 +34,7 @@ class ChatView(SerializerAuthContext, generics.RetrieveDestroyAPIView):
 
     def get_object(self):
         user = get_chat_participants(self.kwargs['chat_id'], self.request.user.id, False)
-        if user.view_chat is False:
+        if self.request.method == 'GET' and user.view_chat is False:
             user.set_view_chat()
         return user.chat
 
