@@ -135,14 +135,35 @@ class TournamentParticipants(models.Model):
         self.save()
         return None
 
-    def __str__(self):
-        name = f'{self.tournament.code}/ {self.user_id}'
-        if self.creator:
-            name += '*'
-        if self.still_in:
-            name += ' in'
+
+class TournamentMatches(models.Model):
+    tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE, related_name='matches')
+    stage = models.ForeignKey(TournamentStage, on_delete=models.CASCADE, related_name='matches')
+    game_code = models.CharField(max_length=4, null=True, default=None)
+    winner = models.ForeignKey(TournamentParticipants, on_delete=models.CASCADE, related_name='wins', null=True, default=None)
+    user_1 = models.ForeignKey(TournamentParticipants, on_delete=models.CASCADE, related_name='matches_1')
+    user_2 = models.ForeignKey(TournamentParticipants, on_delete=models.CASCADE, related_name='matches_2', null=True)
+    score_winner = models.IntegerField(null=True, default=None)
+    score_looser = models.IntegerField(null=True, default=None)
+    reason = models.CharField(null=True, default=None, max_length=50)
+    finished = models.BooleanField(default=False)
+
+    def create_match(self):
+        if self.user_2 is not None:
+            if not self.user_1.still_in:
+                self.winner = self.user_2
+                self.user_2.win()
+            else:
+                try:
+                    self.game_code = create_tournament_match(self.tournament.id, self.stage.id, [[self.user_1.user_id], [self.user_2.user_id]])['code']
+                except APIException:
+                    self.finish_game() # todo make
+        elif self.user_1.still_in:
+            self.winner = self.user_1
+            self.user_1.win()
         else:
-            name += ' eliminate at'
-        if self.stage is not None:
-            name += ' ' + self.stage.label
-        return name
+            self.finish_game() # todo make
+
+    def finish_game(self):
+        self.finished = True
+        self.save()
