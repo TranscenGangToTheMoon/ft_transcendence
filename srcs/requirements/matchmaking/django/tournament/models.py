@@ -36,6 +36,14 @@ class Tournament(models.Model):
         time.sleep(20)
         self.start()
 
+    def cancel_start(self):
+        self.start_at = None
+        self.save()
+        try:
+            create_sse_event(self.users_id(), EventCode.TOURNAMENT_START_CANCEL, {'id': self.id, 'start_at': None})
+        except APIException:
+            pass
+
     def start(self):
         self.is_started = True
         self.save()
