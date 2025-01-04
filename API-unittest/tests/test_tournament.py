@@ -523,7 +523,7 @@ class Test09_StartTournament(UnitTest):
         self.assertResponse(join_tournament(user3, code), 201)
         self.assertResponse(join_tournament(user4, code), 201)
 
-        respone = self.assertResponse(create_tournament(user1, method='GET'), 200)
+        self.assertResponse(create_tournament(user1, method='GET'), 200)
         self.assertThread(user1, user2, user3, user4)
 
     def test_002_start_tournament_80(self):
@@ -548,6 +548,18 @@ class Test09_StartTournament(UnitTest):
         time.sleep(30)
 
         self.assertThread(user1, user2, user3, user4, user5, user6, user7, user8)
+
+    def test_003_cancel_start(self):
+        users = [self.user(['tournament-join'] * (7 - i) + ['tournament-start-at'] + ['tournament-leave'] * int(bool(i)) + ['tournament-cancel-start']) for i in range(8)]
+
+        code = self.assertResponse(create_tournament(users[0], size=10), 201, get_field='code')
+        for user in users[1:]:
+            self.assertResponse(join_tournament(user, code), 201)
+
+        time.sleep(2)
+        self.assertResponse(join_tournament(users[0], code, method='DELETE'), 204)
+        time.sleep(2)
+        self.assertThread(*users)
 
 
 # todo test start after make it
