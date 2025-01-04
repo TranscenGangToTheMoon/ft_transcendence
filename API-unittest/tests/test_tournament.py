@@ -1,3 +1,4 @@
+import time
 import unittest
 
 from services.blocked import blocked_user, unblocked_user
@@ -524,6 +525,29 @@ class Test09_StartTournament(UnitTest):
 
         respone = self.assertResponse(create_tournament(user1, method='GET'), 200)
         self.assertThread(user1, user2, user3, user4)
+
+    def test_002_start_tournament_80(self):
+        user1 = self.user(['tournament-join', 'tournament-join', 'tournament-join', 'tournament-join', 'tournament-join', 'tournament-join', 'tournament-join', 'tournament-start-at', 'tournament-start', 'game-start'])
+        user2 = self.user(['tournament-join', 'tournament-join', 'tournament-join', 'tournament-join', 'tournament-join', 'tournament-join', 'tournament-start-at', 'tournament-start', 'game-start'])
+        user3 = self.user(['tournament-join', 'tournament-join', 'tournament-join', 'tournament-join', 'tournament-join', 'tournament-start-at', 'tournament-start', 'game-start'])
+        user4 = self.user(['tournament-join', 'tournament-join', 'tournament-join', 'tournament-join', 'tournament-start-at', 'tournament-start', 'game-start'])
+        user5 = self.user(['tournament-join', 'tournament-join', 'tournament-join', 'tournament-start-at', 'tournament-start', 'game-start'])
+        user6 = self.user(['tournament-join', 'tournament-join', 'tournament-start-at', 'tournament-start', 'game-start'])
+        user7 = self.user(['tournament-join', 'tournament-start-at', 'tournament-start', 'game-start'])
+        user8 = self.user(['tournament-start-at', 'tournament-start', 'game-start'])
+
+        code = self.assertResponse(create_tournament(user1, size=10), 201, get_field='code')
+        self.assertResponse(join_tournament(user2, code), 201)
+        self.assertResponse(join_tournament(user3, code), 201)
+        self.assertResponse(join_tournament(user4, code), 201)
+        self.assertResponse(join_tournament(user5, code), 201)
+        self.assertResponse(join_tournament(user6, code), 201)
+        self.assertResponse(join_tournament(user7, code), 201)
+        self.assertResponse(join_tournament(user8, code), 201)
+
+        time.sleep(30)
+
+        self.assertThread(user1, user2, user3, user4, user5, user6, user7, user8)
 
 
 # todo test start after make it
