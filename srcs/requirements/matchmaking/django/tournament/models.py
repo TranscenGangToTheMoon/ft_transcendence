@@ -1,14 +1,16 @@
 from datetime import datetime, timezone, timedelta
 from math import log2
 import time
+from threading import Thread
 
 from django.db import models
-from lib_transcendence.sse_events import EventCode
+from lib_transcendence.sse_events import create_sse_event, EventCode
+from rest_framework.exceptions import APIException
 
 from baning.models import delete_banned
 from blocking.utils import delete_player_instance
 from matchmaking.create_match import create_tournament_match
-from matchmaking.utils.sse import send_sse_event
+from matchmaking.utils.sse import send_sse_event, start_tournament_sse
 
 
 class Tournament(models.Model):
@@ -24,23 +26,39 @@ class Tournament(models.Model):
     created_by = models.IntegerField()
     created_by_username = models.CharField(max_length=30)
 
+    def users_id(self):
+        return list(self.participants.all().values_list('user_id', flat=True))
+
     def start_timer(self):
         self.start_at = datetime.now(timezone.utc) + timedelta(seconds=20)
         self.save()
-        # todo websocket: send that game start in ...
-        # todo est ce que lon peut quiter ?
-        # todo si oui est ce qe ca cancel le timer
-        # todo 30 sec
-        # todo 3 when full (on peu plus quitter)
+        create_sse_event(self.users_id(), EventCode.TOURNAMENT_START_AT, {'id': self.id, 'start_at': self.start_at}, {'name': self.name})
+        Thread(target=self.timer).start()
 
-        time.sleep(20)
+    def timer(self):
+        for _ in range(20):
+            if not self.is_enough_players():
+                self.cancel_start()
+                return
+            if self.is_started:
+                return
+            time.sleep(1)
         self.start()
 
+    def cancel_start(self):
+        self.start_at = None
+        self.save()
+        try:
+            create_sse_event(self.users_id(), EventCode.TOURNAMENT_START_CANCEL, {'id': self.id, 'start_at': None})
+        except APIException:
+            pass
+
     def start(self):
+        participants = self.participants.all().order_by('seeding')
         self.is_started = True
+        self.size = participants.count()
         self.save()
         first_stage = self.stages.create(label=Tournament.get_label(self.n_stage))
-        participants = self.participants.all().order_by('seeding')
 
         for p in participants:
             p.stage = first_stage
@@ -48,13 +66,25 @@ class Tournament(models.Model):
 
         index = 0
         for i in range(int(self.size / 2)):
-            participants[i].index = index
-            participants[i].save()
-            if participants.count() > self.size - i - 1:
-                create_tournament_match(self.id, first_stage.id, [[participants[i].user_id], [participants[self.size - i - 1].user_id]])
+            user_1 = participants[i]
+            user_1.index = index
+            user_1.save()
+            k = self.size - i - 1
+            if participants.count() > k:
+                user_2 = participants[k]
+                user_2.index = index
+                user_2.save()
             else:
-                participants[i].win()
+                user_2 = None
+            result = self.matches.create(stage=first_stage, user_1=user_1, user_2=user_2)
             index += 1
+        start_tournament_sse(self)
+        time.sleep(3)
+        for matche in self.matches.all():
+            matche.create_match()
+
+    def is_enough_players(self):
+        return int(self.size * (80 / 100)) <= self.participants.count()
 
     @staticmethod
     def get_label(n_stage, previous_stage=1):
@@ -72,24 +102,11 @@ class Tournament(models.Model):
         delete_banned(self.code)
         super().delete(using=using, keep_parents=keep_parents)
 
-    def __str__(self):
-        if self.private:
-            name = '*'
-        else:
-            name = ''
-        name += f'{self.code}/{self.name} {self.created_by} ({self.participants.count()}/{self.size})'
-        if self.is_started:
-            name += ' STARTED'
-        return name
-
 
 class TournamentStage(models.Model):
     tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE, related_name='stages')
     label = models.CharField(max_length=50)
     stage = models.IntegerField(default=1)
-
-    def __str__(self):
-        return f'{self.tournament.code}/{self.label} ({self.participants.count()})'
 
 
 class TournamentParticipants(models.Model):
@@ -101,7 +118,6 @@ class TournamentParticipants(models.Model):
     still_in = models.BooleanField(default=True)
     creator = models.BooleanField(default=False)
     join_at = models.DateTimeField(auto_now_add=True)
-    # todo cans leave the tournament if started
 
     @property
     def place(self):
@@ -135,14 +151,35 @@ class TournamentParticipants(models.Model):
         self.save()
         return None
 
-    def __str__(self):
-        name = f'{self.tournament.code}/ {self.user_id}'
-        if self.creator:
-            name += '*'
-        if self.still_in:
-            name += ' in'
+
+class TournamentMatches(models.Model):
+    tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE, related_name='matches')
+    stage = models.ForeignKey(TournamentStage, on_delete=models.CASCADE, related_name='matches')
+    game_code = models.CharField(max_length=4, null=True, default=None)
+    winner = models.ForeignKey(TournamentParticipants, on_delete=models.CASCADE, related_name='wins', null=True, default=None)
+    user_1 = models.ForeignKey(TournamentParticipants, on_delete=models.CASCADE, related_name='matches_1')
+    user_2 = models.ForeignKey(TournamentParticipants, on_delete=models.CASCADE, related_name='matches_2', null=True)
+    score_winner = models.IntegerField(null=True, default=None)
+    score_looser = models.IntegerField(null=True, default=None)
+    reason = models.CharField(null=True, default=None, max_length=50)
+    finished = models.BooleanField(default=False)
+
+    def create_match(self):
+        if self.user_2 is not None:
+            if not self.user_1.still_in:
+                self.winner = self.user_2
+                self.user_2.win()
+            else:
+                try:
+                    self.game_code = create_tournament_match(self.tournament.id, self.stage.id, [[self.user_1.user_id], [self.user_2.user_id]])['code']
+                except APIException:
+                    self.finish_game() # todo make
+        elif self.user_1.still_in:
+            self.winner = self.user_1
+            self.user_1.win()
         else:
-            name += ' eliminate at'
-        if self.stage is not None:
-            name += ' ' + self.stage.label
-        return name
+            self.finish_game() # todo make
+
+    def finish_game(self):
+        self.finished = True
+        self.save()

@@ -1,20 +1,14 @@
 import json
-from datetime import datetime
 from enum import Enum
 
 import redis
 from django.db.models import QuerySet
 from lib_transcendence.exceptions import MessagesException, ServiceUnavailable
 from lib_transcendence.sse_events import EventCode
+from lib_transcendence.utils import datetime_serializer
 from rest_framework.exceptions import ParseError
 
 from users.models import Users
-
-
-def datetime_serializer(obj):
-    if isinstance(obj, datetime):
-        return obj.isoformat()
-    raise TypeError
 
 
 def get_username(user_id):
@@ -134,10 +128,9 @@ lobby_destroy = Event(Service.LOBBY, EventCode.LOBBY_DESTROY, 'The lobby has bee
 tournament_join = Event(Service.TOURNAMENT, EventCode.TOURNAMENT_JOIN, '{username} have joined the tournament.')
 tournament_leave = Event(Service.TOURNAMENT, EventCode.TOURNAMENT_LEAVE, '{username} have left the tournament.')
 tournament_banned = Event(Service.TOURNAMENT, EventCode.TOURNAMENT_BANNED, 'You have been banned from this tournament.')
-tournament_start_3 = Event(Service.TOURNAMENT, EventCode.TOURNAMENT_START_3, 'Tournament {name} start in 3 seconds.') # todo format
-tournament_start_20 = Event(Service.TOURNAMENT, EventCode.TOURNAMENT_START_20, 'Tournament {name} start in 20 seconds.') # todo format
+tournament_start = Event(Service.TOURNAMENT, EventCode.TOURNAMENT_START, 'Tournament {name} start in 3 seconds.')
+tournament_start_at = Event(Service.TOURNAMENT, EventCode.TOURNAMENT_START_AT, 'Tournament {name} start in 20 seconds.')
 tournament_start_cancel = Event(Service.TOURNAMENT, EventCode.TOURNAMENT_START_CANCEL)
-tournament_seeding = Event(Service.TOURNAMENT, EventCode.TOURNAMENT_SEEDING) # todo send all game (who play against who)
 tournament_match_finish = Event(Service.TOURNAMENT, EventCode.TOURNAMENT_MATCH_FINISH, '{winner} win against {looser}.') # todo format
 tournament_finish = Event(Service.TOURNAMENT, EventCode.TOURNAMENT_FINISH, 'The tournament {name} is now over. Well done to {username} for his victory!', Target('/history/tournament/{id}/', display_name='view')) # todo format
 

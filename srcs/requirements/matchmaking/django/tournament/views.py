@@ -1,3 +1,4 @@
+from threading import Thread
 from typing import Literal
 
 from django.db.models import Q
@@ -5,7 +6,7 @@ from lib_transcendence.exceptions import MessagesException
 from lib_transcendence.permissions import GuestCannotCreate
 from lib_transcendence.serializer import SerializerAuthContext
 from lib_transcendence.sse_events import EventCode
-from rest_framework import generics, serializers, status
+from rest_framework import generics, status
 from rest_framework.exceptions import PermissionDenied, NotFound
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -16,7 +17,7 @@ from matchmaking.utils.participant import get_tournament_participant
 from matchmaking.utils.place import get_tournament
 from matchmaking.utils.sse import send_sse_event
 from tournament.models import Tournament, TournamentParticipants
-from tournament.serializers import TournamentSerializer, TournamentParticipantsSerializer, TournamentSearchSerializer, TournamentResultMatchSerializer
+from tournament.serializers import TournamentSerializer, TournamentParticipantsSerializer, TournamentSearchSerializer, TournamentMatchSerializer
 
 
 class TournamentView(generics.CreateAPIView, generics.RetrieveAPIView):
@@ -45,10 +46,10 @@ class TournamentSearchView(generics.ListAPIView):
                 delete_player_instance(user_id=self.request.user.id)
             return blocked_results
 
-        query = self.request.data.get('q')
+        query = self.request.query_params.get('q')
         if query is None:
-            raise serializers.ValidationError({'q': [MessagesException.ValidationError.FIELD_REQUIRED]})
-        results = Tournament.objects.filter(Q(private=False) | Q(created_by=self.request.user.id), name__icontains=query)
+            query = ''
+        results = Tournament.objects.filter(Q(private=False) | Q(created_by=self.request.user.id), name__icontains=query, is_started=False)
         exclude_blocked = get_blocked_users('user_id') + get_blocked_users('blocked_user_id')
         return results.exclude(created_by__in=exclude_blocked)
 
@@ -80,15 +81,16 @@ class TournamentParticipantsView(SerializerAuthContext, generics.ListCreateAPIVi
         super().perform_create(serializer)
         send_sse_event(EventCode.TOURNAMENT_JOIN, serializer.instance, serializer.data, self.request)
 
-        # if tournament.size == tournament.participants.count():
-        #     tournament.start() # todo make
-        # if tournament.start_at is None and int(tournament.size * (80 / 100)) < tournament.participants.count(): todo make
-        #     Thread(target=tournament.start_timer).start()
+        tournament = serializer.instance.tournament
+        if tournament.size == tournament.participants.count():
+            Thread(target=tournament.start).start()
+        elif tournament.start_at is None and tournament.is_enough_players():
+            tournament.start_timer()
 
 
-class TournamentResultMatchView(generics.CreateAPIView):
+class TournamentResultMatchView(generics.UpdateAPIView):
     permission_classes = [AllowAny]
-    serializers_class = TournamentResultMatchSerializer
+    serializers_class = TournamentMatchSerializer
 
 
 tournament_view = TournamentView.as_view()

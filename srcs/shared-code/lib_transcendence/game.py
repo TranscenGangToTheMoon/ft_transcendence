@@ -22,16 +22,16 @@ class GameMode:
         return 'Game mode'
 
 
-class Bo:
-    bo1 = 1
-    bo3 = 3
-    bo5 = 5
+class Reason:
+    abandon = 'abandon'
+    server_crash = 'server_crash'
+    victory = 'victory'
 
-    all = [bo1, bo3, bo5]
+    reasons = [abandon, server_crash, victory]
 
     @staticmethod
-    def validate(bo):
-        return validate_type(bo, Bo(), Bo.all)
+    def validate(mode):
+        return validate_type(mode, Reason(), Reason.reasons)
 
     def __str__(self):
-        return 'Best of'
+        return 'Reason'
