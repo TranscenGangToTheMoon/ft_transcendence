@@ -224,7 +224,7 @@ class Game:
             print('game canceled', flush=True)
             return
         self.send_canvas()
-        self.send_team()
+        # self.send_team()
         self.send_game_state()
         print('game launched', flush=True)
         self.play()
@@ -256,15 +256,16 @@ class Game:
     def score(self, team):
         from game_server.server import Server
         last_touch = self.ball.last_racket_touched
-        if last_touch is not None:
+        if last_touch is not None and last_touch.team == team:
             last_touch.csc += 1
+        elif last_touch is not None:
+            last_touch.score += 1
         team.score += 1
-        # todo -> add score via API
-        # print('score:', self.match.teams[0].score, self.match.teams[1].score, flush=True)
+        # TODO -> change to player.score_goal(csc), when django is ready
         self.send_score(team)
         for team in self.match.teams:
             if (team.score == 3):
-                self.finish('game is over', 'team_a' if team == self.match.teams[0] else 'team_b')
+                self.finish('game over', 'team_a' if team == self.match.teams[0] else 'team_b')
                 return
         self.reset_game_state()
         self.send_game_state()

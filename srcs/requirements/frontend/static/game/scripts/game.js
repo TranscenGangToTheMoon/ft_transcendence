@@ -35,8 +35,19 @@
         x : config.enemyScore.x * 3
     }
 
+    const info = {
+		myTeam: {
+			name: '',
+			players: [],
+		},
+		enemyTeam: {
+			name: '',
+			players: [],
+		},
+    }
+
+
     const state = {
-    	team: '',
         isGameActive: false,
         isCountDownActive: false,
         isGamePaused: false,
@@ -468,7 +479,7 @@
         }
     }
 
-    window.PongGame = {startGame, startCountdown, stopGame, state, config, moveUp, moveDown, handleGameOver, resetGame};
+    window.PongGame = {startGame, startCountdown, stopGame, state, config, moveUp, moveDown, handleGameOver, resetGame, info};
 })();
 
 
@@ -532,7 +543,7 @@ function initSocket(){
 		for (paddle in window.PongGame.state.paddles) {
 			window.PongGame.state.paddles[paddle].y = (window.PongGame.config.canvasHeight - window.PongGame.config.paddleHeight) / 2;
 		}
-    	if (window.PongGame.config.team == 'team_a') {
+    	if (window.PongGame.info.myteam.name == 'team_a') {
 			window.PongGame.state.playerScore = event.team_a;
 			window.PongGame.state.enemyScore = event.team_b;
      	}
@@ -543,21 +554,50 @@ function initSocket(){
      	if (event.team_a == window.PongGame.config.winningScore || event.team_b == window.PongGame.config.winningScore)
       	{
        		window.PongGame.handleGameOver();
-      	}
+       	}
     })
     socket.on('game_over', event => {
-		// console.log('game_over');
 		window.PongGame.handleGameOver();
 		window.PongGame.stopGame(true);
     })
-    socket.on('team_id', event => {
-		window.PongGame.state.team = event.team;
-    })
 }
 
-document.getElementById('zizi').addEventListener('click', event => {
-    event.preventDefault();
-    initSocket();
+sse.addEventListener('game-start', event => {
+	if (!event.data || typeof event.data !== 'string') {
+		console.error('Invalid data from SSE');
+		return;
+	}
+	try {
+		data = JSON.parse(event.data);
+	}
+	catch(error) {
+		console.error('Failed to parse JSON from SSE', error);
+		return;
+	}
+	if (!data.data || typeof data.data !== 'string') {
+		console.error('Invalid data from SSE');
+		return;
+	}
+	data = data.data;
+	try {
+		if (data.teams.team_a.some(player => player.id == userInformations.id)) {
+			window.PongGame.info.myTeam.name = 'team_a';
+			window.PongGame.info.myTeam.players = data.teams.team_a;
+			window.PongGame.info.enemyTeam.name = 'team_b';
+			window.PongGame.info.enemyTeam.players = data.teams.team_b;
+		}
+		else if (data.teams.team_b.some(player => player.id == userInformations.id)) {
+			window.PongGame.info.myTeam.name = 'team_b';
+			window.PongGame.info.myTeam.players = data.teams.team_b;
+			window.PongGame.info.enemyTeam.name = 'team_a';
+			window.PongGame.info.enemyTeam.players = data.teams.team_a;
+		}
+	}
+	catch(error) {
+		console.error('Invalid game data from SSE, cannot launch game')
+		return;
+	}
+	initSocket();
 })
 
 document.getElementById('playGame').addEventListener('click', async event => {
