@@ -132,30 +132,84 @@ class TournamentSearchSerializer(serializers.ModelSerializer):
         return obj.participants.count()
 
 
-class TournamentResultMatchSerializer(serializers.Serializer):
-    tournament_id = serializers.IntegerField()
-    game_id = serializers.IntegerField()
+class TournamentMatchSerializer(serializers.ModelSerializer):
     winner = serializers.IntegerField()
-    loser = serializers.IntegerField()
+    score_winner = serializers.IntegerField()
+    score_looser = serializers.IntegerField()
+    reason = serializers.IntegerField()
+    finished = serializers.BooleanField(required=True)
+    user_1 = serializers.SerializerMethodField()
+    user_2 = serializers.SerializerMethodField()
+
+    class Meta:
+        model = TournamentMatches
+        fields = [
+            'id',
+            'game_code',
+            'winner',
+            'score_winner',
+            'score_looser',
+            'reason',
+            'finished',
+            'user_1',
+            'user_2',
+        ]
+        read_only_fields = [
+            'game_code',
+            'user_1',
+            'user_2',
+        ]
+
+    def get_user_instance(self, id):
+        if self.context.get('users') is None:
+            return None
+        for u in self.context['users']:
+            if u['id'] == id:
+                return u
+        return None
 
     def validate_tournament_id(self, value):
         self.context['tournament'] = get_tournament(id=value)
         return value
 
-    def validate_user(self, value, field: Literal['winner', 'looser']):
-        try:
-            self.context[field] = self.context['tournament'].participants.get(user_id=value)
-        except TournamentParticipants.DoesNotExist:
-            raise serializers.ValidationError(MessagesException.NotFound.USER)
+    def validate_winner(self, value):
+        return self.context['tournament'].participants.get(user_id=value)
+
+    @staticmethod
+    def validate_finished(value):
+        if value is not True:
+            raise serializers.ValidationError(MessagesException.ValidationError.TRUE_ONLY)
         return value
 
-    def validate_winner(self, value):
-        return self.validate_user(value, 'winner')
+    @staticmethod
+    def validate_reason(value):
+        return Reason.validate(value)
 
-    def validate_looser(self, value):
-        return self.validate_user(value, 'looser')
+    def get_user_1(self, obj):
+        user = self.get_user_instance(obj.user_1)
+        if user is not None:
+            return user
+        users = [obj.user_1.id]
+        if obj.user_2 is not None:
+            users.append(obj.user_2.id)
+        users_instance = retrieve_users(users)
+        print(users_instance, flush=True)
+        if len(users_instance) > 1:
+            self.context['user_2'] = users_instance[1]
+        if len(users_instance) > 0:
+            return users_instance[0]
+        return None
 
-    def create(self, validated_data):
+    def get_user_2(self, obj):
+        user = self.get_user_instance(obj.user_2)
+        if user is not None:
+            return user
+        if 'users' in self.context:
+            return None
+        return self.context.get('user_2')
+
+    def update(self, instance, validated_data):
+        result = super().update(instance, validated_data)
         tournament = self.context['tournament']
         participants = list(tournament.participants.all().values_list('user_id', flat=True))
         create_sse_event(participants, EventCode.TOURNAMENT_MATCH_FINISH, validated_data)
@@ -184,4 +238,4 @@ class TournamentResultMatchSerializer(serializers.Serializer):
                             [participants[i + 1].user_id]
                         ]
                     )
-        return super().create(validated_data)
+        return result

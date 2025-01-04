@@ -16,7 +16,7 @@ from matchmaking.utils.participant import get_tournament_participant
 from matchmaking.utils.place import get_tournament
 from matchmaking.utils.sse import send_sse_event
 from tournament.models import Tournament, TournamentParticipants
-from tournament.serializers import TournamentSerializer, TournamentParticipantsSerializer, TournamentSearchSerializer, TournamentResultMatchSerializer
+from tournament.serializers import TournamentSerializer, TournamentParticipantsSerializer, TournamentSearchSerializer, TournamentMatchSerializer
 
 
 class TournamentView(generics.CreateAPIView, generics.RetrieveAPIView):
@@ -86,9 +86,9 @@ class TournamentParticipantsView(SerializerAuthContext, generics.ListCreateAPIVi
         #     Thread(target=tournament.start_timer).start()
 
 
-class TournamentResultMatchView(generics.CreateAPIView):
+class TournamentResultMatchView(generics.UpdateAPIView):
     permission_classes = [AllowAny]
-    serializers_class = TournamentResultMatchSerializer
+    serializers_class = TournamentMatchSerializer
 
 
 tournament_view = TournamentView.as_view()
