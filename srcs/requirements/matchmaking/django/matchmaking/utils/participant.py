@@ -2,7 +2,7 @@ from rest_framework.exceptions import NotFound, PermissionDenied
 from lib_transcendence.users import retrieve_users
 from lib_transcendence.exceptions import MessagesException
 
-from lobby.models import LobbyParticipants, Lobby
+from lobby.models import LobbyParticipants
 from tournament.models import TournamentParticipants
 
 
