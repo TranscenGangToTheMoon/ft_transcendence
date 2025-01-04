@@ -45,10 +45,10 @@ class TournamentSearchView(generics.ListAPIView):
                 delete_player_instance(user_id=self.request.user.id)
             return blocked_results
 
-        query = self.request.data.get('q')
+        query = self.request.query_params.get('q')
         if query is None:
-            raise serializers.ValidationError({'q': [MessagesException.ValidationError.FIELD_REQUIRED]})
-        results = Tournament.objects.filter(Q(private=False) | Q(created_by=self.request.user.id), name__icontains=query)
+            query = ''
+        results = Tournament.objects.filter(Q(private=False) | Q(created_by=self.request.user.id), name__icontains=query, is_started=False)
         exclude_blocked = get_blocked_users('user_id') + get_blocked_users('blocked_user_id')
         return results.exclude(created_by__in=exclude_blocked)
 
