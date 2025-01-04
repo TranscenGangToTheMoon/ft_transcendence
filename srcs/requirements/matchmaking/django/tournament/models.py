@@ -102,24 +102,11 @@ class Tournament(models.Model):
         delete_banned(self.code)
         super().delete(using=using, keep_parents=keep_parents)
 
-    def __str__(self):
-        if self.private:
-            name = '*'
-        else:
-            name = ''
-        name += f'{self.code}/{self.name} {self.created_by} ({self.participants.count()}/{self.size})'
-        if self.is_started:
-            name += ' STARTED'
-        return name
-
 
 class TournamentStage(models.Model):
     tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE, related_name='stages')
     label = models.CharField(max_length=50)
     stage = models.IntegerField(default=1)
-
-    def __str__(self):
-        return f'{self.tournament.code}/{self.label} ({self.participants.count()})'
 
 
 class TournamentParticipants(models.Model):
@@ -131,7 +118,6 @@ class TournamentParticipants(models.Model):
     still_in = models.BooleanField(default=True)
     creator = models.BooleanField(default=False)
     join_at = models.DateTimeField(auto_now_add=True)
-    # todo cans leave the tournament if started
 
     @property
     def place(self):
