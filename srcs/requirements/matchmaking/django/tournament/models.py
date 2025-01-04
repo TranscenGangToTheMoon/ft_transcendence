@@ -24,6 +24,9 @@ class Tournament(models.Model):
     created_by = models.IntegerField()
     created_by_username = models.CharField(max_length=30)
 
+    def users_id(self):
+        return list(self.participants.all().values_list('user_id', flat=True))
+
     def start_timer(self):
         self.start_at = datetime.now(timezone.utc) + timedelta(seconds=20)
         self.save()
