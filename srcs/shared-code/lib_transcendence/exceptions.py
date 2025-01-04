@@ -59,6 +59,7 @@ class MessagesException:
         INVALID_EVENT_CODE = 'Invalid event code.'
 
         DATA = 'Data must be a dictionary.'
+        TRUE_ONLY = 'This field must be True.'
 
     class Authentication:
         NOT_CONNECTED_SSE = {'detail': 'You need to be connected to SSE to access this resource.', 'code': 'sse_connection_required'}
