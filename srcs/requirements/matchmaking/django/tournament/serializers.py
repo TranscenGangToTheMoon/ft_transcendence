@@ -85,7 +85,7 @@ class TournamentSerializer(serializers.ModelSerializer):
         validated_data['created_by'] = user['id']
         validated_data['created_by_username'] = user['username']
         result = super().create(validated_data)
-        create_player_instance(request, TournamentParticipants, user_id=user['id'], tournament=result, creator=True)
+        create_player_instance(request, TournamentParticipants, user_id=user['id'], tournament=result, creator=True, trophies=user['trophies'])
         return result
 
 
@@ -105,7 +105,7 @@ class TournamentParticipantsSerializer(serializers.ModelSerializer):
             'id',
             'tournament',
             'stage',
-            'seeding',
+            'seed',
             'still_in',
             'creator',
             'join_at',
@@ -114,7 +114,7 @@ class TournamentParticipantsSerializer(serializers.ModelSerializer):
             'id',
             'tournament',
             'stage',
-            'seeding',
+            'seed',
             'still_in',
             'creator',
             'join_at',
@@ -129,6 +129,7 @@ class TournamentParticipantsSerializer(serializers.ModelSerializer):
         if tournament.created_by == user['id']:
             validated_data['creator'] = True
         validated_data['user_id'] = user['id']
+        validated_data['trophies'] = user['trophies']
         validated_data['tournament'] = tournament
         return super().create(validated_data)
 

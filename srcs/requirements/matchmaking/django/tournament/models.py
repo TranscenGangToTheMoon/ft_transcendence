@@ -4,6 +4,7 @@ import time
 from threading import Thread
 
 from django.db import models
+from django.db.models.functions import Random
 from lib_transcendence.sse_events import create_sse_event, EventCode
 from rest_framework.exceptions import APIException
 
@@ -54,13 +55,14 @@ class Tournament(models.Model):
             pass
 
     def start(self):
-        participants = self.participants.all().order_by('seeding')
+        participants = self.participants.all().order_by('-trophies', Random())
         self.is_started = True
         self.size = participants.count()
         self.save()
         first_stage = self.stages.create(label=Tournament.get_label(self.n_stage))
 
-        for p in participants:
+        for n, p in enumerate(participants):
+            p.seed= n
             p.stage = first_stage
             p.save()
 
@@ -113,8 +115,9 @@ class TournamentParticipants(models.Model):
     user_id = models.IntegerField()
     tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE, related_name='participants')
     stage = models.ForeignKey(TournamentStage, on_delete=models.CASCADE, default=None, null=True, related_name='participants')
-    seeding = models.IntegerField(default=None, null=True) #todo make
-    index = models.IntegerField(default=None, null=True) #todo make
+    seed = models.IntegerField(default=None, null=True)
+    trophies = models.IntegerField()
+    index = models.IntegerField(default=None, null=True)
     still_in = models.BooleanField(default=True)
     creator = models.BooleanField(default=False)
     join_at = models.DateTimeField(auto_now_add=True)
