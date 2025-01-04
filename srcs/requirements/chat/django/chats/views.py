@@ -15,7 +15,7 @@ class ChatsView(generics.ListCreateAPIView):
     permission_classes = [NotGuest]
 
     def get_queryset(self):
-        query = self.request.query_params.get('q', None)
+        query = self.request.query_params.get('q')
         if query == '':
             query = None
         kwars = {'user_id': self.request.user.id}
