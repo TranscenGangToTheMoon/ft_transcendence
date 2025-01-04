@@ -38,7 +38,6 @@ class EventCode(Enum):
     TOURNAMENT_START_3 = 'tournament-start-3'
     TOURNAMENT_START_20 = 'tournament-start-20'
     TOURNAMENT_START_CANCEL = 'tournament-start-cancel'
-    TOURNAMENT_SEEDING = 'tournament-seeding'
     TOURNAMENT_MATCH_FINISH = 'tournament-match-finish'
     TOURNAMENT_FINISH = 'tournament-finish'
 
