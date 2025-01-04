@@ -1,3 +1,4 @@
+from threading import Thread
 from typing import Literal
 
 from django.db.models import Q
@@ -80,10 +81,11 @@ class TournamentParticipantsView(SerializerAuthContext, generics.ListCreateAPIVi
         super().perform_create(serializer)
         send_sse_event(EventCode.TOURNAMENT_JOIN, serializer.instance, serializer.data, self.request)
 
-        # if tournament.size == tournament.participants.count():
-        #     tournament.start() # todo make
-        # if tournament.start_at is None and int(tournament.size * (80 / 100)) < tournament.participants.count(): todo make
-        #     Thread(target=tournament.start_timer).start()
+        tournament = serializer.instance.tournament
+        if tournament.size == tournament.participants.count():
+            Thread(target=tournament.start).start()
+        elif tournament.start_at is None and tournament.is_enough_players():
+            tournament.start_timer()
 
 
 class TournamentResultMatchView(generics.UpdateAPIView):
