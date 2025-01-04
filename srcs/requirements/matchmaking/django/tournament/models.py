@@ -16,6 +16,16 @@ from matchmaking.utils.sse import send_sse_event, start_tournament_sse
 
 class Tournament(models.Model):
     stage_labels = {0: 'final', 1: 'semi-final', 2: 'quarter-final', 3: 'round of 16'}
+    start_countdown = {
+        4: 4,
+        8: 7,
+        16: 14,
+    }
+    match_order = {
+        4: {1: 1, 2: 2},
+        8: {1: 1, 2: 3, 3: 4, 4: 2},
+        16: {1: 1, 2: 5, 3: 7, 4: 3, 5: 4, 6: 8},
+    }
 
     code = models.CharField(max_length=4, unique=True, editable=False)
     name = models.CharField(max_length=50, unique=True)
@@ -55,20 +65,19 @@ class Tournament(models.Model):
             pass
 
     def start(self):
-        participants = self.participants.all().order_by('-trophies', Random())
         self.is_started = True
-        self.size = participants.count()
         self.save()
+        participants = self.participants.all().order_by('-trophies', Random())
         first_stage = self.stages.create(label=Tournament.get_label(self.n_stage))
 
         for n, p in enumerate(participants):
-            p.seed= n
+            p.seed = n + 1
             p.stage = first_stage
             p.save()
 
-        index = 0
         for i in range(int(self.size / 2)):
             user_1 = participants[i]
+            index = self.match_order[self.size][user_1.seed]
             user_1.index = index
             user_1.save()
             k = self.size - i - 1
@@ -78,15 +87,15 @@ class Tournament(models.Model):
                 user_2.save()
             else:
                 user_2 = None
-            result = self.matches.create(stage=first_stage, user_1=user_1, user_2=user_2)
-            index += 1
+            print('USER2', user_2, flush=True)
+            self.matches.create(n=index, stage=first_stage, user_1=user_1, user_2=user_2)
         start_tournament_sse(self)
         time.sleep(3)
         for matche in self.matches.all():
             matche.create_match()
 
     def is_enough_players(self):
-        return int(self.size * (80 / 100)) <= self.participants.count()
+        return self.start_countdown[self.size] <= self.participants.count()
 
     @staticmethod
     def get_label(n_stage, previous_stage=1):
@@ -159,6 +168,7 @@ class TournamentMatches(models.Model):
     tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE, related_name='matches')
     stage = models.ForeignKey(TournamentStage, on_delete=models.CASCADE, related_name='matches')
     game_code = models.CharField(max_length=4, null=True, default=None)
+    n = models.IntegerField()
     winner = models.ForeignKey(TournamentParticipants, on_delete=models.CASCADE, related_name='wins', null=True, default=None)
     user_1 = models.ForeignKey(TournamentParticipants, on_delete=models.CASCADE, related_name='matches_1')
     user_2 = models.ForeignKey(TournamentParticipants, on_delete=models.CASCADE, related_name='matches_2', null=True)

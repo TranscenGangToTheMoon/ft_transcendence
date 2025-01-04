@@ -16,6 +16,7 @@ from matchmaking.utils.participant import get_participants
 from matchmaking.utils.place import get_tournament, verify_place
 from matchmaking.utils.user import verify_user
 from tournament.models import Tournament, TournamentStage, TournamentParticipants, TournamentMatches
+from tournament.utils import TournamentSize
 
 
 class TournamentSerializer(serializers.ModelSerializer):
@@ -48,22 +49,17 @@ class TournamentSerializer(serializers.ModelSerializer):
 
     @staticmethod
     def validate_size(value):
-        if value >= 32:
-            raise serializers.ValidationError(MessagesException.ValidationError.TOURNAMENT_MAX_SIZE)
-        if value < 4:
-            raise serializers.ValidationError(MessagesException.ValidationError.TOURNAMENT_MIN_SIZE)
-        return value
+        return TournamentSize.validate(value)
 
     def get_participants(self, obj):
-        if self.context.get('participants') is None:
-            self.context['participants'] = get_participants(obj)
+        self.context['participants'] = get_participants(obj)
         return self.context['participants']
 
     def get_matches(self, obj):
         if obj.is_started:
             matches = {}
             for stage in obj.stages.all():
-                result = TournamentMatchSerializer(stage.matches.all(), many=True, context={'users': self.context['participants']}).data # todo context not work
+                result = TournamentMatchSerializer(stage.matches.all().order_by('n'), many=True, context={'users': self.context['participants']}).data
                 matches[stage.label] = result
             return matches
         else:
@@ -158,7 +154,7 @@ class TournamentMatchSerializer(serializers.ModelSerializer):
     winner = serializers.IntegerField()
     score_winner = serializers.IntegerField()
     score_looser = serializers.IntegerField()
-    reason = serializers.IntegerField()
+    reason = serializers.IntegerField(required=True)
     finished = serializers.BooleanField(required=True)
     user_1 = serializers.SerializerMethodField()
     user_2 = serializers.SerializerMethodField()
@@ -182,12 +178,17 @@ class TournamentMatchSerializer(serializers.ModelSerializer):
             'user_2',
         ]
 
-    def get_user_instance(self, id):
-        if self.context.get('users') is None:
+    def get_user_instance(self, obj, user):
+        if user is None:
             return None
+        if self.context.get('users') is None:
+            users = [obj.user_1.user_id]
+            if obj.user_2 is not None:
+                users.append(obj.user_2.user_id)
+            self.context['users'] = retrieve_users(users)
         for u in self.context['users']:
-            if u['id'] == id:
-                return u
+            if u['id'] == user.user_id:
+                return {**u, **TournamentParticipantsSerializer(user).data}
         return None
 
     def validate_tournament_id(self, value):
@@ -208,27 +209,10 @@ class TournamentMatchSerializer(serializers.ModelSerializer):
         return Reason.validate(value)
 
     def get_user_1(self, obj):
-        user = self.get_user_instance(obj.user_1)
-        if user is not None:
-            return user
-        users = [obj.user_1.id]
-        if obj.user_2 is not None:
-            users.append(obj.user_2.id)
-        users_instance = retrieve_users(users)
-        print(users_instance, flush=True)
-        if len(users_instance) > 1:
-            self.context['user_2'] = users_instance[1]
-        if len(users_instance) > 0:
-            return users_instance[0]
-        return None
+        return self.get_user_instance(obj, obj.user_1)
 
     def get_user_2(self, obj):
-        user = self.get_user_instance(obj.user_2)
-        if user is not None:
-            return user
-        if 'users' in self.context:
-            return None
-        return self.context.get('user_2')
+        return self.get_user_instance(obj, obj.user_2)
 
     def update(self, instance, validated_data):
         result = super().update(instance, validated_data)
