@@ -25,10 +25,12 @@ def request_service(service: Literal['auth', 'chat', 'game', 'matchmaking', 'use
         )
 
         if response.status_code == 204:
+            print()
             return
 
         json_data = response.json()
         print(f'JSON[{response.status_code}] =', json_data, flush=True)
+        print()
         if response.status_code == 400:
             raise ParseError(json_data)
         if response.status_code == 401:
