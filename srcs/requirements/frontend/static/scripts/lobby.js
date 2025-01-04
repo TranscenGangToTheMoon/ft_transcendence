@@ -39,6 +39,57 @@ document.getElementById("copyLink").addEventListener("click", event => {
         });
 });
 
+document.getElementById('inviteFriends').addEventListener('click', async event => {
+    const onlineFriendsDiv = document.getElementById('iOnlineFriends');
+    const fullFriendsDiv = document.getElementById('iFriends');
+    try {
+        let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/users/me/friends/?online=true`);
+        console.log(data);
+        if (!data.count)
+            fullFriendsDiv.style.display = 'none';
+        else{
+            onlineFriendsDiv.innerHTML += '<li><button class="dropdown-item">loading...</butto></li>';
+            fullFriendsDiv.style.display = 'block';
+            const tempDiv = document.createElement('div');
+            for (i in data.results){
+                let friend = data.results[i].friend;
+                let friendDiv = document.createElement('li');
+                let button = document.createElement('button');
+                button.classList.add('dropdown-item');
+                tempDiv.appendChild(friendDiv);
+                friendDiv.appendChild(button);
+                button.innerText = friend.username;
+                button.id = `oFriend${friend.id}`
+                button.addEventListener('click', async event => {
+                    event.preventDefault();
+                    try {
+                        let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/play/lobby/${code}/invite/${friend.id}/`, 'POST');
+                        console.log(data);
+                    }
+                    catch (error) {
+                        if (error.code === 404){
+                            const feedback = document.getElementById("feedback");
+                            feedback.innerText = 'user disconnected';
+                            feedback.style.display = "block";
+                            setTimeout(() => {
+                                feedback.style.display = "none";
+                                feedback.innerText = "Link copied to clipboard";
+                            }, 1000);
+                        }
+                    }
+                })
+            }
+            setTimeout(()=> {
+                onlineFriendsDiv.innerHTML = tempDiv.innerHTML;
+            }, 700);
+        }
+
+    }
+    catch(error){
+        console.log(error);
+    }
+})
+
 document.getElementById('joinLobby').addEventListener('click', async event => {
     event.preventDefault();
     const joinErrorDiv = document.getElementById('joinLobbyError');
