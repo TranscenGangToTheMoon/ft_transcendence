@@ -567,10 +567,7 @@ class Test09_StartTournament(UnitTest):
         self.assertThread(user1, user2, user3, user4, user5, user6, user7, user8)
 
 
-# todo test start after make it
-# todo test leave tournament after start
-# todo test stage
-# todo test index after make it
+
 # todo test when tournament ended
 
 if __name__ == '__main__':
