@@ -1,14 +1,16 @@
 from datetime import datetime, timezone, timedelta
 from math import log2
 import time
+from threading import Thread
 
 from django.db import models
-from lib_transcendence.sse_events import EventCode
+from lib_transcendence.sse_events import create_sse_event, EventCode
+from rest_framework.exceptions import APIException
 
 from baning.models import delete_banned
 from blocking.utils import delete_player_instance
 from matchmaking.create_match import create_tournament_match
-from matchmaking.utils.sse import send_sse_event
+from matchmaking.utils.sse import send_sse_event, start_tournament_sse
 
 
 class Tournament(models.Model):
@@ -52,10 +54,11 @@ class Tournament(models.Model):
             pass
 
     def start(self):
+        participants = self.participants.all().order_by('seeding')
         self.is_started = True
+        self.size = participants.count()
         self.save()
         first_stage = self.stages.create(label=Tournament.get_label(self.n_stage))
-        participants = self.participants.all().order_by('seeding')
 
         for p in participants:
             p.stage = first_stage
@@ -63,13 +66,25 @@ class Tournament(models.Model):
 
         index = 0
         for i in range(int(self.size / 2)):
-            participants[i].index = index
-            participants[i].save()
-            if participants.count() > self.size - i - 1:
-                create_tournament_match(self.id, first_stage.id, [[participants[i].user_id], [participants[self.size - i - 1].user_id]])
+            user_1 = participants[i]
+            user_1.index = index
+            user_1.save()
+            k = self.size - i - 1
+            if participants.count() > k:
+                user_2 = participants[k]
+                user_2.index = index
+                user_2.save()
             else:
-                participants[i].win()
+                user_2 = None
+            result = self.matches.create(stage=first_stage, user_1=user_1, user_2=user_2)
             index += 1
+        start_tournament_sse(self)
+        time.sleep(3)
+        for matche in self.matches.all():
+            matche.create_match()
+
+    def is_enough_players(self):
+        return int(self.size * (80 / 100)) <= self.participants.count()
 
     @staticmethod
     def get_label(n_stage, previous_stage=1):
