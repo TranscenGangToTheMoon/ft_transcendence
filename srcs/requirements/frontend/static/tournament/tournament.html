@@ -54,13 +54,13 @@
 
 <div id="chatSection" style="display:flex;">
 	<div id="chatsListView">
-		<form id="searchChatForm">
-			<input id="searchUser" placeholder="tournament name" type="text">
+		<form id="searchTournamentForm">
+			<input id="searchTournament" placeholder="tournament name" type="text">
 			<button type="submit">Join tournament</button>
 		</form>
 		<div id="chatsList"></div>
 	</div>
-	<div id="chatView" style="display:none">
+	<!-- <div id="chatView" style="display:none">
 		<div id="chatTitle">
 			<div id="chatName"><p>User test</p></div>
 			<button id="endChat">End Chat</button>
@@ -70,6 +70,34 @@
 			<input autocomplete="off" id="message" placeholder="Enter message" type="text">
 			<button type="submit">Send </button>
 		</form>
+	</div> -->
+</div>
+
+<div class="modal fade" id="createTournamentModal" tabindex="-1" aria-labelledby="createTournamentModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="createTournamentModalLabel">Create tournament</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body" id="createTournamentContent">
+				<form class="row g-3 align-items-center">
+					<div class="col-auto">
+					  <label for="rangeInput" class="form-label" id="tournamentSize">Select size (16)</label>
+					  <input type="range" class="form-range" id="rangeInput" min="4" max="32" value="16">
+					</div>
+					
+					<div class="col-auto">
+					  <label for="numberInput" class="form-label">tournament name</label>
+					  <input type="text" class="form-control" id="tournamentName">
+					</div>
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button type="button" id="createTournament" class="btn btn-primary d-block">Create</button>
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="createTournamentModalClose" tabindex="0">Close</button>
+			</div>
+		</div>
 	</div>
 </div>
 
