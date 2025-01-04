@@ -1,6 +1,7 @@
 import json
 from typing import Literal
 
+from lib_transcendence.utils import datetime_serializer
 from lib_transcendence.exceptions import Conflict, ServiceUnavailable
 from rest_framework.exceptions import AuthenticationFailed, PermissionDenied, MethodNotAllowed, NotFound, ParseError
 import requests
@@ -8,7 +9,7 @@ import requests
 
 def request_service(service: Literal['auth', 'chat', 'game', 'matchmaking', 'users'], endpoint: str, method: Literal['GET', 'POST', 'PUT', 'PATCH', 'DELETE'], data=None, token=None):
     if data is not None:
-        data = json.dumps(data)
+        data = json.dumps(data, default=datetime_serializer)
 
     headers = {'Content-Type': 'application/json'}
     if token is not None:

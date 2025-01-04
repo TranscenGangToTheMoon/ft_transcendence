@@ -1,20 +1,14 @@
 import json
-from datetime import datetime
 from enum import Enum
 
 import redis
 from django.db.models import QuerySet
 from lib_transcendence.exceptions import MessagesException, ServiceUnavailable
 from lib_transcendence.sse_events import EventCode
+from lib_transcendence.utils import datetime_serializer
 from rest_framework.exceptions import ParseError
 
 from users.models import Users
-
-
-def datetime_serializer(obj):
-    if isinstance(obj, datetime):
-        return obj.isoformat()
-    raise TypeError
 
 
 def get_username(user_id):
