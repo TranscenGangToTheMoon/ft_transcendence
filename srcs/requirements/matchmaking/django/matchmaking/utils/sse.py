@@ -1,5 +1,6 @@
 from lib_transcendence.sse_events import EventCode, create_sse_event
 from lib_transcendence.users import retrieve_users
+from rest_framework.exceptions import APIException
 
 
 def send_sse_event(event: EventCode, instance, data=None, exclude_myself=True):
@@ -19,3 +20,12 @@ def send_sse_event(event: EventCode, instance, data=None, exclude_myself=True):
             user_instance = retrieve_users(instance.user_id)
             data.update(user_instance[0])
         create_sse_event(other_members, event, data=data, kwargs=kwargs)
+
+
+def start_tournament_sse(instance):
+    from tournament.serializers import TournamentSerializer
+
+    try:
+        create_sse_event(instance.users_id(), EventCode.TOURNAMENT_START, TournamentSerializer(instance).data, {'name': instance.name})
+    except APIException:
+        pass
