@@ -36,7 +36,14 @@ class Tournament(models.Model):
         # todo 30 sec
         # todo 3 when full (on peu plus quitter)
 
-        time.sleep(20)
+    def timer(self):
+        for _ in range(20):
+            if not self.is_enough_players():
+                self.cancel_start()
+                return
+            if self.is_started:
+                return
+            time.sleep(1)
         self.start()
 
     def cancel_start(self):
