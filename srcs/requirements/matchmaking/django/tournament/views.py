@@ -5,7 +5,7 @@ from lib_transcendence.exceptions import MessagesException
 from lib_transcendence.permissions import GuestCannotCreate
 from lib_transcendence.serializer import SerializerAuthContext
 from lib_transcendence.sse_events import EventCode
-from rest_framework import generics, serializers, status
+from rest_framework import generics, status
 from rest_framework.exceptions import PermissionDenied, NotFound
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
