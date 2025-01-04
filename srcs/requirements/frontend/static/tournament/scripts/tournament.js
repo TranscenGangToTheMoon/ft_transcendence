@@ -5,6 +5,18 @@ document.getElementById('searchTournamentForm').addEventListener('keyup', async 
 	try {
 		let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/play/tournament/search/?q=${e.target.value}`);
 		console.log(data);
+		const tempDiv = document.createElement('div');
+		if (data.count){
+			for (i in data.results){
+				let tournament = data.results[i];
+				let tournamentDiv = document.createElement('div');
+				tournamentDiv.classList.add('tournamentDiv');
+				tournamentDiv.innerText = `${tournament.name} (${tournament.n_participants}/${tournament.size})`;
+				tempDiv.appendChild(tournamentDiv);
+
+			}
+		}
+		document.getElementById('tournamentsList').innerHTML = tempDiv.innerHTML;
 	}
 	catch (error){
 		console.log(error);
