@@ -36,7 +36,7 @@ class EventCode(Enum):
     TOURNAMENT_LEAVE = 'tournament-leave'
     TOURNAMENT_BANNED = 'tournament-banned'
     TOURNAMENT_START_3 = 'tournament-start-3'
-    TOURNAMENT_START_20 = 'tournament-start-20'
+    TOURNAMENT_START_AT = 'tournament-start-at'
     TOURNAMENT_START_CANCEL = 'tournament-start-cancel'
     TOURNAMENT_MATCH_FINISH = 'tournament-match-finish'
     TOURNAMENT_FINISH = 'tournament-finish'
