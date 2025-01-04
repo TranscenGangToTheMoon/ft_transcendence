@@ -30,11 +30,8 @@ class Tournament(models.Model):
     def start_timer(self):
         self.start_at = datetime.now(timezone.utc) + timedelta(seconds=20)
         self.save()
-        # todo websocket: send that game start in ...
-        # todo est ce que lon peut quiter ?
-        # todo si oui est ce qe ca cancel le timer
-        # todo 30 sec
-        # todo 3 when full (on peu plus quitter)
+        create_sse_event(self.users_id(), EventCode.TOURNAMENT_START_AT, {'id': self.id, 'start_at': self.start_at}, {'name': self.name})
+        Thread(target=self.timer).start()
 
     def timer(self):
         for _ in range(20):
