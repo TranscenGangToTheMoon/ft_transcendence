@@ -77,6 +77,14 @@ class Game:
     class PlayerTimeout(Exception):
         pass
 
+    class NoSuchPlayer(Exception):
+        pass
+
+    class NoSuchRacket(Exception):
+        pass
+
+
+
 ################--------getters--------################
 
     def get_racket(self, player_id) -> Racket:
@@ -96,22 +104,24 @@ class Game:
 
     def handle_wall_bounce(self):
         ball_pos_y = self.ball.position.y
-        if ball_pos_y < 0:
+        if ball_pos_y <= 0:
             self.ball.position.y = - ball_pos_y
             self.ball.speed_y = - self.ball.speed_y
             print('bouncing up', flush=True)
-            self.send_game_state()
-        elif ball_pos_y + self.ball.size > self.canvas.y:
+            # self.send_game_state()
+        elif ball_pos_y + self.ball.size >= self.canvas.y:
             self.ball.position.y -= (ball_pos_y + self.ball.size) - self.canvas.y
             self.ball.speed_y = - self.ball.speed_y
             print('bouncing down', flush=True)
-            self.send_game_state()
+            # self.send_game_state()
 
     def handle_goal(self):
         if self.ball.position.x + self.ball.size < 0:
             self.score(self.match.teams[1])
+            # self.send_game_state()
         elif self.ball.position.x > self.canvas.x:
             self.score(self.match.teams[0])
+            # self.send_game_state()
 
     def calculateImpactPosition(self, ballY, paddleY, paddleHeight):
         relativeY = (paddleY + paddleHeight / 2) - ballY
@@ -141,7 +151,7 @@ class Game:
             self.ball.direction_x = -self.ball.direction_x
             self.ball.increment_speed(self.max_ball_speed, self.speed_increment)
             self.calculateNewBallDirection(racket.position.y)
-        self.send_game_state()
+        # self.send_game_state()
 
     def handle_racket_collision(self, racket):
         ball_is_right_from_racket = self.ball.position.x < racket.position.x + racket.width and self.ball.position.x > racket.position.x
@@ -178,6 +188,7 @@ class Game:
         for racket in self.rackets:
             self.handle_racket_collision(racket)
         self.handle_goal()
+        self.send_game_state()
 
     def wait_for_players(self, timeout: float):
         print(time.time(), "wait_for_players()", flush=True)

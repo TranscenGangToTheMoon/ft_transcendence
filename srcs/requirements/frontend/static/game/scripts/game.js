@@ -580,13 +580,13 @@ sse.addEventListener('game-start', event => {
 	}
 	data = data.data;
 	try {
-		if (data.teams.team_a.some(player => player.id == userInformations.id)) {
+		if (data.teams.a.some(player => player.id == userInformations.id)) {
 			window.PongGame.info.myTeam.name = 'team_a';
 			window.PongGame.info.myTeam.players = data.teams.team_a;
 			window.PongGame.info.enemyTeam.name = 'team_b';
 			window.PongGame.info.enemyTeam.players = data.teams.team_b;
 		}
-		else if (data.teams.team_b.some(player => player.id == userInformations.id)) {
+		else if (data.teams.b.some(player => player.id == userInformations.id)) {
 			window.PongGame.info.myTeam.name = 'team_b';
 			window.PongGame.info.myTeam.players = data.teams.team_b;
 			window.PongGame.info.enemyTeam.name = 'team_a';
@@ -594,7 +594,8 @@ sse.addEventListener('game-start', event => {
 		}
 	}
 	catch(error) {
-		console.error('Invalid game data from SSE, cannot launch game')
+		console.log(error);
+		console.log('Invalid game data from SSE, cannot launch game');
 		return;
 	}
 	initSocket();
