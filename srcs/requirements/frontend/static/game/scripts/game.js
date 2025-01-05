@@ -543,7 +543,7 @@ function initSocket(){
 		for (paddle in window.PongGame.state.paddles) {
 			window.PongGame.state.paddles[paddle].y = (window.PongGame.config.canvasHeight - window.PongGame.config.paddleHeight) / 2;
 		}
-    	if (window.PongGame.info.myteam.name == 'team_a') {
+    	if (window.PongGame.info.myTeam.name == 'team_a') {
 			window.PongGame.state.playerScore = event.team_a;
 			window.PongGame.state.enemyScore = event.team_b;
      	}
@@ -574,7 +574,7 @@ sse.addEventListener('game-start', event => {
 		console.error('Failed to parse JSON from SSE', error);
 		return;
 	}
-	if (!data.data || typeof data.data !== 'string') {
+	if (!data.data) {
 		console.error('Invalid data from SSE');
 		return;
 	}
