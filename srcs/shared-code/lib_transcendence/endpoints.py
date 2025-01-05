@@ -41,9 +41,15 @@ class Game:
     _base_game = base_api + 'game/'
     _base_private_game = base_private_api + 'game/'
 
-    match = _base_private_game + 'match/'
-    fmatch_user = match + '{user_id}/'
+    _match = _base_private_game + 'match/'
+    create_match = _match + 'create/'
+    ffinish_match = _match + 'finish/{match_id}/'
+    finish_match = ffinish_match.format(match_id="<int:match_id>")
+    fscore = _match + 'score/{user_id}/'
+    score = fscore.format(user_id=_user_id)
+    fmatch_user = _match + '{user_id}/'
     match_user = fmatch_user.format(user_id=_user_id)
+
     tournaments = _base_private_game + 'tournaments/'
 
     matches_user = _base_game + f'matches/{_user_id}/'
@@ -52,7 +58,6 @@ class Game:
 
 class Matchmaking:
     _base_matchmaking = base_api + 'play/'
-    _base_private_matchmaking = base_private_api + 'play/'
 
     duel = _base_matchmaking + 'duel/'
     ranked = _base_matchmaking + 'ranked/'
@@ -68,7 +73,8 @@ class Matchmaking:
     tournament_invite = tournament_participant + f'invite/{_user_id}/'
     tournament_banned = tournament_participant + f'ban/{_user_id}/'
 
-    tournament_result_match = _base_private_matchmaking + 'tournament/result-match/'
+    ftournament_result_match = base_private_api + 'tournament/result-match/{match_id}/'
+    tournament_result_match = ftournament_result_match.format(match_id='<int:match_id>')
 
 
 class Users:
