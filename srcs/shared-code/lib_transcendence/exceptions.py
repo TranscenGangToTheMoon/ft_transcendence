@@ -33,8 +33,6 @@ class MessagesException:
 
         _OBJS_REQUIRED = '{obj} are required.'
         TEAM_REQUIRED = _OBJS_REQUIRED.format(obj='Two teams')
-        TOURNAMENT_ID_REQUIRED = REQUIRED.format(obj='Tournament id') + ' for tournament mode.'
-        TOURNAMENT_STAGE_ID_REQUIRED = REQUIRED.format(obj='Stage tournament id') + ' for tournament mode.'
 
         USERNAME_NOT_ALLOWED = 'This username is not allowed.'
         USERNAME_LONGER_THAN_3_CHAR = 'Username must be at least 3 characters long.'
@@ -53,9 +51,6 @@ class MessagesException:
 
         GAME_MODE_PLAYERS = '{obj} mode must have {n} players in each teams.'
         CLASH_3_PLAYERS = GAME_MODE_PLAYERS.format(obj='Clash', n=3)
-
-        TOURNAMENT_MAX_SIZE = 'Tournament size must be less than or equal than 32.'
-        TOURNAMENT_MIN_SIZE = 'Tournament size must be greater or equal than 4.'
 
         INVALID_SERVICE = 'Invalid service.'
         INVALID_EVENT_CODE = 'Invalid event code.'
