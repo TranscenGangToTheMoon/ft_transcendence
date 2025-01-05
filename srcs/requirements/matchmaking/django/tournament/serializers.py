@@ -87,7 +87,11 @@ class TournamentSerializer(serializers.ModelSerializer):
 class TournamentStageSerializer(serializers.ModelSerializer):
     class Meta:
         model = TournamentStage
-        fields = '__all__'
+        fields = [
+            'id',
+            'label',
+            'stage',
+        ]
 
 
 class TournamentParticipantsSerializer(serializers.ModelSerializer):
