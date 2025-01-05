@@ -71,7 +71,7 @@ class Matchmaking:
     tournament_search = tournament + 'search/'
     tournament_participant = tournament + '<str:code>/'
     tournament_invite = tournament_participant + f'invite/{_user_id}/'
-    tournament_banned = tournament_participant + f'ban/{_user_id}/'
+    tournament_banned = tournament_participant + f'banned/{_user_id}/'
 
     ftournament_result_match = base_private_api + 'tournament/result-match/{match_id}/'
     tournament_result_match = ftournament_result_match.format(match_id='<int:match_id>')
