@@ -66,6 +66,7 @@ class Tournament(models.Model):
 
     def start(self):
         self.is_started = True
+        self.start_at = datetime.now(timezone.utc)
         self.save()
         participants = self.participants.all().order_by('-trophies', Random())
         first_stage = self.stages.create(label=Tournament.get_label(self.n_stage))
@@ -92,7 +93,7 @@ class Tournament(models.Model):
         start_tournament_sse(self)
         time.sleep(3)
         for matche in self.matches.all():
-            matche.create_match()
+            matche.create()
 
     def is_enough_players(self):
         return self.start_countdown[self.size] <= self.participants.count()
@@ -167,32 +168,38 @@ class TournamentParticipants(models.Model):
 class TournamentMatches(models.Model):
     tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE, related_name='matches')
     stage = models.ForeignKey(TournamentStage, on_delete=models.CASCADE, related_name='matches')
-    game_code = models.CharField(max_length=4, null=True, default=None)
+    match_id = models.IntegerField(null=True, default=None)
+    match_code = models.CharField(max_length=4, null=True, default=None)
     n = models.IntegerField()
     winner = models.ForeignKey(TournamentParticipants, on_delete=models.CASCADE, related_name='wins', null=True, default=None)
     user_1 = models.ForeignKey(TournamentParticipants, on_delete=models.CASCADE, related_name='matches_1')
     user_2 = models.ForeignKey(TournamentParticipants, on_delete=models.CASCADE, related_name='matches_2', null=True)
     score_winner = models.IntegerField(null=True, default=None)
     score_looser = models.IntegerField(null=True, default=None)
-    reason = models.CharField(null=True, default=None, max_length=50)
+    reason = models.CharField(null=True, default=None, max_length=50) # todo rename to finish_reason
     finished = models.BooleanField(default=False)
 
-    def create_match(self):
+    def create(self):
         if self.user_2 is not None:
             if not self.user_1.still_in:
                 self.winner = self.user_2
+                self.save()
                 self.user_2.win()
             else:
                 try:
-                    self.game_code = create_tournament_match(self.tournament.id, self.stage.id, [[self.user_1.user_id], [self.user_2.user_id]])['code']
+                    match = create_tournament_match(self.tournament.id, self.stage.id, [[self.user_1.user_id], [self.user_2.user_id]])
+                    self.match_id = match['id']
+                    self.match_code = match['code']
+                    self.save()
                 except APIException:
-                    self.finish_game() # todo make
+                    self.finish_match() # todo make
         elif self.user_1.still_in:
             self.winner = self.user_1
+            self.save()
             self.user_1.win()
         else:
-            self.finish_game() # todo make
+            self.finish_match() # todo make
 
-    def finish_game(self):
+    def finish_match(self):
         self.finished = True
         self.save()

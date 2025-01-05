@@ -8,7 +8,6 @@ from lib_transcendence.serializer import SerializerAuthContext
 from lib_transcendence.sse_events import EventCode
 from rest_framework import generics, status
 from rest_framework.exceptions import PermissionDenied, NotFound
-from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
 from blocking.models import Blocked
@@ -16,7 +15,7 @@ from blocking.utils import create_player_instance, delete_player_instance
 from matchmaking.utils.participant import get_tournament_participant
 from matchmaking.utils.place import get_tournament
 from matchmaking.utils.sse import send_sse_event
-from tournament.models import Tournament, TournamentParticipants
+from tournament.models import Tournament, TournamentParticipants, TournamentMatches
 from tournament.serializers import TournamentSerializer, TournamentParticipantsSerializer, TournamentSearchSerializer, TournamentMatchSerializer
 
 
@@ -89,8 +88,14 @@ class TournamentParticipantsView(SerializerAuthContext, generics.ListCreateAPIVi
 
 
 class TournamentResultMatchView(generics.UpdateAPIView):
-    permission_classes = [AllowAny]
-    serializers_class = TournamentMatchSerializer
+    authentication_classes = []
+    serializer_class = TournamentMatchSerializer
+
+    def get_object(self):
+        try:
+            return TournamentMatches.objects.get(match_id=self.kwargs['match_id'])
+        except TournamentMatches.DoesNotExist:
+            raise NotFound(MessagesException.NotFound.MATCH)
 
 
 tournament_view = TournamentView.as_view()
