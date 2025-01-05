@@ -1,7 +1,9 @@
 from datetime import timedelta, datetime, timezone
 
+from lib_transcendence.services import request_matchmaking
+from lib_transcendence import endpoints
+from lib_transcendence.game import Reason
 from django.db import models
-from lib_transcendence.services import request_tournament_matchmaking
 
 
 class Matches(models.Model):
@@ -9,63 +11,59 @@ class Matches(models.Model):
     game_mode = models.CharField(max_length=11)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     game_duration = models.DurationField(default=timedelta(minutes=3))
-    finished = models.BooleanField(default=False)
     tournament_id = models.IntegerField(null=True)
-    tournament_stage_id = models.IntegerField(null=True)
+    reason = models.CharField(null=True, default=None, max_length=20)
+    finished = models.BooleanField(default=False)
 
-    @property
-    def winner(self):
-        if not self.finished:
-            return None
-        return self.teams.get(score=max(self.teams.all().values_list('score', flat=True)))
-
-    def finish_match(self, reason: str | None = None):
-        if self.finished:
-            return
+    def finish_match(self):
+        if self.reason is None:
+            self.reason = Reason.normal_end
         self.finished = True
-        if reason is None:
-            self.finish_reason = 'Match is over'
-        else:
-            self.finish_reason = reason
         self.game_duration = self.created_at - datetime.now(timezone.utc)
+        self.save()
         if self.tournament_id is not None:
-            winner, looser = self.players.order_by('-score')
-            request_tournament_matchmaking(self.tournament_id, self.tournament_stage_id, winner.user_id, looser.user_id)
-        self.save()
-
-    def set_port(self, port: int):
-        self.port = port
-        self.save()
+            winner, looser = self.teams.order_by('-score')
+            data = {
+                'winner_id': winner.players.first().user_id,
+                'score_winner': winner.score,
+                'score_looser': looser.score,
+                'reason': self.reason,
+            }
+            request_matchmaking(endpoints.Matchmaking.ftournament_result_match.format(match_id=self.id), 'PUT', data)
 
 
 class Teams(models.Model):
+    names = ['a', 'b']
     match = models.ForeignKey(Matches, on_delete=models.CASCADE, related_name='teams')
+    name = models.CharField(max_length=100)
     score = models.IntegerField(default=0)
 
     @property
     def players_count(self):
         return self.players.count()
 
-    def __str__(self):
-        return f'Team {self.id}[{", ".join([str(user.user_id) for user in self.players.all()])}] - {self.match.code}'
+    def scored(self):
+        if self.score > 3 or self.match.finished:
+            return
+        self.score += 1
+        self.save()
+        if self.score == 3:
+            self.match.finish_match()
 
 
 class Players(models.Model):
     user_id = models.IntegerField()
     match = models.ForeignKey(Matches, on_delete=models.CASCADE, related_name='players')
     team = models.ForeignKey(Teams, on_delete=models.CASCADE, related_name='players')
-    ball_touched = models.IntegerField(default=0)
     score = models.IntegerField(default=0)
 
     def scored(self):
+        if self.score > 3 or self.match.finished:
+            return
         self.score += 1
         self.save()
-        self.team.score += 1
-        self.team.save()
+        self.team.scored()
 
-    def touch_ball(self):
-        self.ball_touched += 1
-        self.save()
-
-    def __str__(self):
-        return f'User {self.user_id}[{self.team}] - {self.match.code}'
+    def own_goal(self):
+        other_team = self.match.teams.exclude(id=self.team.id).first()
+        other_team.scored()
