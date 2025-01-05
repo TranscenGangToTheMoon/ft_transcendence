@@ -34,10 +34,9 @@ urlpatterns = [
     path(UsersManagement.manage_user, manage_user_view),
 ]
 
-# todo 1. make sse tournament events
-#  make seeding tournament
-#  make finish
 # todo handle game state
+# todo handle in game in users
+# todo when in game cannot update player
 
 # todo CHAT
 #   - create chat when lobby is created
@@ -46,10 +45,6 @@ urlpatterns = [
 #   - delete chat when lobby is destroy
 #   - send chat_id in lobby
 #   - send chat_id in tournament
-
-# todo Game
-#  make endpoint for finish game (handle abandon)
-#  make endpoint for update score
 
 
 # todo remove requete django https dans le system de pagination
