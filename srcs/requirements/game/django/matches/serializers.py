@@ -53,6 +53,7 @@ class MatchSerializer(serializers.ModelSerializer):
             'game_duration',
             'finished',
             'tournament_id',
+            'tournament_stage_id',
             'teams',
         ]
         read_only_fields = [
@@ -79,7 +80,9 @@ class MatchSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         if validated_data['game_mode'] == GameMode.tournament:
             if not validated_data.get('tournament_id'):
-                raise serializers.ValidationError({'tournament_id': [MessagesException.ValidationError.TOURNAMENT_ID_REQUIRED]})
+                raise serializers.ValidationError({'tournament_id': [MessagesException.ValidationError.FIELD_REQUIRED]})
+            if not validated_data.get('tournament_stage_id'):
+                raise serializers.ValidationError({'tournament_stage_id': [MessagesException.ValidationError.FIELD_REQUIRED]})
         else:
             validated_data.pop('tournament_id', None)
 
@@ -91,6 +94,7 @@ class MatchSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(MessagesException.ValidationError.GAME_MODE_PLAYERS.format(obj=validated_data['game_mode'].replace('_', ' ').capitalize(), n=1))
         if validated_data['game_mode'] != GameMode.tournament:
             validated_data['tournament_id'] = None
+            validated_data['tournament_stage_id'] = None
         match = super().create(validated_data)
         for n, team in enumerate(teams):
             new_team = Teams.objects.create(match=match, name=Teams.names[n])
