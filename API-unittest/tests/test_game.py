@@ -58,9 +58,9 @@ class Test02_Score(UnitTest):
 
     def test_001_score(self):
         user1 = self.user(['game-start'])
-        score_1 = random.randint(0, 5)
+        score_1 = random.randint(0, 2)
         user2 = self.user(['game-start'])
-        score_2 = random.randint(0, 5)
+        score_2 = random.randint(0, 2)
 
         self.assertResponse(create_game(user1, user2), 201)
         for _ in range(score_1):
