@@ -84,8 +84,9 @@ class Event:
         if self.fmessage is None:
             message = ''
         elif kwargs is not None:
-            if 'username' in kwargs:
-                kwargs['username'] = get_username(kwargs['username'])
+            for name in ('username', 'winner', 'looser'):
+                if name in kwargs:
+                    kwargs[name] = get_username(kwargs[name])
             message = self.fmessage.format(**kwargs)
         else:
             message = self.fmessage
