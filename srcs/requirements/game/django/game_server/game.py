@@ -1,13 +1,15 @@
 from datetime import datetime, timezone
-import math
+
+import requests
 from game_server.match import Match, Player, finish_match
 from game_server.pong_ball import Ball
 from game_server.pong_position import Position
 from game_server.pong_racket import Racket
 from typing import List
+import math
 import os
-import time
 import random
+import time
 
 
 def get_random_direction():
@@ -23,9 +25,8 @@ class Game:
     @staticmethod
     def create_ball(canvas: Position):
         direction_x, direction_y = get_random_direction()
-        ball_speed = Game.default_ball_speed
         ball_size = 20
-        return Ball(Position(int(canvas.x / 2 - (ball_size / 2)), int(canvas.y / 2 - (ball_size / 2))), direction_x, direction_y, ball_speed, ball_size)
+        return Ball(Position(int(canvas.x / 2 - (ball_size / 2)), int(canvas.y / 2 - (ball_size / 2))), direction_x, direction_y, Game.default_ball_speed, ball_size)
 
     @staticmethod
     def create_rackets(match, canvas) -> List[Racket]:
@@ -64,12 +65,12 @@ class Game:
                 )
             except KeyError:
                 self.canvas = Position(800, 600)
-        print('canvas', self.canvas.x, self.canvas.y, flush=True)
+        # print('canvas', self.canvas.x, self.canvas.y, flush=True)
 
         # TODO -> set all variables from .env
         self.max_bounce_angle = 2 * (math.pi / 5)
         self.max_ball_speed = 630
-        self.speed_increment = 1
+        self.speed_increment = 30
         self.ball = self.create_ball(self.canvas)
         self.rackets = self.create_rackets(self.match, self.canvas)
 
@@ -98,10 +99,12 @@ class Game:
         if ball_pos_y < 0:
             self.ball.position.y = - ball_pos_y
             self.ball.speed_y = - self.ball.speed_y
+            print('bouncing up', flush=True)
             self.send_game_state()
         elif ball_pos_y + self.ball.size > self.canvas.y:
             self.ball.position.y -= (ball_pos_y + self.ball.size) - self.canvas.y
             self.ball.speed_y = - self.ball.speed_y
+            print('bouncing down', flush=True)
             self.send_game_state()
 
     def handle_goal(self):
@@ -163,17 +166,18 @@ class Game:
 
     def update(self):
         if (self.last_update == 0):
+            self.send_game_state()
             self.last_update = time.perf_counter()
-        time_delta = (time.perf_counter() - self.last_update)
+        time_delta = time.perf_counter() - self.last_update
+        self.last_update = time.perf_counter()
         for racket in self.rackets:
             racket.update(self.ball.size, self.canvas.y, time_delta)
-        self.last_update = time.perf_counter()
         self.ball.position.x += self.ball.speed_x * time_delta
         self.ball.position.y += self.ball.speed_y * time_delta
         self.handle_wall_bounce()
-        self.handle_goal()
         for racket in self.rackets:
-            self.handle_racket_collision(racket);
+            self.handle_racket_collision(racket)
+        self.handle_goal()
 
     def wait_for_players(self, timeout: float):
         print(time.time(), "wait_for_players()", flush=True)
@@ -209,10 +213,7 @@ class Game:
 
     def launch(self):
         from game_server.server import Server
-        try:
-            timeout = int(os.environ['GAME_PLAYER_CONNECT_TIMEOUT'])
-        except KeyError:
-            timeout = 5
+        timeout = os.environ.get('GAME_PLAYER_CONNECT_TIMEOUT', 5)
         timeout = 60.
         try:
             self.wait_for_players(timeout)
@@ -223,7 +224,7 @@ class Game:
             print('game canceled', flush=True)
             return
         self.send_canvas()
-        self.send_team()
+        # self.send_team()
         self.send_game_state()
         print('game launched', flush=True)
         self.play()
@@ -237,7 +238,7 @@ class Game:
         from game_server.server import Server
         print('finishing game', flush=True)
         self.finished = True
-        self.match.model.finish_match(reason)
+        finish_match(self.match.id, reason) #might not work
         time.sleep(1)
         self.send_finish(reason, winner)
         time.sleep(1)
@@ -245,7 +246,7 @@ class Game:
         Server.delete_game(self.match.id)
 
     def reset_game_state(self):
-        print('reset_game_state', flush=True)
+        # print('reset_game_state', flush=True)
         self.ball = self.create_ball(self.canvas)
         for racket in self.rackets:
             racket.position.y = int(self.canvas.y - racket.height) // 2
@@ -255,47 +256,49 @@ class Game:
     def score(self, team):
         from game_server.server import Server
         last_touch = self.ball.last_racket_touched
-        if last_touch is not None:
+        if last_touch is not None and last_touch.team == team:
             last_touch.csc += 1
+        elif last_touch is not None:
+            last_touch.score += 1
         team.score += 1
-        print('score:', self.match.teams[0].score, self.match.teams[1].score, flush=True)
+        # TODO -> change to player.score_goal(csc), when django is ready
         self.send_score(team)
         for team in self.match.teams:
             if (team.score == 3):
-                self.finish('game is over')
+                self.finish('game over', 'team_a' if team == self.match.teams[0] else 'team_b')
                 return
         self.reset_game_state()
         self.send_game_state()
         start_time = time.perf_counter()
-        print(start_time, flush=True)
         self.send_start_countdown()
         effective_start_time = start_time + 2
+        self.last_update = 0
         while time.perf_counter() < effective_start_time:
             time.sleep(1 / 120)
-        print('sending start', time.perf_counter(), flush=True)
         self.send_start_game()
-        self.last_update = 0
 
 ################--------senders--------################
 
     def send_score(self, scorer_team):
         from game_server.server import Server
-        Server.emit('score', data={'team_a': self.match.teams[0].score, 'team_b': self.match.teams[1].score}, room=str(self.match.id))
+        Server.emit('score', data={
+            'team_a': self.match.teams[0].score,
+            'team_b': self.match.teams[1].score,
+        }, room=str(self.match.id))
 
     def send_finish(self, reason: str | None = None, winner: str | None = None):
-        # from game_server.server import Server
-        # Server.emit('game_over', data={'reason': reason, 'winner': winner}, room=str(self.match.id))
-        pass
+        from game_server.server import Server
+        Server.emit('game_over', data={'reason': reason, 'winner': winner}, room=str(self.match.id))
 
     def send_start_game(self):
         from game_server.server import Server
         Server.emit('start_game', room=str(self.match.id))
-        print('emitted start_game', flush=True)
+        # print('emitted start_game', flush=True)
 
     def send_start_countdown(self):
         from game_server.server import Server
         Server.emit('start_countdown', room=str(self.match.id))
-        print('emitted start_countdown', flush=True)
+        # print('emitted start_countdown', flush=True)
 
     def send_canvas(self):
         from game_server.server import Server
@@ -335,8 +338,10 @@ class Game:
             team_str = 'team_b'
 
     def send_game_state(self):
+        print(time.time(), flush=True)
         from game_server.server import Server
-        print('send_game_state', flush=True)
+        # print('send_game_state', flush=True)
+        # print(self.get_game_state(1), flush=True)
         side = 1
         for team in self.match.teams:
             for player in team.players:

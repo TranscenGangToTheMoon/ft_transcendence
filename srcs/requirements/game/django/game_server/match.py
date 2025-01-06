@@ -1,69 +1,77 @@
 from aiohttp.web_routedef import AbstractRouteDef
-from asgiref.sync import sync_to_async
 from typing import List
+from lib_transcendence.request import AuthenticationFailed
+from lib_transcendence.services import request_game
+from lib_transcendence.endpoints import Game
+from rest_framework.exceptions import APIException, NotFound
 from game_server.pong_racket import Racket
 
-# Django ORM setup
-import os
-import django
 
+import django
+import os
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'game.settings')
 django.setup()
 from matches.models import Matches
 
+
 class Player():
-    def __init__(self, model, match_id, team):
+    def __init__(self, id, match_id, team):
         self.match_id = match_id
         self.racket: Racket
-        self.model = model
-        self.user_id = self.model.user_id
+        self.user_id = id
         self.socket_id = ''
         self.game = None
         self.team = team
+        self.score = 0
         self.csc = 0
 
-    def __str__(self):
-        return str(self.model.user_id)
+    def score_goal(self, csc=False):
+        try:
+            request_game(Game.fscore.format(user_id=self.user_id), 'POST', data={'csc': csc})
+        except NotFound as e:
+            print(e.detail, flush=True)
+        except APIException as e:
+            from game_server.server import Server
+            Server.emit('disconnect', room=str(self.match_id))
+        if csc:
+            self.csc += 1
+        else:
+            self.score += 1
+            self.team.score += 1
+
 
 class Team():
-    def __init__(self, model, match_id):
+    def __init__(self, players, match_id, name):
         self.match_id = match_id
-        self.id = model.id
         self.players: List[Player] = []
-        self.model = model
         self.score = 0
-        raw_players = self.model.players.all()
-        for player in raw_players:
-            self.players.append(Player(player, self.match_id, self))
+        for player in players:
+            self.players.append(Player(player['id'], match_id, self))
 
-    def __str__(self):
-        return str(self.id) + '[' + str(self.players) + ']'
 
 class Match():
-    def __init__(self, match_id):
-        self.model = Matches.objects.get(id=match_id)
-        self.id = match_id
+    def __init__(self, game_data):
+        self.id = game_data['id']
         self.teams: List[Team] = []
-        self.game_mode = self.model.game_mode
-        raw_teams = self.model.teams.all()
-        for team in raw_teams:
-            self.teams.append(Team(team, self.id))
+        self.game_mode = game_data['game_mode']
+        teams = game_data['teams']
+        for team_name, team in teams.items():
+            self.teams.append(Team(team, self.id, team_name))
 
-    def __str__(self):
-        return str(self.id + '[' + 'Team a: ' + str(self.teams[0]) + ', Team b: ' + str(self.teams[1]) + ']')
-
-def fetch_match(match_id):
-    print(f'fetching match {match_id}', flush=True)
-    match = Match(match_id)
-    print(f'fetched match {str(match)}', flush=True)
-    return match
-
-async def fetch_match_async(match_id):
-    return await sync_to_async(fetch_match)(match_id)
 
 def fetch_matches():
-    matches = Matches.objects.all()
-    return matches
+    print('fetching matches', flush=True)
+    return Matches.objects.filter(finished=False)
 
-async def finish_match(match):
-    return await sync_to_async(match.model.finish_match)()
+
+def finish_match(match_id, reason=None):
+    match = Matches.objects.get(id=match_id)
+    match.finish_match(reason)
+    # todo -> change to use API when it's ready
+    # if reason is not 'game over':
+    #     try:
+    #         request_game(Game.finish_match, 'POST', data={'reason': reason})
+    #     except AuthenticationFailed as e:
+    #         print("The finish_match attribute is not available in the Game class.", flush=True)
+    #     except Exception as e:
+    #         print(f"An error occurred while requesting the game finish: {e}", flush=True)

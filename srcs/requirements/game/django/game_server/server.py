@@ -1,11 +1,9 @@
 from aiohttp import web
 from game_server import io_handlers
-from game_server import requests_handlers
-from game_server.match import fetch_match
-from game_server.match import Player, fetch_matches, finish_match
-from game_server.pong_game import Game
+from game_server.match import Player, fetch_matches
+from game_server.game import Game
 from game_server.pong_position import Position
-from threading import Lock
+from threading import Lock, Thread
 from typing import Dict
 import logging
 import asyncio
@@ -28,7 +26,6 @@ class Server:
         Server._sio = socketio.AsyncServer(async_mode='aiohttp', cors_allowed_origins='*', logger=False)
         Server._app = web.Application()
         Server._loop = asyncio.get_event_loop()
-        Server._app.add_routes([web.post('/create-game', requests_handlers.create_game)])
         Server._sio.attach(Server._app, socketio_path='/ws/game/') #TODO -> change with '/ws/game/'
         Server._sio.on('connect', handler=io_handlers.connect)
         Server._sio.on('disconnect', handler=io_handlers.disconnect)
@@ -45,7 +42,7 @@ class Server:
     @staticmethod
     def delete_game(match_id) -> None:
         with Server._games_lock:
-            if Server._games[match_id].match.model.finished == False:
+            if Server._games[match_id].finished == False:
                 Server._games[match_id].finish()
             Server._games.pop(match_id)
 
@@ -57,21 +54,19 @@ class Server:
     @staticmethod
     def get_game(match_id) -> Game:
         with Server._games_lock:
-            try:
-                game = Server._games[match_id]
-            except KeyError as e:
-                raise e
-            return game
+            game = Server._games[match_id]
+        return game
 
     @staticmethod
-    def launch_game(match_id):
-        time.sleep(1)
-        match = fetch_match(match_id)
-        print('creating game', flush=True)
-        print(match, flush=True)
+    def does_game_exist(match_id) -> bool:
+        with Server._games_lock:
+            return match_id in Server._games
+
+    @staticmethod
+    def create_game(match):
         game = Game(Server._sio, match, Position(800, 600))
-        Server.push_game(match_id, game)
-        Server._games[match_id].launch()
+        Server.push_game(match.id, game)
+        Thread(target=Server._games[match.id].launch).start()
 
     @staticmethod
     def emit(event: str, data=None, room=None, to=None, skip_sid=None):
@@ -79,11 +74,11 @@ class Server:
             Server._loop.call_soon_threadsafe(asyncio.create_task, Server._sio.emit(event, data=data, room=room, to=to, skip_sid=skip_sid))
 
     @staticmethod
-    def get_player_and_match_id(user_id: int):
+    def get_player(user_id: int):
         with Server._games_lock:
             for match_id in Server._games:
                 for team in Server._games[match_id].match.teams:
                     for player in team.players:
                         if player.user_id == user_id:
-                            return player, match_id
-            raise Exception(f'No player with id {user_id} is awaited on this server')
+                            return player
+        raise Exception(f'No player with id {user_id} is awaited on this server')

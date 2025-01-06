@@ -15,12 +15,14 @@ class MessagesException:
         FRIENDSHIP = NOT_FOUND.format(obj='Friendship')
         TOURNAMENT = NOT_FOUND.format(obj='Tournament')
         BLOCKED_INSTANCE = NOT_FOUND.format(obj='Blocked instance')
+        MATCH = NOT_FOUND.format(obj='Match')
 
         NOT_BELONG = 'You do not belong to any {obj}.'
         NOT_BELONG_TOURNAMENT = NOT_BELONG.format(obj='tournament')
         NOT_BELONG_GAME = NOT_BELONG.format(obj='game')
 
         NOT_PLAYING = 'You are not currently playing.'
+        NOT_BELONG_MATCH = 'This user does not belong to any match.'
 
     class ValidationError:
         REQUIRED = '{obj} is required.'
@@ -31,8 +33,6 @@ class MessagesException:
 
         _OBJS_REQUIRED = '{obj} are required.'
         TEAM_REQUIRED = _OBJS_REQUIRED.format(obj='Two teams')
-        TOURNAMENT_ID_REQUIRED = REQUIRED.format(obj='Tournament id') + ' for tournament mode.'
-        TOURNAMENT_STAGE_ID_REQUIRED = REQUIRED.format(obj='Stage tournament id') + ' for tournament mode.'
 
         USERNAME_NOT_ALLOWED = 'This username is not allowed.'
         USERNAME_LONGER_THAN_3_CHAR = 'Username must be at least 3 characters long.'
@@ -52,14 +52,12 @@ class MessagesException:
         GAME_MODE_PLAYERS = '{obj} mode must have {n} players in each teams.'
         CLASH_3_PLAYERS = GAME_MODE_PLAYERS.format(obj='Clash', n=3)
 
-        TOURNAMENT_MAX_SIZE = 'Tournament size must be less than or equal than 32.'
-        TOURNAMENT_MIN_SIZE = 'Tournament size must be greater or equal than 4.'
-
         INVALID_SERVICE = 'Invalid service.'
         INVALID_EVENT_CODE = 'Invalid event code.'
 
         DATA = 'Data must be a dictionary.'
         TRUE_ONLY = 'This field must be True.'
+        NOT_BELONG_MATCH = 'This user does not belong to this match.'
 
     class Authentication:
         NOT_CONNECTED_SSE = {'detail': 'You need to be connected to SSE to access this resource.', 'code': 'sse_connection_required'}
@@ -122,6 +120,8 @@ class MessagesException:
 
         INVITE_NOT_FRIEND = 'You can only invite friends.'
 
+        MATCH_NOT_FINISHED = 'Match cannot be set as finished.'
+
     class Conflict:
         DEFAULT = 'Conflict.'
         _ALREADY = 'You are already in a {obj}.'
@@ -139,6 +139,7 @@ class MessagesException:
         FRIEND_REQUEST_RECEIVED = 'You have already received a friend request from this user.'
         SSE = 'You are already connected to SSE.'
         USER = 'This user is already in this {obj}.'
+        MATCH = 'This match is already finished.'
 
         JOIN = 'You already joined this {obj}.'
 

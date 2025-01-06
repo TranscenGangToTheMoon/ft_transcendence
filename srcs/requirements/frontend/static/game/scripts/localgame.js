@@ -35,19 +35,8 @@
         x : config.enemyScore.x * 3
     }
 
-    const info = {
-		myTeam: {
-			name: '',
-			players: [],
-		},
-		enemyTeam: {
-			name: '',
-			players: [],
-		},
-    }
-
-
     const state = {
+    	team: '',
         isGameActive: false,
         isCountDownActive: false,
         isGamePaused: false,
@@ -126,19 +115,17 @@
     function startGame() {
         state.isGameActive = true;
         state.cancelAnimation = false;
-        // console.log('game started');
+        console.log('game started');
 		state.isCountDownActive = false;
-		state.lastFrame = 0;
-		// state.ball.speedX = config.defaultBallSpeed;
-		// state.ball.speedY = config.defaultBallSpeed;
-		state.ball.speed = config.defaultBallSpeed;
 
         function gameLoop(timestamp) {
-            if (state.isGameActive) {
-	            updateGameState(timestamp);
-	            drawGame();
-				requestAnimationFrame(gameLoop);
-            }
+            if (!state.isGameActive) return;
+            state.last_frame_time = Date.now()
+            updateGameState(timestamp);
+            if (!state.isGamePaused)
+                drawGame();
+
+            requestAnimationFrame(gameLoop);
         }
         requestAnimationFrame(gameLoop);
     }
@@ -157,7 +144,34 @@
         state.paddles.right.y = state.paddles.left.y;
     }
 
+    function pauseGame(onlyPause=true) {
+        if (state.isCountDownActive || !state.isGameActive) return;
+        if (state.isGamePaused && !onlyPause) return resumeGame(true);
+        console.log('game paused')
+        state.keys[' '] = false;
+        state.isGamePaused = true;
+
+        ctx.globalAlpha = 0.5;
+        ctx.fillStyle = "black";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.globalAlpha = 1.0;
+
+        ctx.fillStyle = "white";
+        ctx.font = "72px Arial";
+        ctx.fillText("Paused", canvas.width / 2, canvas.height / 2);
+        ctx.font = config.font;
+    }
+
+    function resumeGame(fromPause=false){
+        console.log('game resumed');
+        if (fromPause)
+            state.keys[' '] = false;
+        state.isGamePaused = false;
+    }
+
     function stopGame(animate=false) {
+        console.log('game ended');
         state.isGameActive = false;
         if (animate){
             animatePaddlesToMiddle()
@@ -180,7 +194,7 @@
     function startCountdown() {
 	    state.isGameActive = true;
 	    state.cancelAnimation = false;
-	    // console.log('CD started');
+	    console.log('CD started');
         state.isCountDownActive = true;
 
         for (racket in state.paddles) {
@@ -190,17 +204,17 @@
         function step() {
             state.countDown.currentStep--;
             if (!state.isGameActive){
+                state.isCountDownActive = false;
                 state.countDown.currentStep = config.countDown.steps;
-                ctx.clearRect(0, 0, config.canvasWidth, config.canvasHeight);
                 return;
             }
             if (state.countDown.currentStep >= 0) {
-	            ctx.clearRect(0, 0, config.canvasWidth, config.canvasHeight);
                 drawCountdown();
                 setTimeout(step, config.countDown.delay / (config.countDown.steps + 1));
             }
             else{
                 state.countDown.currentStep = config.countDown.steps;
+                state.isCountDownActive = false;
 				stopGame();
             }
         }
@@ -274,7 +288,7 @@
         if (state.keys['ArrowUp'] && state.keys['ArrowDown']){
             if (state.paddles.right.speed != 0){
                 if (typeof socket !== 'undefined'){
-                    // console.log('emitting stop_moving');
+                    console.log('emitting stop_moving');
                     socket.emit('stop_moving', {'position': state.paddles.right.y});
                 }
                 state.paddles.right.speed = 0;
@@ -285,29 +299,26 @@
             if (typeof socket !== 'undefined'){
                 if (state.paddles.right.speed === 1){
                 		socket.emit('stop_moving', {'position': state.paddles.right.y});
-                  	// console.log('emitting stop_moving');
+                  	console.log('emitting stop_moving');
                 }
                 socket.emit('move_up');
-                // console.log('emitting move_up')
+                console.log('emitting move_up')
             }
             state.paddles.right.speed = -1;
         }
         if (state.keys["ArrowDown"] && state.paddles.right.speed != 1){
             if (typeof window.socket !== 'undefined'){
                 if (state.paddles.right.speed === -1){
-                    socket.emit('stop_moving', {'position': state.paddles.right.y});
-                    // console.log('emitting move_stop');
+                    socket.emit('stop_moving', {'position': state.paddles.right.y}); console.log('emitting move_stop');
                 }
-                socket.emit('move_down');
-                // console.log('emitting move_down')
+                socket.emit('move_down'); console.log('emitting move_down')
             }
             state.paddles.right.speed = 1;
         }
         if (!state.keys["ArrowDown"] && !state.keys['ArrowUp'] && state.paddles.right.speed != 0){
             state.paddles.right.speed = 0;
             if (typeof socket !== 'undefined'){
-                socket.emit('stop_moving', {'position': state.paddles.right.y});
-                // console.log('emitting stop_moving');
+                socket.emit('stop_moving', {'position': state.paddles.right.y}); console.log('emitting stop_moving');
             }
         }
 
@@ -317,6 +328,39 @@
                 moveDown(paddle);
             else if (paddle.speed === -1 && paddle.y > 0)
                 moveUp(paddle);
+        }
+    }
+
+    function handleUserInput(){
+        if (state.keys['d']) config.displayDemo ? config.displayDemo = false : config.displayDemo = true;
+        if (state.keys[' '])
+            pauseGame(false);
+        if (state.isGamePaused) return;
+        // console.log(state.paddles.right.speed);
+        handlePaddleInput();
+        if (state.keys["w"] && state.paddles.left.y > 0){
+            if (!state.paddles.left.blockGlide || state.paddles.left.y - 10 > config.ballSize)
+                state.paddles.left.y -= 10;
+            else if (state.paddles.left.y - 10 <= config.ballSize)
+                state.paddles.left.y = config.ballSize;
+        }
+        if (state.keys["s"] && state.paddles.left.y < config.canvasHeight - config.paddleHeight){
+            if (!state.paddles.left.blockGlide || state.paddles.left.y + config.paddleHeight + 10 < config.canvasHeight - config.ballSize)
+                state.paddles.left.y += 10;
+            else if (state.paddles.left.y + config.paddleHeight + 10 >= config.canvasHeight - config.ballSize)
+                state.paddles.left.y = config.canvasHeight - config.ballSize - config.paddleHeight;
+        }
+        if (state.keys["o"] && state.paddles.leftRight.y > 0){
+            if (!state.paddles.leftRight.blockGlide || state.paddles.leftRight.y - 10 > config.ballSize)
+                state.paddles.leftRight.y -= 10;
+            else if (state.paddles.leftRight.y - 10 <= config.ballSize)
+                state.paddles.leftRight.y = config.ballSize;
+        }
+        if (state.keys["l"] && state.paddles.leftRight.y < config.canvasHeight - config.paddleHeight){
+            if (!state.paddles.leftRight.blockGlide || state.paddles.leftRight.y + config.paddleHeight + 10 < config.canvasHeight - config.ballSize)
+                state.paddles.leftRight.y += 10;
+            else if (state.paddles.leftRight.y + config.paddleHeight + 10 >= config.canvasHeight - config.ballSize)
+                state.paddles.leftRight.y = config.canvasHeight - config.ballSize - config.paddleHeight;
         }
     }
 
@@ -357,17 +401,17 @@
 
     function calculateNewBallDirection(paddleY, paddleSpeed=0) {
         const impactPosition = calculateImpactPosition(state.ball.y + config.ballSize/2, paddleY, config.paddleHeight);
-        // console.log(impactPosition);
+        console.log(impactPosition);
         const bounceAngle = impactPosition * config.maxBounceAngle;
 
         const speed = state.ball.speed;
-        // console.log(bounceAngle);
+        console.log(bounceAngle);
         const xNewSpeed = speed * Math.cos(bounceAngle);
         const yNewSpeed = speed * -Math.sin(bounceAngle);
-        // console.log(xNewSpeed, yNewSpeed);
+        console.log(xNewSpeed, yNewSpeed);
         state.ball.speedX = state.ball.speedX < 0 ? xNewSpeed * -1 : xNewSpeed;
         state.ball.speedY = yNewSpeed;
-        // console.log(state.ball.speedX, state.ball.speedY);
+        console.log(state.ball.speedX, state.ball.speedY);
     }
 
     function handlePaddleBounce(paddle){
@@ -413,6 +457,31 @@
         }
     }
 
+    function displayDemo() {
+        if (state.ball.x < config.canvasWidth/2){
+            let newPaddleLeftY = (state.ball.y + config.ballSize / 2) - config.paddleHeight / 2;
+            if (newPaddleLeftY > state.paddles.left.y && newPaddleLeftY - state.paddles.left.y < 5)
+                return;
+            if (newPaddleLeftY < state.paddles.left.y && state.paddles.left.y - newPaddleLeftY < 5)
+                return;
+            let yIncr = (newPaddleLeftY > state.paddles.left.y) ? 10 : -10;
+            state.paddles.left.y += yIncr;
+            if (state.paddles.left.y < 0) state.paddles.left.y = 0;
+            if (state.paddles.left.y > config.canvasHeight - config.paddleHeight) state.paddles.left.y = config.canvasHeight - config.paddleHeight;
+        }
+        else{
+            let newPaddleRight = (state.ball.y + config.ballSize / 2) - config.paddleHeight / 2;
+            if (newPaddleRight > state.paddles.right.y && newPaddleRight - state.paddles.right.y < 5)
+                return;
+            if (newPaddleRight < state.paddles.right.y && state.paddles.right.y - newPaddleRight < 5)
+                return;
+            let yIncr = (newPaddleRight > state.paddles.right.y) ? 10 : -10;
+            state.paddles.right.y += yIncr;
+            if (state.paddles.right.y < 0) state.paddles.right.y = 0;
+            if (state.paddles.right.y > config.canvasHeight - config.paddleHeight) state.paddles.right.y = config.canvasHeight - config.paddleHeight;
+        }
+    }
+
     function handleGameOver(){
         if (state.playerScore >= config.winningScore || state.enemyScore >= config.winningScore){
             if (config.displayDemo){
@@ -434,28 +503,32 @@
     		state.lastFrame = timestamp;
     	state.deltaTime = (timestamp - state.lastFrame) / 1000;  // Convert to seconds
     	state.lastFrame = timestamp;
-
-        handlePaddleInput();
+        handleUserInput();
+        if (state.isGamePaused)
+            return;
 
         if (!state.isCountDownActive){
             state.ball.x += state.ball.speedX * state.deltaTime;
             state.ball.y += state.ball.speedY * state.deltaTime;
         }
 
-		if (state.ball.y < 0) {
-			state.ball.y = -state.ball.y;
-			state.ball.speedY = -state.ball.speedY;
-			console.log('bouncing up', Date.now());
-		}
-		if (state.ball.y + config.ballSize > config.canvasHeight) {
-			state.ball.y -= (state.ball.y + config.ballSize) - config.canvasHeight;
-			state.ball.speedY = -state.ball.speedY;
-			console.log('bouncing down', Date.now());
-		}
+        if (state.ball.y < 0 || state.ball.y + config.ballSize >= config.canvasHeight){
+            if (state.ball.y < 0)
+	            state.ball.y = -state.ball.y
+            else
+	            state.ball.y -= (state.ball.y + config.ballSize) - config.canvasHeight
+            state.ball.speedY = -state.ball.speedY
+        }
 
+        // handleGoal();
         for (let paddle in state.paddles){
             handlePaddleCollision(state.paddles[paddle]);
         }
+
+        if (config.displayDemo)
+            displayDemo();
+
+		handleGameOver();
     }
 
     function drawPaddles(){
@@ -479,32 +552,31 @@
         }
     }
 
-    window.PongGame = {startGame, startCountdown, stopGame, state, config, moveUp, moveDown, handleGameOver, resetGame, info};
+    window.PongGame = {startGame, startCountdown, stopGame, pauseGame, resumeGame, state, config, moveUp, moveDown, handleGameOver, resetGame};
 })();
 
 
 function initSocket(){
 	const host = window.location.origin;
-	const token = getAccessToken();
 	let socket = io(host, {
       transports: ["websocket"],
       path: "/ws/game/",
       auth : {
           "id": userInformations.id,
-          "token": token,
+          "token": 'kk',
       },
 	});
     window.socket = socket;
-    // console.log(socket)
+    console.log(socket)
 	socket.on('connect', () => {
-        // console.log('Connected to socketIO server!');
+        console.log('Connected to socketIO server!');
     });
     socket.on('start_game', event => {
-        // console.log('received start_game');
+        console.log('received start_game');
         window.PongGame.startGame();
     })
     socket.on('start_countdown', event => {
-        // console.log('received start_countdown');
+        console.log('received start_countdown');
         window.PongGame.startCountdown();
     })
     socket.on('game_state', event => {
@@ -513,24 +585,20 @@ function initSocket(){
 	    window.PongGame.state.ball.speedX = event.direction_x;
 	    window.PongGame.state.ball.speedY = event.direction_y;
 	    window.PongGame.state.ball.speed = event.speed;
-		// console.log(window.PongGame.state.ball.speedX);
-		// console.log(window.PongGame.state.ball.speedY);
-		// console.log(window.PongGame.state.ball.speed);
-		console.log(Date.now());
     })
     socket.on('connect_error', (error)=> {
         console.log('error', error);
     })
     socket.on('move_up', event => {
-        // console.log('move_up received');
+        console.log('move_up received');
         window.PongGame.state.paddles.left.speed = -1;
     })
     socket.on('move_down', event => {
-        // console.log('move_down received');
+        console.log('move_down received');
         window.PongGame.state.paddles.left.speed = 1;
     })
     socket.on('stop_moving', event => {
-        // console.log('received stop_moving')
+        console.log('received stop_moving')
         window.PongGame.state.paddles.left.speed = 0;
         if (event.player == userInformations.id)
 	        window.PongGame.state.paddles.right.y = event.position;
@@ -543,7 +611,7 @@ function initSocket(){
 		for (paddle in window.PongGame.state.paddles) {
 			window.PongGame.state.paddles[paddle].y = (window.PongGame.config.canvasHeight - window.PongGame.config.paddleHeight) / 2;
 		}
-    	if (window.PongGame.info.myTeam.name == 'team_a') {
+    	if (window.PongGame.config.team == 'team_a') {
 			window.PongGame.state.playerScore = event.team_a;
 			window.PongGame.state.enemyScore = event.team_b;
      	}
@@ -553,51 +621,21 @@ function initSocket(){
       	}
      	if (event.team_a == window.PongGame.config.winningScore || event.team_b == window.PongGame.config.winningScore)
       	{
-       		window.PongGame.handleGameOver();
-       	}
+      		window.PongGame.handleGameOver()
+      	}
     })
     socket.on('game_over', event => {
-		window.PongGame.handleGameOver();
-		window.PongGame.stopGame(true);
+		console.log('game_over');
+		window.PongGame.handleGameOver()
+    })
+    socket.on('team_id', event => {
+		window.PongGame.state.team = event.team;
     })
 }
 
-sse.addEventListener('game-start', event => {
-	if (!event.data || typeof event.data !== 'string') {
-		console.error('Invalid data from SSE');
-		return;
-	}
-	try {
-		data = JSON.parse(event.data);
-	}
-	catch(error) {
-		console.error('Failed to parse JSON from SSE', error);
-		return;
-	}
-	if (!data.data) {
-		console.error('Invalid data from SSE');
-		return;
-	}
-	data = data.data;
-	try {
-		if (data.teams.team_a.some(player => player.id == userInformations.id)) {
-			window.PongGame.info.myTeam.name = 'team_a';
-			window.PongGame.info.myTeam.players = data.teams.team_a;
-			window.PongGame.info.enemyTeam.name = 'team_b';
-			window.PongGame.info.enemyTeam.players = data.teams.team_b;
-		}
-		else if (data.teams.team_b.some(player => player.id == userInformations.id)) {
-			window.PongGame.info.myTeam.name = 'team_b';
-			window.PongGame.info.myTeam.players = data.teams.team_b;
-			window.PongGame.info.enemyTeam.name = 'team_a';
-			window.PongGame.info.enemyTeam.players = data.teams.team_a;
-		}
-	}
-	catch(error) {
-		console.error('Invalid game data from SSE, cannot launch game')
-		return;
-	}
-	initSocket();
+document.getElementById('zizi').addEventListener('click', event => {
+    event.preventDefault();
+    initSocket();
 })
 
 document.getElementById('playGame').addEventListener('click', async event => {
