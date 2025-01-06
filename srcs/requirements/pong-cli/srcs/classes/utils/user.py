@@ -1,8 +1,10 @@
+# Python imports
 import json
 import requests
-from requests import Response
 
-SSL_CRT = "./ft_transcendence.crt"
+# Local imports
+from classes.utils.config import SSL_CRT
+
 
 class User():
     SSLCertificate: str = SSL_CRT
@@ -10,7 +12,7 @@ class User():
     headers = {"Content-Type": "application/json"}
     password: str | None = None
     refreshToken: str | None = None
-    response: Response | None = None
+    response: requests.Response | None = None
     server: str | None = None
     username: str | None = None
 

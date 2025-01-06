@@ -1,11 +1,14 @@
-from classes.user import User
-from classes.pongCLI import PongCLI
-import time
+# Python imports
+import os
 
-import json
-import httpx
-import re
+# Local imports
+from classes.PongCLIApp import PongCLI
 
+if __name__ == '__main__':
+    os.system('clear')
+    os.system('printf "\\e[8;60;150t"')
+    app = PongCLI()
+    app.run()
 
 # regix = re.compile(r'event: ([a-z\-]+)\ndata: (.+)\n\n')
 #
@@ -61,19 +64,6 @@ import re
 #                 print(errorr)
 #         elif (User.response.status_code >= 300):
 #             print(User.response)
-
-
-import os
-def main():
-    os.system('clear')
-    os.system('printf "\\e[8;60;150t"')
-    app = PongCLI()
-    app.run()
-
-
-if __name__ == '__main__':
-    main()
-
 
 
 
