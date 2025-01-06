@@ -681,6 +681,15 @@ async function fetchUserInfos(forced=false) {
     }
 }
 
+function hideAllModals(){
+    document.querySelectorAll('.modal').forEach(modal => {
+        const modalInstance = bootstrap.Modal.getInstance(modal);
+        if (modalInstance) {
+            modalInstance.hide();
+        }
+    });
+}
+
 function displayMainAlert(alertTitle, alertContent) {
     const alertContentDiv = document.getElementById('alertContent');
     const alertTitleDiv = document.getElementById('alertModalLabel');
@@ -768,6 +777,7 @@ async function  indexInit(auto=true) {
     if (!auto){
         if (userInformations.code === 'user_not_found'){
             console.log('user was deleted from database, switching to guest mode');
+            hideAllModals();
             displayMainAlert("Unable to retrieve your account/guest profile","We're sorry your account has been permanently deleted and cannot be recovered.");
             await generateToken();
             await fetchUserInfos(true);
