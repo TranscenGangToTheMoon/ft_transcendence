@@ -34,7 +34,6 @@ class SSEView(APIView):
 
     @staticmethod
     def get(request, *args, **kwargs):
-        # todo when serveur up set all is_connected False
 
         def event_stream(_user_id, _channel):
             try:

@@ -1,6 +1,6 @@
-from lib_transcendence.game import GameMode
+from lib_transcendence.game import GameMode, Reason
 from lib_transcendence.generate import generate_code
-from lib_transcendence.exceptions import MessagesException, Conflict
+from lib_transcendence.exceptions import MessagesException, Conflict, ResourceExists
 from lib_transcendence.users import retrieve_users
 from rest_framework import serializers
 from rest_framework.exceptions import NotFound
@@ -45,7 +45,16 @@ class MatchSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Matches
-        fields = '__all__'
+        fields = [
+            'id',
+            'code',
+            'game_mode',
+            'created_at',
+            'game_duration',
+            'finished',
+            'tournament_id',
+            'teams',
+        ]
         read_only_fields = [
             'id',
             'created_at',
@@ -57,21 +66,22 @@ class MatchSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        representation['teams'] = {
-            'team_a': retrieve_users(list(instance.teams.first().players.all().values_list('user_id', flat=True))),
-            'team_b': retrieve_users(list(instance.teams.last().players.all().values_list('user_id', flat=True))),
-        }
+        users = retrieve_users(list(instance.players.all().values_list('user_id', flat=True)))
+        teams = {}
+        for name in Teams.names:
+            teams[name] = []
+        for user in users:
+            player = instance.players.get(user_id=user['id'])
+            teams[player.team.name].append({**user, 'score': player.score})
+        representation['teams'] = teams
         return representation
 
     def create(self, validated_data):
         if validated_data['game_mode'] == GameMode.tournament:
             if not validated_data.get('tournament_id'):
                 raise serializers.ValidationError({'tournament_id': [MessagesException.ValidationError.TOURNAMENT_ID_REQUIRED]})
-            if not validated_data.get('tournament_stage_id'):
-                raise serializers.ValidationError({'tournament_stage_id': [MessagesException.ValidationError.TOURNAMENT_STAGE_ID_REQUIRED]})
         else:
             validated_data.pop('tournament_id', None)
-            validated_data.pop('tournament_stage_id', None)
 
         validated_data['code'] = generate_code(Matches)
         teams = validated_data.pop('teams')
@@ -81,10 +91,48 @@ class MatchSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(MessagesException.ValidationError.GAME_MODE_PLAYERS.format(obj=validated_data['game_mode'].replace('_', ' ').capitalize(), n=1))
         if validated_data['game_mode'] != GameMode.tournament:
             validated_data['tournament_id'] = None
-            validated_data['tournament_stage_id'] = None
         match = super().create(validated_data)
-        for team in teams:
-            new_team = Teams.objects.create(match=match)
+        for n, team in enumerate(teams):
+            new_team = Teams.objects.create(match=match, name=Teams.names[n])
             for user in team:
                 Players.objects.create(user_id=user, match=match, team=new_team)
         return match
+
+
+class MatchFinishSerializer(serializers.ModelSerializer):
+    user_id = serializers.IntegerField(required=True, write_only=True)
+    reason = serializers.CharField(required=True)
+
+    class Meta:
+        model = Matches
+        fields = [
+            'id',
+            'user_id',
+            'reason',
+            'finished',
+        ]
+        read_only_fields = [
+            'id',
+        ]
+
+    @staticmethod
+    def validate_reason(value):
+        return Reason.validate_error(value)
+
+    def update(self, instance, validated_data):
+        if instance.finished:
+            raise ResourceExists(MessagesException.ResourceExists.MATCH)
+        user_id = validated_data.pop('user_id')
+        try:
+            player = instance.players.get(user_id=user_id)
+        except Players.DoesNotExist:
+            raise NotFound(MessagesException.NotFound.NOT_BELONG_MATCH)
+        player.team.score = 0
+        player.save()
+        winner = instance.players.exclude(user_id=player.user_id).first()
+        winner.team.score = 3
+        winner.save()
+        validated_data['finished'] = True
+        result = super().update(instance, validated_data)
+        result.finish_match()
+        return result

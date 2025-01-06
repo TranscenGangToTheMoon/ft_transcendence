@@ -1,32 +1,48 @@
+import asyncio
+from typing import Any, Dict
+from lib_transcendence.auth import auth_verify
 from logging import info, debug, error
+from lib_transcendence.exceptions import MessagesException, ServiceUnavailable
+from rest_framework.exceptions import NotFound
+from lib_transcendence.services import request_game
+from lib_transcendence import endpoints
+from rest_framework.exceptions import APIException
+from threading import Thread
+from game_server.match import Match
 
 
 # TODO -> change this to use the Server class
 async def connect(sid, environ, auth):
     from game_server.server import Server
-
-    # Websockets Debug entrypoint
-    if auth['token'] == 'debug': # TODO -> remove this in prod
-        print('Debug client connected', flush=True)
-        return True
     print('trying to connect', flush=True)
-    # TODO -> do authentication here
-    if auth['token'] != 'kk':
-        error('Authentication failed')
-        return False
-    id = auth['id']
-    print('id is : ', id, flush=True)
+    token = auth.get('token')
+    if token is None:
+        raise ConnectionRefusedError(MessagesException.Authentication.NOT_AUTHENTICATED)
+    token = 'Bearer ' + token
     try:
-        player, match_id = Server.get_player_and_match_id(id)
-        player.socket_id = sid
-        Server._clients[sid] = player
-        print('Transport is : ', Server._sio.transport(sid), flush=True)
-        await Server._sio.enter_room(sid, str(match_id))
-    except Exception as e:
-        error(e)
-        error('Player does not belong to any game')
-        return False
-    info('Client connected & authenticated')
+        user_data = auth_verify(token)
+    except APIException as e:
+        raise ConnectionRefusedError(e.detail)
+    if user_data is None:
+        raise ConnectionRefusedError(MessagesException.Authentication.NOT_AUTHENTICATED)
+    id = user_data['id']
+    try:
+        game_data = request_game(endpoints.Game.fmatch_user.format(user_id=id), 'GET')
+    except NotFound as e:
+        raise ConnectionRefusedError(e.detail)
+    except APIException as e:
+        raise ConnectionRefusedError(MessagesException.ServiceUnavailable.game)
+    if game_data is None:
+        raise ConnectionRefusedError(MessagesException.ServiceUnavailable.game)
+    game_id = game_data['id']
+    if not Server.does_game_exist(game_id):
+        match = Match(game_data)
+        Server.create_game(match)
+    player = Server.get_player(id)
+    player.socket_id = sid
+    Server._clients[sid] = player
+    await Server._sio.enter_room(sid, str(game_id))
+    info(f'User {id} connected & authenticated')
 
 
 async def move_up(sid):
@@ -56,13 +72,12 @@ async def stop_moving(sid, data):
     from game_server.server import Server
     player = Server._clients[sid]
     position = data['position']
+    position = player.racket.stop_moving(position)
     await Server._sio.emit(
         'stop_moving',
         data={'player': player.user_id, 'position': position},
-        room=str(player.match_id),
-        skip_sid=sid
+        room=str(player.match_id)
     )
-    player.racket.stop_moving(position)
 
 
 async def disconnect(sid):

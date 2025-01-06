@@ -1,3 +1,4 @@
+import time
 import unittest
 
 from services.blocked import blocked_user
@@ -32,7 +33,30 @@ class Test01_Friend(UnitTest):
         self.assertResponse(get_friends(user1), 200, count=7)
         self.assertThread(user1, *users)
 
-    def test_004_friends_then_block(self):
+    def test_004_get_friends_is_online(self):
+        user1 = self.user(['accept-friend-request'] * 5)
+        user2 = self.user(['receive-friend-request'])
+        users_online = [self.user(['receive-friend-request']) for _ in range(2)]
+        users = [self.user(['receive-friend-request']) for _ in range(2)]
+
+        self.assertFriendResponse(create_friendship(user1, user2))
+        for user_tmp in users:
+            self.assertFriendResponse(create_friendship(user1, user_tmp))
+        for user_tmp in users_online:
+            self.assertFriendResponse(create_friendship(user1, user_tmp))
+
+        self.assertThread(*users)
+        time.sleep(1)
+        self.assertResponse(get_friends(user1), 200, count=5)
+        self.assertResponse(get_friends(user1, online='caca'), 200, count=5)
+        self.assertResponse(get_friends(user1, online='true'), 200, count=3)
+        self.assertThread(user2)
+        time.sleep(1)
+        self.assertResponse(get_friends(user1, online='true'), 200, count=2)
+        self.assertResponse(get_friends(user1, online='false'), 200, count=3)
+        self.assertThread(user1, *users_online)
+
+    def test_005_friends_then_block(self):
         user1 = self.user(['accept-friend-request', 'delete-friend'])
         user2 = self.user(['receive-friend-request', 'delete-friend'])
 
@@ -45,7 +69,7 @@ class Test01_Friend(UnitTest):
             self.assertResponse(get_friends(u), 200, count=0)
         self.assertThread(user1, user2)
 
-    def test_005_delete_friend_user1(self):
+    def test_006_delete_friend_user1(self):
         user1 = self.user(['accept-friend-request'])
         user2 = self.user(['receive-friend-request', 'delete-friend'])
 
@@ -57,7 +81,7 @@ class Test01_Friend(UnitTest):
         self.assertResponse(get_friends(user2), 200, count=0)
         self.assertThread(user1, user2)
 
-    def test_006_delete_friend_user2(self):
+    def test_007_delete_friend_user2(self):
         user1 = self.user(['accept-friend-request', 'delete-friend'])
         user2 = self.user(['receive-friend-request'])
 
@@ -69,7 +93,7 @@ class Test01_Friend(UnitTest):
         self.assertResponse(get_friends(user1), 200, count=0)
         self.assertThread(user1, user2)
 
-    def test_007_delete_friend_not_belong_user(self):
+    def test_008_delete_friend_not_belong_user(self):
         user1 = self.user(['accept-friend-request'])
         user2 = self.user(['receive-friend-request'])
         user3 = self.user()
@@ -81,7 +105,7 @@ class Test01_Friend(UnitTest):
         self.assertResponse(friend(user1, friendship_id), 200)
         self.assertThread(user1, user2, user3)
 
-    def test_008_delete_friend_sse(self):
+    def test_009_delete_friend_sse(self):
         user1 = self.user(['accept-friend-request', 'delete-friend', 'accept-friend-request', 'delete-friend', 'accept-friend-request', 'delete-friend'])
         user2 = self.user(['receive-friend-request'])
         user3 = self.user(['receive-friend-request', 'delete-friend'])

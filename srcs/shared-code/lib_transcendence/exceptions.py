@@ -15,12 +15,14 @@ class MessagesException:
         FRIENDSHIP = NOT_FOUND.format(obj='Friendship')
         TOURNAMENT = NOT_FOUND.format(obj='Tournament')
         BLOCKED_INSTANCE = NOT_FOUND.format(obj='Blocked instance')
+        MATCH = NOT_FOUND.format(obj='Match')
 
         NOT_BELONG = 'You do not belong to any {obj}.'
         NOT_BELONG_TOURNAMENT = NOT_BELONG.format(obj='tournament')
         NOT_BELONG_GAME = NOT_BELONG.format(obj='game')
 
         NOT_PLAYING = 'You are not currently playing.'
+        NOT_BELONG_MATCH = 'This user does not belong to any match.'
 
     class ValidationError:
         REQUIRED = '{obj} is required.'
@@ -59,6 +61,8 @@ class MessagesException:
         INVALID_EVENT_CODE = 'Invalid event code.'
 
         DATA = 'Data must be a dictionary.'
+        TRUE_ONLY = 'This field must be True.'
+        NOT_BELONG_MATCH = 'This user does not belong to this match.'
 
     class Authentication:
         NOT_CONNECTED_SSE = {'detail': 'You need to be connected to SSE to access this resource.', 'code': 'sse_connection_required'}
@@ -72,7 +76,7 @@ class MessagesException:
     class PermissionDenied:
         GUEST = 'Guest users cannot perform this action.'
         GUEST_UPDATE_USERNAME = 'Guest users can only update their username.'
-        GUEST_REQUIRED = 'You must be a guest user.' # todo useless
+        GUEST_REQUIRED = 'You must be a guest user.'
         ALREADY_AUTHENTICATED = 'You are already authenticated.'
 
         NOT_BELONG = 'You do not belong to this {obj}.'
@@ -121,6 +125,8 @@ class MessagesException:
 
         INVITE_NOT_FRIEND = 'You can only invite friends.'
 
+        MATCH_NOT_FINISHED = 'Match cannot be set as finished.'
+
     class Conflict:
         DEFAULT = 'Conflict.'
         _ALREADY = 'You are already in a {obj}.'
@@ -138,6 +144,7 @@ class MessagesException:
         FRIEND_REQUEST_RECEIVED = 'You have already received a friend request from this user.'
         SSE = 'You are already connected to SSE.'
         USER = 'This user is already in this {obj}.'
+        MATCH = 'This match is already finished.'
 
         JOIN = 'You already joined this {obj}.'
 

@@ -16,7 +16,9 @@ class RetrieveMessagesView(SerializerAuthContext, generics.ListAPIView):
     def filter_queryset(self, queryset):
         chat_id = self.kwargs['chat_id']
 
-        get_chat_participants(chat_id, self.request.user.id)
+        user = get_chat_participants(chat_id, self.request.user.id, view_chat_required=False)
+        if user.view_chat is False:
+            user.set_view_chat()
         return queryset.filter(chat_id=chat_id)
 
     def list(self, request, *args, **kwargs):

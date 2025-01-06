@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.db import models
 from lib_transcendence import endpoints
 from lib_transcendence.chat import AcceptChat
@@ -33,7 +35,7 @@ class Users(models.Model):
     def connect(self):
         print(f'User {self.id} connected', flush=True)
         self.is_online = True
-        self.last_online = self.last_online # todo check if work
+        self.last_online = datetime.now()
         self.save()
 
     def disconnect(self):
@@ -45,6 +47,7 @@ class Users(models.Model):
             pass
 
         self.is_online = False
+        self.last_online = datetime.now()
         self.save()
 
     def __str__(self):

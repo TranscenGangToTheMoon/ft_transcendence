@@ -16,5 +16,3 @@ class Ball:
         self.speed += speed_increment
         if (self.speed > max_speed):
             self.speed = max_speed
-        self.speed_y = self.speed * self.direction_y
-        self.speed_x = self.speed * self.direction_x

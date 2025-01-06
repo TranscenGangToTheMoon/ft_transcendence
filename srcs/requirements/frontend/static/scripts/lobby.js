@@ -12,6 +12,7 @@ if (typeof creator === 'undefined')
     var creator;
 if (typeof lobby === 'undefined')
     var lobby;
+
 document.getElementById('leaveLobby').addEventListener('click', async () => {
     try {
         await apiRequest(getAccessToken(), `${baseAPIUrl}/play/lobby/${code}/`, 'DELETE');
@@ -22,20 +23,6 @@ document.getElementById('leaveLobby').addEventListener('click', async () => {
     await navigateTo('/');
 })
 
-document.getElementById('settingsButton').addEventListener('click', async function() {
-    if (!creator || gameMode != 'Custom Game') return;
-    try {
-        const newMatchType = matchType === '1v1' ? '3v3' : '1v1';
-        await apiRequest(getAccessToken(), `${baseAPIUrl}/play/lobby/`, 'PATCH', undefined, undefined, {
-            'match_type' : newMatchType,
-        })
-        this.innerText = newMatchType;
-        matchType = newMatchType;
-    }
-    catch (error){
-        console.log(error);
-    }
-})
 
 document.getElementById("inviteFriends").addEventListener("click", event => {
     event.preventDefault();
@@ -103,9 +90,7 @@ async function fillBench(player, benchDiv){
         playerDiv.classList.add('draggable');
     }
     benchDiv.querySelector('#benchPlayerList').appendChild(playerDiv);
-    await loadContent('/lobby/player.html', `${playerDiv.id}`);
-    if (player.username.length > 5)
-        player.username = player.username.substring(0, 5) + '..';
+    await loadContent('/lobby/player.html', undefined, false, playerDiv);
     playerDiv.querySelector('.playerUsername').innerText = player.username;
     playerDiv.querySelector('.playerIsReady').style.display = 'none';
     playerDiv.querySelector('.playerId').innerText = player.id;
@@ -126,7 +111,7 @@ async function fillTeamDisplay(player, teamSelectorDiv){
     // if (placeholders.length)
     //     placeholders[0].remove();
     teamDisplayDiv.appendChild(playerDiv);
-    await loadContent('/lobby/player.html', `${playerDiv.id}`);
+    await loadContent('/lobby/player.html', undefined, false, playerDiv);
     playerDiv.querySelector('.playerUsername').innerText = player.username;
     playerDiv.querySelector('.playerIsReady').style.display = 'none';
     playerDiv.querySelector('.playerId').innerText = player.id;
@@ -165,7 +150,7 @@ async function makeRequest(dropzone){
 async function reloadPlayerList(){
     try {
         let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/play/lobby/`);
-        fillPlayerList(true);
+        await fillPlayerList(true);
     }
     catch(error){
         console.log(error);
@@ -223,7 +208,8 @@ function initDragAndDrop(){
 }
 
 document.addEventListener('click', (e) => {
-    if (!contextMenu.contains(e.target))
+    contextMenu = document.getElementById('contextMenu');
+    if (contextMenu && !contextMenu.contains(e.target))
         document.getElementById('contextMenu').style.display = 'none';
 });
 
@@ -234,23 +220,30 @@ document.addEventListener('keyup', e => {
 
 function removeIds(playerListDiv){
     const playerDivs = playerListDiv.querySelectorAll('.player');
-    for (let player of playerDivs)
+    for (let player of playerDivs){
         player.parentElement.removeAttribute('id');
+    }
 }
 
 if (typeof clickedUserDiv === 'undefined')
     var clickedUserDiv;
 
-function addContextMenus(){
+function addContextMenus(){ 
     const playerDivs = document.querySelectorAll('.player');
+    const banButton = document.getElementById('cBan');
     if (!creator)
-        document.getElementById('cKick').style.display = 'none';
+        banButton.classList.add('disabled');
+    else{
+        if (banButton.classList.contains('disabled'))
+            banButton.classList.remove('disabled');
+    }
     for (let playerDiv of playerDivs){
         if (playerDiv.querySelector('.playerUsername').innerText === userInformations.username)
             continue;
         playerDiv.addEventListener('contextmenu', function(e) {
             e.preventDefault();
             clickedUserDiv = this;
+            const contextMenu = document.getElementById('contextMenu');
             contextMenu.style.left = `${e.pageX}px`;
             contextMenu.style.top = `${e.pageY}px`;
             contextMenu.style.display = 'block';
@@ -258,10 +251,10 @@ function addContextMenus(){
     }
 }
 
-document.getElementById('cKick').addEventListener('click', async ()=> {
+document.getElementById('cBan').addEventListener('click', async ()=> {
     const kickedUserId = clickedUserDiv.querySelector('.playerId').innerText;
     try {
-        await apiRequest(getAccessToken(), `${baseAPIUrl}/play/lobby/${code}/ban/${kickedUserId}/`, 'DELETE');
+        await apiRequest(getAccessToken(), `${baseAPIUrl}/play/lobby/${code}/banned/${kickedUserId}/`, 'DELETE');
     }
     catch(error){
         console.log(error);
@@ -336,7 +329,7 @@ async function updateOwnTeam(player, teamDisplayDiv, teamSelectorDiv, benchDiv, 
     const playerDiv = document.createElement('div');
     playerDiv.id = `player${player.id}`;
     teamDisplayDiv.appendChild(playerDiv);
-    await loadContent('/lobby/player.html', `${playerDiv.id}`);
+    await loadContent('/lobby/player.html', undefined, false, playerDiv);
     playerDiv.querySelector('.playerUsername').innerText = player.username;
     playerDiv.querySelector('.playerId').innerText = player.id;
     playerDiv.querySelector('.playerTrophies').innerText = player.trophies;
@@ -345,14 +338,14 @@ async function updateOwnTeam(player, teamDisplayDiv, teamSelectorDiv, benchDiv, 
 
 async function fillPlayerList(noTeam=false){
     const lobbyOptionsDiv = document.getElementById('lobbyOptions');
-    removeIds(lobbyOptionsDiv);
     const tempDiv = document.createElement('div');
     tempDiv.style.display = 'none';
     tempDiv.innerHTML = lobbyOptionsDiv.innerHTML;
+    removeIds(lobbyOptionsDiv);
+    
     let dropzones = tempDiv.querySelectorAll('.dropzone');
     for (let dropzone of dropzones)
         dropzone.innerHTML = '';
-    console.log(tempDiv);
     tempDiv.querySelector('#teamDisplay').innerHTML = '';
     document.body.appendChild(tempDiv);
     const teamDisplayDiv = tempDiv.querySelector('#teamDisplay');
@@ -365,6 +358,25 @@ async function fillPlayerList(noTeam=false){
     if (!noTeam)
         await completeTeams(tempDiv);
     lobbyOptionsDiv.innerHTML = tempDiv.innerHTML;
+    
+    document.getElementById('settingsButton').addEventListener('click', async function() {
+        if (!creator || gameMode != 'Custom Game') return;
+        try {
+            const newMatchType = matchType === '1v1' ? '3v3' : '1v1';
+            let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/play/lobby/`, 'PATCH', undefined, undefined, {
+                'match_type' : newMatchType,
+            })
+            if (!data.detail){
+                matchType = newMatchType;
+                this.innerText = newMatchType;
+                lobby = data;
+                await fillPlayerList();
+            }
+        }
+        catch (error){
+            console.log(error);
+        }
+    })
     tempDiv.remove();
     addContextMenus();
     document.getElementById(`player${userInformations.id}`)?.querySelector('.playerIsReady').addEventListener('click', async function(){
@@ -383,52 +395,105 @@ async function fillPlayerList(noTeam=false){
         initDragAndDrop();
 }
 
-async function lobbyJoined(data){
-    lobby.participants[lobby.participants.length] = data;
-    // if (player.team !== 'Spectator')
-    //     document.getElementById((player.team === 'Team A' ? 'teamA' : 'teamB') + 'Display').innerHTML = "";
+async function lobbyJoined(event){
+    event = JSON.parse(event.data);
+    console.log(event);
+    if (!checkEventDuplication(event)) return;
+    lobby.participants[lobby.participants.length] = event.data;
     await fillPlayerList();
 }
 
-async function lobbyLeaved(data){
+async function lobbyLeaved(event){
+    event = JSON.parse(event.data);
+    console.log(event);
+    if (!checkEventDuplication(event)) return;
     for (let participant in lobby.participants){
-        if (lobby.participants[participant].id === data.id)
+        if (lobby.participants[participant].id === event.data.id)
             lobby.participants.splice(participant, 1);
     }
     await fillPlayerList();
 }
 
-async function lobbyUpdated(data){
+async function participantUpdated(event){
+    event = JSON.parse(event.data);
+    console.log(event);
+    if (!checkEventDuplication(event)) return;
+    const data = event.data;
     for (let participant in lobby.participants){
         if (lobby.participants[participant].id === data.id){
-            if (data.team !== undefined)
+            if (data.team !== undefined){
                 lobby.participants[participant].team = data.team;
+                if (data.id === userInformations.id)
+                    team = data.team;
+            }
             if (data.is_ready !== undefined)
                 lobby.participants[participant].is_ready = data.is_ready;
+            if (data.creator !== undefined){
+                lobby.participants[participant].creator = data.creator;
+                if (data.id === userInformations.id)
+                    creator = data.creator;
+            }
         }
     }
     await fillPlayerList();
 }
 
+async function lobbyUpdated(event){
+    event = JSON.parse(event.data);
+    if (!checkEventDuplication(event)) return;
+    console.log(event.data);
+    if (event.data.match_type){
+        matchType = event.data.match_type;
+        document.getElementById('settingsButton').innerText = event.data.match_type;
+        console.log(lobby);
+        await fillPlayerList();
+    }
+}
+
+async function lobbyBanned(event){
+    event = JSON.parse(event.data);
+    console.log(event);
+    if (!checkEventDuplication(event)) return;
+    await navigateTo('/');
+    displayMainAlert('Banned from Lobby', event.message);
+}
+
+async function lobbyDestroyed(event){
+    await navigateTo('/');
+    console.log(JSON.parse(event.data));
+    displayMainAlert('Lobby destroyed', "The lobby has been destroyed.")
+}
+
 function initLobbySSEListeners(){
-    sse.addEventListener('lobby-join', async event => {
-        event = JSON.parse(event.data);
-        await lobbyJoined(event.data);
-    })
+    if (!SSEListeners.has('lobby-join')){
+        SSEListeners.set('lobby-join', lobbyJoined);
+        sse.addEventListener('lobby-join', lobbyJoined);
+    }
 
-    sse.addEventListener('lobby-leave', async event => {
-        event = JSON.parse(event.data);
-        await lobbyLeaved(event.data);
-    })
+    if (!SSEListeners.has('lobby-leave')){
+        SSEListeners.set('lobby-leave', lobbyLeaved);
+        sse.addEventListener('lobby-leave', lobbyLeaved);
+    }
 
-    sse.addEventListener('lobby-ban', async event => {
-        console.log(event);
-    })
+    if (!SSEListeners.has('lobby-banned')){
+        SSEListeners.set('lobby-banned', lobbyBanned);
+        sse.addEventListener('lobby-banned', lobbyBanned);
+    }
 
-    sse.addEventListener('lobby-update', async event => {
-        event = JSON.parse(event.data);
-        await lobbyUpdated(event.data);
-    })
+    if (!SSEListeners.has('lobby-update')){
+        SSEListeners.set('lobby-update', lobbyUpdated);
+        sse.addEventListener('lobby-update', lobbyUpdated);
+    }
+
+    if (!SSEListeners.has('lobby-update-participant')){
+        SSEListeners.set('lobby-update-participant', participantUpdated);
+        sse.addEventListener('lobby-update-participant', participantUpdated);
+    }
+
+    if (!SSEListeners.has('lobby-destroy')){
+        SSEListeners.set('lobby-destroy', lobbyDestroyed);
+        sse.addEventListener('lobby-destroy', lobbyDestroyed);
+    }
 }
 
 

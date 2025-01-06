@@ -1,8 +1,6 @@
 from typing import Literal
 
-from lib_transcendence import endpoints
 from lib_transcendence.request import request_service
-from lib_transcendence.sse_events import EventCode
 from lib_transcendence.exceptions import MessagesException
 from rest_framework.exceptions import NotAuthenticated
 
@@ -28,17 +26,6 @@ def request_users(endpoint: Literal['users/me/', 'validate/chat/', 'blocked/<>/'
 
 def request_matchmaking(endpoint: str, method: Literal['POST', 'DELETE'], data=None):
     return request_service('matchmaking', endpoint, method, data)
-
-
-def request_tournament_matchmaking(tournament_id, stage_id, winner, looser):
-    data = {
-        'tournament_id': tournament_id,
-        'stage_id': stage_id,
-        'winner': winner,
-        'loser': looser,
-    }
-
-    return request_matchmaking('tournament/result-match/', 'POST', data)
 
 
 def request_game(endpoint: Literal['match/', 'tournaments/', 'playing/{user_id}/'], method: Literal['GET', 'POST'] = 'POST', data=None):
