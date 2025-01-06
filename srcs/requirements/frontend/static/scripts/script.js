@@ -283,10 +283,17 @@ async function handleSSEListenerRemoval(url){
     }
 }
 
+async function handleChatSocketClosing(){
+    if (window.pathName.includes('/chat')){
+        closeChat();
+    }
+}
+
 async function navigateTo(url, doNavigate=true){
     let currentState = getCurrentState();
     lastState = currentState;
     await handleSSEListenerRemoval(url);
+    handleChatSocketClosing();
     history.pushState({state: currentState}, '', url);
     console.log(`added ${url} to history with state : ${currentState}`);
     pathName = window.location.pathname;

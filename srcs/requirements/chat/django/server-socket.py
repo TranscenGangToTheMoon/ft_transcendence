@@ -21,8 +21,6 @@ sys.path.append(BASE_DIR)
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'chat.settings')
 
-django.setup()
-
 sio = socketio.AsyncServer(cors_allowed_origins='*', async_mode='aiohttp', logger=True)
 app = web.Application()
 sio.attach(app, socketio_path='/ws/chat/')

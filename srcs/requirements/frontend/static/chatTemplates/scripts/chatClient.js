@@ -65,7 +65,7 @@ async function loadOldMessages(chatData){
 }
 
 async function connect(token, chatData) {
-	if (window.socket) closeChat();
+	closeChat();
 	try {
 		res = await loadOldMessages(chatData);
 		if (res.code !== 200)
@@ -93,6 +93,8 @@ async function connect(token, chatData) {
 
 function closeChat()
 {
+	if (typeof window.socket === 'undefined')	return;
+	console.log('je close la socket');
 	try {
 		console.log("Closing the connection to the server...");
 		socket.off();
@@ -330,11 +332,11 @@ async function chatClientInit() {
 }
 
 var lastClick = undefined;
-if (typeof loading === undefined)
+if (typeof loading === 'undefined')
 	var loading = false;
-if (typeof nextMessagesRequest === undefined)
+if (typeof nextMessagesRequest === 'undefined')
 	var nextMessagesRequest = undefined;
-if (typeof nextChatsRequest === undefined)
+if (typeof nextChatsRequest === 'undefined')
 	var nextChatsRequest = undefined;
 
 chatClientInit();
@@ -346,12 +348,15 @@ document.getElementById('searchChatForm').addEventListener('keyup', (e) => {
 	if (e.key === 'Enter') return;
 	selectChatMenu(e.target.value);
 });
+
 document.getElementById('searchChatForm').addEventListener('submit', (e) => {
 	e.preventDefault();
 	if (e.target.searchUser.value === '') return;
 	startChat(e.target.searchUser.value);
 });
+
 document.addEventListener('scroll', async event => {
+	console.log('scrolling');
 	if (event.target.id === 'messages'){
 		console.log('scrolling in messages');
 		const chatBox = document.getElementById('messages');
