@@ -5,6 +5,7 @@ from game_server.match import Match, Player, finish_match
 from game_server.pong_ball import Ball
 from game_server.pong_position import Position
 from game_server.pong_racket import Racket
+from lib_transcendence.game import Reason
 from typing import List
 import math
 import os
@@ -249,7 +250,7 @@ class Game:
         from game_server.server import Server
         print('finishing game', flush=True)
         self.finished = True
-        finish_match(self.match.id, reason) #might not work
+        finish_match(self.match.id, reason)
         time.sleep(1)
         self.send_finish(reason, winner)
         time.sleep(1)
@@ -276,7 +277,7 @@ class Game:
         self.send_score(team)
         for team in self.match.teams:
             if (team.score == 3):
-                self.finish('game over', 'team_a' if team == self.match.teams[0] else 'team_b')
+                self.finish(Reason.normal_end, 'team_a' if team == self.match.teams[0] else 'team_b')
                 return
         self.reset_game_state()
         self.send_game_state()
