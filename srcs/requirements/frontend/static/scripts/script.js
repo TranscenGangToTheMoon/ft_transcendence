@@ -353,6 +353,17 @@ async function handleSSEListenerRemoval(url){
             console.log(error);
         }
     }
+    if (window.pathName.includes('/tournament') && !url.includes('/tournament')){
+        removeSSEListeners('tournament');
+        if (tournament){
+            try {
+                await apiRequest(getAccessToken(), `${baseAPIUrl}/play/tournament/${tournament.code}/`, 'DELETE');
+            }
+            catch (error){
+                console.log(error);
+            }
+        }
+    }
 }
 
 function checkEventDuplication(data){
@@ -369,7 +380,6 @@ function checkEventDuplication(data){
     // console.log('cala',eventTimestamps.get(data));
     return 1;
 }
-
 
 function removeSSEListeners(type){
     for (const [key, value] of SSEListeners) {
@@ -717,6 +727,20 @@ function displayConfirmModal(confirmTitle, confirmContent) {
 window.displayMainAlert = displayMainAlert;
 
 // ========================== INDEX SCRIPT ==========================
+
+document.addEventListener('click', (e) => {
+    contextMenu = document.getElementById('contextMenu');
+    if (contextMenu && !contextMenu.contains(e.target))
+        document.getElementById('contextMenu').style.display = 'none';
+});
+
+document.addEventListener('keyup', e => {
+    if (e.key === 'Escape'){
+        let contextMenu = document.getElementById('contextMenu');
+        if (contextMenu)
+            contextMenu.style.display = 'none';
+    }
+})
 
 async function loadFriendListModal() {
     const friendModal = document.getElementById('friendListModal');

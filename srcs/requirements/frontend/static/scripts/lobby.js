@@ -258,17 +258,6 @@ function initDragAndDrop(){
     });
 }
 
-document.addEventListener('click', (e) => {
-    contextMenu = document.getElementById('contextMenu');
-    if (contextMenu && !contextMenu.contains(e.target))
-        document.getElementById('contextMenu').style.display = 'none';
-});
-
-document.addEventListener('keyup', e => {
-    if (e.key === 'Escape')
-        document.getElementById('contextMenu').style.display = 'none';
-})
-
 function removeIds(playerListDiv){
     const playerDivs = playerListDiv.querySelectorAll('.player');
     for (let player of playerDivs){

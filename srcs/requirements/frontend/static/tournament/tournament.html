@@ -1,4 +1,6 @@
 
+<button id="leaveTournament" class="btn btn-danger">Leave Tournament</button>
+
 <div id="chatSection" style="display:flex;">
 	<div id="chatsListView">
 		<form id="searchTournamentForm">
@@ -38,6 +40,12 @@
 			</div>
 		</div>
 	</div>
+</div>
+
+<div id="contextMenu" class="custom-context-menu dropdown-menu">
+    <button id="cBan" class="dropdown-item">ban</button>
+    <button id="cFriendRequest" class="dropdown-item" style="display: flex;">Send friend request<div id="friendRequestValidator" style="display: none;margin-left: 5px;"> V</div></button>
+    <button id="cBlock" class="dropdown-item">block</button>
 </div>
 
 <div script="/tournament/scripts/tournament.js"></div>
