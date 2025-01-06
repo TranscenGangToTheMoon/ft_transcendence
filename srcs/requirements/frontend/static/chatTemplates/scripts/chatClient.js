@@ -110,9 +110,7 @@ function closeChat()
 }
 
 
-
-
-function send(chatData) {
+function send() {
     const chatForm = document.getElementById('sendMessageForm');
     if (!chatForm.hasAttribute('data-listener-added')) {
         chatForm.setAttribute('data-listener-added', 'true');
@@ -192,17 +190,13 @@ function setupSocketListeners(chatData)
 		if (data.error === 401){
 			socket.emit('message', {'content': data.retry_content, 'token' : 'Bearer ' + await refreshToken(), 'retry': true});
 		}
-		else{
-			closeChat();
-			console.log('You\'ve got some issues mate');
-		}
 	});
 	
 	socket.on("debug", (data) => {
 		console.log("Debug received: ", data);
 	});
 
-	send(chatData);
+	send();
 }
 
 function parsChatRequest(chat)
