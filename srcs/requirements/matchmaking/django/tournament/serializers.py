@@ -221,8 +221,7 @@ class TournamentMatchSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         print('FINISH TOURNAMENT', validated_data['score_winner'], validated_data['score_looser'], flush=True)
-        validated_data['finished'] = True
-        result = super().update(instance, validated_data)
+        result = super().update(instance, {**validated_data, 'finished': True})
         result.winner = self.context['winner']
         result.save()
         tournament = result.tournament
