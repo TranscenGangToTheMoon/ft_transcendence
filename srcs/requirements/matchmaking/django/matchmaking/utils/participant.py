@@ -2,7 +2,7 @@ from rest_framework.exceptions import NotFound, PermissionDenied
 from lib_transcendence.users import retrieve_users
 from lib_transcendence.exceptions import MessagesException
 
-from lobby.models import LobbyParticipants, Lobby
+from lobby.models import LobbyParticipants
 from tournament.models import TournamentParticipants
 
 
@@ -45,6 +45,3 @@ def get_lobby_participant(lobby, user_id, creator_check=False, from_place=False)
 
 def get_tournament_participant(tournament, user_id, creator_check=False, from_place=False):
     return get_participant(TournamentParticipants, tournament, user_id, creator_check, from_place)
-
-
-# todo add event for delete friend, and delete friend request

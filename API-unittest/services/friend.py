@@ -24,9 +24,9 @@ def get_friend_requests_received(user):
     )
 
 
-def get_friends(user):
+def get_friends(user, online=None):
     return make_request(
-        endpoint='users/me/friends/',
+        endpoint='users/me/friends/' + ('' if online is None else f'?online={online}'),
         token=user['token'],
     )
 

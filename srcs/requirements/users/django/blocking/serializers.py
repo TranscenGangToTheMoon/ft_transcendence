@@ -40,7 +40,7 @@ class BlockedSerializer(serializers.ModelSerializer):
 
         friendship = get_friendship(user, blocked_user)
         if friendship:
-            publish_event(friendship.friends.all(), EventCode.DELETE_FRIEND, {'id': friendship.id})
+            publish_event([friendship.user_1, friendship.user_2], EventCode.DELETE_FRIEND, {'id': friendship.id})
             friendship.delete()
 
         for user1, user2 in ((user, blocked_user), (blocked_user, user)):

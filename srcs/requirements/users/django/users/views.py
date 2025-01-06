@@ -1,3 +1,4 @@
+from django.db.models import Q
 from rest_framework import generics
 from rest_framework.exceptions import NotAuthenticated, NotFound, APIException
 from lib_transcendence.exceptions import MessagesException
@@ -7,6 +8,7 @@ from lib_transcendence.services import request_matchmaking, request_chat
 from lib_transcendence.sse_events import EventCode
 
 from friends.models import Friends
+from friends.utils import get_friend
 from sse.events import publish_event
 from users.auth import auth_delete, get_valid_user, get_user
 from users.models import Users
@@ -31,11 +33,8 @@ class UsersMeView(generics.RetrieveUpdateDestroyAPIView):
         auth_delete(self.request.headers.get('Authorization'), {'password': password})
 
         user = self.get_object()
-        friendships = Friends.objects.filter(friends__id=user.id)
-        for friendship in friendships:
-            other_user = friendship.friends.exclude(id=user.id).first()
-            publish_event(other_user, EventCode.DELETE_FRIEND, {'id': friendship.id})
-        friendships.delete()
+        for friendship in Friends.objects.filter(Q(user_1=user) | Q(user_2=user)):
+            publish_event(get_friend(friendship, user), EventCode.DELETE_FRIEND, {'id': friendship.id})
 
         for friend_request_received in user.friend_requests_received.all():
             publish_event(friend_request_received.sender, EventCode.REJECT_FRIEND_REQUEST, {'id': friend_request_received.id})
