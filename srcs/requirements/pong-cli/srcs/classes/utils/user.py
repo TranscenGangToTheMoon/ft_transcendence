@@ -3,7 +3,7 @@ import json
 import requests
 
 # Local imports
-from classes.utils.config import SSL_CRT
+from classes.utils.config   import SSL_CRT
 
 
 class User():

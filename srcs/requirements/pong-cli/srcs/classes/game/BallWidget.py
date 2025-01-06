@@ -4,12 +4,11 @@ from textual.widget     import Widget
 
 # Local imports
 from classes.utils.config   import Config
-# from rich_pixels import pixel
+
 class Ball(Widget):
     def __init__(self):
         super().__init__()
-        # test = rich.pixels
-        self.styles.layer = "2"
+        self.styles.layer = "3"
         self.styles.width = Config.Ball.width
         self.styles.height = Config.Ball.height
         self.styles.background = "white"
