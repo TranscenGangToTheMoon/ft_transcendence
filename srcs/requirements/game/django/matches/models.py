@@ -16,19 +16,22 @@ class Matches(models.Model):
     reason = models.CharField(null=True, default=None, max_length=20)
     finished = models.BooleanField(default=False)
 
+    winner = models.ForeignKey('Teams', null=True, default=None, on_delete=models.SET_NULL, related_name='winner')
+    looser = models.ForeignKey('Teams', null=True, default=None, on_delete=models.SET_NULL, related_name='looser')
+
     def finish_match(self):
         if self.reason is None:
             self.reason = Reason.normal_end
         self.finished = True
         self.code = None
         self.game_duration = datetime.now(timezone.utc) - self.created_at
+        self.winner, self.looser = self.teams.order_by('-score')
         self.save()
         if self.tournament_id is not None:
-            winner, looser = self.teams.order_by('-score')
             data = {
-                'winner_id': winner.players.first().user_id,
-                'score_winner': winner.score,
-                'score_looser': looser.score,
+                'winner_id': self.winner.players.first().user_id,
+                'score_winner': self.winner.score,
+                'score_looser': self.looser.score,
                 'reason': self.reason,
             }
             request_matchmaking(endpoints.Matchmaking.ftournament_result_match.format(match_id=self.id), 'PUT', data)

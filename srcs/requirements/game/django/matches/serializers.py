@@ -42,6 +42,8 @@ def validate_teams(value):
 
 class MatchSerializer(serializers.ModelSerializer):
     teams = serializers.JSONField(validators=[validate_teams])
+    score_winner = serializers.IntegerField(read_only=True)
+    score_looser = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Matches
@@ -55,10 +57,19 @@ class MatchSerializer(serializers.ModelSerializer):
             'tournament_id',
             'tournament_stage_id',
             'teams',
+            'winner',
+            'looser',
+            'score_winner',
+            'score_looser',
         ]
         read_only_fields = [
             'id',
             'created_at',
+            'winner',
+            'looser',
+            'score_winner',
+            'score_looser',
+        ]
         ]
 
     @staticmethod
