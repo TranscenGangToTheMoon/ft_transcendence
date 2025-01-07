@@ -104,13 +104,9 @@ async def message(sid, data):
                 to=sid
             )
             try:
+                print(f"User not connected, sending message to the other user {usersConnected.get_chat_with_id(sid)}")
                 await sync_to_async(create_sse_event, thread_sensitive=False)(usersConnected.get_chat_with_id(sid), EventCode.SEND_MESSAGE, answerAPI,{'username':usersConnected.get_user_id(sid),'message':content})
             except (PermissionDenied, AuthenticationFailed, NotFound, APIException) as e:
-                await sio.emit(
-                    'error',
-                    e,
-                    to=sid
-                )
                 print(f"Error SSE: {e}")
         else:
             await sio.emit(

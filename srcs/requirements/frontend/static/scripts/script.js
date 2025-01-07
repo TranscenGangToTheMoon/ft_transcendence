@@ -602,7 +602,7 @@ function addNotificationIndicator(div, number){
 function getBadgesDivs(){
     badgesDivs['all'] = document.querySelectorAll('.all-badges');
     badgesDivs['friend_requests'] = document.querySelectorAll('.friend-badges');
-    badgesDivs['chat'] = document.querySelectorAll('.chat-badges');
+    badgesDivs['chats'] = document.querySelectorAll('.chat-badges');
 }
 
 

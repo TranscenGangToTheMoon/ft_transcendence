@@ -54,6 +54,7 @@ async function openChat(chatInfo)
 {
 	if (await connect(getAccessToken(), chatInfo) === false) return;
 
+	document.getElementById('searchChatForm').reset();
 	lastClick = document.getElementById('chatListElement' + chatInfo.target);
 	lastClick.querySelector('.chatUserCardLastMessage').classList.remove('chatMessageNotRead');
 
@@ -202,10 +203,9 @@ async function getMoreOldsMessages(chatInfo){
 }
 
 async function loadOldMessages(chatInfo){
-	let apiAnswer = undefined;
 	try {
 		console.log('Loading old messages', chatInfo);
-		apiAnswer = await apiRequest(getAccessToken(), `${baseAPIUrl}/chat/${chatInfo.chatId}/messages`, 'GET');
+		var apiAnswer = await apiRequest(getAccessToken(), `${baseAPIUrl}/chat/${chatInfo.chatId}/messages`, 'GET');
 		if (apiAnswer.details){
 			console.log('Error:', apiAnswer.details);
 			return {'code': 400, 'details': apiAnswer.details};
@@ -310,9 +310,8 @@ async function selectChatMenu(filter='') {
 }
 
 async function startChat(username) {
-	let apiAnswer = undefined;
 	try{
-		apiAnswer = await apiRequest(getAccessToken(), `${baseAPIUrl}/chat/?q=${username}`);
+		var apiAnswer = await apiRequest(getAccessToken(), `${baseAPIUrl}/chat/?q=${username}`);
 		if (apiAnswer.details){
 			console.log('Error:', apiAnswer.details);
 			return;
@@ -323,13 +322,12 @@ async function startChat(username) {
 		return;
 	}
 
-	let chatInfo = undefined;
+	chatInfo = undefined;
 	if (apiAnswer.count === 0)
 	{
 		console.log('Chat doesn\'t exist => creating chat');
-		const newChat = undefined;
 		try {
-			newChat = await apiRequest(getAccessToken(), `${baseAPIUrl}/chat/`, 'POST', undefined, undefined, {'username': username, 'type':"private_message"});
+			var newChat = await apiRequest(getAccessToken(), `${baseAPIUrl}/chat/`, 'POST', undefined, undefined, {'username': username, 'type':"private_message"});
 			if (newChat.details){
 				console.log('Error:', newChat.details);
 				return;
@@ -339,17 +337,15 @@ async function startChat(username) {
 			console.log(error);
 			return;
 		}
-		console.log('New chat created:', newchat);
+		console.log('New chat created:', newChat);
 		chatInfo = parsChatInfo(newChat);
 	}
 	else {
 		console.log('Chat already exist => loading chat');
 		chatData = parsChatInfo(apiAnswer.results[0]);
 	}
+	await selectChatMenu();
 	await openChat(chatInfo);
-	lastClick = document.getElementById("chatListElement" + chatData.target);
-	document.getElementById('searchChatForm').reset();
-	selectChatMenu();
 	console.log('Chat started', lastClick);
 }
 

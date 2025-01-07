@@ -36,6 +36,15 @@ document.getElementById('customGame').addEventListener('click', async event => {
     }
 })
 
+document.getElementById('tournament').addEventListener('click', async event => {
+    // try {
+        await navigateTo('/tournament');
+    // }
+    // catch(error){
+    //     console.log(error);
+    // }
+})
+
 document.getElementById('chat').addEventListener('click', async ()=> {
     if (!userInformations.is_guest)
         await navigateTo('/chat');
