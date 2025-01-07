@@ -246,6 +246,6 @@ class TournamentMatchSerializer(serializers.ModelSerializer):
                 ct = participants.count()
 
                 for i in range(0, ct, 2):
-                    match = tournament.matches.create(n=i, stage=self.context['winner'].stage, user_1=participants[i], user_2=participants[i + 1])
                     match.create()
+                    match = tournament.matches.create(n=tournament.get_nb_games(), stage=self.context['winner'].stage, user_1=participants[i], user_2=participants[i + 1])
         return result

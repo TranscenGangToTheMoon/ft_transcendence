@@ -13,6 +13,7 @@ class Matches(models.Model):
     game_duration = models.DurationField(default=timedelta(minutes=3))
     tournament_id = models.IntegerField(null=True)
     tournament_stage_id = models.IntegerField(null=True)
+    tournament_n = models.IntegerField(null=True)
     reason = models.CharField(null=True, default=None, max_length=20)
     finished = models.BooleanField(default=False)
 

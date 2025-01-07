@@ -55,6 +55,7 @@ class MatchSerializer(serializers.ModelSerializer):
             'game_duration',
             'tournament_id',
             'tournament_stage_id',
+            'tournament_n',
             'teams',
             'winner',
             'looser',
@@ -107,6 +108,8 @@ class MatchSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError({'tournament_id': [MessagesException.ValidationError.FIELD_REQUIRED]})
             if not validated_data.get('tournament_stage_id'):
                 raise serializers.ValidationError({'tournament_stage_id': [MessagesException.ValidationError.FIELD_REQUIRED]})
+            if not validated_data.get('tournament_n'):
+                raise serializers.ValidationError({'tournament_n': [MessagesException.ValidationError.FIELD_REQUIRED]})
         else:
             validated_data.pop('tournament_id', None)
 
@@ -119,6 +122,7 @@ class MatchSerializer(serializers.ModelSerializer):
         if validated_data['game_mode'] != GameMode.tournament:
             validated_data['tournament_id'] = None
             validated_data['tournament_stage_id'] = None
+            validated_data['tournament_n'] = None
         match = super().create(validated_data)
         for n, team in enumerate(teams):
             new_team = Teams.objects.create(match=match, name=Teams.names[n])
