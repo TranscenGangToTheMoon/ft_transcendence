@@ -177,18 +177,17 @@ class Game:
 
     def update(self):
         if (self.last_update == 0):
-            self.send_game_state()
             self.last_update = time.perf_counter()
         time_delta = time.perf_counter() - self.last_update
         self.last_update = time.perf_counter()
         for racket in self.rackets:
             racket.update(self.ball.size, self.canvas.y, time_delta)
-        # self.ball.position.x += self.ball.speed_x * time_delta
-        # self.ball.position.y += self.ball.speed_y * time_delta
+        self.ball.position.x += self.ball.speed_x * time_delta
+        self.ball.position.y += self.ball.speed_y * time_delta
         self.handle_wall_bounce()
         for racket in self.rackets:
             self.handle_racket_collision(racket)
-        # self.send_game_state()
+        self.send_game_state()
         self.handle_goal()
 
     def wait_for_players(self, timeout: float):
@@ -218,7 +217,7 @@ class Game:
                 break
             self.update()
             elapsed_time = time.perf_counter() - last_frame_time
-            time_to_wait = (1 / 30) - elapsed_time
+            time_to_wait = (1 / 60) - elapsed_time
             if time_to_wait > 0:
                 time.sleep(time_to_wait)
             last_frame_time = time.perf_counter()
@@ -236,7 +235,6 @@ class Game:
             print('game canceled', flush=True)
             return
         self.send_canvas()
-        # self.send_team()
         self.send_game_state()
         print('game launched', flush=True)
         self.play()

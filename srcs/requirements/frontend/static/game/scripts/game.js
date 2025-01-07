@@ -312,6 +312,9 @@
 
         for (let paddle in state.paddles){
             paddle = state.paddles[paddle];
+			if (state.paddles.left === paddle) {
+				console.log('passe-je?', paddle.speed, paddle.y, config.paddleHeight, config.canvasHeight);
+			}
             if (paddle.speed === 1 && paddle.y + config.paddleHeight < config.canvasHeight)
                 moveDown(paddle);
             else if (paddle.speed === -1 && paddle.y > 0)
@@ -434,12 +437,14 @@
     	state.deltaTime = (timestamp - state.lastFrame) / 1000;  // Convert to seconds
     	state.lastFrame = timestamp;
 
-        handlePaddleInput();
+     	// setTimeout(() => {
+      		handlePaddleInput();
+     	// }, 0)
 
-        if (!state.isCountDownActive){
+        // if (!state.isCountDownActive){
             // state.ball.x += state.ball.speedX * state.deltaTime;
             // state.ball.y += state.ball.speedY * state.deltaTime;
-        }
+        // }
 
 		if (state.ball.y < 0) {
 			state.ball.y = -state.ball.y;
@@ -528,20 +533,25 @@ function initSocket(){
         console.log('error', error);
     })
     socket.on('move_up', event => {
-        // console.log('move_up received');
-        window.PongGame.state.paddles.left.speed = -1;
+        console.log('move_up received', event.player);
+		setTimeout(() => {
+			window.PongGame.state.paddles.left.speed = -1;
+		}, 0);
     })
     socket.on('move_down', event => {
-        // console.log('move_down received');
-        window.PongGame.state.paddles.left.speed = 1;
+		setTimeout(() => {
+			window.PongGame.state.paddles.left.speed = 1;
+		}, 0);
+        console.log('move_down received', event.player);
     })
     socket.on('stop_moving', event => {
-        // console.log('received stop_moving')
-        window.PongGame.state.paddles.left.speed = 0;
+		console.log('received stop_moving', event.player);
         if (event.player == userInformations.id)
 	        window.PongGame.state.paddles.right.y = event.position;
-		else
+		else {
+        	window.PongGame.state.paddles.left.speed = 0;
 	        window.PongGame.state.paddles.left.y = event.position;
+    	}
     })
     socket.on('score', event => {
 		window.PongGame.stopGame();
