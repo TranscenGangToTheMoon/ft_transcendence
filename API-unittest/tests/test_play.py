@@ -37,7 +37,7 @@ class Test02_PlayError(UnitTest):
 
     def test_002_already_in_tournament(self):
         user1 = self.user(['tournament-join', 'tournament-join', 'tournament-join', 'tournament-start'])
-        users = [self.user(['tournament-join'] * (2 - i)) for i in range(3)]
+        users = [self.user(['tournament-join'] * (2 - i) + ['tournament-start']) for i in range(3)]
 
         code = self.assertResponse(create_tournament(user1), 201, get_field='code')
 
