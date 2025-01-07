@@ -137,7 +137,7 @@ function getAccessToken() {
     return localStorage.getItem('token');
 }
 
-function getRefreshToken(name = false) {
+function getRefreshToken() {
     return localStorage.getItem('refresh');
 }
 
@@ -146,10 +146,6 @@ function removeTokens() {
     localStorage.removeItem('refresh');
 }
 
-async function relog() {
-    removeTokens();
-    await navigateTo('/login');
-}
 window.removeTokens = removeTokens;
 window.refreshToken = refreshToken;
 window.getAccessToken = getAccessToken;
@@ -271,29 +267,10 @@ function getCurrentState(){
     return localStorage.getItem('currentState');
 }
 
-async function handleSSEListenerRemoval(url){
-    if (window.pathName.includes('/lobby') && !url.includes('/lobby')){
-        removeSSEListeners('lobby');
-        try {
-            await apiRequest(getAccessToken(), `${baseAPIUrl}/play/lobby/${code}/`, 'DELETE');
-        }
-        catch (error){
-            console.log(error);
-        }
-    }
-}
-
-async function handleChatSocketClosing(){
-    if (window.pathName.includes('/chat')){
-        closeChat();
-    }
-}
-
 async function navigateTo(url, doNavigate=true){
     let currentState = getCurrentState();
     lastState = currentState;
     await handleSSEListenerRemoval(url);
-    handleChatSocketClosing();
     history.pushState({state: currentState}, '', url);
     console.log(`added ${url} to history with state : ${currentState}`);
     pathName = window.location.pathname;
@@ -364,101 +341,29 @@ window.addEventListener('popstate', async event => {
 window.loadContent = loadContent;
 window.cancelNavigation = cancelNavigation;
 
-// ========================== OTHER UTILS ==========================
+// ========================== SSE SCRIPTS ==========================
 
-async function fetchUserInfos(forced=false) {
-    if (!getAccessToken())
-        await generateToken();
-    if (!userInformations || forced) {
+async function handleSSEListenerRemoval(url){
+    if (window.pathName.includes('/lobby') && !url.includes('/lobby')){
+        removeSSEListeners('lobby');
         try {
-            let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/users/me`);
-            userInformations = data;
-            console.log(userInformations);
-            displayBadges();
+            await apiRequest(getAccessToken(), `${baseAPIUrl}/play/lobby/${code}/`, 'DELETE');
         }
-        catch (error) {
+        catch (error){
             console.log(error);
         }
     }
-}
-
-function displayBadges(){
-    if (userInformations.notifications){
-        setTimeout(() => {
-            console.log(userInformations.notifications)
-            let totalNotifications = 0;
-            for (let type in userInformations.notifications){
-                if (!userInformations.notifications[type] || type === 'all') continue;
-                totalNotifications += userInformations.notifications[type];
-                console.log(badgesDivs);
-                for (let badgeDiv of badgesDivs[type]){
-                    addNotificationIndicator(badgeDiv, userInformations.notifications[type]);
-                }
+    if (window.pathName.includes('/tournament') && !url.includes('/tournament')){
+        removeSSEListeners('tournament');
+        if (tournament){
+            try {
+                await apiRequest(getAccessToken(), `${baseAPIUrl}/play/tournament/${tournament.code}/`, 'DELETE');
             }
-            console.log(totalNotifications);
-            userInformations.notifications['all'] = totalNotifications;
-            if (!totalNotifications) return;
-            for (let allBadgesDiv of badgesDivs['all']){
-                addNotificationIndicator(allBadgesDiv, totalNotifications);
-            }
-        }, 70);
-    }
-}
-
-function removeBadges(type){
-    let toDelete = 0;
-    userInformations.notifications[type] = 0;
-    for (let badgeDiv of badgesDivs[type]){
-        let indicator = badgeDiv.querySelector(`.indicator`);
-        if (indicator){
-            toDelete = parseInt(indicator.innerText);
-            console.log(toDelete);
-            if (isNaN(toDelete))
-                toDelete = 0;
-            indicator.remove();
-        }
-    }
-    if (toDelete){
-        userInformations.notifications['all'] -= toDelete;
-        if (!userInformations.notifications['all']){
-            for (let badgeDiv of badgesDivs['all']){
-                let indicator = badgeDiv.querySelector(`.indicator`);
-                if (indicator)
-                    indicator.remove();
-            }
-        }
-        else {
-            for (let allBadgesDiv of badgesDivs['all']){
-                let indicator = allBadgesDiv.querySelector(`.indicator`);
-                if (indicator)
-                    indicator.innerText = userInformations.notifications['all'];
+            catch (error){
+                console.log(error);
             }
         }
     }
-}
-
-function displayMainAlert(alertTitle, alertContent) {
-    const alertContentDiv = document.getElementById('alertContent');
-    const alertTitleDiv = document.getElementById('alertModalLabel');
-    const alertModal = new bootstrap.Modal(document.getElementById('alertModal'));
-
-    alertContentDiv.innerText = alertContent;
-    alertTitleDiv.innerText = alertTitle;
-    alertModal.show();
-}
-
-function displayConfirmModal(confirmTitle, confirmContent) {
-    window.PongGame.pauseGame();
-    const confirmContentDiv = document.getElementById('confirmContent');
-    const confirmTitleDiv = document.getElementById('confirmModalLabel');
-    const confirmModal = new bootstrap.Modal(document.getElementById('confirmModal'));
-
-    confirmContentDiv.innerText = confirmContent;
-    confirmTitleDiv.innerText = confirmTitle;
-    // document.getElementById('confirmModal').addEventListener('shown.bs.modal', function() {
-    //     document.getElementById('confirmModalClose').focus();
-    // })
-    confirmModal.show();
 }
 
 function checkEventDuplication(data){
@@ -476,73 +381,6 @@ function checkEventDuplication(data){
     return 1;
 }
 
-window.displayMainAlert = displayMainAlert;
-
-// ========================== INDEX SCRIPT ==========================
-
-async function loadFriendListModal() {
-    const friendModal = document.getElementById('friendListModal');
-    if (friendModal)
-        friendModal.remove();
-    await loadContent('/friendList.html', 'modals', true);
-}
-
-async function loadBlockedModal(){
-    const friendModal = document.getElementById('blockedUsersModal')
-    if (friendModal)
-        friendModal.remove();
-    await loadContent('/blockedUsers.html', 'modals', true);
-}
-
-async function loadChatsListModal()
-{
-    const chatsListModal = document.getElementById('chatsListModal');
-    console.log("yup yup");
-    if (chatsListModal)
-        chatsListModal.remove();
-    await loadContent('/chatTemplates/chatsListModal.html', 'modals', true);
-}
-
-async function loadUserProfile(){
-    let profileMenu = 'profileMenu.html';
-
-    document.getElementById('username').innerText = userInformations.username;
-    if (userInformations.is_guest){
-        profileMenu = 'guestProfileMenu.html'
-        document.getElementById('trophies').innerText = "";
-        document.getElementById('balance').innerText = "";
-    }
-    else {
-        document.getElementById('trophies').innerText = userInformations.trophies;
-        document.getElementById('balance').innerText = userInformations.coins;
-    }
-    await loadContent(`/${profileMenu}`, 'profileMenu');
-    // if (!userInformations.is_guest)
-        
-}
-
-
-document.getElementById('home').addEventListener('click', async event => {
-    event.preventDefault();
-    if (pathName === '/game'){
-        cancelNavigation(undefined, '/');
-    }
-    else
-        await navigateTo('/');
-})
-
-function addNotificationIndicator(div, number){
-    if (!div.querySelector('.indicator')){
-        const indicator = document.createElement('div');
-        indicator.classList.add('indicator');
-        indicator.innerText = number;
-        div.appendChild(indicator);
-    }
-    else {
-        div.querySelector('.indicator').innerText = number;
-    }
-}
-
 function removeSSEListeners(type){
     for (const [key, value] of SSEListeners) {
         if (key.includes(type)) {
@@ -553,9 +391,7 @@ function removeSSEListeners(type){
     }
 }
 
-function addSSEListeners(){
-    console.log(document.getElementById('friendListModal'));
-    
+function addFriendSSEListeners(){
     sse.addEventListener('receive-friend-request', async event => {
         const friendListModal = bootstrap.Modal.getInstance(document.getElementById('friendListModal'));
         const isModalShown = friendListModal ? friendListModal._isShown : friendListModal;
@@ -637,6 +473,36 @@ function addSSEListeners(){
     })
 }
 
+function addInviteSSEListeners(){
+    sse.addEventListener('invite-clash', event => {
+        event = JSON.parse(event.data);
+        console.log(event);
+    })
+
+    sse.addEventListener('invite-custom-game', event => {
+        event = JSON.parse(event.data);
+        console.log(event);
+    })
+
+    sse.addEventListener('invite-1v1', event => {
+        event = JSON.parse(event.data);
+        console.log(event);
+    })
+
+    sse.addEventListener('invite-tournament', event => {
+        event = JSON.parse(event.data);
+        console.log(event);
+    })
+
+}
+
+function addSSEListeners(){
+
+    addFriendSSEListeners();
+    addInviteSSEListeners();
+    
+}
+
 function initSSE(){
     sse = new EventSource(`/sse/users/?token=${getAccessToken()}`);
 
@@ -658,59 +524,87 @@ function initSSE(){
         const shownModal = document.querySelector('.modal.show[aria-modal="true"]');
         if (shownModal)
             return;
-        displayMainAlert('Error', 'Unable to connect to Server Sent Events. Note that several services will be unaivailable.');
+        displayMainAlert('Error', 'Unable to connect to Server Sent Events. Note that several services will be unavailable.');
     }
 
     addSSEListeners();
 }
 
-function addFriendListListener(){
-    document.getElementById('friendListModal').addEventListener('show.bs.modal', async function() {
-        this.clicked = true;
-        initFriendModal();
-    }, {once: true})
-    document.getElementById('friendListModal').addEventListener('show.bs.modal', () => {
-        if (document.getElementById('innerFriendRequests-tab').classList.contains('active'))
-            removeBadges('friend_requests');
-    })
-    document.getElementById('innerFriendRequests-tab').addEventListener('click', () => {
-        removeBadges('friend_requests');
-    })
+// ====================== NOTIFICATIONS UTILS ======================
+
+
+function displayBadges(){
+    if (userInformations.notifications){
+        setTimeout(() => {
+            console.log(userInformations.notifications)
+            let totalNotifications = 0;
+            for (let type in userInformations.notifications){
+                if (!userInformations.notifications[type] || type === 'all') continue;
+                totalNotifications += userInformations.notifications[type];
+                for (let badgeDiv of badgesDivs[type]){
+                    addNotificationIndicator(badgeDiv, userInformations.notifications[type]);
+                }
+            }
+            console.log(totalNotifications);
+            userInformations.notifications['all'] = totalNotifications;
+            if (!totalNotifications) return;
+            for (let allBadgesDiv of badgesDivs['all']){
+                addNotificationIndicator(allBadgesDiv, totalNotifications);
+            }
+        }, 70);
+    }
+}
+
+function removeBadges(type){
+    let toDelete = 0;
+    userInformations.notifications[type] = 0;
+    for (let badgeDiv of badgesDivs[type]){
+        let indicator = badgeDiv.querySelector(`.indicator`);
+        if (indicator){
+            toDelete = parseInt(indicator.innerText);
+            console.log(toDelete);
+            if (isNaN(toDelete))
+                toDelete = 0;
+            indicator.remove();
+        }
+    }
+    if (toDelete){
+        userInformations.notifications['all'] -= toDelete;
+        if (!userInformations.notifications['all']){
+            for (let badgeDiv of badgesDivs['all']){
+                let indicator = badgeDiv.querySelector(`.indicator`);
+                if (indicator)
+                    indicator.remove();
+            }
+        }
+        else {
+            for (let allBadgesDiv of badgesDivs['all']){
+                let indicator = allBadgesDiv.querySelector(`.indicator`);
+                if (indicator)
+                    indicator.innerText = userInformations.notifications['all'];
+            }
+        }
+    }
+}
+
+function addNotificationIndicator(div, number){
+    if (!div.querySelector('.indicator')){
+        const indicator = document.createElement('div');
+        indicator.classList.add('indicator');
+        indicator.innerText = number;
+        div.appendChild(indicator);
+    }
+    else {
+        div.querySelector('.indicator').innerText = number;
+    }
 }
 
 function getBadgesDivs(){
     badgesDivs['all'] = document.querySelectorAll('.all-badges');
     badgesDivs['friend_requests'] = document.querySelectorAll('.friend-badges');
-    badgesDivs['chats'] = document.querySelectorAll('.chat-badges');
+    badgesDivs['chat'] = document.querySelectorAll('.chat-badges');
 }
 
-async function  indexInit(auto=true) {
-    if (!auto){
-        if (userInformations.code === 'user_not_found'){
-            console.log('user was deleted from database, switching to guest mode');
-            displayMainAlert("Unable to retrieve your account/guest profile","We're sorry your account has been permanently deleted and cannot be recovered.");
-            await generateToken();
-            await fetchUserInfos(true);
-            initSSE();
-            return navigateTo('/');
-        }
-        await loadUserProfile();
-        getBadgesDivs();
-    }
-    else{
-        await fetchUserInfos();
-        initSSE();
-        await loadFriendListModal();
-        document.getElementById('innerFriendRequests-tab').clicked = true;
-        addFriendListListener();
-        let currentState = getCurrentState();
-        console.log(`added ${window.location.pathname} to history with state ${currentState}`)
-        history.replaceState({state: currentState}, '', window.location.pathname);
-        incrementCurrentState();
-        loadCSS('/css/styles.css', false);
-        handleRoute();
-    }
-}
 
 function handleFriendRequestNotification(target, img, notification, toastContainer, toastInstance){
     img.addEventListener('click', async event => {
@@ -808,6 +702,166 @@ async function displayNotification(icon=undefined, title=undefined, body=undefin
             dismissNotification(notification, toastInstance, toastContainer)
         }
     }, 5000);
+}
+
+// ========================== OTHER UTILS ==========================
+
+async function fetchUserInfos(forced=false) {
+    if (!getAccessToken())
+        await generateToken();
+    if (!userInformations || forced) {
+        try {
+            let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/users/me`);
+            userInformations = data;
+            console.log(userInformations);
+            displayBadges();
+        }
+        catch (error) {
+            console.log(error);
+        }
+    }
+}
+
+function hideAllModals(){
+    document.querySelectorAll('.modal').forEach(modal => {
+        // console.log(modal);
+        const modalInstance = bootstrap.Modal.getInstance(modal);
+        // console.log(modalInstance);
+        if (modalInstance) {
+            console.log('je passe par la pourtant');
+            modalInstance.hide();
+        }
+    });
+    document.querySelectorAll('.modal-backrop fade show').forEach(div => {
+        // console.log('removing', div);
+        div.remove;
+    })
+}
+
+function displayMainAlert(alertTitle, alertContent) {
+    const alertContentDiv = document.getElementById('alertContent');
+    const alertTitleDiv = document.getElementById('alertModalLabel');
+    const alertModal = new bootstrap.Modal(document.getElementById('alertModal'));
+
+    alertContentDiv.innerText = alertContent;
+    alertTitleDiv.innerText = alertTitle;
+    alertModal.show();
+}
+
+function displayConfirmModal(confirmTitle, confirmContent) {
+    window.PongGame.pauseGame();
+    const confirmContentDiv = document.getElementById('confirmContent');
+    const confirmTitleDiv = document.getElementById('confirmModalLabel');
+    const confirmModal = new bootstrap.Modal(document.getElementById('confirmModal'));
+
+    confirmContentDiv.innerText = confirmContent;
+    confirmTitleDiv.innerText = confirmTitle;
+    // document.getElementById('confirmModal').addEventListener('shown.bs.modal', function() {
+    //     document.getElementById('confirmModalClose').focus();
+    // })
+    confirmModal.show();
+}
+
+window.displayMainAlert = displayMainAlert;
+
+// ========================== INDEX SCRIPT ==========================
+
+document.addEventListener('click', (e) => {
+    contextMenu = document.getElementById('contextMenu');
+    if (contextMenu && !contextMenu.contains(e.target))
+        document.getElementById('contextMenu').style.display = 'none';
+});
+
+document.addEventListener('keyup', e => {
+    if (e.key === 'Escape'){
+        let contextMenu = document.getElementById('contextMenu');
+        if (contextMenu)
+            contextMenu.style.display = 'none';
+    }
+})
+
+async function loadFriendListModal() {
+    const friendModal = document.getElementById('friendListModal');
+    if (friendModal)
+        friendModal.remove();
+    await loadContent('/friendList.html', 'modals', true);
+}
+
+async function loadBlockedModal(){
+    const friendModal = document.getElementById('blockedUsersModal')
+    if (friendModal)
+        friendModal.remove();
+    await loadContent('/blockedUsers.html', 'modals', true);
+}
+
+async function loadUserProfile(){
+    let profileMenu = 'profileMenu.html';
+
+    document.getElementById('username').innerText = userInformations.username;
+    if (userInformations.is_guest){
+        profileMenu = 'guestProfileMenu.html'
+        document.getElementById('trophies').innerText = "";
+        document.getElementById('balance').innerText = "";
+    }
+    else {
+        document.getElementById('trophies').innerText = userInformations.trophies;
+        document.getElementById('balance').innerText = userInformations.coins;
+    }
+    await loadContent(`/${profileMenu}`, 'profileMenu');
+    // if (!userInformations.is_guest)
+        
+}
+
+document.getElementById('home').addEventListener('click', async event => {
+    event.preventDefault();
+    if (pathName === '/game'){
+        cancelNavigation(undefined, '/');
+    }
+    else
+        await navigateTo('/');
+})
+
+function addFriendListListener(){
+    document.getElementById('friendListModal').addEventListener('show.bs.modal', async function() {
+        this.clicked = true;
+        initFriendModal();
+    }, {once: true})
+    document.getElementById('friendListModal').addEventListener('show.bs.modal', () => {
+        if (document.getElementById('innerFriendRequests-tab').classList.contains('active'))
+            removeBadges('friend_requests');
+    })
+    document.getElementById('innerFriendRequests-tab').addEventListener('click', () => {
+        removeBadges('friend_requests');
+    })
+}
+
+async function  indexInit(auto=true) {
+    if (!auto){
+        if (userInformations.code === 'user_not_found'){
+            console.log('user was deleted from database, switching to guest mode');
+            hideAllModals();
+            displayMainAlert("Unable to retrieve your account/guest profile","We're sorry your account has been permanently deleted and cannot be recovered.");
+            await generateToken();
+            await fetchUserInfos(true);
+            initSSE();
+            return navigateTo('/');
+        }
+        await loadUserProfile();
+        getBadgesDivs();
+    }
+    else{
+        await fetchUserInfos();
+        initSSE();
+        await loadFriendListModal();
+        document.getElementById('innerFriendRequests-tab').clicked = true;
+        addFriendListListener();
+        let currentState = getCurrentState();
+        console.log(`added ${window.location.pathname} to history with state ${currentState}`)
+        history.replaceState({state: currentState}, '', window.location.pathname);
+        incrementCurrentState();
+        loadCSS('/css/styles.css', false);
+        handleRoute();
+    }
 }
 
 window.indexInit = indexInit;
