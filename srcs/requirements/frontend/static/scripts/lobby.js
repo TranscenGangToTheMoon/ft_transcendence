@@ -294,7 +294,7 @@ function addContextMenus(){
 document.getElementById('cBan').addEventListener('click', async ()=> {
     const kickedUserId = clickedUserDiv.querySelector('.playerId').innerText;
     try {
-        await apiRequest(getAccessToken(), `${baseAPIUrl}/play/lobby/${code}/banned/${kickedUserId}/`, 'DELETE');
+        await apiRequest(getAccessToken(), `${baseAPIUrl}/play/lobby/${code}/ban/${kickedUserId}/`, 'DELETE');
     }
     catch(error){
         console.log(error);

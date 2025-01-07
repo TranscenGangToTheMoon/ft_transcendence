@@ -144,14 +144,15 @@ class Test04_Tournament(UnitTest):
         self.assertResponse(score(user1['id']), 204)
         self.assertResponse(score(user1['id']), 204)
 
-        response = self.assertResponse(get_games(user1), 200, count=2) # todo get user instance // same format that matchmakeing
-        self.assertResponse(get_tournament(response['results'][0]['tournament_id'], user1), 200) # todo get user instance // same format that matchmakeing
+        response = self.assertResponse(get_games(user1), 200, count=2)
+        self.assertResponse(get_tournament(response['results'][0]['tournament_id'], user1), 200)
         self.assertThread(user1, user2, user3, user4)
 
     def test_002_tournament_does_not_exist(self):
         user1 = self.user()
 
         self.assertResponse(get_tournament(123456, user1), 404)
+        self.assertThread(user1)
 
 
 if __name__ == '__main__':

@@ -42,6 +42,8 @@ def validate_teams(value):
 
 class MatchSerializer(serializers.ModelSerializer):
     teams = serializers.JSONField(validators=[validate_teams])
+    score_winner = serializers.IntegerField(read_only=True)
+    score_looser = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Matches
@@ -51,14 +53,29 @@ class MatchSerializer(serializers.ModelSerializer):
             'game_mode',
             'created_at',
             'game_duration',
-            'finished',
             'tournament_id',
             'tournament_stage_id',
+            'tournament_n',
             'teams',
+            'winner',
+            'looser',
+            'score_winner',
+            'score_looser',
         ]
         read_only_fields = [
             'id',
             'created_at',
+            'winner',
+            'looser',
+            'score_winner',
+            'score_looser',
+        ]
+        write_only_fields = [
+            'game_mode'
+            'tournament_id'
+            'tournament_stage_id'
+            'tournament_n'
+            'teams'
         ]
 
     @staticmethod
@@ -75,6 +92,14 @@ class MatchSerializer(serializers.ModelSerializer):
             player = instance.players.get(user_id=user['id'])
             teams[player.team.name].append({**user, 'score': player.score})
         representation['teams'] = teams
+        if instance.finished:
+            representation.pop('code')
+            representation['winner'] = instance.winner.name
+            representation['looser'] = instance.looser.name
+            representation['score_winner'] = instance.winner.score
+            representation['score_looser'] = instance.looser.score
+        if representation['tournament_id'] is None:
+            representation.pop('tournament_id')
         return representation
 
     def create(self, validated_data):
@@ -83,6 +108,8 @@ class MatchSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError({'tournament_id': [MessagesException.ValidationError.FIELD_REQUIRED]})
             if not validated_data.get('tournament_stage_id'):
                 raise serializers.ValidationError({'tournament_stage_id': [MessagesException.ValidationError.FIELD_REQUIRED]})
+            if not validated_data.get('tournament_n'):
+                raise serializers.ValidationError({'tournament_n': [MessagesException.ValidationError.FIELD_REQUIRED]})
         else:
             validated_data.pop('tournament_id', None)
 
@@ -95,12 +122,48 @@ class MatchSerializer(serializers.ModelSerializer):
         if validated_data['game_mode'] != GameMode.tournament:
             validated_data['tournament_id'] = None
             validated_data['tournament_stage_id'] = None
+            validated_data['tournament_n'] = None
         match = super().create(validated_data)
         for n, team in enumerate(teams):
             new_team = Teams.objects.create(match=match, name=Teams.names[n])
             for user in team:
                 Players.objects.create(user_id=user, match=match, team=new_team)
         return match
+
+
+class TournamentMatchSerializer(serializers.ModelSerializer):
+    n = serializers.IntegerField(source='tournament_n')
+    score_winner = serializers.IntegerField(source='winner.score')
+    score_looser = serializers.IntegerField(source='looser.score')
+    winner = serializers.SerializerMethodField()
+    looser = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Matches
+        fields = [
+            'id',
+            'n',
+            'game_duration',
+            'winner',
+            'looser',
+            'score_winner',
+            'score_looser',
+        ]
+        read_only_fields = [
+            'id',
+            'n',
+            'game_duration',
+            'winner',
+            'looser',
+            'score_winner',
+            'score_looser',
+        ]
+
+    def get_winner(self, obj):
+        return self.context['users'][obj.winner.players.first().user_id]
+
+    def get_looser(self, obj):
+        return self.context['users'][obj.looser.players.first().user_id]
 
 
 class MatchFinishSerializer(serializers.ModelSerializer):
