@@ -57,10 +57,10 @@ class Test02_ErrorTournament(UnitTest):
         self.assertResponse(join_tournament(user2, code), 409, {'detail': 'You already joined this tournament.'})
         self.assertThread(user1, user2)
 
-    def test_003_tournament_is_full(self):
-        user1 = self.user(['tournament-join'] * 3)
+    def test_003_already_started(self):
+        user1 = self.user(['tournament-join'] * 3 + ['tournament-start'])
         user2 = self.user()
-        users = [self.user(['tournament-join'] * (2 - i)) for i in range(3)]
+        users = [self.user(['tournament-join'] * (2 - i) + ['tournament-start']) for i in range(3)]
 
         code = self.assertResponse(create_tournament(user1), 201, get_field='code')
 
@@ -166,6 +166,14 @@ class Test02_ErrorTournament(UnitTest):
         code = self.assertResponse(create_tournament(user2), 201, get_field='code')
         self.assertResponse(join_tournament(user1, code), 401, {'code': 'sse_connection_required', 'detail': 'You need to be connected to SSE to access this resource.'})
         self.assertThread(user2)
+
+    def test_014_wrong_size(self):
+        user1 = self.user()
+
+        self.assertResponse(create_tournament(user1, size=14), 400)
+        self.assertResponse(create_tournament(user1, size=2), 400)
+        self.assertResponse(create_tournament(user1, size=7), 400)
+        self.assertThread(user1)
 
 
 class Test03_BanTournament(UnitTest):
@@ -421,7 +429,7 @@ class Test07_GetTournament(UnitTest):
         self.assertResponse(search_tournament(user2, 'Blocked ' + name), 200, count=1)
         self.assertResponse(unblocked_user(user1, blocked_id), 204)
         self.assertResponse(search_tournament(user2, 'Blocked ' + name), 200, count=2)
-        self.assertThread(user3, user1, user1)
+        self.assertThread(user1, user2, user3)
 
     def test_008_search_tournaments_blocked_by_user_tournament(self):
         user1 = self.user()
@@ -435,7 +443,7 @@ class Test07_GetTournament(UnitTest):
         self.assertResponse(search_tournament(user2, 'Blocked ' + name), 200, count=1)
         self.assertResponse(unblocked_user(user2, blocked_id), 204)
         self.assertResponse(search_tournament(user2, 'Blocked ' + name), 200, count=2)
-        self.assertThread(user3, user1, user1)
+        self.assertThread(user1, user2, user3)
 
 
 class Test08_InviteTournament(UnitTest):
@@ -452,7 +460,7 @@ class Test08_InviteTournament(UnitTest):
         self.assertResponse(join_tournament(user2, code), 201)
         self.assertResponse(invite_user(user1, user3, code), 204)
         self.assertResponse(invite_user(user2, user4, code), 204)
-        self.assertThread(user1, user2)
+        self.assertThread(user1, user2, user3, user4)
 
     def test_004_invite_yourself(self):
         user1 = self.user()
@@ -515,9 +523,8 @@ class Test09_StartTournament(UnitTest):
         self.assertThread(user1, user2, user3, user4)
 
     def test_002_start_tournament_80(self):
-        users = [self.user(['tournament-join'] * (5 - i) + ['tournament-start-at', 'tournament-join', 'tournament-join', 'tournament-start', 'game-start']) for i in range(6)]
-        user1 = self.user(['tournament-join', 'tournament-start', 'game-start'])
-        user2 = self.user(['tournament-start', 'game-start'])
+        users = [self.user(['tournament-join'] * (6 - i) + ['tournament-start-at', 'tournament-join', 'tournament-start', 'game-start']) for i in range(7)]
+        user1 = self.user(['tournament-start', 'game-start'])
 
         code = self.assertResponse(create_tournament(users[0], size=8), 201, get_field='code')
         for u in users[1:]:
@@ -525,34 +532,31 @@ class Test09_StartTournament(UnitTest):
 
         time.sleep(5)
         self.assertResponse(join_tournament(user1, code), 201)
-        self.assertResponse(join_tournament(user2, code), 201)
-        time.sleep(10)
-        self.assertThread(user1, user2, *users)
+        time.sleep(5)
+        self.assertThread(user1, *users)
 
     def test_003_cancel_start(self):
-        user1 = self.user(['tournament-join', 'tournament-join', 'tournament-join', 'tournament-join', 'tournament-join', 'tournament-join', 'tournament-join', 'tournament-start-at', 'tournament-leave', 'tournament-start-cancel'])
-        user2 = self.user(['tournament-join', 'tournament-join', 'tournament-join', 'tournament-join', 'tournament-join', 'tournament-join', 'tournament-start-at', 'tournament-leave', 'tournament-start-cancel'])
-        user3 = self.user(['tournament-join', 'tournament-join', 'tournament-join', 'tournament-join', 'tournament-join', 'tournament-start-at', 'tournament-leave', 'tournament-start-cancel'])
-        user4 = self.user(['tournament-join', 'tournament-join', 'tournament-join', 'tournament-join', 'tournament-start-at', 'tournament-leave', 'tournament-start-cancel'])
-        user5 = self.user(['tournament-join', 'tournament-join', 'tournament-join', 'tournament-start-at', 'tournament-leave', 'tournament-start-cancel'])
-        user6 = self.user(['tournament-join', 'tournament-join', 'tournament-start-at', 'tournament-leave', 'tournament-start-cancel'])
-        user7 = self.user(['tournament-join', 'tournament-start-at', 'tournament-leave', 'tournament-start-cancel'])
-        user8 = self.user(['tournament-start-at'])
+        user1 = self.user(['tournament-join', 'tournament-join', 'tournament-join', 'tournament-join', 'tournament-join', 'tournament-join', 'tournament-start-at', 'tournament-leave', 'tournament-start-cancel'])
+        user2 = self.user(['tournament-join', 'tournament-join', 'tournament-join', 'tournament-join', 'tournament-join', 'tournament-start-at', 'tournament-leave', 'tournament-start-cancel'])
+        user3 = self.user(['tournament-join', 'tournament-join', 'tournament-join', 'tournament-join', 'tournament-start-at', 'tournament-leave', 'tournament-start-cancel'])
+        user4 = self.user(['tournament-join', 'tournament-join', 'tournament-join', 'tournament-start-at', 'tournament-leave', 'tournament-start-cancel'])
+        user5 = self.user(['tournament-join', 'tournament-join', 'tournament-start-at', 'tournament-leave', 'tournament-start-cancel'])
+        user6 = self.user(['tournament-join', 'tournament-start-at', 'tournament-leave', 'tournament-start-cancel'])
+        user7 = self.user(['tournament-start-at'])
 
-        code = self.assertResponse(create_tournament(user1, size=10), 201, get_field='code')
+        code = self.assertResponse(create_tournament(user1, size=8), 201, get_field='code')
         self.assertResponse(join_tournament(user2, code), 201)
         self.assertResponse(join_tournament(user3, code), 201)
         self.assertResponse(join_tournament(user4, code), 201)
         self.assertResponse(join_tournament(user5, code), 201)
         self.assertResponse(join_tournament(user6, code), 201)
         self.assertResponse(join_tournament(user7, code), 201)
-        self.assertResponse(join_tournament(user8, code), 201)
 
         time.sleep(2)
-        self.assertResponse(join_tournament(user8, code, method='DELETE'), 204)
+        self.assertResponse(join_tournament(user7, code, method='DELETE'), 204)
         time.sleep(2)
 
-        self.assertThread(user1, user2, user3, user4, user5, user6, user7, user8)
+        self.assertThread(user1, user2, user3, user4, user5, user6, user7)
 
 
 class Test10_FinishTournament(UnitTest):

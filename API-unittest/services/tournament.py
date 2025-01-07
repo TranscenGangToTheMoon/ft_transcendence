@@ -30,13 +30,10 @@ def join_tournament(user, code, method: Literal['GET', 'POST', 'PATCH', 'DELETE'
     )
 
 
-def search_tournament(user, query, data=None):
-    if data is None:
-        data = {'q': query}
+def search_tournament(user, query):
     return make_request(
-        endpoint='play/tournament/search/',
+        endpoint=f'play/tournament/search/?q={query}',
         token=user['token'],
-        data=data,
     )
 
 
