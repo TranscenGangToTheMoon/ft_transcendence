@@ -390,6 +390,7 @@ function displayBadges(){
             for (let type in userInformations.notifications){
                 if (!userInformations.notifications[type] || type === 'all') continue;
                 totalNotifications += userInformations.notifications[type];
+                console.log(badgesDivs);
                 for (let badgeDiv of badgesDivs[type]){
                     addNotificationIndicator(badgeDiv, userInformations.notifications[type]);
                 }
@@ -493,6 +494,15 @@ async function loadBlockedModal(){
     await loadContent('/blockedUsers.html', 'modals', true);
 }
 
+async function loadChatsListModal()
+{
+    const chatsListModal = document.getElementById('chatsListModal');
+    console.log("yup yup");
+    if (chatsListModal)
+        chatsListModal.remove();
+    await loadContent('/chatTemplates/chatsListModal.html', 'modals', true);
+}
+
 async function loadUserProfile(){
     let profileMenu = 'profileMenu.html';
 
@@ -510,6 +520,7 @@ async function loadUserProfile(){
     // if (!userInformations.is_guest)
         
 }
+
 
 document.getElementById('home').addEventListener('click', async event => {
     event.preventDefault();
@@ -562,6 +573,37 @@ function addSSEListeners(){
         }
         addFriendRequest(event.data);
     });
+
+    sse.addEventListener('send-message', async event => {
+        event = JSON.parse(event.data);
+        console.log(event, 'ai je ce qu il faut ?');
+        chat = event.target[0]['url'];
+        let apiAnswer = undefined;
+        try {
+            apiAnswer = await apiRequest(getAccessToken(), `${baseAPIUrl}${chat}`, 'GET');
+            if (apiAnswer.details) {
+                console.log('Error:',apiAnswer.details);
+                return;
+            }
+        }
+        catch (error){
+            console.log('Error:', error);
+            return;
+        }
+        userInformations.notifications['chats'] += 1;
+        chatInfo = parsChatInfo(apiAnswer);
+        if (pathName === '/chat'){
+            chatUserCardLastMessage = document.getElementById('chatListElement' + chatInfo.target).querySelector('.chatUserCardLastMessage');
+            chatUserCardLastMessage.innerText = (chatInfo.lastMessage);
+            chatUserCardLastMessage.classList.add('chatMessageNotRead');
+        }
+        await displayNotification(undefined, 'message received', event.message, async event => {
+            if (pathName !== '/chat')
+                await navigateTo('/chat');
+            await openChat(chatInfo);
+        });
+        displayBadges();
+    })
 
     sse.addEventListener('accept-friend-request', async event => {
         event = JSON.parse(event.data);
@@ -639,7 +681,7 @@ function addFriendListListener(){
 function getBadgesDivs(){
     badgesDivs['all'] = document.querySelectorAll('.all-badges');
     badgesDivs['friend_requests'] = document.querySelectorAll('.friend-badges');
-    badgesDivs['chat'] = document.querySelectorAll('.chat-badges');
+    badgesDivs['chats'] = document.querySelectorAll('.chat-badges');
 }
 
 async function  indexInit(auto=true) {

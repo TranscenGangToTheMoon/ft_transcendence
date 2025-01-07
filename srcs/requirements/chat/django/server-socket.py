@@ -11,9 +11,11 @@ from lib_transcendence.auth import auth_verify
 from lib_transcendence.chat import post_messages
 from lib_transcendence.services import request_chat
 from lib_transcendence.endpoints import Chat as endpoint_chat
+from lib_transcendence.sse_events import create_sse_event, EventCode
 from rest_framework.exceptions import APIException
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.exceptions import AuthenticationFailed
+from rest_framework.exceptions import NotFound
 from socketio.exceptions import ConnectionRefusedError
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -54,10 +56,11 @@ async def connect(sid, environ, auth):
             raise ConnectionRefusedError({"error": 403, "message": "Permission denied"})
         except APIException:
             raise ConnectionRefusedError({"error": 500, "message": "error"})
+        await sio.emit('debug', {'message': chat['type']}, to=sid)
         if user and chat and chat['type'] == "private_message":
-            usersConnected.add_user(user['id'], sid, chatId, chat['chat_with'].get('id'))
+            usersConnected.add_user(user['id'], sid, user['username'], chatId, chat['chat_with'].get('id'))
         else:
-            usersConnected.add_user(user['id'], sid, chatId)
+            usersConnected.add_user(user['id'], sid, user['username'], chatId)
     else:
         print(f"Connection failed : {sid}")
         raise ConnectionRefusedError({"error": 400, "message": "Missing args"})
@@ -69,6 +72,10 @@ async def connect(sid, environ, auth):
 async def disconnect(sid):
     usersConnected.remove_user(sid)
     print(f"Client disconnected : {sid}")
+
+@sio.event
+async def leave(sid, data):
+    await sio.disconnect(sid)
 
 @sio.event
 async def message(sid, data):
@@ -96,6 +103,22 @@ async def message(sid, data):
                 {'message': 'The other user is not connected'},
                 to=sid
             )
+            try:
+                await sync_to_async(create_sse_event, thread_sensitive=False)(usersConnected.get_chat_with_id(sid), EventCode.SEND_MESSAGE, answerAPI,{'username':usersConnected.get_user_id(sid),'message':content})
+            except (PermissionDenied, AuthenticationFailed, NotFound, APIException) as e:
+                await sio.emit(
+                    'error',
+                    e,
+                    to=sid
+                )
+                print(f"Error SSE: {e}")
+        else:
+            await sio.emit(
+                'debug',
+                {'message': 'The other user is connected'},
+                to=sid
+            )
+            print(f"User not connected, message saved for later")
         await sio.emit(
             'message',
             {'author':answerAPI['author'], 'content': content},
@@ -119,6 +142,14 @@ async def message(sid, data):
             {'error': 401, 'message': 'Invalid token', 'retry_content': content},
             to=sid
         )
+    except NotFound:
+        print(f"User not found : {sid}")
+        await sio.emit(
+            'error',
+            {'error': 404, 'message': 'User not found'},
+            to=sid
+        )
+        await sio.disconnect(sid)
     except APIException:
         print(f"API error : {sid}")
         await sio.emit(
