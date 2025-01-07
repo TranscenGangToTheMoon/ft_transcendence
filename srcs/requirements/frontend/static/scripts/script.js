@@ -693,11 +693,18 @@ async function fetchUserInfos(forced=false) {
 
 function hideAllModals(){
     document.querySelectorAll('.modal').forEach(modal => {
+        // console.log(modal);
         const modalInstance = bootstrap.Modal.getInstance(modal);
+        // console.log(modalInstance);
         if (modalInstance) {
+            console.log('je passe par la pourtant');
             modalInstance.hide();
         }
     });
+    document.querySelectorAll('.modal-backrop fade show').forEach(div => {
+        // console.log('removing', div);
+        div.remove;
+    })
 }
 
 function displayMainAlert(alertTitle, alertContent) {
