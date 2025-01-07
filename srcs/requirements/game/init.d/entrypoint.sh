@@ -15,9 +15,9 @@ echo -e $BOLD$RED"- Migrating"$RESET
 python manage.py migrate
 
 PGPASSWORD=$POSTGRES_PASSWORD psql -h $POSTGRES_HOST -p 5432 -U $POSTGRES_USER -d $POSTGRES_DB -c "
-DELETE FROM matches_players WHERE match_id IN (SELECT id FROM matches_matches WHERE finished = TRUE);
-DELETE FROM matches_teams WHERE match_id IN (SELECT id FROM matches_matches WHERE finished = TRUE);
-DELETE FROM matches_matches WHERE finished = TRUE;
+DELETE FROM matches_players WHERE match_id IN (SELECT id FROM matches_matches WHERE finished = FALSE);
+DELETE FROM matches_teams WHERE match_id IN (SELECT id FROM matches_matches WHERE finished = FALSE);
+DELETE FROM matches_matches WHERE finished = FALSE;
 "
 
 python socket_server.py &

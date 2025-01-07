@@ -1,5 +1,7 @@
 from lib_transcendence.auth import Authentication
+from lib_transcendence.exceptions import MessagesException
 from rest_framework import generics
+from rest_framework.exceptions import NotFound
 
 from tournaments.models import Tournaments
 from tournaments.serializers import TournamentSerializer
@@ -10,10 +12,14 @@ class SaveTournamentView(generics.CreateAPIView):
 
 
 class RetrieveTournamentView(generics.RetrieveAPIView):
-    queryset = Tournaments.objects.all()
     serializer_class = TournamentSerializer
-    lookup_field = 'tournament_id'
     authentication_classes = [Authentication]
+
+    def get_object(self):
+        try:
+            return Tournaments.objects.get(id=self.kwargs['tournament_id'])
+        except Tournaments.DoesNotExist:
+            raise NotFound(MessagesException.NotFound.TOURNAMENT)
 
 
 save_tournament_view = SaveTournamentView.as_view()

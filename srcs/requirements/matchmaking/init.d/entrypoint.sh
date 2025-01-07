@@ -15,4 +15,16 @@ fi
 echo -e $BOLD$RED"- Migrating"$RESET
 python manage.py migrate
 
+PGPASSWORD=$POSTGRES_PASSWORD psql -h $POSTGRES_HOST -p 5432 -U $POSTGRES_USER -d $POSTGRES_DB -c "
+DELETE FROM baning_banned;
+DELETE FROM blocking_blocked;
+DELETE FROM lobby_lobby;
+DELETE FROM lobby_lobbyparticipants;
+DELETE FROM play_players;
+DELETE FROM tournament_tournament;
+DELETE FROM tournament_tournamentstage;
+DELETE FROM tournament_tournamentparticipants;
+DELETE FROM tournament_tournamentmatches;
+"
+
 exec "$@"

@@ -30,19 +30,16 @@ def join_tournament(user, code, method: Literal['GET', 'POST', 'PATCH', 'DELETE'
     )
 
 
-def search_tournament(user, query, data=None):
-    if data is None:
-        data = {'q': query}
+def search_tournament(user, query):
     return make_request(
-        endpoint='play/tournament/search/',
+        endpoint=f'play/tournament/search/?q={query}',
         token=user['token'],
-        data=data,
     )
 
 
 def ban_user(user, user_ban, code):
     return make_request(
-        endpoint=f'play/tournament/{code}/banned/{user_ban["id"]}/',
+        endpoint=f'play/tournament/{code}/ban/{user_ban["id"]}/',
         token=user['token'],
         method='DELETE',
     )
