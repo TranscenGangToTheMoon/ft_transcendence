@@ -2,7 +2,7 @@ from lib_transcendence.users import retrieve_users
 from rest_framework import serializers
 
 from matches.models import Matches
-from matches.serializers import MatchSerializer
+from matches.serializers import TournamentMatchSerializer
 from tournaments.models import Tournaments
 
 
@@ -32,14 +32,15 @@ class TournamentSerializer(serializers.ModelSerializer):
             for player in match.players.all():
                 if player.user_id not in users:
                     users.append(player.user_id)
-        context = retrieve_users(users)
+        context_users = {}
+        for user in retrieve_users(users):
+            context_users[user['id']] = user
         for stage in obj.stages.all():
-            result = MatchSerializer(stage.matches.all().order_by('n'), many=True, context={'users': context}).data
+            result = TournamentMatchSerializer(Matches.objects.filter(tournament_stage_id=stage.id).order_by('tournament_n'), many=True, context={'users': context_users}).data
             matches[stage.label] = result
         return matches
 
-    def create(self, validated_data): # todo continue to fix that
-        print('VALIDATAE', validated_data, flush=True)
+    def create(self, validated_data):
         stages = validated_data.pop('stages')
         result = super().create(validated_data)
         for stage in stages:
