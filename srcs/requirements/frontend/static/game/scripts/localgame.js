@@ -520,7 +520,7 @@
             state.ball.speedY = -state.ball.speedY
         }
 
-        // handleGoal();
+        handleGoal();
         for (let paddle in state.paddles){
             handlePaddleCollision(state.paddles[paddle]);
         }
@@ -555,99 +555,6 @@
     window.PongGame = {startGame, startCountdown, stopGame, pauseGame, resumeGame, state, config, moveUp, moveDown, handleGameOver, resetGame};
 })();
 
-
-function initSocket(){
-	const host = window.location.origin;
-	let socket = io(host, {
-      transports: ["websocket"],
-      path: "/ws/game/",
-      auth : {
-          "id": userInformations.id,
-          "token": 'kk',
-      },
-	});
-    window.socket = socket;
-    console.log(socket)
-	socket.on('connect', () => {
-        console.log('Connected to socketIO server!');
-    });
-    socket.on('start_game', event => {
-        console.log('received start_game');
-        window.PongGame.startGame();
-    })
-    socket.on('start_countdown', event => {
-        console.log('received start_countdown');
-        window.PongGame.startCountdown();
-    })
-    socket.on('game_state', event => {
-	    window.PongGame.state.ball.y = event.position_y;
-	    window.PongGame.state.ball.x = event.position_x;
-	    window.PongGame.state.ball.speedX = event.direction_x;
-	    window.PongGame.state.ball.speedY = event.direction_y;
-	    window.PongGame.state.ball.speed = event.speed;
-    })
-    socket.on('connect_error', (error)=> {
-        console.log('error', error);
-    })
-    socket.on('move_up', event => {
-        console.log('move_up received');
-        window.PongGame.state.paddles.left.speed = -1;
-    })
-    socket.on('move_down', event => {
-        console.log('move_down received');
-        window.PongGame.state.paddles.left.speed = 1;
-    })
-    socket.on('stop_moving', event => {
-        console.log('received stop_moving')
-        window.PongGame.state.paddles.left.speed = 0;
-        if (event.player == userInformations.id)
-	        window.PongGame.state.paddles.right.y = event.position;
-		else
-	        window.PongGame.state.paddles.left.y = event.position;
-    })
-    socket.on('score', event => {
-		window.PongGame.stopGame();
-		window.PongGame.resetGame();
-		for (paddle in window.PongGame.state.paddles) {
-			window.PongGame.state.paddles[paddle].y = (window.PongGame.config.canvasHeight - window.PongGame.config.paddleHeight) / 2;
-		}
-    	if (window.PongGame.config.team == 'team_a') {
-			window.PongGame.state.playerScore = event.team_a;
-			window.PongGame.state.enemyScore = event.team_b;
-     	}
-     	else {
-			window.PongGame.state.playerScore = event.team_b;
-			window.PongGame.state.enemyScore = event.team_a;
-      	}
-     	if (event.team_a == window.PongGame.config.winningScore || event.team_b == window.PongGame.config.winningScore)
-      	{
-      		window.PongGame.handleGameOver()
-      	}
-    })
-    socket.on('game_over', event => {
-		console.log('game_over');
-		window.PongGame.handleGameOver()
-    })
-    socket.on('team_id', event => {
-		window.PongGame.state.team = event.team;
-    })
-}
-
-document.getElementById('zizi').addEventListener('click', event => {
-    event.preventDefault();
-    initSocket();
-})
-
-document.getElementById('playGame').addEventListener('click', async event => {
-	try {
-		let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/play/duel/`, 'POST');
-	}
-	catch(error) {
-		console.log(error);
-	}
-	// initSocket();
-})
-
 document.getElementById('confirmModal').addEventListener('hidden.bs.modal', () => {
     window.PongGame.resumeGame();
 })
@@ -657,31 +564,10 @@ document.getElementById('testA').addEventListener('click', event => {
     window.PongGame.stopGame();
 })
 
-function checkGameAuthorization(){
-    console.log(window.location.pathname);
-    if (userInformations.is_guest && window.location.pathname === '/game/ranked')
-        throw `${window.location.pathname}`
-}
-
 async function initGame(){
     await indexInit(false);
     if (window.location.pathname === '/') return;
-    try {
-        checkGameAuthorization();
-        try {
-            let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/play/duel/`, 'POST');
-            console.log(data);
-        }
-        catch(error) {
-            console.log(error);
-        }
-        // window.PongGame.startGame();
-    }
-    catch (unauthorized){
-        if (!document.getElementById('alertModal').classList.contains('show'))
-            displayMainAlert("Error", `You don't have permission to play in ${unauthorized}`);
-        await navigateTo('/');
-    }
+    window.PongGame.startGame();
 }
 
 initGame();

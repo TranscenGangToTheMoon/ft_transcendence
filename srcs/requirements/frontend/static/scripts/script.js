@@ -246,6 +246,7 @@ async function handleRoute() {
         '/game/ranked' : '/game/game.html',
         '/game/duel' : '/game/game.html',
         '/game/custom' : '/game/game.html',
+        '/game/local' : '/game/localGame.html',
         '/tournament' : '/tournament/tournament.html'
     };
 
