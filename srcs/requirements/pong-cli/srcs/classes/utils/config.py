@@ -11,6 +11,7 @@ class Config:
         height = 13
         speed = 2
     class Ball:
+        speed = 1 #convert
         width = 4
         height = 2
 

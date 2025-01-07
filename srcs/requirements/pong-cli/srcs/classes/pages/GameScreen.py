@@ -25,10 +25,10 @@ class GamePage(Screen):
         self.playground = Playground()
         self.pressed_keys = set()
         self.running = True
+        self.key_thread = threading.Thread(target=self.check_keys)
+        self.listener = None
 
     def on_mount(self):
-        # Démarrage du thread de surveillance des touches
-        self.key_thread = threading.Thread(target=self.check_keys)
         self.key_thread.daemon = True
         self.key_thread.start()
 
@@ -49,6 +49,7 @@ class GamePage(Screen):
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         if (event.button.id == "exitAction"):
+            self.app.exit() #to handle when voila
             self.dismiss()
 
     def on_press(self, key):
