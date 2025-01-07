@@ -1,76 +1,53 @@
 
-<style>
-	#chatSection {
-		display: flex;
-		min-height:100%;
-	}
-	#chatsListView {
-		padding: 5px;
-		border-right: 1px solid #ccc;
-		background-color: #f7f7f7;
-		width: 20%;
-		min-height:90vh;
-		overflow-y: auto;
-	}
-	#chatsList {
-		padding: 5px;
-	}
-	#chatListElement{
-		border-bottom: 1px solid #ccc;
-		border-top: 1px solid #ccc;
-		padding: 5px;
-	}
-	#chatListElementTarget {
-		font-weight: bold;
-	}
-	#chatListElementMessagePreview { 
-		color: #606060;
-	}
-	#chatView {
-		width: 80%;
-		height: 90vh;
-		overflow-y: auto;
-	}
-	#chatTitle {
-		display: flex;
-		padding: 5px;
-		border-bottom: 1px solid #ccc;
-		width: 100%;
-	}
-	#messages {
-		padding: 5px;
-		width: 100%;
-		height: 80vh;
-		overflow-y: auto;
-	}
-	#sendMessageForm {
-		border-top: 1px solid #ccc;
-		padding: 5px;
-		width: 100%;
-		height: 5%;
-	}
-
-</style>
+<button id="leaveTournament" class="btn btn-danger">Leave Tournament</button>
 
 <div id="chatSection" style="display:flex;">
 	<div id="chatsListView">
-		<form id="searchChatForm">
-			<input id="searchUser" placeholder="tournament name" type="text">
+		<form id="searchTournamentForm">
+			<input id="searchTournament" placeholder="tournament name" type="text" autocomplete="off">
 			<button type="submit">Join tournament</button>
 		</form>
-		<div id="chatsList"></div>
+		<div id="tournamentsList"></div>
 	</div>
-	<div id="chatView" style="display:none">
-		<div id="chatTitle">
-			<div id="chatName"><p>User test</p></div>
-			<button id="endChat">End Chat</button>
+	<div id="tournamentView">
+	</div>
+	<div id="bracket" class="tournament-bracket"></div>
+</div>
+
+<div class="modal fade" id="createTournamentModal" tabindex="-1" aria-labelledby="createTournamentModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="createTournamentModalLabel">Create tournament</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body" id="createTournamentContent">
+				<form class="row g-3 align-items-center">
+					<div class="col-auto">
+					  <label for="rangeInput" class="form-label" id="tournamentSize">Select size (16)</label>
+					  <input type="range" class="form-range" id="rangeInput" min="4" max="32" value="16">
+					</div>
+					
+					<div class="col-auto">
+					  <label for="numberInput" class="form-label">tournament name</label>
+					  <input type="text" class="form-control" id="tournamentName">
+					</div>
+				</form>
+				<div id="createTournamentError"></div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" id="createTournament" class="btn btn-primary d-block">Create</button>
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="createTournamentModalClose" tabindex="0">Close</button>
+			</div>
 		</div>
-		<div id="messages"></div>
-		<form id="sendMessageForm">
-			<input autocomplete="off" id="message" placeholder="Enter message" type="text">
-			<button type="submit">Send </button>
-		</form>
 	</div>
 </div>
 
+<div id="contextMenu" class="custom-context-menu dropdown-menu">
+    <button id="cBan" class="dropdown-item">ban</button>
+    <button id="cFriendRequest" class="dropdown-item" style="display: flex;">Send friend request<div id="friendRequestValidator" style="display: none;margin-left: 5px;"> V</div></button>
+    <button id="cBlock" class="dropdown-item">block</button>
+</div>
+
 <div script="/tournament/scripts/tournament.js"></div>
+<div _style="/tournament/css/tournament.css"></div>
