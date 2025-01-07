@@ -53,7 +53,6 @@ class MatchSerializer(serializers.ModelSerializer):
             'game_mode',
             'created_at',
             'game_duration',
-            'finished',
             'tournament_id',
             'tournament_stage_id',
             'teams',
@@ -70,6 +69,12 @@ class MatchSerializer(serializers.ModelSerializer):
             'score_winner',
             'score_looser',
         ]
+        write_only_fields = [
+            'game_mode'
+            'tournament_id'
+            'tournament_stage_id'
+            'tournament_n'
+            'teams'
         ]
 
     @staticmethod
