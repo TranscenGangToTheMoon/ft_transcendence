@@ -6,7 +6,7 @@
         paddleWidth: 30,
         paddleHeight: 200,
         ballSize: 20,
-        maxBallSpeed: 630,
+        maxBallSpeed: 1500,
         maxPaddleSpeed: 500,
         animationDuration: 800,
         font: "48px Arial",
@@ -159,8 +159,9 @@
 
     function stopGame(animate=false) {
         state.isGameActive = false;
+        ctx.fillText('Game over', config.canvasWidth / 2, config.canvasHeight / 2);
         if (animate){
-            animatePaddlesToMiddle()
+            animatePaddlesToMiddle();
         }
         else{
             state.cancelAnimation = true;
@@ -178,29 +179,29 @@
     }
 
     function startCountdown() {
-	    state.isGameActive = true;
+	    state.isGameActive = false;
 	    state.cancelAnimation = false;
         state.isCountDownActive = true;
 
-        for (racket in state.paddles) {
-        	racket.y = (config.canvasHeight + config.paddleHeight) / 2
-        }
-
+        // for (racket in state.paddles) {
+        // 	racket.y = (config.canvasHeight + config.paddleHeight) / 2
+        // }
+        ctx.clearRect(0, 0, config.canvasWidth, config.canvasHeight);
+        animatePaddlesToMiddle();
         function step() {
             state.countDown.currentStep--;
-            if (!state.isGameActive){
+            if (state.isGameActive){
                 state.countDown.currentStep = config.countDown.steps;
-                ctx.clearRect(0, 0, config.canvasWidth, config.canvasHeight);
+                ctx.clearRect(config.canvasWidth / 2 - 50 , 0, 100, config.canvasHeight);
                 return;
             }
             if (state.countDown.currentStep >= 0) {
-	            ctx.clearRect(0, 0, config.canvasWidth, config.canvasHeight);
+	            ctx.clearRect(config.canvasWidth / 2 - 50 , 0, 100, config.canvasHeight);
                 drawCountdown();
                 setTimeout(step, config.countDown.delay / (config.countDown.steps + 1));
             }
             else{
                 state.countDown.currentStep = config.countDown.steps;
-				stopGame();
             }
         }
 
@@ -208,6 +209,7 @@
     }
 
     function animatePaddlesToMiddle(){
+        // state.isCountDownActive = true;
         const startTime = performance.now();
         const startLeft = state.paddles.left.y;
         const startRight = state.paddles.right.y;
@@ -236,7 +238,12 @@
     }
 
     function drawPaddleReturn(){
-        ctx.clearRect(0, 0, config.canvasWidth, config.canvasHeight);
+        
+        for (paddle in state.paddles){
+            paddle = state.paddles[paddle];
+            ctx.clearRect(paddle.x, 0, config.paddleWidth, config.canvasHeight);
+        }
+
         ctx.drawImage(
             paddleImage, state.paddles.left.x, state.paddles.left.y,
             config.paddleWidth, config.paddleHeight
@@ -249,8 +256,7 @@
             config.paddleWidth,
             config.paddleHeight
         );
-
-        ctx.fillText('Game over', config.canvasWidth / 2, config.canvasHeight / 2);
+            
     }
 
     function moveUp(paddle){
@@ -312,37 +318,10 @@
 
         for (let paddle in state.paddles){
             paddle = state.paddles[paddle];
-			if (state.paddles.left === paddle) {
-				console.log('passe-je?', paddle.speed, paddle.y, config.paddleHeight, config.canvasHeight);
-			}
             if (paddle.speed === 1 && paddle.y + config.paddleHeight < config.canvasHeight)
                 moveDown(paddle);
             else if (paddle.speed === -1 && paddle.y > 0)
                 moveUp(paddle);
-        }
-    }
-
-    function handleGoal() {
-        if (state.ball.x + config.ballSize <= 0 || state.ball.x >= canvas.width) {
-			if (state.ball.x + config.ballSize <= 0){
-                state.playerScore++;
-            }
-			else state.enemyScore++;
-			resetBall();
-            // state.ball.speedX = -state.ball.speedX;
-        }
-    }
-
-    function resetBall() {
-        state.ball.x = (config.canvasWidth - config.ballSize) / 2;
-        state.ball.y = (config.canvasHeight - config.ballSize) / 2;
-        state.ball.speed = config.defaultBallSpeed;
-        state.ball.speedX = (Math.random()) < 0.5 ? config.defaultBallSpeed : -config.defaultBallSpeed;
-        state.ball.speedY = (Math.random()) < 0.5 ? config.defaultBallSpeed : -config.defaultBallSpeed;
-        if (typeof socket !=='undefined'){
-            state.ball.speed = 0;
-            state.ball.speedX = 0;
-            state.ball.speedY = 0;
         }
     }
 
@@ -415,7 +394,7 @@
         }
     }
 
-    function handleGameOver(){
+    function handleGameOver(reason){
         if (state.playerScore >= config.winningScore || state.enemyScore >= config.winningScore){
             if (config.displayDemo){
                 resumeGame();
@@ -427,6 +406,7 @@
                 }, config.animationDuration + 100);
                 return;
             }
+            // animatePaddlesToMiddle(true);
             stopGame(true);
         }
     }
@@ -441,10 +421,10 @@
       		handlePaddleInput();
      	// }, 0)
 
-        // if (!state.isCountDownActive){
-            // state.ball.x += state.ball.speedX * state.deltaTime;
-            // state.ball.y += state.ball.speedY * state.deltaTime;
-        // }
+        if (!state.isCountDownActive){
+            state.ball.x += state.ball.speedX * state.deltaTime;
+            state.ball.y += state.ball.speedY * state.deltaTime;
+        }
 
 		if (state.ball.y < 0) {
 			state.ball.y = -state.ball.y;
@@ -470,20 +450,17 @@
     }
 
     function drawGame() {
-
-        ctx.clearRect(0, 0, config.canvasWidth, config.canvasHeight);
-        if (state.isCountDownActive)
-            drawCountdown();
-        drawPaddles();
-
+        
         if (!state.isCountDownActive) {
-            ctx.fillText(`${state.playerScore}`, config.playerScore.x, config.playerScore.y);
-            ctx.fillText(`${state.enemyScore}`, config.enemyScore.x, config.enemyScore.y);
+            ctx.clearRect(0, 0, config.canvasWidth, config.canvasHeight);
+            drawPaddles();
+            // ctx.fillText(`${state.playerScore}`, config.playerScore.x, config.playerScore.y);
+            // ctx.fillText(`${state.enemyScore}`, config.enemyScore.x, config.enemyScore.y);
             ctx.drawImage(ballImage, state.ball.x, state.ball.y, config.ballSize, config.ballSize);
         }
     }
 
-    window.PongGame = {startGame, startCountdown, stopGame, state, config, moveUp, moveDown, handleGameOver, resetGame, info};
+    window.PongGame = {startGame, startCountdown, stopGame, state, config, moveUp, moveDown, handleGameOver, resetGame, info, animatePaddlesToMiddle};
 })();
 
 
@@ -505,29 +482,29 @@ function initSocket(){
     });
     socket.on('start_game', event => {
         // console.log('received start_game');
-        window.PongGame.startGame();
+        if (!window.PongGame.state.isGameActive)
+            window.PongGame.startGame();
     })
     socket.on('start_countdown', event => {
         // console.log('received start_countdown');
         window.PongGame.startCountdown();
     })
     socket.on('game_state', event => {
-		console.log('front : ', window.PongGame.state.ball.speedX);
-		console.log('front : ', window.PongGame.state.ball.speedY);
-		console.log('front : ', window.PongGame.state.ball.speed);
-		console.log('back : ', event.direction_x);
-		console.log('back : ', event.direction_y);
-		console.log('back : ', event.speed);
-
+		// console.log('front : ', window.PongGame.state.ball.speedX);
+		// console.log('front : ', window.PongGame.state.ball.speedY);
+		// console.log('front : ', window.PongGame.state.ball.speed);
+		// console.log('back : ', event.direction_x);
+		// console.log('back : ', event.direction_y);
+		// console.log('back : ', event.speed);
 		window.PongGame.state.ball.y = event.position_y;
 		window.PongGame.state.ball.x = event.position_x;
 		window.PongGame.state.ball.speedX = event.direction_x;
 		window.PongGame.state.ball.speedY = event.direction_y;
 		window.PongGame.state.ball.speed = event.speed;
-		console.log(Date.now());
-		console.log('front apres : ', window.PongGame.state.ball.speedX);
-		console.log('front apres : ', window.PongGame.state.ball.speedY);
-		console.log('front apres : ', window.PongGame.state.ball.speed);
+		// console.log(Date.now());
+		// console.log('front apres : ', window.PongGame.state.ball.speedX);
+		// console.log('front apres : ', window.PongGame.state.ball.speedY);
+		// console.log('front apres : ', window.PongGame.state.ball.speed);
     })
     socket.on('connect_error', (error)=> {
         console.log('error', error);
@@ -554,11 +531,11 @@ function initSocket(){
     	}
     })
     socket.on('score', event => {
-		window.PongGame.stopGame();
-		window.PongGame.resetGame();
-		for (paddle in window.PongGame.state.paddles) {
-			window.PongGame.state.paddles[paddle].y = (window.PongGame.config.canvasHeight - window.PongGame.config.paddleHeight) / 2;
-		}
+        window.PongGame.state.ball.speed = 0;
+		// for (paddle in window.PongGame.state.paddles) {
+		// 	window.PongGame.state.paddles[paddle].y = (window.PongGame.config.canvasHeight - window.PongGame.config.paddleHeight) / 2;
+		// }
+        // window.PongGame.animatePaddlesToMiddle()
     	if (window.PongGame.info.myTeam.name == 'team_a') {
 			window.PongGame.state.playerScore = event.team_a;
 			window.PongGame.state.enemyScore = event.team_b;
@@ -567,14 +544,10 @@ function initSocket(){
 			window.PongGame.state.playerScore = event.team_b;
 			window.PongGame.state.enemyScore = event.team_a;
       	}
-     	if (event.team_a == window.PongGame.config.winningScore || event.team_b == window.PongGame.config.winningScore)
-      	{
-       		window.PongGame.handleGameOver();
-       	}
     })
     socket.on('game_over', event => {
-		window.PongGame.handleGameOver();
-		window.PongGame.stopGame(true);
+        console.log('game_over received', event);
+		window.PongGame.handleGameOver(event.reason);
     })
 }
 
@@ -629,11 +602,6 @@ document.getElementById('playGame').addEventListener('click', async event => {
 
 document.getElementById('confirmModal').addEventListener('hidden.bs.modal', () => {
     window.PongGame.resumeGame();
-})
-
-document.getElementById('testA').addEventListener('click', event => {
-    event.preventDefault();
-    window.PongGame.stopGame();
 })
 
 function checkGameAuthorization(){

@@ -70,7 +70,7 @@ class Game:
 
         # TODO -> set all variables from .env
         self.max_bounce_angle = 2 * (math.pi / 5)
-        self.max_ball_speed = 630
+        self.max_ball_speed = 1500
         self.speed_increment = 30
         self.ball = self.create_ball(self.canvas)
         self.rackets = self.create_rackets(self.match, self.canvas)
@@ -249,7 +249,7 @@ class Game:
         print('finishing game', flush=True)
         self.finished = True
         finish_match(self.match.id, reason)
-        time.sleep(1)
+        # time.sleep(1)
         self.send_finish(reason, winner)
         time.sleep(1)
         self.disconnect_players()
@@ -329,6 +329,7 @@ class Game:
                 'direction_x': self.ball.speed_x,
                 'direction_y': self.ball.speed_y,
                 'speed': self.ball.speed,
+                'timestamp' : time.perf_counter(),
             }
         else:
             return {
@@ -337,6 +338,7 @@ class Game:
                 'direction_x': -self.ball.speed_x,
                 'direction_y': self.ball.speed_y,
                 'speed': self.ball.speed,
+                'timestamp' : time.perf_counter(),
             }
 
     def send_team(self):
