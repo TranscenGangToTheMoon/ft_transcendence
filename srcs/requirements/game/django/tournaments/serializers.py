@@ -17,7 +17,6 @@ class TournamentSerializer(serializers.ModelSerializer):
             'id',
             'name',
             'size',
-            'created_at',
             'start_at',
             'finish_at',
             'created_by',
