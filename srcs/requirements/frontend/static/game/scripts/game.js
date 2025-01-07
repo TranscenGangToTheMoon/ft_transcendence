@@ -180,7 +180,6 @@
     function startCountdown() {
 	    state.isGameActive = true;
 	    state.cancelAnimation = false;
-	    // console.log('CD started');
         state.isCountDownActive = true;
 
         for (racket in state.paddles) {
@@ -313,6 +312,9 @@
 
         for (let paddle in state.paddles){
             paddle = state.paddles[paddle];
+			if (state.paddles.left === paddle) {
+				console.log('passe-je?', paddle.speed, paddle.y, config.paddleHeight, config.canvasHeight);
+			}
             if (paddle.speed === 1 && paddle.y + config.paddleHeight < config.canvasHeight)
                 moveDown(paddle);
             else if (paddle.speed === -1 && paddle.y > 0)
@@ -435,12 +437,14 @@
     	state.deltaTime = (timestamp - state.lastFrame) / 1000;  // Convert to seconds
     	state.lastFrame = timestamp;
 
-        handlePaddleInput();
+     	// setTimeout(() => {
+      		handlePaddleInput();
+     	// }, 0)
 
-        if (!state.isCountDownActive){
-            state.ball.x += state.ball.speedX * state.deltaTime;
-            state.ball.y += state.ball.speedY * state.deltaTime;
-        }
+        // if (!state.isCountDownActive){
+            // state.ball.x += state.ball.speedX * state.deltaTime;
+            // state.ball.y += state.ball.speedY * state.deltaTime;
+        // }
 
 		if (state.ball.y < 0) {
 			state.ball.y = -state.ball.y;
@@ -508,34 +512,46 @@ function initSocket(){
         window.PongGame.startCountdown();
     })
     socket.on('game_state', event => {
-	    window.PongGame.state.ball.y = event.position_y;
-	    window.PongGame.state.ball.x = event.position_x;
-	    window.PongGame.state.ball.speedX = event.direction_x;
-	    window.PongGame.state.ball.speedY = event.direction_y;
-	    window.PongGame.state.ball.speed = event.speed;
-		// console.log(window.PongGame.state.ball.speedX);
-		// console.log(window.PongGame.state.ball.speedY);
-		// console.log(window.PongGame.state.ball.speed);
+		console.log('front : ', window.PongGame.state.ball.speedX);
+		console.log('front : ', window.PongGame.state.ball.speedY);
+		console.log('front : ', window.PongGame.state.ball.speed);
+		console.log('back : ', event.direction_x);
+		console.log('back : ', event.direction_y);
+		console.log('back : ', event.speed);
+
+		window.PongGame.state.ball.y = event.position_y;
+		window.PongGame.state.ball.x = event.position_x;
+		window.PongGame.state.ball.speedX = event.direction_x;
+		window.PongGame.state.ball.speedY = event.direction_y;
+		window.PongGame.state.ball.speed = event.speed;
 		console.log(Date.now());
+		console.log('front apres : ', window.PongGame.state.ball.speedX);
+		console.log('front apres : ', window.PongGame.state.ball.speedY);
+		console.log('front apres : ', window.PongGame.state.ball.speed);
     })
     socket.on('connect_error', (error)=> {
         console.log('error', error);
     })
     socket.on('move_up', event => {
-        // console.log('move_up received');
-        window.PongGame.state.paddles.left.speed = -1;
+        console.log('move_up received', event.player);
+		setTimeout(() => {
+			window.PongGame.state.paddles.left.speed = -1;
+		}, 0);
     })
     socket.on('move_down', event => {
-        // console.log('move_down received');
-        window.PongGame.state.paddles.left.speed = 1;
+		setTimeout(() => {
+			window.PongGame.state.paddles.left.speed = 1;
+		}, 0);
+        console.log('move_down received', event.player);
     })
     socket.on('stop_moving', event => {
-        // console.log('received stop_moving')
-        window.PongGame.state.paddles.left.speed = 0;
+		console.log('received stop_moving', event.player);
         if (event.player == userInformations.id)
 	        window.PongGame.state.paddles.right.y = event.position;
-		else
+		else {
+        	window.PongGame.state.paddles.left.speed = 0;
 	        window.PongGame.state.paddles.left.y = event.position;
+    	}
     })
     socket.on('score', event => {
 		window.PongGame.stopGame();
@@ -580,13 +596,13 @@ sse.addEventListener('game-start', event => {
 	}
 	data = data.data;
 	try {
-		if (data.teams.team_a.some(player => player.id == userInformations.id)) {
+		if (data.teams.a.some(player => player.id == userInformations.id)) {
 			window.PongGame.info.myTeam.name = 'team_a';
 			window.PongGame.info.myTeam.players = data.teams.team_a;
 			window.PongGame.info.enemyTeam.name = 'team_b';
 			window.PongGame.info.enemyTeam.players = data.teams.team_b;
 		}
-		else if (data.teams.team_b.some(player => player.id == userInformations.id)) {
+		else if (data.teams.b.some(player => player.id == userInformations.id)) {
 			window.PongGame.info.myTeam.name = 'team_b';
 			window.PongGame.info.myTeam.players = data.teams.team_b;
 			window.PongGame.info.enemyTeam.name = 'team_a';
@@ -594,7 +610,8 @@ sse.addEventListener('game-start', event => {
 		}
 	}
 	catch(error) {
-		console.error('Invalid game data from SSE, cannot launch game')
+		console.log(error);
+		console.log('Invalid game data from SSE, cannot launch game');
 		return;
 	}
 	initSocket();
