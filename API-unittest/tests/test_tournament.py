@@ -587,8 +587,6 @@ class Test10_FinishTournament(UnitTest):
             self.assertResponse(score(user3['id']), 204)
             self.assertResponse(score(user3['id']), 204)
             self.assertResponse(score(user3['id']), 204)
-        response = self.assertResponse(create_tournament(user1, method='GET'), 200)
-        print('TOURNAMENT', response)
         user2['expected_thread_result'] = len(user2['thread_tests'])
         user3['expected_thread_result'] = len(user3['thread_tests'])
 
