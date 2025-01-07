@@ -20,3 +20,74 @@
     border: 1px solid #ccc;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
+
+/* test id */
+
+.tournament-bracket {
+    display: flex;
+    gap: 50px;
+    padding: 20px;
+}
+
+.round {
+    display: flex;
+    flex-direction: column;
+}
+
+.round-inside {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    height: 100%;
+    gap: 10px;
+}
+
+.match {
+    position: relative;
+    width: 200px;
+    /* margin-bottom: 50px; */
+}
+
+/* .match::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: -25px;
+    width: 25px;
+    height: 2px;
+    background: #dee2e6;
+}
+
+.match:nth-child(odd)::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: -25px;
+    width: 2px;
+    height: 100%;
+    background: #dee2e6;
+}
+
+.match:nth-child(even)::before {
+    content: '';
+    position: absolute;
+    bottom: 50%;
+    right: -25px;
+    width: 2px;
+    height: 100%;
+    background: #dee2e6;
+}
+
+.round:last-child .match::after,
+.round:last-child .match::before {
+    display: none;
+} */
+
+.winner {
+    background-color: #d4edda;
+}
+
+.tournament-participant-pp {
+    width: 20px;
+    height: 20px;
+}

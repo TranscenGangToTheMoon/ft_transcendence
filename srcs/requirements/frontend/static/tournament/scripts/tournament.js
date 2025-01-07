@@ -170,9 +170,112 @@ function tournamentStartCancel(){
 		countdownDiv.remove();
 }
 
+
+function createBracket(data) {
+	const bracketDiv = document.getElementById('bracket');
+	const rounds = ['sixteenth-final' ,'eighth-final', 'quarter-final', 'semi-final', 'final'];
+	let firstPassed = false;
+
+	rounds.forEach(roundName => {
+		const matches = data.matches[roundName] || [];
+		if (matches.length)
+			firstPassed = true;
+
+		if (firstPassed){
+			var roundDiv = document.createElement('div');
+			roundDiv.className = 'round';
+	
+			var titleDiv = document.createElement('h5');
+			titleDiv.className = 'text-center mb-4';
+			titleDiv.textContent = roundName.replace('-', ' ').toUpperCase();
+			roundDiv.appendChild(titleDiv);
+			var roundInsideDiv = document.createElement('div');
+			roundInsideDiv.className = 'round-inside';
+			roundDiv.appendChild(roundInsideDiv);
+		}
+
+		matches.forEach(match => {
+			const matchDiv = document.createElement('div');
+			matchDiv.className = 'match';
+
+			const card = document.createElement('div');
+			card.className = 'card';
+			if (match === null){
+				const player1Div = document.createElement('div');
+				player1Div.className = 'card-body border-bottom';
+				player1Div.innerHTML = `
+					<div class="d-flex justify-content-between">
+						<span>to be defined</span>
+					</div>
+				`;
+	
+				const player2Div = document.createElement('div');
+				player2Div.className = 'card-body';
+				player2Div.innerHTML = `
+					<div class="d-flex justify-content-between">
+						<span>to be defined</span>
+					</div>
+				`;
+	
+				card.appendChild(player1Div);
+				card.appendChild(player2Div);
+				matchDiv.appendChild(card);
+				roundInsideDiv.appendChild(matchDiv);
+			}
+			else {
+				const player1Div = document.createElement('div');
+				player1Div.className = `card-body border-bottom ${match.winner === match.user_1?.id ? 'winner' : ''}`;
+				player1Div.innerHTML = `
+					<div class="d-flex justify-content-between" id="${}">
+						<img class="tournament-participant-pp" src="/assets/imageNotFound.png"></img>
+						<span>${match.user_1?.username}</span>
+						<span class="fw-bold">${match.winner === match.user_1?.id ? match.score_winner : match.score_looser || ''}</span>
+					</div>
+				`;
+	
+				const player2Div = document.createElement('div');
+				player2Div.className = `card-body ${match.winner === match.user_2?.id ? 'winner' : ''}`;
+				player2Div.innerHTML = `
+					<div class="d-flex justify-content-between">
+						<img class="tournament-participant-pp" src="/assets/imageNotFound.png"></img>
+						<span>${match.user_2?.username}</span>
+						<span class="fw-bold">${match.winner === match.user_2?.id ? match.score_winner : match.score_looser || ''}</span>
+					</div>
+				`;
+	
+				card.appendChild(player1Div);
+				card.appendChild(player2Div);
+				matchDiv.appendChild(card);
+				roundInsideDiv.appendChild(matchDiv);
+			}
+		});
+		if (firstPassed)
+			bracketDiv.appendChild(roundDiv);
+	});
+}
+
 function tournamentStart(event){
-	event = JSON.parse(event);
+	event = JSON.parse(event.data);
 	console.log(event);
+	if (!event.data.matches['semi-final']){
+		event.data.matches['semi-final'] = [];
+		for (i = 0; i < event.data.matches['quarter-final'].length / 2; ++i)
+			event.data.matches['semi-final'].push(null);
+	}
+	if (!event.data.matches['final']){
+		event.data.matches['final'] = [];
+		for (i = 0; i < event.data.matches['semi-final'].length / 2; ++i)
+			event.data.matches['final'].push(null);
+	}
+	console.log(event.data.matches);
+	document.getElementById('tournamentView').innerHTML = '';
+	createBracket(event.data);
+}
+
+function tournamentMatchFinished(event){
+	event = JSON.parse(event.data);
+	console.log(event);
+
 }
 
 function addTournamentSSEListeners(){
@@ -205,6 +308,11 @@ function addTournamentSSEListeners(){
         SSEListeners.set('tournament-start', tournamentStart);
         sse.addEventListener('tournament-start', tournamentStart);
     }
+
+	if (!SSEListeners.has('tournament-match-finish')){
+		SSEListeners.set('tournament-match-finish', tournamentMatchFinished);
+        sse.addEventListener('tournament-match-finish', tournamentMatchFinished);
+	}
 }
 
 function loadTournament(tournament){
@@ -215,6 +323,17 @@ function loadTournament(tournament){
 	}
 	addTournamentSSEListeners();
 }
+
+if (typeof dataTest === 'undefined'){
+	var dataTest = { 'matches': {
+		"sixteenth-final": [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+		"eighth-final": [null, null, null, null, null, null, null, null],
+		"quarter-final": [null, null, null, null],
+		"semi-final": [null, null],
+		"final": [null]
+	}}
+}
+
 
 document.getElementById('searchTournamentForm').addEventListener('submit', async (e) => {
 	e.preventDefault();
@@ -260,8 +379,8 @@ document.getElementById('createTournament').addEventListener('click', async even
 			'size' : tournamentSize
 		});
 		console.log(data);
-		if (data.detail){
-			document.getElementById('createTournamentError').innerText = data.detail;
+		if (data.detail || (data.name && !data.id)){
+			document.getElementById('createTournamentError').innerText = data.detail ?? data.name;
 			setTimeout(() => {
 				document.getElementById('createTournamentError').innerText = '';
 			}, 2500);
@@ -325,6 +444,7 @@ async function initTournament(){
 	catch(error) {
 		console.log(error);
 	}
+	// createBracket(dataTest);
 }
 
 initTournament();
