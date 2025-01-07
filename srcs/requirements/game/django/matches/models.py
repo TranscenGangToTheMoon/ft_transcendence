@@ -7,7 +7,7 @@ from django.db import models
 
 
 class Matches(models.Model):
-    code = models.CharField(max_length=4, unique=True, editable=False)
+    code = models.CharField(max_length=4, null=True)
     game_mode = models.CharField(max_length=11)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     game_duration = models.DurationField(default=timedelta(minutes=3))
@@ -21,6 +21,7 @@ class Matches(models.Model):
             self.reason = Reason.normal_end
         self.finished = True
         self.game_duration = self.created_at - datetime.now(timezone.utc)
+        self.code = None
         self.save()
         if self.tournament_id is not None:
             winner, looser = self.teams.order_by('-score')

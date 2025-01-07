@@ -75,6 +75,8 @@ class MatchSerializer(serializers.ModelSerializer):
             player = instance.players.get(user_id=user['id'])
             teams[player.team.name].append({**user, 'score': player.score})
         representation['teams'] = teams
+        if instance.finished:
+            representation.pop('code')
         return representation
 
     def create(self, validated_data):
