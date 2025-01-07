@@ -96,7 +96,7 @@ class Tournament(models.Model):
         start_tournament_sse(self)
         time.sleep(3)
         for matche in self.matches.all():
-            matche.create()
+            matche.post()
 
     def get_nb_games(self):
         self.nb_games += 1

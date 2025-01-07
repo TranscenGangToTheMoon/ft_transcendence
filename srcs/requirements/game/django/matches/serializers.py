@@ -131,6 +131,41 @@ class MatchSerializer(serializers.ModelSerializer):
         return match
 
 
+class TournamentMatchSerializer(serializers.ModelSerializer):
+    n = serializers.IntegerField(source='tournament_n')
+    score_winner = serializers.IntegerField(source='winner.score')
+    score_looser = serializers.IntegerField(source='looser.score')
+    winner = serializers.SerializerMethodField()
+    looser = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Matches
+        fields = [
+            'id',
+            'n',
+            'game_duration',
+            'winner',
+            'looser',
+            'score_winner',
+            'score_looser',
+        ]
+        read_only_fields = [
+            'id',
+            'n',
+            'game_duration',
+            'winner',
+            'looser',
+            'score_winner',
+            'score_looser',
+        ]
+
+    def get_winner(self, obj):
+        return self.context['users'][obj.winner.players.first().user_id]
+
+    def get_looser(self, obj):
+        return self.context['users'][obj.looser.players.first().user_id]
+
+
 class MatchFinishSerializer(serializers.ModelSerializer):
     user_id = serializers.IntegerField(required=True, write_only=True)
     reason = serializers.CharField(required=True)
