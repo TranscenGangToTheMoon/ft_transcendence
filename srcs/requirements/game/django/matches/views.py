@@ -53,7 +53,7 @@ class ListMatchesView(generics.ListAPIView):
     authentication_classes = [Authentication]
 
     def filter_queryset(self, queryset):
-        return queryset.filter(players__user_id=self.kwargs['user_id'])
+        return queryset.filter(players__user_id=self.kwargs['user_id'], finished=True)
 
 
 class MatchRetrieveView(generics.RetrieveAPIView):
