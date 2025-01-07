@@ -57,20 +57,10 @@ class Test01_SSE(UnitTest):
         self.assertResponse(me(user1, 'DELETE', password=True), 204)
         self.assertThread(user1)
 
-#todo message d'erreur qui finit pas un point
 #todo test invalid parameters, fogrt, not good type, etc..., not users.
 # class Test02_EventsEndpoint(UnitTest):
 #
 #     def test_001_test_message(self):
-#         # with open('../user1.json') as f:
-#         #     user1 = json.load(f)
-#         #
-#         # user1 = self.assertResponse(login(user1['username'], user1['password']), 200, get_user=True)
-#         # user1 = {**user1, **me(user1).json} # todo user token args
-#         # Thread(target=connect_to_sse, args=(user_1,)).start()
-#         # time.sleep(1)
-#         users = [int(i) for i in input('users -> ').split(' ')]
-#         self.assertResponse(events(users=users, data={'caca': 'pipi'}), 201)
 
 
 class Test03_SSEConnectionClose(UnitTest):
