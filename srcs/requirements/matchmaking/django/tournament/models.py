@@ -187,7 +187,7 @@ class TournamentMatches(models.Model):
     reason = models.CharField(null=True, default=None, max_length=50) # todo rename to finish_reason
     finished = models.BooleanField(default=False)
 
-    def create(self):
+    def post(self):
         if self.user_2 is not None:
             if not self.user_1.still_in:
                 self.winner = self.user_2
