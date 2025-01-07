@@ -180,7 +180,6 @@
     function startCountdown() {
 	    state.isGameActive = true;
 	    state.cancelAnimation = false;
-	    // console.log('CD started');
         state.isCountDownActive = true;
 
         for (racket in state.paddles) {
@@ -438,8 +437,8 @@
         handlePaddleInput();
 
         if (!state.isCountDownActive){
-            state.ball.x += state.ball.speedX * state.deltaTime;
-            state.ball.y += state.ball.speedY * state.deltaTime;
+            // state.ball.x += state.ball.speedX * state.deltaTime;
+            // state.ball.y += state.ball.speedY * state.deltaTime;
         }
 
 		if (state.ball.y < 0) {
@@ -508,15 +507,22 @@ function initSocket(){
         window.PongGame.startCountdown();
     })
     socket.on('game_state', event => {
-	    window.PongGame.state.ball.y = event.position_y;
-	    window.PongGame.state.ball.x = event.position_x;
-	    window.PongGame.state.ball.speedX = event.direction_x;
-	    window.PongGame.state.ball.speedY = event.direction_y;
-	    window.PongGame.state.ball.speed = event.speed;
-		// console.log(window.PongGame.state.ball.speedX);
-		// console.log(window.PongGame.state.ball.speedY);
-		// console.log(window.PongGame.state.ball.speed);
+		console.log('front : ', window.PongGame.state.ball.speedX);
+		console.log('front : ', window.PongGame.state.ball.speedY);
+		console.log('front : ', window.PongGame.state.ball.speed);
+		console.log('back : ', event.direction_x);
+		console.log('back : ', event.direction_y);
+		console.log('back : ', event.speed);
+
+		window.PongGame.state.ball.y = event.position_y;
+		window.PongGame.state.ball.x = event.position_x;
+		window.PongGame.state.ball.speedX = event.direction_x;
+		window.PongGame.state.ball.speedY = event.direction_y;
+		window.PongGame.state.ball.speed = event.speed;
 		console.log(Date.now());
+		console.log('front apres : ', window.PongGame.state.ball.speedX);
+		console.log('front apres : ', window.PongGame.state.ball.speedY);
+		console.log('front apres : ', window.PongGame.state.ball.speed);
     })
     socket.on('connect_error', (error)=> {
         console.log('error', error);

@@ -183,13 +183,13 @@ class Game:
         self.last_update = time.perf_counter()
         for racket in self.rackets:
             racket.update(self.ball.size, self.canvas.y, time_delta)
-        self.ball.position.x += self.ball.speed_x * time_delta
-        self.ball.position.y += self.ball.speed_y * time_delta
+        # self.ball.position.x += self.ball.speed_x * time_delta
+        # self.ball.position.y += self.ball.speed_y * time_delta
         self.handle_wall_bounce()
         for racket in self.rackets:
             self.handle_racket_collision(racket)
+        # self.send_game_state()
         self.handle_goal()
-        self.send_game_state()
 
     def wait_for_players(self, timeout: float):
         print(time.time(), "wait_for_players()", flush=True)
@@ -218,7 +218,7 @@ class Game:
                 break
             self.update()
             elapsed_time = time.perf_counter() - last_frame_time
-            time_to_wait = (1 / 60) - elapsed_time
+            time_to_wait = (1 / 30) - elapsed_time
             if time_to_wait > 0:
                 time.sleep(time_to_wait)
             last_frame_time = time.perf_counter()
