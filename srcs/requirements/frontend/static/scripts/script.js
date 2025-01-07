@@ -493,7 +493,7 @@ function initSSE(){
         const shownModal = document.querySelector('.modal.show[aria-modal="true"]');
         if (shownModal)
             return;
-        displayMainAlert('Error', 'Unable to connect to Server Sent Events. Note that several services will be unaivailable.');
+        displayMainAlert('Error', 'Unable to connect to Server Sent Events. Note that several services will be unavailable.');
     }
 
     addSSEListeners();

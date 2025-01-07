@@ -226,7 +226,7 @@ function createBracket(data) {
 				const player1Div = document.createElement('div');
 				player1Div.className = `card-body border-bottom ${match.winner === match.user_1?.id ? 'winner' : ''}`;
 				player1Div.innerHTML = `
-					<div class="d-flex justify-content-between" id="${}">
+					<div class="d-flex justify-content-between">
 						<img class="tournament-participant-pp" src="/assets/imageNotFound.png"></img>
 						<span>${match.user_1?.username}</span>
 						<span class="fw-bold">${match.winner === match.user_1?.id ? match.score_winner : match.score_looser || ''}</span>
