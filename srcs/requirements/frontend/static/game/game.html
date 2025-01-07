@@ -1,11 +1,15 @@
 
-<canvas id="gameCanvas" style="height: 600px; width: 800px;background-color: grey; margin: 50px;">
+<div id="gameArea" style="display: none;">
+    <canvas id="gameCanvas" style="height: 600px; width: 800px;background-color: grey; margin: 50px;">
+    
+    </canvas>
+    <button id="playGame">Play</button>
+    <button id="replayFront">replay front</button>
+    
+    <button id="testA">test</button>
+    <h1>space to pause front game</h1>
+</div>
 
-</canvas>
-<button id="playGame">Play</button>
-<button id="replayFront">replay front</button>
-
-<button id="testA">test</button>
-<h1>space to pause front game</h1>
+<h5 class="align-self-center" id="opponentWait">Waiting for an opponent...</h5>
 
 <div script="/game/scripts/game.js"></div>

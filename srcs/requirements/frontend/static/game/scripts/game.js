@@ -587,6 +587,8 @@ sse.addEventListener('game-start', event => {
 		console.log('Invalid game data from SSE, cannot launch game');
 		return;
 	}
+    document.getElementById('gameArea').style.display = "block";
+    document.getElementById('opponentWait').style.display = "none";
 	initSocket();
 })
 
@@ -613,6 +615,8 @@ function checkGameAuthorization(){
 async function initGame(){
     await indexInit(false);
     if (window.location.pathname === '/') return;
+    document.getElementById('gameArea').style.display = "none";
+    document.getElementById('opponentWait').style.display = "block";
     try {
         checkGameAuthorization();
         try {
@@ -622,7 +626,6 @@ async function initGame(){
         catch(error) {
             console.log(error);
         }
-        // window.PongGame.startGame();
     }
     catch (unauthorized){
         if (!document.getElementById('alertModal').classList.contains('show'))
