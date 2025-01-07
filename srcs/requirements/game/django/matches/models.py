@@ -20,8 +20,8 @@ class Matches(models.Model):
         if self.reason is None:
             self.reason = Reason.normal_end
         self.finished = True
-        self.game_duration = self.created_at - datetime.now(timezone.utc)
         self.code = None
+        self.game_duration = datetime.now(timezone.utc) - self.created_at
         self.save()
         if self.tournament_id is not None:
             winner, looser = self.teams.order_by('-score')

@@ -77,6 +77,12 @@ class MatchSerializer(serializers.ModelSerializer):
         representation['teams'] = teams
         if instance.finished:
             representation.pop('code')
+            representation['winner'] = instance.winner.name
+            representation['looser'] = instance.looser.name
+            representation['score_winner'] = instance.winner.score
+            representation['score_looser'] = instance.looser.score
+        if representation['tournament_id'] is None:
+            representation.pop('tournament_id')
         return representation
 
     def create(self, validated_data):
