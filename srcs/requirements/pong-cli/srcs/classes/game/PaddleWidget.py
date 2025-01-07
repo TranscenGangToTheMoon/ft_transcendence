@@ -24,7 +24,6 @@ class Paddle(Widget):
         # return "█" * Config.Paddle.height * Config.Paddle.width
 
     def moveUp(self):
-        print(f"region paddle {self.parent.region}")
         if self.offset.y > 0:
             self.offset -= Offset(0, Config.Paddle.speed)
 

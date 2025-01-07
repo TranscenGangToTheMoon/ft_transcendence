@@ -1,6 +1,11 @@
+# Python imports
+import threading
+import time
+
+from pynput import keyboard
+
 # Textual imports
-from textual import events
-from textual.app        import ComposeResult
+from textual.app import ComposeResult
 from textual.screen     import Screen
 from textual.widgets    import Header, Button, Footer
 
@@ -9,21 +14,31 @@ from classes.game.PaddleWidget      import Paddle
 from classes.game.PlaygroundWidget  import Playground
 from classes.game.BallWidget        import Ball
 
-
 class GamePage(Screen):
     SUB_TITLE = "Game Page"
     CSS_PATH = "styles/GamePage.tcss"
-
     def __init__(self):
         super().__init__()
         self.paddleLeft = Paddle("left")
         self.paddleRight = Paddle("right")
         self.ball = Ball()
         self.playground = Playground()
-        self.keys_pressed = set()
+        self.pressed_keys = set()
+        self.running = True
+
+    def on_mount(self):
+        # Démarrage du thread de surveillance des touches
+        self.key_thread = threading.Thread(target=self.check_keys)
+        self.key_thread.daemon = True
+        self.key_thread.start()
+
+        # Configuration des listeners
+        self.listener = keyboard.Listener(
+            on_press=self.on_press,
+            on_release=self.on_release)
+        self.listener.start()
 
     def compose(self) -> ComposeResult:
-        # self.set_interval(1/20, self.updateMouvements)
         yield Header()
         with self.playground:
             yield self.paddleLeft
@@ -32,38 +47,37 @@ class GamePage(Screen):
         yield Button("Exit Button", id="exitAction")
         yield Footer()
 
-    def on_mount(self) -> None:
-        self.keys_pressed = set()
-
-    def updateMouvements(self) -> None:
-        if "w" in self.keys_pressed:
-            self.paddleLeft.moveUp()
-            # self.keys_pressed.remove("w")
-        if "s" in self.keys_pressed:
-            self.paddleLeft.moveDown()
-#             self.keys_pressed.remove("s")
-        if "up" in self.keys_pressed:
-            self.paddleRight.moveUp()
-#             self.keys_pressed.remove("up")
-        if "down" in self.keys_pressed:
-            self.paddleRight.moveDown()
-#             self.keys_pressed.remove("down")
-
     def on_button_pressed(self, event: Button.Pressed) -> None:
         if (event.button.id == "exitAction"):
             self.dismiss()
 
-    # def on_event(self, event: Event) -> None:
-    def on_key(self, event) -> None: #key repeat for continuous press
-        # self.keys_pressed.add(str(event.key))
-        if event.key == "w":
-            self.paddleLeft.moveUp()
-        if event.key == "s":
-            self.paddleLeft.moveDown()
-        if event.key == "up":
-            self.paddleRight.moveUp()
-        if event.key == "down":
-            self.paddleRight.moveDown()
+    def on_press(self, key):
+        try:
+            self.pressed_keys.add(key.char)
+        except (AttributeError, TypeError):
+            self.pressed_keys.add(key)
 
-    def on_key_up(self, event) -> None:
-        pass
+    def on_release(self, key):
+        try:
+            self.pressed_keys.remove(key.char)
+        except (KeyError, AttributeError, TypeError):
+            try:
+                self.pressed_keys.remove(key)
+            except KeyError:
+                pass
+
+    def check_keys(self):
+        while self.running:
+            if 'w' in self.pressed_keys:
+                self.paddleLeft.moveUp()
+            if 's' in self.pressed_keys:
+                self.paddleLeft.moveDown()
+            if keyboard.Key.up in self.pressed_keys:
+                self.paddleRight.moveUp()
+            if keyboard.Key.down in self.pressed_keys:
+                self.paddleRight.moveDown()
+            time.sleep(1/60)
+
+    def on_unmount(self) -> None:
+        self.running = False
+        self.listener.stop()
