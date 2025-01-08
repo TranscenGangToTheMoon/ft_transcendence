@@ -548,27 +548,15 @@ function initSocket(){
     socket.on('game_over', event => {
         console.log('game_over received', event);
 		window.PongGame.handleGameOver(event.reason);
+        if (fromTournament)
+            setTimeout(async ()=> {
+                await navigateTo('/tournament')
+            }, 500)
     })
 }
 
-sse.addEventListener('game-start', event => {
-	if (!event.data || typeof event.data !== 'string') {
-		console.error('Invalid data from SSE');
-		return;
-	}
-	try {
-		data = JSON.parse(event.data);
-	}
-	catch(error) {
-		console.error('Failed to parse JSON from SSE', error);
-		return;
-	}
-	if (!data.data) {
-		console.error('Invalid data from SSE');
-		return;
-	}
-	data = data.data;
-	try {
+function initData(data){
+    try {
 		if (data.teams.a.some(player => player.id == userInformations.id)) {
 			window.PongGame.info.myTeam.name = 'team_a';
 			window.PongGame.info.myTeam.players = data.teams.team_a;
@@ -590,6 +578,12 @@ sse.addEventListener('game-start', event => {
     document.getElementById('gameArea').style.display = "block";
     document.getElementById('opponentWait').style.display = "none";
 	initSocket();
+}
+
+sse.addEventListener('game-start', event => {
+    data = JSON.parse(event.data);
+	data = data.data;
+	initData(data);
 })
 
 document.getElementById('playGame').addEventListener('click', async event => {
@@ -609,7 +603,9 @@ document.getElementById('confirmModal').addEventListener('hidden.bs.modal', () =
 function checkGameAuthorization(){
     console.log(window.location.pathname);
     if (userInformations.is_guest && window.location.pathname === '/game/ranked')
-        throw `${window.location.pathname}`
+        throw `${window.location.pathname}`;
+    if (window.location.pathname === '/game/tournament' && typeof tournamentData === 'undefined')
+        throw `${window.location.pathname}`;
 }
 
 async function initGame(){
@@ -619,12 +615,16 @@ async function initGame(){
     document.getElementById('opponentWait').style.display = "block";
     try {
         checkGameAuthorization();
-        try {
-            let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/play/${window.location.pathname.split('/')[2]}/`, 'POST');
-            console.log(data);
-        }
-        catch(error) {
-            console.log(error);
+        if (window.location.pathname === '/game/tournament')
+            initData(tournamentData);
+        else {
+            try {
+                let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/play/${window.location.pathname.split('/')[2]}/`, 'POST');
+                console.log(data);
+            }
+            catch(error) {
+                console.log(error);
+            }
         }
     }
     catch (unauthorized){

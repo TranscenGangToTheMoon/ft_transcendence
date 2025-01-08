@@ -17,6 +17,7 @@ var pathName = window.location.pathname;
 var badgesDivs = {};
 var notificationQueue = [];
 const SSEListeners = new Map();
+var fromTournament = false;
 
 window.pathName = pathName;
 
@@ -247,6 +248,7 @@ async function handleRoute() {
         '/game/duel' : '/game/game.html',
         '/game/custom' : '/game/game.html',
         '/game/local' : '/game/localGame.html',
+        '/game/tournament' : '/game/game.html',
         '/tournament' : '/tournament/tournament.html'
     };
 
