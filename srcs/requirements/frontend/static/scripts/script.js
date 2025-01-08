@@ -489,7 +489,7 @@ function addInviteSSEListeners(){
         console.log(event);
     })
 
-    sse.addEventListener('invite-custom-game', event => {
+    sse.addEventListener('invite-3v3', event => {
         event = JSON.parse(event.data);
         displayNotification(undefined, event.service, event.message, undefined, event.target);
         console.log(event);
