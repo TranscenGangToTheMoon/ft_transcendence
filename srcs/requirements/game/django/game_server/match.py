@@ -28,7 +28,7 @@ class Player():
 
     def score_goal(self, csc=False):
         try:
-            request_game(endpoints.Game.fscore.format(user_id=self.user_id), 'POST', data={'csc': csc})
+            request_game(endpoints.Game.fscore.format(user_id=self.user_id), 'POST', data={'own_goal': csc})
         except NotFound as e:
             print(e.detail, flush=True)
         except APIException as e:
@@ -45,6 +45,7 @@ class Team():
     def __init__(self, players, match_id, name):
         self.match_id = match_id
         self.players: List[Player] = []
+        self.name = name
         self.score = 0
         for player in players:
             self.players.append(Player(player['id'], match_id, self))
@@ -66,7 +67,14 @@ def finish_match(match_id, reason: str, user_id=None):
     # todo -> change to use API when it's ready
     if reason != Reason.normal_end:
         try:
-            request_game(endpoints.Game.ffinish_match.format(match_id=match_id), 'POST', data={'reason': reason, 'id': user_id})
+            request_game(
+                endpoints.Game.ffinish_match.format(match_id=match_id),
+                'POST',
+                data={
+                    'reason': reason,
+                    'id': user_id
+                }
+            )
         except AuthenticationFailed as e:
             print("The finish_match attribute is not available in the Game class.", flush=True)
         except Exception as e:
