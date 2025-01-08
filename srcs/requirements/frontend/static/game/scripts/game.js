@@ -238,7 +238,6 @@
     }
 
     function drawPaddleReturn(){
-        
         for (paddle in state.paddles){
             paddle = state.paddles[paddle];
             ctx.clearRect(paddle.x, 0, config.paddleWidth, config.canvasHeight);
@@ -256,7 +255,6 @@
             config.paddleWidth,
             config.paddleHeight
         );
-            
     }
 
     function moveUp(paddle){
@@ -450,7 +448,6 @@
     }
 
     function drawGame() {
-        
         if (!state.isCountDownActive) {
             ctx.clearRect(0, 0, config.canvasWidth, config.canvasHeight);
             drawPaddles();
