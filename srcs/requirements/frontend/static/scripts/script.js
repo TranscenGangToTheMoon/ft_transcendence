@@ -272,6 +272,7 @@ async function navigateTo(url, doNavigate=true){
     let currentState = getCurrentState();
     lastState = currentState;
     await handleSSEListenerRemoval(url);
+    await quitLobbies(window.location.pathname);
     history.pushState({state: currentState}, '', url);
     console.log(`added ${url} to history with state : ${currentState}`);
     pathName = window.location.pathname;
@@ -330,6 +331,7 @@ window.addEventListener('popstate', async event => {
     console.log(pathName, window.location.pathname);
     if (pathName === '/game')
         return cancelNavigation(event, undefined);
+    await quitLobbies(pathName);
     pathName = window.location.pathname;
     if (event.state && event.state.state)
         lastState = event.state.state;
@@ -339,6 +341,25 @@ window.addEventListener('popstate', async event => {
     handleRoute();
 })
 
+async function quitLobbies(oldUrl){
+    if (oldUrl.includes('/lobby')){
+        try {
+            await apiRequest(getAccessToken(), `${baseAPIUrl}/play${oldUrl}/`, 'DELETE');
+        }
+        catch (error){
+            console.log(error);
+        }
+    }
+    if (oldUrl.includes('/tournament') && tournament){
+        try {
+            await apiRequest(getAccessToken(), `${baseAPIUrl}/play/tournament/${tournament.code}/`, 'DELETE');
+        }
+        catch (error){
+            console.log(error);
+        }
+    }
+}
+
 window.loadContent = loadContent;
 window.cancelNavigation = cancelNavigation;
 
@@ -347,23 +368,9 @@ window.cancelNavigation = cancelNavigation;
 async function handleSSEListenerRemoval(url){
     if (window.pathName.includes('/lobby') && !url.includes('/lobby')){
         removeSSEListeners('lobby');
-        try {
-            await apiRequest(getAccessToken(), `${baseAPIUrl}/play/lobby/${code}/`, 'DELETE');
-        }
-        catch (error){
-            console.log(error);
-        }
     }
     if (window.pathName.includes('/tournament') && !url.includes('/tournament')){
         removeSSEListeners('tournament');
-        if (tournament){
-            try {
-                await apiRequest(getAccessToken(), `${baseAPIUrl}/play/tournament/${tournament.code}/`, 'DELETE');
-            }
-            catch (error){
-                console.log(error);
-            }
-        }
     }
 }
 
