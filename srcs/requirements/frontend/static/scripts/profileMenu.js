@@ -1,12 +1,11 @@
 document.getElementById('logOut').addEventListener('click', async event => {
     event.preventDefault();
+    await closeGameConnection(window.location.pathname());
     removeTokens();
     await generateToken();
     await fetchUserInfos(true);
     handleRoute();
     sse.close();
-    if (typeof gameSocket !== 'undefined')
-        gameSocket.close();
     initSSE();
 })
 

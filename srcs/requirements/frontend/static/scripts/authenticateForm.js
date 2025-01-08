@@ -39,10 +39,9 @@ document.getElementById("loginButton").addEventListener('click', event => {
     getDataFromApi(getAccessToken(), endpoint, method, undefined, undefined, userInfo)
         .then (async data => {
             if (data.access){
+                await closeGameConnection(window.location.pathname);
                 removeTokens();
                 sse.close();
-                if (typeof gameSocket !== 'undefined')
-                    gameSocket.close();
                 localStorage.setItem('token', data.access);
                 localStorage.setItem('refresh', data.refresh);
                 initSSE();

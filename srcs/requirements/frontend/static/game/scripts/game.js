@@ -511,15 +511,13 @@ function initSocket(){
     })
     gameSocket.on('move_up', event => {
         console.log('move_up received', event.player);
-		setTimeout(() => {
-			window.PongGame.state.paddles.left.speed = -1;
-		}, 0);
+        if (event.player !== userInformations.id)
+            window.PongGame.state.paddles.left.speed = -1;
     })
     gameSocket.on('move_down', event => {
-		setTimeout(() => {
-			window.PongGame.state.paddles.left.speed = 1;
-		}, 0);
         console.log('move_down received', event.player);
+        if (event.player !== userInformations.id)
+            window.PongGame.state.paddles.left.speed = 1;
     })
     gameSocket.on('stop_moving', event => {
 		console.log('received stop_moving', event.player);

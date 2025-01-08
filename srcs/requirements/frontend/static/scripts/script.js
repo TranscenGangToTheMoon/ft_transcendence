@@ -275,8 +275,7 @@ async function navigateTo(url, doNavigate=true){
     lastState = currentState;
     await handleSSEListenerRemoval(url);
     await quitLobbies(window.location.pathname);
-    if (typeof gameSocket !== 'undefined')
-        gameSocket.close();
+    await closeGameConnection(window.location.pathname);
     history.pushState({state: currentState}, '', url);
     console.log(`added ${url} to history with state : ${currentState}`);
     pathName = window.location.pathname;
@@ -336,8 +335,7 @@ window.addEventListener('popstate', async event => {
     if (pathName === '/game')
         return cancelNavigation(event, undefined);
     await quitLobbies(pathName);
-    if (typeof gameSocket !== 'undefined')
-        gameSocket.close();
+    await closeGameConnection(pathName);
     pathName = window.location.pathname;
     if (event.state && event.state.state)
         lastState = event.state.state;
@@ -741,6 +739,18 @@ async function displayNotification(icon=undefined, title=undefined, body=undefin
 }
 
 // ========================== OTHER UTILS ==========================
+
+async function closeGameConnection(oldUrl){
+    if (!oldUrl.includes('game')) return;
+    try {
+        await apiRequest(getAccessToken(), `${baseAPIUrl}${oldUrl.replace("game", 'play')}/`, 'DELETE');
+    }
+    catch(error){
+        console.log(error);
+    }
+    if (typeof gameSocket !== 'undefined')
+        gameSocket.close();
+}
 
 async function fetchUserInfos(forced=false) {
     if (!getAccessToken())
