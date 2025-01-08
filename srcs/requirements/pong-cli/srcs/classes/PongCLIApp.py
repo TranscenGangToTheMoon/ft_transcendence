@@ -11,6 +11,8 @@ from textual.worker import Worker
 # Local imports
 from classes.pages.GameScreen   import GamePage
 from classes.utils.user         import User
+from classes.pages.LoginScreen  import LoginPage
+
 
 
 class PongCLI(App):
@@ -30,8 +32,8 @@ class PongCLI(App):
         return (self.connected)
 
     def on_mount(self) -> None:
-        self.push_screen(GamePage())
-        # self.push_screen(LoginPage())
+        # self.push_screen(GamePage())
+        self.push_screen(LoginPage())
 
     @work(exclusive=True)
     async def startSSE(self):
