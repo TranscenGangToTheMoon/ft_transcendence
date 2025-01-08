@@ -9,7 +9,9 @@ class Ball:
         self.speed_y = speed * direction_y
         self.speed_x = speed * direction_x
         self.size = size
-        self.last_racket_touched = None
+        self.last_racket_touched: int | None = None
+        self.last_touch_team_a: int
+        self.last_touch_team_b: int
         # TODO -> update and check last_racket_touched to count CSC goals
 
     def increment_speed(self, max_speed, speed_increment):
