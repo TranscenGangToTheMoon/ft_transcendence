@@ -5,6 +5,8 @@ document.getElementById('logOut').addEventListener('click', async event => {
     await fetchUserInfos(true);
     handleRoute();
     sse.close();
+    if (typeof gameSocket !== 'undefined')
+        gameSocket.close();
     initSSE();
 })
 

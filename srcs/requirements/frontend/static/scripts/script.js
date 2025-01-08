@@ -275,6 +275,8 @@ async function navigateTo(url, doNavigate=true){
     lastState = currentState;
     await handleSSEListenerRemoval(url);
     await quitLobbies(window.location.pathname);
+    if (typeof gameSocket !== 'undefined')
+        gameSocket.close();
     history.pushState({state: currentState}, '', url);
     console.log(`added ${url} to history with state : ${currentState}`);
     pathName = window.location.pathname;
@@ -334,6 +336,8 @@ window.addEventListener('popstate', async event => {
     if (pathName === '/game')
         return cancelNavigation(event, undefined);
     await quitLobbies(pathName);
+    if (typeof gameSocket !== 'undefined')
+        gameSocket.close();
     pathName = window.location.pathname;
     if (event.state && event.state.state)
         lastState = event.state.state;
