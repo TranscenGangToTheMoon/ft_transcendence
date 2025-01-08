@@ -3,7 +3,7 @@ class Config:
         width = 0
         height = 0
     class Playground:
-        width = 115
+        width = 114
         height = 40
     class Paddle:
         gap = 14
