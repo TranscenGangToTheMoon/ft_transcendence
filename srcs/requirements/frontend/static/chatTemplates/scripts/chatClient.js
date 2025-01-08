@@ -211,7 +211,7 @@ async function loadOldMessages(chatInfo){
 			return {'code': 400, 'details': apiAnswer.details};
 		};
 		if (apiAnswer.count !== 0){
-			displayMessages(chatInfo, apiAnswer.results, 'beforeend');
+			displayMessages(chatInfo, apiAnswer.results);
 			nextMessagesRequest = apiAnswer.next;
 		}
 		else {

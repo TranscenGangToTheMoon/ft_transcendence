@@ -65,6 +65,7 @@ async def connect(sid, environ, auth):
         print(f"Connection failed : {sid}")
         raise ConnectionRefusedError({"error": 400, "message": "Missing args"})
     await sio.emit('message', {'author':'', 'content': 'You\'re now connected'}, to=sid)
+    await sio.emit('debug', {'message': 'user joined the room'}, room = str(chatId))
 
 
 
@@ -82,6 +83,7 @@ async def message(sid, data):
     chatId = usersConnected.get_chat_id(sid)
     content = data.get('content')
     token = data.get('token')
+    isChatWithConnected = usersConnected.is_chat_with_connected_with_him(sid)
     print(f"New message from {sid}: {data}")
     if (content is None or token is None):
         await sio.emit(
@@ -97,14 +99,14 @@ async def message(sid, data):
             answerAPI,
             to=sid
         )
-        if usersConnected.is_chat_with_connected_with_him(sid) == False:
+        if (isChatWithConnected == False):
             await sio.emit(
                 'debug',
                 {'message': 'The other user is not connected'},
                 to=sid
             )
             try:
-                print(f"User not connected, sending message to the other user {usersConnected.get_chat_with_id(sid)}")
+                print(f"User not connected, sending sse {usersConnected.get_chat_with_id(sid)}")
                 await sync_to_async(create_sse_event, thread_sensitive=False)(usersConnected.get_chat_with_id(sid), EventCode.SEND_MESSAGE, answerAPI,{'username':usersConnected.get_user_id(sid),'message':content})
             except (PermissionDenied, AuthenticationFailed, NotFound, APIException) as e:
                 print(f"Error SSE: {e}")
@@ -114,10 +116,9 @@ async def message(sid, data):
                 {'message': 'The other user is connected'},
                 to=sid
             )
-            print(f"User not connected, message saved for later")
         await sio.emit(
             'message',
-            {'author':answerAPI['author'], 'content': content},
+            {'author':answerAPI['author'], 'content': content, 'is_read': isChatWithConnected},
             room=str(chatId)
         )
         print(f"Message saved and sent from {sid}: {data}")
