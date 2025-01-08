@@ -14,7 +14,7 @@ class Paddle(Widget):
             self.styles.layer = "1"
             self.styles.background = "white"
             self.offset = Offset(Config.Paddle.gap, (Config.Playground.height - Config.Paddle.height) // 2)
-        else:
+        elif side == "right":
             self.styles.layer = "2"
             self.styles.background = "white"
             self.offset = Offset(Config.Playground.width - Config.Paddle.gap - Config.Paddle.width, (Config.Playground.height - Config.Paddle.height) // 2)
