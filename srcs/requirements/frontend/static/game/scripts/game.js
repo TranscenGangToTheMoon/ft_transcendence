@@ -625,6 +625,8 @@ async function initGame(){
             try {
                 let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/play/${window.location.pathname.split('/')[2]}/`, 'POST');
                 console.log(data);
+                if (data.detail)
+                    document.getElementById('opponentWait').innerText = data.detail;
             }
             catch(error) {
                 console.log(error);
