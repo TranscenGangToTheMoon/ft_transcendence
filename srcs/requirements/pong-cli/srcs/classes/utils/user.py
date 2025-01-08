@@ -15,6 +15,7 @@ class User():
     response: requests.Response | None = None
     server: str | None = None
     username: str | None = None
+    id: int | None = None
 
     @staticmethod
     def loginUser():
