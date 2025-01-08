@@ -18,7 +18,7 @@ class Playground(Widget):
 
     def render(self):
         # return ""
-        return "                                                         |\n" * Config.Playground.width
+        return "                                                        ||\n" * Config.Playground.width
         # return ".*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.█.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.\n" * self.region.width
 
     def on_mount(self):
