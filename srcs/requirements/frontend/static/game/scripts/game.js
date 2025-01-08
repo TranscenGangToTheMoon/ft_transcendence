@@ -157,9 +157,12 @@
         state.paddles.right.y = state.paddles.left.y;
     }
 
-    function stopGame(animate=false) {
+    function stopGame(animate=false, reason=undefined) {
+        console.log('je passe ici normalement');
         state.isGameActive = false;
         ctx.fillText('Game over', config.canvasWidth / 2, config.canvasHeight / 2);
+        if (reason)
+            ctx.fillText(reason, config.canvasWidth / 2, config.canvasHeight / 2 + 96);
         if (animate){
             animatePaddlesToMiddle();
         }
@@ -393,20 +396,18 @@
     }
 
     function handleGameOver(reason){
-        if (state.playerScore >= config.winningScore || state.enemyScore >= config.winningScore){
-            if (config.displayDemo){
-                resumeGame();
-                state.ball.speed = config.defaultBallSpeed;
-                stopGame(true);
-                setTimeout(()=>{
-                    resetGame();
-                    startGame();
-                }, config.animationDuration + 100);
-                return;
-            }
-            // animatePaddlesToMiddle(true);
+        if (config.displayDemo){
+            resumeGame();
+            state.ball.speed = config.defaultBallSpeed;
             stopGame(true);
+            setTimeout(()=>{
+                resetGame();
+                startGame();
+            }, config.animationDuration + 100);
+            return;
         }
+        ctx.clearRect(state.ball.x, state.ball.y, config.ballSize, config.ballSize);
+        stopGame(true, reason);
     }
 
     function updateGameState(timestamp) {
@@ -477,6 +478,10 @@ function initSocket(){
 	gameSocket.on('connect', () => {
         // console.log('Connected to socketIO server!');
     });
+    gameSocket.on('disconnect', () => {
+        console.log('disconnected from gameSocket');
+    })
+
     gameSocket.on('start_game', event => {
         // console.log('received start_game');
         if (!window.PongGame.state.isGameActive)
