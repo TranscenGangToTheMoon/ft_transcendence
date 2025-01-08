@@ -56,6 +56,7 @@ class MainPage(Screen):
     def userMeStatic(self) -> Static:
         try:
             response = requests.get(url=f"{User.server}/api/users/me/", data={}, headers=User.headers, verify=User.SSLCertificate)
+            User.id = response.json()["id"]
             return Static(f"({response.status_code}) GET /api/users/me/ : {response.text}")
         except Exception as error:
             return Static(f"GET /api/users/me/ Error: {error}")
