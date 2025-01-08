@@ -538,10 +538,14 @@ function initSocket(){
         // window.PongGame.animatePaddlesToMiddle()
     	if (window.PongGame.info.myTeam.name == 'team_a') {
 			window.PongGame.state.playerScore = event.team_a;
+            document.getElementById('playerScore').innerText = event.team_a;
+            document.getElementById('enemyScore').innerText = event.team_b;
 			window.PongGame.state.enemyScore = event.team_b;
      	}
      	else {
 			window.PongGame.state.playerScore = event.team_b;
+            document.getElementById('playerScore').innerText = event.team_b;
+            document.getElementById('enemyScore').innerText = event.team_a;
 			window.PongGame.state.enemyScore = event.team_a;
       	}
     })
