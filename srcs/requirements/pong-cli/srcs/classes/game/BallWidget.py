@@ -34,7 +34,7 @@ class Ball(Widget):
 
     def move(self):
         self.offset += Offset(self.dx, self.dy)
-        print(f"{self.offset} += {Offset(self.dx, self.dy)}")
+        # print(f"{self.offset} += {Offset(self.dx, self.dy)}")
 
     def getRandomAngle(self):
         randomAngle = random.random() * 2 * math.pi
