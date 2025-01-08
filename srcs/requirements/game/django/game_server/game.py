@@ -255,12 +255,11 @@ class Game:
     def finish(self, reason: str, winner: str | None = None, disconnected_user_id: int | None = None):
         from game_server.server import Server
         print('finishing game', flush=True)
-        self.finished = True
         if (disconnected_user_id is not None):
             finish_match(self.match.id, reason, disconnected_user_id)
         self.send_finish(reason, winner)
-        time.sleep(1)
         self.disconnect_players()
+        self.finished = True
         Server.delete_game(self.match.id)
 
     def reset_game_state(self):
@@ -322,7 +321,7 @@ class Game:
 
     def send_finish(self, reason: str | None = None, winner: str | None = None):
         from game_server.server import Server
-        Server.emit('game_over', data={'reason': reason, 'winner': winner}, room=str(self.match.id))
+        Server.emit('game_over', data={"reason":reason, "winner":winner})
 
     def send_start_game(self):
         from game_server.server import Server
@@ -370,7 +369,6 @@ class Game:
             team_str = 'team_b'
 
     def send_game_state(self):
-        print(time.time(), flush=True)
         from game_server.server import Server
         side = 1
         for team in self.match.teams:

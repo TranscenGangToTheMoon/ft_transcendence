@@ -66,10 +66,10 @@ def finish_match(match_id, reason: str, user_id: int):
         try:
             request_game(
                 endpoints.Game.ffinish_match.format(match_id=match_id),
-                'POST',
+                'PUT',
                 data={
                     'reason': reason,
-                    'id': user_id
+                    'user_id': user_id
                 }
             )
         except AuthenticationFailed as e:
