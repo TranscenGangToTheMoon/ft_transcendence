@@ -410,6 +410,37 @@ function addFriendSSEListeners(){
         addFriendRequest(event.data);
     });
 
+    sse.addEventListener('send-message', async event => {
+        event = JSON.parse(event.data);
+        console.log(event, 'ai je ce qu il faut ?');
+        chat = event.target[0]['url'];
+        let apiAnswer = undefined;
+        try {
+            apiAnswer = await apiRequest(getAccessToken(), `${baseAPIUrl}${chat}`, 'GET');
+            if (apiAnswer.details) {
+                console.log('Error:',apiAnswer.details);
+                return;
+            }
+        }
+        catch (error){
+            console.log('Error:', error);
+            return;
+        }
+        userInformations.notifications['chats'] += 1;
+        chatInfo = parsChatInfo(apiAnswer);
+        if (pathName === '/chat'){
+            chatUserCardLastMessage = document.getElementById('chatListElement' + chatInfo.target).querySelector('.chatUserCardLastMessage');
+            chatUserCardLastMessage.innerText = (chatInfo.lastMessage);
+            chatUserCardLastMessage.classList.add('chatMessageNotRead');
+        }
+        await displayNotification(undefined, 'message received', event.message, async event => {
+            if (pathName !== '/chat')
+                await navigateTo('/chat');
+            await openChat(chatInfo);
+        });
+        displayBadges();
+    })
+
     sse.addEventListener('accept-friend-request', async event => {
         event = JSON.parse(event.data);
         console.log(event);
@@ -571,7 +602,7 @@ function addNotificationIndicator(div, number){
 function getBadgesDivs(){
     badgesDivs['all'] = document.querySelectorAll('.all-badges');
     badgesDivs['friend_requests'] = document.querySelectorAll('.friend-badges');
-    badgesDivs['chat'] = document.querySelectorAll('.chat-badges');
+    badgesDivs['chats'] = document.querySelectorAll('.chat-badges');
 }
 
 
