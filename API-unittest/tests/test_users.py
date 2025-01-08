@@ -277,11 +277,8 @@ class Test05_RenameUser(UnitTest):
 
         id = self.assertFriendResponse(create_friendship(user1, user2))
         user1['id'] = self.assertResponse(me(user1, method='PATCH', data={'username': new_username}), 200, get_field=True)
-        response = self.assertResponse(friend(user1, id), 200)
-        for f in response['friends']:
-            if f['id'] == user1['id']:
-                self.assertEqual(new_username, f['username'])
-                break
+        response = self.assertResponse(friend(user2, id), 200)
+        self.assertEqual(new_username, response['friend']['username'])
         self.assertThread(user1, user2)
 
     def test_003_rename_blocked_user(self):
@@ -306,8 +303,8 @@ class Test05_RenameUser(UnitTest):
         self.assertResponse(create_chat(user1, user2['username']), 201)
         self.assertResponse(me(user1, method='PATCH', data={'username': new_username}), 200)
 
-        self.assertResponse(create_chat(user2, method='GET', data={'q': old_username}), 200, count=0)
-        self.assertResponse(create_chat(user2, method='GET', data={'q': new_username}), 200, count=1)
+        self.assertResponse(create_chat(user2, method='GET', query=old_username), 200, count=0)
+        self.assertResponse(create_chat(user2, method='GET', query=new_username), 200, count=1)
         self.assertThread(user1, user2)
 
     def test_005_rename_sse(self):

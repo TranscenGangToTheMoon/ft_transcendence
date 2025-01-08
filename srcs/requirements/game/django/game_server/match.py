@@ -2,7 +2,8 @@ from aiohttp.web_routedef import AbstractRouteDef
 from typing import List
 from lib_transcendence.request import AuthenticationFailed
 from lib_transcendence.services import request_game
-from lib_transcendence.endpoints import Game
+from lib_transcendence.game import Reason
+from lib_transcendence import endpoints
 from rest_framework.exceptions import APIException, NotFound
 from game_server.pong_racket import Racket
 
@@ -27,7 +28,7 @@ class Player():
 
     def score_goal(self, csc=False):
         try:
-            request_game(Game.fscore.format(user_id=self.user_id), 'POST', data={'csc': csc})
+            request_game(endpoints.Game.fscore.format(user_id=self.user_id), 'POST', data={'csc': csc})
         except NotFound as e:
             print(e.detail, flush=True)
         except APIException as e:
@@ -59,19 +60,14 @@ class Match():
             self.teams.append(Team(team, self.id, team_name))
 
 
-def fetch_matches():
-    print('fetching matches', flush=True)
-    return Matches.objects.filter(finished=False)
-
-
-def finish_match(match_id, reason=None):
-    match = Matches.objects.get(id=match_id)
-    match.finish_match(reason)
+def finish_match(match_id, reason: str, user_id=None):
+    # match = Matches.objects.get(id=match_id)
+    # match.finish_match(reason)
     # todo -> change to use API when it's ready
-    # if reason is not 'game over':
-    #     try:
-    #         request_game(Game.finish_match, 'POST', data={'reason': reason})
-    #     except AuthenticationFailed as e:
-    #         print("The finish_match attribute is not available in the Game class.", flush=True)
-    #     except Exception as e:
-    #         print(f"An error occurred while requesting the game finish: {e}", flush=True)
+    if reason != Reason.normal_end:
+        try:
+            request_game(endpoints.Game.ffinish_match.format(match_id=match_id), 'POST', data={'reason': reason, 'id': user_id})
+        except AuthenticationFailed as e:
+            print("The finish_match attribute is not available in the Game class.", flush=True)
+        except Exception as e:
+            print(f"An error occurred while requesting the game finish: {e}", flush=True)

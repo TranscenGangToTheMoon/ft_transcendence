@@ -87,7 +87,11 @@ class TournamentSerializer(serializers.ModelSerializer):
 class TournamentStageSerializer(serializers.ModelSerializer):
     class Meta:
         model = TournamentStage
-        fields = '__all__'
+        fields = [
+            'id',
+            'label',
+            'stage',
+        ]
 
 
 class TournamentParticipantsSerializer(serializers.ModelSerializer):
@@ -217,8 +221,7 @@ class TournamentMatchSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         print('FINISH TOURNAMENT', validated_data['score_winner'], validated_data['score_looser'], flush=True)
-        validated_data['finished'] = True
-        result = super().update(instance, validated_data)
+        result = super().update(instance, {**validated_data, 'finished': True})
         result.winner = self.context['winner']
         result.save()
         tournament = result.tournament
@@ -232,8 +235,8 @@ class TournamentMatchSerializer(serializers.ModelSerializer):
             data = TournamentSerializer(tournament).data
             data['finish_at'] = datetime.now(timezone.utc)
             data['stages'] = TournamentStageSerializer(tournament.stages.all(), many=True).data
-            save_tournament = request_game(endpoints.Game.tournaments, data=data)
-            create_sse_event(tournament.users_id(), EventCode.TOURNAMENT_FINISH, {'id': save_tournament['id'], 'name': save_tournament['name']}, {'name': save_tournament['name'], 'username': validated_data['winner_id']})
+            request_game(endpoints.Game.tournaments, data=data)
+            create_sse_event(tournament.users_id(), EventCode.TOURNAMENT_FINISH, {'id': tournament.id}, {'name': tournament.name, 'username': validated_data['winner_id']})
             tournament.delete()
         else:
             print('else FINISHED', flush=True)
@@ -243,6 +246,6 @@ class TournamentMatchSerializer(serializers.ModelSerializer):
                 ct = participants.count()
 
                 for i in range(0, ct, 2):
-                    match = tournament.matches.create(n=i, stage=self.context['winner'].stage, user_1=participants[i], user_2=participants[i + 1])
-                    match.create()
+                    match = tournament.matches.create(n=tournament.get_nb_games(), stage=self.context['winner'].stage, user_1=participants[i], user_2=participants[i + 1])
+                    match.post()
         return result

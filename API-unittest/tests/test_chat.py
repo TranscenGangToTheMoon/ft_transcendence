@@ -100,9 +100,10 @@ class Test02_CreateChatError(UnitTest):
 
     def test_010_chat_with_guest(self):
         user1 = self.user()
+        user2 = self.user(guest=True)
 
-        self.assertResponse(create_chat(user1, self.user(guest=True)['username']), 404, {'detail': 'User not found.'})
-        self.assertThread(user1)
+        self.assertResponse(create_chat(user1, user2['username']), 404, {'detail': 'User not found.'})
+        self.assertThread(user1, user2)
 
     def test_011_guest_create_chat(self):
         user1 = self.user()
@@ -176,7 +177,7 @@ class Test03_GetChat(UnitTest):
         chat_id = self.assertResponse(create_chat(user1, user2['username']), 201, get_field=True)
 
         self.assertResponse(request_chat_id(user3, chat_id), 403, {'detail': 'You do not belong to this chat.'})
-        self.assertThread(user3, user1, user1)
+        self.assertThread(user1, user2, user3)
 
     def test_006_do_not_view_chat(self):
         user1 = self.user()
@@ -252,7 +253,7 @@ class Test04_Messages(UnitTest):
         chat_id = self.assertResponse(create_chat(user2, user1['username']), 201, get_field=True)
 
         self.assertResponse(create_message(user3, chat_id, 'test'), 403, {'detail': 'You do not belong to this chat.'})
-        self.assertThread(user3, user1, user1)
+        self.assertThread(user1, user2, user3)
 
     def test_005_chat_blocked(self):
         user1 = self.user()
@@ -332,7 +333,7 @@ class Test04_Messages(UnitTest):
         self.assertEqual(2, self.assertResponse(me(user1), 200, get_field='notifications')['chats'])
         self.assertResponse(create_message(user1, chat_id, method='GET'), 200)
         self.assertEqual(1, self.assertResponse(me(user1), 200, get_field='notifications')['chats'])
-        self.assertThread(user3, user1, user1)
+        self.assertThread(user1, user2, user3)
 
 
 if __name__ == '__main__':

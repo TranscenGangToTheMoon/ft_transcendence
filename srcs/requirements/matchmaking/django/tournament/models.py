@@ -31,6 +31,7 @@ class Tournament(models.Model):
     name = models.CharField(max_length=50, unique=True)
     size = models.IntegerField(default=16)
     private = models.BooleanField(default=False)
+    nb_games = models.IntegerField(default=1)
     is_started = models.BooleanField(default=False)
     start_at = models.DateTimeField(default=None, null=True)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
@@ -90,10 +91,17 @@ class Tournament(models.Model):
                 user_2 = None
             print('USER2', user_2, flush=True)
             self.matches.create(n=index, stage=first_stage, user_1=user_1, user_2=user_2)
+            self.nb_games = index
+        self.save()
         start_tournament_sse(self)
         time.sleep(3)
         for matche in self.matches.all():
-            matche.create()
+            matche.post()
+
+    def get_nb_games(self):
+        self.nb_games += 1
+        self.save()
+        return self.nb_games
 
     def is_enough_players(self):
         return self.start_countdown[self.size] <= self.participants.count()
@@ -179,7 +187,7 @@ class TournamentMatches(models.Model):
     reason = models.CharField(null=True, default=None, max_length=50) # todo rename to finish_reason
     finished = models.BooleanField(default=False)
 
-    def create(self):
+    def post(self):
         if self.user_2 is not None:
             if not self.user_1.still_in:
                 self.winner = self.user_2
@@ -187,7 +195,7 @@ class TournamentMatches(models.Model):
                 self.user_2.win()
             else:
                 try:
-                    match = create_tournament_match(self.tournament.id, self.stage.id, [[self.user_1.user_id], [self.user_2.user_id]])
+                    match = create_tournament_match(self.tournament.id, self.stage.id, self.n, [[self.user_1.user_id], [self.user_2.user_id]])
                     self.match_id = match['id']
                     self.match_code = match['code']
                     self.save()

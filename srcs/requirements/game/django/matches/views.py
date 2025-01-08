@@ -4,7 +4,7 @@ from lib_transcendence.auth import Authentication
 from lib_transcendence.sse_events import create_sse_event, EventCode
 from lib_transcendence.exceptions import MessagesException
 from rest_framework import generics, views, status
-from rest_framework.exceptions import PermissionDenied, NotFound
+from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 
 from matches.models import Matches, Players
@@ -53,7 +53,7 @@ class ListMatchesView(generics.ListAPIView):
     authentication_classes = [Authentication]
 
     def filter_queryset(self, queryset):
-        return queryset.filter(players__user_id=self.kwargs['user_id'])
+        return queryset.filter(players__user_id=self.kwargs['user_id'], finished=True)
 
 
 class MatchRetrieveView(generics.RetrieveAPIView):
