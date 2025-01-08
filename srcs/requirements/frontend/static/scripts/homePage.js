@@ -45,6 +45,10 @@ document.getElementById('tournament').addEventListener('click', async event => {
     // }
 })
 
+document.getElementById('local').addEventListener('click', async () => {
+    await navigateTo('/game/local');
+})
+
 document.getElementById('chat').addEventListener('click', async ()=> {
     if (!userInformations.is_guest)
         await navigateTo('/chat');

@@ -620,7 +620,7 @@ async function initGame(){
     try {
         checkGameAuthorization();
         try {
-            let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/play/duel/`, 'POST');
+            let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/play/${window.location.pathname.split('/')[2]}/`, 'POST');
             console.log(data);
         }
         catch(error) {

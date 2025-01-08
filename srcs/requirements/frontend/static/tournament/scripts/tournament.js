@@ -2,6 +2,8 @@ if (typeof tournaments === 'undefined')
 	var tournaments;
 if (typeof tournament === 'undefined')
 	var tournament;
+if (typeof selectedValue === 'undefined')
+	var selectedValue;
 
 document.getElementById('searchTournamentForm').addEventListener('keyup', async (e) => {
 	e.preventDefault();
@@ -60,7 +62,7 @@ function setBanOption(){
 document.getElementById('cBan').addEventListener('click', async ()=> {
 	const playerId = clickedUserDiv.id.substring(12);
     try {
-        await apiRequest(getAccessToken(), `${baseAPIUrl}/play/tournament/${tournament.code}/banned/${playerId}/`, 'DELETE');
+        await apiRequest(getAccessToken(), `${baseAPIUrl}/play/tournament/${tournament.code}/ban/${playerId}/`, 'DELETE');
     }
     catch(error){
         console.log(error);
@@ -229,7 +231,7 @@ function createBracket(data) {
 					<div class="d-flex justify-content-between">
 						<img class="tournament-participant-pp" src="/assets/imageNotFound.png"></img>
 						<span>${match.user_1?.username}</span>
-						<span class="fw-bold">${match.winner === match.user_1?.id ? match.score_winner : match.score_looser || ''}</span>
+						<span class="fw-bold">${match.winner === match.user_1?.id ? match.score_winner || '' : match.score_looser || ''}</span>
 					</div>
 				`;
 	
@@ -292,6 +294,11 @@ function addTournamentSSEListeners(){
 	if (!SSEListeners.has('tournament-banned')){
         SSEListeners.set('tournament-banned', tournamentBanned);
         sse.addEventListener('tournament-banned', tournamentBanned);
+    }
+
+	if (!SSEListeners.has('tournament-ban')){
+        SSEListeners.set('tournament-ban', tournamentBanned);
+        sse.addEventListener('tournament-ban', tournamentBanned);
     }
 
 	if (!SSEListeners.has('tournament-start-at')){
@@ -364,15 +371,15 @@ document.getElementById('searchTournamentForm').addEventListener('submit', async
 	createTournamentModal.show();
 });
 
-document.getElementById('rangeInput').addEventListener('input', e => {
-	document.getElementById('tournamentSize').innerText = `Select size (${e.target.value})`;	
-})
+// document.getElementById('rangeInput').addEventListener('input', e => {
+// 	document.getElementById('tournamentSize').innerText = `Select size (${e.target.value})`;	
+// })
 
 document.getElementById('createTournament').addEventListener('click', async event => {
 	event.preventDefault();
 	const createTournamentModal = bootstrap.Modal.getOrCreateInstance('#createTournamentModal');
 	const tournamentName = document.getElementById('tournamentName').value;
-	const tournamentSize = document.getElementById('rangeInput').value;
+	const tournamentSize = selectedValue;
 	try { 
 		let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/play/tournament/`, 'POST', undefined, undefined, {
 			'name' : tournamentName,
@@ -412,8 +419,27 @@ async function leaveTournament(){
 	}
 }
 
+function setTournamentOptions(){
+	const options = document.querySelectorAll('.option');
+	selectedValue = 16;
+
+	options.forEach(option => {
+  		if (option.dataset.value == selectedValue) {
+    		option.classList.add('selected');
+  		}
+  
+  		option.addEventListener('click', () => {
+			options.forEach(opt => opt.classList.remove('selected'));
+			option.classList.add('selected');
+			selectedValue = option.dataset.value;
+ 		});
+	});
+}
+
 async function initTournament(){
     await indexInit(false);
+	loadCSS('/tournament/css/tournament.css', false);
+	setTournamentOptions();
 	document.getElementById('tournamentsList').addEventListener('click', async (e) => {
 		const tournamentDiv = e.target.closest('.tournament-div');
 		if (!tournamentDiv) return;
@@ -439,7 +465,9 @@ async function initTournament(){
 	});
 	try {
 		let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/play/tournament/`);
-		console.log('idejio',data);
+		tournament = data;
+		setBanOption()
+		loadTournament(data);
 	}
 	catch(error) {
 		console.log(error);

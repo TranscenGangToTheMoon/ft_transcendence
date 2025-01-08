@@ -246,6 +246,7 @@ async function handleRoute() {
         '/game/ranked' : '/game/game.html',
         '/game/duel' : '/game/game.html',
         '/game/custom' : '/game/game.html',
+        '/game/local' : '/game/localGame.html',
         '/tournament' : '/tournament/tournament.html'
     };
 
@@ -447,6 +448,7 @@ function addFriendSSEListeners(){
         if (!(bootstrap.Modal.getInstance(document.getElementById('friendListModal'))._isShown))
             await displayNotification(undefined, 'friend request', event.message);
         removeFriendRequest(event.data.id);
+        console.log(event.data);
         addFriend(event.data);
     })
 
@@ -768,7 +770,7 @@ window.displayMainAlert = displayMainAlert;
 
 document.addEventListener('click', (e) => {
     contextMenu = document.getElementById('contextMenu');
-    if (contextMenu && !contextMenu.contains(e.target))
+    if (contextMenu)
         document.getElementById('contextMenu').style.display = 'none';
 });
 
