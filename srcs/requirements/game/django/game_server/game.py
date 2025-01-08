@@ -87,21 +87,20 @@ class Game:
         pass
 
 
-
 ################--------getters--------################
 
     def get_racket(self, player_id) -> Racket:
         for racket in self.rackets:
             if racket.player_id == player_id:
                 return racket
-        raise Exception(f'no racket matching socket id {player_id}')
+        raise self.NoSuchRacket(f'no racket matching socket id {player_id}')
 
     def get_player(self, user_id: int) -> Player:
         for team in self.match.teams:
             for player in team.players:
                 if player.user_id == user_id:
                     return player
-        raise Exception(f'cannot find player with user_id {user_id}')
+        raise self.NoSuchPlayer(f'cannot find player with user_id {user_id}')
 
 ################--------game--------################
 
