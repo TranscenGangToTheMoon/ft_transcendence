@@ -483,7 +483,20 @@ function addChatSSEListeners(){
             return;
         }
         userInformations.notifications['chats'] += 1;
-        chatInfo = parsChatInfo(apiAnswer);
+        chatInfo = {
+            'chatId': apiAnswer.id,
+            'target': apiAnswer.chat_with.username,
+            'targetId': apiAnswer.chat_with.id,
+            'lastMessage': '< Say hi! >',
+            'isLastMessageRead': false,
+        };
+        if (apiAnswer.last_message) {
+            if (apiAnswer.last_message.content.length > 37){
+                chatInfo.lastMessage = apiAnswer.last_message.content.slice(0, 37) + '...';
+            }
+            else chatInfo.lastMessage = apiAnswer.last_message.content;
+            chatInfo.isLastMessageRead = apiAnswer.last_message.is_read;
+        }
         if (pathName === '/chat'){
             chatUserCardLastMessage = document.getElementById('chatListElement' + chatInfo.target).querySelector('.chatUserCardLastMessage');
             chatUserCardLastMessage.innerText = (chatInfo.lastMessage);
@@ -491,6 +504,7 @@ function addChatSSEListeners(){
         }
         await displayNotification(undefined, 'message received', event.message, async event => {
             if (pathName !== '/chat')
+                console.log('clicked');
                 await navigateTo('/chat');
             await openChat(chatInfo);
         });
