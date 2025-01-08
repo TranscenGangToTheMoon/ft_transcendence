@@ -52,3 +52,22 @@
     -ms-transform: translateY(50%);
     transform: translateY(50%);
 }
+
+.options-container {
+    display: flex;
+    gap: 1rem;
+}
+
+.option {
+    padding: 1rem 2rem;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.option.selected {
+    background-color: #007bff;
+    color: white;
+    border-color: #0056b3;
+}

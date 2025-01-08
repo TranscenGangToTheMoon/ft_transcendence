@@ -23,28 +23,6 @@ if (document.getElementById('modals').friendListened !== true){
                     document.getElementById('searchResults').innerText = 'user not found';
             }
         }
-        if (event.target.matches('#simulateFriends')){
-            const nb = document.getElementById('simulateNb').value;
-            if (!nb) return;
-            document.getElementById('loading').style.display = 'unset';
-            for (let i = 0; i < nb; i++){
-                try {
-                    let data = await apiRequest(undefined, `${baseAPIUrl}/auth/guest/`, 'POST');
-                    data = await apiRequest(data.access, `${baseAPIUrl}/auth/register/guest/`, 'PUT', undefined, undefined, {
-                        'username' : `test${localStorage.getItem('currentState') + i}`,
-                        'password' : `password${i}`
-                    });
-                    await apiRequest(data.access, `${baseAPIUrl}/users/me/friend_requests/`, 'POST', undefined, undefined, {
-                        'username' : 'flo',
-                    })
-                }
-                catch (error){
-                    console.log(error);
-                }
-            }
-            document.getElementById('loading').style.display = 'none'
-            await loadReceivedFriendRequests();
-        }
         if (event.target.matches('.deleteFriend')){
             try {
                 const friendshipId = `${event.target.parentElement.id}`.substring(6);

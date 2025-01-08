@@ -1,3 +1,7 @@
+if (typeof selectedValue === 'undefined'){
+    var selectedValue;
+}
+
 document.getElementById('pDeleteAccount').addEventListener('click', event => {
     event.preventDefault();
     const deleteAccountModal = new bootstrap.Modal(document.getElementById('pDeleteAccountModal'));
@@ -86,11 +90,38 @@ function fillNicknamePlaceholder() {
     document.getElementById('pNicknameInput').placeholder = userInformations.username;
 }
 
+function setChatAcceptationOptions(){
+	const options = document.querySelectorAll('.option');
+	selectedValue = userInformations.accept_chat_from;
+
+	options.forEach(option => {
+        console.log(option.dataset.value);
+  		if (option.dataset.value == selectedValue) {
+    		option.classList.add('selected');
+  		}
+  
+  		option.addEventListener('click', async () => {
+            try {
+                await apiRequest(getAccessToken(), `${baseAPIUrl}/users/me/`, 'PATCH', undefined, undefined, {
+                    'accept_chat_from': option.dataset.value,
+                })
+                options.forEach(opt => opt.classList.remove('selected'));
+                option.classList.add('selected');
+                selectedValue = option.dataset.value;
+            }
+            catch(error){
+                console.log(error);
+            }
+ 		});
+	});
+}
+
 async function accountInit(){
     if (userInformations.is_guest){
         document.getElementById('pDeleteAccount').classList.add('disabled');
     }
     fillNicknamePlaceholder();
+    setChatAcceptationOptions();
 } 
 
 accountInit();

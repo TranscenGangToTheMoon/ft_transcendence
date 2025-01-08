@@ -157,9 +157,12 @@
         state.paddles.right.y = state.paddles.left.y;
     }
 
-    function stopGame(animate=false) {
+    function stopGame(animate=false, reason=undefined) {
+        console.log('je passe ici normalement');
         state.isGameActive = false;
         ctx.fillText('Game over', config.canvasWidth / 2, config.canvasHeight / 2);
+        if (reason)
+            ctx.fillText(reason, config.canvasWidth / 2, config.canvasHeight / 2 + 96);
         if (animate){
             animatePaddlesToMiddle();
         }
@@ -276,40 +279,40 @@
     function handlePaddleInput(){
         if (state.keys['ArrowUp'] && state.keys['ArrowDown']){
             if (state.paddles.right.speed != 0){
-                if (typeof socket !== 'undefined'){
+                if (typeof gameSocket !== 'undefined'){
                     // console.log('emitting stop_moving');
-                    socket.emit('stop_moving', {'position': state.paddles.right.y});
+                    gameSocket.emit('stop_moving', {'position': state.paddles.right.y});
                 }
                 state.paddles.right.speed = 0;
             }
             return;
         }
         if (state.keys["ArrowUp"] && state.paddles.right.speed != -1){
-            if (typeof socket !== 'undefined'){
+            if (typeof gameSocket !== 'undefined'){
                 if (state.paddles.right.speed === 1){
-                		socket.emit('stop_moving', {'position': state.paddles.right.y});
+                		gameSocket.emit('stop_moving', {'position': state.paddles.right.y});
                   	// console.log('emitting stop_moving');
                 }
-                socket.emit('move_up');
+                gameSocket.emit('move_up');
                 // console.log('emitting move_up')
             }
             state.paddles.right.speed = -1;
         }
         if (state.keys["ArrowDown"] && state.paddles.right.speed != 1){
-            if (typeof window.socket !== 'undefined'){
+            if (typeof gameSocket !== 'undefined'){
                 if (state.paddles.right.speed === -1){
-                    socket.emit('stop_moving', {'position': state.paddles.right.y});
+                    gameSocket.emit('stop_moving', {'position': state.paddles.right.y});
                     // console.log('emitting move_stop');
                 }
-                socket.emit('move_down');
+                gameSocket.emit('move_down');
                 // console.log('emitting move_down')
             }
             state.paddles.right.speed = 1;
         }
         if (!state.keys["ArrowDown"] && !state.keys['ArrowUp'] && state.paddles.right.speed != 0){
             state.paddles.right.speed = 0;
-            if (typeof socket !== 'undefined'){
-                socket.emit('stop_moving', {'position': state.paddles.right.y});
+            if (typeof gameSocket !== 'undefined'){
+                gameSocket.emit('stop_moving', {'position': state.paddles.right.y});
                 // console.log('emitting stop_moving');
             }
         }
@@ -393,20 +396,18 @@
     }
 
     function handleGameOver(reason){
-        if (state.playerScore >= config.winningScore || state.enemyScore >= config.winningScore){
-            if (config.displayDemo){
-                resumeGame();
-                state.ball.speed = config.defaultBallSpeed;
-                stopGame(true);
-                setTimeout(()=>{
-                    resetGame();
-                    startGame();
-                }, config.animationDuration + 100);
-                return;
-            }
-            // animatePaddlesToMiddle(true);
+        if (config.displayDemo){
+            resumeGame();
+            state.ball.speed = config.defaultBallSpeed;
             stopGame(true);
+            setTimeout(()=>{
+                resetGame();
+                startGame();
+            }, config.animationDuration + 100);
+            return;
         }
+        ctx.clearRect(state.ball.x, state.ball.y, config.ballSize, config.ballSize);
+        stopGame(true, reason);
     }
 
     function updateGameState(timestamp) {
@@ -464,7 +465,7 @@
 function initSocket(){
 	const host = window.location.origin;
 	const token = getAccessToken();
-	let socket = io(host, {
+	let gameSocket = io(host, {
       transports: ["websocket"],
       path: "/ws/game/",
       auth : {
@@ -472,21 +473,25 @@ function initSocket(){
           "token": token,
       },
 	});
-    window.socket = socket;
+    window.gameSocket = gameSocket;
     // console.log(socket)
-	socket.on('connect', () => {
+	gameSocket.on('connect', () => {
         // console.log('Connected to socketIO server!');
     });
-    socket.on('start_game', event => {
+    gameSocket.on('disconnect', () => {
+        console.log('disconnected from gameSocket');
+    })
+
+    gameSocket.on('start_game', event => {
         // console.log('received start_game');
         if (!window.PongGame.state.isGameActive)
             window.PongGame.startGame();
     })
-    socket.on('start_countdown', event => {
+    gameSocket.on('start_countdown', event => {
         // console.log('received start_countdown');
         window.PongGame.startCountdown();
     })
-    socket.on('game_state', event => {
+    gameSocket.on('game_state', event => {
 		// console.log('front : ', window.PongGame.state.ball.speedX);
 		// console.log('front : ', window.PongGame.state.ball.speedY);
 		// console.log('front : ', window.PongGame.state.ball.speed);
@@ -503,18 +508,20 @@ function initSocket(){
 		// console.log('front apres : ', window.PongGame.state.ball.speedY);
 		// console.log('front apres : ', window.PongGame.state.ball.speed);
     })
-    socket.on('connect_error', (error)=> {
+    gameSocket.on('connect_error', (error)=> {
         console.log('error', error);
     })
-    socket.on('move_up', event => {
+    gameSocket.on('move_up', event => {
         console.log('move_up received', event.player);
-		window.PongGame.state.paddles.left.speed = -1;
+        if (event.player !== userInformations.id)
+            window.PongGame.state.paddles.left.speed = -1;
     })
-    socket.on('move_down', event => {
-		window.PongGame.state.paddles.left.speed = 1;
+    gameSocket.on('move_down', event => {
         console.log('move_down received', event.player);
+        if (event.player !== userInformations.id)
+            window.PongGame.state.paddles.left.speed = 1;
     })
-    socket.on('stop_moving', event => {
+    gameSocket.on('stop_moving', event => {
 		console.log('received stop_moving', event.player);
         if (event.player == userInformations.id)
 	        window.PongGame.state.paddles.right.y = event.position;
@@ -523,7 +530,7 @@ function initSocket(){
 	        window.PongGame.state.paddles.left.y = event.position;
     	}
     })
-    socket.on('score', event => {
+    gameSocket.on('score', event => {
         window.PongGame.state.ball.speed = 0;
 		// for (paddle in window.PongGame.state.paddles) {
 		// 	window.PongGame.state.paddles[paddle].y = (window.PongGame.config.canvasHeight - window.PongGame.config.paddleHeight) / 2;
@@ -531,38 +538,29 @@ function initSocket(){
         // window.PongGame.animatePaddlesToMiddle()
     	if (window.PongGame.info.myTeam.name == 'team_a') {
 			window.PongGame.state.playerScore = event.team_a;
+            document.getElementById('playerScore').innerText = event.team_a;
+            document.getElementById('enemyScore').innerText = event.team_b;
 			window.PongGame.state.enemyScore = event.team_b;
      	}
      	else {
 			window.PongGame.state.playerScore = event.team_b;
+            document.getElementById('playerScore').innerText = event.team_b;
+            document.getElementById('enemyScore').innerText = event.team_a;
 			window.PongGame.state.enemyScore = event.team_a;
       	}
     })
-    socket.on('game_over', event => {
+    gameSocket.on('game_over', event => {
         console.log('game_over received', event);
 		window.PongGame.handleGameOver(event.reason);
+        if (fromTournament)
+            setTimeout(async ()=> {
+                await navigateTo('/tournament')
+            }, 500)
     })
 }
 
-sse.addEventListener('game-start', event => {
-	console.log('sse event game-start');
-	if (!event.data || typeof event.data !== 'string') {
-		console.error('Invalid data from SSE');
-		return;
-	}
-	try {
-		data = JSON.parse(event.data);
-	}
-	catch(error) {
-		console.error('Failed to parse JSON from SSE', error);
-		return;
-	}
-	if (!data.data) {
-		console.error('Invalid data from SSE');
-		return;
-	}
-	data = data.data;
-	try {
+function initData(data){
+    try {
 		if (data.teams.a.some(player => player.id == userInformations.id)) {
 			window.PongGame.info.myTeam.name = 'team_a';
 			window.PongGame.info.myTeam.players = data.teams.team_a;
@@ -584,6 +582,12 @@ sse.addEventListener('game-start', event => {
     document.getElementById('gameArea').style.display = "block";
     document.getElementById('opponentWait').style.display = "none";
 	initSocket();
+}
+
+sse.addEventListener('game-start', event => {
+    data = JSON.parse(event.data);
+	data = data.data;
+	initData(data);
 })
 
 document.getElementById('playGame').addEventListener('click', async event => {
@@ -603,7 +607,9 @@ document.getElementById('confirmModal').addEventListener('hidden.bs.modal', () =
 function checkGameAuthorization(){
     console.log(window.location.pathname);
     if (userInformations.is_guest && window.location.pathname === '/game/ranked')
-        throw `${window.location.pathname}`
+        throw `${window.location.pathname}`;
+    if (window.location.pathname === '/game/tournament' && typeof tournamentData === 'undefined')
+        throw `${window.location.pathname}`;
 }
 
 async function initGame(){
@@ -613,12 +619,18 @@ async function initGame(){
     document.getElementById('opponentWait').style.display = "block";
     try {
         checkGameAuthorization();
-        try {
-            let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/play/${window.location.pathname.split('/')[2]}/`, 'POST');
-            console.log(data);
-        }
-        catch(error) {
-            console.log(error);
+        if (window.location.pathname === '/game/tournament')
+            initData(tournamentData);
+        else {
+            try {
+                let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/play/${window.location.pathname.split('/')[2]}/`, 'POST');
+                console.log(data);
+                if (data.detail)
+                    document.getElementById('opponentWait').innerText = data.detail;
+            }
+            catch(error) {
+                console.log(error);
+            }
         }
     }
     catch (unauthorized){

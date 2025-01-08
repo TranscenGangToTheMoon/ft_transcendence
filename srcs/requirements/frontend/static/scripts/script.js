@@ -17,6 +17,7 @@ var pathName = window.location.pathname;
 var badgesDivs = {};
 var notificationQueue = [];
 const SSEListeners = new Map();
+var fromTournament = false;
 
 window.pathName = pathName;
 
@@ -247,6 +248,7 @@ async function handleRoute() {
         '/game/duel' : '/game/game.html',
         '/game/custom' : '/game/game.html',
         '/game/local' : '/game/localGame.html',
+        '/game/tournament' : '/game/game.html',
         '/tournament' : '/tournament/tournament.html'
     };
 
@@ -272,6 +274,8 @@ async function navigateTo(url, doNavigate=true){
     let currentState = getCurrentState();
     lastState = currentState;
     await handleSSEListenerRemoval(url);
+    await quitLobbies(window.location.pathname);
+    await closeGameConnection(window.location.pathname);
     history.pushState({state: currentState}, '', url);
     console.log(`added ${url} to history with state : ${currentState}`);
     pathName = window.location.pathname;
@@ -330,6 +334,8 @@ window.addEventListener('popstate', async event => {
     console.log(pathName, window.location.pathname);
     if (pathName === '/game')
         return cancelNavigation(event, undefined);
+    await quitLobbies(pathName);
+    await closeGameConnection(pathName);
     pathName = window.location.pathname;
     if (event.state && event.state.state)
         lastState = event.state.state;
@@ -339,6 +345,25 @@ window.addEventListener('popstate', async event => {
     handleRoute();
 })
 
+async function quitLobbies(oldUrl){
+    if (oldUrl.includes('/lobby')){
+        try {
+            await apiRequest(getAccessToken(), `${baseAPIUrl}/play${oldUrl}/`, 'DELETE');
+        }
+        catch (error){
+            console.log(error);
+        }
+    }
+    if (oldUrl.includes('/tournament') && tournament){
+        try {
+            await apiRequest(getAccessToken(), `${baseAPIUrl}/play/tournament/${tournament.code}/`, 'DELETE');
+        }
+        catch (error){
+            console.log(error);
+        }
+    }
+}
+
 window.loadContent = loadContent;
 window.cancelNavigation = cancelNavigation;
 
@@ -347,23 +372,9 @@ window.cancelNavigation = cancelNavigation;
 async function handleSSEListenerRemoval(url){
     if (window.pathName.includes('/lobby') && !url.includes('/lobby')){
         removeSSEListeners('lobby');
-        try {
-            await apiRequest(getAccessToken(), `${baseAPIUrl}/play/lobby/${code}/`, 'DELETE');
-        }
-        catch (error){
-            console.log(error);
-        }
     }
     if (window.pathName.includes('/tournament') && !url.includes('/tournament')){
         removeSSEListeners('tournament');
-        if (tournament){
-            try {
-                await apiRequest(getAccessToken(), `${baseAPIUrl}/play/tournament/${tournament.code}/`, 'DELETE');
-            }
-            catch (error){
-                console.log(error);
-            }
-        }
     }
 }
 
@@ -478,16 +489,19 @@ function addFriendSSEListeners(){
 function addInviteSSEListeners(){
     sse.addEventListener('invite-clash', event => {
         event = JSON.parse(event.data);
+        displayNotification(undefined, event.service, event.message, undefined, event.target);
         console.log(event);
     })
 
-    sse.addEventListener('invite-custom-game', event => {
+    sse.addEventListener('invite-3v3', event => {
         event = JSON.parse(event.data);
+        displayNotification(undefined, event.service, event.message, undefined, event.target);
         console.log(event);
     })
 
     sse.addEventListener('invite-1v1', event => {
         event = JSON.parse(event.data);
+        displayNotification(undefined, event.service, event.message, undefined, event.target);
         console.log(event);
     })
 
@@ -638,12 +652,22 @@ async function addTargets(notification, targets, toastInstance, toastContainer){
     console.log(targets);
     const notificationBody = notification.querySelector('.toast-body');
     Object.entries(targets).forEach(([i, target]) => {
-        const img = document.createElement('img');
-        img.id = `notif${notification.id}-target${i}`;
-        img.className = 'notif-img';
-        img.src = target.display_icon;
-        
-        notificationBody.appendChild(img);
+        if (target.display_icon){
+            var img = document.createElement('img');
+            img.id = `notif${notification.id}-target${i}`;
+            img.className = 'notif-img';
+            img.src = target.display_icon;
+            
+            notificationBody.appendChild(img);
+        }
+        if (target.display_name){
+            var button = document.createElement('button');
+            button.id = `notif${notification.id}-nametarget${i}`;
+            button.className = 'notif-button';
+            button.innerText = target.display_name;
+
+            notificationBody.appendChild(button);
+        }
         
         if (target.type === 'API') {
             handleFriendRequestNotification(target, img, notification, toastContainer, toastInstance);
@@ -651,6 +675,14 @@ async function addTargets(notification, targets, toastInstance, toastContainer){
             //     notification.clicked = true;
             //     dismissNotification(notification, toastInstance, toastContainer);
             // });
+        }
+        else if (target.type === 'URL'){
+            button.addEventListener('click', async () => {
+                console.log(target.url.slice(0, -1));
+                await navigateTo(target.url.slice(0, -1));
+                notification.clicked = true;
+                dismissNotification(notification, toastInstance, toastContainer);
+            })
         }
     });
 }
@@ -707,6 +739,18 @@ async function displayNotification(icon=undefined, title=undefined, body=undefin
 }
 
 // ========================== OTHER UTILS ==========================
+
+async function closeGameConnection(oldUrl){
+    if (!oldUrl.includes('game')) return;
+    try {
+        await apiRequest(getAccessToken(), `${baseAPIUrl}${oldUrl.replace("game", 'play')}/`, 'DELETE');
+    }
+    catch(error){
+        console.log(error);
+    }
+    if (typeof gameSocket !== 'undefined')
+        gameSocket.close();
+}
 
 async function fetchUserInfos(forced=false) {
     if (!getAccessToken())
