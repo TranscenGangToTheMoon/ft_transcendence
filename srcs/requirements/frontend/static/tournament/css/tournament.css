@@ -1,0 +1,77 @@
+.tournament-participant {
+    width: 70px;
+    height: 100px;
+    background-color: darkseagreen;
+    text-align: center;
+    margin: 10px;
+}
+
+.tournament-div {
+    background-color: rebeccapurple;
+    cursor: pointer;
+}
+
+.custom-context-menu {
+    position: absolute;
+    z-index: 1000;
+    display: none;
+    min-width: 150px;
+    background-color: white;
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* test id */
+
+.tournament-bracket {
+    display: flex;
+    gap: 50px;
+    padding: 20px;
+}
+
+.round {
+    display: flex;
+    flex-direction: column;
+}
+
+.round-inside {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    height: 100%;
+    gap: 10px;
+}
+
+.match {
+    position: relative;
+    width: 200px;
+    /* margin-bottom: 50px; */
+}
+
+.winner {
+    background-color: #d4edda;
+}
+
+.tournament-participant-pp {
+    width: 20px;
+    height: 20px;
+}
+
+.options-container {
+    display: flex;
+    gap: 1rem;
+}
+
+.option {
+    padding: 1rem 2rem;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.option.selected {
+    background-color: #007bff;
+    color: white;
+    border-color: #0056b3;
+}

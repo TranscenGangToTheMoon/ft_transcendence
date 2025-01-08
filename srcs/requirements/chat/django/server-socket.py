@@ -11,17 +11,17 @@ from lib_transcendence.auth import auth_verify
 from lib_transcendence.chat import post_messages
 from lib_transcendence.services import request_chat
 from lib_transcendence.endpoints import Chat as endpoint_chat
+from lib_transcendence.sse_events import create_sse_event, EventCode
 from rest_framework.exceptions import APIException
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.exceptions import AuthenticationFailed
+from rest_framework.exceptions import NotFound
 from socketio.exceptions import ConnectionRefusedError
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_DIR)
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'chat.settings')
-
-django.setup()
 
 sio = socketio.AsyncServer(cors_allowed_origins='*', async_mode='aiohttp', logger=True)
 app = web.Application()
@@ -56,14 +56,16 @@ async def connect(sid, environ, auth):
             raise ConnectionRefusedError({"error": 403, "message": "Permission denied"})
         except APIException:
             raise ConnectionRefusedError({"error": 500, "message": "error"})
+        await sio.emit('debug', {'message': chat['type']}, to=sid)
         if user and chat and chat['type'] == "private_message":
-            usersConnected.add_user(user['id'], sid, chatId, chat['chat_with'].get('id'))
+            usersConnected.add_user(user['id'], sid, user['username'], chatId, chat['chat_with'].get('id'))
         else:
-            usersConnected.add_user(user['id'], sid, chatId)
+            usersConnected.add_user(user['id'], sid, user['username'], chatId)
     else:
         print(f"Connection failed : {sid}")
         raise ConnectionRefusedError({"error": 400, "message": "Missing args"})
     await sio.emit('message', {'author':'', 'content': 'You\'re now connected'}, to=sid)
+    await sio.emit('debug', {'message': 'user joined the room'}, room = str(chatId))
 
 
 
@@ -73,10 +75,15 @@ async def disconnect(sid):
     print(f"Client disconnected : {sid}")
 
 @sio.event
+async def leave(sid, data):
+    await sio.disconnect(sid)
+
+@sio.event
 async def message(sid, data):
     chatId = usersConnected.get_chat_id(sid)
     content = data.get('content')
     token = data.get('token')
+    isChatWithConnected = usersConnected.is_chat_with_connected_with_him(sid)
     print(f"New message from {sid}: {data}")
     if (content is None or token is None):
         await sio.emit(
@@ -92,15 +99,26 @@ async def message(sid, data):
             answerAPI,
             to=sid
         )
-        if usersConnected.is_chat_with_connected_with_him(sid) == False:
+        if (isChatWithConnected == False):
             await sio.emit(
                 'debug',
                 {'message': 'The other user is not connected'},
                 to=sid
             )
+            try:
+                print(f"User not connected, sending sse {usersConnected.get_chat_with_id(sid)}")
+                await sync_to_async(create_sse_event, thread_sensitive=False)(usersConnected.get_chat_with_id(sid), EventCode.SEND_MESSAGE, answerAPI,{'username':usersConnected.get_user_id(sid),'message':content})
+            except (PermissionDenied, AuthenticationFailed, NotFound, APIException) as e:
+                print(f"Error SSE: {e}")
+        else:
+            await sio.emit(
+                'debug',
+                {'message': 'The other user is connected'},
+                to=sid
+            )
         await sio.emit(
             'message',
-            {'author':answerAPI['author'], 'content': content},
+            {'author':answerAPI['author'], 'content': content, 'is_read': isChatWithConnected},
             room=str(chatId)
         )
         print(f"Message saved and sent from {sid}: {data}")
@@ -121,6 +139,14 @@ async def message(sid, data):
             {'error': 401, 'message': 'Invalid token', 'retry_content': content},
             to=sid
         )
+    except NotFound:
+        print(f"User not found : {sid}")
+        await sio.emit(
+            'error',
+            {'error': 404, 'message': 'User not found'},
+            to=sid
+        )
+        await sio.disconnect(sid)
     except APIException:
         print(f"API error : {sid}")
         await sio.emit(

@@ -7,26 +7,32 @@ from django.db import models
 
 
 class Matches(models.Model):
-    code = models.CharField(max_length=4, unique=True, editable=False)
+    code = models.CharField(max_length=4, null=True)
     game_mode = models.CharField(max_length=11)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     game_duration = models.DurationField(default=timedelta(minutes=3))
     tournament_id = models.IntegerField(null=True)
+    tournament_stage_id = models.IntegerField(null=True)
+    tournament_n = models.IntegerField(null=True)
     reason = models.CharField(null=True, default=None, max_length=20)
     finished = models.BooleanField(default=False)
+
+    winner = models.ForeignKey('Teams', null=True, default=None, on_delete=models.SET_NULL, related_name='winner')
+    looser = models.ForeignKey('Teams', null=True, default=None, on_delete=models.SET_NULL, related_name='looser')
 
     def finish_match(self):
         if self.reason is None:
             self.reason = Reason.normal_end
         self.finished = True
-        self.game_duration = self.created_at - datetime.now(timezone.utc)
+        self.code = None
+        self.game_duration = datetime.now(timezone.utc) - self.created_at
+        self.winner, self.looser = self.teams.order_by('-score')
         self.save()
         if self.tournament_id is not None:
-            winner, looser = self.teams.order_by('-score')
             data = {
-                'winner_id': winner.players.first().user_id,
-                'score_winner': winner.score,
-                'score_looser': looser.score,
+                'winner_id': self.winner.players.first().user_id,
+                'score_winner': self.winner.score,
+                'score_looser': self.looser.score,
                 'reason': self.reason,
             }
             request_matchmaking(endpoints.Matchmaking.ftournament_result_match.format(match_id=self.id), 'PUT', data)

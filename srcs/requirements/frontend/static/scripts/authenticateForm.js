@@ -40,8 +40,10 @@ document.getElementById("loginButton").addEventListener('click', event => {
         .then (async data => {
             if (data.access){
                 removeTokens();
+                sse.close();
                 localStorage.setItem('token', data.access);
                 localStorage.setItem('refresh', data.refresh);
+                initSSE();
                 await fetchUserInfos(true);
                 loadUserProfile();
                 handleRoute();

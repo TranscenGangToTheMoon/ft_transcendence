@@ -13,14 +13,14 @@ def create_match(game_mode: Literal['duel', 'clash', 'ranked', 'custom_game'] | 
         data['game_mode'] = GameMode.tournament
     else:
         data['game_mode'] = game_mode
-        data['tournament_stage_id'] = None
 
     return request_game(endpoints.Game.create_match, data=data)
 
 
-def create_tournament_match(tournament_id, stage_id, teams):
+def create_tournament_match(tournament_id, stage_id, n, teams):
     data = {
         'tournament_id': tournament_id,
         'tournament_stage_id': stage_id,
+        'tournament_n': n,
     }
     return create_match(data, teams)

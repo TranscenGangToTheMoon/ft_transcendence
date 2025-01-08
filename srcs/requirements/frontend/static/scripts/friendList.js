@@ -215,10 +215,11 @@ async function loadFriendList(){
     else{
         resultDiv.innerText = "";
         for (let friend of data.results){
-            const friend1 = friend.friends[0].username;
-            const friend2 = friend.friends[1].username;
+            console.log(friend)
+            // const friend1 = friend.friends[0].username;
+            // const friend2 = friend.friends[1].username;
             resultDiv.innerHTML += `<div class="friendRequestBlock knownFriend" id="friend${friend.id}">\
-            <div>${friend1 === userInformations.username ? friend2 : friend1}</div>\
+            <div>${friend.friend.username}</div>\
             <button class='deleteFriend'>delete X</button></div>\n`;
         }
     }
@@ -226,11 +227,12 @@ async function loadFriendList(){
 
 function addFriend(friendInstance){
     const friendDiv = document.getElementById('knownFriends');
-    friendDiv.innerText = '';
-    const friend1 = friendInstance.friends[0].username;
-    const friend2 = friendInstance.friends[1].username;
+    if (!friendDiv.querySelector('div'))
+        friendDiv.innerText = '';
+    // const friend1 = friendInstance.friends[0].username;
+    // const friend2 = friendInstance.friends[1].username;
     friendDiv.innerHTML += `<div class="friendRequestBlock knownFriend" id="friend${friendInstance.id}">\
-            <div>${friend1 === userInformations.username ? friend2 : friend1}</div>\
+            <div>${friendInstance.friend.username}</div>\
             <button class='deleteFriend'>delete X</button></div>\n`;
 }
 

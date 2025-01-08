@@ -1,7 +1,9 @@
 import random
+import time
 import unittest
 
-from services.game import create_game, is_in_game, score, finish_match
+from services.game import create_game, is_in_game, score, finish_match, get_tournament, get_games
+from services.tournament import join_tournament, create_tournament
 from utils.my_unittest import UnitTest
 
 
@@ -99,6 +101,58 @@ class Test03_Finish(UnitTest):
             self.assertResponse(score(user1['id']), 204)
         self.assertResponse(finish_match(match_id, 'player-disconnect', user2['id']), 200)
         self.assertThread(user1, user2)
+
+
+class Test04_Tournament(UnitTest):
+
+    def test_001_tournament(self):
+        user1 = self.user(['tournament-join', 'tournament-join', 'tournament-join', 'tournament-start', 'game-start', 'tournament-match-finish', 'tournament-match-finish', 'game-start', 'tournament-match-finish', 'tournament-finish'])
+        user2 = self.user(['tournament-join', 'tournament-join', 'tournament-start', 'game-start', 'tournament-match-finish', 'tournament-match-finish'])
+        user3 = self.user(['tournament-join', 'tournament-start', 'game-start', 'tournament-match-finish', 'tournament-match-finish'])
+        user4 = self.user(['tournament-start', 'game-start', 'tournament-match-finish', 'tournament-match-finish', 'tournament-match-finish', 'tournament-finish'])
+
+        code = self.assertResponse(create_tournament(user1), 201, get_field='code')
+        self.assertResponse(join_tournament(user2, code), 201)
+        self.assertResponse(join_tournament(user3, code), 201)
+        self.assertResponse(join_tournament(user4, code), 201)
+
+        time.sleep(5)
+
+        self.assertResponse(score(user1['id']), 204)
+        self.assertResponse(score(user1['id']), 204)
+        self.assertResponse(score(user1['id']), 204)
+
+        response = score(user2['id'])
+        if response.status_code == 204:
+            user2['thread_tests'] += ['game-start', 'tournament-match-finish', 'tournament-finish']
+            user3['thread_tests'] += ['tournament-match-finish', 'tournament-finish']
+            self.assertResponse(response, 204)
+            self.assertResponse(score(user2['id']), 204)
+            self.assertResponse(score(user2['id']), 204)
+        else:
+            user3['thread_tests'] += ['game-start', 'tournament-match-finish', 'tournament-finish']
+            user2['thread_tests'] += ['tournament-match-finish', 'tournament-finish']
+            self.assertResponse(score(user3['id']), 204)
+            self.assertResponse(score(user3['id']), 204)
+            self.assertResponse(score(user3['id']), 204)
+        user2['expected_thread_result'] = len(user2['thread_tests'])
+        user3['expected_thread_result'] = len(user3['thread_tests'])
+
+        time.sleep(5)
+
+        self.assertResponse(score(user1['id']), 204)
+        self.assertResponse(score(user1['id']), 204)
+        self.assertResponse(score(user1['id']), 204)
+
+        response = self.assertResponse(get_games(user1), 200, count=2)
+        self.assertResponse(get_tournament(response['results'][0]['tournament_id'], user1), 200)
+        self.assertThread(user1, user2, user3, user4)
+
+    def test_002_tournament_does_not_exist(self):
+        user1 = self.user()
+
+        self.assertResponse(get_tournament(123456, user1), 404)
+        self.assertThread(user1)
 
 
 if __name__ == '__main__':

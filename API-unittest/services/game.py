@@ -42,3 +42,17 @@ def finish_match(match_id, reason=None, user_id=None, data=None):
         data=data,
         port=8003,
     )
+
+
+def get_tournament(tournament_id, user):
+    return make_request(
+        endpoint=f'game/tournaments/{tournament_id}/',
+        token=user['token'],
+    )
+
+
+def get_games(user):
+    return make_request(
+        endpoint=f'game/matches/{user["id"]}/',
+        token=user['token'],
+    )
