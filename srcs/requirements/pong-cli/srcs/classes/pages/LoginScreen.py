@@ -6,7 +6,7 @@ from textual.widgets    import Input, Header, Button, Static, Footer
 
 # Local imports
 from classes.pages.MainScreen   import MainPage
-from classes.user               import User
+from classes.utils.user               import User
 
 
 class LoginPage(Screen):
