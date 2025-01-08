@@ -61,10 +61,7 @@ class Match():
             self.teams.append(Team(team, self.id, team_name))
 
 
-def finish_match(match_id, reason: str, user_id=None):
-    # match = Matches.objects.get(id=match_id)
-    # match.finish_match(reason)
-    # todo -> change to use API when it's ready
+def finish_match(match_id, reason: str, user_id: int):
     if reason != Reason.normal_end:
         try:
             request_game(

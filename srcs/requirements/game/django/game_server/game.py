@@ -252,12 +252,12 @@ class Game:
         from game_server.server import Server
         Server.emit('disconnect', room=str(self.match.id))
 
-    def finish(self, reason: str, winner: str | None = None):
+    def finish(self, reason: str, winner: str | None = None, disconnected_user_id: int | None = None):
         from game_server.server import Server
         print('finishing game', flush=True)
         self.finished = True
-        finish_match(self.match.id, reason)
-        # time.sleep(1)
+        if (disconnected_user_id is not None):
+            finish_match(self.match.id, reason, disconnected_user_id)
         self.send_finish(reason, winner)
         time.sleep(1)
         self.disconnect_players()

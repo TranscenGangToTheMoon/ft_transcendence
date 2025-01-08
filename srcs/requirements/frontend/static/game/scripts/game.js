@@ -511,14 +511,10 @@ function initSocket(){
     })
     socket.on('move_up', event => {
         console.log('move_up received', event.player);
-		setTimeout(() => {
-			window.PongGame.state.paddles.left.speed = -1;
-		}, 0);
+		window.PongGame.state.paddles.left.speed = -1;
     })
     socket.on('move_down', event => {
-		setTimeout(() => {
-			window.PongGame.state.paddles.left.speed = 1;
-		}, 0);
+		window.PongGame.state.paddles.left.speed = 1;
         console.log('move_down received', event.player);
     })
     socket.on('stop_moving', event => {
@@ -552,6 +548,7 @@ function initSocket(){
 }
 
 sse.addEventListener('game-start', event => {
+	console.log('sse event game-start');
 	if (!event.data || typeof event.data !== 'string') {
 		console.error('Invalid data from SSE');
 		return;
