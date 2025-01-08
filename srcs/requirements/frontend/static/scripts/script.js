@@ -448,6 +448,7 @@ function addFriendSSEListeners(){
         if (!(bootstrap.Modal.getInstance(document.getElementById('friendListModal'))._isShown))
             await displayNotification(undefined, 'friend request', event.message);
         removeFriendRequest(event.data.id);
+        console.log(event.data);
         addFriend(event.data);
     })
 
