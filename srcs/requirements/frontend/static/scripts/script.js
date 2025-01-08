@@ -485,16 +485,19 @@ function addFriendSSEListeners(){
 function addInviteSSEListeners(){
     sse.addEventListener('invite-clash', event => {
         event = JSON.parse(event.data);
+        displayNotification(undefined, event.service, event.message, undefined, event.target);
         console.log(event);
     })
 
     sse.addEventListener('invite-custom-game', event => {
         event = JSON.parse(event.data);
+        displayNotification(undefined, event.service, event.message, undefined, event.target);
         console.log(event);
     })
 
     sse.addEventListener('invite-1v1', event => {
         event = JSON.parse(event.data);
+        displayNotification(undefined, event.service, event.message, undefined, event.target);
         console.log(event);
     })
 
@@ -645,12 +648,22 @@ async function addTargets(notification, targets, toastInstance, toastContainer){
     console.log(targets);
     const notificationBody = notification.querySelector('.toast-body');
     Object.entries(targets).forEach(([i, target]) => {
-        const img = document.createElement('img');
-        img.id = `notif${notification.id}-target${i}`;
-        img.className = 'notif-img';
-        img.src = target.display_icon;
-        
-        notificationBody.appendChild(img);
+        if (target.display_icon){
+            var img = document.createElement('img');
+            img.id = `notif${notification.id}-target${i}`;
+            img.className = 'notif-img';
+            img.src = target.display_icon;
+            
+            notificationBody.appendChild(img);
+        }
+        if (target.display_name){
+            var button = document.createElement('button');
+            button.id = `notif${notification.id}-nametarget${i}`;
+            button.className = 'notif-button';
+            button.innerText = target.display_name;
+
+            notificationBody.appendChild(button);
+        }
         
         if (target.type === 'API') {
             handleFriendRequestNotification(target, img, notification, toastContainer, toastInstance);
@@ -658,6 +671,14 @@ async function addTargets(notification, targets, toastInstance, toastContainer){
             //     notification.clicked = true;
             //     dismissNotification(notification, toastInstance, toastContainer);
             // });
+        }
+        else if (target.type === 'URL'){
+            button.addEventListener('click', async () => {
+                console.log(target.url.slice(0, -1));
+                await navigateTo(target.url.slice(0, -1));
+                notification.clicked = true;
+                dismissNotification(notification, toastInstance, toastContainer);
+            })
         }
     });
 }
