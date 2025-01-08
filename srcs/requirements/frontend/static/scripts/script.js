@@ -769,7 +769,7 @@ window.displayMainAlert = displayMainAlert;
 
 document.addEventListener('click', (e) => {
     contextMenu = document.getElementById('contextMenu');
-    if (contextMenu && !contextMenu.contains(e.target))
+    if (contextMenu)
         document.getElementById('contextMenu').style.display = 'none';
 });
 
