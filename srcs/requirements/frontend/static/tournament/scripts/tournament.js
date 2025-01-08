@@ -438,6 +438,7 @@ function setTournamentOptions(){
 
 async function initTournament(){
     await indexInit(false);
+	loadCSS('/tournament/css/tournament.css', false);
 	setTournamentOptions();
 	document.getElementById('tournamentsList').addEventListener('click', async (e) => {
 		const tournamentDiv = e.target.closest('.tournament-div');
