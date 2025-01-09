@@ -44,6 +44,9 @@ class Server:
         print(f"SocketIO server running on port {port}", flush=True)
         web.run_app(Server._app, host='0.0.0.0', port=port, loop=Server._loop)
 
+    class ServerException(Exception):
+        pass
+
     @staticmethod
     def delete_game(match_id) -> None:
         with Server._games_lock:
@@ -81,6 +84,8 @@ class Server:
 
     @staticmethod
     def emit(event: str, data=None, room=None, to=None, skip_sid=None):
+        if (room is None) and (to is None):
+            raise Server.ServerException('Unauthorized: Emit to all clients is not allowed')
         with Server._loop_lock:
             Server._loop.call_soon_threadsafe(asyncio.create_task, Server._sio.emit(event, data=data, room=room, to=to, skip_sid=skip_sid))
 

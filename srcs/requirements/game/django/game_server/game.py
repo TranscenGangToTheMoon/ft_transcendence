@@ -328,7 +328,7 @@ class Game:
 
     def send_finish(self, reason: str | None = None, winner: str | None = None):
         from game_server.server import Server
-        Server.emit('game_over', data={"reason":reason, "winner":winner})
+        Server.emit('game_over', data={"reason":reason, "winner":winner}, room=str(self.match.id))
 
     def send_start_game(self):
         from game_server.server import Server
