@@ -1,6 +1,6 @@
 document.getElementById('logOut').addEventListener('click', async event => {
     event.preventDefault();
-    await closeGameConnection(window.location.pathname());
+    await closeGameConnection(window.location.pathname);
     removeTokens();
     await generateToken();
     await fetchUserInfos(true);
