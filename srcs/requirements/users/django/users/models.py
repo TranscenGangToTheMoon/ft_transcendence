@@ -32,6 +32,10 @@ class Users(models.Model):
     current_rank = models.IntegerField(default=None, null=True)
     highest_rank = models.IntegerField(default=None, null=True)
 
+    def set_game_playing(self, code=None):
+        self.game_playing = code
+        self.save()
+
     def connect(self):
         print(f'User {self.id} connected', flush=True)
         self.is_online = True
