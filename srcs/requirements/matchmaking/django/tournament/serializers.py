@@ -220,28 +220,26 @@ class TournamentMatchSerializer(serializers.ModelSerializer):
         return self.get_user_instance(obj, obj.user_2)
 
     def update(self, instance, validated_data):
-        print('FINISH TOURNAMENT', validated_data['score_winner'], validated_data['score_looser'], flush=True)
         result = super().update(instance, {**validated_data, 'finished': True})
         result.winner = self.context['winner']
         result.save()
         tournament = result.tournament
-        create_sse_event(tournament.users_id(), EventCode.TOURNAMENT_MATCH_FINISH, validated_data, {'winner': self.context['winner'].user_id, 'looser': self.context['looser'].user_id, 'score_winner': validated_data['score_winner'], 'score_looser': validated_data['score_looser']})
+        validated_data.pop('winner_id')
+        winner_user_id = self.context['winner'].user_id
+        create_sse_event(tournament.users_id(), EventCode.TOURNAMENT_MATCH_FINISH, {'id': result.id, 'winner': winner_user_id, **validated_data}, {'winner': winner_user_id, 'looser': self.context['looser'].user_id, 'score_winner': validated_data['score_winner'], 'score_looser': validated_data['score_looser']})
         current_stage = self.context['winner'].stage
         finished = self.context['winner'].win()
         self.context['looser'].eliminate()
 
         if finished is not None:
-            print('FINISHED', flush=True)
             data = TournamentSerializer(tournament).data
             data['finish_at'] = datetime.now(timezone.utc)
             data['stages'] = TournamentStageSerializer(tournament.stages.all(), many=True).data
             request_game(endpoints.Game.tournaments, data=data)
-            create_sse_event(tournament.users_id(), EventCode.TOURNAMENT_FINISH, {'id': tournament.id}, {'name': tournament.name, 'username': validated_data['winner_id']})
+            create_sse_event(tournament.users_id(), EventCode.TOURNAMENT_FINISH, {'id': tournament.id}, {'name': tournament.name, 'username': winner_user_id})
             tournament.delete()
         else:
-            print('else FINISHED', flush=True)
             if not current_stage.matches.filter(finished=False).exists():
-                print('created_game', flush=True)
                 participants = tournament.participants.filter(still_in=True).order_by('index')
                 ct = participants.count()
 
