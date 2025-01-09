@@ -18,7 +18,6 @@ class RetrieveStatsView(generics.ListAPIView):
 
 class RetrieveRankedStatsView(generics.ListAPIView):
     serializer_class = RankedStatsSerializer
-    pagination_class = None
 
     def get_queryset(self):
         return RankedStats.objects.filter(user__id=self.request.user.id)
