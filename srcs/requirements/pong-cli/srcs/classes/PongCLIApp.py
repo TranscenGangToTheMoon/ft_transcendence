@@ -16,7 +16,7 @@ from classes.pages.LoginScreen  import LoginPage
 
 
 class PongCLI(App):
-    SCREENS = {
+    SCREENS = { #maybe delete
         # "loginPage": LoginPage,
     }
 

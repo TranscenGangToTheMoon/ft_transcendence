@@ -2,13 +2,13 @@
 import asyncio
 import threading
 import time
-
 import socketio
 from pynput import keyboard
 
 # Textual imports
 from textual            import work
 from textual.app        import ComposeResult
+from textual.geometry   import Offset
 from textual.screen     import Screen
 from textual.widgets    import Header, Button, Footer
 
@@ -18,7 +18,7 @@ from classes.game.PaddleWidget      import Paddle
 from classes.game.PlaygroundWidget  import Playground
 from classes.utils.config           import Config
 from classes.utils.user             import User
-from classes.utils.config           import SSL_CRT
+# from classes.utils.config           import SSL_CRT
 
 
 class GamePage(Screen):
@@ -34,7 +34,11 @@ class GamePage(Screen):
         self.running = True
         self.key_thread = threading.Thread(target=self.checkKeys)
         self.listener = None
-        self.sio = socketio.Client(ssl_verify=False)
+        self.connected = False
+        self.sio = socketio.Client(
+            ssl_verify=False,
+        )
+        self.sio_lock = threading.Lock()
 
     def on_mount(self):
         #key handling
@@ -46,7 +50,6 @@ class GamePage(Screen):
         self.listener.start()
         #game handling
         self.eventFromServer()
-        self.setHandler()
         self.gameLoop()
 
 
@@ -81,16 +84,28 @@ class GamePage(Screen):
                 pass
 
     def checkKeys(self):
-        while self.running:
-            # if 'w' in self.pressedKeys:
-            #     self.paddleLeft.moveUp()
-            # if 's' in self.pressedKeys:
-            #     self.paddleLeft.moveDown()
+        print(f"Check keys connected{self.connected}")
+        while self.running and self.connected:
+            direction = self.paddleRight.direction
             if keyboard.Key.up in self.pressedKeys:
+                if direction == 1:
+                    with self.sio_lock:
+                        self.sio.emit('stop_moving', {"position": self.paddleRight.cY})
                 self.paddleRight.moveUp()
-            if keyboard.Key.down in self.pressedKeys:
+                with self.sio_lock:
+                    self.sio.emit('move_up')
+            elif keyboard.Key.down in self.pressedKeys:
+                if direction == -1:
+                    with self.sio_lock:
+                        self.sio.emit('stop_moving', {"position": self.paddleRight.cY})
                 self.paddleRight.moveDown()
-            time.sleep(1/60)
+                with self.sio_lock:
+                    self.sio.emit('move_down')
+            else:
+                with self.sio_lock:
+                    self.sio.emit('stop_moving', {"position": self.paddleRight.cY})
+                self.paddleRight.direction = 0
+            time.sleep(1 / Config.frameRate)
 
     def checkWallBounce(self):
         if (self.ball.offset.y <= 0):
@@ -102,12 +117,7 @@ class GamePage(Screen):
             self.ball.dy *= -1
             print("hit lower wall")
 
-    # def checkPaddleBounce(self, paddle: Paddle):
-    #     if ()
-    #     #if (one of corner of the ball is inside the paddle)
-    #         # bounce
-    #     pass
-    #     # if (self.paddleLeft.reg)
+
 
     @work
     async def gameLoop(self):
@@ -123,6 +133,7 @@ class GamePage(Screen):
 
     def eventFromServer(self):
         try:
+            self.setHandler()
             self.sio.connect(
                 "wss://localhost:4443/",
                 socketio_path="/ws/game/",
@@ -139,53 +150,69 @@ class GamePage(Screen):
     def setHandler(self):
         @self.sio.on('connect')
         def connect():
-            print("Connected to server event!")
-            print(self.running)
+            self.connected = True
+            print("Connected to server event!🎉🎉🎉🎉🎉🎉🎉🎉", flush=True)
+            print(self.running, flush=True)
+
+        @self.sio.on('disconnect')
+        def disconnect():
+            self.connected = False
+            print("Disconnected from server event!", flush=True)
+            print(self.running, flush=True)
 
         @self.sio.on('start_game')
         def start_game_action():
-            print("start_game_action")
-            print(self.running)
+            print("start_game_action", flush=True)
+            print(self.running, flush=True)
 
         @self.sio.on('start_countdown')
         def start_countdown_action():
-            print("start_countdown_action")
-            print(self.running)
+            print("start_countdown_action", flush=True)
+            print(self.running, flush=True)
 
         @self.sio.on('game_state')
-        def game_state_action(data):
-            print(f"game_state_action: {data}")
-            print(self.running)
+        def gameStateAction(data):
+            # print(f"Game state received: {data}", flush=True)
+            self.ball.move(data["position_x"] / 7, data["position_y"] / 15)
+            self.ball.dx = data["direction_x"] / 7
+            self.ball.dy = data["direction_y"] / 15
+            self.ball.speed = data["speed"]
+            # print(f"Ball offset: {self.ball.offset}", flush=True)
+            # print(f"Ball dx, dy: {self.ball.dx}, {self.ball.dy}", flush=True)
 
         @self.sio.on('connect_error')
         def connect_error_action():
-            print("connect_error_action")
-            print(self.running)
+            print("connect_error_action", flush=True)
+            print(self.running, flush=True)
 
         @self.sio.on('move_up')
-        def move_up_action(data):
-            print(f"move_up_action: {data}")
-            print(self.running)
+        def moveUpAction(data):
+            print(f"move_up_action: {data}", flush=True)
+            print(self.running, flush=True)
 
         @self.sio.on('move_down')
-        def move_down_action(data):
-            print(f"move_down_action: {data}")
-            print(self.running)
+        def moveDownAction(data):
+            print(f"move_down_action: {data}", flush=True)
+            print(self.running, flush=True)
 
         @self.sio.on('stop_moving')
-        def stop_moving_action(data):
-            print(f"stop_moving_action: {data}")
-            print(self.running)
+        def stopMovingAction(data):
+            # print(f"stop_moving_action: {data}", flush=True)
+            if (data["player"] == User.id):
+                self.paddleRight.stopMoving(data["position"])
+            else:
+                self.paddleLeft.stopMoving(data["position"])
+            # print(self.running, flush=True)
 
         @self.sio.on('score')
         def score_action(data):
-            print(f"score_action: {data}")
-            print(self.running)
+            print(f"score_action: {data}", flush=True)
+            print(self.running, flush=True)
 
         @self.sio.on('game_over')
         def game_over_action(data):
-            print(f"game_over_action: {data}")
-            print(self.running)
+            print(f"game_over_action: {data}", flush=True)
+            print(self.running, flush=True)
 
     def on_unmount(self) -> None:
         self.running = False
