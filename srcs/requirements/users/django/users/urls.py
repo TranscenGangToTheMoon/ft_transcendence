@@ -34,6 +34,15 @@ urlpatterns = [
     path(UsersManagement.manage_user, manage_user_view),
 ]
 
+# todo 1. when user start game, block all users change
+# todo 2. make endpoint for game finish
+# todo 3. don't show ban when search for a tournament
+# todo 4. test ban after tournament start
+# todo 5. un user ban le creator du tournoi
+# todo 6. event accept-friend-request pas la bonne instance de user
+# todo 7. quand la game est finish, dans linstance de tournament, les matches sont pas set as fiunished
+
+
 # todo handle game state
 # todo handle in game in users
 # todo when in game cannot update player
@@ -48,6 +57,7 @@ urlpatterns = [
 
 
 # todo remove requete django https dans le system de pagination
+# todo when user play a game, bloque all user endpoint
 
 # todo make endpoint for user stats, xp, trophies (when match ended, or when tournament ended)
 # - pas de stat (custom_game)
