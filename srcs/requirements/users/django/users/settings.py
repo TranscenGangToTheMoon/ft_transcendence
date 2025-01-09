@@ -48,7 +48,10 @@ INSTALLED_APPS = [
     'friend_requests',
     'friends',
     'profile_pictures',
+    'sse',
+    'stats',
     'users',
+    'validate',
 ]
 
 MIDDLEWARE = [
