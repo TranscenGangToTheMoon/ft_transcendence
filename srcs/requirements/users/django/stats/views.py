@@ -4,10 +4,6 @@ from stats.models import GameModeStats, RankedStats
 from stats.serializer import StatsSerializer, FinishMatchSerializer, RankedStatsSerializer
 
 
-# todo finish match endpoint (update stat and friend)
-# todo get evovle of trophies
-# todo get stat of game
-
 class RetrieveStatsView(generics.ListAPIView):
     serializer_class = StatsSerializer
     pagination_class = None

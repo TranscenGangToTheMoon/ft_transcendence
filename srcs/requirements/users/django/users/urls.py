@@ -39,8 +39,6 @@ urlpatterns = [
     path(UsersManagement.manage_user, manage_user_view),
 ]
 
-# todo 1. when user start game, block all users change
-# todo 2. make endpoint for game finish
 # todo 3. don't show ban when search for a tournament
 # todo 4. test ban after tournament start
 # todo 5. un user ban le creator du tournoi
