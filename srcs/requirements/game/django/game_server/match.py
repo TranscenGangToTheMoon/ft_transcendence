@@ -8,13 +8,6 @@ from rest_framework.exceptions import APIException, NotFound
 from game_server.pong_racket import Racket
 
 
-import django
-import os
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'game.settings')
-django.setup()
-from matches.models import Matches
-
-
 class Player():
     def __init__(self, id, match_id, team):
         self.match_id = match_id
