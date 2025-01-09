@@ -21,6 +21,6 @@ def get_stats(user):
 
 def get_ranked_stats(user):
     return make_request(
-        endpoint='users/me/stats/ranked',
+        endpoint='users/me/stats/ranked/',
         token=user['token'],
     )
