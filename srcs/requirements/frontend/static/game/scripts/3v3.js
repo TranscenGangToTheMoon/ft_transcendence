@@ -489,7 +489,11 @@ function initSocket(){
     gameSocket.on('disconnect', () => {
         console.log('disconnected from gameSocket');
     })
-
+    gameSocket.on('rackets', event => {
+        console.log('received rackets');
+        console.log(event);
+        // for (racket in event.)
+    })
     gameSocket.on('start_game', event => {
         // console.log('received start_game');
         if (!window.PongGame.state.isGameActive)

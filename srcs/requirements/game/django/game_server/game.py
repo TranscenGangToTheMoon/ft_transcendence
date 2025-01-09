@@ -246,7 +246,7 @@ class Game:
             self.finish('game timed out, not all players connected to server')
             print('game canceled', flush=True)
             return
-        if (self.game_mode == 'clash'): #watchout for 'clash'
+        if (self.match.game_mode == 'clash'): #watchout for 'clash'
             self.canvas = Position(1800, 750)
             self.send_rackets()
         self.send_canvas()
@@ -383,6 +383,27 @@ class Game:
                 Server.emit(
                     'game_state',
                     data=self.get_game_state(side),
+                    to=player.socket_id
+                )
+            side = -1
+
+    def get_rackets(self, side: int):
+        rackets = {}
+        for racket in self.rackets:
+            if side == 1:
+                rackets[racket.player_id] = racket.position
+            else:
+                rackets[racket.player_id] = racket.position.invert(self.canvas)
+
+
+    def send_rackets(self):
+        from game_server.server import Server
+        side = 1
+        for team in self.match.teams:
+            for player in team.players:
+                Server.emit(
+                    'rackets',
+                    data=self.get_rackets(side),
                     to=player.socket_id
                 )
             side = -1

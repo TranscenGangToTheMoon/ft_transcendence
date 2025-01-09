@@ -510,10 +510,10 @@ async function lobbyDestroyed(event){
     displayMainAlert('Lobby destroyed', "The lobby has been destroyed.")
 }
 
-// async function lobbyGameStart(event){
-//     event = JSON.parse(event.data);
-//     console.log(event);
-// }
+async function lobbyGameStart(event){
+    event = JSON.parse(event.data);
+    console.log(event);
+}
 
 function initLobbySSEListeners(){
     if (!SSEListeners.has('lobby-join')){
@@ -546,13 +546,13 @@ function initLobbySSEListeners(){
         sse.addEventListener('lobby-destroy', lobbyDestroyed);
     }
 
-    // if (SSEListeners.has('game-start'))
-    //     SSEListeners.delete('game-start');
-    // console.log(
-    //     'je listen'
-    // )
-    // SSEListeners.set('game-start', lobbyGameStart);
-    // sse.addEventListener('game-start', lobbyGameStart);
+    if (SSEListeners.has('game-start'))
+        SSEListeners.delete('game-start');
+    console.log(
+        'je listen'
+    )
+    SSEListeners.set('game-start', lobbyGameStart);
+    sse.addEventListener('game-start', lobbyGameStart);
 }
 
 
