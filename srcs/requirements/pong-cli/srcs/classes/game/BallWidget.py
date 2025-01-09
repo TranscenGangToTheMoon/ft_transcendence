@@ -1,9 +1,11 @@
 # Python imports
 import math
 import random
+from collections import namedtuple
+from typing import NamedTuple
 
 # Textual imports
-from textual.geometry import Offset, Region
+from textual.geometry   import Offset, Region
 from textual.widget     import Widget
 
 # Local imports
@@ -23,6 +25,7 @@ class Ball(Widget):
         self.styles.height = Config.Ball.height
         self.styles.background = "white"
         self.offset = Offset((Config.Playground.width - Config.Ball.width) / 2, (Config.Playground.height - Config.Ball.height) / 2)
+        # self.realOffset = namedtuple("RealOffset", ["x", "y"])(*self.offset)
         self.speed = Config.Ball.speed
         self.angle = self.getRandomAngle()
         self.dx = self.getRandomX() * self.speed
@@ -32,8 +35,11 @@ class Ball(Widget):
         # return "▄▄\n▀▀"
         return ""
 
-    def move(self):
-        self.offset += Offset(self.dx, self.dy)
+    def move(self, x = None, y = None):
+        if (not x or not y):
+            self.offset += Offset(self.dx, self.dy)
+        elif (x and y):
+            self.offset = Offset(x, y)
         # print(f"{self.offset} += {Offset(self.dx, self.dy)}")
 
     def getRandomAngle(self):
