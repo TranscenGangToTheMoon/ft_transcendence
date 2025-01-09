@@ -1,5 +1,7 @@
+import time
 import unittest
 
+from services.game import create_game, score
 from services.stats import finish_match_stat, get_stats, get_ranked_stats
 from utils.my_unittest import UnitTest
 
@@ -33,6 +35,22 @@ class Test02_Stats(UnitTest):
         response = self.assertResponse(get_stats(user1), 200)
         self.assertEqual(response[0]['wins'], 1)
         self.assertThread(user1)
+
+    def test_002_ended_from_game(self):
+        user1 = self.user(['game-start'])
+        user2 = self.user(['game-start'])
+
+        self.assertResponse(create_game(user1, user2), 201)
+        self.assertResponse(score(user1['id']), 204)
+        self.assertResponse(score(user1['id']), 204)
+        self.assertResponse(score(user1['id']), 204)
+        time.sleep(1)
+        response = self.assertResponse(get_stats(user1), 200)
+        for game_mode in response:
+            if game_mode['game_mode'] == 'duel':
+                self.assertEqual(game_mode['wins'], 1)
+                break
+        self.assertThread(user1, user2)
 
 
 class Test03_StatsRanked(UnitTest):
