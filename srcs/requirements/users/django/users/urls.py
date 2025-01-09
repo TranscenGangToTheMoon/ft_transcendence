@@ -39,7 +39,6 @@ urlpatterns = [
     path(UsersManagement.manage_user, manage_user_view),
 ]
 
-# todo 6. event accept-friend-request pas la bonne instance de user
 # todo 7. quand la game est finish, dans linstance de tournament, les matches sont pas set as fiunished
 
 
