@@ -64,6 +64,9 @@ urlpatterns = [
 # todo remove requete django https dans le system de pagination
 # todo when user play a game, bloque all user endpoint
 
+# todo remake all endpoint, use serializer for each and create
+
+
 # todo make endpoint for user stats, xp, trophies (when match ended, or when tournament ended)
 # - pas de stat (custom_game)
 # - stat tournoi gagne
