@@ -42,7 +42,7 @@ class RankedStats(models.Model):
 
     @staticmethod
     def log(user: Users, trophies: int):
-        total_trophies = get_trophies(user).total_trophies + trophies
+        total_trophies = get_trophies(user) + trophies
         if total_trophies < 0:
             total_trophies = 0
         user.ranked_stats.create(trophies=trophies, total_trophies=total_trophies)
