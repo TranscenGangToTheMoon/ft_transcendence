@@ -3,5 +3,5 @@ class Position:
         self.x = x
         self.y = y
 
-    def invert(self, canvas: Position):
-        return Position(-self.x + canvas.x, self.y)
+    def invert(self, canvas: int):
+        return Position(-self.x + canvas, self.y)
