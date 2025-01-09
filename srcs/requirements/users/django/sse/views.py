@@ -43,7 +43,7 @@ class SSEView(APIView):
                         if event == EventCode.DELETE_USER.value:
                             raise ConnectionClose
                         if event == EventCode.GAME_START.value:
-                            get_user(id=_user_id).set_game_playing(json.loads(data)['code'])
+                            get_user(id=_user_id).set_game_playing(json.loads(data)['data']['code'])
                     else:
                         data = 'PING'
                         event = 'ping'
