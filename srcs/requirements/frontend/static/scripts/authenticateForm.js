@@ -39,6 +39,7 @@ document.getElementById("loginButton").addEventListener('click', event => {
     getDataFromApi(getAccessToken(), endpoint, method, undefined, undefined, userInfo)
         .then (async data => {
             if (data.access){
+                await closeGameConnection(window.location.pathname);
                 removeTokens();
                 sse.close();
                 localStorage.setItem('token', data.access);

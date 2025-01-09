@@ -48,22 +48,28 @@ document.getElementById('inviteFriends').addEventListener('click', async event =
         if (!data.count)
             fullFriendsDiv.style.display = 'none';
         else{
-            onlineFriendsDiv.innerHTML += '<li><button class="dropdown-item">loading...</butto></li>';
+            // onlineFriendsDiv.innerHTML += '<li><button class="dropdown-item">loading...</button></li>';
             fullFriendsDiv.style.display = 'block';
             const tempDiv = document.createElement('div');
             for (i in data.results){
                 let friend = data.results[i].friend;
                 let friendDiv = document.createElement('li');
                 let button = document.createElement('button');
-                button.classList.add('dropdown-item');
+                button.className = 'dropdown-item inviteOnlineFriend';
                 tempDiv.appendChild(friendDiv);
-                friendDiv.appendChild(button);
                 button.innerText = friend.username;
                 button.id = `oFriend${friend.id}`
+                friendDiv.appendChild(button);
+            }
+            onlineFriendsDiv.innerHTML = tempDiv.innerHTML;
+            const friendButtons = document.querySelectorAll('.inviteOnlineFriend');
+            for (let button of friendButtons){
+                console.log(button);
                 button.addEventListener('click', async event => {
                     event.preventDefault();
+                    console.log(button);
                     try {
-                        let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/play/lobby/${code}/invite/${friend.id}/`, 'POST');
+                        let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/play/lobby/${code}/invite/${button.id.substring(7)}/`, 'POST');
                         console.log(data);
                     }
                     catch (error) {
@@ -79,9 +85,6 @@ document.getElementById('inviteFriends').addEventListener('click', async event =
                     }
                 })
             }
-            setTimeout(()=> {
-                onlineFriendsDiv.innerHTML = tempDiv.innerHTML;
-            }, 700);
         }
 
     }

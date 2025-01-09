@@ -329,6 +329,8 @@ function loadTournament(tournament){
 		addParticipant(participant);
 	}
 	addTournamentSSEListeners();
+	if (tournament.matches)
+		createBracket(tournament)
 }
 
 if (typeof dataTest === 'undefined'){
@@ -436,10 +438,28 @@ function setTournamentOptions(){
 	});
 }
 
+if (typeof tournamentData === 'undefined')
+	var tournamentData;
+
 async function initTournament(){
+	fromTournament = false;
     await indexInit(false);
 	loadCSS('/tournament/css/tournament.css', false);
 	setTournamentOptions();
+
+	async function gameStart(event) {
+		event = JSON.parse(event.data);
+		console.log(event);
+		fromTournament = true;
+		tournamentData = event.data;
+		await navigateTo('/game/tournament');
+	}
+
+	if (!SSEListeners.has('game-start')){
+		SSEListeners.set('game-start', gameStart);
+		sse.addEventListener('game-start', gameStart);
+	}
+
 	document.getElementById('tournamentsList').addEventListener('click', async (e) => {
 		const tournamentDiv = e.target.closest('.tournament-div');
 		if (!tournamentDiv) return;

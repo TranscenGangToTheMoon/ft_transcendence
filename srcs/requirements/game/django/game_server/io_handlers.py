@@ -99,6 +99,6 @@ async def disconnect(sid):
     from game_server.server import Server
     try:
         match_id = Server._clients[sid].match_id
-        Server.finish_game(match_id, Reason.player_disconnect)
+        Server.finish_game(match_id, Reason.player_disconnect, Server._clients[sid].user_id)
     except KeyError:
         pass # player has already disconnected
