@@ -4,6 +4,7 @@ base_sse = 'sse/'
 _user_id = '<int:user_id>'
 
 
+# todo remake all
 class Auth:
     _base_auth = base_api + 'auth/'
     _base_private_auth = base_private_api + 'auth/'
