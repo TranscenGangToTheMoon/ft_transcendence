@@ -39,13 +39,6 @@ urlpatterns = [
     path(UsersManagement.manage_user, manage_user_view),
 ]
 
-# todo 7. quand la game est finish, dans linstance de tournament, les matches sont pas set as fiunished
-
-
-# todo handle game state
-# todo handle in game in users
-# todo when in game cannot update player
-
 # todo CHAT
 #   - create chat when lobby is created
 #   - create chat when tournament is created
