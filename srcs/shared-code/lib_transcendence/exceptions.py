@@ -121,6 +121,7 @@ class MessagesException:
         INVITE_NOT_FRIEND = 'You can only invite friends.'
 
         MATCH_NOT_FINISHED = 'Match cannot be set as finished.'
+        IN_GAME = 'You cannot perform this action when you playing.'
 
     class Conflict:
         DEFAULT = 'Conflict.'

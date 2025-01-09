@@ -12,12 +12,13 @@ from friends.utils import get_friend
 from sse.events import publish_event
 from users.auth import auth_delete, get_valid_user, get_user
 from users.models import Users
+from users.permissions import NotInGame
 from users.serializers import UsersSerializer, UsersMeSerializer, ManageUserSerializer
 
 
 class UsersMeView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = UsersMeSerializer
-    permission_classes = [GuestCannotDestroy]
+    permission_classes = [GuestCannotDestroy, NotInGame]
 
     def get_object(self):
         try:
