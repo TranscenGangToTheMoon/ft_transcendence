@@ -249,6 +249,7 @@ async function handleRoute() {
         '/game/custom' : '/game/game.html',
         '/game/local' : '/game/localGame.html',
         '/game/tournament' : '/game/game.html',
+        '/game/3v3' : '/game/3v3.html',
         '/tournament' : '/tournament/tournament.html'
     };
 

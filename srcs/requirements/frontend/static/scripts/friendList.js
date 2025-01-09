@@ -258,6 +258,7 @@ async function loadReceivedFriendRequests(){
     const friendRequestTitleDiv = document.getElementById('friendRequestsTitle');
     if (data.count === 0){
         friendRequestTitleDiv.innerText = 'no pending friend requests';
+        friendRequestsDiv.innerHTML = "";
     }
     else if (data.count){
         friendRequestsDiv.innerHTML = "";
@@ -286,6 +287,7 @@ async function loadSentFriendRequests(){
     const requestsDivTitle = document.getElementById('sentFriendRequestsTitle');
     if (data.count === 0){
         requestsDivTitle.innerText = 'no sent friend requests';
+        requestsDiv.innerHTML = "";
     }
     else if (data.count){
         requestsDiv.innerHTML = "";

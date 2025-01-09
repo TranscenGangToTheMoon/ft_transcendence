@@ -423,11 +423,14 @@ async function fillPlayerList(noTeam=false){
     tempDiv.remove();
     addContextMenus();
     document.getElementById(`player${userInformations.id}`)?.querySelector('.playerIsReady').addEventListener('click', async function(){
-        isReady = !isReady;
         try {
             await apiRequest(getAccessToken(), `${baseAPIUrl}/play/lobby/${code}/`, 'PATCH', undefined, undefined, {
-                'is_ready' : isReady,
+                'is_ready' : !isReady,
             })
+            isReady = !isReady;
+            for (participant in lobby.participants)
+                if (lobby.participants[participant].id === userInformations.id)
+                    lobby.participants[participant].is_ready = isReady;
             this.innerText = isReady ? 'Ready' : 'Not Ready';
         }
         catch (error) {
@@ -507,6 +510,11 @@ async function lobbyDestroyed(event){
     displayMainAlert('Lobby destroyed', "The lobby has been destroyed.")
 }
 
+async function lobbyGameStart(event){
+    event = JSON.parse(event.data);
+    console.log(event);
+}
+
 function initLobbySSEListeners(){
     if (!SSEListeners.has('lobby-join')){
         SSEListeners.set('lobby-join', lobbyJoined);
@@ -537,6 +545,14 @@ function initLobbySSEListeners(){
         SSEListeners.set('lobby-destroy', lobbyDestroyed);
         sse.addEventListener('lobby-destroy', lobbyDestroyed);
     }
+
+    if (SSEListeners.has('game-start'))
+        SSEListeners.delete('game-start');
+    console.log(
+        'je listen'
+    )
+    SSEListeners.set('game-start', lobbyGameStart);
+    sse.addEventListener('game-start', lobbyGameStart);
 }
 
 
