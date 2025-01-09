@@ -101,3 +101,18 @@ socket.on('game_state', event => {
     ball.speed = event.speed;
 })
 ```
+
+## Receive score update
+
+As the server register a new goal in the game you are in, you will receive a score update as a socketIO event:
+```javascript
+socket.on('score', event => {
+	if (myTeam.name == 'team_a') {
+		player.score = event.team_a;
+		enemy.score = event.team_b;
+	} else {
+		player.score = event.team_b;
+		enemy.score = event.team_a;
+	}
+})
+```
