@@ -40,7 +40,16 @@ class Test03_StatsRanked(UnitTest):
     def test_001_ranked_stats(self):
         user1 = self.user()
 
-        self.assertResponse(get_ranked_stats(user1), 200)
+        self.assertResponse(get_ranked_stats(user1), 200, count=1)
+        data = validata_data
+        data['teams']['b'][0]['id'] = user1['id']
+        data['teams']['b'][0]['trophies'] = 30
+        data['game_mode'] = 'ranked'
+        self.assertResponse(finish_match_stat(data), 201)
+        data['teams']['b'][0]['trophies'] = 28
+        self.assertResponse(finish_match_stat(data), 201)
+        response = self.assertResponse(get_ranked_stats(user1), 200, count=3)
+        self.assertEqual(response['results'][-1]['total_trophies'], 58)
         self.assertThread(user1)
 
 
