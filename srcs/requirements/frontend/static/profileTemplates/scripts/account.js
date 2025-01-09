@@ -95,7 +95,6 @@ function setChatAcceptationOptions(){
 	selectedValue = userInformations.accept_chat_from;
 
 	options.forEach(option => {
-        console.log(option.dataset.value);
   		if (option.dataset.value == selectedValue) {
     		option.classList.add('selected');
   		}
