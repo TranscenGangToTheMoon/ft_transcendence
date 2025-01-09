@@ -39,7 +39,6 @@ urlpatterns = [
     path(UsersManagement.manage_user, manage_user_view),
 ]
 
-# todo 3. don't show ban when search for a tournament
 # todo 4. test ban after tournament start
 # todo 5. un user ban le creator du tournoi
 # todo 6. event accept-friend-request pas la bonne instance de user
