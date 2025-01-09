@@ -71,6 +71,10 @@ class Users:
     blocked                     = 'api/users/me/blocked/'
     blocked_user                = 'api/users/me/blocked/<int:blocking_id>/'
 
+    stats                       = 'api/users/me/stats/'
+    stats_ranked                = 'api/users/me/stats/ranked/'
+    result_match                = 'api/private/users/result-match/'
+
     sse                         = 'sse/users/'
     event                       = 'api/private/users/events/'
 
