@@ -37,14 +37,18 @@ class Game:
         racket_size: Position = Position(30, 200)
         # create rackets for right players
         for player in match.teams[0].players:
-            racket = Racket(player.user_id, Position(canvas.x - racket_size.x - 100, int(canvas.y / 2 - racket_size.y / 2)))
+            racket_offset = 100
+            racket = Racket(player.user_id, Position(canvas.x - racket_size.x - racket_offset, int(canvas.y / 2 - racket_size.y / 2)))
             player.racket = racket
             rackets.append(racket)
+            racket_offset += 200
         # create rackets for left players
         for player in match.teams[1].players:
-            racket = Racket(player.user_id, Position(100, int(canvas.y / 2 - racket_size.y / 2)))
+            racket_offset = 100
+            racket = Racket(player.user_id, Position(racket_offset, int(canvas.y / 2 - racket_size.y / 2)))
             player.racket = racket
             rackets.append(racket)
+            racket_offset += 200
         return rackets
 
     def __init__(self,
@@ -242,6 +246,9 @@ class Game:
             self.finish('game timed out, not all players connected to server')
             print('game canceled', flush=True)
             return
+        if (self.match.game_mode == 'clash'): #watchout for 'clash'
+            self.canvas = Position(1800, 750)
+            self.send_rackets()
         self.send_canvas()
         self.send_game_state()
         print('game launched', flush=True)
@@ -376,6 +383,27 @@ class Game:
                 Server.emit(
                     'game_state',
                     data=self.get_game_state(side),
+                    to=player.socket_id
+                )
+            side = -1
+
+    def get_rackets(self, side: int):
+        rackets = {}
+        for racket in self.rackets:
+            if side == 1:
+                rackets[racket.player_id] = racket.position
+            else:
+                rackets[racket.player_id] = racket.position.invert(self.canvas)
+
+
+    def send_rackets(self):
+        from game_server.server import Server
+        side = 1
+        for team in self.match.teams:
+            for player in team.players:
+                Server.emit(
+                    'rackets',
+                    data=self.get_rackets(side),
                     to=player.socket_id
                 )
             side = -1
