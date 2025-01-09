@@ -154,6 +154,19 @@ class Test02_ErrorJoinLobby(UnitTest):
         self.assertResponse(join_lobby(user1, code), 401, {'code': 'sse_connection_required', 'detail': 'You need to be connected to SSE to access this resource.'})
         self.assertThread(user2)
 
+    def test_012_user_blocked_creator(self):
+        user1 = self.user(['lobby-join', 'lobby-join', 'lobby-leave'])
+        user2 = self.user(['lobby-join', 'lobby-leave'])
+        user3 = self.user(['lobby-banned'])
+
+        code = self.assertResponse(create_lobby(user1), 201, get_field='code')
+        self.assertResponse(join_lobby(user2, code), 201)
+        self.assertResponse(join_lobby(user3, code), 201)
+        self.assertResponse(blocked_user(user3, user1['id']), 201)
+        response = self.assertResponse(join_lobby(user1, code, 'GET'), 200)
+        self.assertEqual(2, len(response))
+        self.assertThread(user1, user2, user3)
+
 
 class Test03_BanLobby(UnitTest):
 

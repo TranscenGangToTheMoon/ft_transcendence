@@ -175,6 +175,19 @@ class Test02_ErrorTournament(UnitTest):
         self.assertResponse(create_tournament(user1, size=7), 400)
         self.assertThread(user1)
 
+    def test_015_user_blocked_creator(self):
+        user1 = self.user(['tournament-join', 'tournament-join', 'tournament-leave'])
+        user2 = self.user(['tournament-join', 'tournament-leave'])
+        user3 = self.user(['tournament-banned'])
+
+        code = self.assertResponse(create_tournament(user1), 201, get_field='code')
+        self.assertResponse(join_tournament(user2, code), 201)
+        self.assertResponse(join_tournament(user3, code), 201)
+        self.assertResponse(blocked_user(user3, user1['id']), 201)
+        response = self.assertResponse(join_tournament(user1, code, 'GET'), 200)
+        self.assertEqual(2, len(response))
+        self.assertThread(user1, user2, user3)
+
 
 class Test03_BanTournament(UnitTest):
 
