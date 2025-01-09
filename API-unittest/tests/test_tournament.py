@@ -574,6 +574,22 @@ class Test09_StartTournament(UnitTest):
 
         self.assertThread(user1, user2, user3, user4, user5, user6, user7)
 
+    def test_004_ban_after_start(self):
+        user1 = self.user(['tournament-join', 'tournament-join', 'tournament-join', 'tournament-start', 'game-start'])
+        user2 = self.user(['tournament-join', 'tournament-join', 'tournament-start', 'game-start'])
+        user3 = self.user(['tournament-join', 'tournament-start', 'game-start'])
+        user4 = self.user(['tournament-start', 'game-start'])
+
+        code = self.assertResponse(create_tournament(user1), 201, get_field='code')
+        self.assertResponse(join_tournament(user2, code), 201)
+        self.assertResponse(join_tournament(user3, code), 201)
+        self.assertResponse(join_tournament(user4, code), 201)
+
+        time.sleep(5)
+        self.assertResponse(ban_user(user1, user4, code), 403)
+
+        self.assertThread(user1, user2, user3, user4)
+
 
 class Test10_FinishTournament(UnitTest):
 
