@@ -355,7 +355,8 @@ async function quitLobbies(oldUrl){
             console.log(error);
         }
     }
-    if (oldUrl.includes('/tournament') && tournament){
+    if (oldUrl.includes('/tournament') && typeof tournament !== 'undefined' && tournament && !fromTournament){
+        console.log('non normalement non non', fromTournament);
         try {
             await apiRequest(getAccessToken(), `${baseAPIUrl}/play/tournament/${tournament.code}/`, 'DELETE');
         }
@@ -374,7 +375,7 @@ async function handleSSEListenerRemoval(url){
     if (window.pathName.includes('/lobby') && !url.includes('/lobby')){
         removeSSEListeners('lobby');
     }
-    if (window.pathName.includes('/tournament') && !url.includes('/tournament')){
+    if (window.pathName.includes('/tournament')){
         removeSSEListeners('tournament');
     }
 }
@@ -399,7 +400,7 @@ function removeSSEListeners(type){
         if (key.includes(type)) {
             sse.removeEventListener(key, value);
             SSEListeners.delete(key);
-            console.log('removed sse listener:', key);
+            // console.log('removed sse listener:', key);
         }
     }
 }
@@ -743,14 +744,17 @@ async function displayNotification(icon=undefined, title=undefined, body=undefin
 
 async function closeGameConnection(oldUrl){
     if (!oldUrl.includes('game')) return;
+    if (typeof gameSocket !== 'undefined'){
+        console.log("je close la grosse game socket la");
+        gameSocket.close();
+    }
+    if (fromTournament)return;
     try {
         await apiRequest(getAccessToken(), `${baseAPIUrl}${oldUrl.replace("game", 'play')}/`, 'DELETE');
     }
     catch(error){
         console.log(error);
     }
-    if (typeof gameSocket !== 'undefined')
-        gameSocket.close();
 }
 
 async function fetchUserInfos(forced=false) {
