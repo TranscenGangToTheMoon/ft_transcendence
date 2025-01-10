@@ -41,37 +41,10 @@ urlpatterns = [
 
 # todo remake all endpoint, use serializer for each and create
 
-# todo make endpoint for user stats, xp, trophies (when match ended, or when tournament ended)
-# - pas de stat (custom_game)
-# - stat tournoi gagne
-# - stat tournoi point marque en tournoi
-# - stat tournoi nombre de game gagne
-# - stat tournoi nombre de game joue
-
-# - stat ranked evolution du ranked au file du temps
-# - stat ranked nb de point
-# - stat ranked win
-# - stat ranked play
-
-# - stat 1v1 nb de point
-# - stat 1v1 win
-# - stat 1v1 play
-
-# - stat 3v3 nb de point
-# - stat 3v3 win
-# - stat 3v3 play
-# - stat 3v3 csc
-
-# - stat total partie faite
-# - stat total point marque
-# - stat total win
-
-# - stat ranked max elo
-
-# - delete season
-# - delete coin
-# - delete xp
-
+# todo - stat tournoi gagne
+# todo - stat total partie faite
+# todo - stat total point marque
+# todo - stat total win
 
 # todo fix github issue
 # todo ajouter password field pour change password
