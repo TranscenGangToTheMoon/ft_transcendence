@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 from django.db import models
 from lib_transcendence import endpoints
@@ -27,15 +27,17 @@ class Users(models.Model):
     game_playing = models.CharField(max_length=5, default=None, null=True)
     last_online = models.DateTimeField(auto_now_add=True)
 
-    coins = models.IntegerField(default=100)
-    trophies = models.IntegerField(default=0)
     current_rank = models.IntegerField(default=None, null=True)
     highest_rank = models.IntegerField(default=None, null=True)
+
+    def set_game_playing(self, code=None):
+        self.game_playing = code
+        self.save()
 
     def connect(self):
         print(f'User {self.id} connected', flush=True)
         self.is_online = True
-        self.last_online = datetime.now()
+        self.last_online = datetime.now(timezone.utc)
         self.save()
 
     def disconnect(self):
@@ -47,18 +49,8 @@ class Users(models.Model):
             pass
 
         self.is_online = False
-        self.last_online = datetime.now()
+        self.last_online = datetime.now(timezone.utc)
         self.save()
 
     def __str__(self):
         return f'{self.id} {self.username}'
-
-# class Stats(models.Model):
-#     # auto update when register new match
-#     user = models.ForeignKey(Users, on_delete=models.CASCADE)
-#     game_mode = models.ForeignKey(GameModes, on_delete=models.SET_NULL, null=True)
-#     score_points = models.IntegerField(default=0)
-#     cashed_points = models.IntegerField(default=0)
-#     game_played = models.IntegerField(default=0)
-#     win = models.IntegerField(default=0)
-#     longest_win_streak = models.IntegerField(default=0)

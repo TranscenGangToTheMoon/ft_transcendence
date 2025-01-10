@@ -769,22 +769,6 @@ async function fetchUserInfos(forced=false) {
     }
 }
 
-function hideAllModals(){
-    document.querySelectorAll('.modal').forEach(modal => {
-        // console.log(modal);
-        const modalInstance = bootstrap.Modal.getInstance(modal);
-        // console.log(modalInstance);
-        if (modalInstance) {
-            console.log('je passe par la pourtant');
-            modalInstance.hide();
-        }
-    });
-    document.querySelectorAll('.modal-backrop fade show').forEach(div => {
-        // console.log('removing', div);
-        div.remove;
-    })
-}
-
 function displayMainAlert(alertTitle, alertContent) {
     const alertContentDiv = document.getElementById('alertContent');
     const alertTitleDiv = document.getElementById('alertModalLabel');
@@ -884,20 +868,18 @@ function addFriendListListener(){
 
 async function  indexInit(auto=true) {
     if (!auto){
-        if (userInformations.code === 'user_not_found'){
-            console.log('user was deleted from database, switching to guest mode');
-            hideAllModals();
-            displayMainAlert("Unable to retrieve your account/guest profile","We're sorry your account has been permanently deleted and cannot be recovered.");
-            await generateToken();
-            await fetchUserInfos(true);
-            initSSE();
-            return navigateTo('/');
-        }
         await loadUserProfile();
         getBadgesDivs();
     }
     else{
         await fetchUserInfos();
+        if (userInformations.code === 'user_not_found'){
+            console.log('user was deleted from database, switching to guest mode');
+            await generateToken();
+            await fetchUserInfos(true);
+            displayMainAlert("Unable to retrieve your account/guest profile","We're sorry your account has been permanently deleted and cannot be recovered.");
+            return navigateTo('/');
+        }
         initSSE();
         await loadFriendListModal();
         document.getElementById('innerFriendRequests-tab').clicked = true;

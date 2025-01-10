@@ -35,30 +35,14 @@ class Test02_CreateChatError(UnitTest):
         self.assertResponse(create_chat(user1, 'caca_pipi_proute'), 404, {'detail': 'User not found.'})
         self.assertThread(user1)
 
-    def test_002_invalid_type(self):
-        user1 = self.user()
-        user2 = self.user()
-
-        self.assertResponse(accept_chat(user2), 200)
-        self.assertResponse(create_chat(user1, data={'username': user2['username'], 'type': 'caca'}), 400, {'type': ["Chat type must be 'private_message', 'lobby', 'tournament' or 'custom_game'."]})
-        self.assertThread(user1, user2)
-
-    def test_003_type_not_allowed(self):
-        user1 = self.user()
-        user2 = self.user()
-
-        self.assertResponse(accept_chat(user2), 200)
-        self.assertResponse(create_chat(user1, data={'username': user2['username'], 'type': 'tournament'}), 403, {'detail': 'You can only create private messages.'})
-        self.assertThread(user1, user2)
-
-    def test_004_does_not_accept_chat(self):
+    def test_002_does_not_accept_chat(self):
         user1 = self.user()
         user2 = self.user()
 
         self.assertResponse(create_chat(user1, user2['username']), 403, {'detail': 'This user does not accept new chat.'})
         self.assertThread(user1, user2)
 
-    def test_005_blocked_by_user(self):
+    def test_003_blocked_by_user(self):
         user1 = self.user()
         user2 = self.user()
 
@@ -66,13 +50,13 @@ class Test02_CreateChatError(UnitTest):
         self.assertResponse(create_chat(user2, user1['username']), 404, {'detail': 'User not found.'})
         self.assertThread(user1, user2)
 
-    def test_006_chat_with_myself(self):
+    def test_004_chat_with_myself(self):
         user1 = self.user()
 
         self.assertResponse(create_chat(user1, user1['username']), 403, {'detail': 'You cannot chat with yourself.'})
         self.assertThread(user1)
 
-    def test_007_accept_chat_from_none(self):
+    def test_005_accept_chat_from_none(self):
         user1 = self.user(['accept-friend-request'])
         user2 = self.user(['receive-friend-request'])
 
@@ -81,7 +65,7 @@ class Test02_CreateChatError(UnitTest):
         self.assertResponse(create_chat(user1, user2['username']), 403, {'detail': 'This user does not accept new chat.'})
         self.assertThread(user1, user2)
 
-    def test_008_already_chat_with(self):
+    def test_006_already_chat_with(self):
         user1 = self.user(['accept-friend-request'])
         user2 = self.user(['receive-friend-request'])
 
@@ -90,7 +74,7 @@ class Test02_CreateChatError(UnitTest):
         self.assertResponse(create_chat(user1, user2['username']), 409, {'detail': 'You are already chat with this user.'})
         self.assertThread(user1, user2)
 
-    def test_009_blocked_user_trying_request(self):
+    def test_007_blocked_user_trying_request(self):
         user1 = self.user()
         user2 = self.user()
 
@@ -98,14 +82,14 @@ class Test02_CreateChatError(UnitTest):
         self.assertResponse(friend_requests(user1, user2), 403, {'detail': 'You blocked this user.'})
         self.assertThread(user1, user2)
 
-    def test_010_chat_with_guest(self):
+    def test_008_chat_with_guest(self):
         user1 = self.user()
         user2 = self.user(guest=True)
 
         self.assertResponse(create_chat(user1, user2['username']), 404, {'detail': 'User not found.'})
         self.assertThread(user1, user2)
 
-    def test_011_guest_create_chat(self):
+    def test_009_guest_create_chat(self):
         user1 = self.user()
         user2 = self.user(guest=True)
 

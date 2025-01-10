@@ -14,6 +14,9 @@ fi
 echo -e $BOLD$RED"- Migrating"$RESET
 python manage.py migrate
 
-PGPASSWORD=$POSTGRES_PASSWORD psql -h $POSTGRES_HOST -p 5432 -U $POSTGRES_USER -d $POSTGRES_DB -c "UPDATE users_users SET is_online = FALSE WHERE is_online = TRUE;"
+PGPASSWORD=$POSTGRES_PASSWORD psql -h $POSTGRES_HOST -p 5432 -U $POSTGRES_USER -d $POSTGRES_DB -c "
+UPDATE users_users SET is_online = FALSE WHERE is_online = TRUE;
+UPDATE users_users SET game_playing = NULL WHERE game_playing IS NOT NULL;
+"
 
 exec "$@"

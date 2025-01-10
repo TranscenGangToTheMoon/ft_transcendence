@@ -10,6 +10,7 @@ from rest_framework import generics, status
 from rest_framework.exceptions import PermissionDenied, NotFound
 from rest_framework.response import Response
 
+from baning.models import Banned
 from blocking.models import Blocked
 from blocking.utils import create_player_instance, delete_player_instance
 from matchmaking.utils.participant import get_tournament_participant
@@ -34,23 +35,30 @@ class TournamentSearchView(generics.ListAPIView):
     serializer_class = TournamentSearchSerializer
 
     def get_queryset(self):
+        user_id = self.request.user.id
+
         def get_blocked_users(kwargs: Literal['user_id', 'blocked_user_id']):
             if kwargs == 'user_id':
                 create_player_instance(self.request)
                 values_list = 'blocked_user_id'
             else:
                 values_list = 'user_id'
-            blocked_results = list(Blocked.objects.filter(**{kwargs: self.request.user.id}).values_list(values_list, flat=True))
+            blocked_results = list(Blocked.objects.filter(**{kwargs: user_id}).values_list(values_list, flat=True))
             if kwargs == 'user_id':
-                delete_player_instance(user_id=self.request.user.id)
+                delete_player_instance(user_id=user_id)
             return blocked_results
 
         query = self.request.query_params.get('q')
         if query is None:
             query = ''
-        results = Tournament.objects.filter(Q(private=False) | Q(created_by=self.request.user.id), name__icontains=query, is_started=False)
+        results = Tournament.objects.filter(Q(private=False) | Q(created_by=user_id), name__icontains=query, is_started=False)
         exclude_blocked = get_blocked_users('user_id') + get_blocked_users('blocked_user_id')
-        return results.exclude(created_by__in=exclude_blocked)
+        queryset = results.exclude(created_by__in=exclude_blocked)
+        exclude_tournament = []
+        for tournament in queryset:
+            if user_id in Banned.objects.filter(code=tournament.code).values_list('banned_user_id', flat=True):
+                exclude_tournament.append(tournament.id)
+        return queryset.exclude(id__in=exclude_tournament)
 
 
 class TournamentParticipantsView(SerializerAuthContext, generics.ListCreateAPIView, generics.DestroyAPIView):

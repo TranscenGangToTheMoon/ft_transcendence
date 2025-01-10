@@ -7,7 +7,6 @@ from blocking.models import BlockedUsers
 from blocking.serializers import BlockedSerializer
 
 
-
 class BlockedMixin(generics.GenericAPIView):
     queryset = BlockedUsers.objects.all()
     serializer_class = BlockedSerializer

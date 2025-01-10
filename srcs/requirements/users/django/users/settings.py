@@ -48,7 +48,10 @@ INSTALLED_APPS = [
     'friend_requests',
     'friends',
     'profile_pictures',
+    'sse',
+    'stats',
     'users',
+    'validate',
 ]
 
 MIDDLEWARE = [
@@ -143,6 +146,6 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'lib_transcendence.auth.Authentication',
     ],
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'DEFAULT_PAGINATION_CLASS': 'lib_transcendence.pagination.LimitOffsetPagination',
     'PAGE_SIZE': 10,
 }
