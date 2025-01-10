@@ -121,9 +121,9 @@ class Game:
 
     def handle_goal(self):
         if self.ball.position.x + self.ball.size < 0:
-            self.score(self.match.teams[1])
-        elif self.ball.position.x > self.canvas.x:
             self.score(self.match.teams[0])
+        elif self.ball.position.x > self.canvas.x:
+            self.score(self.match.teams[1])
 
     def calculateImpactPosition(self, ballY, paddleY, paddleHeight):
         relativeY = (paddleY + paddleHeight / 2) - ballY
