@@ -38,13 +38,22 @@ class LobbyGetParticipantsSerializer(serializers.ModelSerializer):
 
 class LobbySerializer(serializers.ModelSerializer):
     participants = serializers.SerializerMethodField(read_only=True)
-    is_full = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = Lobby
-        fields = '__all__'
-        read_only_fields = [
+        fields = [
+            'id',
             'code',
+            'participants',
+            'max_participants',
+            'created_at',
+            'game_mode',
+            'match_type',
+        ]
+        read_only_fields = [
+            'id',
+            'code',
+            'participants',
             'max_participants',
             'created_at',
         ]
@@ -69,10 +78,6 @@ class LobbySerializer(serializers.ModelSerializer):
         if obj.game_mode == GameMode.custom_game:
             fields.extend(['team'])
         return get_participants(obj, fields)
-
-    @staticmethod
-    def get_is_full(obj):
-        return obj.is_full
 
     def create(self, validated_data):
         request = self.context.get('request')
