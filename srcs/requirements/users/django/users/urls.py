@@ -40,6 +40,9 @@ urlpatterns = [
 ]
 
 # todo remake all endpoint, use serializer for each and create
+# todo test tournament with ui
+# todo test tournament abandon
+# todo test tournament quit tournament via sse
 
 # todo make matchamking for duel
 # todo make matchamking for clash
