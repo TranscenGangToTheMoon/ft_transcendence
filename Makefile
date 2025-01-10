@@ -81,15 +81,13 @@ banner		:
 			@echo -e '                                          bajeanno fguirama jcoquard nfaust xcharra'
 			@echo -e '$(RESET)'
 
-secrets		:	$(ENV_FILE)
+secrets		:	$(ENV_EXEMPLE)
 			mkdir -p $@
+			./launch.d/01passwords.sh $(ENV_EXEMPLE) $(ENV_FILE)
 			./launch.d/02set-hostname.sh
 			./launch.d/03genreateSSL.sh
 			ln -f ./secrets/ssl.crt ./srcs/requirements/pong-cli/ft_transcendence.crt
 			ln -f ./secrets/ssl.key ./srcs/requirements/pong-cli/ft_transcendence.key
-
-$(ENV_FILE)	:	$(ENV_EXEMPLE)
-			./launch.d/01passwords.sh $(ENV_EXEMPLE) $(ENV_FILE)
 
 .PHONY: clean
 clean		:
