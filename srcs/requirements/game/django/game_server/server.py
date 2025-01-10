@@ -1,5 +1,4 @@
 from aiohttp import web
-from socketio.exceptions import DisconnectedError
 from game_server import io_handlers
 from game_server.match import Player
 from game_server.game import Game
