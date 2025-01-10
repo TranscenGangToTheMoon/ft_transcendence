@@ -36,9 +36,24 @@ document.getElementById('customGame').addEventListener('click', async event => {
     }
 })
 
+document.getElementById('tournament').addEventListener('click', async event => {
+    // try {
+        await navigateTo('/tournament');
+    // }
+    // catch(error){
+    //     console.log(error);
+    // }
+})
+
+document.getElementById('local').addEventListener('click', async () => {
+    await navigateTo('/game/local');
+})
+
 document.getElementById('chat').addEventListener('click', async ()=> {
     if (!userInformations.is_guest)
         await navigateTo('/chat');
+    // console.log('chat');
+    // await loadChatsListModal();
 })
 
 async function homePageInit() {

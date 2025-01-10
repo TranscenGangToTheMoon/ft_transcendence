@@ -1,10 +1,10 @@
 (function PongGame() {
 
     const config = {
-        canvasWidth: 800,
-        canvasHeight: 600,
+        canvasWidth: 1800,
+        canvasHeight: 750,
         paddleWidth: 30,
-        paddleHeight: 200,
+        paddleHeight: 100,
         ballSize: 20,
         maxBallSpeed: 1500,
         maxPaddleSpeed: 500,
@@ -74,11 +74,30 @@
                 blockGlide: false,
                 speed : 0
             },
-            // leftRight :{
-            //     x : 100 + 100,
-            //     y : (config.canvasHeight - config.paddleHeight) / 2,
-            //     blockGlide: false,
-            // },
+            left_1: {
+                x: 300,
+                y: (config.canvasHeight - config.paddleHeight) / 2,
+                blockGlide: false,
+                speed:0
+            },
+            right_1: {
+                x: config.canvasWidth - config.paddleWidth - 300,
+                y: (config.canvasHeight - config.paddleHeight) / 2,
+                blockGlide: false,
+                speed : 0
+            },
+            left_2: {
+                x: 500,
+                y: (config.canvasHeight - config.paddleHeight) / 2,
+                blockGlide: false,
+                speed:0
+            },
+            right_2: {
+                x: config.canvasWidth - config.paddleWidth - 500,
+                y: (config.canvasHeight - config.paddleHeight) / 2,
+                blockGlide: false,
+                speed : 0
+            },
         },
         countDown: {
             currentStep: config.countDown.steps,
@@ -111,17 +130,6 @@
             state.keys[e.key] = true;
     });
     document.addEventListener("keyup", (e) => (state.keys[e.key] = undefined));
-
-    document.getElementById("replayFront").addEventListener("click", event => {
-        event.target.blur();
-        resumeGame();
-        state.ball.speed = config.defaultBallSpeed;
-        stopGame(true);
-        setTimeout(()=>{
-            resetGame();
-            startGame();
-        }, config.animationDuration + 100);
-    });
 
     function startGame() {
         state.isGameActive = true;
@@ -481,7 +489,11 @@ function initSocket(){
     gameSocket.on('disconnect', () => {
         console.log('disconnected from gameSocket');
     })
-
+    gameSocket.on('rackets', event => {
+        console.log('received rackets');
+        console.log(event);
+        // for (racket in event.)
+    })
     gameSocket.on('start_game', event => {
         // console.log('received start_game');
         if (!window.PongGame.state.isGameActive)
@@ -492,21 +504,11 @@ function initSocket(){
         window.PongGame.startCountdown();
     })
     gameSocket.on('game_state', event => {
-		// console.log('front : ', window.PongGame.state.ball.speedX);
-		// console.log('front : ', window.PongGame.state.ball.speedY);
-		// console.log('front : ', window.PongGame.state.ball.speed);
-		// console.log('back : ', event.direction_x);
-		// console.log('back : ', event.direction_y);
-		// console.log('back : ', event.speed);
 		window.PongGame.state.ball.y = event.position_y;
 		window.PongGame.state.ball.x = event.position_x;
 		window.PongGame.state.ball.speedX = event.direction_x;
 		window.PongGame.state.ball.speedY = event.direction_y;
 		window.PongGame.state.ball.speed = event.speed;
-		// console.log(Date.now());
-		// console.log('front apres : ', window.PongGame.state.ball.speedX);
-		// console.log('front apres : ', window.PongGame.state.ball.speedY);
-		// console.log('front apres : ', window.PongGame.state.ball.speed);
     })
     gameSocket.on('connect_error', (error)=> {
         console.log('error', error);
@@ -532,10 +534,6 @@ function initSocket(){
     })
     gameSocket.on('score', event => {
         window.PongGame.state.ball.speed = 0;
-		// for (paddle in window.PongGame.state.paddles) {
-		// 	window.PongGame.state.paddles[paddle].y = (window.PongGame.config.canvasHeight - window.PongGame.config.paddleHeight) / 2;
-		// }
-        // window.PongGame.animatePaddlesToMiddle()
     	if (window.PongGame.info.myTeam.name == 'team_a') {
 			window.PongGame.state.playerScore = event.team_a;
             document.getElementById('playerScore').innerText = event.team_a;
@@ -590,16 +588,6 @@ sse.addEventListener('game-start', event => {
 	initData(data);
 })
 
-document.getElementById('playGame').addEventListener('click', async event => {
-	try {
-		let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/play/duel/`, 'POST');
-	}
-	catch(error) {
-		console.log(error);
-	}
-	// initSocket();
-})
-
 document.getElementById('confirmModal').addEventListener('hidden.bs.modal', () => {
     window.PongGame.resumeGame();
 })
@@ -615,8 +603,8 @@ function checkGameAuthorization(){
 async function initGame(){
     await indexInit(false);
     if (window.location.pathname === '/') return;
-    document.getElementById('gameArea').style.display = "none";
-    document.getElementById('opponentWait').style.display = "block";
+    // document.getElementById('gameArea').style.display = "none";
+    // document.getElementById('opponentWait').style.display = "block";
     try {
         checkGameAuthorization();
         if (window.location.pathname === '/game/tournament')
@@ -632,6 +620,7 @@ async function initGame(){
                 console.log(error);
             }
         }
+        window.PongGame.startGame();
     }
     catch (unauthorized){
         if (!document.getElementById('alertModal').classList.contains('show'))

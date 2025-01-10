@@ -1,7 +1,8 @@
 from lib_transcendence import endpoints
 from lib_transcendence.request import request_service
 from lib_transcendence.validate_type import validate_type
-
+from lib_transcendence.endpoints import Chat as endpoint
+from lib_transcendence.request import request_service
 
 class AcceptChat:
     none = 'none'
@@ -23,4 +24,4 @@ class AcceptChat:
 
 
 def post_messages(chat_id: int, content: str, token: str):
-    return request_service('chat', endpoints.Chat.fmessage.format(chat_id=chat_id), 'POST', {'content': content}, token)
+    return request_service('chat', endpoint.fmessage.format(chat_id=chat_id), 'POST', {'content': content}, token)

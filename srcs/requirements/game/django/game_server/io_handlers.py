@@ -1,6 +1,7 @@
 import asyncio
 from typing import Any, Dict
 from lib_transcendence.auth import auth_verify
+from lib_transcendence.game import Reason
 from logging import info, debug, error
 from lib_transcendence.exceptions import MessagesException, ServiceUnavailable
 from rest_framework.exceptions import NotFound
@@ -26,6 +27,7 @@ async def connect(sid, environ, auth):
     if user_data is None:
         raise ConnectionRefusedError(MessagesException.Authentication.NOT_AUTHENTICATED)
     id = user_data['id']
+    print(f'user_id = {id}', flush=True)
     try:
         game_data = request_game(endpoints.Game.fmatch_user.format(user_id=id), 'GET')
     except NotFound as e:
@@ -34,15 +36,19 @@ async def connect(sid, environ, auth):
         raise ConnectionRefusedError(MessagesException.ServiceUnavailable.game)
     if game_data is None:
         raise ConnectionRefusedError(MessagesException.ServiceUnavailable.game)
+    print(f"game_data = {game_data}", flush=True)
     game_id = game_data['id']
+    print(f"game_id = {game_id}", flush=True)
     if not Server.does_game_exist(game_id):
         match = Match(game_data)
         Server.create_game(match)
     player = Server.get_player(id)
+    print(f"player = {player}")
+    print(f"sid = {sid}", flush=True)
     player.socket_id = sid
     Server._clients[sid] = player
     await Server._sio.enter_room(sid, str(game_id))
-    info(f'User {id} connected & authenticated')
+    print(f'User {id} connected & authenticated', flush=True)
 
 
 async def move_up(sid):
@@ -71,7 +77,12 @@ async def move_down(sid):
 async def stop_moving(sid, data):
     from game_server.server import Server
     player = Server._clients[sid]
-    position = data['position']
+    try:
+        position = data['position']
+    except KeyError:
+        error('Need position data for event stop_moving')
+        await Server._sio.emit('error', data={'message': 'Need position data for event stop_moving'}, to=sid)
+        return
     position = player.racket.stop_moving(position)
     await Server._sio.emit(
         'stop_moving',
@@ -79,16 +90,20 @@ async def stop_moving(sid, data):
         room=str(player.match_id)
     )
 
+# TODO -> make some tests for player abandon while a game is running
+async def ff(sid):
+    from game_server.server import Server
+    try:
+        match_id = Server._clients[sid].match_id
+        Server.finish_game(match_id, Reason.player_abandon)
+    except KeyError:
+        pass
 
+# TODO -> make some tests for disconnect while a game is running
 async def disconnect(sid):
     from game_server.server import Server
-    if Server._clients == {}:
-        return
-    match_id = Server._clients[sid].match_id
     try:
-        game = Server._games[match_id]
-        game.finish('A player has disconnected')
-        # TODO -> change this to avoid django exception on async context (sync_to_async)
+        match_id = Server._clients[sid].match_id
+        Server.finish_game(match_id, Reason.player_disconnect, Server._clients[sid].user_id)
     except KeyError:
-        pass # if the game is not registered, it means the game has already finished
-    await Server._sio.leave_room(sid, str(match_id))
+        pass # player has already disconnected

@@ -3,9 +3,10 @@ class ConnectedUsers:
 		self.users_sid = {}
 		self.users_id = {}
 
-	def add_user(self, id, sid, chat_id, chat_with_id=None):
+	def add_user(self, id, sid, username, chat_id, chat_with_id=None):
 		self.users_sid[sid] = {
 			'user_id': id,
+			'username': username,
 			'chat_id': chat_id,
 			'chat_with_id': chat_with_id,
 		}
@@ -23,6 +24,24 @@ class ConnectedUsers:
 		if self.users_id.get(id):
 			return True
 		return False
+
+	def get_user_id(self, sid):
+		user = self.users_sid.get(sid)
+		if user:
+			return user['user_id']
+		return None
+	
+	def get_username(self, sid):
+		user = self.users_sid.get(sid)
+		if user:
+			return user['username']
+		return None
+
+	def get_chat_with_id(self, sid):
+		user = self.users_sid.get(sid)
+		if user:
+			return user['chat_with_id']
+		return None
 
 	def get_user_sid(self, id):
 		user = self.users_id.get(id)

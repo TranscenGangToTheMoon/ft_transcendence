@@ -1,6 +1,6 @@
 from aiohttp import web
 from game_server import io_handlers
-from game_server.match import Player, fetch_matches
+from game_server.match import Player
 from game_server.game import Game
 from game_server.pong_position import Position
 from threading import Lock, Thread
@@ -23,10 +23,15 @@ class Server:
 
     @staticmethod
     def serve():
-        Server._sio = socketio.AsyncServer(async_mode='aiohttp', cors_allowed_origins='*', logger=False)
+        Server._sio = socketio.AsyncServer(
+            async_mode='aiohttp',
+            cors_allowed_origins='*',
+            logger=False,
+            engineio_logger=False
+        )
         Server._app = web.Application()
         Server._loop = asyncio.get_event_loop()
-        Server._sio.attach(Server._app, socketio_path='/ws/game/') #TODO -> change with '/ws/game/'
+        Server._sio.attach(Server._app, socketio_path='/ws/game/')
         Server._sio.on('connect', handler=io_handlers.connect)
         Server._sio.on('disconnect', handler=io_handlers.disconnect)
         Server._sio.on('move_down', handler=io_handlers.move_down)
@@ -42,20 +47,25 @@ class Server:
     @staticmethod
     def delete_game(match_id) -> None:
         with Server._games_lock:
-            if Server._games[match_id].finished == False:
-                Server._games[match_id].finish()
-            Server._games.pop(match_id)
+            try:
+                if Server._games[match_id].finished == False:
+                    Server._games[match_id].finish()
+                Server._games.pop(match_id)
+                Server._loop.call_soon_threadsafe(asyncio.create_task, Server._sio.close_room(str(match_id)))
+            except KeyError:
+                pass # game has already been deleted
+
+    @staticmethod
+    def finish_game(match_id, reason: str, user_id: int | None = None) -> None:
+        with Server._games_lock:
+            game = Server._games[match_id]
+        if game.finished is not True:
+            game.finish(reason, disconnected_user_id=user_id)
 
     @staticmethod
     def push_game(match_id, game) -> None:
         with Server._games_lock:
             Server._games[match_id] = game
-
-    @staticmethod
-    def get_game(match_id) -> Game:
-        with Server._games_lock:
-            game = Server._games[match_id]
-        return game
 
     @staticmethod
     def does_game_exist(match_id) -> bool:
@@ -64,7 +74,8 @@ class Server:
 
     @staticmethod
     def create_game(match):
-        game = Game(Server._sio, match, Position(800, 600))
+        canvas = Position(800, 600)
+        game = Game(Server._sio, match, canvas)
         Server.push_game(match.id, game)
         Thread(target=Server._games[match.id].launch).start()
 

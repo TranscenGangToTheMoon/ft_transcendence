@@ -24,7 +24,7 @@ document.getElementById('leaveLobby').addEventListener('click', async () => {
 })
 
 
-document.getElementById("inviteFriends").addEventListener("click", event => {
+document.getElementById("copyLink").addEventListener("click", event => {
     event.preventDefault();
     const currentURL = window.location.href;
 
@@ -38,6 +38,60 @@ document.getElementById("inviteFriends").addEventListener("click", event => {
             console.error("Failed to copy URL: ", err);
         });
 });
+
+document.getElementById('inviteFriends').addEventListener('click', async event => {
+    const onlineFriendsDiv = document.getElementById('iOnlineFriends');
+    const fullFriendsDiv = document.getElementById('iFriends');
+    try {
+        let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/users/me/friends/?online=true`);
+        console.log(data);
+        if (!data.count)
+            fullFriendsDiv.style.display = 'none';
+        else{
+            // onlineFriendsDiv.innerHTML += '<li><button class="dropdown-item">loading...</button></li>';
+            fullFriendsDiv.style.display = 'block';
+            const tempDiv = document.createElement('div');
+            for (i in data.results){
+                let friend = data.results[i].friend;
+                let friendDiv = document.createElement('li');
+                let button = document.createElement('button');
+                button.className = 'dropdown-item inviteOnlineFriend';
+                tempDiv.appendChild(friendDiv);
+                button.innerText = friend.username;
+                button.id = `oFriend${friend.id}`
+                friendDiv.appendChild(button);
+            }
+            onlineFriendsDiv.innerHTML = tempDiv.innerHTML;
+            const friendButtons = document.querySelectorAll('.inviteOnlineFriend');
+            for (let button of friendButtons){
+                console.log(button);
+                button.addEventListener('click', async event => {
+                    event.preventDefault();
+                    console.log(button);
+                    try {
+                        let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/play/lobby/${code}/invite/${button.id.substring(7)}/`, 'POST');
+                        console.log(data);
+                    }
+                    catch (error) {
+                        if (error.code === 404){
+                            const feedback = document.getElementById("feedback");
+                            feedback.innerText = 'user disconnected';
+                            feedback.style.display = "block";
+                            setTimeout(() => {
+                                feedback.style.display = "none";
+                                feedback.innerText = "Link copied to clipboard";
+                            }, 1000);
+                        }
+                    }
+                })
+            }
+        }
+
+    }
+    catch(error){
+        console.log(error);
+    }
+})
 
 document.getElementById('joinLobby').addEventListener('click', async event => {
     event.preventDefault();
@@ -207,17 +261,6 @@ function initDragAndDrop(){
     });
 }
 
-document.addEventListener('click', (e) => {
-    contextMenu = document.getElementById('contextMenu');
-    if (contextMenu && !contextMenu.contains(e.target))
-        document.getElementById('contextMenu').style.display = 'none';
-});
-
-document.addEventListener('keyup', e => {
-    if (e.key === 'Escape')
-        document.getElementById('contextMenu').style.display = 'none';
-})
-
 function removeIds(playerListDiv){
     const playerDivs = playerListDiv.querySelectorAll('.player');
     for (let player of playerDivs){
@@ -380,11 +423,14 @@ async function fillPlayerList(noTeam=false){
     tempDiv.remove();
     addContextMenus();
     document.getElementById(`player${userInformations.id}`)?.querySelector('.playerIsReady').addEventListener('click', async function(){
-        isReady = !isReady;
         try {
             await apiRequest(getAccessToken(), `${baseAPIUrl}/play/lobby/${code}/`, 'PATCH', undefined, undefined, {
-                'is_ready' : isReady,
+                'is_ready' : !isReady,
             })
+            isReady = !isReady;
+            for (participant in lobby.participants)
+                if (lobby.participants[participant].id === userInformations.id)
+                    lobby.participants[participant].is_ready = isReady;
             this.innerText = isReady ? 'Ready' : 'Not Ready';
         }
         catch (error) {
@@ -464,6 +510,11 @@ async function lobbyDestroyed(event){
     displayMainAlert('Lobby destroyed', "The lobby has been destroyed.")
 }
 
+async function lobbyGameStart(event){
+    event = JSON.parse(event.data);
+    console.log(event);
+}
+
 function initLobbySSEListeners(){
     if (!SSEListeners.has('lobby-join')){
         SSEListeners.set('lobby-join', lobbyJoined);
@@ -494,6 +545,14 @@ function initLobbySSEListeners(){
         SSEListeners.set('lobby-destroy', lobbyDestroyed);
         sse.addEventListener('lobby-destroy', lobbyDestroyed);
     }
+
+    if (SSEListeners.has('game-start'))
+        SSEListeners.delete('game-start');
+    console.log(
+        'je listen'
+    )
+    SSEListeners.set('game-start', lobbyGameStart);
+    sse.addEventListener('game-start', lobbyGameStart);
 }
 
 

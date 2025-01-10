@@ -17,6 +17,7 @@ var pathName = window.location.pathname;
 var badgesDivs = {};
 var notificationQueue = [];
 const SSEListeners = new Map();
+var fromTournament = false;
 
 window.pathName = pathName;
 
@@ -137,7 +138,7 @@ function getAccessToken() {
     return localStorage.getItem('token');
 }
 
-function getRefreshToken(name = false) {
+function getRefreshToken() {
     return localStorage.getItem('refresh');
 }
 
@@ -146,10 +147,6 @@ function removeTokens() {
     localStorage.removeItem('refresh');
 }
 
-async function relog() {
-    removeTokens();
-    await navigateTo('/login');
-}
 window.removeTokens = removeTokens;
 window.refreshToken = refreshToken;
 window.getAccessToken = getAccessToken;
@@ -250,6 +247,9 @@ async function handleRoute() {
         '/game/ranked' : '/game/game.html',
         '/game/duel' : '/game/game.html',
         '/game/custom' : '/game/game.html',
+        '/game/local' : '/game/localGame.html',
+        '/game/tournament' : '/game/game.html',
+        '/game/3v3' : '/game/3v3.html',
         '/tournament' : '/tournament/tournament.html'
     };
 
@@ -271,22 +271,12 @@ function getCurrentState(){
     return localStorage.getItem('currentState');
 }
 
-async function handleSSEListenerRemoval(url){
-    if (window.pathName.includes('/lobby') && !url.includes('/lobby')){
-        removeSSEListeners('lobby');
-        try {
-            await apiRequest(getAccessToken(), `${baseAPIUrl}/play/lobby/${code}/`, 'DELETE');
-        }
-        catch (error){
-            console.log(error);
-        }
-    }
-}
-
 async function navigateTo(url, doNavigate=true){
     let currentState = getCurrentState();
     lastState = currentState;
     await handleSSEListenerRemoval(url);
+    await quitLobbies(window.location.pathname);
+    await closeGameConnection(window.location.pathname);
     history.pushState({state: currentState}, '', url);
     console.log(`added ${url} to history with state : ${currentState}`);
     pathName = window.location.pathname;
@@ -345,6 +335,8 @@ window.addEventListener('popstate', async event => {
     console.log(pathName, window.location.pathname);
     if (pathName === '/game')
         return cancelNavigation(event, undefined);
+    await quitLobbies(pathName);
+    await closeGameConnection(pathName);
     pathName = window.location.pathname;
     if (event.state && event.state.state)
         lastState = event.state.state;
@@ -354,26 +346,209 @@ window.addEventListener('popstate', async event => {
     handleRoute();
 })
 
-window.loadContent = loadContent;
-window.cancelNavigation = cancelNavigation;
-
-// ========================== OTHER UTILS ==========================
-
-async function fetchUserInfos(forced=false) {
-    if (!getAccessToken())
-        await generateToken();
-    if (!userInformations || forced) {
+async function quitLobbies(oldUrl){
+    if (oldUrl.includes('/lobby')){
         try {
-            let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/users/me`);
-            userInformations = data;
-            console.log(userInformations);
-            displayBadges();
+            await apiRequest(getAccessToken(), `${baseAPIUrl}/play${oldUrl}/`, 'DELETE');
         }
-        catch (error) {
+        catch (error){
+            console.log(error);
+        }
+    }
+    if (oldUrl.includes('/tournament') && tournament){
+        try {
+            await apiRequest(getAccessToken(), `${baseAPIUrl}/play/tournament/${tournament.code}/`, 'DELETE');
+        }
+        catch (error){
             console.log(error);
         }
     }
 }
+
+window.loadContent = loadContent;
+window.cancelNavigation = cancelNavigation;
+
+// ========================== SSE SCRIPTS ==========================
+
+async function handleSSEListenerRemoval(url){
+    if (window.pathName.includes('/lobby') && !url.includes('/lobby')){
+        removeSSEListeners('lobby');
+    }
+    if (window.pathName.includes('/tournament') && !url.includes('/tournament')){
+        removeSSEListeners('tournament');
+    }
+}
+
+function checkEventDuplication(data){
+    const now = Date.now();
+
+    const lastTimeStamp = eventTimestamps.get(data.event_code);
+    // console.log(lastTimeStamp);f
+    if (lastTimeStamp && (now - lastTimeStamp < DEBOUNCE_TIME)){
+        console.log('skip', data);
+        return 0;
+    }
+
+    eventTimestamps.set(data.event_code, now);
+    // console.log('cala',eventTimestamps.get(data));
+    return 1;
+}
+
+function removeSSEListeners(type){
+    for (const [key, value] of SSEListeners) {
+        if (key.includes(type)) {
+            sse.removeEventListener(key, value);
+            SSEListeners.delete(key);
+            console.log('removed sse listener:', key);
+        }
+    }
+}
+
+function addFriendSSEListeners(){
+    sse.addEventListener('receive-friend-request', async event => {
+        const friendListModal = bootstrap.Modal.getInstance(document.getElementById('friendListModal'));
+        const isModalShown = friendListModal ? friendListModal._isShown : friendListModal;
+        const isTabActive = document.getElementById('innerFriendRequests-tab').classList.contains('active');
+        event = JSON.parse(event.data);
+        console.log(event);
+        if (!isModalShown || !isTabActive) {
+            await displayNotification(undefined, 'friend request', event.message, event => {
+                const friendListModal = new bootstrap.Modal(document.getElementById('friendListModal'));
+                friendListModal.show();
+                document.getElementById('innerFriendRequests-tab').click();
+            }, event.target);
+            userInformations.notifications['friend_requests'] += 1;
+            displayBadges();
+        }
+        addFriendRequest(event.data);
+    });
+
+    sse.addEventListener('send-message', async event => {
+        event = JSON.parse(event.data);
+        console.log(event, 'ai je ce qu il faut ?');
+        chat = event.target[0]['url'];
+        let apiAnswer = undefined;
+        try {
+            apiAnswer = await apiRequest(getAccessToken(), `${baseAPIUrl}${chat}`, 'GET');
+            if (apiAnswer.details) {
+                console.log('Error:',apiAnswer.details);
+                return;
+            }
+        }
+        catch (error){
+            console.log('Error:', error);
+            return;
+        }
+        userInformations.notifications['chats'] += 1;
+        chatInfo = parsChatInfo(apiAnswer);
+        if (pathName === '/chat'){
+            chatUserCardLastMessage = document.getElementById('chatListElement' + chatInfo.target).querySelector('.chatUserCardLastMessage');
+            chatUserCardLastMessage.innerText = (chatInfo.lastMessage);
+            chatUserCardLastMessage.classList.add('chatMessageNotRead');
+        }
+        await displayNotification(undefined, 'message received', event.message, async event => {
+            if (pathName !== '/chat')
+                await navigateTo('/chat');
+            await openChat(chatInfo);
+        });
+        displayBadges();
+    })
+
+    sse.addEventListener('accept-friend-request', async event => {
+        event = JSON.parse(event.data);
+        console.log(event);
+        if (!(bootstrap.Modal.getInstance(document.getElementById('friendListModal'))._isShown))
+            await displayNotification(undefined, 'friend request', event.message);
+        removeFriendRequest(event.data.id);
+        console.log(event.data);
+        addFriend(event.data);
+    })
+
+    sse.addEventListener('cancel-friend-request', async event => {
+        event = JSON.parse(event.data);
+        if (userInformations.notifications['friend_requests'])
+            userInformations.notifications['friend_requests'] -= 1;
+        if (!userInformations.notifications['friend_requests'])
+            removeBadges('friend_requests');
+        else    
+            displayBadges();
+        removeFriendRequest(event.data.id);
+    })
+
+    sse.addEventListener('reject-friend-request', async event => {
+        event = JSON.parse(event.data);
+        removeFriendRequest(event.data.id);
+        console.log(event);
+    })
+
+    sse.addEventListener('delete-friend', event => {
+        event = JSON.parse(event.data);
+        removeFriend(event.data);
+    })
+}
+
+function addInviteSSEListeners(){
+    sse.addEventListener('invite-clash', event => {
+        event = JSON.parse(event.data);
+        displayNotification(undefined, event.service, event.message, undefined, event.target);
+        console.log(event);
+    })
+
+    sse.addEventListener('invite-3v3', event => {
+        event = JSON.parse(event.data);
+        displayNotification(undefined, event.service, event.message, undefined, event.target);
+        console.log(event);
+    })
+
+    sse.addEventListener('invite-1v1', event => {
+        event = JSON.parse(event.data);
+        displayNotification(undefined, event.service, event.message, undefined, event.target);
+        console.log(event);
+    })
+
+    sse.addEventListener('invite-tournament', event => {
+        event = JSON.parse(event.data);
+        console.log(event);
+    })
+
+}
+
+function addSSEListeners(){
+
+    addFriendSSEListeners();
+    addInviteSSEListeners();
+    
+}
+
+function initSSE(){
+    sse = new EventSource(`/sse/users/?token=${getAccessToken()}`);
+
+    sse.onopen = () => {
+        console.log('SSE connection initialized');
+    }
+
+    sse.onmessage = event => {
+        let data = JSON.parse(event.data);
+        console.log(data);
+    }
+
+    // sse.addEventListener('ping', event => {
+    //     console.log(event);
+    // })
+
+    sse.onerror = async error => {
+        console.log(error);
+        const shownModal = document.querySelector('.modal.show[aria-modal="true"]');
+        if (shownModal)
+            return;
+        displayMainAlert('Error', 'Unable to connect to Server Sent Events. Note that several services will be unavailable.');
+    }
+
+    addSSEListeners();
+}
+
+// ====================== NOTIFICATIONS UTILS ======================
+
 
 function displayBadges(){
     if (userInformations.notifications){
@@ -429,90 +604,6 @@ function removeBadges(type){
     }
 }
 
-function displayMainAlert(alertTitle, alertContent) {
-    const alertContentDiv = document.getElementById('alertContent');
-    const alertTitleDiv = document.getElementById('alertModalLabel');
-    const alertModal = new bootstrap.Modal(document.getElementById('alertModal'));
-
-    alertContentDiv.innerText = alertContent;
-    alertTitleDiv.innerText = alertTitle;
-    alertModal.show();
-}
-
-function displayConfirmModal(confirmTitle, confirmContent) {
-    window.PongGame.pauseGame();
-    const confirmContentDiv = document.getElementById('confirmContent');
-    const confirmTitleDiv = document.getElementById('confirmModalLabel');
-    const confirmModal = new bootstrap.Modal(document.getElementById('confirmModal'));
-
-    confirmContentDiv.innerText = confirmContent;
-    confirmTitleDiv.innerText = confirmTitle;
-    // document.getElementById('confirmModal').addEventListener('shown.bs.modal', function() {
-    //     document.getElementById('confirmModalClose').focus();
-    // })
-    confirmModal.show();
-}
-
-function checkEventDuplication(data){
-    const now = Date.now();
-
-    const lastTimeStamp = eventTimestamps.get(data.event_code);
-    // console.log(lastTimeStamp);f
-    if (lastTimeStamp && (now - lastTimeStamp < DEBOUNCE_TIME)){
-        console.log('skip', data);
-        return 0;
-    }
-
-    eventTimestamps.set(data.event_code, now);
-    // console.log('cala',eventTimestamps.get(data));
-    return 1;
-}
-
-window.displayMainAlert = displayMainAlert;
-
-// ========================== INDEX SCRIPT ==========================
-
-async function loadFriendListModal() {
-    const friendModal = document.getElementById('friendListModal');
-    if (friendModal)
-        friendModal.remove();
-    await loadContent('/friendList.html', 'modals', true);
-}
-
-async function loadBlockedModal(){
-    const friendModal = document.getElementById('blockedUsersModal')
-    if (friendModal)
-        friendModal.remove();
-    await loadContent('/blockedUsers.html', 'modals', true);
-}
-
-async function loadUserProfile(){
-    let profileMenu = 'profileMenu.html';
-
-    document.getElementById('username').innerText = userInformations.username;
-    if (userInformations.is_guest){
-        profileMenu = 'guestProfileMenu.html'
-        document.getElementById('trophies').innerText = "";
-        document.getElementById('balance').innerText = "";
-    }
-    else {
-        document.getElementById('trophies').innerText = userInformations.trophies;
-        document.getElementById('balance').innerText = userInformations.coins;
-    }
-    await loadContent(`/${profileMenu}`, 'profileMenu');
-    // if (!userInformations.is_guest)
-        
-}
-
-document.getElementById('home').addEventListener('click', async event => {
-    event.preventDefault();
-    if (pathName === '/game'){
-        cancelNavigation(undefined, '/');
-    }
-    else
-        await navigateTo('/');
-})
-
 function addNotificationIndicator(div, number){
     if (!div.querySelector('.indicator')){
         const indicator = document.createElement('div');
@@ -525,143 +616,12 @@ function addNotificationIndicator(div, number){
     }
 }
 
-function removeSSEListeners(type){
-    for (const [key, value] of SSEListeners) {
-        if (key.includes(type)) {
-            sse.removeEventListener(key, value);
-            SSEListeners.delete(key);
-            console.log('removed sse listener:', key);
-        }
-    }
-}
-
-function addSSEListeners(){
-    console.log(document.getElementById('friendListModal'));
-    
-    sse.addEventListener('receive-friend-request', async event => {
-        const friendListModal = bootstrap.Modal.getInstance(document.getElementById('friendListModal'));
-        const isModalShown = friendListModal ? friendListModal._isShown : friendListModal;
-        const isTabActive = document.getElementById('innerFriendRequests-tab').classList.contains('active');
-        event = JSON.parse(event.data);
-        console.log(event);
-        if (!isModalShown || !isTabActive) {
-            await displayNotification(undefined, 'friend request', event.message, event => {
-                const friendListModal = new bootstrap.Modal(document.getElementById('friendListModal'));
-                friendListModal.show();
-                document.getElementById('innerFriendRequests-tab').click();
-            }, event.target);
-            userInformations.notifications['friend_requests'] += 1;
-            displayBadges();
-        }
-        addFriendRequest(event.data);
-    });
-
-    sse.addEventListener('accept-friend-request', async event => {
-        event = JSON.parse(event.data);
-        console.log(event);
-        if (!(bootstrap.Modal.getInstance(document.getElementById('friendListModal'))._isShown))
-            await displayNotification(undefined, 'friend request', event.message);
-        removeFriendRequest(event.data.id);
-        addFriend(event.data);
-    })
-
-    sse.addEventListener('cancel-friend-request', async event => {
-        event = JSON.parse(event.data);
-        if (userInformations.notifications['friend_requests'])
-            userInformations.notifications['friend_requests'] -= 1;
-        if (!userInformations.notifications['friend_requests'])
-            removeBadges('friend_requests');
-        else    
-            displayBadges();
-        removeFriendRequest(event.data.id);
-    })
-
-    sse.addEventListener('reject-friend-request', async event => {
-        event = JSON.parse(event.data);
-        removeFriendRequest(event.data.id);
-        console.log(event);
-    })
-
-    sse.addEventListener('delete-friend', event => {
-        event = JSON.parse(event.data);
-        removeFriend(event.data);
-    })
-}
-
-function initSSE(){
-    sse = new EventSource(`/sse/users/?token=${getAccessToken()}`);
-
-    sse.onopen = () => {
-        console.log('SSE connection initialized');
-    }
-
-    sse.onmessage = event => {
-        let data = JSON.parse(event.data);
-        console.log(data);
-    }
-
-    // sse.addEventListener('ping', event => {
-    //     console.log(event);
-    // })
-
-    sse.onerror = async error => {
-        console.log(error);
-        const shownModal = document.querySelector('.modal.show[aria-modal="true"]');
-        if (shownModal)
-            return;
-        displayMainAlert('Error', 'Unable to connect to Server Sent Events. Note that several services will be unaivailable.');
-    }
-
-    addSSEListeners();
-}
-
-function addFriendListListener(){
-    document.getElementById('friendListModal').addEventListener('show.bs.modal', async function() {
-        this.clicked = true;
-        initFriendModal();
-    }, {once: true})
-    document.getElementById('friendListModal').addEventListener('show.bs.modal', () => {
-        if (document.getElementById('innerFriendRequests-tab').classList.contains('active'))
-            removeBadges('friend_requests');
-    })
-    document.getElementById('innerFriendRequests-tab').addEventListener('click', () => {
-        removeBadges('friend_requests');
-    })
-}
-
 function getBadgesDivs(){
     badgesDivs['all'] = document.querySelectorAll('.all-badges');
     badgesDivs['friend_requests'] = document.querySelectorAll('.friend-badges');
-    badgesDivs['chat'] = document.querySelectorAll('.chat-badges');
+    badgesDivs['chats'] = document.querySelectorAll('.chat-badges');
 }
 
-async function  indexInit(auto=true) {
-    if (!auto){
-        if (userInformations.code === 'user_not_found'){
-            console.log('user was deleted from database, switching to guest mode');
-            displayMainAlert("Unable to retrieve your account/guest profile","We're sorry your account has been permanently deleted and cannot be recovered.");
-            await generateToken();
-            await fetchUserInfos(true);
-            initSSE();
-            return navigateTo('/');
-        }
-        await loadUserProfile();
-        getBadgesDivs();
-    }
-    else{
-        await fetchUserInfos();
-        initSSE();
-        await loadFriendListModal();
-        document.getElementById('innerFriendRequests-tab').clicked = true;
-        addFriendListListener();
-        let currentState = getCurrentState();
-        console.log(`added ${window.location.pathname} to history with state ${currentState}`)
-        history.replaceState({state: currentState}, '', window.location.pathname);
-        incrementCurrentState();
-        loadCSS('/css/styles.css', false);
-        handleRoute();
-    }
-}
 
 function handleFriendRequestNotification(target, img, notification, toastContainer, toastInstance){
     img.addEventListener('click', async event => {
@@ -693,12 +653,22 @@ async function addTargets(notification, targets, toastInstance, toastContainer){
     console.log(targets);
     const notificationBody = notification.querySelector('.toast-body');
     Object.entries(targets).forEach(([i, target]) => {
-        const img = document.createElement('img');
-        img.id = `notif${notification.id}-target${i}`;
-        img.className = 'notif-img';
-        img.src = target.display_icon;
-        
-        notificationBody.appendChild(img);
+        if (target.display_icon){
+            var img = document.createElement('img');
+            img.id = `notif${notification.id}-target${i}`;
+            img.className = 'notif-img';
+            img.src = target.display_icon;
+            
+            notificationBody.appendChild(img);
+        }
+        if (target.display_name){
+            var button = document.createElement('button');
+            button.id = `notif${notification.id}-nametarget${i}`;
+            button.className = 'notif-button';
+            button.innerText = target.display_name;
+
+            notificationBody.appendChild(button);
+        }
         
         if (target.type === 'API') {
             handleFriendRequestNotification(target, img, notification, toastContainer, toastInstance);
@@ -706,6 +676,14 @@ async function addTargets(notification, targets, toastInstance, toastContainer){
             //     notification.clicked = true;
             //     dismissNotification(notification, toastInstance, toastContainer);
             // });
+        }
+        else if (target.type === 'URL'){
+            button.addEventListener('click', async () => {
+                console.log(target.url.slice(0, -1));
+                await navigateTo(target.url.slice(0, -1));
+                notification.clicked = true;
+                dismissNotification(notification, toastInstance, toastContainer);
+            })
         }
     });
 }
@@ -759,6 +737,160 @@ async function displayNotification(icon=undefined, title=undefined, body=undefin
             dismissNotification(notification, toastInstance, toastContainer)
         }
     }, 5000);
+}
+
+// ========================== OTHER UTILS ==========================
+
+async function closeGameConnection(oldUrl){
+    if (!oldUrl.includes('game')) return;
+    try {
+        await apiRequest(getAccessToken(), `${baseAPIUrl}${oldUrl.replace("game", 'play')}/`, 'DELETE');
+    }
+    catch(error){
+        console.log(error);
+    }
+    if (typeof gameSocket !== 'undefined')
+        gameSocket.close();
+}
+
+async function fetchUserInfos(forced=false) {
+    if (!getAccessToken())
+        await generateToken();
+    if (!userInformations || forced) {
+        try {
+            let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/users/me`);
+            userInformations = data;
+            console.log(userInformations);
+            displayBadges();
+        }
+        catch (error) {
+            console.log(error);
+        }
+    }
+}
+
+function displayMainAlert(alertTitle, alertContent) {
+    const alertContentDiv = document.getElementById('alertContent');
+    const alertTitleDiv = document.getElementById('alertModalLabel');
+    const alertModal = new bootstrap.Modal(document.getElementById('alertModal'));
+
+    alertContentDiv.innerText = alertContent;
+    alertTitleDiv.innerText = alertTitle;
+    alertModal.show();
+}
+
+function displayConfirmModal(confirmTitle, confirmContent) {
+    window.PongGame.pauseGame();
+    const confirmContentDiv = document.getElementById('confirmContent');
+    const confirmTitleDiv = document.getElementById('confirmModalLabel');
+    const confirmModal = new bootstrap.Modal(document.getElementById('confirmModal'));
+
+    confirmContentDiv.innerText = confirmContent;
+    confirmTitleDiv.innerText = confirmTitle;
+    // document.getElementById('confirmModal').addEventListener('shown.bs.modal', function() {
+    //     document.getElementById('confirmModalClose').focus();
+    // })
+    confirmModal.show();
+}
+
+window.displayMainAlert = displayMainAlert;
+
+// ========================== INDEX SCRIPT ==========================
+
+document.addEventListener('click', (e) => {
+    contextMenu = document.getElementById('contextMenu');
+    if (contextMenu)
+        document.getElementById('contextMenu').style.display = 'none';
+});
+
+document.addEventListener('keyup', e => {
+    if (e.key === 'Escape'){
+        let contextMenu = document.getElementById('contextMenu');
+        if (contextMenu)
+            contextMenu.style.display = 'none';
+    }
+})
+
+async function loadFriendListModal() {
+    const friendModal = document.getElementById('friendListModal');
+    if (friendModal)
+        friendModal.remove();
+    await loadContent('/friendList.html', 'modals', true);
+}
+
+async function loadBlockedModal(){
+    const friendModal = document.getElementById('blockedUsersModal')
+    if (friendModal)
+        friendModal.remove();
+    await loadContent('/blockedUsers.html', 'modals', true);
+}
+
+async function loadUserProfile(){
+    let profileMenu = 'profileMenu.html';
+
+    document.getElementById('username').innerText = userInformations.username;
+    if (userInformations.is_guest){
+        profileMenu = 'guestProfileMenu.html'
+        document.getElementById('trophies').innerText = "";
+        document.getElementById('balance').innerText = "";
+    }
+    else {
+        document.getElementById('trophies').innerText = userInformations.trophies;
+        document.getElementById('balance').innerText = userInformations.coins;
+    }
+    await loadContent(`/${profileMenu}`, 'profileMenu');
+    // if (!userInformations.is_guest)
+        
+}
+
+document.getElementById('home').addEventListener('click', async event => {
+    event.preventDefault();
+    if (pathName === '/game'){
+        cancelNavigation(undefined, '/');
+    }
+    else
+        await navigateTo('/');
+})
+
+function addFriendListListener(){
+    document.getElementById('friendListModal').addEventListener('show.bs.modal', async function() {
+        this.clicked = true;
+        initFriendModal();
+    }, {once: true})
+    document.getElementById('friendListModal').addEventListener('show.bs.modal', () => {
+        if (document.getElementById('innerFriendRequests-tab').classList.contains('active'))
+            removeBadges('friend_requests');
+    })
+    document.getElementById('innerFriendRequests-tab').addEventListener('click', () => {
+        removeBadges('friend_requests');
+    })
+}
+
+async function  indexInit(auto=true) {
+    if (!auto){
+        await loadUserProfile();
+        getBadgesDivs();
+    }
+    else{
+        await fetchUserInfos();
+        if (userInformations.code === 'user_not_found'){
+            console.log('user was deleted from database, switching to guest mode');
+            await generateToken();
+            await fetchUserInfos(true);
+            displayMainAlert("Unable to retrieve your account/guest profile","We're sorry your account has been permanently deleted and cannot be recovered.");
+            return navigateTo('/');
+        }
+        initSSE();
+        await loadFriendListModal();
+        document.getElementById('innerFriendRequests-tab').clicked = true;
+        addFriendListListener();
+        let currentState = getCurrentState();
+        console.log(`added ${window.location.pathname} to history with state ${currentState}`)
+        history.replaceState({state: currentState}, '', window.location.pathname);
+        incrementCurrentState();
+        loadCSS('/css/styles.css', false);
+        handleRoute();
+    }
 }
 
 window.indexInit = indexInit;

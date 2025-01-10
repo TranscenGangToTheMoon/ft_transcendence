@@ -23,28 +23,6 @@ if (document.getElementById('modals').friendListened !== true){
                     document.getElementById('searchResults').innerText = 'user not found';
             }
         }
-        if (event.target.matches('#simulateFriends')){
-            const nb = document.getElementById('simulateNb').value;
-            if (!nb) return;
-            document.getElementById('loading').style.display = 'unset';
-            for (let i = 0; i < nb; i++){
-                try {
-                    let data = await apiRequest(undefined, `${baseAPIUrl}/auth/guest/`, 'POST');
-                    data = await apiRequest(data.access, `${baseAPIUrl}/auth/register/guest/`, 'PUT', undefined, undefined, {
-                        'username' : `test${localStorage.getItem('currentState') + i}`,
-                        'password' : `password${i}`
-                    });
-                    await apiRequest(data.access, `${baseAPIUrl}/users/me/friend_requests/`, 'POST', undefined, undefined, {
-                        'username' : 'flo',
-                    })
-                }
-                catch (error){
-                    console.log(error);
-                }
-            }
-            document.getElementById('loading').style.display = 'none'
-            await loadReceivedFriendRequests();
-        }
         if (event.target.matches('.deleteFriend')){
             try {
                 const friendshipId = `${event.target.parentElement.id}`.substring(6);
@@ -215,10 +193,11 @@ async function loadFriendList(){
     else{
         resultDiv.innerText = "";
         for (let friend of data.results){
-            const friend1 = friend.friends[0].username;
-            const friend2 = friend.friends[1].username;
+            console.log(friend)
+            // const friend1 = friend.friends[0].username;
+            // const friend2 = friend.friends[1].username;
             resultDiv.innerHTML += `<div class="friendRequestBlock knownFriend" id="friend${friend.id}">\
-            <div>${friend1 === userInformations.username ? friend2 : friend1}</div>\
+            <div>${friend.friend.username}</div>\
             <button class='deleteFriend'>delete X</button></div>\n`;
         }
     }
@@ -226,11 +205,12 @@ async function loadFriendList(){
 
 function addFriend(friendInstance){
     const friendDiv = document.getElementById('knownFriends');
-    friendDiv.innerText = '';
-    const friend1 = friendInstance.friends[0].username;
-    const friend2 = friendInstance.friends[1].username;
+    if (!friendDiv.querySelector('div'))
+        friendDiv.innerText = '';
+    // const friend1 = friendInstance.friends[0].username;
+    // const friend2 = friendInstance.friends[1].username;
     friendDiv.innerHTML += `<div class="friendRequestBlock knownFriend" id="friend${friendInstance.id}">\
-            <div>${friend1 === userInformations.username ? friend2 : friend1}</div>\
+            <div>${friendInstance.friend.username}</div>\
             <button class='deleteFriend'>delete X</button></div>\n`;
 }
 
@@ -278,6 +258,7 @@ async function loadReceivedFriendRequests(){
     const friendRequestTitleDiv = document.getElementById('friendRequestsTitle');
     if (data.count === 0){
         friendRequestTitleDiv.innerText = 'no pending friend requests';
+        friendRequestsDiv.innerHTML = "";
     }
     else if (data.count){
         friendRequestsDiv.innerHTML = "";
@@ -306,6 +287,7 @@ async function loadSentFriendRequests(){
     const requestsDivTitle = document.getElementById('sentFriendRequestsTitle');
     if (data.count === 0){
         requestsDivTitle.innerText = 'no sent friend requests';
+        requestsDiv.innerHTML = "";
     }
     else if (data.count){
         requestsDiv.innerHTML = "";
