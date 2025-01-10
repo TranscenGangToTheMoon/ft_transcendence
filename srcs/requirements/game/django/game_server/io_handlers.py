@@ -1,5 +1,6 @@
 import asyncio
 from typing import Any, Dict
+from asgiref.sync import sync_to_async
 from lib_transcendence.auth import auth_verify
 from lib_transcendence.game import Reason
 from logging import info, debug, error
@@ -104,6 +105,6 @@ async def disconnect(sid):
     from game_server.server import Server
     try:
         match_id = Server._clients[sid].match_id
-        Server.finish_game(match_id, Reason.player_disconnect, Server._clients[sid].user_id)
+        await sync_to_async(Server.finish_game)(match_id, Reason.player_disconnect, Server._clients[sid].user_id)
     except KeyError:
         pass # player has already disconnected
