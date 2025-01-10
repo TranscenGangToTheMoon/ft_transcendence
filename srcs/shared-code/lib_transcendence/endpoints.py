@@ -45,7 +45,7 @@ class Matchmaking:
     lobby                       = 'api/play/lobby/'
     lobby_participant           = 'api/play/lobby/<str:code>/'
     lobby_invite                = 'api/play/lobby/<str:code>/invite/<int:user_id>/'
-    lobby_ban                   = 'api/play/lobby/<str:code>/ban/<int:user_id}/'
+    lobby_ban                   = 'api/play/lobby/<str:code>/ban/<int:user_id>/'
 
     tournament                  = 'api/play/tournament/'
     tournament_search           = 'api/play/tournament/search/'
