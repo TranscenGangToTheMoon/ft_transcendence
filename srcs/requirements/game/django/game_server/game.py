@@ -255,9 +255,16 @@ class Game:
         self.play()
         print('game finished', flush=True)
 
-    def disconnect_players(self):
+    def disconnect_players(self, disconnected_user_id: int | None = None):
         from game_server.server import Server
-        Server.emit('disconnect', room=str(self.match.id))
+        players = []
+        disc_sid = None
+        for team in self.match.teams:
+            for player in team.players:
+                if player.user_id == disconnected_user_id:
+                    disc_sid = player.socket_id
+                players.append(player)
+        Server.disconnect(players, disc_sid)
 
     def finish(self, reason: str, winner: str | None = None, disconnected_user_id: int | None = None):
         from game_server.server import Server
@@ -265,7 +272,7 @@ class Game:
         if (disconnected_user_id is not None):
             finish_match(self.match.id, reason, disconnected_user_id)
         self.send_finish(reason, winner)
-        self.disconnect_players()
+        self.disconnect_players(disconnected_user_id)
         self.finished = True
         Server.delete_game(self.match.id)
 

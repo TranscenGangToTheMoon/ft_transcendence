@@ -1,4 +1,5 @@
 from aiohttp import web
+from socketio.exceptions import DisconnectedError
 from game_server import io_handlers
 from game_server.match import Player
 from game_server.game import Game
@@ -51,10 +52,9 @@ class Server:
     def delete_game(match_id) -> None:
         with Server._games_lock:
             try:
-                if Server._games[match_id].finished == False:
-                    Server._games[match_id].finish()
                 Server._games.pop(match_id)
-                Server._loop.call_soon_threadsafe(asyncio.create_task, Server._sio.close_room(str(match_id)))
+                with Server._loop_lock:
+                    Server._loop.call_soon_threadsafe(asyncio.create_task, Server._sio.close_room(str(match_id)))
             except KeyError:
                 pass # game has already been deleted
 
@@ -62,7 +62,7 @@ class Server:
     def finish_game(match_id, reason: str, user_id: int | None = None) -> None:
         with Server._games_lock:
             game = Server._games[match_id]
-        if game.finished is not True:
+        if game.finished is False:
             game.finish(reason, disconnected_user_id=user_id)
 
     @staticmethod
@@ -88,6 +88,14 @@ class Server:
             raise Server.ServerException('Unauthorized: Emit to all clients is not allowed')
         with Server._loop_lock:
             Server._loop.call_soon_threadsafe(asyncio.create_task, Server._sio.emit(event, data=data, room=room, to=to, skip_sid=skip_sid))
+
+    @staticmethod
+    def disconnect(players, disconnected_sid=None):
+        for player in players:
+            Server._clients.pop(player.socket_id)
+            if player.socket_id == disconnected_sid:
+                continue
+            Server._loop.call_soon_threadsafe(asyncio.create_task, Server._sio.disconnect(player.socket_id))
 
     @staticmethod
     def get_player(user_id: int):
