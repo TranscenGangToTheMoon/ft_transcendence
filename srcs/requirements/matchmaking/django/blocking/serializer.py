@@ -41,7 +41,7 @@ class BlockedSerializer(serializers.ModelSerializer):
                     if user.creator:
                         banned(blocked_user, False)
                         blocked_user.delete()
-                    else:
+                    elif blocked_user.creator:
                         banned(user, False)
                         user.delete()
 
