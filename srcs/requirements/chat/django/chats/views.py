@@ -1,4 +1,3 @@
-from lib_transcendence.chat import ChatType
 from lib_transcendence.serializer import SerializerAuthContext
 from lib_transcendence.utils import get_host
 from lib_transcendence.permissions import NotGuest
@@ -24,7 +23,7 @@ class ChatsView(generics.ListCreateAPIView):
         join_chats = ChatParticipants.objects.filter(**kwars).values_list('chat_id', flat=True)
         if query is not None:
             join_chats = ChatParticipants.objects.exclude(user_id=self.request.user.id).filter(chat_id__in=join_chats, username__icontains=query).values_list('chat_id', flat=True)
-        return Chats.objects.filter(id__in=join_chats, blocked=False, type=ChatType.private_message).distinct().order_by('-last_updated')
+        return Chats.objects.filter(id__in=join_chats, blocked=False).distinct().order_by('-last_updated')
 
 
 class ChatView(SerializerAuthContext, generics.RetrieveDestroyAPIView):
