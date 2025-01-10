@@ -46,8 +46,6 @@ class GamePage(Screen):
             # logger=True,
             # engineio_logger=True,
         )
-
-        self.sio_lock = threading.Lock()
         self.gameStarted = False
 
     async def on_mount(self) -> None:
@@ -72,16 +70,7 @@ class GamePage(Screen):
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         if event.button.id == "exitAction":
-            self.app.call_from_thread(self.cleanupAndDismiss)
-
-    @work
-    async def cleanupAndDismiss(self) -> None:
-        if self.connected:
-            await self.sio.disconnect()
-            print("Cleanup disconnect from server!")
-        self.connected = False
-        self.listener.stop()
-        await self.dismiss()
+            self.dismiss()
 
     def onPress(self, key):
         try:
@@ -181,17 +170,13 @@ class GamePage(Screen):
 
         @self.sio.on('move_up')
         async def moveUpAction(data):
-            print(f"move_up_action: {data}", flush=True)
             if (data["player"] != User.id):
                 self.paddleLeft.direction = -1
-            print(self.connected, flush=True)
 
         @self.sio.on('move_down')
         async def moveDownAction(data):
-            print(f"move_down_action: {data}", flush=True)
             if (data["player"] != User.id):
                 self.paddleLeft.direction = 1
-            print(self.connected, flush=True)
 
         @self.sio.on('stop_moving')
         async def stopMovingAction(data):
@@ -211,6 +196,7 @@ class GamePage(Screen):
             print(self.connected, flush=True)
 
     async def on_unmount(self) -> None:
+        print("Unmount GamePage")
         if (self.connected):
             await self.sio.disconnect()
             print("Unmount disconnect the server!")
