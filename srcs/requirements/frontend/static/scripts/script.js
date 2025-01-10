@@ -241,7 +241,6 @@ async function handleRoute() {
         '/': '/homePage.html',
         '/profile' : 'profile.html',
         '/lobby' : '/lobby.html',
-        '/chat' : '/chatTemplates/chat.html',
 
         '/game/ranked' : '/game/game.html',
         '/game/duel' : '/game/game.html',
@@ -810,11 +809,11 @@ async function loadBlockedModal(){
     await loadContent('/blockedUsers.html', 'modals', true);
 }
 
-async function loadChatModal(){
-    const chatModal = document.getElementById('chatModal')
-    if (friendModal)
-        friendModal.remove();
-    await loadContent('/blockedUsers.html', 'modals', true);
+async function loadChatListModal(){
+    const chatListModal = document.getElementById('chatListModal')
+    if (chatListModal)
+        chatListModal.remove();
+    await loadContent('/chatTemplates/chatListModal.html', 'modals', true);
 }
 
 async function loadUserProfile(){
@@ -876,6 +875,7 @@ async function  indexInit(auto=true) {
         await fetchUserInfos();
         initSSE();
         await loadFriendListModal();
+        await loadChatListModal();
         document.getElementById('innerFriendRequests-tab').clicked = true;
         addFriendListListener();
         let currentState = getCurrentState();

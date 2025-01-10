@@ -1,0 +1,18 @@
+<div id="chatListModal" class="modal fade" tabindex="-1" aria-labelledby="chatListModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header" id="chatListModalHeader" style="display: flex;">
+				<form id="searchChatForm">
+					<input id="searchChat" placeholder="Search user" type="text">
+					<button id="searchChatButton" type="submit">Start Chat</button>
+				</form>
+				<button type="button" class="btn btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body" id="chatListModalBody">
+				<div id="chatsList" class="overflow-auto"></div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div script="/chatTemplates/scripts/chat.js"></div>
