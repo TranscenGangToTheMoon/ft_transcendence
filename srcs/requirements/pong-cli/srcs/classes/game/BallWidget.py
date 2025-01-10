@@ -24,12 +24,15 @@ class Ball(Widget):
         self.styles.width = Config.Ball.width
         self.styles.height = Config.Ball.height
         self.styles.background = "white"
-        self.offset = Offset((Config.Playground.width - Config.Ball.width) / 2, (Config.Playground.height - Config.Ball.height) / 2)
-        # self.realOffset = namedtuple("RealOffset", ["x", "y"])(*self.offset)
-        self.speed = Config.Ball.speed
-        self.angle = self.getRandomAngle()
-        self.dx = self.getRandomX() * self.speed
-        self.dy = self.getRandomY() * self.speed
+        self.cX = int(Config.Playground.cWidth / 2 - (Config.Ball.cWidth / 2))
+        self.cY = int(Config.Playground.cHeight / 2 - (Config.Ball.cHeight / 2))
+        self.offset = Offset(self.cX  * Config.Playground.width / Config.Playground.cWidth,
+                             self.cY * Config.Playground.height / Config.Playground.cHeight)
+        self.speed = 0
+        self.cdX = 0
+        self.cdY = 0
+        self.dx = 0
+        self.dy = 0
 
     def render(self):
         # return "▄▄\n▀▀"
@@ -41,15 +44,3 @@ class Ball(Widget):
         elif (x and y):
             self.offset = Offset(x, y)
         # print(f"{self.offset} += {Offset(self.dx, self.dy)}")
-
-    def getRandomAngle(self):
-        randomAngle = random.random() * 2 * math.pi
-        while abs(math.cos(randomAngle)) < math.cos(math.pi / 3):
-            randomAngle = random.random() * 2 * math.pi
-        return (randomAngle)
-
-    def getRandomX(self):
-        return (math.cos(self.angle)) #convert
-
-    def getRandomY(self):
-        return (math.sin(self.angle)) #convert
