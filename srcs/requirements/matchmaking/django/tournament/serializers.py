@@ -166,6 +166,7 @@ class TournamentMatchSerializer(serializers.ModelSerializer):
         model = TournamentMatches
         fields = [
             'id',
+            'n',
             'match_code',
             'winner',
             'winner_id',
@@ -178,6 +179,7 @@ class TournamentMatchSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = [
             'id',
+            'n',
             'winner',
             'match_code',
             'user_1',
