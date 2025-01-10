@@ -2,6 +2,7 @@
 import asyncio
 import threading
 import time
+import requests
 import socketio
 from pynput import keyboard
 
@@ -16,7 +17,7 @@ from textual.widgets    import Header, Button, Footer
 from classes.game.BallWidget        import Ball
 from classes.game.PaddleWidget      import Paddle
 from classes.game.PlaygroundWidget  import Playground
-from classes.utils.config           import Config
+from classes.utils.config           import Config, SSL_CRT, SSL_KEY
 from classes.utils.user             import User
 # from classes.utils.config           import SSL_CRT
 
@@ -35,8 +36,14 @@ class GamePage(Screen):
         self.key_thread = threading.Thread(target=self.checkKeys)
         self.listener = None
         self.connected = False
+        httpSession = requests.Session()
+        httpSession.verify = SSL_CRT
+        httpSession.cert = (SSL_CRT, SSL_KEY)
+
         self.sio = socketio.Client(
-            ssl_verify=False,
+            http_session=httpSession,
+            logger=True,
+            engineio_logger=True,
         )
         self.sio_lock = threading.Lock()
 

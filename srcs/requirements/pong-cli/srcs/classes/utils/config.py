@@ -24,4 +24,6 @@ class Config:
         width = 7
         height = 15
     frameRate = 60
+
 SSL_CRT = "./ft_transcendence.crt"
+SSL_KEY = "./ft_transcendence.key"
