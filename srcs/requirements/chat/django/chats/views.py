@@ -1,5 +1,4 @@
 from lib_transcendence.serializer import SerializerAuthContext
-from lib_transcendence.utils import get_host
 from lib_transcendence.permissions import NotGuest
 from rest_framework import generics, status
 from rest_framework.response import Response
@@ -38,11 +37,9 @@ class ChatView(SerializerAuthContext, generics.RetrieveDestroyAPIView):
         return user.chat
 
     def destroy(self, request, *args, **kwargs):
-        if get_host(request) not in ('game', 'users'):
-            user = get_chat_participants(kwargs['chat_id'], request.user.id, False)
-            user.set_view_chat(False)
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        return super().destroy(request, *args, **kwargs)
+        user = get_chat_participants(kwargs['chat_id'], request.user.id, False)
+        user.set_view_chat(False)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class GetChatNotifications(generics.RetrieveAPIView):
