@@ -117,8 +117,8 @@ class Test03_DeleteUser(UnitTest):
         user2 = self.user(['game-start'])
 
         self.assertResponse(create_game(user1, user2), 201)
-        self.assertResponse(me(user1, method='DELETE', password=True), 204)
-        # todo make when have game
+        time.sleep(1)
+        self.assertResponse(me(user1, method='DELETE', password=True), 403)
         self.assertThread(user1, user2)
 
     def test_007_user_in_tournament(self):
@@ -235,15 +235,6 @@ class Test03_DeleteUser(UnitTest):
         self.assertResponse(blocked_user(user2, user1['id'], method='GET'), 200, count=1)
         self.assertResponse(me(user1, method='DELETE', password=True), 204)
         self.assertResponse(blocked_user(user2, user1['id'], method='GET'), 200, count=0)
-        self.assertThread(user1, user2)
-
-    def test_016_delete_in_game(self):
-        user1 = self.user(['game-start'])
-        user2 = self.user(['game-start'])
-
-        self.assertResponse(create_game(user1, user2), 201)
-        time.sleep(1)
-        self.assertResponse(me(user1, method='DELETE', password=True), 403)
         self.assertThread(user1, user2)
 
 
