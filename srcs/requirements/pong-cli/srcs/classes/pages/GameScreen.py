@@ -1,7 +1,10 @@
 # Python imports
 import asyncio
+import ssl
 import threading
 import time
+
+import aiohttp
 import requests
 import socketio
 from pynput import keyboard
@@ -22,6 +25,7 @@ from classes.utils.user             import User
 class GamePage(Screen):
     SUB_TITLE = "Game Page"
     CSS_PATH = "styles/GamePage.tcss"
+
     def __init__(self):
         super().__init__()
         self.playground = Playground()
@@ -31,12 +35,14 @@ class GamePage(Screen):
         self.pressedKeys = set()
         self.listener = None
         self.connected = False
-        httpSession = requests.Session()
-        httpSession.verify = SSL_CRT
-        httpSession.cert = (SSL_CRT, SSL_KEY)
 
-        self.sio = socketio.Client(
-            http_session=httpSession,
+        # ssl_context = ssl.create_default_context()
+        # ssl_context.load_cert_chain(SSL_CRT)
+        # connector = aiohttp.TCPConnector(ssl=ssl_context)
+        # http_session = aiohttp.ClientSession(connector=connector)
+        self.sio = socketio.AsyncClient(
+            # http_session=http_session,
+            ssl_verify=False,
             # logger=True,
             # engineio_logger=True,
         )
@@ -44,17 +50,16 @@ class GamePage(Screen):
         self.sio_lock = threading.Lock()
         self.gameStarted = False
 
-    def on_mount(self):
-        #key handling
+    async def on_mount(self) -> None:
+        # Key handling
         self.listener = keyboard.Listener(
             on_press=self.onPress,
             on_release=self.onRelease)
         self.listener.start()
-        #game handling
-        self.launchSocketIO()
-        # self.gameLoop()
-        self.gameLoop()
 
+        # Game handling
+        await self.launchSocketIO()
+        self.gameLoop()
 
     def compose(self) -> ComposeResult:
         yield Header()
@@ -66,10 +71,17 @@ class GamePage(Screen):
         yield Footer()
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
-        if (event.button.id == "exitAction"):
-            self.dismiss()
-            # self.app.exit() #to handle when voila
-            # self.dismiss()
+        if event.button.id == "exitAction":
+            self.app.call_from_thread(self.cleanupAndDismiss)
+
+    @work
+    async def cleanupAndDismiss(self) -> None:
+        if self.connected:
+            await self.sio.disconnect()
+            print("Cleanup disconnect from server!")
+        self.connected = False
+        self.listener.stop()
+        await self.dismiss()
 
     def onPress(self, key):
         try:
@@ -88,46 +100,37 @@ class GamePage(Screen):
 
     @work
     async def gameLoop(self):
-        while not self.connected or not self.gameStarted:
-            pass
+        while (not self.connected or not self.gameStarted):
+            await asyncio.sleep(0.1)
         print(f"Connected: {self.connected}, Game started: {self.gameStarted}")
-        while self.connected and self.gameStarted:
-            #Move right paddle
-            if keyboard.Key.up in self.pressedKeys:
+        while (self.connected and self.gameStarted):
+            # Move right paddle
+            if (keyboard.Key.up in self.pressedKeys):
                 if self.paddleRight.direction == 1:
-                    self.sio.emit('stop_moving', {"position": self.paddleRight.cY})
+                    await self.sio.emit('stop_moving', {"position": self.paddleRight.cY})
                 self.paddleRight.moveUp()
-                self.sio.emit('move_up')
+                await self.sio.emit('move_up')
             elif keyboard.Key.down in self.pressedKeys:
                 if self.paddleRight.direction == -1:
-                    self.sio.emit('stop_moving', {"position": self.paddleRight.cY})
+                    await self.sio.emit('stop_moving', {"position": self.paddleRight.cY})
                 self.paddleRight.moveDown()
-                self.sio.emit('move_down')
+                await self.sio.emit('move_down')
             else:
-                self.sio.emit('stop_moving', {"position": self.paddleRight.cY})
+                await self.sio.emit('stop_moving', {"position": self.paddleRight.cY})
                 self.paddleRight.direction = 0
 
-            #Move left paddle
+            # Move left paddle
             if (self.paddleLeft.direction == -1):
                 self.paddleLeft.moveUp()
             if (self.paddleLeft.direction == 1):
                 self.paddleLeft.moveDown()
+
             await asyncio.sleep(1 / Config.frameRate)
 
-    # def checkWallBounce(self):
-    #     if (self.ball.offset.y <= 0):
-    #         #mirror y position
-    #         self.ball.dy *= -1
-    #         print("hit upper wall")
-    #     elif (self.ball.offset.y + Config.Ball.height > Config.Playground.height): #maybe -1
-    #         #mirror y position
-    #         self.ball.dy *= -1
-    #         print("hit lower wall")
-
-    def launchSocketIO(self):
+    async def launchSocketIO(self):
         try:
             self.setHandler()
-            self.sio.connect(
+            await self.sio.connect(
                 "wss://localhost:4443/",
                 socketio_path="/ws/game/",
                 transports=["websocket"],
@@ -142,75 +145,74 @@ class GamePage(Screen):
 
     def setHandler(self):
         @self.sio.on('connect')
-        def connect():
+        async def connect():
             self.connected = True
             print("Connected to server event!", flush=True)
             print(self.connected, flush=True)
 
         @self.sio.on('disconnect')
-        def disconnect():
+        async def disconnect():
             self.connected = False
-            # self.dismiss()
             print("Disconnected from server event!", flush=True)
             print(self.connected, flush=True)
 
         @self.sio.on('start_game')
-        def start_game_action():
+        async def start_game_action():
             self.gameStarted = True
             print("start_game_action", flush=True)
             print(self.connected, flush=True)
 
         @self.sio.on('start_countdown')
-        def start_countdown_action():
+        async def start_countdown_action():
             print("start_countdown_action", flush=True)
             print(self.connected, flush=True)
 
         @self.sio.on('game_state')
-        def gameStateAction(data):
+        async def gameStateAction(data):
             self.ball.move(data["position_x"] / 7, data["position_y"] / 15)
             self.ball.dx = data["direction_x"] / 7
             self.ball.dy = data["direction_y"] / 15
             self.ball.speed = data["speed"]
 
         @self.sio.on('connect_error')
-        def connectErrorAction(data):
+        async def connectErrorAction(data):
             print(f"Connect error received: {data}", flush=True)
             print(self.connected, flush=True)
 
         @self.sio.on('move_up')
-        def moveUpAction(data):
+        async def moveUpAction(data):
             print(f"move_up_action: {data}", flush=True)
             if (data["player"] != User.id):
                 self.paddleLeft.direction = -1
             print(self.connected, flush=True)
 
         @self.sio.on('move_down')
-        def moveDownAction(data):
+        async def moveDownAction(data):
             print(f"move_down_action: {data}", flush=True)
             if (data["player"] != User.id):
                 self.paddleLeft.direction = 1
             print(self.connected, flush=True)
 
         @self.sio.on('stop_moving')
-        def stopMovingAction(data):
+        async def stopMovingAction(data):
             if (data["player"] == User.id):
                 self.paddleRight.stopMoving(data["position"])
             else:
                 self.paddleLeft.stopMoving(data["position"])
 
         @self.sio.on('score')
-        def score_action(data):
+        async def score_action(data):
             print(f"score_action: {data}", flush=True)
             print(self.connected, flush=True)
 
         @self.sio.on('game_over')
-        def game_over_action(data):
+        async def game_over_action(data):
             print(f"game_over_action: {data}", flush=True)
             print(self.connected, flush=True)
 
-    def on_unmount(self) -> None:
+    async def on_unmount(self) -> None:
         if (self.connected):
-            self.sio.disconnect()
+            await self.sio.disconnect()
             print("Unmount disconnect the server!")
         self.connected = False
         self.listener.stop()
