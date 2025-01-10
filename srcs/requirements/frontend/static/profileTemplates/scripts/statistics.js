@@ -1,6 +1,6 @@
-async function loadGameStats(){
+async function loadRankedStats(){
     try {
-        let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/users/me/stats/`);
+        let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/users/me/stats/ranked/`);
         console.log(data);
     }
     catch (error){
@@ -9,7 +9,7 @@ async function loadGameStats(){
 }
 
 async function initStatistics(){
-    await loadGameStats();
+    await loadRankedStats();
 }
 
 initStatistics();
