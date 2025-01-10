@@ -41,6 +41,15 @@ urlpatterns = [
 
 # todo remake all endpoint, use serializer for each and create
 
+# todo make matchamking for duel
+# todo make matchamking for clash
+# todo make matchamking for ranked
+
+# todo test utilisateur se connecte deux fois au jeux
+# todo si utilisateur se supprime pendant le chat
+# todo chat lobby et tournoi
+# todo return 200 avec data when score (PATCH not PUT)
+
 # todo - stat tournoi gagne
 # todo - stat total partie faite
 # todo - stat total point marque
