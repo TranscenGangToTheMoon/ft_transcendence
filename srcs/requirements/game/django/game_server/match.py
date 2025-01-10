@@ -33,6 +33,9 @@ class Player():
             self.score += 1
             self.team.score += 1
 
+    def __str__(self) -> str:
+        return str(self.user_id)
+
 
 class Team():
     def __init__(self, players, match_id, name):
@@ -42,6 +45,9 @@ class Team():
         self.score = 0
         for player in players:
             self.players.append(Player(player['id'], match_id, self))
+
+    def __str__(self) -> str:
+        return self.name + ': ' + ', '.join([str(player) for player in self.players]) + 'score: ' + str(self.score)
 
 
 class Match():
