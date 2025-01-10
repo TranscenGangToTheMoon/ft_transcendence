@@ -1,20 +1,6 @@
+from lib_transcendence import endpoints
+from lib_transcendence.request import request_service
 from lib_transcendence.validate_type import validate_type
-
-
-class ChatType:
-    private_message = 'private_message'
-    lobby = 'lobby'
-    tournament = 'tournament'
-    custom_game = 'custom_game'
-
-    types = [private_message, lobby, tournament, custom_game]
-
-    @staticmethod
-    def validate(chat_type):
-        return validate_type(chat_type, ChatType(), ChatType.types)
-
-    def __str__(self):
-        return 'Chat type'
 
 
 class AcceptChat:
