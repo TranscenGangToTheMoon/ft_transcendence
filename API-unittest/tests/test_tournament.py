@@ -5,7 +5,7 @@ from distutils.dir_util import remove_tree
 
 from services.blocked import blocked_user, unblocked_user
 from services.friend import create_friendship
-from services.game import score
+from services.game import score, get_tournament
 from services.stats import set_trophies
 from services.tournament import create_tournament, join_tournament, ban_user, search_tournament, invite_user
 from utils.generate_random import rnstr
@@ -722,25 +722,12 @@ class Test10_FinishTournament(UnitTest):
 
         time.sleep(2)
 
-        response = self.assertResponse(create_tournament(user1, method='GET'), 200)
-        json.dump(response, open('test.json', 'w'), indent=4)
-
         self.assertResponse(score(user1['id']), 204)
         self.assertResponse(score(user3['id']), 204)
         self.assertResponse(score(user1['id']), 204)
         self.assertResponse(score(user3['id']), 204)
         self.assertResponse(score(user3['id']), 204)
 
-        time.sleep(2)
-
-        print('USER1', user1['id'], user1['username'])
-        print('USER2', user2['id'], user2['username'])
-        print('USER3', user3['id'], user3['username'])
-        print('USER4', user4['id'], user4['username'])
-        print('USER5', user5['id'], user5['username'])
-        print('USER6', user6['id'], user6['username'])
-        print('USER7', user7['id'], user7['username'])
-        print('USER8', user8['id'], user8['username'])
         self.assertThread(user1, user2, user3, user4, user5, user6, user7, user8)
 
 
