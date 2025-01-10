@@ -546,8 +546,10 @@ function initLobbySSEListeners(){
         sse.addEventListener('lobby-destroy', lobbyDestroyed);
     }
 
-    if (SSEListeners.has('game-start'))
+    if (SSEListeners.has('game-start')){
+        sse.removeEventListener('game-start', SSEListeners.get('game-start'));
         SSEListeners.delete('game-start');
+    }
     console.log(
         'je listen'
     )

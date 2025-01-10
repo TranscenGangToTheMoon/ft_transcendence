@@ -124,6 +124,7 @@
     });
 
     function startGame() {
+        console.log('game start');
         state.isGameActive = true;
         state.cancelAnimation = false;
         // console.log('game started');
@@ -158,7 +159,7 @@
     }
 
     function stopGame(animate=false, reason=undefined) {
-        console.log('je passe ici normalement');
+        console.log('game stop');
         state.isGameActive = false;
         ctx.fillText('Game over', config.canvasWidth / 2, config.canvasHeight / 2);
         if (reason)
@@ -428,12 +429,10 @@
 		if (state.ball.y < 0) {
 			state.ball.y = -state.ball.y;
 			state.ball.speedY = -state.ball.speedY;
-			console.log('bouncing up', Date.now());
 		}
 		if (state.ball.y + config.ballSize > config.canvasHeight) {
 			state.ball.y -= (state.ball.y + config.ballSize) - config.canvasHeight;
 			state.ball.speedY = -state.ball.speedY;
-			console.log('bouncing down', Date.now());
 		}
 
         for (let paddle in state.paddles){
@@ -479,6 +478,7 @@ function initSocket(){
         // console.log('Connected to socketIO server!');
     });
     gameSocket.on('disconnect', () => {
+        gameSocket.close();
         console.log('disconnected from gameSocket');
     })
 
@@ -549,13 +549,14 @@ function initSocket(){
 			window.PongGame.state.enemyScore = event.team_a;
       	}
     })
-    gameSocket.on('game_over', event => {
+    gameSocket.on('game_over', async event => {
         console.log('game_over received', event);
 		window.PongGame.handleGameOver(event.reason);
         if (fromTournament)
-            setTimeout(async ()=> {
-                await navigateTo('/tournament')
-            }, 500)
+            // setTimeout(async ()=> {
+            //     if (typeof userInformations.cancelReturn === 'undefined' || !userInformations.cancelReturn)
+                    await navigateTo('/tournament')
+            // }, 500)
     })
 }
 
@@ -584,12 +585,6 @@ function initData(data){
 	initSocket();
 }
 
-sse.addEventListener('game-start', event => {
-    data = JSON.parse(event.data);
-	data = data.data;
-	initData(data);
-})
-
 document.getElementById('playGame').addEventListener('click', async event => {
 	try {
 		let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/play/duel/`, 'POST');
@@ -612,6 +607,12 @@ function checkGameAuthorization(){
         throw `${window.location.pathname}`;
 }
 
+function gameStart(event){
+    data = JSON.parse(event.data);
+    data = data.data;
+    initData(data);
+}
+
 async function initGame(){
     await indexInit(false);
     if (window.location.pathname === '/') return;
@@ -622,6 +623,12 @@ async function initGame(){
         if (window.location.pathname === '/game/tournament')
             initData(tournamentData);
         else {
+            if (SSEListeners.has('game-start')){
+                sse.removeEventListener('game-start', SSEListeners.get('game-start'));
+                SSEListeners.delete('game-start');
+            }
+            SSEListeners.set('game-start', gameStart);
+            sse.addEventListener('game-start', gameStart);
             try {
                 let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/play/${window.location.pathname.split('/')[2]}/`, 'POST');
                 console.log(data);
