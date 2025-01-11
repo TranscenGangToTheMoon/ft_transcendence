@@ -32,7 +32,7 @@ def request_game(endpoint: Literal['match/', 'tournaments/', 'playing/{user_id}/
     return request_service('game', endpoint, method, data)
 
 
-def request_chat(endpoint: str, method: Literal['GET', 'PATCH', 'DELETE'] = 'PATCH', data=None, token=None):
+def request_chat(endpoint: str, method: Literal['GET', 'PUT', 'DELETE'] = 'PUT', data=None, token=None):
     return request_service('chat', endpoint, method, data, token)
 
 
