@@ -1,5 +1,7 @@
 from django.db import models
 
+from user_management.models import Users
+
 
 class Chats(models.Model):
     blocked = models.BooleanField(default=False)
@@ -13,13 +15,10 @@ class Chats(models.Model):
 
 class ChatParticipants(models.Model):
     chat = models.ForeignKey(Chats, on_delete=models.CASCADE, related_name='participants')
-    user_id = models.IntegerField()
+    user = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='chats')
     username = models.CharField(max_length=30)
     view_chat = models.BooleanField(default=True)
 
     def set_view_chat(self, view_chat=True):
         self.view_chat = view_chat
         self.save()
-
-    def __str__(self):
-        return f'[{self.chat.id}] {self.user_id} {self.username}'

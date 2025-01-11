@@ -22,19 +22,11 @@ class RetrieveMessagesView(SerializerAuthContext, generics.ListAPIView):
         return queryset.filter(chat_id=chat_id)
 
     def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
-
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            for message in serializer.instance:
-                if not message.is_read and message.author != request.user.id:
-                    message.is_read = True
-                    message.save()
-            return self.get_paginated_response(serializer.data)
-
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
+        page = self.paginate_queryset(self.filter_queryset(self.get_queryset()))
+        for message in page:
+            if not message.is_read and message.author.id != request.user.id:
+                message.read()
+        return super().list(request, *args, **kwargs)
 
 
 class CreateMessageView(SerializerAuthContext, generics.CreateAPIView):

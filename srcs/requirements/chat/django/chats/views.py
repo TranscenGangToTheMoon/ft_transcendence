@@ -5,7 +5,7 @@ from rest_framework.response import Response
 
 from chat_messages.utils import get_chat_participants
 from chats.models import Chats, ChatParticipants
-from chats.serializers import ChatsSerializer
+from chats.serializers import ChatsSerializer, ChatNotificationsSerializer
 
 
 class ChatsView(generics.ListCreateAPIView):
@@ -16,12 +16,12 @@ class ChatsView(generics.ListCreateAPIView):
         query = self.request.query_params.get('q')
         if query == '':
             query = None
-        kwars = {'user_id': self.request.user.id}
+        kwars = {'user__id': self.request.user.id}
         if query is None:
             kwars['view_chat'] = True
         join_chats = ChatParticipants.objects.filter(**kwars).values_list('chat_id', flat=True)
         if query is not None:
-            join_chats = ChatParticipants.objects.exclude(user_id=self.request.user.id).filter(chat_id__in=join_chats, username__icontains=query).values_list('chat_id', flat=True)
+            join_chats = ChatParticipants.objects.exclude(user__id=self.request.user.id).filter(chat_id__in=join_chats, user__username__icontains=query).values_list('chat_id', flat=True)
         return Chats.objects.filter(id__in=join_chats, blocked=False).distinct().order_by('-last_updated')
 
 
@@ -44,16 +44,10 @@ class ChatView(SerializerAuthContext, generics.RetrieveDestroyAPIView):
 
 class GetChatNotifications(generics.RetrieveAPIView):
     authentication_classes = []
+    serializer_class = ChatNotificationsSerializer
 
-    def retrieve(self, request, *args, **kwargs):
-        user_id = self.kwargs['user_id']
-        count = 0
-
-        for chat in Chats.objects.filter(participants__user_id=user_id):
-            if chat.messages.exclude(author=user_id).filter(is_read=False).exists():
-                count += 1
-
-        return Response({'notifications': count})
+    def get_object(self):
+        return self.kwargs['user_id']
 
 
 chats_view = ChatsView.as_view()
