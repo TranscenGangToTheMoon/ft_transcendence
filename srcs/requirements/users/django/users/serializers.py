@@ -137,7 +137,7 @@ class ManageUserSerializer(serializers.ModelSerializer):
         ]
 
     def create(self, validated_data):
-        result = super(ManageUserSerializer, self).create(validated_data)
+        result = super().create(validated_data)
         for game_mode in GameMode.modes:
             if game_mode == GameMode.custom_game:
                 continue

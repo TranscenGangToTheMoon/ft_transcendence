@@ -21,7 +21,7 @@ class StatsSerializer(serializers.ModelSerializer):
         ]
 
     def to_representation(self, instance):
-        representation = super(StatsSerializer, self).to_representation(instance)
+        representation = super().to_representation(instance)
         if instance.game_mode != GameMode.tournament:
             representation.pop('tournament_wins')
         if instance.game_mode != GameMode.clash:

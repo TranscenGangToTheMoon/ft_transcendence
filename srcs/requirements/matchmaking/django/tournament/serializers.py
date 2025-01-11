@@ -65,7 +65,7 @@ class TournamentSerializer(serializers.ModelSerializer):
             return None
 
     def to_representation(self, instance):
-        result = super(TournamentSerializer, self).to_representation(instance)
+        result = super().to_representation(instance)
         if instance.is_started:
             result.pop('participants')
         return result
