@@ -12,7 +12,7 @@ def get_auth_token(request):
     raise NotAuthenticated(MessagesException.Authentication.NOT_AUTHENTICATED)
 
 
-def request_users(endpoint: Literal['users/me/', 'validate/chat/', 'blocked/<>/'], method: Literal['GET', 'POST', 'PUT', 'PATCH', 'DELETE'] = 'GET', request=None, data=None, token=None):
+def request_users(endpoint: Literal['users/me/', 'validate/chat/', 'blocked/<>/'], method: Literal['GET', 'POST', 'PUT', 'PATCH', 'DELETE'], request=None, data=None, token=None):
     kwargs = {}
     if token is not None:
         kwargs['token'] = token
@@ -28,11 +28,11 @@ def request_matchmaking(endpoint: str, method: Literal['POST', 'PUT', 'DELETE'],
     return request_service('matchmaking', endpoint, method, data)
 
 
-def request_game(endpoint: Literal['match/', 'tournaments/', 'playing/{user_id}/'], method: Literal['GET', 'POST'] = 'POST', data=None):
+def request_game(endpoint: Literal['match/', 'tournaments/', 'playing/{user_id}/'], method: Literal['GET', 'PUT', 'POST'], data=None):
     return request_service('game', endpoint, method, data)
 
 
-def request_chat(endpoint: str, method: Literal['GET', 'PUT', 'DELETE'] = 'PUT', data=None, token=None):
+def request_chat(endpoint: str, method: Literal['GET', 'PUT', 'DELETE'], data=None, token=None):
     return request_service('chat', endpoint, method, data, token)
 
 

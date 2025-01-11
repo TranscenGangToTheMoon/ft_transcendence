@@ -237,7 +237,7 @@ class TournamentMatchSerializer(serializers.ModelSerializer):
             data = TournamentSerializer(tournament).data
             data['finish_at'] = datetime.now(timezone.utc)
             data['stages'] = TournamentStageSerializer(tournament.stages.all(), many=True).data
-            request_game(endpoints.Game.tournaments, data=data)
+            request_game(endpoints.Game.tournaments, method='POST', data=data)
             create_sse_event(tournament.users_id(), EventCode.TOURNAMENT_FINISH, {'id': tournament.id}, {'name': tournament.name, 'username': winner_user_id})
             tournament.delete()
         else:
