@@ -95,11 +95,13 @@ class GamePage(Screen):
         while (self.connected and self.gameStarted):
             # Move right paddle
             if (keyboard.Key.up in self.pressedKeys):
+                # print("Move Up")
                 if self.paddleRight.direction == 1:
                     await self.sio.emit('stop_moving', {"position": self.paddleRight.cY})
                 self.paddleRight.moveUp()
                 await self.sio.emit('move_up')
-            elif keyboard.Key.down in self.pressedKeys:
+            elif (keyboard.Key.down in self.pressedKeys):
+                # print("Move Down")
                 if self.paddleRight.direction == -1:
                     await self.sio.emit('stop_moving', {"position": self.paddleRight.cY})
                 self.paddleRight.moveDown()
@@ -187,7 +189,9 @@ class GamePage(Screen):
 
         @self.sio.on('score')
         async def score_action(data):
-            print(f"score_action: {data}", flush=True)
+            print(f"Score action event ====: {data}", flush=True)
+            self.paddleLeft.reset()
+            self.paddleRight.reset()
             print(self.connected, flush=True)
 
         @self.sio.on('game_over')
