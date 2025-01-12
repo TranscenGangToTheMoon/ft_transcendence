@@ -68,6 +68,7 @@ class Test02_ErrorTournament(UnitTest):
 
         for user_tmp in users:
             self.assertResponse(join_tournament(user_tmp, code), 201)
+        time.sleep(5)
         self.assertResponse(join_tournament(user2, code), 403, {'detail': 'Tournament already started.'})
         self.assertThread(user1, user2, *users)
 
@@ -140,14 +141,14 @@ class Test02_ErrorTournament(UnitTest):
         self.assertResponse(join_tournament(user2, code), 201)
         self.assertThread(user1, user2)
 
-    def test_011_create_two_tournament(self):
+    def test_010_create_two_tournament(self):
         user1 = self.user()
 
         self.assertResponse(create_tournament(user1), 201)
         self.assertResponse(create_tournament(user1), 403, {'detail': 'You cannot create more than one tournament at the same time.'})
         self.assertThread(user1)
 
-    def test_012_create_two_tournament_leave_first(self):
+    def test_011_create_two_tournament_leave_first(self):
         user1 = self.user(['tournament-join'])
         user2 = self.user(['tournament-leave'])
 
@@ -160,7 +161,7 @@ class Test02_ErrorTournament(UnitTest):
         self.assertResponse(create_tournament(user1), 201)
         self.assertThread(user1, user2)
 
-    def test_013_join_tournament_without_sse(self):
+    def test_012_join_tournament_without_sse(self):
         user1 = self.user(sse=False)
         user2 = self.user()
 
@@ -169,7 +170,7 @@ class Test02_ErrorTournament(UnitTest):
         self.assertResponse(join_tournament(user1, code), 401, {'code': 'sse_connection_required', 'detail': 'You need to be connected to SSE to access this resource.'})
         self.assertThread(user2)
 
-    def test_014_wrong_size(self):
+    def test_013_wrong_size(self):
         user1 = self.user()
 
         self.assertResponse(create_tournament(user1, size=14), 400)
@@ -177,7 +178,7 @@ class Test02_ErrorTournament(UnitTest):
         self.assertResponse(create_tournament(user1, size=7), 400)
         self.assertThread(user1)
 
-    def test_015_user_blocked_creator(self):
+    def test_014_user_blocked_creator(self):
         user1 = self.user(['tournament-join', 'tournament-join', 'tournament-leave'])
         user2 = self.user(['tournament-join', 'tournament-leave'])
         user3 = self.user(['tournament-banned'])
