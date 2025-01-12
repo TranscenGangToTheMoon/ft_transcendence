@@ -1,16 +1,18 @@
-from lib_transcendence.validate_type import validate_type
+from lib_transcendence.validate_type import validate_type, surchage_list
 
 
 class TournamentSize:
-    size4 = 4
-    size8 = 8
-    size16 = 16
-
-    sizes = [size4, size8, size16]
+    S4 = 4
+    S8 = 8
+    S16 = 16
 
     @staticmethod
     def validate(mode):
-        return validate_type(mode, TournamentSize(), TournamentSize.sizes)
+        return validate_type(mode, TournamentSize)
+
+    @staticmethod
+    def attr():
+        return surchage_list(TournamentSize)
 
     def __str__(self):
         return 'Tournament size'

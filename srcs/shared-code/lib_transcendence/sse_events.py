@@ -1,12 +1,12 @@
-from enum import Enum
-
 from lib_transcendence.exceptions import MessagesException, ServiceUnavailable
 from lib_transcendence.request import request_service
 from lib_transcendence import endpoints
 from rest_framework.exceptions import APIException, NotFound
 
+from lib_transcendence.validate_type import surchage_list
 
-class EventCode(Enum):
+
+class EventCode:
     DELETE_USER = 'delete-user'
     SEND_MESSAGE = 'send-message'
     ACCEPT_FRIEND_REQUEST = 'accept-friend-request'
@@ -34,6 +34,10 @@ class EventCode(Enum):
     TOURNAMENT_MATCH_FINISH = 'tournament-match-finish'
     TOURNAMENT_FINISH = 'tournament-finish'
 
+    @staticmethod
+    def attr():
+        return surchage_list(EventCode)
+
 
 def create_sse_event(
         users: list[int] | int,
@@ -43,7 +47,7 @@ def create_sse_event(
 ):
     sse_data = {
         'users_id': [users] if isinstance(users, int) else users,
-        'event_code': event_code.value,
+        'event_code': event_code,
     }
 
     if data is not None:

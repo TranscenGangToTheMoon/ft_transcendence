@@ -137,8 +137,8 @@ class ManageUserSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         result = super().create(validated_data)
-        for game_mode in [GameMode.global_] + GameMode.modes:
-            if game_mode == GameMode.custom_game:
+        for game_mode in [GameMode.GLOBAL] + GameMode.attr():
+            if game_mode == GameMode.CUSTOM_GAME:
                 continue
             kwargs = {'game_mode': game_mode}
             if GameMode.tournament_field(game_mode):

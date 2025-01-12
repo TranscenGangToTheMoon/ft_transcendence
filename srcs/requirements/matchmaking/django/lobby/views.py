@@ -20,7 +20,7 @@ class LobbyView(SerializerAuthContext, generics.CreateAPIView, generics.Retrieve
 
     def get_object(self):
         participant = get_lobby_participant(None, self.request.user.id, self.request.method != 'GET', True)
-        if self.request.method in ('PUT', 'PATCH') and participant.lobby.game_mode == GameMode.clash:
+        if self.request.method in ('PUT', 'PATCH') and participant.lobby.game_mode == GameMode.CLASH:
             raise PermissionDenied(MessagesException.PermissionDenied.UPDATE_CLASH_MODE)
         return participant.lobby
 

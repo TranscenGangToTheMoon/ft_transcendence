@@ -98,8 +98,8 @@ class MessagesException:
 
         TOURNAMENT_ALREADY_STARTED = 'Tournament already started.'
 
-        UPDATE_CLASH_MODE = f'You cannot update {GameMode.clash} lobby.'
-        UPDATE_TEAM_CLASH_MODE = f'You cannot update team in {GameMode.clash} mode.'
+        UPDATE_CLASH_MODE = f'You cannot update {GameMode.CLASH} lobby.'
+        UPDATE_TEAM_CLASH_MODE = f'You cannot update team in {GameMode.CLASH} mode.'
 
         NOT_CREATOR = 'Only creator can update this {obj}.'
 

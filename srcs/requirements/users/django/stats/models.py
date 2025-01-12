@@ -18,10 +18,10 @@ class GameModeStats(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def get_global(self):
-        return self.user.stats.get(game_mode=GameMode.global_)
+        return self.user.stats.get(game_mode=GameMode.GLOBAL)
 
     def log(self, score: int, win: bool, own_goals: int | None):
-        if self.game_mode != GameMode.global_:
+        if self.game_mode != GameMode.GLOBAL:
             self.get_global().log(score, win, own_goals)
         self.game_played += 1
         self.scored += score
@@ -37,7 +37,7 @@ class GameModeStats(models.Model):
         self.save()
 
     def win_tournament(self):
-        if self.game_mode != GameMode.global_:
+        if self.game_mode != GameMode.GLOBAL:
             self.get_global().win_tournament()
         self.tournament_wins += 1
         self.save()

@@ -1,6 +1,6 @@
 from django.db import models
 from lib_transcendence.game import GameMode
-from lib_transcendence.Lobby import MatchType, Teams
+from lib_transcendence.lobby import MatchType, Teams
 from lib_transcendence.sse_events import EventCode, create_sse_event
 
 from baning.models import delete_banned
@@ -38,7 +38,7 @@ class Lobby(models.Model):
     @property
     def is_ready(self):
         qs = self.participants
-        if self.game_mode == GameMode.custom_game:
+        if self.game_mode == GameMode.CUSTOM_GAME:
             qs.exclude(team=Teams.spectator)
             if not self.is_team_full(Teams.a) or not self.is_team_full(Teams.b):
                 return False
@@ -54,7 +54,7 @@ class Lobby(models.Model):
 
     def __str__(self):
         name = f'{self.code}/{self.game_mode} ({self.participants.count()}/{self.max_participants})'
-        if self.game_mode == GameMode.custom_game:
+        if self.game_mode == GameMode.CUSTOM_GAME:
             name += ' {' + self.match_type + '}'
         return name
 

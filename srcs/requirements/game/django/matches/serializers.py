@@ -114,9 +114,9 @@ class MatchSerializer(serializers.ModelSerializer):
 
         validated_data['code'] = generate_code(Matches)
         teams = validated_data.pop('teams')
-        if len(teams['a']) == 1 and validated_data['game_mode'] == GameMode.clash:
+        if len(teams['a']) == 1 and validated_data['game_mode'] == GameMode.CLASH:
             raise serializers.ValidationError(MessagesException.ValidationError.CLASH_3_PLAYERS)
-        if len(teams['b']) == 3 and (validated_data['game_mode'] != GameMode.clash or validated_data['game_mode'] != GameMode.custom_game):
+        if len(teams['b']) == 3 and (validated_data['game_mode'] != GameMode.CLASH or validated_data['game_mode'] != GameMode.CUSTOM_GAME):
             raise serializers.ValidationError(MessagesException.ValidationError.GAME_MODE_PLAYERS.format(obj=validated_data['game_mode'].replace('_', ' ').capitalize(), n=1))
         if validated_data['game_mode'] != GameMode.tournament:
             validated_data['tournament_id'] = None

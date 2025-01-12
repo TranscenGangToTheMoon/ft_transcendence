@@ -63,7 +63,7 @@ class FinishMatchSerializer(serializers.Serializer):
         for team_name, team_users in validated_data['teams'].items():
             for user_json in team_users:
                 try:
-                    if validated_data['game_mode'] == GameMode.clash and 'own_goals' in user_json:
+                    if validated_data['game_mode'] == GameMode.CLASH and 'own_goals' in user_json:
                         own_goals = validated_data['own_goals']
                     else:
                         own_goals = None
