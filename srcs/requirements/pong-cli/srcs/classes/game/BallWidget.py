@@ -1,11 +1,9 @@
 # Python imports
 import math
 import random
-from collections import namedtuple
-from typing import NamedTuple
 
 # Textual imports
-from textual.geometry   import Offset, Region
+from textual.geometry   import Offset
 from textual.widget     import Widget
 
 # Local imports
@@ -24,23 +22,22 @@ class Ball(Widget):
         self.styles.width = Config.Ball.width
         self.styles.height = Config.Ball.height
         self.styles.background = "white"
-        self.cX = int(Config.Playground.cWidth / 2 - (Config.Ball.cWidth / 2))
-        self.cY = int(Config.Playground.cHeight / 2 - (Config.Ball.cHeight / 2))
-        self.offset = Offset(self.cX  * Config.Playground.width / Config.Playground.cWidth,
-                             self.cY * Config.Playground.height / Config.Playground.cHeight)
-        self.speed = 0
-        self.cdX = 0
-        self.cdY = 0
-        self.dx = 0
-        self.dy = 0
+        self.cX = Config.Playground.cWidth / 2 - (Config.Ball.cWidth / 2)
+        self.cY = Config.Playground.cHeight / 2 - (Config.Ball.cHeight / 2)
+        self.offset = Offset(
+            int(self.cX  * Config.Playground.width / Config.Playground.cWidth),
+            int(self.cY * Config.Playground.height / Config.Playground.cHeight)
+        )
 
     def render(self):
         # return "▄▄\n▀▀"
         return ""
 
-    def move(self, x = None, y = None):
-        if (not x or not y):
-            self.offset += Offset(self.dx, self.dy)
-        elif (x and y):
-            self.offset = Offset(x, y)
+    def move(self, cX: float, cY: float):
+        self.cX = cX
+        self.cY = cY
+        self.offset = Offset(
+            int(self.cX  * Config.Playground.width / Config.Playground.cWidth),
+            int(self.cY * Config.Playground.height / Config.Playground.cHeight)
+        )
         # print(f"{self.offset} += {Offset(self.dx, self.dy)}")

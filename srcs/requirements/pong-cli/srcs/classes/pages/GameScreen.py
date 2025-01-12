@@ -160,10 +160,7 @@ class GamePage(Screen):
 
         @self.sio.on('game_state')
         async def gameStateAction(data):
-            self.ball.move(data["position_x"] / 7, data["position_y"] / 15)
-            self.ball.dx = data["direction_x"] / 7
-            self.ball.dy = data["direction_y"] / 15
-            self.ball.speed = data["speed"]
+            self.ball.move(data["position_x"], data["position_y"])
 
         @self.sio.on('connect_error')
         async def connectErrorAction(data):
