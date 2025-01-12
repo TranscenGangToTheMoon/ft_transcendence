@@ -14,7 +14,7 @@ def create_match(game_mode: Literal['duel', 'clash', 'ranked', 'custom_game'] | 
 
     if type(game_mode) is dict:
         data.update(game_mode)
-        data['game_mode'] = GameMode.tournament
+        data['game_mode'] = GameMode.TOURNAMENT
     else:
         data['game_mode'] = game_mode
 

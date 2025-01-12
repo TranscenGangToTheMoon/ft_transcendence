@@ -11,10 +11,10 @@ def get_participants(obj, add_fields: list[str] = None):
     if add_fields is not None:
         fields.extend(add_fields)
     participants = {p['user_id']: p for p in obj.participants.all().values(*fields)}
-    results = retrieve_users(list(participants))
-    for participant in results:
+    results = retrieve_users(list(participants), return_type=dict)
+    for user_id in results:
         for f in fields[1:]:
-            participant[f] = participants[participant['id']][f]
+            results[user_id][f] = participants[user_id][f]
     return results
 
 

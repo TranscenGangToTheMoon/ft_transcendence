@@ -102,7 +102,7 @@ class MatchSerializer(serializers.ModelSerializer):
         return representation
 
     def create(self, validated_data):
-        if validated_data['game_mode'] == GameMode.tournament:
+        if validated_data['game_mode'] == GameMode.TOURNAMENT:
             if not validated_data.get('tournament_id'):
                 raise serializers.ValidationError({'tournament_id': [MessagesException.ValidationError.FIELD_REQUIRED]})
             if not validated_data.get('tournament_stage_id'):
@@ -118,7 +118,7 @@ class MatchSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(MessagesException.ValidationError.CLASH_3_PLAYERS)
         if len(teams['b']) == 3 and (validated_data['game_mode'] != GameMode.CLASH or validated_data['game_mode'] != GameMode.CUSTOM_GAME):
             raise serializers.ValidationError(MessagesException.ValidationError.GAME_MODE_PLAYERS.format(obj=validated_data['game_mode'].replace('_', ' ').capitalize(), n=1))
-        if validated_data['game_mode'] != GameMode.tournament:
+        if validated_data['game_mode'] != GameMode.TOURNAMENT:
             validated_data['tournament_id'] = None
             validated_data['tournament_stage_id'] = None
             validated_data['tournament_n'] = None
