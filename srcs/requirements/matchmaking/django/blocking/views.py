@@ -4,7 +4,7 @@ from rest_framework import generics
 from rest_framework.exceptions import NotFound
 
 from blocking.models import Blocked
-from blocking.serializer import BlockedSerializer
+from blocking.serializers import BlockedSerializer
 
 
 class BlockedUserView(SerializerKwargsContext, generics.CreateAPIView, generics.DestroyAPIView):

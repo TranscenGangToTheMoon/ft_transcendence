@@ -23,7 +23,6 @@ def finish_tournament_stat(user=None, data=None):
     )
 
 
-# todo rename all serializer.py -> serializers.py
 def get_stats(user):
     return make_request(
         endpoint='users/me/stats/',

@@ -1,7 +1,7 @@
 from rest_framework import generics
 
 from stats.models import GameModeStats, RankedStats
-from stats.serializer import StatsSerializer, FinishMatchSerializer, RankedStatsSerializer, FinishTournamentSerializer
+from stats.serializers import StatsSerializer, FinishMatchSerializer, RankedStatsSerializer, FinishTournamentSerializer
 
 
 class RetrieveStatsView(generics.ListAPIView):
