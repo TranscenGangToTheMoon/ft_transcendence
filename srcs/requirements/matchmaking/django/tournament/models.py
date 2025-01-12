@@ -49,10 +49,10 @@ class Tournament(models.Model):
 
     def timer(self):
         for _ in range(20):
-            if not self.is_enough_players():
-                self.cancel_start()
-                return
             if self.is_started:
+                return
+            elif not self.is_enough_players():
+                self.cancel_start()
                 return
             time.sleep(1)
         self.start()
