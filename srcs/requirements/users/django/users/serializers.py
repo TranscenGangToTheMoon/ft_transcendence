@@ -17,6 +17,7 @@ class UsersMeSerializer(serializers.ModelSerializer):
     accept_friend_request = serializers.BooleanField()
     notifications = serializers.SerializerMethodField(read_only=True)
     password = serializers.CharField(write_only=True)
+    old_password = serializers.CharField(write_only=True)
     trophies = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
@@ -35,6 +36,7 @@ class UsersMeSerializer(serializers.ModelSerializer):
             'is_online',
             'last_online',
             'password',
+            'old_password',
 
         ]
         read_only_fields = [

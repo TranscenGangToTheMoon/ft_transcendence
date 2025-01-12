@@ -45,11 +45,7 @@ urlpatterns = [
 # todo make matchamking for ranked
 
 # todo fix github issue
-# todo ajouter password field pour change password
 # todo handle download all data
-
-
-
 
 # --- OTHER ---
 # todo test tournament with ui

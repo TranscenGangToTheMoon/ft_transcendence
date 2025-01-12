@@ -27,10 +27,6 @@ SECRET_KEY = 'django-insecure-ranyb=dsky&upv%^1*b7$bg%yqbqvbk6hupucn!0jju&adfwl)
 DEBUG = environ["DEBUG"]
 
 ALLOWED_HOSTS = [
-    'localhost',
-    'auth',
-    # '127.0.0.1',
-    # environ["HOSTNAME"]
     '*'
 ]
 

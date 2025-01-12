@@ -65,7 +65,7 @@ class MessagesException:
         NOT_AUTHENTICATED = {'detail': 'Authentication credentials were not provided.', 'code': 'not_authenticated'}
         USER_NOT_FOUND = {'detail': 'User not found.', 'code': 'user_not_found'}
 
-        PASSWORD_CONFIRMATION_REQUIRED = 'Password confirmation is required to delete the account.'
+        PASSWORD_CONFIRMATION_REQUIRED = 'Password confirmation is required.'
         INCORRECT_PASSWORD = 'Incorrect password.'
 
     class PermissionDenied:

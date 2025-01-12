@@ -244,16 +244,24 @@ class Test04_UpdateUserMe(UnitTest):
         user1 = self.user()
         old_password = user1['password']
 
-        self.assertResponse(me(user1, method='PATCH', data={'password': 'new_password'}), 200)
+        self.assertResponse(me(user1, method='PATCH', data={'password': 'new_password', 'old_password': old_password}), 200)
         self.assertResponse(login(user1['username'], 'new_password'), 200)
         self.assertResponse(login(user1['username'], old_password), 401, {'detail': 'No active account found with the given credentials'})
         self.assertThread(user1)
 
     def test_002_update_password_same_as_before(self):
         user1 = self.user()
-        print(user1)
 
-        self.assertResponse(me(user1, method='PATCH', data={'password': user1['password']}), 400, {'password': ['Password is the same as the old one.']})
+        self.assertResponse(me(user1, method='PATCH', data={'password': user1['password'], 'old_password': user1['password']}), 400, {'password': ['Password is the same as the old one.']})
+        self.assertResponse(login(data=user1), 200)
+        self.assertThread(user1)
+
+    def test_003_update_password_error_old_password(self):
+        user1 = self.user()
+        new_password = 'new-' + rnstr(10)
+
+        self.assertResponse(me(user1, method='PATCH', data={'password': new_password}), 400, {'old_password': ['Password confirmation is required.']})
+        self.assertResponse(me(user1, method='PATCH', data={'password': new_password, 'old_password': 'caca'}), 400, {'old_password': ['Incorrect password.']})
         self.assertResponse(login(data=user1), 200)
         self.assertThread(user1)
 
