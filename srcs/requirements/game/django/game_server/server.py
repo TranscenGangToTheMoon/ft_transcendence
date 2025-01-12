@@ -92,9 +92,9 @@ class Server:
     def disconnect(players, disconnected_sid=None):
         for player in players:
             Server._clients.pop(player.socket_id)
-            if player.socket_id == disconnected_sid:
+            if player.socket_id == disconnected_sid or player.socket_id == '':
                 continue
-            Server._loop.call_soon_threadsafe(asyncio.create_task, Server._sio.disconnect(player.socket_id))
+            Server._loop.call_later(0.5, asyncio.create_task, Server._sio.disconnect(player.socket_id))
 
     @staticmethod
     def get_player(user_id: int):

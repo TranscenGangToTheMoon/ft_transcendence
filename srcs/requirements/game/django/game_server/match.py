@@ -26,12 +26,15 @@ class Player():
             print(e.detail, flush=True)
         except APIException as e:
             from game_server.server import Server
-            Server.emit('disconnect', room=str(self.match_id))
+            Server.disconnect(str(self.match_id))
         if csc:
             self.csc += 1
         else:
             self.score += 1
             self.team.score += 1
+
+    def __str__(self) -> str:
+        return str(self.user_id)
 
 
 class Team():
@@ -42,6 +45,9 @@ class Team():
         self.score = 0
         for player in players:
             self.players.append(Player(player['id'], match_id, self))
+
+    def __str__(self) -> str:
+        return self.name + ': ' + ', '.join([str(player) for player in self.players]) + 'score: ' + str(self.score)
 
 
 class Match():

@@ -121,9 +121,9 @@ class Game:
 
     def handle_goal(self):
         if self.ball.position.x + self.ball.size < 0:
-            self.score(self.match.teams[1])
-        elif self.ball.position.x > self.canvas.x:
             self.score(self.match.teams[0])
+        elif self.ball.position.x > self.canvas.x:
+            self.score(self.match.teams[1])
 
     def calculateImpactPosition(self, ballY, paddleY, paddleHeight):
         relativeY = (paddleY + paddleHeight / 2) - ballY
@@ -209,7 +209,7 @@ class Game:
             for player in team.players:
                 while player.socket_id == '':
                     if time.time() - start_waiting > timeout:
-                        raise self.PlayerTimeout(f'player socketio connection timed out : player_id: {player.user_id}')
+                        raise self.PlayerTimeout('player socketio connection timed out')
                     time.sleep(0.1)
                 print(time.time(),flush=True)
                 print(f'player {player.user_id} has join in!', flush=True)
@@ -243,7 +243,7 @@ class Game:
             print(time.time(), "all players are connected", flush=True)
         except self.PlayerTimeout as e:
             print(e, flush=True)
-            self.finish('game timed out, not all players connected to server')
+            self.finish(Reason.player_not_connected)
             print('game canceled', flush=True)
             return
         if (self.match.game_mode == 'clash'): #watchout for 'clash'
