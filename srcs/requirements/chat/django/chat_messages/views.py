@@ -1,7 +1,6 @@
 from rest_framework import generics
 from lib_transcendence.permissions import NotGuest
 from lib_transcendence.serializer import SerializerAuthContext
-from rest_framework.response import Response
 
 from chat_messages.models import Messages
 from chat_messages.serializers import MessagesSerializer
