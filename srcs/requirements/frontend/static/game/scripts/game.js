@@ -478,7 +478,7 @@ function initSocket(){
         // console.log('Connected to socketIO server!');
     });
     gameSocket.on('disconnect', () => {
-        gameSocket.close();
+        // gameSocket.close();
         console.log('disconnected from gameSocket');
     })
 
@@ -536,16 +536,12 @@ function initSocket(){
 		// 	window.PongGame.state.paddles[paddle].y = (window.PongGame.config.canvasHeight - window.PongGame.config.paddleHeight) / 2;
 		// }
         // window.PongGame.animatePaddlesToMiddle()
-    	if (window.PongGame.info.myTeam.name == 'team_a') {
+    	if (window.PongGame.info.myTeam.name == 'A') {
 			window.PongGame.state.playerScore = event.team_a;
-            document.getElementById('playerScore').innerText = event.team_a;
-            document.getElementById('enemyScore').innerText = event.team_b;
 			window.PongGame.state.enemyScore = event.team_b;
      	}
      	else {
 			window.PongGame.state.playerScore = event.team_b;
-            document.getElementById('playerScore').innerText = event.team_b;
-            document.getElementById('enemyScore').innerText = event.team_a;
 			window.PongGame.state.enemyScore = event.team_a;
       	}
     })
@@ -557,22 +553,41 @@ function initSocket(){
             //     if (typeof userInformations.cancelReturn === 'undefined' || !userInformations.cancelReturn)
                     await navigateTo('/tournament')
             // }, 500)
+        else {
+            document.getElementById('enemyScore').innerText = window.PongGame.state.enemyScore;
+            const enemyScoreLabel = document.getElementById('enemyScoreLabel');
+            enemyScoreLabel.innerText = enemyScoreLabel.innerText.replace('{team-id}', window.PongGame.info.enemyTeam.name);
+            const myScoreLabel = document.getElementById('playerScoreLabel');
+            myScoreLabel.innerText = myScoreLabel.innerText.replace('{team-id}', window.PongGame.info.myTeam.name);
+            document.getElementById('playerScore').innerText = window.PongGame.state.playerScore;
+            const gameOverModal = new bootstrap.Modal(document.getElementById('gameOverModal'));
+            gameOverModal.show();
+        }
     })
 }
 
+document.getElementById('gameOverModalPlayAgain').addEventListener('click', async () => {
+    await handleRoute();
+})
+
+document.getElementById('gameOverModalQuit').addEventListener('click', async () => {
+    await navigateTo('/');
+})
+
 function initData(data){
     try {
+        console.log(data);
 		if (data.teams.a.some(player => player.id == userInformations.id)) {
-			window.PongGame.info.myTeam.name = 'team_a';
+			window.PongGame.info.myTeam.name = 'A';
 			window.PongGame.info.myTeam.players = data.teams.team_a;
-			window.PongGame.info.enemyTeam.name = 'team_b';
+			window.PongGame.info.enemyTeam.name = 'B';
 			window.PongGame.info.enemyTeam.players = data.teams.team_b;
 		}
 		else if (data.teams.b.some(player => player.id == userInformations.id)) {
-			window.PongGame.info.myTeam.name = 'team_b';
-			window.PongGame.info.myTeam.players = data.teams.team_b;
-			window.PongGame.info.enemyTeam.name = 'team_a';
-			window.PongGame.info.enemyTeam.players = data.teams.team_a;
+			window.PongGame.info.myTeam.name = 'B';
+			window.PongGame.info.myTeam.players = data.teams.b;
+			window.PongGame.info.enemyTeam.name = 'A';
+			window.PongGame.info.enemyTeam.players = data.teams.a;
 		}
 	}
 	catch(error) {
