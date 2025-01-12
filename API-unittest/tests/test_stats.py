@@ -41,9 +41,9 @@ class Test02_Stats(UnitTest):
         user2 = self.user(['game-start'])
 
         self.assertResponse(create_game(user1, user2), 201)
-        self.assertResponse(score(user1['id']), 204)
-        self.assertResponse(score(user1['id']), 204)
-        self.assertResponse(score(user1['id']), 204)
+        self.assertResponse(score(user1['id']), 200)
+        self.assertResponse(score(user1['id']), 200)
+        self.assertResponse(score(user1['id']), 200)
         time.sleep(1)
         response = self.assertResponse(get_stats(user1), 200)
         for game_mode in response:

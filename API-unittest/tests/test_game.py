@@ -3,7 +3,8 @@ import time
 import unittest
 
 from services.game import create_game, is_in_game, score, finish_match, get_tournament, get_games
-from services.tournament import join_tournament, create_tournament
+from services.stats import set_trophies
+from services.tournament import join_tournament, create_tournament, tj, ts, gs, tmf, tf
 from utils.my_unittest import UnitTest
 
 
@@ -66,9 +67,9 @@ class Test02_Score(UnitTest):
 
         self.assertResponse(create_game(user1, user2), 201)
         for _ in range(score_1):
-            self.assertResponse(score(user1['id']), 204)
+            self.assertResponse(score(user1['id']), 200)
         for _ in range(score_2):
-            self.assertResponse(score(user2['id']), 204)
+            self.assertResponse(score(user2['id']), 200)
         response = self.assertResponse(is_in_game(user1), 200)
         self.assertEqual(score_1, response['teams']['a'][0]['score'])
         self.assertEqual(score_2, response['teams']['b'][0]['score'])
@@ -89,7 +90,7 @@ class Test03_Finish(UnitTest):
 
         self.assertResponse(create_game(user1, user2), 201)
         for _ in range(3):
-            self.assertResponse(score(user1['id']), 204)
+            self.assertResponse(score(user1['id']), 200)
         self.assertThread(user1, user2)
 
     def test_002_finish_abandon(self):
@@ -98,7 +99,7 @@ class Test03_Finish(UnitTest):
 
         match_id = self.assertResponse(create_game(user1, user2), 201, get_field=True)
         for _ in range(2):
-            self.assertResponse(score(user1['id']), 204)
+            self.assertResponse(score(user1['id']), 200)
         self.assertResponse(finish_match(match_id, 'player-disconnect', user2['id']), 200)
         self.assertThread(user1, user2)
 
@@ -106,10 +107,15 @@ class Test03_Finish(UnitTest):
 class Test04_Tournament(UnitTest):
 
     def test_001_tournament(self):
-        user1 = self.user(['tournament-join', 'tournament-join', 'tournament-join', 'tournament-start', 'game-start', 'tournament-match-finish', 'tournament-match-finish', 'game-start', 'tournament-match-finish', 'tournament-finish'])
-        user2 = self.user(['tournament-join', 'tournament-join', 'tournament-start', 'game-start', 'tournament-match-finish', 'tournament-match-finish'])
-        user3 = self.user(['tournament-join', 'tournament-start', 'game-start', 'tournament-match-finish', 'tournament-match-finish'])
-        user4 = self.user(['tournament-start', 'game-start', 'tournament-match-finish', 'tournament-match-finish', 'tournament-match-finish', 'tournament-finish'])
+        user1 = self.user([tj, tj, tj, ts, gs, tmf, tmf, gs, tmf, tf])
+        user2 = self.user([tj, tj, ts, gs, tmf, tmf, gs, tmf, tf])
+        user3 = self.user([tj, ts, gs, tmf, tmf, tmf, tf])
+        user4 = self.user([ts, gs, tmf, tmf, tmf, tf])
+
+        self.assertResponse(set_trophies(user1, 1000), 201)
+        self.assertResponse(set_trophies(user2, 500), 201)
+        self.assertResponse(set_trophies(user3, 200), 201)
+        self.assertResponse(set_trophies(user4, 100), 201)
 
         code = self.assertResponse(create_tournament(user1), 201, get_field='code')
         self.assertResponse(join_tournament(user2, code), 201)
@@ -118,31 +124,19 @@ class Test04_Tournament(UnitTest):
 
         time.sleep(5)
 
-        self.assertResponse(score(user1['id']), 204)
-        self.assertResponse(score(user1['id']), 204)
-        self.assertResponse(score(user1['id']), 204)
+        self.assertResponse(score(user1['id']), 200)
+        self.assertResponse(score(user1['id']), 200)
+        self.assertResponse(score(user1['id']), 200)
 
-        response = score(user2['id'])
-        if response.status_code == 204:
-            user2['thread_tests'] += ['game-start', 'tournament-match-finish', 'tournament-finish']
-            user3['thread_tests'] += ['tournament-match-finish', 'tournament-finish']
-            self.assertResponse(response, 204)
-            self.assertResponse(score(user2['id']), 204)
-            self.assertResponse(score(user2['id']), 204)
-        else:
-            user3['thread_tests'] += ['game-start', 'tournament-match-finish', 'tournament-finish']
-            user2['thread_tests'] += ['tournament-match-finish', 'tournament-finish']
-            self.assertResponse(score(user3['id']), 204)
-            self.assertResponse(score(user3['id']), 204)
-            self.assertResponse(score(user3['id']), 204)
-        user2['expected_thread_result'] = len(user2['thread_tests'])
-        user3['expected_thread_result'] = len(user3['thread_tests'])
+        self.assertResponse(score(user2['id']), 200)
+        self.assertResponse(score(user2['id']), 200)
+        self.assertResponse(score(user2['id']), 200)
 
         time.sleep(5)
 
-        self.assertResponse(score(user1['id']), 204)
-        self.assertResponse(score(user1['id']), 204)
-        self.assertResponse(score(user1['id']), 204)
+        self.assertResponse(score(user1['id']), 200)
+        self.assertResponse(score(user1['id']), 200)
+        self.assertResponse(score(user1['id']), 200)
 
         response = self.assertResponse(get_games(user1), 200, count=2)
         self.assertResponse(get_tournament(response['results'][0]['tournament_id'], user1), 200)

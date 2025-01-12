@@ -24,7 +24,7 @@ def is_in_game(user1):
 def score(user_id):
     return make_request(
         endpoint=f'private/game/match/score/{user_id}/',
-        method='POST',
+        method='PUT',
         port=8003,
     )
 
