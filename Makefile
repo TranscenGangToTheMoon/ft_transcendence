@@ -98,7 +98,7 @@ clean		:
 .PHONY: vclean
 vclean		:
 			$(COMPOSE) $(FLAGS) down -v --remove-orphans
-			rm -rf $(ENV_FILE)
+#			rm -rf $(ENV_FILE)
 #			rm -rf $(SECRETS_D)
 
 .PHONY: fclean
