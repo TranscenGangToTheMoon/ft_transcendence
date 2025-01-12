@@ -76,6 +76,8 @@ class Users:
     result_match                = 'api/private/users/result-match/'
     result_tournament           = 'api/private/users/result-tournament/'
 
+    export_data               = 'api/users/me/downalod-data/'
+
     sse                         = 'sse/users/'
     event                       = 'api/private/users/events/'
 
@@ -87,6 +89,8 @@ class Users:
 
 class UsersManagement:
     manage_user                 = 'api/private/user/manage/'
+    fexport_data              = 'api/private/export-data/{user_id}/'
+    export_data               = 'api/private/export-data/<int:user_id>/'
     frename_user                = 'api/private/user/rename/{user_id}/'
     rename_user                 = 'api/private/user/rename/<int:user_id>/'
     fblocked_user               = 'api/private/user/blocked/{user_id}/{blocked_user_id}/'

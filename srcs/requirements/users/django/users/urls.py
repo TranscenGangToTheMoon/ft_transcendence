@@ -2,6 +2,7 @@ from django.urls import path
 from lib_transcendence.endpoints import Users, UsersManagement
 
 from blocking.views import blocked_view, delete_blocked_view
+from export_data.views import export_data_view
 from friend_requests.views import friend_requests_list_create_view, friend_request_view, \
     friend_requests_receive_list_view
 from friends.views import friends_view, friend_view
@@ -31,6 +32,8 @@ urlpatterns = [
     path(Users.result_match, finish_match_view),
     path(Users.result_tournament, finish_tournament_view),
 
+    path(Users.export_data, export_data_view),
+
     path(Users.sse, sse_view),
     path(Users.event, events_view),
 
@@ -45,7 +48,6 @@ urlpatterns = [
 # todo make matchamking for ranked
 
 # todo fix github issue
-# todo handle download all data
 
 # --- OTHER ---
 # todo test tournament with ui

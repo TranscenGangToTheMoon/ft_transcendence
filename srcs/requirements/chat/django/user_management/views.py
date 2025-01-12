@@ -1,11 +1,12 @@
 from lib_transcendence.exceptions import MessagesException
+from lib_transcendence.serializer import SerializerKwargsContext
 from rest_framework import generics
 from rest_framework.exceptions import NotFound
 from rest_framework.views import APIView
 
 from chats.models import Chats
 from user_management.models import Users
-from user_management.serializers import BlockChatSerializer
+from user_management.serializers import BlockChatSerializer, UserDataSerializer
 from chats.utils import get_chat_together
 from user_management.serializers import UserSerializer
 
@@ -18,6 +19,16 @@ class UserMixin(APIView):
             return Users.objects.get(id=self.kwargs['user_id'])
         except Users.DoesNotExist:
             raise NotFound(MessagesException.NotFound.USER)
+
+
+class DownloadDataView(SerializerKwargsContext, generics.ListAPIView):
+    queryset = Chats.objects.all()
+    serializer_class = UserDataSerializer
+    authentication_classes = []
+    pagination_class = None
+
+    def filter_queryset(self, queryset):
+        return Chats.objects.filter(participants__user__id=self.kwargs['user_id'])
 
 
 class RenameUserView(UserMixin, generics.UpdateAPIView):
@@ -38,6 +49,7 @@ class DeleteUserView(UserMixin, generics.DestroyAPIView):
         return super().delete(request, *args, **kwargs)
 
 
+export_data_view = DownloadDataView.as_view()
 rename_user_view = RenameUserView.as_view()
 blocked_user_view = UpdateBlockedUserView.as_view()
 delete_user_view = DeleteUserView.as_view()

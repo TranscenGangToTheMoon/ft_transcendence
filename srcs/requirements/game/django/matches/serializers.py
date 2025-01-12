@@ -78,13 +78,18 @@ class MatchSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        users = retrieve_users(list(instance.players.all().values_list('user_id', flat=True)))
+        if self.context.get('retrieve_users', True):
+            users = retrieve_users(list(instance.players.all().values_list('user_id', flat=True)), return_type=dict)
+        else:
+            users = {}
         teams = {}
-        for name in Teams.names:
-            teams[name] = []
-        for user in users:
-            player = instance.players.get(user_id=user['id'])
-            teams[player.team.name].append({**user, 'score': player.score})
+        for team in ('a', 'b'):
+            teams[team] = []
+            for player in instance.teams.get(name=team).players.all():
+                add_user = users.get(player.user_id)
+                if add_user is None:
+                    add_user = {'id': player.user_id}
+                teams[team].append({**add_user, 'score': player.score})
         representation['teams'] = teams
         if instance.finished:
             representation.pop('code')
@@ -154,10 +159,14 @@ class TournamentMatchSerializer(serializers.ModelSerializer):
         ]
 
     def get_winner(self, obj):
-        return self.context['users'][obj.winner.players.first().user_id]
+        if 'users' in self.context:
+            return self.context['users'][obj.winner.players.first().user_id]
+        return {'id': obj.winner.players.first().user_id}
 
     def get_looser(self, obj):
-        return self.context['users'][obj.looser.players.first().user_id]
+        if 'users' in self.context:
+            return self.context['users'][obj.looser.players.first().user_id]
+        return {'id': obj.winner.players.first().user_id}
 
 
 class MatchFinishSerializer(serializers.ModelSerializer):

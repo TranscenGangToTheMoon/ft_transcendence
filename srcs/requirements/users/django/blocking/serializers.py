@@ -18,7 +18,12 @@ class BlockedSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = BlockedUsers
-        fields = '__all__'
+        fields = [
+            'user_id',
+            'id',
+            'blocked',
+            'blocked_at',
+        ]
 
     @staticmethod
     def get_blocked(obj):
