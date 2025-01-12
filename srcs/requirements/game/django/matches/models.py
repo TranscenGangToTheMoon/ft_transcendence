@@ -47,7 +47,6 @@ class Matches(models.Model):
 
 
 class Teams(models.Model):
-    names = ['a', 'b']
     match = models.ForeignKey(Matches, on_delete=models.CASCADE, related_name='teams')
     name = models.CharField(max_length=100)
     score = models.IntegerField(default=0)

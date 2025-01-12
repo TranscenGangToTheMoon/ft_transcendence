@@ -74,10 +74,6 @@ class ChatsSerializer(serializers.ModelSerializer):
 class ChatNotificationsSerializer(serializers.Serializer):
     notifications = serializers.SerializerMethodField(read_only=True)
 
-    class Meta:
-        model = int
-        fields = '__all__'
-
     @staticmethod
     def get_notifications(obj):
         count = 0

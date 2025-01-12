@@ -27,8 +27,6 @@ class Users(models.Model):
     game_playing = models.CharField(max_length=5, default=None, null=True)
     last_online = models.DateTimeField(auto_now_add=True)
 
-    current_rank = models.IntegerField(default=None, null=True)
-    highest_rank = models.IntegerField(default=None, null=True)
 
     def set_game_playing(self, code=None):
         self.game_playing = code
