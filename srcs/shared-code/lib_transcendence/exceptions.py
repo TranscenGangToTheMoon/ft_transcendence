@@ -44,7 +44,6 @@ class MessagesException:
         SAME_PASSWORD = 'Password is the same as the old one.'
 
         ONLY_1V1_3V3_ALLOWED = 'Only 1v1 and 3v3 are allowed.'
-        BO_MUST_BE = 'Best of must be 1, 3 or 5.'
 
         TEAMS_LIST = 'Teams must be a list.'
         TEAMS_NOT_EQUAL = 'Both teams must have the same number of players.'
