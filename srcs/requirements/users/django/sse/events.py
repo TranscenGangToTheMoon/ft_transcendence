@@ -114,7 +114,7 @@ reject_friend_request = Event(Service.FRIENDS, EventCode.REJECT_FRIEND_REQUEST)
 cancel_friend_request = Event(Service.FRIENDS, EventCode.CANCEL_FRIEND_REQUEST)
 delete_friend = Event(Service.FRIENDS, EventCode.DELETE_FRIEND)
 
-game_start = Event(Service.GAME, EventCode.GAME_START, 'You play in a game.', Target('/ws/game/', type=UrlType.WS))
+game_start = Event(Service.GAME, EventCode.GAME_START, 'You play in a game.', Target('/ws/game/', type=UrlType.WS), type=SSEType.EVENT) # todo handle
 
 invite_1v1 = Event(Service.INVITE, EventCode.INVITE_1V1, '{username} has challenged you to a game.', Target('/lobby/{code}/', display_name='join'))
 invite_3v3 = Event(Service.INVITE, EventCode.INVITE_3V3, '{username} inviting you to join an epic 3v3 friendly battle.', Target('/lobby/{code}/', display_name='join'))

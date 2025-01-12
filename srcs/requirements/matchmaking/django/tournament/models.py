@@ -194,7 +194,7 @@ class TournamentMatches(models.Model):
                 self.user_2.win()
             else:
                 try:
-                    match = create_tournament_match(self.tournament.id, self.stage.id, self.n, [[self.user_1.user_id], [self.user_2.user_id]])
+                    match = create_tournament_match(self.tournament.id, self.stage.id, self.n, self.user_1.user_id, self.user_2.user_id)
                     self.match_id = match['id']
                     self.match_code = match['code']
                     self.save()

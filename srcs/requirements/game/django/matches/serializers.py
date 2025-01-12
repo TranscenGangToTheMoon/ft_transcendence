@@ -9,9 +9,6 @@ from matches.models import Matches, Teams, Players
 
 
 def validate_user_id(value, return_user=False):
-    if type(value) is not int:
-        raise serializers.ValidationError(MessagesException.ValidationError.USER_ID_REQUIRED)
-
     try:
         player = Players.objects.get(user_id=value, match__finished=False)
         if return_user:
@@ -22,26 +19,23 @@ def validate_user_id(value, return_user=False):
             raise NotFound(MessagesException.NotFound.NOT_BELONG_GAME)
 
 
-def validate_teams(value):
-    if type(value) is not list or type(value[0]) is not list or type(value[1]) is not list:
-        raise serializers.ValidationError(MessagesException.ValidationError.TEAMS_LIST)
-    if len(value) != 2:
-        raise serializers.ValidationError(MessagesException.ValidationError.TEAM_REQUIRED)
-    if len(value[0]) not in (1, 3):
-        raise serializers.ValidationError(MessagesException.ValidationError.ONLY_1V1_3V3_ALLOWED)
-    if len(value[0]) != len(value[1]):
-        raise serializers.ValidationError(MessagesException.ValidationError.TEAMS_NOT_EQUAL)
-    for team in value:
-        for user in team:
-            validate_user_id(user)
-    for user in value[0]:
-        if user in value[1]:
-            raise serializers.ValidationError(MessagesException.ValidationError.IN_BOTH_TEAMS)
-    return value
+class TeamsSerializer(serializers.Serializer):
+    a = serializers.ListSerializer(child=serializers.IntegerField(validators=[validate_user_id]))
+    b = serializers.ListSerializer(child=serializers.IntegerField(validators=[validate_user_id]))
 
-# todo remake
+    def validate(self, attrs):
+        attr = super().validate(attrs)
+        if len(attr['a']) != len(attr['b']):
+            raise serializers.ValidationError(MessagesException.ValidationError.TEAMS_NOT_EQUAL)
+        if len(attr['a']) not in (1, 3):
+            raise serializers.ValidationError(MessagesException.ValidationError.ONLY_1V1_3V3_ALLOWED)
+        if len(attr['a'] + attr['b']) != len(set(attr['a'] + attr['b'])):
+            raise serializers.ValidationError(MessagesException.ValidationError.IN_BOTH_TEAMS)
+        return attr
+
+
 class MatchSerializer(serializers.ModelSerializer):
-    teams = serializers.JSONField(validators=[validate_teams])
+    teams = TeamsSerializer(write_only=True)
     score_winner = serializers.IntegerField(read_only=True)
     score_looser = serializers.IntegerField(read_only=True)
 
@@ -115,18 +109,18 @@ class MatchSerializer(serializers.ModelSerializer):
 
         validated_data['code'] = generate_code(Matches)
         teams = validated_data.pop('teams')
-        if len(teams[0]) == 1 and validated_data['game_mode'] == GameMode.clash:
+        if len(teams['a']) == 1 and validated_data['game_mode'] == GameMode.clash:
             raise serializers.ValidationError(MessagesException.ValidationError.CLASH_3_PLAYERS)
-        if len(teams[0]) == 3 and (validated_data['game_mode'] != GameMode.clash or validated_data['game_mode'] != GameMode.custom_game):
+        if len(teams['b']) == 3 and (validated_data['game_mode'] != GameMode.clash or validated_data['game_mode'] != GameMode.custom_game):
             raise serializers.ValidationError(MessagesException.ValidationError.GAME_MODE_PLAYERS.format(obj=validated_data['game_mode'].replace('_', ' ').capitalize(), n=1))
         if validated_data['game_mode'] != GameMode.tournament:
             validated_data['tournament_id'] = None
             validated_data['tournament_stage_id'] = None
             validated_data['tournament_n'] = None
         match = super().create(validated_data)
-        for n, team in enumerate(teams):
-            new_team = Teams.objects.create(match=match, name=Teams.names[n])
-            for user in team:
+        for name_team, players in teams.items():
+            new_team = Teams.objects.create(match=match, name=name_team)
+            for user in players:
                 Players.objects.create(user_id=user, match=match, team=new_team)
         return match
 

@@ -43,13 +43,10 @@ def set_trophies(user, trophies):
         'game_mode': 'ranked',
         'created_at': '2025-01-09T02:39:48.794986+01:00',
         'game_duration': '00:00:05.206017',
-        'tournament_id': 1,
-        'tournament_stage_id': 2,
-        'tournament_n': 3,
         'teams':
             {
                 'a': [{'id': user['id'], 'trophies': trophies, 'score': 3}],
-                'b': [{'id': 2, 'trophies': 0, 'score': 0}]
+                'b': [{'id': 732, 'trophies': 0, 'score': 0}]
             },
         'winner': 'a',
         'looser': 'b',

@@ -43,7 +43,7 @@ class MessagesException:
         PASSWORD_SHORTER_THAN_50_CHAR = 'Password must be less than 50 characters long.'
         SAME_PASSWORD = 'Password is the same as the old one.'
 
-        ONLY_1V1_3V3_ALLOWED = 'Only 1v1 and 3v3 are allowed.'
+        ONLY_1V1_3V3_ALLOWED = 'Only 1v1 and 3v3 teams are allowed.'
 
         TEAMS_LIST = 'Teams must be a list.'
         TEAMS_NOT_EQUAL = 'Both teams must have the same number of players.'

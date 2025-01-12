@@ -14,7 +14,7 @@ class CreateMatchView(generics.CreateAPIView):
     serializer_class = MatchSerializer
 
     def perform_create(self, serializer):
-        users = list(itertools.chain.from_iterable(serializer.validated_data['teams']))
+        users = serializer.validated_data['teams']['a'] + serializer.validated_data['teams']['b']
         super().perform_create(serializer)
         create_sse_event(users, EventCode.GAME_START, serializer.data)
 
@@ -52,7 +52,7 @@ class MatchRetrieveView(generics.RetrieveAPIView):
     serializer_class = MatchSerializer
 
     def get_object(self):
-        return validate_user_id(self.kwargs.get('user_id'), True)
+        return validate_user_id(self.kwargs['user_id'], True)
 
 
 create_match_view = CreateMatchView.as_view()

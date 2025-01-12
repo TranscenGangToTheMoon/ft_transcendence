@@ -10,11 +10,16 @@ from utils.my_unittest import UnitTest
 
 class Test01_Game(UnitTest):
 
+    @staticmethod
+    def ran():
+        return random.randint(500, 1500)
+
     def test_001_create_game(self):
         user1 = self.user(['game-start'])
         user2 = self.user(['game-start'])
 
         self.assertResponse(create_game(user1, user2), 201)
+        time.sleep(1)
         self.assertThread(user1, user2)
 
     def test_002_already_in_game(self):
@@ -34,20 +39,22 @@ class Test01_Game(UnitTest):
         self.assertThread(user1, user2)
 
     def test_004_no_game_mode(self):
-        self.assertResponse(create_game(data={'teams': [[1], [2]]}), 400, {'game_mode': ['This field is required.']})
+        self.assertResponse(create_game(data={'teams': {'a': [self.ran()], 'b': [self.ran()]}}), 400, {'game_mode': ['This field is required.']})
 
     def test_005_invalid_teams(self):
+        n = self.ran()
         invalid_teams = [
-            [[], []],
-            [[1], []],
-            [[], [1]],
-            [['coucou'], ['hey']],
-            [[1, 2], [5]],
-            [[1], [1]],
-            [[1, 2, 3], [4, 5, 6]],
-            ['bonjour'],
-            [[1, 2, 3], 'bonjour'],
-            [[1, 2, 3], 5],
+            {'a': [], 'b': []},
+            {'a': [self.ran()], 'b': []},
+            {'a': [], 'b': [self.ran()]},
+            {'a': 'coucou', 'b': ['hey']},
+            {'a': [self.ran(), self.ran()], 'b': [self.ran()]},
+            {'a': [n], 'b': [n]},
+            {'a': [self.ran(), self.ran(), self.ran()], 'b': [self.ran(), self.ran(), self.ran()]},
+            {'a': [self.ran()]},
+            {'a': 'bonjour'},
+            {'a': [self.ran(), self.ran(), self.ran()], 'b': 'bonjour'},
+            {'a': [self.ran(), self.ran(), self.ran()], 'b': self.ran()},
         ]
 
         for invalid_team in invalid_teams:

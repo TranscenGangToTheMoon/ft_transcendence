@@ -5,7 +5,7 @@ from utils.request import make_request
 
 def create_game(user1=None, user2=None, game_mode: Literal['ranked', 'duel'] = 'duel', data=None, method: Literal['GET', 'POST', 'PATCH', 'DELETE'] = 'POST'):
     if data is None:
-        data = {'game_mode': game_mode, 'teams': [[user1['id']], [user2['id']]]}
+        data = {'game_mode': game_mode, 'teams': {'a': [user1['id']], 'b': [user2['id']]}}
     return make_request(
         endpoint='private/game/match/create/',
         method=method,
