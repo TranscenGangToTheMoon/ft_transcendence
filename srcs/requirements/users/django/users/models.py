@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
 
 from django.db import models
+from django.db.models import Q
 from lib_transcendence import endpoints
 from lib_transcendence.chat import AcceptChat
 from lib_transcendence.services import request_matchmaking

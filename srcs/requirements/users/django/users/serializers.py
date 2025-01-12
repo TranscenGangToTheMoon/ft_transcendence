@@ -79,7 +79,7 @@ class UsersMeSerializer(serializers.ModelSerializer):
 
 class UsersSerializer(serializers.ModelSerializer):
     status = serializers.SerializerMethodField(read_only=True)
-    friends = FriendsSerializer(read_only=True)
+    friends = FriendsSerializer(source='get_friends', read_only=True)
     trophies = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
