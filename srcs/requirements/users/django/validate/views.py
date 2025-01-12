@@ -35,7 +35,7 @@ class AreFriendsView(generics.RetrieveAPIView):
         user2 = get_user(id=self.kwargs['user2_id'])
         friendship = get_friendship(user1, user2)
         if friendship is None:
-            raise NotFound()
+            raise NotFound(MessagesException.NotFound.FRIENDSHIP)
         return friendship
 
 

@@ -23,6 +23,7 @@ class PlayMixin(generics.CreateAPIView, generics.DestroyAPIView):
 
 
 class DuelView(PlayMixin):
+
     def create(self, request, *args, **kwargs):
         request.data['game_mode'] = GameMode.duel
         return super().create(request, *args, **kwargs)

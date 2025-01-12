@@ -25,6 +25,7 @@ def create_user_get_token(user, create=True):
 
 
 class Authentication(JWTAuthentication):
+
     def authenticate(self, request):
         token = request.headers.get('Authorization', None)
         if token is None:

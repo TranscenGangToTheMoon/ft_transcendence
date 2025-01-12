@@ -18,6 +18,7 @@ class FriendsMixin(generics.GenericAPIView):
 
 
 class FriendsView(generics.ListAPIView, FriendsMixin):
+
     def filter_queryset(self, queryset):
         kwargs1 = {'user_1': self.request.user.id}
         kwargs2 = {'user_2': self.request.user.id}

@@ -50,6 +50,7 @@ class AbstractAuthentication(ABC, BaseAuthentication):
 
 
 class Authentication(AbstractAuthentication):
+
     def auth_request(self, token):
         return auth_verify(token)
 

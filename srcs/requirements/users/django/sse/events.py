@@ -42,6 +42,7 @@ class Service(Enum):
 
 
 class Target:
+
     def __init__(self, url: str, method: str = None, display_name: str = None, display_icon: str = None, type: UrlType = None):
         self.url = url
         if type is not None:
@@ -65,6 +66,7 @@ class Target:
 
 
 class Event:
+
     def __init__(self, service: Service, code: EventCode, fmessage=None, target: list[Target] | Target = None, type: SSEType = None):
         self.service = service
         self.code = code

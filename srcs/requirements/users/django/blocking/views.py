@@ -10,17 +10,16 @@ from blocking.serializers import BlockedSerializer
 class BlockedMixin(generics.GenericAPIView):
     queryset = BlockedUsers.objects.all()
     serializer_class = BlockedSerializer
+    permission_classes = [NotGuest]
 
 
 class BlockedView(generics.ListCreateAPIView, BlockedMixin):
-    permission_classes = [NotGuest]
 
     def filter_queryset(self, queryset):
         return queryset.filter(user_id=self.request.user.id)
 
 
 class DeleteBlockedView(generics.DestroyAPIView, BlockedMixin):
-    permission_classes = [NotGuest]
 
     def get_object(self):
         try:
