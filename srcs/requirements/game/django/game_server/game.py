@@ -14,7 +14,6 @@ import os
 import random
 import time
 
-
 def get_random_direction():
     random_angle = random.random() * 2 * math.pi
     while abs(math.cos(random_angle)) < math.cos(math.pi / 3):
