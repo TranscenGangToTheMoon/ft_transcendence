@@ -275,7 +275,7 @@ class Test04_UpdateLobby(UnitTest):
         self.assertResponse(create_lobby(user1, method='PATCH'), 403, {'detail': 'You cannot update game mode.'})
         self.assertThread(user1)
 
-    # def test_006_update_match_type_when_full(self): # todo fix this test
+    # def test_006_update_match_type_when_full(self): # TODO fguirama: fix this test
     #     users = {}
     #     teams = ['Team A', 'Team A', 'Team A', 'Team B', 'Team B', 'Team B']
     #     after_teams = ['Team A', 'Spectator', 'Spectator', 'Team B', 'Spectator', 'Spectator']

@@ -7,7 +7,7 @@ tj = 'tournament-join'
 tsa = 'tournament-start-at'
 ts = 'tournament-start'
 gs = 'game-start'
-tmf = 'tournament-match-finish' # todo rename all to game
+tmf = 'tournament-match-finish' # TODO fguirama: rename all to game
 tf = 'tournament-finish'
 
 

@@ -1,7 +1,7 @@
 from lib_transcendence.validate_type import validate_type
 
 
-class GameMode: # todo change to enum
+class GameMode: # TODO fguirama: change to enum
     duel = 'duel'
     clash = 'clash'
     ranked = 'ranked'
@@ -31,7 +31,7 @@ class GameMode: # todo change to enum
         return 'Game mode'
 
 
-class Reason: # todo rename
+class Reason: # TODO fguirama: rename
     normal_end = 'normal-end'
     player_abandon = 'player-abandon'
     player_disconnect = 'player-disconnect'

@@ -15,9 +15,9 @@ from utils.generate_random import rnstr
 from utils.my_unittest import UnitTest
 
 
-# todo test update user
-# todo test get friend field
-# todo test get status field
+# TODO fguirama: test update user
+# TODO fguirama: test get friend field
+# TODO fguirama: test get status field
 
 
 class Test01_GetUsers(UnitTest):
@@ -148,7 +148,7 @@ class Test03_DeleteUser(UnitTest):
         self.assertResponse(me(user1, method='DELETE', password=True), 204)
         response = self.assertResponse(search_tournament(user3, name), 200, count=1)
         self.assertEqual(1, response['results'][0]['n_participants'])
-        # todo make when tournament work
+        # TODO fguirama: make when tournament work
         self.assertThread(user1, user2, user3)
 
     def test_009_chat_with(self):

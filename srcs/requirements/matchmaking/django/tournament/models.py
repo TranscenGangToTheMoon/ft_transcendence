@@ -147,7 +147,7 @@ class TournamentParticipants(models.Model):
         tournament = self.tournament
         last_member = tournament.participants.count() == 1
         if tournament.is_started:
-            self.eliminate() # todo remake ?
+            self.eliminate() # TODO fguirama: remake ?
         else:
             delete_player_instance(self.user_id)
             if not last_member:
@@ -183,7 +183,7 @@ class TournamentMatches(models.Model):
     user_2 = models.ForeignKey(TournamentParticipants, on_delete=models.CASCADE, related_name='matches_2', null=True)
     score_winner = models.IntegerField(null=True, default=None)
     score_looser = models.IntegerField(null=True, default=None)
-    reason = models.CharField(null=True, default=None, max_length=50) # todo rename to finish_reason
+    reason = models.CharField(null=True, default=None, max_length=50) # TODO fguirama: rename to finish_reason
     finished = models.BooleanField(default=False)
 
     def post(self):
@@ -199,13 +199,13 @@ class TournamentMatches(models.Model):
                     self.match_code = match['code']
                     self.save()
                 except APIException:
-                    self.finish_match() # todo make
+                    self.finish_match() # TODO fguirama: make
         elif self.user_1.still_in:
             self.winner = self.user_1
             self.save()
             self.user_1.win()
         else:
-            self.finish_match() # todo make
+            self.finish_match() # TODO fguirama: make
 
     def finish_match(self):
         self.finished = True
