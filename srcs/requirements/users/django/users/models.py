@@ -27,6 +27,10 @@ class Users(models.Model):
     game_playing = models.CharField(max_length=5, default=None, null=True)
     last_online = models.DateTimeField(auto_now_add=True)
 
+    def friends(self):
+        from friends.models import Friends
+
+        return Friends.objects.filter(Q(user_1=self.id) | Q(user_2=self.id))
 
     def set_game_playing(self, code=None):
         self.game_playing = code

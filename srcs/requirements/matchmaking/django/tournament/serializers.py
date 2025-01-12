@@ -194,11 +194,11 @@ class TournamentMatchSerializer(serializers.ModelSerializer):
             users = [obj.user_1.user_id]
             if obj.user_2 is not None:
                 users.append(obj.user_2.user_id)
-            self.context['users'] = retrieve_users(users)
-        for u in self.context['users']:
-            if u['id'] == user.user_id:
-                return {**u, **TournamentParticipantsSerializer(user).data}
-        return None
+            self.context['users'] = retrieve_users(users, return_type=dict)
+        u = self.context['users'].get(user.user_id)
+        if u is None:
+            return None
+        return {**u, **TournamentParticipantsSerializer(user).data}
 
     def validate_winner_id(self, value):
         if value == self.instance.user_1.user_id:
