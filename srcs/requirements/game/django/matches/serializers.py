@@ -39,7 +39,7 @@ def validate_teams(value):
             raise serializers.ValidationError(MessagesException.ValidationError.IN_BOTH_TEAMS)
     return value
 
-
+# todo remake
 class MatchSerializer(serializers.ModelSerializer):
     teams = serializers.JSONField(validators=[validate_teams])
     score_winner = serializers.IntegerField(read_only=True)
@@ -203,3 +203,32 @@ class MatchFinishSerializer(serializers.ModelSerializer):
         result = super().update(instance, validated_data)
         result.finish_match()
         return result
+
+
+class ScoreSerializer(serializers.ModelSerializer):
+    own_goal = serializers.BooleanField(required=False)
+
+    class Meta:
+        model = Players
+        fields = [
+            'score',
+            'own_goal',
+        ]
+        read_only_fields = [
+            'score',
+        ]
+
+    def to_representation(self, instance):
+        result = super().to_representation(instance)
+        if instance.match.finished:
+            result['finished'] = True
+        if result['own_goal'] is None:
+            result.pop('own_goal')
+        return result
+
+    def update(self, instance, validated_data):
+        if validated_data.pop('own_goal', None) is True:
+            instance.own_goal()
+        else:
+            instance.scored()
+        return instance

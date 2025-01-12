@@ -3,12 +3,11 @@ import itertools
 from lib_transcendence.auth import Authentication
 from lib_transcendence.sse_events import create_sse_event, EventCode
 from lib_transcendence.exceptions import MessagesException
-from rest_framework import generics, views, status
+from rest_framework import generics
 from rest_framework.exceptions import NotFound
-from rest_framework.response import Response
 
 from matches.models import Matches, Players
-from matches.serializers import MatchSerializer, validate_user_id, MatchFinishSerializer
+from matches.serializers import MatchSerializer, validate_user_id, MatchFinishSerializer, ScoreSerializer
 
 
 class CreateMatchView(generics.CreateAPIView):
@@ -22,7 +21,6 @@ class CreateMatchView(generics.CreateAPIView):
 
 class FinishMatchView(generics.UpdateAPIView):
     serializer_class = MatchFinishSerializer
-    queryset = Matches.objects.all()
 
     def get_object(self):
         try:
@@ -31,20 +29,14 @@ class FinishMatchView(generics.UpdateAPIView):
             raise NotFound(MessagesException.NotFound.MATCH)
 
 
-class ScoreView(views.APIView):
+class ScoreView(generics.UpdateAPIView):
+    serializer_class = ScoreSerializer
 
-    @staticmethod
-    def post(request, *args, **kwargs):
+    def get_object(self):
         try:
-            player = Players.objects.get(user_id=kwargs['user_id'], match__finished=False)
-        except Players.DoesNotExist:
-            raise NotFound(MessagesException.NotFound.NOT_BELONG_MATCH)
-        own_goal = request.data.get('own_goal')
-        if own_goal is True:
-            player.own_goal()
-        else:
-            player.scored()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+            return Players.objects.get(user_id=self.kwargs['user_id'], match__finished=False)
+        except Matches.DoesNotExist:
+            raise NotFound(MessagesException.NotFound.MATCH)
 
 
 class ListMatchesView(generics.ListAPIView):

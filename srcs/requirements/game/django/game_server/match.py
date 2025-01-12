@@ -21,7 +21,7 @@ class Player():
 
     def score_goal(self, csc=False):
         try:
-            request_game(endpoints.Game.fscore.format(user_id=self.user_id), 'POST', data={'own_goal': csc})
+            request_game(endpoints.Game.fscore.format(user_id=self.user_id), 'PUT', data={'own_goal': csc})
         except NotFound as e:
             print(e.detail, flush=True)
         except APIException as e:
