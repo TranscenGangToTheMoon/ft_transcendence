@@ -1,3 +1,5 @@
+from enum import Enum
+
 from lib_transcendence.validate_type import validate_type
 
 
@@ -31,22 +33,22 @@ class GameMode: # TODO fguirama: change to enum
         return 'Game mode'
 
 
-class Reason: # TODO fguirama: rename
+class FinishReason:
     normal_end = 'normal-end'
     player_abandon = 'player-abandon'
     player_disconnect = 'player-disconnect'
     player_not_connected = 'player-not-connected'
 
-    error_reasons = [player_abandon, player_disconnect, player_not_connected]
-    reasons = [normal_end] + error_reasons
+    error_finish_reasons = [player_abandon, player_disconnect, player_not_connected]
+    finish_reasons = [normal_end] + error_finish_reasons
 
     @staticmethod
     def validate(mode):
-        return validate_type(mode, Reason(), Reason.reasons)
+        return validate_type(mode, FinishReason(), FinishReason.finish_reasons)
 
     @staticmethod
     def validate_error(mode):
-        return validate_type(mode, Reason(), Reason.error_reasons)
+        return validate_type(mode, FinishReason(), FinishReason.error_finish_reasons)
 
     def __str__(self):
-        return 'Reason'
+        return 'FinishReason'

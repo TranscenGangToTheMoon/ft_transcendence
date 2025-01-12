@@ -1,4 +1,4 @@
-from lib_transcendence.game import GameMode, Reason
+from lib_transcendence.game import GameMode, FinishReason
 from lib_transcendence.generate import generate_code
 from lib_transcendence.exceptions import MessagesException, Conflict, ResourceExists
 from lib_transcendence.users import retrieve_users
@@ -171,14 +171,14 @@ class TournamentMatchSerializer(serializers.ModelSerializer):
 
 class MatchFinishSerializer(serializers.ModelSerializer):
     user_id = serializers.IntegerField(required=True, write_only=True)
-    reason = serializers.CharField(required=True)
+    finish_reason = serializers.CharField(required=True)
 
     class Meta:
         model = Matches
         fields = [
             'id',
             'user_id',
-            'reason',
+            'finish_reason',
             'finished',
         ]
         read_only_fields = [
@@ -186,8 +186,8 @@ class MatchFinishSerializer(serializers.ModelSerializer):
         ]
 
     @staticmethod
-    def validate_reason(value):
-        return Reason.validate_error(value)
+    def validate_finish_reason(value):
+        return FinishReason.validate_error(value)
 
     def update(self, instance, validated_data):
         if instance.finished:

@@ -3,7 +3,7 @@ from datetime import timedelta, datetime, timezone
 from lib_transcendence.exceptions import ServiceUnavailable
 from lib_transcendence.services import request_matchmaking
 from lib_transcendence import endpoints
-from lib_transcendence.game import Reason
+from lib_transcendence.game import FinishReason
 from django.db import models
 from rest_framework.exceptions import APIException
 
@@ -18,15 +18,15 @@ class Matches(models.Model):
     tournament_id = models.IntegerField(null=True)
     tournament_stage_id = models.IntegerField(null=True)
     tournament_n = models.IntegerField(null=True)
-    reason = models.CharField(null=True, default=None, max_length=20)
+    finish_reason = models.CharField(null=True, default=None, max_length=20)
     finished = models.BooleanField(default=False)
 
     winner = models.ForeignKey('Teams', null=True, default=None, on_delete=models.SET_NULL, related_name='winner')
     looser = models.ForeignKey('Teams', null=True, default=None, on_delete=models.SET_NULL, related_name='looser')
 
     def finish_match(self):
-        if self.reason is None:
-            self.reason = Reason.normal_end
+        if self.finish_reason is None:
+            self.finish_reason = FinishReason.normal_end
         self.finished = True
         self.code = None
         self.game_duration = datetime.now(timezone.utc) - self.created_at
@@ -37,7 +37,7 @@ class Matches(models.Model):
                 'winner_id': self.winner.players.first().user_id,
                 'score_winner': self.winner.score,
                 'score_looser': self.looser.score,
-                'reason': self.reason,
+                'finish_reason': self.finish_reason,
             }
             try:
                 request_matchmaking(endpoints.Matchmaking.ftournament_result_match.format(match_id=self.id), 'PUT', data)

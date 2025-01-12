@@ -29,11 +29,11 @@ def score(user_id):
     )
 
 
-def finish_match(match_id, reason=None, user_id=None, data=None):
+def finish_match(match_id, finish_reason=None, user_id=None, data=None):
     if data is None:
         data = {}
-    if reason is not None:
-        data['reason'] = reason
+    if finish_reason is not None:
+        data['finish_reason'] = finish_reason
     if user_id is not None:
         data['user_id'] = user_id
     return make_request(

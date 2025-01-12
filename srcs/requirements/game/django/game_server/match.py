@@ -2,7 +2,7 @@ from aiohttp.web_routedef import AbstractRouteDef
 from typing import List
 from lib_transcendence.request import AuthenticationFailed
 from lib_transcendence.services import request_game
-from lib_transcendence.game import Reason
+from lib_transcendence.game import FinishReason
 from lib_transcendence import endpoints
 from rest_framework.exceptions import APIException, NotFound
 from game_server.pong_racket import Racket
@@ -60,14 +60,14 @@ class Match():
             self.teams.append(Team(team, self.id, team_name))
 
 
-def finish_match(match_id, reason: str, user_id: int):
-    if reason != Reason.normal_end:
+def finish_match(match_id, finish_reason: str, user_id: int):
+    if finish_reason != FinishReason.normal_end:
         try:
             request_game(
                 endpoints.Game.ffinish_match.format(match_id=match_id),
                 'PUT',
                 data={
-                    'reason': reason,
+                    'finish_reason': finish_reason,
                     'user_id': user_id
                 }
             )

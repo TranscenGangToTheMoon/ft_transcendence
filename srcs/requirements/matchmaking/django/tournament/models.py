@@ -183,7 +183,7 @@ class TournamentMatches(models.Model):
     user_2 = models.ForeignKey(TournamentParticipants, on_delete=models.CASCADE, related_name='matches_2', null=True)
     score_winner = models.IntegerField(null=True, default=None)
     score_looser = models.IntegerField(null=True, default=None)
-    reason = models.CharField(null=True, default=None, max_length=50) # TODO fguirama: rename to finish_reason
+    finish_reason = models.CharField(null=True, default=None, max_length=50)
     finished = models.BooleanField(default=False)
 
     def post(self):

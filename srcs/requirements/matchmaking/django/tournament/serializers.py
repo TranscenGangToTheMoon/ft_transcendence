@@ -6,7 +6,7 @@ from lib_transcendence.exceptions import MessagesException
 from lib_transcendence.generate import generate_code
 from lib_transcendence.services import request_game, request_users
 from lib_transcendence.sse_events import create_sse_event, EventCode
-from lib_transcendence.game import Reason
+from lib_transcendence.game import FinishReason
 from lib_transcendence.users import retrieve_users
 from rest_framework import serializers
 
@@ -158,7 +158,7 @@ class TournamentMatchSerializer(serializers.ModelSerializer):
     winner = serializers.IntegerField(source='winner.user_id', read_only=True)
     score_winner = serializers.IntegerField(required=True)
     score_looser = serializers.IntegerField(required=True)
-    reason = serializers.CharField(max_length=20, required=True)
+    finish_reason = serializers.CharField(max_length=20, required=True)
     user_1 = serializers.SerializerMethodField(read_only=True)
     user_2 = serializers.SerializerMethodField(read_only=True)
 
@@ -172,7 +172,7 @@ class TournamentMatchSerializer(serializers.ModelSerializer):
             'winner_id',
             'score_winner',
             'score_looser',
-            'reason',
+            'finish_reason',
             'finished',
             'user_1',
             'user_2',
@@ -212,8 +212,8 @@ class TournamentMatchSerializer(serializers.ModelSerializer):
         return self.context['winner'].id
 
     @staticmethod
-    def validate_reason(value):
-        return Reason.validate(value)
+    def validate_finish_reason(value):
+        return FinishReason.validate(value)
 
     def get_user_1(self, obj):
         return self.get_user_instance(obj, obj.user_1)
