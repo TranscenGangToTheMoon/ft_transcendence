@@ -89,13 +89,16 @@ class Test02_ErrorJoinLobby(UnitTest):
 
     def test_007_blocked_user_cannot_join(self):
         user1 = self.user()
-        user2 = self.user()
+        users = [self.user() for _ in range(30)]
+
+        for u in users:
+            self.assertResponse(blocked_user(user1, u['id']), 201)
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
 
-        self.assertResponse(blocked_user(user1, user2['id']), 201)
-        self.assertResponse(join_lobby(user2, code), 404, {'detail': 'Lobby not found.'})
-        self.assertThread(user1, user2)
+        for u in users:
+            self.assertResponse(join_lobby(u, code), 404, {'detail': 'Lobby not found.'})
+        self.assertThread(user1, *users)
 
     def test_008_blocked_user(self):
         user1 = self.user(['lobby-join', 'lobby-leave'])
