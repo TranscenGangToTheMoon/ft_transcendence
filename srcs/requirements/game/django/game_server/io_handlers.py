@@ -96,11 +96,11 @@ async def ff(sid):
     from game_server.server import Server
     try:
         match_id = Server._clients[sid].match_id
-        Server.finish_game(match_id, Reason.player_abandon)
+        await sync_to_async(Server.finish_game)(match_id, Reason.player_abandon, Server._clients[sid].user_id)
     except KeyError:
         pass
 
-# TODO -> make some tests for disconnect while a game is running
+
 async def disconnect(sid):
     from game_server.server import Server
     try:
