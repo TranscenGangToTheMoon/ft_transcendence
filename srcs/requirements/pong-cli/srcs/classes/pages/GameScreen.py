@@ -1,11 +1,5 @@
 # Python imports
 import asyncio
-import ssl
-import threading
-import time
-
-import aiohttp
-import requests
 import socketio
 from pynput import keyboard
 
@@ -35,18 +29,8 @@ class GamePage(Screen):
         self.pressedKeys = set()
         self.listener = None
         self.connected = False
-
-        # ssl_context = ssl.create_default_context()
-        # ssl_context.load_cert_chain(SSL_CRT)
-        # connector = aiohttp.TCPConnector(ssl=ssl_context)
-        # http_session = aiohttp.ClientSession(connector=connector)
-        self.sio = socketio.AsyncClient(
-            # http_session=http_session,
-            ssl_verify=False,
-            # logger=True,
-            # engineio_logger=True,
-        )
         self.gameStarted = False
+        self.sio = socketio.AsyncClient(ssl_verify=False)
 
     async def on_mount(self) -> None:
         # Key handling
@@ -148,7 +132,7 @@ class GamePage(Screen):
             print(self.connected, flush=True)
 
         @self.sio.on('start_game')
-        async def start_game_action():
+        async def startGameAction():
             self.gameStarted = True
             print("start_game_action", flush=True)
             print(self.connected, flush=True)
@@ -185,7 +169,7 @@ class GamePage(Screen):
                 self.paddleLeft.stopMoving(data["position"])
 
         @self.sio.on('score')
-        async def score_action(data):
+        async def scoreAction(data):
             print(f"Score action event ====: {data}", flush=True)
             self.paddleLeft.reset()
             self.paddleRight.reset()
