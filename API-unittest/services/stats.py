@@ -11,6 +11,18 @@ def finish_match_stat(data=None):
         data=data,
     )
 
+
+def finish_tournament_stat(user=None, data=None):
+    if data is None:
+        data = {'winner': user['id']}
+    return make_request(
+        endpoint='private/users/result-tournament/',
+        port=8005,
+        method='POST',
+        data=data,
+    )
+
+
 # todo rename all serializer.py -> serializers.py
 def get_stats(user):
     return make_request(

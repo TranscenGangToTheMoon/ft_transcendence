@@ -89,7 +89,6 @@ class Tournament(models.Model):
                 user_2.save()
             else:
                 user_2 = None
-            print('USER2', user_2, flush=True)
             self.matches.create(n=index, stage=first_stage, user_1=user_1, user_2=user_2)
             self.nb_games = index
         self.save()

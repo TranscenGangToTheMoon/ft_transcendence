@@ -1,7 +1,7 @@
 from rest_framework import generics
 
 from stats.models import GameModeStats, RankedStats
-from stats.serializer import StatsSerializer, FinishMatchSerializer, RankedStatsSerializer
+from stats.serializer import StatsSerializer, FinishMatchSerializer, RankedStatsSerializer, FinishTournamentSerializer
 
 
 class RetrieveStatsView(generics.ListAPIView):
@@ -24,6 +24,12 @@ class FinishMatchView(generics.CreateAPIView):
     serializer_class = FinishMatchSerializer
 
 
+class FinishTournamentView(generics.CreateAPIView):
+    authentication_classes = []
+    serializer_class = FinishTournamentSerializer
+
+
 stats_view = RetrieveStatsView.as_view()
 stats_ranked_view = RetrieveRankedStatsView.as_view()
 finish_match_view = FinishMatchView.as_view()
+finish_tournament_view = FinishTournamentView.as_view()

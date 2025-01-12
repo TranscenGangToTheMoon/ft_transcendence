@@ -2,7 +2,8 @@ import time
 import unittest
 
 from services.game import create_game, score
-from services.stats import finish_match_stat, get_stats, get_ranked_stats
+from services.stats import finish_match_stat, get_stats, get_ranked_stats, set_trophies, finish_tournament_stat
+from services.tournament import tj, ts, gs, tmf, tf, join_tournament, create_tournament
 from utils.my_unittest import UnitTest
 
 
@@ -40,6 +41,12 @@ class Test02_Stats(UnitTest):
         user1 = self.user(['game-start'])
         user2 = self.user(['game-start'])
 
+        response = self.assertResponse(get_stats(user1), 200)
+        for game_mode in response:
+            if game_mode['game_mode'] == 'tournament':
+                self.assertEqual(game_mode['tournament_wins'], 0)
+                break
+
         self.assertResponse(create_game(user1, user2), 201)
         self.assertResponse(score(user1['id']), 200)
         self.assertResponse(score(user1['id']), 200)
@@ -51,6 +58,61 @@ class Test02_Stats(UnitTest):
                 self.assertEqual(game_mode['wins'], 1)
                 break
         self.assertThread(user1, user2)
+
+    def test_003_win_tournament_from_endpoint(self):
+        user1 = self.user()
+
+        self.assertResponse(finish_tournament_stat(user1), 201)
+        response = self.assertResponse(get_stats(user1), 200)
+        for game_mode in response:
+            if game_mode['game_mode'] == 'tournament':
+                self.assertEqual(game_mode['tournament_wins'], 1)
+                break
+        self.assertThread(user1)
+
+    def test_004_win_tournament(self):
+        user1 = self.user([tj, tj, tj, ts, gs, tmf, tmf, gs, tmf, tf])
+        user2 = self.user([tj, tj, ts, gs, tmf, tmf, gs, tmf, tf])
+        user3 = self.user([tj, ts, gs, tmf, tmf, tmf, tf])
+        user4 = self.user([ts, gs, tmf, tmf, tmf, tf])
+
+        self.assertResponse(set_trophies(user1, 1000), 201)
+        self.assertResponse(set_trophies(user2, 500), 201)
+        self.assertResponse(set_trophies(user3, 200), 201)
+        self.assertResponse(set_trophies(user4, 100), 201)
+
+        code = self.assertResponse(create_tournament(user1), 201, get_field='code')
+        self.assertResponse(join_tournament(user2, code), 201)
+        self.assertResponse(join_tournament(user3, code), 201)
+        self.assertResponse(join_tournament(user4, code), 201)
+
+        time.sleep(5)
+
+        self.assertResponse(score(user1['id']), 200)
+        self.assertResponse(score(user1['id']), 200)
+        self.assertResponse(score(user1['id']), 200)
+
+        self.assertResponse(score(user2['id']), 200)
+        self.assertResponse(score(user2['id']), 200)
+        self.assertResponse(score(user2['id']), 200)
+
+        time.sleep(5)
+
+        self.assertResponse(score(user1['id']), 200)
+        self.assertResponse(score(user1['id']), 200)
+        self.assertResponse(score(user1['id']), 200)
+
+        time.sleep(1)
+        response = self.assertResponse(get_stats(user1), 200)
+        for game_mode in response:
+            if game_mode['game_mode'] == 'tournament':
+                self.assertEqual(game_mode['tournament_wins'], 1)
+                break
+        self.assertThread(user1, user2, user3, user4)
+
+    def test_005_finish_tournament_error(self):
+        self.assertResponse(finish_tournament_stat({'id': 123456}), 404)
+        self.assertResponse(finish_tournament_stat(data={'looser': 2}), 400)
 
 
 class Test03_StatsRanked(UnitTest):

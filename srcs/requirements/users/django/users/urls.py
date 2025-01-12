@@ -7,7 +7,7 @@ from friend_requests.views import friend_requests_list_create_view, friend_reque
 from friends.views import friends_view, friend_view
 from events.views import events_view
 from sse.views import sse_view
-from stats.views import finish_match_view, stats_view, stats_ranked_view
+from stats.views import finish_match_view, stats_view, stats_ranked_view, finish_tournament_view
 from users.views import users_me_view, retrieve_user_view, retrieve_users_view, manage_user_view
 from validate.views import validate_chat_view, are_friends_view
 
@@ -29,6 +29,7 @@ urlpatterns = [
     path(Users.stats, stats_view),
     path(Users.stats_ranked, stats_ranked_view),
     path(Users.result_match, finish_match_view),
+    path(Users.result_tournament, finish_tournament_view),
 
     path(Users.sse, sse_view),
     path(Users.event, events_view),
@@ -39,19 +40,9 @@ urlpatterns = [
     path(UsersManagement.manage_user, manage_user_view),
 ]
 
-# todo remake all endpoint, use serializer for each and create
-# todo test tournament with ui
-# todo test tournament abandon
-# todo test tournament quit tournament via sse
-
 # todo make matchamking for duel
 # todo make matchamking for clash
 # todo make matchamking for ranked
-
-# todo test utilisateur se connecte deux fois au jeux
-# todo si utilisateur se supprime pendant le chat
-# todo chat lobby et tournoi
-# todo return 200 avec data when score (PATCH not PUT)
 
 # todo - stat tournoi gagne
 # todo - stat total partie faite
@@ -62,6 +53,18 @@ urlpatterns = [
 # todo ajouter password field pour change password
 # todo handle download all data
 
+
+
+
+# --- OTHER ---
+# todo test tournament with ui
+# todo test tournament abandon
+# todo test tournament quit tournament via sse
+
+# todo test utilisateur se connecte deux fois au jeux
+# todo si utilisateur se supprime pendant le chat
+# todo chat lobby et tournoi
+# todo return 200 avec data when score (PATCH not PUT)
 
 # --- before push ---
 # todo type all python code (make variable)

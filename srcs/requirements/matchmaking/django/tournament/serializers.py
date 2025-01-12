@@ -4,7 +4,7 @@ from lib_transcendence import endpoints
 from lib_transcendence.auth import get_auth_user
 from lib_transcendence.exceptions import MessagesException
 from lib_transcendence.generate import generate_code
-from lib_transcendence.services import request_game
+from lib_transcendence.services import request_game, request_users
 from lib_transcendence.sse_events import create_sse_event, EventCode
 from lib_transcendence.game import Reason
 from lib_transcendence.users import retrieve_users
@@ -239,6 +239,7 @@ class TournamentMatchSerializer(serializers.ModelSerializer):
             data['stages'] = TournamentStageSerializer(tournament.stages.all(), many=True).data
             request_game(endpoints.Game.tournaments, method='POST', data=data)
             create_sse_event(tournament.users_id(), EventCode.TOURNAMENT_FINISH, {'id': tournament.id}, {'name': tournament.name, 'username': winner_user_id})
+            request_users(endpoints.Users.result_tournament, method='POST', data={'winner': winner_user_id})
             tournament.delete()
         else:
             if not current_stage.matches.filter(finished=False).exists():

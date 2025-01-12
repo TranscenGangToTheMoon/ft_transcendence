@@ -222,13 +222,13 @@ class ScoreSerializer(serializers.ModelSerializer):
         result = super().to_representation(instance)
         if instance.match.finished:
             result['finished'] = True
-        if result['own_goal'] is None:
+        if 'own_goal' in result and result['own_goal'] is None:
             result.pop('own_goal')
         return result
 
     def update(self, instance, validated_data):
         if validated_data.pop('own_goal', None) is True:
-            instance.own_goal()
+            instance.score_own_goal()
         else:
             instance.scored()
         return instance

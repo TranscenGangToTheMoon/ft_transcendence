@@ -12,12 +12,12 @@ class GameModeStats(models.Model):
     wins = models.IntegerField(default=0)
     longest_win_streak = models.IntegerField(default=0)
     current_win_streak = models.IntegerField(default=0)
-    tournament_wins = models.IntegerField(default=None, null=True) # todo handle
+    tournament_wins = models.IntegerField(default=None, null=True)
     own_goals = models.IntegerField(default=None, null=True)
 
     def log(self, score: int, win: bool, own_goals: int | None):
         self.game_played += 1
-        self.scored = score
+        self.scored += score
         if win:
             self.wins += 1
             self.current_win_streak += 1

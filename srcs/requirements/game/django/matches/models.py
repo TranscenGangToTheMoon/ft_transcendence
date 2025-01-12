@@ -57,8 +57,6 @@ class Teams(models.Model):
         return self.players.count()
 
     def scored(self):
-        if self.score > 3 or self.match.finished:
-            return
         self.score += 1
         self.save()
         if self.score == 3:
@@ -72,12 +70,10 @@ class Players(models.Model):
     score = models.IntegerField(default=0)
 
     def scored(self):
-        if self.score > 3 or self.match.finished:
-            return
         self.score += 1
         self.save()
         self.team.scored()
 
-    def own_goal(self):
+    def score_own_goal(self):
         other_team = self.match.teams.exclude(id=self.team.id).first()
         other_team.scored()

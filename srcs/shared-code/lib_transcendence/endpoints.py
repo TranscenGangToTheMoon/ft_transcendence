@@ -74,6 +74,7 @@ class Users:
     stats                       = 'api/users/me/stats/'
     stats_ranked                = 'api/users/me/stats/ranked/'
     result_match                = 'api/private/users/result-match/'
+    result_tournament           = 'api/private/users/result-tournament/'
 
     sse                         = 'sse/users/'
     event                       = 'api/private/users/events/'

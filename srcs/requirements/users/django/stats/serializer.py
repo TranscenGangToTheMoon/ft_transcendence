@@ -61,7 +61,9 @@ class FinishMatchSerializer(serializers.Serializer):
 
     def create(self, validated_data):
         for team_name, team_users in validated_data['teams'].items():
+            print('COUCOUCOUCOU', team_users, flush=True)
             for user_json in team_users:
+                print('COUCOUCOUCOU', user_json, flush=True)
                 try:
                     if validated_data['game_mode'] == GameMode.clash and 'own_goals' in user_json:
                         own_goals = validated_data['own_goals']
@@ -69,10 +71,20 @@ class FinishMatchSerializer(serializers.Serializer):
                         own_goals = None
                     user = get_user(id=user_json['id'])
                     user.set_game_playing()
+                    print(validated_data['game_mode'], user.id, flush=True)
                     stat = user.stats.get(game_mode=validated_data['game_mode'])
                     stat.log(user_json['score'], team_name == validated_data['winner'], own_goals)
                     if validated_data['game_mode'] == GameMode.ranked and 'trophies' in user_json:
                         RankedStats.log(user, user_json['trophies'])
                 except APIException:
                     pass
+        return validated_data
+
+
+class FinishTournamentSerializer(serializers.Serializer):
+    winner = serializers.IntegerField()
+
+    def create(self, validated_data):
+        winner = get_user(id=validated_data['winner'])
+        winner.stats.get(game_mode=GameMode.tournament).win_tournament()
         return validated_data
