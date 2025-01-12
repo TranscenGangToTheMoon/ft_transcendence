@@ -1,6 +1,3 @@
-# Python imports
-
-
 # Textual imports
 from textual.geometry   import Offset
 from textual.widget     import Widget
@@ -20,12 +17,18 @@ class Paddle(Widget):
             self.styles.layer = "1"
 
             self.cX = Config.Paddle.cGap
-            self.offset = Offset(self.cX * Config.Playground.width / Config.Playground.cWidth, self.cY * Config.Playground.height / Config.Playground.cHeight)
+            self.offset = Offset(
+                round(self.cX * Config.Playground.width / Config.Playground.cWidth),
+                round(self.cY * Config.Playground.height / Config.Playground.cHeight)
+            )
         elif side == "right":
             self.styles.layer = "2"
 
             self.cX = Config.Playground.cWidth - Config.Paddle.cGap - Config.Paddle.cWidth
-            self.offset = Offset(self.cX * Config.Playground.width / Config.Playground.cWidth, self.cY * Config.Playground.height / Config.Playground.cHeight)
+            self.offset = Offset(
+                round(self.cX * Config.Playground.width / Config.Playground.cWidth),
+                round(self.cY * Config.Playground.height / Config.Playground.cHeight)
+            )
 
     def render(self):
         return " " * Config.Paddle.height * Config.Paddle.width
@@ -33,7 +36,10 @@ class Paddle(Widget):
 
     def reset(self):
         self.cY = (Config.Playground.cHeight - Config.Paddle.cHeight) // 2
-        self.offset = Offset(self.offset.x, self.cY * Config.Playground.height / Config.Playground.cHeight)
+        self.offset = Offset(
+            self.offset.x,
+            round(self.cY * Config.Playground.height / Config.Playground.cHeight)
+        )
 
     def moveUp(self):
         self.direction = -1
@@ -41,7 +47,10 @@ class Paddle(Widget):
             self.cY -= Config.Paddle.cSpeed / Config.frameRate
         else:
             self.cY = 0
-        self.offset = Offset(self.offset.x, round(self.cY * Config.Playground.height / Config.Playground.cHeight))
+        self.offset = Offset(
+            self.offset.x,
+            round(self.cY * Config.Playground.height / Config.Playground.cHeight)
+        )
 
     def moveDown(self):
         self.direction = 1
@@ -49,9 +58,15 @@ class Paddle(Widget):
             self.cY += Config.Paddle.cSpeed / Config.frameRate
         else:
             self.cY = Config.Playground.cHeight - Config.Paddle.cHeight
-        self.offset = Offset(self.offset.x, round(self.cY * Config.Playground.height / Config.Playground.cHeight))
+        self.offset = Offset(
+            self.offset.x,
+            round(self.cY * Config.Playground.height / Config.Playground.cHeight)
+        )
 
     def stopMoving(self, cY: float):
         self.direction = 0
         self.cY = cY
-        self.offset = Offset(self.offset.x, round(self.cY * Config.Playground.height / Config.Playground.cHeight))
+        self.offset = Offset(
+            self.offset.x,
+            round(self.cY * Config.Playground.height / Config.Playground.cHeight)
+        )
