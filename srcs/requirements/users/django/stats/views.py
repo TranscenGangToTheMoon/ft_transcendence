@@ -9,7 +9,7 @@ class RetrieveStatsView(generics.ListAPIView):
     pagination_class = None
 
     def get_queryset(self):
-        return GameModeStats.objects.filter(user__id=self.request.user.id)
+        return GameModeStats.objects.filter(user__id=self.request.user.id).order_by('created_at')
 
 
 class RetrieveRankedStatsView(generics.ListAPIView):

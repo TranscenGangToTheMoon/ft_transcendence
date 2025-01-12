@@ -138,13 +138,13 @@ class ManageUserSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         result = super().create(validated_data)
-        for game_mode in GameMode.modes:
+        for game_mode in [GameMode.global_] + GameMode.modes:
             if game_mode == GameMode.custom_game:
                 continue
             kwargs = {'game_mode': game_mode}
-            if game_mode == GameMode.tournament:
+            if GameMode.tournament_field(game_mode):
                 kwargs['tournament_wins'] = 0
-            elif game_mode == GameMode.clash:
+            if GameMode.own_goal_field(game_mode):
                 kwargs['own_goals'] = 0
             result.stats.create(**kwargs)
         result.ranked_stats.create(trophies=0, total_trophies=0)

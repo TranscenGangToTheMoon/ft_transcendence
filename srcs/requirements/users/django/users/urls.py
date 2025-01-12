@@ -44,11 +44,6 @@ urlpatterns = [
 # todo make matchamking for clash
 # todo make matchamking for ranked
 
-# todo - stat tournoi gagne
-# todo - stat total partie faite
-# todo - stat total point marque
-# todo - stat total win
-
 # todo fix github issue
 # todo ajouter password field pour change password
 # todo handle download all data

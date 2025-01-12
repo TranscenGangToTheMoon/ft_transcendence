@@ -1,4 +1,5 @@
 from django.db import models
+from lib_transcendence.game import GameMode
 
 from stats.utils import get_trophies
 from users.models import Users
@@ -14,8 +15,14 @@ class GameModeStats(models.Model):
     current_win_streak = models.IntegerField(default=0)
     tournament_wins = models.IntegerField(default=None, null=True)
     own_goals = models.IntegerField(default=None, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def get_global(self):
+        return self.user.stats.get(game_mode=GameMode.global_)
 
     def log(self, score: int, win: bool, own_goals: int | None):
+        if self.game_mode != GameMode.global_:
+            self.get_global().log(score, win, own_goals)
         self.game_played += 1
         self.scored += score
         if win:
@@ -30,6 +37,8 @@ class GameModeStats(models.Model):
         self.save()
 
     def win_tournament(self):
+        if self.game_mode != GameMode.global_:
+            self.get_global().win_tournament()
         self.tournament_wins += 1
         self.save()
 

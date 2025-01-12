@@ -7,6 +7,7 @@ class GameMode: # todo change to enum
     ranked = 'ranked'
     tournament = 'tournament'
     custom_game = 'custom_game'
+    global_ = 'global'
 
     modes = [duel, clash, ranked, tournament, custom_game]
 
@@ -17,6 +18,14 @@ class GameMode: # todo change to enum
     @staticmethod
     def validate_lobby(mode):
         return validate_type(mode, GameMode(), (GameMode.clash, GameMode.custom_game))
+
+    @staticmethod
+    def tournament_field(game_mode):
+        return game_mode in [GameMode.tournament, GameMode.global_]
+
+    @staticmethod
+    def own_goal_field(game_mode):
+        return game_mode in [GameMode.clash, GameMode.global_]
 
     def __str__(self):
         return 'Game mode'
