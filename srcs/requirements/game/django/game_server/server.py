@@ -58,11 +58,11 @@ class Server:
                 pass # game has already been deleted
 
     @staticmethod
-    def finish_game(match_id, reason: str, user_id: int | None = None) -> None:
+    def finish_game(match_id, finish_reason: str, user_id: int | None = None) -> None:
         with Server._games_lock:
             game = Server._games[match_id]
         if game.finished is False:
-            game.finish(reason, disconnected_user_id=user_id)
+            game.finish(finish_reason, disconnected_user_id=user_id)
 
     @staticmethod
     def push_game(match_id, game) -> None:

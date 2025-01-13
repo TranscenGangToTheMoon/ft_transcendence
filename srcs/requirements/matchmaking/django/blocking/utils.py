@@ -1,22 +1,15 @@
 from django.db.models import Q
 from lib_transcendence import endpoints
-from lib_transcendence.exceptions import ServiceUnavailable
+from lib_transcendence.pagination import get_all_pagination_items
 from lib_transcendence.services import request_users
-from rest_framework.exceptions import APIException
 
 from blocking.models import Blocked
 
 
 def create_player_instance(request, instance=None, *args, **kwargs):
-    while True:
-        try:
-            result = request_users(endpoints.Users.blocked, request=request)
-            for blocked_instance in result['results']:
-                Blocked.objects.create(user_id=blocked_instance['user']['id'], blocked_user_id=blocked_instance['blocked']['id'])
-            if result['next'] is None:
-                break
-        except APIException:
-            raise ServiceUnavailable('users')
+    result = get_all_pagination_items(request_users, 'users', endpoints.Users.blocked, request=request)
+    for blocked_instance in result:
+        Blocked.objects.create(user_id=request.user.id, blocked_user_id=blocked_instance['blocked']['id'])
 
     if instance is not None:
         return instance.objects.create(*args, **kwargs)

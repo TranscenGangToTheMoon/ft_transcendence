@@ -33,9 +33,9 @@ class FriendRequestsReceiveListView(generics.ListAPIView, FriendRequestsMixin):
     def filter_queryset(self, queryset):
         return queryset.filter(receiver=self.request.user.id)
 
-    def get(self, request, *args, **kwargs):
-        response = super().get(request, *args, **kwargs)
-        self.filter_queryset(self.queryset).update(new=False)
+    def list(self, request, *args, **kwargs):
+        response = super().list(request, *args, **kwargs)
+        self.filter_queryset(self.get_queryset()).update(new=False)
         return response
 
 

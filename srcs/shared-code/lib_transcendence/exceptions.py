@@ -16,6 +16,7 @@ class MessagesException:
         TOURNAMENT = NOT_FOUND.format(obj='Tournament')
         BLOCKED_INSTANCE = NOT_FOUND.format(obj='Blocked instance')
         MATCH = NOT_FOUND.format(obj='Match')
+        CHAT = NOT_FOUND.format(obj='Chat')
 
         NOT_BELONG = 'You do not belong to any {obj}.'
         NOT_BELONG_TOURNAMENT = NOT_BELONG.format(obj='tournament')
@@ -42,8 +43,7 @@ class MessagesException:
         PASSWORD_SHORTER_THAN_50_CHAR = 'Password must be less than 50 characters long.'
         SAME_PASSWORD = 'Password is the same as the old one.'
 
-        ONLY_1V1_3V3_ALLOWED = 'Only 1v1 and 3v3 are allowed.'
-        BO_MUST_BE = 'Best of must be 1, 3 or 5.'
+        ONLY_1V1_3V3_ALLOWED = 'Only 1v1 and 3v3 teams are allowed.'
 
         TEAMS_LIST = 'Teams must be a list.'
         TEAMS_NOT_EQUAL = 'Both teams must have the same number of players.'
@@ -65,7 +65,7 @@ class MessagesException:
         NOT_AUTHENTICATED = {'detail': 'Authentication credentials were not provided.', 'code': 'not_authenticated'}
         USER_NOT_FOUND = {'detail': 'User not found.', 'code': 'user_not_found'}
 
-        PASSWORD_CONFIRMATION_REQUIRED = 'Password confirmation is required to delete the account.'
+        PASSWORD_CONFIRMATION_REQUIRED = 'Password confirmation is required.'
         INCORRECT_PASSWORD = 'Incorrect password.'
 
     class PermissionDenied:
@@ -98,8 +98,8 @@ class MessagesException:
 
         TOURNAMENT_ALREADY_STARTED = 'Tournament already started.'
 
-        UPDATE_CLASH_MODE = f'You cannot update {GameMode.clash} lobby.'
-        UPDATE_TEAM_CLASH_MODE = f'You cannot update team in {GameMode.clash} mode.'
+        UPDATE_CLASH_MODE = f'You cannot update {GameMode.CLASH} lobby.'
+        UPDATE_TEAM_CLASH_MODE = f'You cannot update team in {GameMode.CLASH} mode.'
 
         NOT_CREATOR = 'Only creator can update this {obj}.'
 

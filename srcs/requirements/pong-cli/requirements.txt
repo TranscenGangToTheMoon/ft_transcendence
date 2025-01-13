@@ -1,0 +1,8 @@
+requests==2.32.3
+python-socketio==5.11.4
+websocket-client==1.8.0
+textual==1.0.0
+textual-dev==1.7.0
+httpx==0.28.1
+rich==13.9.4
+pynput==1.7.7

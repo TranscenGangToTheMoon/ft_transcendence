@@ -1,0 +1,23 @@
+{
+  "canvasWidth": 800,
+  "canvasHeight": 600,
+  "paddleWidth": 30,
+  "paddleHeight": 200,
+  "ballSize": 20,
+  "maxBallSpeed": 15,
+  "animationDuration": 800,
+  "font": "48px Arial",
+  "fontColor": "white",
+  "defaultBallSpeed" : 4,
+  "ballSpeedIncrement": 1,
+  "winningScore": 3,
+  "enemyScore" : {},
+  "playerScore" : {},
+  "countDown" : {
+    "steps" : 3,
+    "delay" : 2000
+  },
+  "maxBounceAngle" : "2 * (Math.PI / 5)",
+  "displayDemo": false,
+  "team": ""
+}

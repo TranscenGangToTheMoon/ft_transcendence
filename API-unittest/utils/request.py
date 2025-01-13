@@ -5,6 +5,7 @@ import requests
 
 
 class RequestResult:
+
     def __init__(self, status_code, json_data=None):
         self.status_code = status_code
         if json_data is None:

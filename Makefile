@@ -81,13 +81,13 @@ banner		:
 			@echo -e '                                          bajeanno fguirama jcoquard nfaust xcharra'
 			@echo -e '$(RESET)'
 
-secrets		:	$(ENV_FILE)
+secrets		:	$(ENV_EXEMPLE)
 			mkdir -p $@
+			./launch.d/01passwords.sh $(ENV_EXEMPLE) $(ENV_FILE)
 			./launch.d/02set-hostname.sh
 			./launch.d/03genreateSSL.sh
-
-$(ENV_FILE)	:	$(ENV_EXEMPLE)
-			./launch.d/01passwords.sh $(ENV_EXEMPLE) $(ENV_FILE)
+			ln -f ./secrets/ssl.crt ./srcs/requirements/pong-cli/ft_transcendence.crt
+			ln -f ./secrets/ssl.key ./srcs/requirements/pong-cli/ft_transcendence.key
 
 .PHONY: clean
 clean		:
@@ -98,7 +98,7 @@ clean		:
 .PHONY: vclean
 vclean		:
 			$(COMPOSE) $(FLAGS) down -v --remove-orphans
-			rm -rf $(ENV_FILE)
+#			rm -rf $(ENV_FILE)
 #			rm -rf $(SECRETS_D)
 
 .PHONY: fclean
@@ -110,6 +110,8 @@ fclean		:	dusting
 			rm -rf ./srcs/shared-code/lib_transcendence.egg-info/ # todo remove in prod
 			rm -rf ./srcs/shared-code/build/ # todo remove in prod
 			rm -rf $(SECRETS_D)
+			rm -rf ./srcs/requirements/pong-cli/ft_transcendence.crt
+			rm -rf ./srcs/requirements/pong-cli/ft_transcendence.key
 
 .PHONY: dusting
 dusting		:

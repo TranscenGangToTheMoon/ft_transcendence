@@ -20,12 +20,12 @@ class LobbyView(SerializerAuthContext, generics.CreateAPIView, generics.Retrieve
 
     def get_object(self):
         participant = get_lobby_participant(None, self.request.user.id, self.request.method != 'GET', True)
-        if self.request.method in ('PUT', 'PATCH') and participant.lobby.game_mode == GameMode.clash:
+        if self.request.method in ('PUT', 'PATCH') and participant.lobby.game_mode == GameMode.CLASH:
             raise PermissionDenied(MessagesException.PermissionDenied.UPDATE_CLASH_MODE)
         return participant.lobby
 
 
-class LobbyParticipantsView(SerializerAuthContext, generics.ListCreateAPIView, generics.UpdateAPIView, generics.DestroyAPIView): # todo GET usefull ? also for tournament
+class LobbyParticipantsView(SerializerAuthContext, generics.ListCreateAPIView, generics.UpdateAPIView, generics.DestroyAPIView): # TODO fguirama: GET usefull ? also for tournament
     queryset = LobbyParticipants.objects.all()
     serializer_class = LobbyParticipantsSerializer
     pagination_class = None

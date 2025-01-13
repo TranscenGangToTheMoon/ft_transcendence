@@ -6,6 +6,7 @@ from users.auth import get_user
 
 
 class NotInGame(permissions.BasePermission):
+
     def has_permission(self, request, view):
         if request.method in permissions.SAFE_METHODS:
             return True
