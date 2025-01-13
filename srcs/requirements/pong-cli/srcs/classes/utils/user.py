@@ -9,12 +9,13 @@ from classes.utils.config   import SSL_CRT
 class User():
     accessToken: str | None = None
     headers = {"Content-Type": "application/json"}
+    id: int | None = None
     password: str | None = None
     refreshToken: str | None = None
     response: requests.Response | None = None
     server: str | None = None
+    team: str | None = None
     username: str | None = None
-    id: int | None = None
 
     @staticmethod
     def loginUser():
