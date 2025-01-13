@@ -161,9 +161,9 @@
     function stopGame(animate=false, reason=undefined) {
         console.log('game stop');
         state.isGameActive = false;
-        ctx.fillText('Game over', config.canvasWidth / 2, config.canvasHeight / 2);
-        if (reason)
-            ctx.fillText(reason, config.canvasWidth / 2, config.canvasHeight / 2 + 96);
+        // ctx.fillText('Game over', config.canvasWidth / 2, config.canvasHeight / 2);
+        // if (reason)
+        //     ctx.fillText(reason, config.canvasWidth / 2, config.canvasHeight / 2 + 96);
         if (animate){
             animatePaddlesToMiddle();
         }
@@ -190,7 +190,7 @@
         // for (racket in state.paddles) {
         // 	racket.y = (config.canvasHeight + config.paddleHeight) / 2
         // }
-        ctx.clearRect(0, 0, config.canvasWidth, config.canvasHeight);
+        // ctx.clearRect(0, 0, config.canvasWidth, config.canvasHeight);
         animatePaddlesToMiddle();
         function step() {
             state.countDown.currentStep--;
@@ -451,13 +451,13 @@
         if (!state.isCountDownActive) {
             ctx.clearRect(0, 0, config.canvasWidth, config.canvasHeight);
             drawPaddles();
-            // ctx.fillText(`${state.playerScore}`, config.playerScore.x, config.playerScore.y);
-            // ctx.fillText(`${state.enemyScore}`, config.enemyScore.x, config.enemyScore.y);
+            ctx.fillText(`${state.playerScore}`, config.playerScore.x, config.playerScore.y);
+            ctx.fillText(`${state.enemyScore}`, config.enemyScore.x, config.enemyScore.y);
             ctx.drawImage(ballImage, state.ball.x, state.ball.y, config.ballSize, config.ballSize);
         }
     }
 
-    window.PongGame = {startGame, startCountdown, stopGame, state, config, moveUp, moveDown, handleGameOver, resetGame, info, animatePaddlesToMiddle};
+    window.PongGame = {startGame, startCountdown, drawGame, stopGame, state, config, moveUp, moveDown, handleGameOver, resetGame, info, animatePaddlesToMiddle};
 })();
 
 function fillTeamDetail(enemyTeamDetail, playerTeamDetail){
@@ -550,18 +550,19 @@ function initSocket(){
     gameSocket.on('score', event => {
         window.PongGame.state.ball.speed = 0;
 		// for (paddle in window.PongGame.state.paddles) {
-		// 	window.PongGame.state.paddles[paddle].y = (window.PongGame.config.canvasHeight - window.PongGame.config.paddleHeight) / 2;
-		// }
-        // window.PongGame.animatePaddlesToMiddle()
-    	if (window.PongGame.info.myTeam.name == 'A') {
-			window.PongGame.state.playerScore = event.team_a;
-			window.PongGame.state.enemyScore = event.team_b;
-     	}
-     	else {
-			window.PongGame.state.playerScore = event.team_b;
-			window.PongGame.state.enemyScore = event.team_a;
-      	}
-    })
+            // 	window.PongGame.state.paddles[paddle].y = (window.PongGame.config.canvasHeight - window.PongGame.config.paddleHeight) / 2;
+            // }
+            // window.PongGame.animatePaddlesToMiddle()
+            if (window.PongGame.info.myTeam.name == 'A') {
+                window.PongGame.state.playerScore = event.team_a;
+                window.PongGame.state.enemyScore = event.team_b;
+            }
+            else {
+                window.PongGame.state.playerScore = event.team_b;
+                window.PongGame.state.enemyScore = event.team_a;
+            }
+            window.PongGame.drawGame();
+        })
     gameSocket.on('game_over', async event => {
         console.log('game_over received', event);
         gameSocket.close();
