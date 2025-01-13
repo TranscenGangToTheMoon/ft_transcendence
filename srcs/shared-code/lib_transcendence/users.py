@@ -12,7 +12,7 @@ def retrieve_users(user_id: list[int] | int):
         user_ids = user_id
     result = request_users(endpoints.Users.users, data={'user_ids': user_ids})
     if len(result) == 0:
-        raise NotFound(MessagesException.NotFound.Users)
+        raise NotFound(MessagesException.NotFound.USERS)
     return result
 
 

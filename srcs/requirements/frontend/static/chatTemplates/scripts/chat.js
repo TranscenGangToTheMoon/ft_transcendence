@@ -6,6 +6,7 @@ function parsChatInfo(chat)
 		'targetId': chat.chat_with.id,
 		'lastMessage': '< Say hi! >',
 		'isLastMessageRead': false,
+		'chatMessageNext': null,
 	};
 	if (chat.last_message) {
 		if (chat.last_message.content.length > 37){
@@ -18,7 +19,8 @@ function parsChatInfo(chat)
 }
 
 function disconnect() {
-	if (socket === null) return;
+	if (typeof window.socket === 'undefined')	return;
+	if (socket === null)	return;
 	console.log("Closing the connection to the server...");
 	socket.off();
 	socket.disconnect();
@@ -27,15 +29,7 @@ function disconnect() {
 
 async function connect(token, chatInfo) {
 	if(typeof window.socket !== 'undefined')	disconnect();
-	try {
-		res = await loadOldMessages(chatInfo);
-		if (res.code !== 200)
-			throw (res);
-	}
-	catch (error) {
-		console.log(error);
-		return false;
-	}
+	console.log(chatInfo);
 	let socket = await io("/", {
 		path: "/ws/chat/",
 		transports: ['websocket'],
@@ -47,35 +41,19 @@ async function connect(token, chatInfo) {
 	console.log(socket);
 	window.socket = socket;
 	console.log("Connecting to the server...");
+	setupSocketListeners(chatInfo);
 	return true;
 }
 
-function send() {
-    const chatForm = document.getElementById('sendMessageForm');
-    if (!chatForm.hasAttribute('data-listener-added')) {
-        chatForm.setAttribute('data-listener-added', 'true');
-        chatForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const message = e.target.message.value;
-			if (message === '') return;
-            socket.emit('message', {'content': message, 'token' : 'Bearer ' + getAccessToken()});
-            console.log('Message sent: ', message);
-            chatForm.reset();
-        });
-    }
-}
-
-function setupSocketListeners(chatData)
+function setupSocketListeners(chatInfo)
 {
-	const chatBox = document.getElementById('messages');
+	const chatBox = document.getElementById('messages' + chatInfo.target);
 
 	socket.off();
 	
 	socket.on("connect", () => {
 		console.log("Connected to the server");
 		console.log(socket);
-		document.getElementById('chatView').style.display = 'block';
-		document.getElementById('chatName').innerHTML = chatData.target;
 	});
 
 	socket.on("connect_error", async (data) => {
@@ -83,30 +61,28 @@ function setupSocketListeners(chatData)
 		console.log('You\'ve got some issues mate');
 		if (data.error === 401){
 			console.log('reattempting connection');
-			await connect(await refreshToken(), chatData.chatId);
+			await connect(await refreshToken(), chatInfo.chatId);
 		}
 		else {
-			lastClick = undefined;
 			console.log('You\'ve got some issues mate ', data);
+			closeChatTab(chatInfo);
 		}
 	});
 	
 	socket.on("disconnect", () => {
 		console.log("Disconnected from the server");
-		lastClick = undefined;
-		document.getElementById('chatView').style.display = 'none';
-		document.getElementById('messages').innerHTML = "";
+		closeChatTab(chatInfo);
 	});
 	
 	socket.on("message", (data) => {
 		console.log("Message received: ", data);
-		console.log(chatData.targetId, chatData.target, data.author);
+		console.log(chatInfo.targetId, chatInfo.target, data.author);
+		if (chatBox === null) return;
 		if (data.author === '')
 			chatBox.insertAdjacentHTML('beforeend', `<div><p><strong>:</strong> ${data.content}</p></div>`);
 		else{
-			document.getElementById('chatListElement' + chatData.target).querySelector('.chatUserCardLastMessage').innerText = data.content;
-			if (data.author === chatData.targetId) {
-				chatBox.insertAdjacentHTML('beforeend', `<div><p><strong>${chatData.target}:</strong> ${data.content}</p></div>`);
+			if (data.author === chatInfo.targetId) {
+				chatBox.insertAdjacentHTML('beforeend', `<div><p><strong>${chatInfo.target}:</strong> ${data.content}</p></div>`);
 			}
 			else {
 				chatBox.insertAdjacentHTML('beforeend', `<div><p><strong>You:</strong> ${data.content}</p></div>`);
@@ -139,23 +115,21 @@ function displayMessages(chatInfo, chatMessages, method='afterbegin'){
 	});
 }
 
-// async function getMoreOldsMessages(chatInfo){
-// 	if (!nextMessagesRequest) return;
-// 	if (nextMessagesRequest.substring(0, 5) === "https") return;
-// 	nextMessagesRequest = `${nextMessagesRequest.substring(0, 4)}s${nextMessagesRequest.substring(4)}`
-// 	try {
-// 		let apiAnswer = await apiRequest(getAccessToken(), nextMessagesRequest);
-// 		if (apiAnswer.detail){
-// 			console.log('Error:', apiAnswer.detail);
-// 			return;
-// 		}
-// 		if (apiAnswer.count !== 0) displayMessages(chatInfo, apiAnswer.results);
-// 		nextMessagesRequest = apiAnswer.next;
-// 	}
-// 	catch (error) {
-// 		console.log('Something went wrong:', error);
-// 	}
-// }
+async function getMoreOldsMessages(chatInfo){
+	if (!chatInfo.chatMessageNext) return;
+	try {
+		let apiAnswer = await apiRequest(getAccessToken(), chatInfo.chatMessageNext);
+		if (apiAnswer.detail){
+			console.log('Error:', apiAnswer.detail);
+			return;
+		}
+		if (apiAnswer.count !== 0) displayMessages(chatInfo, apiAnswer.results);
+		chatInfo.chatMessageNext = apiAnswer.next;
+	}
+	catch (error) {
+		console.log('Something went wrong:', error);
+	}
+}
 
 async function loadOldMessages(chatInfo){
 	try {
@@ -167,7 +141,7 @@ async function loadOldMessages(chatInfo){
 		};
 		if (apiAnswer.count !== 0){
 			displayMessages(chatInfo, apiAnswer.results);
-			nextMessagesRequest = apiAnswer.next;
+			chatInfo.chatMessageNext = apiAnswer.next;
 		}
 		else {
 			document.getElementById('messages'+ chatInfo.target).insertAdjacentHTML('afterbegin', `<div><p><strong>:</strong> Start the conversation ;)</p></div>`);
@@ -213,8 +187,34 @@ async function createChatUserCard(chatInfo) {
 		if (lastClick === e.target.closest('#chatListElement' + chatInfo.target)) return;
 		if (e.target === chatUserCard.querySelector('.chatUserCardButtonDeleteChat')) return;
 		console.log("lastClickAfter: ",lastClick);
-		await openChat(chatInfo);
+		await openChatTab(chatInfo);
 	});
+}
+
+async function getMoreChats(){
+	if (!nextChatsRequest) return;
+	// if (nextChatsRequest.substring(0, 5) === "https") return;
+	// nextChatsRequest = `${nextChatsRequest.substring(0, 4)}s${nextChatsRequest.substring(4)}`
+
+	try {
+		let apiAnswer = await apiRequest(getAccessToken(), nextChatsRequest);
+		if (apiAnswer.details){
+			console.log('Error:', apiAnswer.details);
+			return;
+		}
+		if (apiAnswer.count !== 0) {
+			chatBox = document.getElementById('chatsList');
+			apiAnswer.results.forEach(async element => {
+				console.log(element);
+				data = parsChatInfo(element);
+				await createUserCard(data);
+			});
+		}
+		nextMessagesRequest = apiAnswer.next;
+	}
+	catch (error) {
+		console.log('Something went wrong:', error);
+	}
 }
 
 async function displayChatsList(filter='') {
@@ -291,22 +291,45 @@ async function searchChatButton(username) {
 		}
 		console.log('Chat loaded:', chatRequest);
 	}
+	document.getElementById('searchChatForm').reset();
 	chatInfo = parsChatInfo(chatRequest);
 	await displayChatsList();
-	document.getElementById('searchChatForm').reset();
-	await openChat(chatInfo);
+	await openChatTab(chatInfo);
 }
 
-async function createTab(chatInfo, isFirst = false) {
+async function closeChatTab(chatInfo, )
+{
+	var isTabActive = false;
+	let chatActiveTab = document.querySelector('#chatTabs .nav-link.active');
+	if (chatActiveTab.id === 'chatTab' + chatInfo.target + 'Link') isTabActive = true;
+	document.getElementById('chatTab' + chatInfo.target).remove();
+	document.getElementById('chatBox' + chatInfo.target).remove();
+	openChat['chatTab' + chatInfo.target] = undefined;
+	let lastTab = document.getElementById('chatTabs').lastElementChild;
+	if (!lastTab) {
+		disconnect();
+		console.log('No more chat', lastTab);
+		document.getElementById('chatView').remove();
+	}
+	else if (isTabActive) {
+		disconnect();
+		lastTab.querySelector('a').click();
+		console.log('lastClickBefore nananananana: ', lastTab.id);
+		if (await connect(getAccessToken(), openChat[lastTab.id]) === false) return;
+		lastClick = lastTab;
+	}
+}
+
+async function createChatTab(chatInfo) {
     let idChatTab = "chatTab" + chatInfo.target;
     let idChatBox = "chatBox" + chatInfo.target;
 
     let chatTabs = document.getElementById('chatTabs');
 
-    let chatLastTab = document.querySelector('#chatTabs .nav-link.active');
-    if (chatLastTab) {
-        chatLastTab.classList.remove('active');
-        let lastTabId = chatLastTab.getAttribute('href').substring(1);
+    let chatActiveTab = document.querySelector('#chatTabs .nav-link.active');
+    if (chatActiveTab) {
+        chatActiveTab.classList.remove('active');
+        let lastTabId = chatActiveTab.getAttribute('href').substring(1);
         let lastChatBox = document.getElementById(lastTabId);
         if (lastChatBox) {
             lastChatBox.classList.remove('active');
@@ -341,85 +364,117 @@ async function createTab(chatInfo, isFirst = false) {
     chatBody.appendChild(chatBox);
 
     await loadContent('/chatTemplates/chatBox.html', idChatBox);
-	const messagesDiv = document.querySelector('.messages');
+	const messagesDiv = chatBox.querySelector('.messages');
 	if (messagesDiv){
 		messagesDiv.id = 'messages' + chatInfo.target;
 	}
-    if (!isFirst) {
-        const tab = new bootstrap.Tab(chatTabLink);
-        tab.show();
-    }
+	const sendMessageForm = chatBox.querySelector('.sendMessageForm');
+	if (sendMessageForm){
+		sendMessageForm.id = 'sendMessageForm' + chatInfo.target;
+	}
+	const tab = new bootstrap.Tab(chatTabLink);
+	tab.show();
 
-    chatTabButton.addEventListener('click', async e => {
-        e.preventDefault();
-        chatTab.remove();
-        chatBox.remove();
-		lastTab = document.getElementById('chatTabs').lastElementChild;
-        if (!lastTab) {
-            document.getElementById('chatView').remove();
-        }
-		else
-			lastTab.querySelector('a').click();
-        console.log('Chat view deleted');
+	lastClick = chatTabLink;
+
+	closeTabListener(chatInfo);
+	switchChatListner(chatInfo);
+	sendMessageListener(chatInfo.target);
+}
+
+async function closeTabListener(chatInfo)
+{
+	let closeChatButton = document.getElementById('chatTab' + chatInfo.target + 'Button');
+	closeChatButton.addEventListener('click', async e => {
+		e.preventDefault();
+		closeChatTab(chatInfo);
     });
 }
 
-async function openChat(chatInfo)
+async function switchChatListner(chatInfo)
+{
+	let chatTabLink = document.getElementById('chatTab' + chatInfo.target + 'Link');
+	chatTabLink.addEventListener('click', async e => {
+		e.preventDefault();
+		if (lastClick === chatTabLink) return;
+		if (e.target === document.getElementById('chatTab' + chatInfo.target + 'Button')) return;
+		if (!document.getElementById('chatTabs').lastElementChild) return;
+		lastClick = chatTabLink;
+		await connect(getAccessToken(), chatInfo);
+		console.log('Switching chat', e.target);
+	});
+}
+
+function sendMessageListener(target) {
+	console.log('Adding listener to chatForm', target);
+    const chatForm = document.getElementById('sendMessageForm'+target);
+    if (!chatForm.hasAttribute('data-listener-added')) {
+        chatForm.setAttribute('data-listener-added', 'true');
+        chatForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            const message = this.querySelector('input').value;
+			if (message === '') return;
+            socket.emit('message', {'content': message, 'token' : 'Bearer ' + getAccessToken()});
+            console.log('Message sent: ', message);
+            chatForm.reset();
+        });
+    }
+}
+
+async function openChatTab(chatInfo)
 {
 	chatTabs = document.getElementById('chatTabs');
 	if (!chatTabs) {
 		await loadContent('/chatTemplates/chatTabs.html', 'content', true);
 	}
+	else {
+		disconnect();
+	}
 	if (!document.getElementById('chatTab'+chatInfo.target))
 	{
-		createTab(chatInfo);
+		openChat['chatTab' + chatInfo.target] = chatInfo;
+		createChatTab(chatInfo);
+		try {
+			res = await loadOldMessages(chatInfo);
+			if (res.code !== 200)
+				throw (res);
+		}
+		catch (error) {
+			console.log(error);
+		}
 		const chatModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('chatListModal'));
 		chatModal.hide();
 		console.log(chatModal);
 	}
+	else {
+		document.getElementById('chatTab'+chatInfo.target).querySelector('a').click();
+	}
 	if (await connect(getAccessToken(), chatInfo) === false) return;
 	document.getElementById('searchChatForm').reset();
-	// lastClick = document.getElementById('chatListElement' + chatInfo.target);
-	// lastClick.querySelector('.chatUserCardLastMessage').classList.remove('chatMessageNotRead');
 
-	// setupSocketListeners(chatInfo);
+	document.getElementById('logOut').addEventListener('click', () => {
+		disconnect();
+		openChat = {};
+		document.getElementById('chatView').remove();
+	});
 
-	// document.getElementById('endChat').addEventListener('click', () => {
-	// 	closeChat();
-	// 	lastClick = undefined;
-	// });
-	// document.getElementById('logOut').addEventListener('click', () => {
-	// 	closeChat();
-	// 	lastClick = undefined;
-	// });
-
-	// document.getElementById('messages').addEventListener('scroll', async event => {
-	// 	const chatBox = document.getElementById('messages');
-	// 	const scrollHeight = chatBox.scrollHeight;
-	// 	const clientHeight = chatBox.clientHeight;
-	// 	const scrollTop = chatBox.scrollTop;
-	// 	const scrollPercentage = (scrollTop / (scrollHeight - clientHeight)) * 100;
-	// 	if (scrollPercentage <= 15 && !loading) {
-	// 		loading = true;
-	// 		await getMoreOldsMessages(chatInfo);
-	// 		loading = false;
-	// 		console.log(chatBox.scrollTop, chatBox.scrollHeight, chatBox.clientHeight);
-	// 	}
-	// });
-
-	// send();
-}
-
-function closeChat()
-{
-	if (typeof window.socket !== 'undefined')	disconnect();
-	lastClick = undefined;
-	document.getElementById('chatView').style.display = 'none';
-	document.getElementById('messages').innerHTML = "";
-	socket = null;
+	messagesDiv = document.getElementById('messages'+chatInfo.target);
+	messagesDiv.addEventListener('scroll', async event => {
+		const scrollHeight = messagesDiv.scrollHeight;
+		const clientHeight = messagesDiv.clientHeight;
+		const scrollTop = messagesDiv.scrollTop;
+		const scrollPercentage = (scrollTop / (scrollHeight - clientHeight)) * 100;
+		if (scrollPercentage <= 15 && !loading) {
+			loading = true;
+			await getMoreOldsMessages(chatInfo);
+			loading = false;
+		}
+	});
 }
 
 var lastClick = undefined;
+if (typeof openChat === 'undefined')
+	var openChat = {};
 if (typeof loading === 'undefined')
 	var loading = false;
 if (typeof nextMessagesRequest === 'undefined')
@@ -441,16 +496,16 @@ document.getElementById('searchChatButton').addEventListener('click', (e) => {
 	searchChatButton(request);
 });
 
-// document.getElementById('chatsList').addEventListener('scroll', async event => {
-// 	const chatsListBox = document.getElementById('chatsList');
-// 	const scrollHeight = chatsListBox.scrollHeight;
-// 	const clientHeight = chatsListBox.clientHeight;
-// 	const scrollTop = chatsListBox.scrollTop;
-// 	const scrollPercentage = (scrollTop / (scrollHeight - clientHeight)) * 100;
-// 	if (scrollPercentage >= 85 && !loading) {
-// 		loading = true;
-// 		await getMoreChats();
-// 		loading = false;
-// 	}
-// 	console.log('scrolling in chatsList');
-// }, true);
+document.getElementById('chatsList').addEventListener('scroll', async event => {
+	const chatsListBox = document.getElementById('chatsList');
+	const scrollHeight = chatsListBox.scrollHeight;
+	const clientHeight = chatsListBox.clientHeight;
+	const scrollTop = chatsListBox.scrollTop;
+	const scrollPercentage = (scrollTop / (scrollHeight - clientHeight)) * 100;
+	if (scrollPercentage >= 85 && !loading) {
+		loading = true;
+		await getMoreChats();
+		loading = false;
+	}
+	console.log('scrolling in chatsList');
+}, true);

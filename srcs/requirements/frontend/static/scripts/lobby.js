@@ -48,22 +48,28 @@ document.getElementById('inviteFriends').addEventListener('click', async event =
         if (!data.count)
             fullFriendsDiv.style.display = 'none';
         else{
-            onlineFriendsDiv.innerHTML += '<li><button class="dropdown-item">loading...</butto></li>';
+            // onlineFriendsDiv.innerHTML += '<li><button class="dropdown-item">loading...</button></li>';
             fullFriendsDiv.style.display = 'block';
             const tempDiv = document.createElement('div');
             for (i in data.results){
                 let friend = data.results[i].friend;
                 let friendDiv = document.createElement('li');
                 let button = document.createElement('button');
-                button.classList.add('dropdown-item');
+                button.className = 'dropdown-item inviteOnlineFriend';
                 tempDiv.appendChild(friendDiv);
-                friendDiv.appendChild(button);
                 button.innerText = friend.username;
                 button.id = `oFriend${friend.id}`
+                friendDiv.appendChild(button);
+            }
+            onlineFriendsDiv.innerHTML = tempDiv.innerHTML;
+            const friendButtons = document.querySelectorAll('.inviteOnlineFriend');
+            for (let button of friendButtons){
+                console.log(button);
                 button.addEventListener('click', async event => {
                     event.preventDefault();
+                    console.log(button);
                     try {
-                        let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/play/lobby/${code}/invite/${friend.id}/`, 'POST');
+                        let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/play/lobby/${code}/invite/${button.id.substring(7)}/`, 'POST');
                         console.log(data);
                     }
                     catch (error) {
@@ -79,9 +85,6 @@ document.getElementById('inviteFriends').addEventListener('click', async event =
                     }
                 })
             }
-            setTimeout(()=> {
-                onlineFriendsDiv.innerHTML = tempDiv.innerHTML;
-            }, 700);
         }
 
     }
@@ -420,11 +423,14 @@ async function fillPlayerList(noTeam=false){
     tempDiv.remove();
     addContextMenus();
     document.getElementById(`player${userInformations.id}`)?.querySelector('.playerIsReady').addEventListener('click', async function(){
-        isReady = !isReady;
         try {
             await apiRequest(getAccessToken(), `${baseAPIUrl}/play/lobby/${code}/`, 'PATCH', undefined, undefined, {
-                'is_ready' : isReady,
+                'is_ready' : !isReady,
             })
+            isReady = !isReady;
+            for (participant in lobby.participants)
+                if (lobby.participants[participant].id === userInformations.id)
+                    lobby.participants[participant].is_ready = isReady;
             this.innerText = isReady ? 'Ready' : 'Not Ready';
         }
         catch (error) {
@@ -504,6 +510,11 @@ async function lobbyDestroyed(event){
     displayMainAlert('Lobby destroyed', "The lobby has been destroyed.")
 }
 
+async function lobbyGameStart(event){
+    event = JSON.parse(event.data);
+    console.log(event);
+}
+
 function initLobbySSEListeners(){
     if (!SSEListeners.has('lobby-join')){
         SSEListeners.set('lobby-join', lobbyJoined);
@@ -534,6 +545,16 @@ function initLobbySSEListeners(){
         SSEListeners.set('lobby-destroy', lobbyDestroyed);
         sse.addEventListener('lobby-destroy', lobbyDestroyed);
     }
+
+    if (SSEListeners.has('game-start')){
+        sse.removeEventListener('game-start', SSEListeners.get('game-start'));
+        SSEListeners.delete('game-start');
+    }
+    console.log(
+        'je listen'
+    )
+    SSEListeners.set('game-start', lobbyGameStart);
+    sse.addEventListener('game-start', lobbyGameStart);
 }
 
 

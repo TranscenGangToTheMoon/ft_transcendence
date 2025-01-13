@@ -1,9 +1,13 @@
 from datetime import timedelta, datetime, timezone
 
+from lib_transcendence.exceptions import ServiceUnavailable
 from lib_transcendence.services import request_matchmaking
 from lib_transcendence import endpoints
 from lib_transcendence.game import Reason
 from django.db import models
+from rest_framework.exceptions import APIException
+
+from matches.utils import send_match_result
 
 
 class Matches(models.Model):
@@ -35,7 +39,11 @@ class Matches(models.Model):
                 'score_looser': self.looser.score,
                 'reason': self.reason,
             }
-            request_matchmaking(endpoints.Matchmaking.ftournament_result_match.format(match_id=self.id), 'PUT', data)
+            try:
+                request_matchmaking(endpoints.Matchmaking.ftournament_result_match.format(match_id=self.id), 'PUT', data)
+            except APIException:
+                raise ServiceUnavailable('matchmaking')
+        send_match_result(self)
 
 
 class Teams(models.Model):

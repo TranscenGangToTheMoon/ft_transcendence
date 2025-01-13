@@ -17,6 +17,7 @@ var pathName = window.location.pathname;
 var badgesDivs = {};
 var notificationQueue = [];
 const SSEListeners = new Map();
+var fromTournament = false;
 
 window.pathName = pathName;
 
@@ -245,6 +246,9 @@ async function handleRoute() {
         '/game/ranked' : '/game/game.html',
         '/game/duel' : '/game/game.html',
         '/game/custom' : '/game/game.html',
+        '/game/local' : '/game/localGame.html',
+        '/game/tournament' : '/game/game.html',
+        '/game/3v3' : '/game/3v3.html',
         '/tournament' : '/tournament/tournament.html'
     };
 
@@ -270,6 +274,8 @@ async function navigateTo(url, doNavigate=true){
     let currentState = getCurrentState();
     lastState = currentState;
     await handleSSEListenerRemoval(url);
+    await quitLobbies(window.location.pathname);
+    await closeGameConnection(window.location.pathname);
     history.pushState({state: currentState}, '', url);
     console.log(`added ${url} to history with state : ${currentState}`);
     pathName = window.location.pathname;
@@ -328,6 +334,8 @@ window.addEventListener('popstate', async event => {
     console.log(pathName, window.location.pathname);
     if (pathName === '/game')
         return cancelNavigation(event, undefined);
+    await quitLobbies(pathName);
+    await closeGameConnection(pathName);
     pathName = window.location.pathname;
     if (event.state && event.state.state)
         lastState = event.state.state;
@@ -337,6 +345,26 @@ window.addEventListener('popstate', async event => {
     handleRoute();
 })
 
+async function quitLobbies(oldUrl){
+    if (oldUrl.includes('/lobby')){
+        try {
+            await apiRequest(getAccessToken(), `${baseAPIUrl}/play${oldUrl}/`, 'DELETE');
+        }
+        catch (error){
+            console.log(error);
+        }
+    }
+    if (oldUrl.includes('/tournament') && typeof tournament !== 'undefined' && tournament && !fromTournament){
+        console.log('non normalement non non', fromTournament);
+        try {
+            await apiRequest(getAccessToken(), `${baseAPIUrl}/play/tournament/${tournament.code}/`, 'DELETE');
+        }
+        catch (error){
+            console.log(error);
+        }
+    }
+}
+
 window.loadContent = loadContent;
 window.cancelNavigation = cancelNavigation;
 
@@ -345,23 +373,9 @@ window.cancelNavigation = cancelNavigation;
 async function handleSSEListenerRemoval(url){
     if (window.pathName.includes('/lobby') && !url.includes('/lobby')){
         removeSSEListeners('lobby');
-        try {
-            await apiRequest(getAccessToken(), `${baseAPIUrl}/play/lobby/${code}/`, 'DELETE');
-        }
-        catch (error){
-            console.log(error);
-        }
     }
-    if (window.pathName.includes('/tournament') && !url.includes('/tournament')){
+    if (window.pathName.includes('/tournament')){
         removeSSEListeners('tournament');
-        if (tournament){
-            try {
-                await apiRequest(getAccessToken(), `${baseAPIUrl}/play/tournament/${tournament.code}/`, 'DELETE');
-            }
-            catch (error){
-                console.log(error);
-            }
-        }
     }
 }
 
@@ -385,7 +399,7 @@ function removeSSEListeners(type){
         if (key.includes(type)) {
             sse.removeEventListener(key, value);
             SSEListeners.delete(key);
-            console.log('removed sse listener:', key);
+            // console.log('removed sse listener:', key);
         }
     }
 }
@@ -415,6 +429,7 @@ function addFriendSSEListeners(){
         if (!(bootstrap.Modal.getInstance(document.getElementById('friendListModal'))._isShown))
             await displayNotification(undefined, 'friend request', event.message);
         removeFriendRequest(event.data.id);
+        console.log(event.data);
         addFriend(event.data);
     })
 
@@ -444,16 +459,19 @@ function addFriendSSEListeners(){
 function addInviteSSEListeners(){
     sse.addEventListener('invite-clash', event => {
         event = JSON.parse(event.data);
+        displayNotification(undefined, event.service, event.message, undefined, event.target);
         console.log(event);
     })
 
-    sse.addEventListener('invite-custom-game', event => {
+    sse.addEventListener('invite-3v3', event => {
         event = JSON.parse(event.data);
+        displayNotification(undefined, event.service, event.message, undefined, event.target);
         console.log(event);
     })
 
     sse.addEventListener('invite-1v1', event => {
         event = JSON.parse(event.data);
+        displayNotification(undefined, event.service, event.message, undefined, event.target);
         console.log(event);
     })
 
@@ -488,6 +506,7 @@ function addChatSSEListeners(){
             'targetId': apiAnswer.chat_with.id,
             'lastMessage': '< Say hi! >',
             'isLastMessageRead': false,
+            'chatMessageNext': null,
         };
         if (apiAnswer.last_message) {
             if (apiAnswer.last_message.content.length > 37){
@@ -496,16 +515,8 @@ function addChatSSEListeners(){
             else chatInfo.lastMessage = apiAnswer.last_message.content;
             chatInfo.isLastMessageRead = apiAnswer.last_message.is_read;
         }
-        if (pathName === '/chat'){
-            chatUserCardLastMessage = document.getElementById('chatListElement' + chatInfo.target).querySelector('.chatUserCardLastMessage');
-            chatUserCardLastMessage.innerText = (chatInfo.lastMessage);
-            chatUserCardLastMessage.classList.add('chatMessageNotRead');
-        }
         await displayNotification(undefined, 'message received', event.message, async event => {
-            if (pathName !== '/chat')
-                console.log('clicked');
-                await navigateTo('/chat');
-            await openChat(chatInfo);
+            await openChatTab(chatInfo);
         });
         displayBadges();
     })
@@ -651,12 +662,22 @@ async function addTargets(notification, targets, toastInstance, toastContainer){
     console.log(targets);
     const notificationBody = notification.querySelector('.toast-body');
     Object.entries(targets).forEach(([i, target]) => {
-        const img = document.createElement('img');
-        img.id = `notif${notification.id}-target${i}`;
-        img.className = 'notif-img';
-        img.src = target.display_icon;
-        
-        notificationBody.appendChild(img);
+        if (target.display_icon){
+            var img = document.createElement('img');
+            img.id = `notif${notification.id}-target${i}`;
+            img.className = 'notif-img';
+            img.src = target.display_icon;
+            
+            notificationBody.appendChild(img);
+        }
+        if (target.display_name){
+            var button = document.createElement('button');
+            button.id = `notif${notification.id}-nametarget${i}`;
+            button.className = 'notif-button';
+            button.innerText = target.display_name;
+
+            notificationBody.appendChild(button);
+        }
         
         if (target.type === 'API') {
             handleFriendRequestNotification(target, img, notification, toastContainer, toastInstance);
@@ -664,6 +685,14 @@ async function addTargets(notification, targets, toastInstance, toastContainer){
             //     notification.clicked = true;
             //     dismissNotification(notification, toastInstance, toastContainer);
             // });
+        }
+        else if (target.type === 'URL'){
+            button.addEventListener('click', async () => {
+                console.log(target.url.slice(0, -1));
+                await navigateTo(target.url.slice(0, -1));
+                notification.clicked = true;
+                dismissNotification(notification, toastInstance, toastContainer);
+            })
         }
     });
 }
@@ -721,6 +750,21 @@ async function displayNotification(icon=undefined, title=undefined, body=undefin
 
 // ========================== OTHER UTILS ==========================
 
+async function closeGameConnection(oldUrl){
+    if (!oldUrl.includes('game')) return;
+    if (typeof gameSocket !== 'undefined'){
+        console.log("je close la grosse game socket la");
+        gameSocket.close();
+    }
+    if (fromTournament)return;
+    try {
+        await apiRequest(getAccessToken(), `${baseAPIUrl}${oldUrl.replace("game", 'play')}/`, 'DELETE');
+    }
+    catch(error){
+        console.log(error);
+    }
+}
+
 async function fetchUserInfos(forced=false) {
     if (!getAccessToken())
         await generateToken();
@@ -735,22 +779,6 @@ async function fetchUserInfos(forced=false) {
             console.log(error);
         }
     }
-}
-
-function hideAllModals(){
-    document.querySelectorAll('.modal').forEach(modal => {
-        // console.log(modal);
-        const modalInstance = bootstrap.Modal.getInstance(modal);
-        // console.log(modalInstance);
-        if (modalInstance) {
-            console.log('je passe par la pourtant');
-            modalInstance.hide();
-        }
-    });
-    document.querySelectorAll('.modal-backrop fade show').forEach(div => {
-        // console.log('removing', div);
-        div.remove;
-    })
 }
 
 function displayMainAlert(alertTitle, alertContent) {
@@ -783,7 +811,7 @@ window.displayMainAlert = displayMainAlert;
 
 document.addEventListener('click', (e) => {
     contextMenu = document.getElementById('contextMenu');
-    if (contextMenu && !contextMenu.contains(e.target))
+    if (contextMenu)
         document.getElementById('contextMenu').style.display = 'none';
 });
 
@@ -859,20 +887,18 @@ function addFriendListListener(){
 
 async function  indexInit(auto=true) {
     if (!auto){
-        if (userInformations.code === 'user_not_found'){
-            console.log('user was deleted from database, switching to guest mode');
-            hideAllModals();
-            displayMainAlert("Unable to retrieve your account/guest profile","We're sorry your account has been permanently deleted and cannot be recovered.");
-            await generateToken();
-            await fetchUserInfos(true);
-            initSSE();
-            return navigateTo('/');
-        }
         await loadUserProfile();
         getBadgesDivs();
     }
     else{
         await fetchUserInfos();
+        if (userInformations.code === 'user_not_found'){
+            console.log('user was deleted from database, switching to guest mode');
+            await generateToken();
+            await fetchUserInfos(true);
+            displayMainAlert("Unable to retrieve your account/guest profile","We're sorry your account has been permanently deleted and cannot be recovered.");
+            return navigateTo('/');
+        }
         initSSE();
         await loadFriendListModal();
         await loadChatListModal();

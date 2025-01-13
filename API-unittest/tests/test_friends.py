@@ -15,6 +15,10 @@ class Test01_Friend(UnitTest):
         user2 = self.user(['receive-friend-request'])
 
         self.assertFriendResponse(create_friendship(user1, user2))
+        response = self.assertResponse(get_friends(user1), 200, count=1)
+        self.assertEqual(response['results'][0]['friend']['username'], user2['username'])
+        response = self.assertResponse(get_friends(user2), 200, count=1)
+        self.assertEqual(response['results'][0]['friend']['username'], user1['username'])
         self.assertThread(user1, user2)
 
     def test_002_friend_without_friend_request(self):

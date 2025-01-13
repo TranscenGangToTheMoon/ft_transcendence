@@ -1,5 +1,6 @@
 import asyncio
 from typing import Any, Dict
+from asgiref.sync import sync_to_async
 from lib_transcendence.auth import auth_verify
 from lib_transcendence.game import Reason
 from logging import info, debug, error
@@ -27,6 +28,7 @@ async def connect(sid, environ, auth):
     if user_data is None:
         raise ConnectionRefusedError(MessagesException.Authentication.NOT_AUTHENTICATED)
     id = user_data['id']
+    print(f'user_id = {id}', flush=True)
     try:
         game_data = request_game(endpoints.Game.fmatch_user.format(user_id=id), 'GET')
     except NotFound as e:
@@ -35,15 +37,19 @@ async def connect(sid, environ, auth):
         raise ConnectionRefusedError(MessagesException.ServiceUnavailable.game)
     if game_data is None:
         raise ConnectionRefusedError(MessagesException.ServiceUnavailable.game)
+    print(f"game_data = {game_data}", flush=True)
     game_id = game_data['id']
+    print(f"game_id = {game_id}", flush=True)
     if not Server.does_game_exist(game_id):
         match = Match(game_data)
         Server.create_game(match)
     player = Server.get_player(id)
+    print(f"player = {player}")
+    print(f"sid = {sid}", flush=True)
     player.socket_id = sid
     Server._clients[sid] = player
     await Server._sio.enter_room(sid, str(game_id))
-    info(f'User {id} connected & authenticated')
+    print(f'User {id} connected & authenticated', flush=True)
 
 
 async def move_up(sid):
@@ -99,6 +105,6 @@ async def disconnect(sid):
     from game_server.server import Server
     try:
         match_id = Server._clients[sid].match_id
-        Server.finish_game(match_id, Reason.player_disconnect)
+        await sync_to_async(Server.finish_game)(match_id, Reason.player_disconnect, Server._clients[sid].user_id)
     except KeyError:
         pass # player has already disconnected

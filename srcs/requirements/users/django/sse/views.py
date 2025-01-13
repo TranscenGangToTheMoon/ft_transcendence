@@ -1,15 +1,14 @@
+import json
 import time
 
 from django.http import StreamingHttpResponse
-from lib_transcendence.exceptions import MessagesException, ServiceUnavailable, ResourceExists
+from lib_transcendence.exceptions import ServiceUnavailable
 from lib_transcendence.sse_events import EventCode
 from rest_framework import renderers
 from rest_framework.exceptions import NotFound
 from rest_framework.views import APIView
-
 import redis
 
-from sse.events import publish_event
 from users.auth import get_user
 
 
@@ -43,6 +42,8 @@ class SSEView(APIView):
                         event, data = message['data'].decode('utf-8').split(':', 1)
                         if event == EventCode.DELETE_USER.value:
                             raise ConnectionClose
+                        if event == EventCode.GAME_START.value:
+                            get_user(id=_user_id).set_game_playing(json.loads(data)['data']['code'])
                     else:
                         data = 'PING'
                         event = 'ping'

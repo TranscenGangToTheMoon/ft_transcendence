@@ -1,12 +1,10 @@
 from lib_transcendence import endpoints
-from lib_transcendence.chat import ChatType
 from lib_transcendence.auth import get_auth_user
 from lib_transcendence.exceptions import MessagesException, ResourceExists
 from lib_transcendence.services import request_users
 from lib_transcendence.users import retrieve_users
-from lib_transcendence.utils import get_host
 from rest_framework import serializers
-from rest_framework.exceptions import MethodNotAllowed, PermissionDenied, NotFound
+from rest_framework.exceptions import PermissionDenied, NotFound
 
 from chat_messages.serializers import MessagesSerializer
 from chats.models import Chats, ChatParticipants
@@ -18,14 +16,12 @@ class ChatsSerializer(serializers.ModelSerializer):
     chat_with = serializers.SerializerMethodField(read_only=True)
     unread_messages = serializers.SerializerMethodField(read_only=True)
     last_message = MessagesSerializer(source='messages.last', read_only=True)
-    type = serializers.CharField()
 
     class Meta:
         model = Chats
         fields = [
             'username',
             'id',
-            'type',
             'chat_with',
             'last_message',
             'created_at',
@@ -57,17 +53,6 @@ class ChatsSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(MessagesException.ValidationError.REQUEST_REQUIRED)
         return obj.messages.exclude(author=get_auth_user(request)['id']).filter(is_read=False).count()
 
-    def validate_type(self, value):
-        request = self.context.get('request')
-        if request is None:
-            raise serializers.ValidationError(MessagesException.ValidationError.REQUEST_REQUIRED)
-        ChatType.validate(value)
-        if get_host(request) != 'chat' and value != ChatType.private_message:
-            raise PermissionDenied(MessagesException.PermissionDenied.ONLY_CREATE_PRIVATE_MESSAGES)
-        if request.method in ('PATCH', 'PUT'):
-            raise MethodNotAllowed(request.method)
-        return value
-
     def create(self, validated_data):
         request = self.context.get('request')
         user = get_auth_user(request)
@@ -80,9 +65,6 @@ class ChatsSerializer(serializers.ModelSerializer):
             raise ResourceExists(MessagesException.ResourceExists.CHAT)
 
         user2 = request_users(endpoints.Users.fchat.format(user1_id=user['id'], username2=username), 'GET', request)
-
-        if get_host(request) != 'chat':
-            validated_data['type'] = 'private_message'
         result = super().create(validated_data)
         ChatParticipants.objects.create(user_id=user['id'], username=user['username'], chat_id=result.id)
         ChatParticipants.objects.create(user_id=user2['id'], username=user2['username'], chat_id=result.id)

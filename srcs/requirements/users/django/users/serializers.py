@@ -2,11 +2,13 @@ from lib_transcendence import endpoints
 from lib_transcendence.chat import AcceptChat
 from lib_transcendence.exceptions import MessagesException
 from lib_transcendence.services import request_chat
+from lib_transcendence.game import GameMode
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied, APIException
 
 from friends.serializers import FriendsSerializer
 from friends.utils import get_friendship
+from stats.utils import get_trophies
 from users.auth import auth_update
 from users.models import Users
 
@@ -15,6 +17,7 @@ class UsersMeSerializer(serializers.ModelSerializer):
     accept_friend_request = serializers.BooleanField()
     notifications = serializers.SerializerMethodField(read_only=True)
     password = serializers.CharField(write_only=True)
+    trophies = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Users
@@ -25,7 +28,6 @@ class UsersMeSerializer(serializers.ModelSerializer):
             'profile_picture',
             'accept_friend_request',
             'accept_chat_from',
-            'coins',
             'trophies',
             'current_rank',
             'created_at',
@@ -39,7 +41,6 @@ class UsersMeSerializer(serializers.ModelSerializer):
             'id',
             'is_guest',
             'profile_picture',
-            'coins',
             'trophies',
             'current_rank',
             'created_at',
@@ -51,6 +52,10 @@ class UsersMeSerializer(serializers.ModelSerializer):
     @staticmethod
     def validate_accept_chat_from(value):
         return AcceptChat.validate(value)
+
+    @staticmethod
+    def get_trophies(obj):
+        return get_trophies(obj)
 
     @staticmethod
     def get_notifications(obj):
@@ -75,6 +80,7 @@ class UsersMeSerializer(serializers.ModelSerializer):
 class UsersSerializer(serializers.ModelSerializer):
     status = serializers.SerializerMethodField(read_only=True)
     friends = FriendsSerializer(read_only=True)
+    trophies = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Users
@@ -93,6 +99,9 @@ class UsersSerializer(serializers.ModelSerializer):
             'is_guest',
             'profile_picture',
             'current_rank',
+            'status',
+            'trophies',
+            'friends',
         ]
 
     @staticmethod
@@ -102,6 +111,10 @@ class UsersSerializer(serializers.ModelSerializer):
             'game_playing': obj.game_playing,
             'last_online': obj.last_online,
         }
+
+    @staticmethod
+    def get_trophies(obj):
+        return get_trophies(obj)
 
     def get_friends(self, obj):
         request = self.context.get('request')
@@ -122,3 +135,17 @@ class ManageUserSerializer(serializers.ModelSerializer):
             'username',
             'is_guest',
         ]
+
+    def create(self, validated_data):
+        result = super(ManageUserSerializer, self).create(validated_data)
+        for game_mode in GameMode.modes:
+            if game_mode == GameMode.custom_game:
+                continue
+            kwargs = {'game_mode': game_mode}
+            if game_mode == GameMode.tournament:
+                kwargs['tournament_wins'] = 0
+            elif game_mode == GameMode.clash:
+                kwargs['own_goals'] = 0
+            result.stats.create(**kwargs)
+        result.ranked_stats.create(trophies=0, total_trophies=0)
+        return result
