@@ -159,13 +159,14 @@ class TournamentMatchSerializer(serializers.ModelSerializer):
     score_winner = serializers.IntegerField(required=True)
     score_looser = serializers.IntegerField(required=True)
     reason = serializers.CharField(max_length=20, required=True)
-    user_1 = serializers.SerializerMethodField()
-    user_2 = serializers.SerializerMethodField()
+    user_1 = serializers.SerializerMethodField(read_only=True)
+    user_2 = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = TournamentMatches
         fields = [
             'id',
+            'n',
             'match_code',
             'winner',
             'winner_id',
@@ -178,6 +179,7 @@ class TournamentMatchSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = [
             'id',
+            'n',
             'winner',
             'match_code',
             'user_1',

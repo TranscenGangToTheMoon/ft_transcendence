@@ -175,6 +175,7 @@ function tournamentStartCancel(){
 
 function createBracket(data) {
 	const bracketDiv = document.getElementById('bracket');
+	bracketDiv.innerHTML = '';
 	const rounds = ['sixteenth-final' ,'eighth-final', 'quarter-final', 'semi-final', 'final'];
 	let firstPassed = false;
 
@@ -225,23 +226,29 @@ function createBracket(data) {
 				roundInsideDiv.appendChild(matchDiv);
 			}
 			else {
+				let score = match.winner === match.user_1?.id ? match.score_winner : match.score_looser;
+				if (score === null)
+					score = '';
 				const player1Div = document.createElement('div');
 				player1Div.className = `card-body border-bottom ${match.winner === match.user_1?.id ? 'winner' : ''}`;
 				player1Div.innerHTML = `
 					<div class="d-flex justify-content-between">
 						<img class="tournament-participant-pp" src="/assets/imageNotFound.png"></img>
 						<span>${match.user_1?.username}</span>
-						<span class="fw-bold">${match.winner === match.user_1?.id ? match.score_winner || '' : match.score_looser || ''}</span>
+						<span class="fw-bold">${score}</span>
 					</div>
 				`;
 	
 				const player2Div = document.createElement('div');
+				score = match.winner === match.user_2?.id ? match.score_winner : match.score_looser;
+				if (score === null)
+					score = '';
 				player2Div.className = `card-body ${match.winner === match.user_2?.id ? 'winner' : ''}`;
 				player2Div.innerHTML = `
 					<div class="d-flex justify-content-between">
 						<img class="tournament-participant-pp" src="/assets/imageNotFound.png"></img>
 						<span>${match.user_2?.username}</span>
-						<span class="fw-bold">${match.winner === match.user_2?.id ? match.score_winner : match.score_looser || ''}</span>
+						<span class="fw-bold">${score}</span>
 					</div>
 				`;
 	
@@ -259,25 +266,54 @@ function createBracket(data) {
 function tournamentStart(event){
 	event = JSON.parse(event.data);
 	console.log(event);
-	if (!event.data.matches['semi-final']){
-		event.data.matches['semi-final'] = [];
-		for (i = 0; i < event.data.matches['quarter-final'].length / 2; ++i)
-			event.data.matches['semi-final'].push(null);
-	}
-	if (!event.data.matches['final']){
-		event.data.matches['final'] = [];
-		for (i = 0; i < event.data.matches['semi-final'].length / 2; ++i)
-			event.data.matches['final'].push(null);
-	}
-	console.log(event.data.matches);
-	document.getElementById('tournamentView').innerHTML = '';
-	createBracket(event.data);
+	loadTournament(event.data);
+	// if (!event.data.matches['semi-final']){
+	// 	event.data.matches['semi-final'] = [];
+	// 	for (i = 0; i < event.data.matches['quarter-final'].length / 2; ++i)
+	// 		event.data.matches['semi-final'].push(null);
+	// }
+	// if (!event.data.matches['final']){
+	// 	event.data.matches['final'] = [];
+	// 	for (i = 0; i < event.data.matches['semi-final'].length / 2; ++i)
+	// 		event.data.matches['final'].push(null);
+	// }
+	// console.log(event.data.matches);
+	// document.getElementById('tournamentView').innerHTML = '';
+	// createBracket(event.data);
 }
 
-function tournamentMatchFinished(event){
-	event = JSON.parse(event.data);
-	console.log(event);
+function updateMatchFromWinnerId(id, data){
+	for (round in tournament.matches){
+		for (let match in tournament.matches[round]){
+			match = tournament.matches[round][match];
+			if (match.finished)
+				continue;
+			if (match.user_1.id === id || match.user_2.id === id){
+				match.score_winner = data.score_winner;
+				match.score_looser = data.score_looser;
+				match.reason = data.reason;
+				match.finished = true;
+				match.winner = id;
+			}
+		}
+	}
+}
 
+async function tournamentMatchFinished(event){
+	event = JSON.parse(event.data);
+	console.log('received match finished event');
+	console.log(event);
+	try {
+		let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/play/tournament/`);
+		tournament = data;
+		setBanOption()
+		loadTournament(data);
+	}
+	catch(error){
+		if (error.code === 404)
+			document.getElementById('bracket').innerHTML = '';
+		console.log(error);
+	}
 }
 
 function addTournamentSSEListeners(){
@@ -329,20 +365,22 @@ function loadTournament(tournament){
 		addParticipant(participant);
 	}
 	addTournamentSSEListeners();
-	if (tournament.matches)
-		createBracket(tournament)
+	if (tournament.matches){
+		if (!tournament.matches['semi-final']|| !tournament.matches['semi-final'].length){
+			tournament.matches['semi-final'] = [];
+			for (i = 0; i < tournament.matches['quarter-final'].length / 2; ++i)
+				tournament.matches['semi-final'].push(null);
+		}
+		if (!tournament.matches['final'] || !tournament.matches['final'].length){
+			tournament.matches['final'] = [];
+			for (i = 0; i < tournament.matches['semi-final'].length / 2; ++i)
+				tournament.matches['final'].push(null);
+		}
+		console.log(tournament.matches);
+		document.getElementById('tournamentView').innerHTML = '';
+		createBracket(tournament);
+	}
 }
-
-if (typeof dataTest === 'undefined'){
-	var dataTest = { 'matches': {
-		"sixteenth-final": [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
-		"eighth-final": [null, null, null, null, null, null, null, null],
-		"quarter-final": [null, null, null, null],
-		"semi-final": [null, null],
-		"final": [null]
-	}}
-}
-
 
 document.getElementById('searchTournamentForm').addEventListener('submit', async (e) => {
 	e.preventDefault();
@@ -441,24 +479,37 @@ function setTournamentOptions(){
 if (typeof tournamentData === 'undefined')
 	var tournamentData;
 
+async function gameStart(event) {
+	event = JSON.parse(event.data);
+	if (!checkEventDuplication(event)) return;
+	console.log('game-start received (tournament)',event);
+	if (fromTournament)
+		userInformations.cancelReturn = true;
+	fromTournament = true;
+	tournamentData = event.data;
+	await navigateTo('/game/tournament');
+}
+
 async function initTournament(){
 	fromTournament = false;
+	userInformations.cancelReturn = false;
     await indexInit(false);
+	if (window.location.pathname === '/')
+		return;
+	if (userInformations.is_guest){
+		await navigateTo('/');
+		return displayMainAlert('Error', 'You do not have permission to play in tournaments');
+	}
 	loadCSS('/tournament/css/tournament.css', false);
 	setTournamentOptions();
 
-	async function gameStart(event) {
-		event = JSON.parse(event.data);
-		console.log(event);
-		fromTournament = true;
-		tournamentData = event.data;
-		await navigateTo('/game/tournament');
-	}
-
-	if (!SSEListeners.has('game-start')){
-		SSEListeners.set('game-start', gameStart);
-		sse.addEventListener('game-start', gameStart);
-	}
+	if (SSEListeners.has('game-start')){
+		// console.log('je remove :', SSEListeners.get('game-start'));
+        sse.removeEventListener('game-start', SSEListeners.get('game-start'));
+        SSEListeners.delete('game-start');
+    }
+	SSEListeners.set('game-start', gameStart);
+	sse.addEventListener('game-start', gameStart);
 
 	document.getElementById('tournamentsList').addEventListener('click', async (e) => {
 		const tournamentDiv = e.target.closest('.tournament-div');
@@ -487,6 +538,7 @@ async function initTournament(){
 		let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/play/tournament/`);
 		tournament = data;
 		setBanOption()
+		console.log(data);
 		loadTournament(data);
 	}
 	catch(error) {

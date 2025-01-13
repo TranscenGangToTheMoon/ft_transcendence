@@ -1,6 +1,8 @@
 from datetime import datetime, timezone
 
 import requests
+import asyncio
+from asgiref.sync import async_to_sync
 from game_server.match import Match, Player, finish_match
 from game_server.pong_ball import Ball
 from game_server.pong_position import Position
@@ -121,9 +123,9 @@ class Game:
 
     def handle_goal(self):
         if self.ball.position.x + self.ball.size < 0:
-            self.score(self.match.teams[1])
-        elif self.ball.position.x > self.canvas.x:
             self.score(self.match.teams[0])
+        elif self.ball.position.x > self.canvas.x:
+            self.score(self.match.teams[1])
 
     def calculateImpactPosition(self, ballY, paddleY, paddleHeight):
         relativeY = (paddleY + paddleHeight / 2) - ballY
@@ -209,7 +211,7 @@ class Game:
             for player in team.players:
                 while player.socket_id == '':
                     if time.time() - start_waiting > timeout:
-                        raise self.PlayerTimeout(f'player socketio connection timed out : player_id: {player.user_id}')
+                        raise self.PlayerTimeout('player socketio connection timed out')
                     time.sleep(0.1)
                 print(time.time(),flush=True)
                 print(f'player {player.user_id} has join in!', flush=True)
@@ -243,7 +245,7 @@ class Game:
             print(time.time(), "all players are connected", flush=True)
         except self.PlayerTimeout as e:
             print(e, flush=True)
-            self.finish('game timed out, not all players connected to server')
+            self.finish(Reason.player_not_connected)
             print('game canceled', flush=True)
             return
         if (self.match.game_mode == 'clash'): #watchout for 'clash'
@@ -269,12 +271,12 @@ class Game:
     def finish(self, reason: str, winner: str | None = None, disconnected_user_id: int | None = None):
         from game_server.server import Server
         print('finishing game', flush=True)
-        if (disconnected_user_id is not None):
-            finish_match(self.match.id, reason, disconnected_user_id)
         self.send_finish(reason, winner)
         self.disconnect_players(disconnected_user_id)
         self.finished = True
         Server.delete_game(self.match.id)
+        if (disconnected_user_id is not None):
+            finish_match(self.match.id, reason, disconnected_user_id)
 
     def reset_game_state(self):
         # print('reset_game_state', flush=True)
@@ -335,7 +337,7 @@ class Game:
 
     def send_finish(self, reason: str | None = None, winner: str | None = None):
         from game_server.server import Server
-        Server.emit('game_over', data={"reason":reason, "winner":winner}, room=str(self.match.id))
+        async_to_sync(Server._sio.emit)('game_over', data={"reason":reason, "winner":winner}, room=str(self.match.id))
 
     def send_start_game(self):
         from game_server.server import Server
