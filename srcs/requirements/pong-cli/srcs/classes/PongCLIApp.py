@@ -53,15 +53,16 @@ class PongCLI(App):
                             raise (Exception(f"({response.status_code}) SSE connection prout! {response.text}"))
 
                         async for line in response.aiter_text():
-                            # if (self.is_cancelled):
-                            #     break
-                            # log("Prout")
                             try:
                                 events = self.regex.findall(line)
                                 for event, data in events:
                                     dataJson = None
                                     if (event == "game-start"):# game start
                                         dataJson = json.loads(data)
+                                        if (dataJson["data"]["teams"]["a"][0]["id"] == User.id):
+                                            User.team = "a"
+                                        else:
+                                            User.team = "b"
                                         log(f"{dataJson}")
                                         await self.push_screen(GamePage()) #maybe it's a solution
                                     elif (event != "game-start" and event != "ping"):
