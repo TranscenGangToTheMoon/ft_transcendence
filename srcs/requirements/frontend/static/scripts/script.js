@@ -836,11 +836,9 @@ async function loadUserProfile(){
     if (userInformations.is_guest){
         profileMenu = 'guestProfileMenu.html'
         document.getElementById('trophies').innerText = "";
-        document.getElementById('balance').innerText = "";
     }
     else {
         document.getElementById('trophies').innerText = userInformations.trophies;
-        document.getElementById('balance').innerText = userInformations.coins;
     }
     await loadContent(`/${profileMenu}`, 'profileMenu');
     // if (!userInformations.is_guest)
