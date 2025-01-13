@@ -6,12 +6,30 @@ from threading import Thread
 from django.db import models
 from django.db.models.functions import Random
 from lib_transcendence.sse_events import create_sse_event, EventCode
+from lib_transcendence.validate_type import validate_type, surchage_list
 from rest_framework.exceptions import APIException
 
 from baning.models import delete_banned
 from blocking.utils import delete_player_instance
 from matchmaking.create_match import create_tournament_match
 from matchmaking.utils.sse import send_sse_event, start_tournament_sse
+
+
+class TournamentSize:
+    S4 = 4
+    S8 = 8
+    S16 = 16
+
+    @staticmethod
+    def validate(mode):
+        return validate_type(mode, TournamentSize)
+
+    @staticmethod
+    def attr():
+        return surchage_list(TournamentSize)
+
+    def __str__(self):
+        return 'Tournament size'
 
 
 class Tournament(models.Model):
@@ -31,7 +49,7 @@ class Tournament(models.Model):
     name = models.CharField(max_length=50, unique=True)
     size = models.IntegerField(default=16)
     private = models.BooleanField(default=False)
-    nb_games = models.IntegerField(default=1)
+    nb_matches = models.IntegerField(default=1)
     is_started = models.BooleanField(default=False)
     start_at = models.DateTimeField(default=None, null=True)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
@@ -90,17 +108,17 @@ class Tournament(models.Model):
             else:
                 user_2 = None
             self.matches.create(n=index, stage=first_stage, user_1=user_1, user_2=user_2)
-            self.nb_games = index
+            self.nb_matches = index
         self.save()
         start_tournament_sse(self)
         time.sleep(3)
         for matche in self.matches.all():
             matche.post()
 
-    def get_nb_games(self):
-        self.nb_games += 1
+    def get_nb_matches(self):
+        self.nb_matches += 1
         self.save()
-        return self.nb_games
+        return self.nb_matches
 
     def is_enough_players(self):
         return self.start_countdown[self.size] <= self.participants.count()
@@ -189,9 +207,7 @@ class TournamentMatches(models.Model):
     def post(self):
         if self.user_2 is not None:
             if not self.user_1.still_in:
-                self.winner = self.user_2
-                self.save()
-                self.user_2.win()
+                self.finish(self.user_2)
             else:
                 try:
                     match = create_tournament_match(self.tournament.id, self.stage.id, self.n, self.user_1.user_id, self.user_2.user_id)
@@ -199,14 +215,40 @@ class TournamentMatches(models.Model):
                     self.match_code = match['code']
                     self.save()
                 except APIException:
-                    self.finish_match() # TODO fguirama: make
+                    self.finish(None)
         elif self.user_1.still_in:
-            self.winner = self.user_1
-            self.save()
-            self.user_1.win()
+            self.finish(self.user_1)
         else:
-            self.finish_match() # TODO fguirama: make
+            self.finish(None)
 
-    def finish_match(self):
+    def finish(self, winner, looser=None, validated_data=None):
+        if winner is None:
+            return # TODO fguirama: handle
         self.finished = True
+        self.winner = winner
         self.save()
+        tournament = self.tournament
+        if validated_data is None:
+            pass
+        else:
+            print('validated_data', validated_data, flush=True)
+            validated_data.pop('winner_id')
+        winner_user_id = winner.user_id
+        create_sse_event(tournament.users_id(), EventCode.TOURNAMENT_MATCH_FINISH, {'id': self.id, 'winner': winner_user_id, **validated_data}, {'winner': winner_user_id, 'looser': looser if looser is None else looser.user_id, 'score_winner': validated_data['score_winner'], 'score_looser': validated_data['score_looser']})
+        current_stage = winner.stage
+        finished = winner.win()
+        if looser is not None:
+            looser.eliminate()
+
+        if finished is not None:
+            from tournament.utils import finish_tournament
+
+            finish_tournament(self.tournament, winner_user_id)
+        else:
+            if not current_stage.matches.filter(finished=False).exists():
+                participants = tournament.participants.filter(still_in=True).order_by('index')
+                ct = participants.count()
+
+                for i in range(0, ct, 2):
+                    match = tournament.matches.create(n=tournament.get_nb_matches(), stage=winner.stage, user_1=participants[i], user_2=participants[i + 1])
+                    match.post()

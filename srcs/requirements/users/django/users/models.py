@@ -54,6 +54,3 @@ class Users(models.Model):
         self.is_online = False
         self.last_online = datetime.now(timezone.utc)
         self.save()
-
-    def __str__(self):
-        return f'{self.id} {self.username}'

@@ -204,7 +204,7 @@ class MatchFinishSerializer(serializers.ModelSerializer):
         winner.save()
         validated_data['finished'] = True
         result = super().update(instance, validated_data)
-        result.finish_match()
+        result.finish()
         return result
 
 

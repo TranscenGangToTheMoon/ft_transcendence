@@ -71,7 +71,7 @@ class Test01_Register(UnitTest):
         user = self.assertResponse(register(username), 201, get_user=True)
         new_username = 'new_username' + rnstr()
 
-        self.assertResponse(me(user, 'PATCH', data={'username': new_username, 'password': password}), 200)
+        self.assertResponse(me(user, 'PATCH', data={'username': new_username, 'password': password, 'old_password': user['password']}), 200)
         self.assertResponse(login(new_username, password), 200)
 
     def test_006_register_password_contain_new_username(self):

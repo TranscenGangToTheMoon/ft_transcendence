@@ -7,11 +7,11 @@ from tournaments.serializers import TournamentSerializer
 
 
 class DownloadDataSerializer(serializers.Serializer):
-    games = serializers.SerializerMethodField()
+    matches = serializers.SerializerMethodField()
     tournaments = serializers.SerializerMethodField()
 
     @staticmethod
-    def get_games(obj):
+    def get_matches(obj):
         matches = Matches.objects.filter(finished=True, players__user_id=obj)
         return MatchSerializer(matches, many=True, context={'retrieve_users': False}).data
 

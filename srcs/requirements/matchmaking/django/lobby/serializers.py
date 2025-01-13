@@ -87,15 +87,15 @@ class LobbySerializer(serializers.ModelSerializer):
 
         validated_data['code'] = generate_code(Lobby)
         if validated_data['game_mode'] == GameMode.CLASH:
-            validated_data['match_type'] = MatchType.m3v3
+            validated_data['match_type'] = MatchType.M3V3
             validated_data['max_participants'] = 3
         else:
-            validated_data['match_type'] = MatchType.m1v1
+            validated_data['match_type'] = MatchType.M1V1
             validated_data['max_participants'] = 6
         result = super().create(validated_data)
         creator = create_player_instance(request, LobbyParticipants, lobby_id=result.id, user_id=user['id'], creator=True)
         if validated_data['game_mode'] == GameMode.CUSTOM_GAME:
-            creator.team = Teams.a
+            creator.team = Teams.A
             creator.save()
         return result
 
@@ -104,11 +104,11 @@ class LobbySerializer(serializers.ModelSerializer):
             raise PermissionDenied(MessagesException.PermissionDenied.CANNOT_UPDATE_GAME_MODE)
 
         participants = instance.participants.all()
-        if validated_data.get('match_type') == MatchType.m1v1 and instance.match_type == MatchType.m3v3:
-            for team in Teams.play:
+        if validated_data.get('match_type') == MatchType.M1V1 and instance.match_type == MatchType.M3V3:
+            for team in [Teams.A, Teams.B]:
                 for p in participants.filter(team=team)[1:]:
-                    participant_data = {'team': Teams.spectator}
-                    p.team = Teams.spectator
+                    participant_data = {'team': Teams.SPECTATOR}
+                    p.team = Teams.SPECTATOR
                     if p.is_ready:
                         p.is_ready = False
                         participant_data['is_ready'] = False
@@ -162,7 +162,7 @@ class LobbyParticipantsSerializer(serializers.ModelSerializer):
         validated_data['user_id'] = user['id']
         validated_data['is_guest'] = user['is_guest']
         if lobby.game_mode == GameMode.CUSTOM_GAME:
-            for t in Teams.all:
+            for t in Teams.attr():
                 if not lobby.is_team_full(t):
                     validated_data['team'] = t
                     break

@@ -24,15 +24,15 @@ class Chat:
 
 
 class Game:
-    create_match                = 'api/private/game/match/create/'
-    ffinish_match               = 'api/private/game/match/finish/{match_id}/'
-    finish_match                = 'api/private/game/match/finish/<int:match_id>/'
-    fscore                      = 'api/private/game/match/score/{user_id}/'
-    score                       = 'api/private/game/match/score/<int:user_id>/'
-    fmatch_user                 = 'api/private/game/match/{user_id}/'
-    match_user                  = 'api/private/game/match/<int:user_id>/'
+    create_match                = 'api/private/match/create/'
+    ffinish_match               = 'api/private/match/finish/{match_id}/'
+    finish_match                = 'api/private/match/finish/<int:match_id>/'
+    fscore                      = 'api/private/match/score/{user_id}/'
+    score                       = 'api/private/match/score/<int:user_id>/'
+    fmatch_user                 = 'api/private/match/{user_id}/'
+    match_user                  = 'api/private/match/<int:user_id>/'
 
-    tournaments                 = 'api/private/game/tournaments/'
+    tournaments                 = 'api/private/tournaments/'
 
     matches_user                = 'api/game/matches/<int:user_id>/'
     tournament                  = 'api/game/tournaments/<int:tournament_id>/'

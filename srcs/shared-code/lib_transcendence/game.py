@@ -27,7 +27,9 @@ class GameMode:
 
     @staticmethod
     def attr():
-        return surchage_list(GameMode)
+        result = surchage_list(GameMode)
+        result.remove(GameMode.GLOBAL)
+        return result
 
     def __str__(self):
         return 'Game mode'

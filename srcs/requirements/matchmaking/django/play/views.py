@@ -25,7 +25,7 @@ class PlayMixin(generics.CreateAPIView, generics.DestroyAPIView):
 class DuelView(PlayMixin):
 
     def create(self, request, *args, **kwargs):
-        request.data['game_mode'] = GameMode.duel
+        request.data['game_mode'] = GameMode.DUEL
         return super().create(request, *args, **kwargs)
 
 
@@ -33,7 +33,7 @@ class RankedView(PlayMixin):
     permission_classes = [NotGuest]
 
     def create(self, request, *args, **kwargs):
-        request.data['game_mode'] = GameMode.ranked
+        request.data['game_mode'] = GameMode.RANKED
         return super().create(request, *args, **kwargs)
 
 

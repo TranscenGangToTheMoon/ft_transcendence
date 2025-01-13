@@ -52,12 +52,6 @@ class Lobby(models.Model):
         delete_banned(self.code)
         super().delete(using=using, keep_parents=keep_parents)
 
-    def __str__(self):
-        name = f'{self.code}/{self.game_mode} ({self.participants.count()}/{self.max_participants})'
-        if self.game_mode == GameMode.CUSTOM_GAME:
-            name += ' {' + self.match_type + '}'
-        return name
-
 
 class LobbyParticipants(models.Model):
     lobby = models.ForeignKey(Lobby, on_delete=models.CASCADE, related_name='participants')
@@ -91,13 +85,3 @@ class LobbyParticipants(models.Model):
                 first_join.creator = True
                 first_join.save()
                 send_sse_event(EventCode.LOBBY_UPDATE_PARTICIPANT, first_join, {'creator': True}, exclude_myself=False)
-
-    def __str__(self):
-        name = f'{self.lobby.code}/{self.lobby.game_mode} {self.user_id}'
-        if self.creator:
-            name += '*'
-        if self.is_ready:
-            name += ' ready'
-        if self.team is not None:
-            name += f" '{self.team}'"
-        return name

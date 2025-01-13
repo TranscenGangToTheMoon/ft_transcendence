@@ -59,5 +59,5 @@ class DownloadDataSerializer(serializers.ModelSerializer):
         try:
             result = request_game(endpoints.UsersManagement.fexport_data.format(user_id=obj.id), 'GET')
         except APIException:
-            result = {'games': [], 'tournaments': []}
+            result = {'matches': [], 'tournaments': []}
         return result

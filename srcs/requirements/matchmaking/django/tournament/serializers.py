@@ -1,11 +1,6 @@
-from datetime import datetime, timezone
-
-from lib_transcendence import endpoints
 from lib_transcendence.auth import get_auth_user
 from lib_transcendence.exceptions import MessagesException
 from lib_transcendence.generate import generate_code
-from lib_transcendence.services import request_game, request_users
-from lib_transcendence.sse_events import create_sse_event, EventCode
 from lib_transcendence.game import FinishReason
 from lib_transcendence.users import retrieve_users
 from rest_framework import serializers
@@ -14,8 +9,7 @@ from blocking.utils import create_player_instance
 from matchmaking.utils.participant import get_participants
 from matchmaking.utils.place import get_tournament, verify_place
 from matchmaking.utils.user import verify_user
-from tournament.models import Tournament, TournamentStage, TournamentParticipants, TournamentMatches
-from tournament.utils import TournamentSize
+from tournament.models import Tournament, TournamentSize, TournamentStage, TournamentParticipants, TournamentMatches
 
 
 class TournamentSerializer(serializers.ModelSerializer):
@@ -222,31 +216,6 @@ class TournamentMatchSerializer(serializers.ModelSerializer):
         return self.get_user_instance(obj, obj.user_2)
 
     def update(self, instance, validated_data):
-        result = super().update(instance, {**validated_data, 'finished': True})
-        result.winner = self.context['winner']
-        result.save()
-        tournament = result.tournament
-        validated_data.pop('winner_id')
-        winner_user_id = self.context['winner'].user_id
-        create_sse_event(tournament.users_id(), EventCode.TOURNAMENT_MATCH_FINISH, {'id': result.id, 'winner': winner_user_id, **validated_data}, {'winner': winner_user_id, 'looser': self.context['looser'].user_id, 'score_winner': validated_data['score_winner'], 'score_looser': validated_data['score_looser']})
-        current_stage = self.context['winner'].stage
-        finished = self.context['winner'].win()
-        self.context['looser'].eliminate()
-
-        if finished is not None:
-            data = TournamentSerializer(tournament).data
-            data['finish_at'] = datetime.now(timezone.utc)
-            data['stages'] = TournamentStageSerializer(tournament.stages.all(), many=True).data
-            request_game(endpoints.Game.tournaments, method='POST', data=data)
-            create_sse_event(tournament.users_id(), EventCode.TOURNAMENT_FINISH, {'id': tournament.id}, {'name': tournament.name, 'username': winner_user_id})
-            request_users(endpoints.Users.result_tournament, method='POST', data={'winner': winner_user_id})
-            tournament.delete()
-        else:
-            if not current_stage.matches.filter(finished=False).exists():
-                participants = tournament.participants.filter(still_in=True).order_by('index')
-                ct = participants.count()
-
-                for i in range(0, ct, 2):
-                    match = tournament.matches.create(n=tournament.get_nb_games(), stage=self.context['winner'].stage, user_1=participants[i], user_2=participants[i + 1])
-                    match.post()
+        result = super().update(instance, validated_data)
+        result.finish(self.context['winner'], self.context['looser'], validated_data)
         return result

@@ -13,9 +13,6 @@ class BlockedUsers(models.Model):
     blocked = models.ForeignKey(Users, on_delete=models.CASCADE)
     blocked_at = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
-        return f'{self.id}/ {self.user} => {self.blocked}'
-
     def blocked_services(self, status: Literal['block', 'unblock'] = 'block'):
         endpoint = endpoints.UsersManagement.fblocked_user.format(user_id=self.user_id, blocked_user_id=self.blocked_id)
 

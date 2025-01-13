@@ -24,9 +24,9 @@ class Matches(models.Model):
     winner = models.ForeignKey('Teams', null=True, default=None, on_delete=models.SET_NULL, related_name='winner')
     looser = models.ForeignKey('Teams', null=True, default=None, on_delete=models.SET_NULL, related_name='looser')
 
-    def finish_match(self):
+    def finish(self):
         if self.finish_reason is None:
-            self.finish_reason = FinishReason.normal_end
+            self.finish_reason = FinishReason.NORMAL_END
         self.finished = True
         self.code = None
         self.game_duration = datetime.now(timezone.utc) - self.created_at
@@ -59,7 +59,7 @@ class Teams(models.Model):
         self.score += 1
         self.save()
         if self.score == 3:
-            self.match.finish_match()
+            self.match.finish()
 
 
 class Players(models.Model):
