@@ -36,7 +36,7 @@ class PongCLI(App):
         # self.push_screen(GamePage())
         self.push_screen(LoginPage())
 
-    @work(exclusive=True)
+    @work
     async def startSSE(self):
         log("Start SSE")
         if (not self.isConnected):
