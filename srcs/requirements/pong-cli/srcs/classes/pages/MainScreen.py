@@ -9,6 +9,8 @@ from textual.widgets    import Header, Footer, Rule, Button, Static
 # Local imports
 from classes.utils.user import User
 
+from srcs.classes.utils.config import Config, SSL_CRT
+
 
 class MainPage(Screen):
     SUB_TITLE = "Main Page"
@@ -20,12 +22,11 @@ class MainPage(Screen):
 
         yield self.userMeStatic()
         yield Rule()
+        yield Static("", id="duelResult")
         yield Button("Duel", id="duel", variant="primary")
-        # change this button Widget.loading to true to transform it into loading bar when it pressed and requete made
-        yield Static("POST /api/play/duel/", id="duelResult")
         yield Rule()
-        yield Button("Cancel Duel", id="cancelDuelGame", variant="error")
-        yield Static("DELETE /api/play/duel/", id="cancelDuelResult")
+        yield Static("", id="cancelDuelResult")
+        yield Button("Cancel Duel", id="cancelDuelGame", variant="error", disabled=True)
         yield Rule()
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
@@ -39,7 +40,10 @@ class MainPage(Screen):
             response = requests.post(url=f"{User.server}/api/play/duel/", data="", headers=User.headers, verify=User.SSLCertificate)
             if (response.status_code >= 400):
                 raise (Exception(f"({response.status_code}) Error: {response.text}"))
-            self.query_one("#duelResult").update(f"({response.status_code}) POST /api/play/duel/ : {response.text}")
+            self.query_one("#duel").loading = True
+            self.query_one("#duel").variant = "default"
+            self.query_one("#cancelDuelGame").disabled = False
+            self.query_one("#duelResult").update(f"({response.status_code}) Searching for an opponent")
         except Exception as error:
             self.query_one("#duelResult").update(f"POST /api/play/duel/ Error: {error}")
 
@@ -50,6 +54,10 @@ class MainPage(Screen):
                 raise (Exception(f"({response.status_code}) Error: {response.text}"))
             elif (response.status_code == 204):
                 self.query_one("#cancelDuelResult").update(f"({response.status_code}) DELETE /api/play/duel/ : Duel deleted")
+                self.query_one("#duel").loading = False
+                self.query_one("#duel").variant = "primary"
+                self.query_one("#cancelDuelGame").disabled = True
+
         except Exception as error:
             self.query_one("#cancelDuelResult").update(f"DELETE /api/play/duel/ Error: {error}")
 
