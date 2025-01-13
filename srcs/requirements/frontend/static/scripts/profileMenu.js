@@ -1,14 +1,14 @@
 document.getElementById('logOut').addEventListener('click', async event => {
     event.preventDefault();
-    clearCSS();
-    await closeGameConnection(window.location.pathname);
-    clearFriendRequests();
+    sse.close();
     removeTokens();
     await generateToken();
     await fetchUserInfos(true);
-    handleRoute();
-    sse.close();
     initSSE();
+    clearCSS();
+    clearFriendRequests();
+    await closeGameConnection(window.location.pathname);
+    handleRoute();
 })
 
 function clearFriendRequests(){
