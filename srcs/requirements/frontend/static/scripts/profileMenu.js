@@ -1,5 +1,6 @@
 document.getElementById('logOut').addEventListener('click', async event => {
     event.preventDefault();
+    clearCSS();
     await closeGameConnection(window.location.pathname);
     clearFriendRequests();
     removeTokens();

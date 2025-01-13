@@ -177,7 +177,16 @@ function loadScript(scriptSrc, type) {
     });
 }
 
+function clearCSS(){
+    const links = document.querySelectorAll('link[clearable]');
+    for (let link of links){
+        console.log('removing', link);
+        link.remove();
+    }
+}
+
 function loadCSS(cssHref, toUpdate=true) {
+    console.log('loading CSS:', cssHref);
     const existingLink = document.querySelector('link[dynamic-css]');
     if (existingLink) {
         // console.log('deleted', existingLink);
@@ -187,8 +196,11 @@ function loadCSS(cssHref, toUpdate=true) {
     const link = document.createElement('link');
     link.rel = 'stylesheet';
     link.href = cssHref;
-    if (toUpdate)
-        link.setAttribute('dynamic-css', 'true');
+    // if (toUpdate)
+
+    console.log(cssHref, '/css/styles.css', cssHref !== '/css/styles.css');
+    if (cssHref != '/css/styles.css')
+        link.setAttribute('clearable', 'true');
     document.head.appendChild(link);
     // console.log(`Style ${cssHref} loaded.`)
 }
