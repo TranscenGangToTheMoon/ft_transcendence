@@ -43,6 +43,7 @@ async def connect(sid, environ, auth):
     if not Server.does_game_exist(game_id):
         match = Match(game_data)
         Server.create_game(match)
+        # TODO -> request game to say the first player is connected
     player = Server.get_player(id)
     print(f"player = {player}")
     print(f"sid = {sid}", flush=True)
@@ -96,15 +97,15 @@ async def ff(sid):
     from game_server.server import Server
     try:
         match_id = Server._clients[sid].match_id
-        Server.finish_game(match_id, FinishReason.PLAYER_ABANDON)
+        await sync_to_async(Server.finish_game)(match_id, FinishReason.PLAYER_ABANDON, Server._clients[sid].user_id)
     except KeyError:
         pass
 
-# TODO -> make some tests for disconnect while a game is running
+
 async def disconnect(sid):
     from game_server.server import Server
     try:
         match_id = Server._clients[sid].match_id
-        await sync_to_async(Server.finish_game)(match_id, FinishReason.PLAYER_DISCONNECT, Server._clients[sid].user_id)
+        await sync_to_async(Server.finish_game)(match_id, FinishReason.PLAYER_ABANDON, Server._clients[sid].user_id)
     except KeyError:
         pass # player has already disconnected
