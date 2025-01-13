@@ -1,18 +1,16 @@
-from datetime import datetime, timezone
-
-from lib_transcendence.services import request_game
-import requests
-import asyncio
 from asgiref.sync import async_to_sync
+from datetime import datetime, timezone
 from game_server.match import Match, Player, finish_match
 from game_server.pong_ball import Ball
 from game_server.pong_position import Position
 from game_server.pong_racket import Racket
 from lib_transcendence.game import FinishReason
 from typing import List
+import asyncio
 import math
 import os
 import random
+import requests
 import time
 
 def get_random_direction():
