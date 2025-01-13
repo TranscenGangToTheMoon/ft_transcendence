@@ -482,7 +482,7 @@ if (typeof tournamentData === 'undefined')
 async function gameStart(event) {
 	event = JSON.parse(event.data);
 	if (!checkEventDuplication(event)) return;
-	console.log(event);
+	console.log('game-start received (tournament)',event);
 	if (fromTournament)
 		userInformations.cancelReturn = true;
 	fromTournament = true;
@@ -494,6 +494,12 @@ async function initTournament(){
 	fromTournament = false;
 	userInformations.cancelReturn = false;
     await indexInit(false);
+	if (window.location.pathname === '/')
+		return;
+	if (userInformations.is_guest){
+		await navigateTo('/');
+		return displayMainAlert('Error', 'You do not have permission to play in tournaments');
+	}
 	loadCSS('/tournament/css/tournament.css', false);
 	setTournamentOptions();
 
