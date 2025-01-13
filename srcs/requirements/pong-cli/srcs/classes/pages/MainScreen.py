@@ -7,9 +7,8 @@ from textual.screen     import Screen
 from textual.widgets    import Header, Footer, Rule, Button, Static
 
 # Local imports
-from classes.utils.user import User
-
-from srcs.classes.utils.config import SSL_CRT
+from classes.utils.user     import User
+from classes.utils.config   import SSL_CRT
 
 
 class MainPage(Screen):
@@ -34,6 +33,12 @@ class MainPage(Screen):
             self.duelAction()
         elif (event.button.id == "cancelDuelGame"):
             self.cancelDuelAction()
+
+    def on_screen_resume(self) -> None:
+        self.query_one("#duel").loading = False
+        self.query_one("#duel").variant = "primary"
+        self.query_one("#cancelDuelGame").disabled = True
+        self.query_one("#cancelDuelResult").update("")
 
     def duelAction(self):
         try:
