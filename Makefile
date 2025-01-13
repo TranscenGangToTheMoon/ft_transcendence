@@ -86,8 +86,6 @@ secrets		:	$(ENV_EXEMPLE)
 			./launch.d/01passwords.sh $(ENV_EXEMPLE) $(ENV_FILE)
 			./launch.d/02set-hostname.sh
 			./launch.d/03genreateSSL.sh
-			ln -f ./secrets/ssl.crt ./srcs/requirements/pong-cli/ft_transcendence.crt
-			ln -f ./secrets/ssl.key ./srcs/requirements/pong-cli/ft_transcendence.key
 
 .PHONY: clean
 clean		:
@@ -110,8 +108,6 @@ fclean		:	dusting
 			rm -rf ./srcs/shared-code/lib_transcendence.egg-info/ # todo remove in prod
 			rm -rf ./srcs/shared-code/build/ # todo remove in prod
 			rm -rf $(SECRETS_D)
-			rm -rf ./srcs/requirements/pong-cli/ft_transcendence.crt
-			rm -rf ./srcs/requirements/pong-cli/ft_transcendence.key
 
 .PHONY: dusting
 dusting		:
