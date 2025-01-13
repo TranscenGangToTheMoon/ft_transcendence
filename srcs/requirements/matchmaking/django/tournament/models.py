@@ -229,7 +229,7 @@ class TournamentMatches(models.Model):
         self.save()
         tournament = self.tournament
         if validated_data is None:
-            pass
+            validated_data = {}
         else:
             print('validated_data', validated_data, flush=True)
             validated_data.pop('winner_id')

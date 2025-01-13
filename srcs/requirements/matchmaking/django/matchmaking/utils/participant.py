@@ -6,15 +6,18 @@ from lobby.models import LobbyParticipants
 from tournament.models import TournamentParticipants
 
 
-def get_participants(obj, add_fields: list[str] = None):
+def get_participants(obj, add_fields: list[str] = None, return_type=list):
     fields = ['user_id', 'creator', 'join_at']
     if add_fields is not None:
         fields.extend(add_fields)
     participants = {p['user_id']: p for p in obj.participants.all().values(*fields)}
-    results = retrieve_users(list(participants), return_type=dict)
-    for user_id in results:
+    results = retrieve_users(list(participants), return_type=return_type)
+    for item in results:
         for f in fields[1:]:
-            results[user_id][f] = participants[user_id][f]
+            if return_type is list:
+                item[f] = participants[item['id']][f]
+            else:
+                results[item][f] = participants[item][f]
     return results
 
 

@@ -45,7 +45,7 @@ class TournamentSerializer(serializers.ModelSerializer):
         return TournamentSize.validate(value)
 
     def get_participants(self, obj):
-        self.context['participants'] = get_participants(obj)
+        self.context['participants'] = get_participants(obj, return_type=dict)
         return self.context['participants']
 
     def get_matches(self, obj):

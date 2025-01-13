@@ -19,7 +19,7 @@ class Lobby(models.Model):
 
     @property
     def max_team_participants(self):
-        if self.match_type == MatchType.m1v1:
+        if self.match_type == MatchType.M1V1:
             return 1
         return 3
 
@@ -27,7 +27,7 @@ class Lobby(models.Model):
         return self.participants.filter(team=team).count()
 
     def is_team_full(self, team):
-        if team == Teams.spectator:
+        if team == Teams.SPECTATOR:
             return False
         return self.get_team_count(team) >= self.max_team_participants
 
@@ -39,8 +39,8 @@ class Lobby(models.Model):
     def is_ready(self):
         qs = self.participants
         if self.game_mode == GameMode.CUSTOM_GAME:
-            qs.exclude(team=Teams.spectator)
-            if not self.is_team_full(Teams.a) or not self.is_team_full(Teams.b):
+            qs.exclude(team=Teams.SPECTATOR)
+            if not self.is_team_full(Teams.A) or not self.is_team_full(Teams.B):
                 return False
         return qs.filter(is_ready=False).count() == 0
 

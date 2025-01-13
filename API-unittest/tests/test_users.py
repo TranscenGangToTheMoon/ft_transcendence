@@ -59,7 +59,7 @@ class Test02_UserMe(UnitTest):
 
         response = self.assertResponse(me(user1), 200)
         last_online = response['last_online']
-        self.assertDictEqual(response, {'id': response['id'], 'username': user1['username'], 'is_guest': False, 'created_at': response['created_at'], 'profile_picture': None, 'accept_friend_request': True, 'accept_chat_from': 'friends_only', 'trophies': 0, 'current_rank': None, 'notifications': {'friend_requests': 0, 'chats': 0}, 'is_online': True, 'last_online': response['last_online']})
+        self.assertDictEqual(response, {'id': response['id'], 'username': user1['username'], 'is_guest': False, 'created_at': response['created_at'], 'profile_picture': None, 'accept_friend_request': True, 'accept_chat_from': 'friends_only', 'trophies': 0, 'notifications': {'friend_requests': 0, 'chats': 0}, 'is_online': True, 'last_online': response['last_online']})
         self.assertThread(user1)
         time.sleep(1)
         self.assertNotEqual(last_online, self.assertResponse(me(user1), 200)['last_online'])
@@ -68,7 +68,7 @@ class Test02_UserMe(UnitTest):
         user1 = self.user(guest=True)
 
         response = self.assertResponse(me(user1), 200)
-        self.assertDictEqual(response, {'id': response['id'], 'username': response['username'], 'is_guest': True, 'created_at': response['created_at'], 'profile_picture': None, 'accept_friend_request': True, 'accept_chat_from': 'friends_only', 'trophies': 0, 'current_rank': None, 'notifications': {'friend_requests': 0, 'chats': 0}, 'is_online': True, 'last_online': response['last_online']})
+        self.assertDictEqual(response, {'id': response['id'], 'username': response['username'], 'is_guest': True, 'created_at': response['created_at'], 'profile_picture': None, 'accept_friend_request': True, 'accept_chat_from': 'friends_only', 'trophies': 0, 'notifications': {'friend_requests': 0, 'chats': 0}, 'is_online': True, 'last_online': response['last_online']})
         self.assertThread(user1)
 
 

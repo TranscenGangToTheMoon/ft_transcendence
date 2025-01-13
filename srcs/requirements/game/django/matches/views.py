@@ -35,8 +35,8 @@ class ScoreView(generics.UpdateAPIView):
     def get_object(self):
         try:
             return Players.objects.get(user_id=self.kwargs['user_id'], match__finished=False)
-        except Matches.DoesNotExist:
-            raise NotFound(MessagesException.NotFound.MATCH)
+        except Players.DoesNotExist:
+            raise NotFound(MessagesException.NotFound.NOT_BELONG_MATCH)
 
 
 class ListMatchesView(generics.ListAPIView):

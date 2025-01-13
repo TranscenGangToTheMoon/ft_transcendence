@@ -60,9 +60,9 @@ class Test02_ErrorTournament(UnitTest):
         self.assertThread(user1, user2)
 
     def test_003_already_started(self):
-        user1 = self.user(['tournament-join'] * 3 + ['tournament-start'])
+        user1 = self.user(['tournament-join'] * 3 + ['tournament-start', 'game-start'])
         user2 = self.user()
-        users = [self.user(['tournament-join'] * (2 - i) + ['tournament-start']) for i in range(3)]
+        users = [self.user(['tournament-join'] * (2 - i) + ['tournament-start', 'game-start']) for i in range(3)]
 
         code = self.assertResponse(create_tournament(user1), 201, get_field='code')
 

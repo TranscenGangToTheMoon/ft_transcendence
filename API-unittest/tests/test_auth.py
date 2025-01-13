@@ -68,10 +68,11 @@ class Test01_Register(UnitTest):
     def test_005_register_password_contain_paste_username(self):
         username = 'pass_contain_username' + rnstr()
         password = 'password' + username
-        user = self.assertResponse(register(username), 201, get_user=True)
+        first_password = 'register_' + rnstr(15)
+        user = self.assertResponse(register(username, first_password), 201, get_user=True)
         new_username = 'new_username' + rnstr()
 
-        self.assertResponse(me(user, 'PATCH', data={'username': new_username, 'password': password, 'old_password': user['password']}), 200)
+        self.assertResponse(me(user, 'PATCH', data={'username': new_username, 'password': password, 'old_password': first_password}), 200)
         self.assertResponse(login(new_username, password), 200)
 
     def test_006_register_password_contain_new_username(self):
