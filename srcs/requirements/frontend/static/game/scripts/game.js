@@ -460,6 +460,24 @@
     window.PongGame = {startGame, startCountdown, stopGame, state, config, moveUp, moveDown, handleGameOver, resetGame, info, animatePaddlesToMiddle};
 })();
 
+function fillTeamDetail(enemyTeamDetail, playerTeamDetail){
+    enemyTeamDetail.title += window.PongGame.info.enemyTeam.name;
+    playerTeamDetail.title += window.PongGame.info.myTeam.name;
+    for (let player in window.PongGame.info.myTeam.players){
+        player = window.PongGame.info.myTeam.players[player];
+        const oldContent = playerTeamDetail.getAttribute('data-bs-content');
+        playerTeamDetail.setAttribute('data-bs-content', oldContent || '' + `
+            <div id=TD-username>${player.username}</div>
+        `);
+    }
+    for (let player in window.PongGame.info.enemyTeam.players){
+        player = window.PongGame.info.enemyTeam.players[player];
+        const oldContent = enemyTeamDetail.getAttribute('data-bs-content');
+        enemyTeamDetail.setAttribute('data-bs-content', oldContent || '' + `
+            <div id=TD-username>${player.username}</div>
+        `);
+    }    
+}
 
 function initSocket(){
 	const host = window.location.origin;
@@ -478,10 +496,9 @@ function initSocket(){
         // console.log('Connected to socketIO server!');
     });
     gameSocket.on('disconnect', () => {
-        // gameSocket.close();
+        gameSocket.close();
         console.log('disconnected from gameSocket');
     })
-
     gameSocket.on('start_game', event => {
         // console.log('received start_game');
         if (!window.PongGame.state.isGameActive)
@@ -547,6 +564,7 @@ function initSocket(){
     })
     gameSocket.on('game_over', async event => {
         console.log('game_over received', event);
+        gameSocket.close();
 		window.PongGame.handleGameOver(event.reason);
         if (fromTournament)
             // setTimeout(async ()=> {
@@ -555,19 +573,30 @@ function initSocket(){
             // }, 500)
         else {
             document.getElementById('enemyScore').innerText = window.PongGame.state.enemyScore;
-            const enemyScoreLabel = document.getElementById('enemyScoreLabel');
-            enemyScoreLabel.innerText = enemyScoreLabel.innerText.replace('{team-id}', window.PongGame.info.enemyTeam.name);
-            const myScoreLabel = document.getElementById('playerScoreLabel');
-            myScoreLabel.innerText = myScoreLabel.innerText.replace('{team-id}', window.PongGame.info.myTeam.name);
+            const enemyTeamDetail = document.getElementById('enemyScoreLabel').querySelector('.teamDetail');
+            enemyTeamDetail.innerText = enemyTeamDetail.innerText.replace('{team-id}', window.PongGame.info.enemyTeam.name);
+            const playerTeamDetail = document.getElementById('playerScoreLabel').querySelector('.teamDetail');
+            playerTeamDetail.innerText = playerTeamDetail.innerText.replace('{team-id}', window.PongGame.info.myTeam.name);
             document.getElementById('playerScore').innerText = window.PongGame.state.playerScore;
             const gameOverModal = new bootstrap.Modal(document.getElementById('gameOverModal'));
             gameOverModal.show();
+            document.getElementById('gameOverModal').addEventListener('hidden.bs.modal', async () => {
+                await handleRoute();
+            });
+            fillTeamDetail(enemyTeamDetail, playerTeamDetail);
+            console.log(enemyTeamDetail);
+            const popovers = document.querySelectorAll('.teamDetail');
+            popovers.forEach(element => {
+                new bootstrap.Popover(element, {
+                html: true
+                });
+            });
         }
     })
 }
 
 document.getElementById('gameOverModalPlayAgain').addEventListener('click', async () => {
-    await handleRoute();
+    // await handleRoute();
 })
 
 document.getElementById('gameOverModalQuit').addEventListener('click', async () => {
@@ -579,9 +608,9 @@ function initData(data){
         console.log(data);
 		if (data.teams.a.some(player => player.id == userInformations.id)) {
 			window.PongGame.info.myTeam.name = 'A';
-			window.PongGame.info.myTeam.players = data.teams.team_a;
+			window.PongGame.info.myTeam.players = data.teams.a;
 			window.PongGame.info.enemyTeam.name = 'B';
-			window.PongGame.info.enemyTeam.players = data.teams.team_b;
+			window.PongGame.info.enemyTeam.players = data.teams.b;
 		}
 		else if (data.teams.b.some(player => player.id == userInformations.id)) {
 			window.PongGame.info.myTeam.name = 'B';
@@ -625,6 +654,7 @@ function checkGameAuthorization(){
 function gameStart(event){
     data = JSON.parse(event.data);
     data = data.data;
+    console.log('game-start received (game)');
     initData(data);
 }
 

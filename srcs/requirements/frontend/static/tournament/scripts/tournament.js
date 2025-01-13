@@ -482,7 +482,7 @@ if (typeof tournamentData === 'undefined')
 async function gameStart(event) {
 	event = JSON.parse(event.data);
 	if (!checkEventDuplication(event)) return;
-	console.log(event);
+	console.log('game-start received (tournament)',event);
 	if (fromTournament)
 		userInformations.cancelReturn = true;
 	fromTournament = true;

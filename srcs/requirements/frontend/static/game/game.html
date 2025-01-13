@@ -24,9 +24,23 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body" id="gameOverContent">
-                <label for="playerScore" id="playerScoreLabel">Team {team-id} Score:</label>
+                <label for="playerScore" id="playerScoreLabel">
+                    <a class="teamDetail"
+                        data-bs-toggle="popover" 
+                        data-bs-trigger="hover"
+                        data-bs-html="true"
+                        title="Team ">
+                    Team {team-id}</a> Score:
+                </label>
                 <div id="playerScore">-</div>
-                <label for="enemyScore" id="enemyScoreLabel">Team {team-id} Score:</label>
+                <label for="enemyScore" id="enemyScoreLabel">
+                <a class="teamDetail"
+                    data-bs-toggle="popover" 
+                    data-bs-trigger="hover"
+                    data-bs-html="true"
+                    title="Team ">
+                    Team {team-id}</a> Score:
+                </label>
                 <div id="enemyScore">-</div>
             </div>
             <div class="modal-footer">

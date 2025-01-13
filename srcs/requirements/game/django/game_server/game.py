@@ -269,12 +269,12 @@ class Game:
     def finish(self, reason: str, winner: str | None = None, disconnected_user_id: int | None = None):
         from game_server.server import Server
         print('finishing game', flush=True)
-        if (disconnected_user_id is not None):
-            finish_match(self.match.id, reason, disconnected_user_id)
         self.send_finish(reason, winner)
         self.disconnect_players(disconnected_user_id)
         self.finished = True
         Server.delete_game(self.match.id)
+        if (disconnected_user_id is not None):
+            finish_match(self.match.id, reason, disconnected_user_id)
 
     def reset_game_state(self):
         # print('reset_game_state', flush=True)
