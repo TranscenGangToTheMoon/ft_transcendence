@@ -1,5 +1,7 @@
 # Python imports
 import asyncio
+import ssl
+import aiohttp
 import socketio
 from pynput import keyboard
 
@@ -30,7 +32,13 @@ class GamePage(Screen):
         self.listener = None
         self.connected = False
         self.gameStarted = False
-        self.sio = socketio.AsyncClient(ssl_verify=False)
+
+        SSLContext = ssl.create_default_context()
+        SSLContext.load_verify_locations(SSL_CRT)
+        connector = aiohttp.TCPConnector(ssl=SSLContext)
+        self.HTTPSession = aiohttp.ClientSession(connector=connector)
+
+        self.sio = socketio.AsyncClient(http_session=self.HTTPSession)
 
     async def on_mount(self) -> None:
         # Key handling
@@ -176,12 +184,14 @@ class GamePage(Screen):
         @self.sio.on('game_over')
         async def game_over_action(data):
             print(f"game_over_action: {data}", flush=True)
+            await self.sio.disconnect()
             print(self.connected, flush=True)
 
     async def on_unmount(self) -> None:
-        print("Unmount GamePage")
+        print("Unmounting GamePage")
         if (self.connected):
             await self.sio.disconnect()
             print("Unmount disconnect the server!")
         self.connected = False
         self.listener.stop()
+        self.HTTPSession.close()
