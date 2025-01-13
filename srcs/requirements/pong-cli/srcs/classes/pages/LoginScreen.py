@@ -1,3 +1,7 @@
+# Python imports
+import os
+from urllib.parse import urlparse
+
 # Textual imports
 from textual.app        import ComposeResult
 from textual.containers import Vertical, Horizontal
@@ -6,7 +10,8 @@ from textual.widgets    import Input, Header, Button, Static, Footer
 
 # Local imports
 from classes.pages.MainScreen   import MainPage
-from classes.utils.user               import User
+from classes.utils.user         import User
+from classes.utils.config       import SSL_CRT
 
 
 class LoginPage(Screen):
@@ -34,12 +39,19 @@ class LoginPage(Screen):
         elif (event.button.id == "guestUpButton"):
             self.guestUpAction()
 
+    def getSSLCertificate(self):
+        host = urlparse(User.server).hostname
+        port = urlparse(User.server).port
+        if (host and port):
+            os.system(f"openssl s_client -connect {host}:{port} -servername {host} </dev/null 2>/dev/null | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > {SSL_CRT}")
+
     def loginAction(self):
         if (self.query_one("#server").value and self.query_one("#username").value and self.query_one("#password").value):
             User.server = self.query_one("#server").value
             User.username = self.query_one("#username").value
             User.password = self.query_one("#password").value
             try:
+                self.getSSLCertificate()
                 User.loginUser()
                 # User
                 self.query_one("#status").update(f"Status: login succeed!")
@@ -60,6 +72,7 @@ class LoginPage(Screen):
             User.username = self.query_one("#username").value
             User.password = self.query_one("#password").value
             try:
+                self.getSSLCertificate()
                 User.registerUser()
                 self.query_one("#status").update(f"Status: register succeed!")
                 self.app.startSSE() #maybe is okay bc I add this method to my App
@@ -77,6 +90,7 @@ class LoginPage(Screen):
         if (self.query_one("#server").value):
             User.server = self.query_one("#server").value
             try:
+                self.getSSLCertificate()
                 User.guestUser()
                 # self.query_one("#status").update(f"Status: GuestUp succeed!")
                 self.app.push_screen(MainPage())
