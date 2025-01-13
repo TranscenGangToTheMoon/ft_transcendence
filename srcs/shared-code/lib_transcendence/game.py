@@ -38,7 +38,7 @@ class GameMode:
 class FinishReason:
     NORMAL_END = 'normal-end'
     PLAYER_ABANDON = 'player-abandon'
-    PLAYER_DISCONNECT = 'player-disconnect'
+    PLAYER_DISCONNECT = 'player-abandon'
     PLAYER_NOT_CONNECTED = 'player-not-connected'
 
     @staticmethod
