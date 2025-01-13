@@ -59,6 +59,15 @@ document.getElementById('pChangeNickname').addEventListener('submit', async even
     }
 })
 
+document.getElementById('pDownloadData').addEventListener('click', async () => {
+    try {
+        await apiRequest(getAccessToken(), `${baseAPIUrl}/users/me/download-data/`);
+    }
+    catch(error){
+        console.log(error);
+    }
+})
+
 document.getElementById('pChangePassword').addEventListener('submit', async event => {
     event.preventDefault();
     const newPasswordInputDiv = document.getElementById('pPasswordInput');
