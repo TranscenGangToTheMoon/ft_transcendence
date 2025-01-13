@@ -9,7 +9,7 @@ from textual.widgets    import Header, Footer, Rule, Button, Static
 # Local imports
 from classes.utils.user import User
 
-from srcs.classes.utils.config import Config, SSL_CRT
+from srcs.classes.utils.config import SSL_CRT
 
 
 class MainPage(Screen):
@@ -37,7 +37,7 @@ class MainPage(Screen):
 
     def duelAction(self):
         try:
-            response = requests.post(url=f"{User.server}/api/play/duel/", data="", headers=User.headers, verify=User.SSLCertificate)
+            response = requests.post(url=f"{User.server}/api/play/duel/", data="", headers=User.headers, verify=SSL_CRT)
             if (response.status_code >= 400):
                 raise (Exception(f"({response.status_code}) Error: {response.text}"))
             self.query_one("#duel").loading = True
@@ -49,7 +49,7 @@ class MainPage(Screen):
 
     def cancelDuelAction(self):
         try:
-            response = requests.delete(url=f"{User.server}/api/play/duel/", data="", headers=User.headers, verify=User.SSLCertificate)
+            response = requests.delete(url=f"{User.server}/api/play/duel/", data="", headers=User.headers, verify=SSL_CRT)
             if (response.status_code >= 400): #if 404 c'est que j'ai join le match maius oas recu le event SSE
                 raise (Exception(f"({response.status_code}) Error: {response.text}"))
             elif (response.status_code == 204):
@@ -63,7 +63,7 @@ class MainPage(Screen):
 
     def userMeStatic(self) -> Static:
         try:
-            response = requests.get(url=f"{User.server}/api/users/me/", data={}, headers=User.headers, verify=User.SSLCertificate)
+            response = requests.get(url=f"{User.server}/api/users/me/", data={}, headers=User.headers, verify=SSL_CRT)
             User.id = response.json()["id"]
             return Static(f"({response.status_code}) GET /api/users/me/ : {response.text}")
         except Exception as error:

@@ -12,6 +12,7 @@ from textual.worker import Worker
 from classes.pages.GameScreen   import GamePage
 from classes.utils.user         import User
 from classes.pages.LoginScreen  import LoginPage
+from classes.utils.config       import SSL_CRT
 
 
 
@@ -40,7 +41,7 @@ class PongCLI(App):
         log("Start SSE")
         if (not self.isConnected):
             self.connected = True
-            async with httpx.AsyncClient(verify=User.SSLCertificate) as client:
+            async with httpx.AsyncClient(verify=SSL_CRT) as client:
                 headers = {
                     'Content-Type': 'text/event-stream',
                     'Authorization': f'Bearer {User.accessToken}',
