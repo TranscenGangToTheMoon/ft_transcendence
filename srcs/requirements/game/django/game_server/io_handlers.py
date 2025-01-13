@@ -2,7 +2,7 @@ import asyncio
 from typing import Any, Dict
 from asgiref.sync import sync_to_async
 from lib_transcendence.auth import auth_verify
-from lib_transcendence.game import Reason
+from lib_transcendence.game import FinishReason
 from logging import info, debug, error
 from lib_transcendence.exceptions import MessagesException, ServiceUnavailable
 from rest_framework.exceptions import NotFound
@@ -96,7 +96,7 @@ async def ff(sid):
     from game_server.server import Server
     try:
         match_id = Server._clients[sid].match_id
-        Server.finish_game(match_id, Reason.player_abandon)
+        Server.finish_game(match_id, FinishReason.player_abandon)
     except KeyError:
         pass
 
@@ -105,6 +105,6 @@ async def disconnect(sid):
     from game_server.server import Server
     try:
         match_id = Server._clients[sid].match_id
-        await sync_to_async(Server.finish_game)(match_id, Reason.player_disconnect, Server._clients[sid].user_id)
+        await sync_to_async(Server.finish_game)(match_id, FinishReason.player_disconnect, Server._clients[sid].user_id)
     except KeyError:
         pass # player has already disconnected

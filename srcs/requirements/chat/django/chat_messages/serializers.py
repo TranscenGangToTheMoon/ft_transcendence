@@ -8,6 +8,8 @@ from chats.models import ChatParticipants, Chats
 
 
 class MessagesSerializer(serializers.ModelSerializer):
+    author = serializers.IntegerField(source='author.id', read_only=True)
+
     class Meta:
         model = Messages
         fields = [
@@ -28,7 +30,7 @@ class MessagesSerializer(serializers.ModelSerializer):
         chat_id = self.context['chat_id']
         user_id = self.context['auth_user']['id']
 
-        get_chat_participants(chat_id, user_id)
+        author = get_chat_participants(chat_id, user_id)
 
         try:
             chat = Chats.objects.get(id=chat_id)
@@ -37,7 +39,7 @@ class MessagesSerializer(serializers.ModelSerializer):
             raise PermissionDenied(MessagesException.PermissionDenied.NOT_BELONG_TO_CHAT)
 
         validated_data['chat_id'] = chat_id
-        validated_data['author'] = user_id
+        validated_data['author'] = author.user
 
         for user in chat.participants.filter(view_chat=False):
             user.set_view_chat()

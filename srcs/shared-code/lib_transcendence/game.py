@@ -1,43 +1,56 @@
-from lib_transcendence.validate_type import validate_type
+from lib_transcendence.validate_type import validate_type, surchage_list
 
 
-class GameMode: # todo change to enum
-    duel = 'duel'
-    clash = 'clash'
-    ranked = 'ranked'
-    tournament = 'tournament'
-    custom_game = 'custom_game'
-
-    modes = [duel, clash, ranked, tournament, custom_game]
+class GameMode:
+    DUEL = 'duel'
+    CLASH = 'clash'
+    RANKED = 'ranked'
+    TOURNAMENT = 'tournament'
+    CUSTOM_GAME = 'custom_game'
+    GLOBAL = 'global'
 
     @staticmethod
     def validate(mode):
-        return validate_type(mode, GameMode(), GameMode.modes)
+        return validate_type(mode, GameMode)
 
     @staticmethod
     def validate_lobby(mode):
-        return validate_type(mode, GameMode(), (GameMode.clash, GameMode.custom_game))
+        return validate_type(mode, GameMode, [GameMode.CLASH, GameMode.CUSTOM_GAME])
+
+    @staticmethod
+    def tournament_field(game_mode):
+        return game_mode in [GameMode.TOURNAMENT, GameMode.GLOBAL]
+
+    @staticmethod
+    def own_goal_field(game_mode):
+        return game_mode in [GameMode.CLASH, GameMode.GLOBAL]
+
+    @staticmethod
+    def attr():
+        result = surchage_list(GameMode)
+        result.remove(GameMode.GLOBAL)
+        return result
 
     def __str__(self):
         return 'Game mode'
 
 
-class Reason: # todo rename
-    normal_end = 'normal-end'
-    player_abandon = 'player-abandon'
-    player_disconnect = 'player-disconnect'
-    player_not_connected = 'player-not-connected'
-
-    error_reasons = [player_abandon, player_disconnect, player_not_connected]
-    reasons = [normal_end] + error_reasons
+class FinishReason:
+    NORMAL_END = 'normal-end'
+    PLAYER_ABANDON = 'player-abandon'
+    PLAYER_NOT_CONNECTED = 'player-not-connected'
 
     @staticmethod
     def validate(mode):
-        return validate_type(mode, Reason(), Reason.reasons)
+        return validate_type(mode, FinishReason)
 
     @staticmethod
     def validate_error(mode):
-        return validate_type(mode, Reason(), Reason.error_reasons)
+        return validate_type(mode, FinishReason, [FinishReason.PLAYER_ABANDON, FinishReason.PLAYER_NOT_CONNECTED])
+
+    @staticmethod
+    def attr():
+        return surchage_list(FinishReason)
 
     def __str__(self):
-        return 'Reason'
+        return 'Finish reason'

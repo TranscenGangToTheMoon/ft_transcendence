@@ -17,6 +17,7 @@ class UsersMeSerializer(serializers.ModelSerializer):
     accept_friend_request = serializers.BooleanField()
     notifications = serializers.SerializerMethodField(read_only=True)
     password = serializers.CharField(write_only=True)
+    old_password = serializers.CharField(write_only=True)
     trophies = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
@@ -29,12 +30,12 @@ class UsersMeSerializer(serializers.ModelSerializer):
             'accept_friend_request',
             'accept_chat_from',
             'trophies',
-            'current_rank',
             'created_at',
             'notifications',
             'is_online',
             'last_online',
             'password',
+            'old_password',
 
         ]
         read_only_fields = [
@@ -42,7 +43,6 @@ class UsersMeSerializer(serializers.ModelSerializer):
             'is_guest',
             'profile_picture',
             'trophies',
-            'current_rank',
             'created_at',
             'notifications',
             'is_online',
@@ -79,7 +79,7 @@ class UsersMeSerializer(serializers.ModelSerializer):
 
 class UsersSerializer(serializers.ModelSerializer):
     status = serializers.SerializerMethodField(read_only=True)
-    friends = FriendsSerializer(read_only=True)
+    friends = FriendsSerializer(source='get_friends', read_only=True)
     trophies = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
@@ -98,7 +98,6 @@ class UsersSerializer(serializers.ModelSerializer):
             'username',
             'is_guest',
             'profile_picture',
-            'current_rank',
             'status',
             'trophies',
             'friends',
@@ -137,14 +136,14 @@ class ManageUserSerializer(serializers.ModelSerializer):
         ]
 
     def create(self, validated_data):
-        result = super(ManageUserSerializer, self).create(validated_data)
-        for game_mode in GameMode.modes:
-            if game_mode == GameMode.custom_game:
+        result = super().create(validated_data)
+        for game_mode in [GameMode.GLOBAL] + GameMode.attr():
+            if game_mode == GameMode.CUSTOM_GAME:
                 continue
             kwargs = {'game_mode': game_mode}
-            if game_mode == GameMode.tournament:
+            if GameMode.tournament_field(game_mode):
                 kwargs['tournament_wins'] = 0
-            elif game_mode == GameMode.clash:
+            if GameMode.own_goal_field(game_mode):
                 kwargs['own_goals'] = 0
             result.stats.create(**kwargs)
         result.ranked_stats.create(trophies=0, total_trophies=0)

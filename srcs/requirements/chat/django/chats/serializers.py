@@ -4,11 +4,12 @@ from lib_transcendence.exceptions import MessagesException, ResourceExists
 from lib_transcendence.services import request_users
 from lib_transcendence.users import retrieve_users
 from rest_framework import serializers
-from rest_framework.exceptions import PermissionDenied, NotFound
+from rest_framework.exceptions import PermissionDenied
 
 from chat_messages.serializers import MessagesSerializer
 from chats.models import Chats, ChatParticipants
 from chats.utils import get_chat_together
+from user_management.models import Users
 
 
 class ChatsSerializer(serializers.ModelSerializer):
@@ -41,17 +42,15 @@ class ChatsSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         if request is None:
             raise serializers.ValidationError(MessagesException.ValidationError.REQUEST_REQUIRED)
-        chat_with = obj.participants.exclude(user_id=get_auth_user(request)['id']).first()
-        chat_with_user = retrieve_users(chat_with.user_id)
-        if len(chat_with_user) != 1:
-            raise NotFound(MessagesException.NotFound.USER)
+        chat_with = obj.participants.exclude(user__id=get_auth_user(request)['id']).first()
+        chat_with_user = retrieve_users(chat_with.user.id)
         return chat_with_user[0]
 
     def get_unread_messages(self, obj):
         request = self.context.get('request')
         if request is None:
             raise serializers.ValidationError(MessagesException.ValidationError.REQUEST_REQUIRED)
-        return obj.messages.exclude(author=get_auth_user(request)['id']).filter(is_read=False).count()
+        return obj.messages.exclude(author__id=get_auth_user(request)['id']).filter(is_read=False).count()
 
     def create(self, validated_data):
         request = self.context.get('request')
@@ -66,18 +65,21 @@ class ChatsSerializer(serializers.ModelSerializer):
 
         user2 = request_users(endpoints.Users.fchat.format(user1_id=user['id'], username2=username), 'GET', request)
         result = super().create(validated_data)
-        ChatParticipants.objects.create(user_id=user['id'], username=user['username'], chat_id=result.id)
-        ChatParticipants.objects.create(user_id=user2['id'], username=user2['username'], chat_id=result.id)
+        for u in (user, user2):
+            user_instance, created = Users.objects.get_or_create(id=u['id'], username=u['username'])
+            ChatParticipants.objects.create(user=user_instance, chat_id=result.id)
         return result
 
 
-class BlockChatSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Chats
-        fields = [
-            'id',
-            'blocked',
-        ]
-        read_only_fields = [
-            'id',
-        ]
+class ChatNotificationsSerializer(serializers.Serializer):
+    notifications = serializers.SerializerMethodField(read_only=True)
+
+    @staticmethod
+    def get_notifications(obj):
+        count = 0
+
+        for chat in Chats.objects.filter(participants__user__id=obj):
+            if chat.messages.exclude(author__id=obj).filter(is_read=False).exists():
+                count += 1
+
+        return count

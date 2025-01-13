@@ -1,12 +1,7 @@
-from datetime import datetime, timezone
-
-from lib_transcendence import endpoints
 from lib_transcendence.auth import get_auth_user
 from lib_transcendence.exceptions import MessagesException
 from lib_transcendence.generate import generate_code
-from lib_transcendence.services import request_game
-from lib_transcendence.sse_events import create_sse_event, EventCode
-from lib_transcendence.game import Reason
+from lib_transcendence.game import FinishReason
 from lib_transcendence.users import retrieve_users
 from rest_framework import serializers
 
@@ -14,8 +9,7 @@ from blocking.utils import create_player_instance
 from matchmaking.utils.participant import get_participants
 from matchmaking.utils.place import get_tournament, verify_place
 from matchmaking.utils.user import verify_user
-from tournament.models import Tournament, TournamentStage, TournamentParticipants, TournamentMatches
-from tournament.utils import TournamentSize
+from tournament.models import Tournament, TournamentSize, TournamentStage, TournamentParticipants, TournamentMatches
 
 
 class TournamentSerializer(serializers.ModelSerializer):
@@ -51,8 +45,9 @@ class TournamentSerializer(serializers.ModelSerializer):
         return TournamentSize.validate(value)
 
     def get_participants(self, obj):
-        self.context['participants'] = get_participants(obj)
-        return self.context['participants']
+        participants = get_participants(obj)
+        self.context['participants'] = {u['id']: u for u in participants}
+        return participants
 
     def get_matches(self, obj):
         if obj.is_started:
@@ -65,7 +60,7 @@ class TournamentSerializer(serializers.ModelSerializer):
             return None
 
     def to_representation(self, instance):
-        result = super(TournamentSerializer, self).to_representation(instance)
+        result = super().to_representation(instance)
         if instance.is_started:
             result.pop('participants')
         return result
@@ -158,7 +153,7 @@ class TournamentMatchSerializer(serializers.ModelSerializer):
     winner = serializers.IntegerField(source='winner.user_id', read_only=True)
     score_winner = serializers.IntegerField(required=True)
     score_looser = serializers.IntegerField(required=True)
-    reason = serializers.CharField(max_length=20, required=True)
+    finish_reason = serializers.CharField(max_length=20, required=True)
     user_1 = serializers.SerializerMethodField(read_only=True)
     user_2 = serializers.SerializerMethodField(read_only=True)
 
@@ -172,7 +167,7 @@ class TournamentMatchSerializer(serializers.ModelSerializer):
             'winner_id',
             'score_winner',
             'score_looser',
-            'reason',
+            'finish_reason',
             'finished',
             'user_1',
             'user_2',
@@ -194,11 +189,11 @@ class TournamentMatchSerializer(serializers.ModelSerializer):
             users = [obj.user_1.user_id]
             if obj.user_2 is not None:
                 users.append(obj.user_2.user_id)
-            self.context['users'] = retrieve_users(users)
-        for u in self.context['users']:
-            if u['id'] == user.user_id:
-                return {**u, **TournamentParticipantsSerializer(user).data}
-        return None
+            self.context['users'] = retrieve_users(users, return_type=dict)
+        u = self.context['users'].get(user.user_id)
+        if u is None:
+            return None
+        return {**u, **TournamentParticipantsSerializer(user).data}
 
     def validate_winner_id(self, value):
         if value == self.instance.user_1.user_id:
@@ -212,8 +207,8 @@ class TournamentMatchSerializer(serializers.ModelSerializer):
         return self.context['winner'].id
 
     @staticmethod
-    def validate_reason(value):
-        return Reason.validate(value)
+    def validate_finish_reason(value):
+        return FinishReason.validate(value)
 
     def get_user_1(self, obj):
         return self.get_user_instance(obj, obj.user_1)
@@ -222,30 +217,6 @@ class TournamentMatchSerializer(serializers.ModelSerializer):
         return self.get_user_instance(obj, obj.user_2)
 
     def update(self, instance, validated_data):
-        result = super().update(instance, {**validated_data, 'finished': True})
-        result.winner = self.context['winner']
-        result.save()
-        tournament = result.tournament
-        validated_data.pop('winner_id')
-        winner_user_id = self.context['winner'].user_id
-        create_sse_event(tournament.users_id(), EventCode.TOURNAMENT_MATCH_FINISH, {'id': result.id, 'winner': winner_user_id, **validated_data}, {'winner': winner_user_id, 'looser': self.context['looser'].user_id, 'score_winner': validated_data['score_winner'], 'score_looser': validated_data['score_looser']})
-        current_stage = self.context['winner'].stage
-        finished = self.context['winner'].win()
-        self.context['looser'].eliminate()
-
-        if finished is not None:
-            data = TournamentSerializer(tournament).data
-            data['finish_at'] = datetime.now(timezone.utc)
-            data['stages'] = TournamentStageSerializer(tournament.stages.all(), many=True).data
-            request_game(endpoints.Game.tournaments, data=data)
-            create_sse_event(tournament.users_id(), EventCode.TOURNAMENT_FINISH, {'id': tournament.id}, {'name': tournament.name, 'username': winner_user_id})
-            tournament.delete()
-        else:
-            if not current_stage.matches.filter(finished=False).exists():
-                participants = tournament.participants.filter(still_in=True).order_by('index')
-                ct = participants.count()
-
-                for i in range(0, ct, 2):
-                    match = tournament.matches.create(n=tournament.get_nb_games(), stage=self.context['winner'].stage, user_1=participants[i], user_2=participants[i + 1])
-                    match.post()
+        result = super().update(instance, validated_data)
+        result.finish(self.context['winner'], self.context['looser'], validated_data)
         return result
