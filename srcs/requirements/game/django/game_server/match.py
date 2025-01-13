@@ -61,7 +61,7 @@ class Match():
 
 
 def finish_match(match_id, finish_reason: str, user_id: int):
-    if finish_reason != FinishReason.normal_end:
+    if finish_reason != FinishReason.NORMAL_END:
         try:
             request_game(
                 endpoints.Game.ffinish_match.format(match_id=match_id),

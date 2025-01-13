@@ -245,7 +245,7 @@ class Game:
             print(time.time(), "all players are connected", flush=True)
         except self.PlayerTimeout as e:
             print(e, flush=True)
-            self.finish(FinishReason.player_not_connected)
+            self.finish(FinishReason.PLAYER_NOT_CONNECTED)
             print('game canceled', flush=True)
             return
         if (self.match.game_mode == 'clash'): #watchout for 'clash'
@@ -309,12 +309,12 @@ class Game:
                     self.get_player(self.ball.last_touch_team_b).score_goal()
             except self.NoSuchPlayer as e:
                 print(e, flush=True)
-                self.finish(FinishReason.player_disconnect, team.name)
+                self.finish(FinishReason.PLAYER_DISCONNECT, team.name)
                 return
         self.send_score(team)
         for team in self.match.teams:
             if (team.score == 3):
-                self.finish(FinishReason.normal_end, team.name)
+                self.finish(FinishReason.NORMAL_END, team.name)
                 return
         self.reset_game_state()
         self.send_game_state()
