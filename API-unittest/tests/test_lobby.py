@@ -89,13 +89,16 @@ class Test02_ErrorJoinLobby(UnitTest):
 
     def test_007_blocked_user_cannot_join(self):
         user1 = self.user()
-        user2 = self.user()
+        users = [self.user() for _ in range(30)]
+
+        for u in users:
+            self.assertResponse(blocked_user(user1, u['id']), 201)
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
 
-        self.assertResponse(blocked_user(user1, user2['id']), 201)
-        self.assertResponse(join_lobby(user2, code), 404, {'detail': 'Lobby not found.'})
-        self.assertThread(user1, user2)
+        for u in users:
+            self.assertResponse(join_lobby(u, code), 404, {'detail': 'Lobby not found.'})
+        self.assertThread(user1, *users)
 
     def test_008_blocked_user(self):
         user1 = self.user(['lobby-join', 'lobby-leave'])
@@ -272,7 +275,7 @@ class Test04_UpdateLobby(UnitTest):
         self.assertResponse(create_lobby(user1, method='PATCH'), 403, {'detail': 'You cannot update game mode.'})
         self.assertThread(user1)
 
-    # def test_006_update_match_type_when_full(self): # todo fix this test
+    # def test_006_update_match_type_when_full(self): # TODO fguirama: fix this test
     #     users = {}
     #     teams = ['Team A', 'Team A', 'Team A', 'Team B', 'Team B', 'Team B']
     #     after_teams = ['Team A', 'Spectator', 'Spectator', 'Team B', 'Spectator', 'Spectator']

@@ -15,7 +15,7 @@ def create_user_get_token(user, create=True):
 
     try:
         data = {'id': user.id, 'username': user.username, 'is_guest': is_guest(user=user)}
-        request_users(endpoints.UsersManagement.manage_user, method='POST' if create else 'PATCH', data=data)
+        request_users(endpoints.UsersManagement.manage_user, 'POST' if create else 'PATCH', data=data)
     except APIException:
         if create:
             user.delete()
@@ -25,6 +25,7 @@ def create_user_get_token(user, create=True):
 
 
 class Authentication(JWTAuthentication):
+
     def authenticate(self, request):
         token = request.headers.get('Authorization', None)
         if token is None:

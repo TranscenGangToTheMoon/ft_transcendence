@@ -1,6 +1,6 @@
 from rest_framework.generics import CreateAPIView
 
-from events.serializer import EventSerializer
+from events.serializers import EventSerializer
 
 
 class EnventsAPIView(CreateAPIView):

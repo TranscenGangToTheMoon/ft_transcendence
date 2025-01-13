@@ -24,15 +24,15 @@ class Chat:
 
 
 class Game:
-    create_match                = 'api/private/game/match/create/'
-    ffinish_match               = 'api/private/game/match/finish/{match_id}/'
-    finish_match                = 'api/private/game/match/finish/<int:match_id>/'
-    fscore                      = 'api/private/game/match/score/{user_id}/'
-    score                       = 'api/private/game/match/score/<int:user_id>/'
-    fmatch_user                 = 'api/private/game/match/{user_id}/'
-    match_user                  = 'api/private/game/match/<int:user_id>/'
+    create_match                = 'api/private/match/create/'
+    ffinish_match               = 'api/private/match/finish/{match_id}/'
+    finish_match                = 'api/private/match/finish/<int:match_id>/'
+    fscore                      = 'api/private/match/score/{user_id}/'
+    score                       = 'api/private/match/score/<int:user_id>/'
+    fmatch_user                 = 'api/private/match/{user_id}/'
+    match_user                  = 'api/private/match/<int:user_id>/'
 
-    tournaments                 = 'api/private/game/tournaments/'
+    tournaments                 = 'api/private/tournaments/'
 
     matches_user                = 'api/game/matches/<int:user_id>/'
     tournament                  = 'api/game/tournaments/<int:tournament_id>/'
@@ -74,6 +74,9 @@ class Users:
     stats                       = 'api/users/me/stats/'
     stats_ranked                = 'api/users/me/stats/ranked/'
     result_match                = 'api/private/users/result-match/'
+    result_tournament           = 'api/private/users/result-tournament/'
+
+    export_data               = 'api/users/me/downalod-data/'
 
     sse                         = 'sse/users/'
     event                       = 'api/private/users/events/'
@@ -86,6 +89,8 @@ class Users:
 
 class UsersManagement:
     manage_user                 = 'api/private/user/manage/'
+    fexport_data              = 'api/private/export-data/{user_id}/'
+    export_data               = 'api/private/export-data/<int:user_id>/'
     frename_user                = 'api/private/user/rename/{user_id}/'
     rename_user                 = 'api/private/user/rename/<int:user_id>/'
     fblocked_user               = 'api/private/user/blocked/{user_id}/{blocked_user_id}/'

@@ -1,4 +1,4 @@
-from lib_transcendence.game import GameMode, Reason
+from lib_transcendence.game import GameMode, FinishReason
 from lib_transcendence.generate import generate_code
 from lib_transcendence.exceptions import MessagesException, Conflict, ResourceExists
 from lib_transcendence.users import retrieve_users
@@ -9,9 +9,6 @@ from matches.models import Matches, Teams, Players
 
 
 def validate_user_id(value, return_user=False):
-    if type(value) is not int:
-        raise serializers.ValidationError(MessagesException.ValidationError.USER_ID_REQUIRED)
-
     try:
         player = Players.objects.get(user_id=value, match__finished=False)
         if return_user:
@@ -22,26 +19,23 @@ def validate_user_id(value, return_user=False):
             raise NotFound(MessagesException.NotFound.NOT_BELONG_GAME)
 
 
-def validate_teams(value):
-    if type(value) is not list or type(value[0]) is not list or type(value[1]) is not list:
-        raise serializers.ValidationError(MessagesException.ValidationError.TEAMS_LIST)
-    if len(value) != 2:
-        raise serializers.ValidationError(MessagesException.ValidationError.TEAM_REQUIRED)
-    if len(value[0]) not in (1, 3):
-        raise serializers.ValidationError(MessagesException.ValidationError.ONLY_1V1_3V3_ALLOWED)
-    if len(value[0]) != len(value[1]):
-        raise serializers.ValidationError(MessagesException.ValidationError.TEAMS_NOT_EQUAL)
-    for team in value:
-        for user in team:
-            validate_user_id(user)
-    for user in value[0]:
-        if user in value[1]:
+class TeamsSerializer(serializers.Serializer):
+    a = serializers.ListSerializer(child=serializers.IntegerField(validators=[validate_user_id]))
+    b = serializers.ListSerializer(child=serializers.IntegerField(validators=[validate_user_id]))
+
+    def validate(self, attrs):
+        attr = super().validate(attrs)
+        if len(attr['a']) != len(attr['b']):
+            raise serializers.ValidationError(MessagesException.ValidationError.TEAMS_NOT_EQUAL)
+        if len(attr['a']) not in (1, 3):
+            raise serializers.ValidationError(MessagesException.ValidationError.ONLY_1V1_3V3_ALLOWED)
+        if len(attr['a'] + attr['b']) != len(set(attr['a'] + attr['b'])):
             raise serializers.ValidationError(MessagesException.ValidationError.IN_BOTH_TEAMS)
-    return value
+        return attr
 
 
 class MatchSerializer(serializers.ModelSerializer):
-    teams = serializers.JSONField(validators=[validate_teams])
+    teams = TeamsSerializer(write_only=True)
     score_winner = serializers.IntegerField(read_only=True)
     score_looser = serializers.IntegerField(read_only=True)
 
@@ -84,13 +78,18 @@ class MatchSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        users = retrieve_users(list(instance.players.all().values_list('user_id', flat=True)))
+        if self.context.get('retrieve_users', True):
+            users = retrieve_users(list(instance.players.all().values_list('user_id', flat=True)), return_type=dict)
+        else:
+            users = {}
         teams = {}
-        for name in Teams.names:
-            teams[name] = []
-        for user in users:
-            player = instance.players.get(user_id=user['id'])
-            teams[player.team.name].append({**user, 'score': player.score})
+        for team in ('a', 'b'):
+            teams[team] = []
+            for player in instance.teams.get(name=team).players.all():
+                add_user = users.get(player.user_id)
+                if add_user is None:
+                    add_user = {'id': player.user_id}
+                teams[team].append({**add_user, 'score': player.score})
         representation['teams'] = teams
         if instance.finished:
             representation.pop('code')
@@ -103,7 +102,7 @@ class MatchSerializer(serializers.ModelSerializer):
         return representation
 
     def create(self, validated_data):
-        if validated_data['game_mode'] == GameMode.tournament:
+        if validated_data['game_mode'] == GameMode.TOURNAMENT:
             if not validated_data.get('tournament_id'):
                 raise serializers.ValidationError({'tournament_id': [MessagesException.ValidationError.FIELD_REQUIRED]})
             if not validated_data.get('tournament_stage_id'):
@@ -115,18 +114,18 @@ class MatchSerializer(serializers.ModelSerializer):
 
         validated_data['code'] = generate_code(Matches)
         teams = validated_data.pop('teams')
-        if len(teams[0]) == 1 and validated_data['game_mode'] == GameMode.clash:
+        if len(teams['a']) == 1 and validated_data['game_mode'] == GameMode.CLASH:
             raise serializers.ValidationError(MessagesException.ValidationError.CLASH_3_PLAYERS)
-        if len(teams[0]) == 3 and (validated_data['game_mode'] != GameMode.clash or validated_data['game_mode'] != GameMode.custom_game):
+        if len(teams['b']) == 3 and (validated_data['game_mode'] != GameMode.CLASH or validated_data['game_mode'] != GameMode.CUSTOM_GAME):
             raise serializers.ValidationError(MessagesException.ValidationError.GAME_MODE_PLAYERS.format(obj=validated_data['game_mode'].replace('_', ' ').capitalize(), n=1))
-        if validated_data['game_mode'] != GameMode.tournament:
+        if validated_data['game_mode'] != GameMode.TOURNAMENT:
             validated_data['tournament_id'] = None
             validated_data['tournament_stage_id'] = None
             validated_data['tournament_n'] = None
         match = super().create(validated_data)
-        for n, team in enumerate(teams):
-            new_team = Teams.objects.create(match=match, name=Teams.names[n])
-            for user in team:
+        for name_team, players in teams.items():
+            new_team = Teams.objects.create(match=match, name=name_team)
+            for user in players:
                 Players.objects.create(user_id=user, match=match, team=new_team)
         return match
 
@@ -160,22 +159,26 @@ class TournamentMatchSerializer(serializers.ModelSerializer):
         ]
 
     def get_winner(self, obj):
-        return self.context['users'][obj.winner.players.first().user_id]
+        if 'users' in self.context:
+            return self.context['users'][obj.winner.players.first().user_id]
+        return {'id': obj.winner.players.first().user_id}
 
     def get_looser(self, obj):
-        return self.context['users'][obj.looser.players.first().user_id]
+        if 'users' in self.context:
+            return self.context['users'][obj.looser.players.first().user_id]
+        return {'id': obj.winner.players.first().user_id}
 
 
 class MatchFinishSerializer(serializers.ModelSerializer):
     user_id = serializers.IntegerField(required=True, write_only=True)
-    reason = serializers.CharField(required=True)
+    finish_reason = serializers.CharField(required=True)
 
     class Meta:
         model = Matches
         fields = [
             'id',
             'user_id',
-            'reason',
+            'finish_reason',
             'finished',
         ]
         read_only_fields = [
@@ -183,8 +186,8 @@ class MatchFinishSerializer(serializers.ModelSerializer):
         ]
 
     @staticmethod
-    def validate_reason(value):
-        return Reason.validate_error(value)
+    def validate_finish_reason(value):
+        return FinishReason.validate_error(value)
 
     def update(self, instance, validated_data):
         if instance.finished:
@@ -201,5 +204,34 @@ class MatchFinishSerializer(serializers.ModelSerializer):
         winner.save()
         validated_data['finished'] = True
         result = super().update(instance, validated_data)
-        result.finish_match()
+        result.finish()
         return result
+
+
+class ScoreSerializer(serializers.ModelSerializer):
+    own_goal = serializers.BooleanField(required=False)
+
+    class Meta:
+        model = Players
+        fields = [
+            'score',
+            'own_goal',
+        ]
+        read_only_fields = [
+            'score',
+        ]
+
+    def to_representation(self, instance):
+        result = super().to_representation(instance)
+        if instance.match.finished:
+            result['finished'] = True
+        if 'own_goal' in result and result['own_goal'] is None:
+            result.pop('own_goal')
+        return result
+
+    def update(self, instance, validated_data):
+        if validated_data.pop('own_goal', None) is True:
+            instance.score_own_goal()
+        else:
+            instance.scored()
+        return instance

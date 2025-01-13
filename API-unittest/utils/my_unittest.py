@@ -12,6 +12,7 @@ from utils.generate_random import rnstr
 
 
 class UnitTest(unittest.TestCase):
+
     def user(self, tests_sse: list[str] = None, username=None, password=None, guest=False, sse=True):
         _new_user = {}
 

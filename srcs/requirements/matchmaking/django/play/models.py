@@ -16,10 +16,10 @@ class Players(models.Model):
         #print('tag')
         players = Players.objects.all()
         #print('in normal game = ', players.filter(game_mode=GameMode.duel).count())
-        if players.filter(game_mode=GameMode.duel).count() >= 2:#change at 1 maybe ?
-            launch_dual_game(players.filter(game_mode=GameMode.duel))
+        if players.filter(game_mode=GameMode.DUEL).count() >= 2:#change at 1 maybe ?
+            launch_dual_game(players.filter(game_mode=GameMode.DUEL))
             #print('normal taged')
-        if players.filter(game_mode=GameMode.ranked).count() == 1:
+        if players.filter(game_mode=GameMode.RANKED).count() == 1:
             pass
             # Thread(target=search_ranked_players()).start()
             #subprocess ??
@@ -27,6 +27,3 @@ class Players(models.Model):
     def delete(self, using=None, keep_parents=False):
         delete_player_instance(self.user_id)
         super().delete(using=using, keep_parents=keep_parents)
-
-    def __str__(self):
-        return str(self.user_id)

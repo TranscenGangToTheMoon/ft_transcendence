@@ -57,7 +57,7 @@ class Test01_SSE(UnitTest):
         self.assertResponse(me(user1, 'DELETE', password=True), 204)
         self.assertThread(user1)
 
-#todo test invalid parameters, fogrt, not good type, etc..., not users.
+#TODO fguirama: test invalid parameters, fogrt, not good type, etc..., not users.
 # class Test02_EventsEndpoint(UnitTest):
 #
 #     def test_001_test_message(self):

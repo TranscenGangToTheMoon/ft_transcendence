@@ -1,5 +1,4 @@
 import json
-from enum import Enum
 
 import redis
 from django.db.models import QuerySet
@@ -20,18 +19,18 @@ def get_username(user_id):
         return 'DeleteUser'
 
 
-class SSEType(Enum):
+class SSEType:
     NOTIFICATION = 'notification'
     EVENT = 'event'
 
 
-class UrlType(Enum):
+class UrlType:
     URL = 'url'
     API = 'api'
     WS = 'websocket'
 
 
-class Service(Enum):
+class Service:
     AUTH = 'auth'
     CHAT = 'chat'
     FRIENDS = 'friends'
@@ -42,6 +41,7 @@ class Service(Enum):
 
 
 class Target:
+
     def __init__(self, url: str, method: str = None, display_name: str = None, display_icon: str = None, type: UrlType = None):
         self.url = url
         if type is not None:
@@ -57,7 +57,7 @@ class Target:
     def dumps(self, data):
         return {
             'url': self.url.format(**data),
-            'type': self.type.name,
+            'type': self.type,
             'method': self.method,
             'display_name': self.display_name,
             'display_icon': None if self.display_icon is None else f'/assets/{self.display_icon}',
@@ -65,7 +65,8 @@ class Target:
 
 
 class Event:
-    def __init__(self, service: Service, code: EventCode, fmessage=None, target: list[Target] | Target = None, type: SSEType = None):
+
+    def __init__(self, service, code: EventCode, fmessage=None, target: list[Target] | Target = None, type: str = None):
         self.service = service
         self.code = code
         self.type = type
@@ -92,9 +93,9 @@ class Event:
             message = self.fmessage
 
         result = {
-            'service': self.service.value,
-            'event_code': self.code.value,
-            'type': self.type.value,
+            'service': self.service,
+            'event_code': self.code,
+            'type': self.type,
             'message': message,
             'target': None if self.target is None else [t.dumps(data) for t in self.target],
             'data': data,
@@ -112,7 +113,7 @@ reject_friend_request = Event(Service.FRIENDS, EventCode.REJECT_FRIEND_REQUEST)
 cancel_friend_request = Event(Service.FRIENDS, EventCode.CANCEL_FRIEND_REQUEST)
 delete_friend = Event(Service.FRIENDS, EventCode.DELETE_FRIEND)
 
-game_start = Event(Service.GAME, EventCode.GAME_START, 'You play in a game.', Target('/ws/game/', type=UrlType.WS))
+game_start = Event(Service.GAME, EventCode.GAME_START, 'You play in a game.', Target('/ws/game/', type=UrlType.WS), type=SSEType.EVENT) # todo handle
 
 invite_1v1 = Event(Service.INVITE, EventCode.INVITE_1V1, '{username} has challenged you to a game.', Target('/lobby/{code}/', display_name='join'))
 invite_3v3 = Event(Service.INVITE, EventCode.INVITE_3V3, '{username} inviting you to join an epic 3v3 friendly battle.', Target('/lobby/{code}/', display_name='join'))
@@ -140,7 +141,7 @@ redis_client = redis.StrictRedis(host='event-queue')
 
 
 def publish_event(users: Users | QuerySet[Users] | list[Users], event_code: EventCode, data=None, kwargs=None):
-    event = globals().get(event_code.value.replace('-', '_'))
+    event = globals().get(event_code.replace('-', '_'))
     if event is None:
         raise ParseError({'event_code': [MessagesException.ValidationError.INVALID_EVENT_CODE]})
 
@@ -154,6 +155,6 @@ def publish_event(users: Users | QuerySet[Users] | list[Users], event_code: Even
             channel = f'events:user_{user.id}'
 
             try:
-                redis_client.publish(channel, event.code.value + ':' + event.dumps(data, kwargs))
+                redis_client.publish(channel, event.code + ':' + event.dumps(data, kwargs))
             except redis.exceptions.ConnectionError:
                 raise ServiceUnavailable('event-queue')
