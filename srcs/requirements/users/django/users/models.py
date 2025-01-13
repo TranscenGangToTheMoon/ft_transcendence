@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
 
 from django.db import models
+from django.db.models import Q
 from lib_transcendence import endpoints
 from lib_transcendence.chat import AcceptChat
 from lib_transcendence.services import request_matchmaking
@@ -21,14 +22,16 @@ class Users(models.Model):
     own_profile_pictures = models.ManyToManyField(ProfilePictures, default=None, symmetrical=False, related_name='own_profile_pictures', blank=True)
 
     accept_friend_request = models.BooleanField(default=True)
-    accept_chat_from = models.CharField(max_length=30, default=AcceptChat.friends_only)
+    accept_chat_from = models.CharField(max_length=30, default=AcceptChat.FRIENDS_ONLY)
 
     is_online = models.BooleanField(default=False)
     game_playing = models.CharField(max_length=5, default=None, null=True)
     last_online = models.DateTimeField(auto_now_add=True)
 
-    current_rank = models.IntegerField(default=None, null=True)
-    highest_rank = models.IntegerField(default=None, null=True)
+    def friends(self):
+        from friends.models import Friends
+
+        return Friends.objects.filter(Q(user_1=self.id) | Q(user_2=self.id))
 
     def set_game_playing(self, code=None):
         self.game_playing = code
@@ -51,6 +54,3 @@ class Users(models.Model):
         self.is_online = False
         self.last_online = datetime.now(timezone.utc)
         self.save()
-
-    def __str__(self):
-        return f'{self.id} {self.username}'

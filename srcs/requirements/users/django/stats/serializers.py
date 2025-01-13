@@ -21,10 +21,10 @@ class StatsSerializer(serializers.ModelSerializer):
         ]
 
     def to_representation(self, instance):
-        representation = super(StatsSerializer, self).to_representation(instance)
-        if instance.game_mode != GameMode.tournament:
+        representation = super().to_representation(instance)
+        if not GameMode.tournament_field(instance.game_mode):
             representation.pop('tournament_wins')
-        if instance.game_mode != GameMode.clash:
+        if not GameMode.own_goal_field(instance.game_mode):
             representation.pop('own_goals')
         return representation
 
@@ -63,7 +63,7 @@ class FinishMatchSerializer(serializers.Serializer):
         for team_name, team_users in validated_data['teams'].items():
             for user_json in team_users:
                 try:
-                    if validated_data['game_mode'] == GameMode.clash and 'own_goals' in user_json:
+                    if validated_data['game_mode'] == GameMode.CLASH and 'own_goals' in user_json:
                         own_goals = validated_data['own_goals']
                     else:
                         own_goals = None
@@ -71,8 +71,17 @@ class FinishMatchSerializer(serializers.Serializer):
                     user.set_game_playing()
                     stat = user.stats.get(game_mode=validated_data['game_mode'])
                     stat.log(user_json['score'], team_name == validated_data['winner'], own_goals)
-                    if validated_data['game_mode'] == GameMode.ranked and 'trophies' in user_json:
+                    if validated_data['game_mode'] == GameMode.RANKED and 'trophies' in user_json:
                         RankedStats.log(user, user_json['trophies'])
                 except APIException:
                     pass
+        return validated_data
+
+
+class FinishTournamentSerializer(serializers.Serializer):
+    winner = serializers.IntegerField()
+
+    def create(self, validated_data):
+        winner = get_user(id=validated_data['winner'])
+        winner.stats.get(game_mode=GameMode.TOURNAMENT).win_tournament()
         return validated_data

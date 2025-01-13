@@ -19,7 +19,7 @@ def validate_participants_for_inviting(model, me_id, invite_user_id):
     except (LobbyParticipants.DoesNotExist, TournamentParticipants.DoesNotExist):
         pass
     try:
-        request_users(endpoints.Users.fare_friends.format(user1_id=me_id, user2_id=invite_user_id))
+        request_users(endpoints.Users.fare_friends.format(user1_id=me_id, user2_id=invite_user_id), 'GET')
     except NotFound:
         raise PermissionDenied(MessagesException.PermissionDenied.INVITE_NOT_FRIEND)
     except APIException:

@@ -21,3 +21,24 @@ def me(user, method: Literal['GET', 'DELETE', 'PATCH'] = 'GET', data=None, passw
         method=method,
         data=data,
     )
+
+
+def get_data(user):
+    return make_request(
+        endpoint=f'users/me/downalod-data/',
+        token=user['token'],
+    )
+
+
+def get_chat_data(user):
+    return make_request(
+        endpoint=f'private/export-data/{user["id"]}/',
+        port=8002,
+    )
+
+
+def get_game_data(user):
+    return make_request(
+        endpoint=f'private/export-data/{user["id"]}/',
+        port=8003,
+    )

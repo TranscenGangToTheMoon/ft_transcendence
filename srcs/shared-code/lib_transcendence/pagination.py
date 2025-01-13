@@ -1,7 +1,11 @@
+from rest_framework.exceptions import APIException
 from rest_framework.pagination import LimitOffsetPagination as LimitOffsetPaginationRestFramework
+
+from lib_transcendence.exceptions import ServiceUnavailable
 
 
 class LimitOffsetPagination(LimitOffsetPaginationRestFramework):
+
     def get_next_link(self):
         next_link = super().get_next_link()
         if next_link is not None:
@@ -13,3 +17,19 @@ class LimitOffsetPagination(LimitOffsetPaginationRestFramework):
         if previous_link is not None:
             return '/' + previous_link.split(self.request.build_absolute_uri('/'))[-1]
         return None
+
+
+def get_all_pagination_items(request_service, service, endpoint, **kwargs):
+    result = []
+    while True:
+        try:
+            response = request_service(endpoint, 'GET', **kwargs)
+            print('RESPONSE', response, flush=True)
+            result += response['results']
+            if response['next'] is None:
+                break
+            endpoint = response['next']
+        except APIException:
+            raise ServiceUnavailable(service)
+    print('COUNT', len(result), flush=True)
+    return result

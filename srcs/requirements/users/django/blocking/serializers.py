@@ -13,12 +13,16 @@ from users.serializers_utils import SmallUsersSerializer
 
 class BlockedSerializer(serializers.ModelSerializer):
     user_id = serializers.IntegerField(write_only=True)
-    user = SmallUsersSerializer(read_only=True)
     blocked = SmallUsersSerializer(read_only=True)
 
     class Meta:
         model = BlockedUsers
-        fields = '__all__'
+        fields = [
+            'user_id',
+            'id',
+            'blocked',
+            'blocked_at',
+        ]
 
     @staticmethod
     def get_blocked(obj):

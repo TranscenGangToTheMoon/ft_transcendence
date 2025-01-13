@@ -1,7 +1,7 @@
 from lib_transcendence.exceptions import MessagesException
 from lib_transcendence.sse_events import EventCode
 from rest_framework import serializers
-from rest_framework.exceptions import NotFound, APIException
+from rest_framework.exceptions import NotFound
 
 from sse.events import publish_event
 from users.auth import get_user
@@ -22,7 +22,7 @@ class EventSerializer(serializers.Serializer):
 
     @staticmethod
     def validate_event_code(value):
-        if value not in EventCode:
+        if value not in EventCode.attr():
             raise serializers.ValidationError(MessagesException.ValidationError.INVALID_EVENT_CODE)
         return value
 
@@ -34,5 +34,5 @@ class EventSerializer(serializers.Serializer):
             if not user.is_online and one_user:
                 raise NotFound(MessagesException.NotFound.USER)
             users_id.append(user)
-        publish_event(users_id, EventCode(validated_data['event_code']), validated_data.get('data'), validated_data.get('kwargs'))
+        publish_event(users_id, validated_data['event_code'], validated_data.get('data'), validated_data.get('kwargs'))
         return validated_data

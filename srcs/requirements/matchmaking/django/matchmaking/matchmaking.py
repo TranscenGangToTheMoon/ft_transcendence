@@ -8,7 +8,7 @@ def launch_dual_game(players):
 	player1 = players[0]
 	player2 = players[1]
 
-	create_match(GameMode.duel, [[player1.user_id], [player2.user_id]])
+	create_match(GameMode.DUEL, player1.user_id, player2.user_id)
 	#print('made request for: ', player1.user_id, ' ', player1.trophies, ' ', player2.user_id, ' ', player2.trophies, flush=True)
 	player1.delete()
 	player2.delete()

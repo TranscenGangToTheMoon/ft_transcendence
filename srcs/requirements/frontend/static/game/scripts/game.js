@@ -407,7 +407,7 @@
             }, config.animationDuration + 100);
             return;
         }
-        ctx.clearRect(state.ball.x, state.ball.y, config.ballSize, config.ballSize);
+        // ctx.clearRect(state.ball.x, state.ball.y, config.ballSize, config.ballSize);
         stopGame(true, reason);
     }
 

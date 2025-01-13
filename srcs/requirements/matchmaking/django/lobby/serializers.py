@@ -1,6 +1,6 @@
 from lib_transcendence.exceptions import MessagesException, ResourceExists
 from lib_transcendence.game import GameMode
-from lib_transcendence.Lobby import MatchType, Teams
+from lib_transcendence.lobby import MatchType, Teams
 from lib_transcendence.auth import get_auth_user
 from lib_transcendence.generate import generate_code
 from lib_transcendence.sse_events import EventCode, create_sse_event
@@ -31,7 +31,7 @@ class LobbyGetParticipantsSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         representation = super().to_representation(instance)
 
-        if instance.lobby.game_mode != GameMode.custom_game:
+        if instance.lobby.game_mode != GameMode.CUSTOM_GAME:
             representation.pop('team', None)
         return representation
 
@@ -75,7 +75,7 @@ class LobbySerializer(serializers.ModelSerializer):
     @staticmethod
     def get_participants(obj):
         fields = ['is_ready']
-        if obj.game_mode == GameMode.custom_game:
+        if obj.game_mode == GameMode.CUSTOM_GAME:
             fields.extend(['team'])
         return get_participants(obj, fields)
 
@@ -86,16 +86,16 @@ class LobbySerializer(serializers.ModelSerializer):
         verify_user(user['id'])
 
         validated_data['code'] = generate_code(Lobby)
-        if validated_data['game_mode'] == GameMode.clash:
-            validated_data['match_type'] = MatchType.m3v3
+        if validated_data['game_mode'] == GameMode.CLASH:
+            validated_data['match_type'] = MatchType.M3V3
             validated_data['max_participants'] = 3
         else:
-            validated_data['match_type'] = MatchType.m1v1
+            validated_data['match_type'] = MatchType.M1V1
             validated_data['max_participants'] = 6
         result = super().create(validated_data)
         creator = create_player_instance(request, LobbyParticipants, lobby_id=result.id, user_id=user['id'], creator=True)
-        if validated_data['game_mode'] == GameMode.custom_game:
-            creator.team = Teams.a
+        if validated_data['game_mode'] == GameMode.CUSTOM_GAME:
+            creator.team = Teams.A
             creator.save()
         return result
 
@@ -104,11 +104,11 @@ class LobbySerializer(serializers.ModelSerializer):
             raise PermissionDenied(MessagesException.PermissionDenied.CANNOT_UPDATE_GAME_MODE)
 
         participants = instance.participants.all()
-        if validated_data.get('match_type') == MatchType.m1v1 and instance.match_type == MatchType.m3v3:
-            for team in Teams.play:
+        if validated_data.get('match_type') == MatchType.M1V1 and instance.match_type == MatchType.M3V3:
+            for team in [Teams.A, Teams.B]:
                 for p in participants.filter(team=team)[1:]:
-                    participant_data = {'team': Teams.spectator}
-                    p.team = Teams.spectator
+                    participant_data = {'team': Teams.SPECTATOR}
+                    p.team = Teams.SPECTATOR
                     if p.is_ready:
                         p.is_ready = False
                         participant_data['is_ready'] = False
@@ -144,7 +144,7 @@ class LobbyParticipantsSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         representation = super().to_representation(instance)
 
-        if instance.lobby.game_mode != GameMode.custom_game:
+        if instance.lobby.game_mode != GameMode.CUSTOM_GAME:
             representation.pop('team', None)
         return representation
 
@@ -161,8 +161,8 @@ class LobbyParticipantsSerializer(serializers.ModelSerializer):
         validated_data['lobby'] = lobby
         validated_data['user_id'] = user['id']
         validated_data['is_guest'] = user['is_guest']
-        if lobby.game_mode == GameMode.custom_game:
-            for t in Teams.all:
+        if lobby.game_mode == GameMode.CUSTOM_GAME:
+            for t in Teams.attr():
                 if not lobby.is_team_full(t):
                     validated_data['team'] = t
                     break
@@ -170,7 +170,7 @@ class LobbyParticipantsSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         if 'team' in validated_data:
-            if instance.lobby.game_mode != GameMode.custom_game:
+            if instance.lobby.game_mode != GameMode.CUSTOM_GAME:
                 raise PermissionDenied(MessagesException.PermissionDenied.UPDATE_TEAM_CLASH_MODE)
             elif instance.team == validated_data['team']:
                 raise ResourceExists(MessagesException.ResourceExists.TEAM)
