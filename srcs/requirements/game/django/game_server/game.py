@@ -1,6 +1,8 @@
 from datetime import datetime, timezone
 
 import requests
+import asyncio
+from asgiref.sync import async_to_sync
 from game_server.match import Match, Player, finish_match
 from game_server.pong_ball import Ball
 from game_server.pong_position import Position
@@ -335,7 +337,7 @@ class Game:
 
     def send_finish(self, finish_reason: str | None = None, winner: str | None = None):
         from game_server.server import Server
-        Server.emit('game_over', data={"reason":finish_reason, "winner":winner}, room=str(self.match.id))
+        async_to_sync(Server._sio.emit)('game_over', data={"reason":finish_reason, "winner":winner}, room=str(self.match.id))
 
     def send_start_game(self):
         from game_server.server import Server
