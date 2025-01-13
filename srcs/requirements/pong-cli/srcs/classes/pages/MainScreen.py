@@ -38,6 +38,7 @@ class MainPage(Screen):
         self.query_one("#duel").loading = False
         self.query_one("#duel").variant = "primary"
         self.query_one("#cancelDuelGame").disabled = True
+        self.query_one("#duelResult").update("")
         self.query_one("#cancelDuelResult").update("")
 
     def duelAction(self):
