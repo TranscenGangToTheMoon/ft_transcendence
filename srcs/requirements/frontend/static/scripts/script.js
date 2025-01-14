@@ -712,7 +712,7 @@ function dismissNotification(notification, toastInstance, toastContainer){
         if (notificationQueue.length){
             let notif= notificationQueue.shift();
             console.log(notificationQueue);
-            displayNotification(notif[0], notif[1], notif[2], notif[3]);
+            displayNotification(notif[0], notif[1], notif[2], notif[3], notif[4]);
         }
     }, 500);
 }
@@ -720,7 +720,7 @@ function dismissNotification(notification, toastInstance, toastContainer){
 async function displayNotification(icon=undefined, title=undefined, body=undefined, mainListener=undefined, target=undefined){
 
     if (displayedNotifications >= MAX_DISPLAYED_NOTIFICATIONS) {
-        notificationQueue.push([icon, title, body, mainListener]);
+        notificationQueue.push([icon, title, body, mainListener, target]);
         return;
     }
     const toastContainer = document.getElementById('toastContainer');
