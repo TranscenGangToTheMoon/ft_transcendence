@@ -8,7 +8,7 @@ from chats.models import Chats, ChatParticipants
 from chats.serializers import ChatsSerializer, ChatNotificationsSerializer
 
 
-class ChatsView(generics.ListCreateAPIView):
+class ChatsView(SerializerAuthContext, generics.ListCreateAPIView):
     serializer_class = ChatsSerializer
     permission_classes = [NotGuest]
 

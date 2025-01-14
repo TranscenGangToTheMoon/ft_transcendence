@@ -9,6 +9,7 @@ from chats.models import ChatParticipants, Chats
 
 class MessagesSerializer(serializers.ModelSerializer):
     author = serializers.IntegerField(source='author.id', read_only=True)
+    is_read = serializers.SerializerMethodField()
 
     class Meta:
         model = Messages
@@ -25,6 +26,11 @@ class MessagesSerializer(serializers.ModelSerializer):
             'author',
             'chat_id',
         ]
+
+    def get_is_read(self, obj):
+        if obj.author_id == self.context['auth_user']['id']:
+            return True
+        return obj.is_read
 
     def create(self, validated_data):
         chat_id = self.context['chat_id']
