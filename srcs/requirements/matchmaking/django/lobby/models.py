@@ -9,6 +9,10 @@ from matchmaking.create_match import create_match
 from matchmaking.utils.sse import send_sse_event
 
 
+class NoLobbyFound(Exception):
+    pass
+
+
 class Lobby(models.Model):
     code = models.CharField(max_length=4, unique=True, editable=False)
     max_participants = models.IntegerField(editable=False)
@@ -16,6 +20,7 @@ class Lobby(models.Model):
     game_mode = models.CharField(max_length=11)
     ready_to_play = models.BooleanField(default=False)
     is_playing = models.BooleanField(default=False)
+    count = models.IntegerField(default=1)
 
     match_type = models.CharField(max_length=3)
 
@@ -25,14 +30,10 @@ class Lobby(models.Model):
             return 1
         return 3
 
-    @property
-    def count(self):
-        return self.participants.count()
-
     def get_team_count(self, team):
         return self.participants.filter(team=team).count()
 
-    def get_team_user_id(self, team):
+    def get_user_id(self, team=None):
         return list(self.participants.filter(team=team).values_list('user_id', flat=True))
 
     def is_team_full(self, team):
@@ -56,15 +57,56 @@ class Lobby(models.Model):
     def set_ready_to_play(self, value: bool):
         self.ready_to_play = value
         self.save()
-        if self.ready_to_play: # todo handle block user
-            if self.game_mode == GameMode.CUSTOM_GAME:
-                print('COUCOU', flush=True)
-                create_match(GameMode.CUSTOM_GAME, self.get_team_user_id(Teams.A), self.get_team_user_id(Teams.B))
-            else:
-                pass
-            self.is_playing = True
-            self.save()
-            # Lobby.objects.exclude(id=self.id).filter(ready_to_play=True, count=)
+        if self.ready_to_play:
+            self.play()
+
+    def make_team(self, team, order_by_count=False):
+        remain_player = self.max_participants - len(team)
+        while remain_player != 0:
+            result = Lobby.objects.exclude(id__in=self.exclude_lobby).filter(ready_to_play=True, count__lte=remain_player)
+
+            if order_by_count:
+                result = result.order_by('count')
+            result = result.last()
+            if result is None:
+                raise NoLobbyFound()
+            team += result.get_user_id()
+            self.exclude_lobby.append(result.id)
+            self.playing_lobby.append(result)
+            remain_player = self.max_participants - len(team)
+        return team
+
+    def play(self):
+        self.playing_lobby = [self]
+        if self.game_mode == GameMode.CUSTOM_GAME:
+            team_a = self.get_user_id(Teams.A)
+            team_b = self.get_user_id(Teams.B)
+        else: # todo handle block users
+            team_a = self.get_user_id()
+            team_b = []
+            self.exclude_lobby = [self.id]
+            try:
+                team_a = self.make_team(team_a)
+                team_b = self.make_team(team_b, True)
+            except NoLobbyFound:
+                return
+
+        create_match(GameMode.CUSTOM_GAME, team_a, team_b)
+        for lobby in self.playing_lobby:
+            lobby.playing()
+
+    def playing(self):
+        self.participants.all().update(is_ready=False)
+        self.is_playing = True
+        self.set_ready_to_play(False)
+
+    def join(self):
+        self.count += 1
+        self.save()
+
+    def leave(self):
+        self.count -= 1
+        self.save()
 
     def delete(self, using=None, keep_parents=False):
         delete_banned(self.code)
@@ -92,6 +134,7 @@ class LobbyParticipants(models.Model):
         if not destroy_lobby:
             send_sse_event(EventCode.LOBBY_LEAVE, self)
         super().delete(using=using, keep_parents=keep_parents)
+        lobby.leave()
         if creator:
             first_join = lobby.participants.filter(is_guest=False).order_by('join_at').first()
             if first_join is None:

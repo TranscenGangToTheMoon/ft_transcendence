@@ -27,6 +27,32 @@ class Test01_Play(UnitTest):
         self.assertResponse(play(user1, game_mode='ranked'), 201)
         self.assertThread(user1)
 
+    def test_003_play_clash(self):
+        user1 = self.user([lj, lup, 'game-start'])
+        user2 = self.user([lup, 'game-start'])
+        user3 = self.user(['game-start'])
+        user4 = self.user([lj, lj, lup, lup, 'game-start'])
+        user5 = self.user([lj, lup, lup, 'game-start'])
+        user6 = self.user([lup, lup, 'game-start'])
+
+        code = self.assertResponse(create_lobby(user1), 201, get_field='code')
+        self.assertResponse(join_lobby(user2, code), 201)
+        self.assertResponse(join_lobby(user1, code, data={'is_ready': True}), 200)
+        self.assertResponse(join_lobby(user2, code, data={'is_ready': True}), 200)
+
+        code = self.assertResponse(create_lobby(user3), 201, get_field='code')
+        self.assertResponse(join_lobby(user3, code, data={'is_ready': True}), 200)
+
+        code = self.assertResponse(create_lobby(user4), 201, get_field='code')
+        self.assertResponse(join_lobby(user5, code), 201)
+        self.assertResponse(join_lobby(user6, code), 201)
+        self.assertResponse(join_lobby(user4, code, data={'is_ready': True}), 200)
+        self.assertResponse(join_lobby(user5, code, data={'is_ready': True}), 200)
+        self.assertResponse(join_lobby(user6, code, data={'is_ready': True}), 200)
+
+        time.sleep(2)
+        self.assertThread(user1, user2, user3, user4, user5, user6)
+
     def test_004_play_custom_game(self):
         user1 = self.user([lj, lj, lj, lj, lj, lup, lup, lup, lup, lup, 'game-start'])
         user2 = self.user([lj, lj, lj, lj, lup, lup, lup, lup, lup, 'game-start'])

@@ -169,6 +169,7 @@ class LobbyParticipantsSerializer(serializers.ModelSerializer):
                 if not lobby.is_team_full(t):
                     validated_data['team'] = t
                     break
+        lobby.join()
         return super().create(validated_data)
 
     def update(self, instance, validated_data):
