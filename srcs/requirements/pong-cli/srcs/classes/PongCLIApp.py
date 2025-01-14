@@ -17,9 +17,7 @@ from classes.utils.config       import SSL_CRT
 
 
 class PongCLI(App):
-    SCREENS = { #maybe delete
-        # "loginPage": LoginPage,
-    }
+    SCREENS = {}
 
     BINDINGS = [("d", "toggle_dark", "Toggle dark mode")]
 
@@ -33,7 +31,6 @@ class PongCLI(App):
         return (self.connected)
 
     def on_mount(self) -> None:
-        # self.push_screen(GamePage())
         self.push_screen(LoginPage())
 
     @work
