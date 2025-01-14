@@ -61,14 +61,17 @@ class GamePage(Screen):
         Config.Console.width = console.width
         Config.Console.height = console.height
         # Score board
-        # self.scoreLeft.styles.border = ("solid", "white")
+        self.scoreLeft.styles.border = ("vkey", "white")
         self.scoreLeft.styles.layer = "1"
-        self.scoreLeft.styles.width = 3
+        self.scoreLeft.styles.color = "red"
+        self.scoreLeft.styles.width = "auto"
         self.scoreLeft.styles.offset = Offset(Config.Console.width // 4, 5)
-        # self.scoreRight.styles.border = ("solid", "white")
+
+        self.scoreRight.styles.border = ("vkey", "white")
         self.scoreRight.styles.layer = "2"
-        self.scoreLeft.styles.offset = Offset(Config.Console.width // 4 * 3, 5)
-        self.scoreRight.styles.width = 3
+        self.scoreRight.styles.color = "blue"
+        self.scoreRight.styles.width = "auto"
+        self.scoreRight.styles.offset = Offset(Config.Console.width // 4 * 3 - 5, 5)
 
         # Key handling
         self.listener = keyboard.Listener(
@@ -112,10 +115,9 @@ class GamePage(Screen):
 
     @work
     async def gameLoop(self):
-        print(f"Width: {self.region.width}")
         while (not self.connected or not self.gameStarted):
             await asyncio.sleep(0.1)
-        print(f"Connected: {self.connected}, Game started: {self.gameStarted}")
+#        print(f"Connected: {self.connected}, Game started: {self.gameStarted}")
         while (self.connected and self.gameStarted):
             # Move right paddle
             if (keyboard.Key.up in self.pressedKeys):
@@ -176,12 +178,16 @@ class GamePage(Screen):
             print(self.connected, flush=True)
 
         @self.sio.on('start_countdown')
-        async def start_countdown_action():
-            print("start_countdown_action", flush=True)
+        async def startCountdownAction():
+            await self.app.push_screen(Countdown())
             print(self.connected, flush=True)
 
         @self.sio.on('game_state')
         async def gameStateAction(data):
+#            print(f"Score Left Region: {self.scoreLeft.region}")
+#            print(f"Score Left Size: {self.scoreLeft.styles.width}")
+#            print(f"Score Right Region: {self.scoreRight.region}")
+#            print(f"Score Right Size: {self.scoreRight.styles.width}")
             self.ball.move(data["position_x"], data["position_y"])
 
         @self.sio.on('connect_error')
