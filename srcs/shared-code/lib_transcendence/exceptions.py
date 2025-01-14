@@ -78,6 +78,7 @@ class MessagesException:
         NOT_BELONG_TO_CHAT = NOT_BELONG.format(obj='chat')
         NOT_BELONG_LOBBY = NOT_BELONG.format(obj='lobby')
         NOT_BELONG_TOURNAMENT = NOT_BELONG.format(obj='tournament')
+        NOT_BELONG_GAME = NOT_BELONG.format(obj='game')
         NOT_BELONG_BLOCKED = 'This blocked user entry does not belong to you.'
         USER_NOT_BELONG = 'This user does not belong to this {obj}.'
 

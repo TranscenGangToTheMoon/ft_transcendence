@@ -20,13 +20,21 @@ class Matches(models.Model):
     tournament_n = models.IntegerField(null=True)
     finish_reason = models.CharField(null=True, default=None, max_length=35)
     finished = models.BooleanField(default=False)
+    game_start = models.BooleanField(default=False)
 
     winner = models.ForeignKey('Teams', null=True, default=None, on_delete=models.SET_NULL, related_name='winner')
     looser = models.ForeignKey('Teams', null=True, default=None, on_delete=models.SET_NULL, related_name='looser')
 
-    def finish(self):
+    def start(self):
+        self.game_start = True
+        self.save()
+
+    def finish(self, finish_reason=FinishReason.NORMAL_END):
         if self.finish_reason is None:
-            self.finish_reason = FinishReason.NORMAL_END
+            self.finish_reason = finish_reason
+        if self.finish_reason == FinishReason.PLAYERS_TIMEOUT:
+            self.delete()
+            return
         self.finished = True
         self.code = None
         self.game_duration = datetime.now(timezone.utc) - self.created_at

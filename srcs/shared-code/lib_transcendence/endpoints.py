@@ -29,8 +29,10 @@ class Game:
     finish_match                = 'api/private/match/finish/<int:match_id>/'
     fscore                      = 'api/private/match/score/{user_id}/'
     score                       = 'api/private/match/score/<int:user_id>/'
-    fmatch_user                 = 'api/private/match/{user_id}/'
-    match_user                  = 'api/private/match/<int:user_id>/'
+    fuser                       = 'api/private/match/{user_id}/'
+    user                        = 'api/private/match/<int:user_id>/'
+    fmatch_user                 = 'api/private/match/{match_id}/{user_id}/'
+    match_user                  = 'api/private/match/<int:match_id>/<int:user_id>/'
 
     tournaments                 = 'api/private/tournaments/'
 

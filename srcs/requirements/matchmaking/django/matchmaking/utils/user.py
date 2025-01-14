@@ -11,7 +11,7 @@ from tournament.models import TournamentParticipants, Tournament
 
 def verify_user(user_id, created_tournament=False):
     try:
-        request_game(endpoints.Game.fmatch_user.format(user_id=user_id), method='GET')
+        request_game(endpoints.Game.fuser.format(user_id=user_id), method='GET')
     except NotFound:
         try:
             participant = TournamentParticipants.objects.get(user_id=user_id, still_in=True)

@@ -3,19 +3,23 @@ from lib_transcendence.generate import generate_code
 from lib_transcendence.exceptions import MessagesException, Conflict, ResourceExists
 from lib_transcendence.users import retrieve_users
 from rest_framework import serializers
-from rest_framework.exceptions import NotFound
+from rest_framework.exceptions import NotFound, PermissionDenied
 
 from matches.models import Matches, Teams, Players
 
 
-def validate_user_id(value, return_user=False):
+def validate_user_id(value, return_match=False, kwargs=None):
+    if kwargs is None:
+        kwargs = {}
     try:
-        player = Players.objects.get(user_id=value, match__finished=False)
-        if return_user:
+        player = Players.objects.get(user_id=value, match__finished=False, **kwargs)
+        if return_match:
             return player.match
         raise Conflict(MessagesException.Conflict.USER_ALREADY_IN_GAME)
     except Players.DoesNotExist:
-        if return_user:
+        if return_match:
+            if kwargs:
+                return PermissionDenied(MessagesException.PermissionDenied.NOT_BELONG_GAME)
             raise NotFound(MessagesException.NotFound.NOT_BELONG_GAME)
 
 

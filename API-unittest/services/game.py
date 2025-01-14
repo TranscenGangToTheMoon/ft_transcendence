@@ -14,7 +14,12 @@ def create_game(user1=None, user2=None, game_mode: Literal['ranked', 'duel'] = '
     )
 
 
-def is_in_game(user1):
+def is_in_game(user1, match_id=None):
+    if match_id is not None:
+        return make_request(
+            endpoint=f'private/match/{match_id}/{user1["id"]}/',
+            port=8003,
+        )
     return make_request(
         endpoint=f'private/match/{user1["id"]}/',
         port=8003,
