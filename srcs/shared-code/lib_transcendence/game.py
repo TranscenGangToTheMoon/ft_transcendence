@@ -36,7 +36,7 @@ class GameMode:
 
 
 class FinishReason:
-    NORMAL_END = 'The game is over'
+    NORMAL_END = 'The game is over' # todo error
     PLAYER_ABANDON = 'A player has abandoned the game'
     PLAYER_DISCONNECT = 'A player has disconnected'
     PLAYER_NOT_CONNECTED = 'Not all players are connected'
