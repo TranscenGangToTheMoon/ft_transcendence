@@ -4,6 +4,8 @@ from lib_transcendence.game import GameMode
 from blocking.utils import delete_player_instance
 from matchmaking.create_match import create_match
 
+RANGE = 50
+
 
 class Players(models.Model):
     user_id = models.IntegerField(unique=True)
@@ -19,7 +21,7 @@ class Players(models.Model):
                 self.delete()
                 other_player.delete()
         else:
-            ranked_players = Players.objects.exclude(user_id=self.user_id).filter(game_mode=GameMode.RANKED, trophies__range=(self.trophies, 50))
+            ranked_players = Players.objects.exclude(user_id=self.user_id).filter(game_mode=GameMode.RANKED, trophies__gte=self.trophies - RANGE, trophies__lte=self.trophies + RANGE)
             ranked_players = sorted(list(ranked_players), key=lambda x: abs(x.trophies - self.trophies))
             if len(ranked_players) > 0:
                 create_match(GameMode.RANKED, self.user_id, ranked_players[0].user_id)
