@@ -185,24 +185,17 @@ function clearCSS(){
     }
 }
 
-function loadCSS(cssHref, toUpdate=true) {
-    console.log('loading CSS:', cssHref);
+function loadCSS(cssHref) {
     const existingLink = document.querySelector('link[dynamic-css]');
     if (existingLink) {
-        // console.log('deleted', existingLink);
         existingLink.remove();
     }
-    // console.log('will update =', toUpdate);
     const link = document.createElement('link');
     link.rel = 'stylesheet';
     link.href = cssHref;
-    // if (toUpdate)
-
-    console.log(cssHref, '/css/styles.css', cssHref !== '/css/styles.css');
     if (cssHref != '/css/styles.css')
         link.setAttribute('clearable', 'true');
     document.head.appendChild(link);
-    // console.log(`Style ${cssHref} loaded.`)
 }
 
 async function loadContent(url, containerId='content', append=false, container=undefined) {
@@ -755,7 +748,7 @@ async function displayNotification(icon=undefined, title=undefined, body=undefin
 // ========================== OTHER UTILS ==========================
 
 async function closeGameConnection(oldUrl){
-    if (!oldUrl.includes('game')) return;
+    if (!oldUrl.includes('game') || oldUrl.includes('local')) return;
     if (typeof gameSocket !== 'undefined'){
         console.log("je close la grosse game socket la");
         gameSocket.close();
