@@ -18,7 +18,7 @@ class Matches(models.Model):
     tournament_id = models.IntegerField(null=True)
     tournament_stage_id = models.IntegerField(null=True)
     tournament_n = models.IntegerField(null=True)
-    finish_reason = models.CharField(null=True, default=None, max_length=20)
+    finish_reason = models.CharField(null=True, default=None, max_length=35)
     finished = models.BooleanField(default=False)
 
     winner = models.ForeignKey('Teams', null=True, default=None, on_delete=models.SET_NULL, related_name='winner')
