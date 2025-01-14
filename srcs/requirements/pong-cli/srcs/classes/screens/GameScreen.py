@@ -19,7 +19,7 @@ from textual.widgets    import Button, Digits, Footer, Header
 from classes.game.BallWidget                    import Ball
 from classes.game.PaddleWidget                  import Paddle
 from classes.game.PlaygroundWidget              import Playground
-from classes.modalScreen.CountdownModalScreen   import Countdown
+from classes.modalScreens.CountdownModalScreen  import Countdown
 from classes.utils.config                       import Config, SSL_CRT
 from classes.utils.user                         import User
 

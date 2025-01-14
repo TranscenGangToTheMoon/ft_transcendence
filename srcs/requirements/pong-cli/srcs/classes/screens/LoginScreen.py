@@ -9,7 +9,7 @@ from textual.screen     import Screen
 from textual.widgets    import Button, Footer, Header, Input, Static
 
 # Local imports
-from classes.screen.MainScreen  import MainPage
+from classes.screens.MainScreen import MainPage
 from classes.utils.config       import SSL_CRT
 from classes.utils.user         import User
 

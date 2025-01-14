@@ -9,10 +9,10 @@ from textual.app    import App
 from textual.worker import Worker
 
 # Local imports
-from classes.screen.GameScreen  import GamePage
-from classes.screen.LoginScreen import LoginPage
-from classes.utils.config       import SSL_CRT
-from classes.utils.user         import User
+from classes.screens.GameScreen     import GamePage
+from classes.screens.LoginScreen    import LoginPage
+from classes.utils.config           import SSL_CRT
+from classes.utils.user             import User
 
 class PongCLI(App):
     SCREENS = {}
