@@ -47,6 +47,8 @@ if (document.getElementById('modals').friendListened !== true){
 
 function decrementOffset(url) {
     if (!url) return;
+    url = `https://test.fr${url}`;
+    console.log(url);
     const urlObj = new URL(url);
     const params = urlObj.searchParams;
 
@@ -54,7 +56,7 @@ function decrementOffset(url) {
     if (offset > 0) {
         params.set('offset', offset - 1);
     }
-    return urlObj.toString();
+    return urlObj.toString().substring(15);
 }
 
 function getDisplayedFriendRequests(sent) {
