@@ -247,7 +247,6 @@ async function handleRoute() {
         '/': '/homePage.html',
         '/profile' : 'profile.html',
         '/lobby' : '/lobby.html',
-        '/chat' : '/chatTemplates/chat.html',
 
         '/game/ranked' : '/game/game.html',
         '/game/duel' : '/game/game.html',
@@ -429,37 +428,6 @@ function addFriendSSEListeners(){
         addFriendRequest(event.data);
     });
 
-    sse.addEventListener('send-message', async event => {
-        event = JSON.parse(event.data);
-        console.log(event, 'ai je ce qu il faut ?');
-        chat = event.target[0]['url'];
-        let apiAnswer = undefined;
-        try {
-            apiAnswer = await apiRequest(getAccessToken(), `${baseAPIUrl}${chat}`, 'GET');
-            if (apiAnswer.details) {
-                console.log('Error:',apiAnswer.details);
-                return;
-            }
-        }
-        catch (error){
-            console.log('Error:', error);
-            return;
-        }
-        userInformations.notifications['chats'] += 1;
-        chatInfo = parsChatInfo(apiAnswer);
-        if (pathName === '/chat'){
-            chatUserCardLastMessage = document.getElementById('chatListElement' + chatInfo.target).querySelector('.chatUserCardLastMessage');
-            chatUserCardLastMessage.innerText = (chatInfo.lastMessage);
-            chatUserCardLastMessage.classList.add('chatMessageNotRead');
-        }
-        await displayNotification(undefined, 'message received', event.message, async event => {
-            if (pathName !== '/chat')
-                await navigateTo('/chat');
-            await openChat(chatInfo);
-        });
-        displayBadges();
-    })
-
     sse.addEventListener('accept-friend-request', async event => {
         event = JSON.parse(event.data);
         console.log(event);
@@ -519,11 +487,51 @@ function addInviteSSEListeners(){
 
 }
 
+function addChatSSEListeners(){
+    sse.addEventListener('send-message', async event => {
+        event = JSON.parse(event.data);
+        console.log(event, 'ai je ce qu il faut ?');
+        chat = event.target[0]['url'];
+        let apiAnswer = undefined;
+        try {
+            apiAnswer = await apiRequest(getAccessToken(), `${baseAPIUrl}${chat}`, 'GET');
+            if (apiAnswer.details) {
+                console.log('Error:',apiAnswer.details);
+                return;
+            }
+        }
+        catch (error){
+            console.log('Error:', error);
+            return;
+        }
+        userInformations.notifications['chats'] += 1;
+        chatInfo = {
+            'chatId': apiAnswer.id,
+            'target': apiAnswer.chat_with.username,
+            'targetId': apiAnswer.chat_with.id,
+            'lastMessage': '< Say hi! >',
+            'isLastMessageRead': false,
+            'chatMessageNext': null,
+        };
+        if (apiAnswer.last_message) {
+            if (apiAnswer.last_message.content.length > 37){
+                chatInfo.lastMessage = apiAnswer.last_message.content.slice(0, 37) + '...';
+            }
+            else chatInfo.lastMessage = apiAnswer.last_message.content;
+            chatInfo.isLastMessageRead = apiAnswer.last_message.is_read;
+        }
+        await displayNotification(undefined, 'message received', event.message, async event => {
+            await openChatTab(chatInfo);
+        });
+        displayBadges();
+    })
+}
+
 function addSSEListeners(){
 
     addFriendSSEListeners();
     addInviteSSEListeners();
-    
+    addChatSSEListeners();
 }
 
 function initSSE(){
@@ -834,6 +842,13 @@ async function loadBlockedModal(){
     await loadContent('/blockedUsers.html', 'modals', true);
 }
 
+async function loadChatListModal(){
+    const chatListModal = document.getElementById('chatListModal')
+    if (chatListModal)
+        chatListModal.remove();
+    await loadContent('/chatTemplates/chatListModal.html', 'modals', true);
+}
+
 async function loadUserProfile(){
     let profileMenu = 'profileMenu.html';
 
@@ -889,6 +904,7 @@ async function  indexInit(auto=true) {
         }
         initSSE();
         await loadFriendListModal();
+        await loadChatListModal();
         document.getElementById('innerFriendRequests-tab').clicked = true;
         addFriendListListener();
         let currentState = getCurrentState();

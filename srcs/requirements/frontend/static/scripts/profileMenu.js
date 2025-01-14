@@ -17,11 +17,13 @@ function clearFriendRequests(){
     document.getElementById('friendSearched').value = '';
 }
 
-document.getElementById('chats').addEventListener('click', async event => {
+document.getElementById('pMenuChats').addEventListener('click', async event => {
     event.preventDefault();
-    if (pathName === '/game')
+    if (pathName === '/game'){
+        console.log("Error: Can't display chat while in game")
         return cancelNavigation(undefined, '/chat');
-    await navigateTo('/chat');
+    }
+    await displayChatsList();
 })
 
 document.getElementById('settings').addEventListener('click', async event => {

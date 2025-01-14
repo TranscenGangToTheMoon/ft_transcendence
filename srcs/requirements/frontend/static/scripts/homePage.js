@@ -83,12 +83,10 @@ document.getElementById('local').addEventListener('click', async () => {
     await navigateTo('/game/local');
 })
 
-document.getElementById('chat').addEventListener('click', async ()=> {
-    if (!userInformations.is_guest)
-        await navigateTo('/chat');
-    // console.log('chat');
-    // await loadChatsListModal();
-})
+document.getElementById('chat').addEventListener('click', async e => {
+	e.preventDefault();
+    await displayChatsList();
+});
 
 async function homePageInit() {
     await indexInit(false);

@@ -465,7 +465,7 @@ function fillTeamDetail(enemyTeamDetail, playerTeamDetail){
         enemyTeamDetail.setAttribute('data-bs-content', oldContent || '' + `
             <div id=TD-username>${player.username}</div>
         `);
-    }    
+    }
 }
 
 function initSocket(){
@@ -506,8 +506,8 @@ function initSocket(){
 		// console.log('back : ', event.speed);
 		window.PongGame.state.ball.y = event.position_y;
 		window.PongGame.state.ball.x = event.position_x;
-		window.PongGame.state.ball.speedX = event.direction_x;
-		window.PongGame.state.ball.speedY = event.direction_y;
+		window.PongGame.state.ball.speedX = event.speed_x;
+		window.PongGame.state.ball.speedY = event.speed_y;
 		window.PongGame.state.ball.speed = event.speed;
 		// console.log(Date.now());
 		// console.log('front apres : ', window.PongGame.state.ball.speedX);

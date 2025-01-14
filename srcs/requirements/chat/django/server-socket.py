@@ -56,11 +56,11 @@ async def connect(sid, environ, auth):
             raise ConnectionRefusedError({"error": 403, "message": "Permission denied"})
         except APIException:
             raise ConnectionRefusedError({"error": 500, "message": "error"})
-        await sio.emit('debug', {'message': chat['type']}, to=sid)
-        if user and chat and chat['type'] == "private_message":
+        # await sio.emit('debug', {'message': chat['type']}, to=sid)
+        if user and chat: #and chat['type'] == "private_message":
             usersConnected.add_user(user['id'], sid, user['username'], chatId, chat['chat_with'].get('id'))
-        else:
-            usersConnected.add_user(user['id'], sid, user['username'], chatId)
+        #     usersConnected.add_user(user['id'], sid, user['username'], chatId, chat['chat_with'].get('id'))
+        # else:
     else:
         print(f"Connection failed : {sid}")
         raise ConnectionRefusedError({"error": 400, "message": "Missing args"})
