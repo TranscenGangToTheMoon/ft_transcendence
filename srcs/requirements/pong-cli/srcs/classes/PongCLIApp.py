@@ -59,7 +59,7 @@ class PongCLI(App):
                                         else:
                                             User.team = "b"
                                         log(f"{dataJson}")
-                                        await self.push_screen(GamePage()) #maybe it's a solution
+                                        await self.push_screen(GamePage())
                                     elif (event != "game-start" and event != "ping"):
                                         log(f"{event}: {dataJson}")
                             except (IndexError, ValueError) as error:
