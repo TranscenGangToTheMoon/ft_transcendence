@@ -775,7 +775,7 @@ async function fetchUserInfos(forced=false) {
         await generateToken();
     if (!userInformations || forced) {
         try {
-            let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/users/me`);
+            let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/users/me/`);
             userInformations = data;
             console.log(userInformations);
             displayBadges();
