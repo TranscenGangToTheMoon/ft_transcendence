@@ -3,10 +3,9 @@
 
 <div class="modal fade" id="friendListModal" tabindex="-1" aria-labelledby="friendListModalLabel" aria-hidden="true">
     <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-body">
+        <div class="modal-content" style="height: 550px;">
+            <div class="modal-body d-flex flex-column">
                 <div class="d-flex justify-content-between align-items-start">
-
                     <ul class="nav nav-tabs" id="tab" role="tablist">
                         <li class="nav-item" role="presentation">
                             <a class="nav-link active" id="innerFriendList-tab" data-bs-toggle="tab" href="#innerFriendList" role="tab" aria-controls="innerFriendList" aria-selected="true">Friend list</a>
@@ -17,26 +16,37 @@
                     </ul>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <!-- <h5 class="modal-title" id="friendListModalLabel">Friend List</h5> -->
-            <!-- </div>
-            <div class="modal-body"> -->
                 
-                <div class="tab-content mt-3" id="tabContent">
-                    <div class="tab-pane fade show active" id="innerFriendList" role="tabpanel" aria-labelledby="innerFriendList-tab">
-                        <div id="onlineFriends"></div>
-                        <div id="knownFriends" class="overflow-auto" style="background-color: aquamarine    ;"></div>
+                <div class="tab-content mt-3 flex-grow-1" id="tabContent">
+                    <div class="tab-pane show active" style="height: 100%;" id="innerFriendList" role="tabpanel" aria-labelledby="innerFriendList-tab">
+                        <div class="d-flex flex-column h-100">
+                            <div class="d-flex flex-column flex-grow-1">
+                                <div class="h-100 d-flex flex-column">
+                                    <div id="knownFriends" class="overflow-auto h-100 friend-display"></div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="tab-pane fade" id="innerFriendRequests" role="tabpanel" aria-labelledby="innerFriendRequests-tab">
-                        <form id="requestFriendship">
-                            <input type="text" placeholder="username" id="friendSearched">
-                            <button id="sendFriendRequest" class="btn btn-dark">send friend request</button>
-                        </form>
-                        
-                        <div id="searchResults"></div>
-                        <div id="friendRequestsTitle">friend requests :</div>
-                        <div class="overflow-auto" id="friendRequests" style="background-color: red;"></div>
-                        <div id="sentFriendRequestsTitle">sent friend requests:</div>
-                        <div class="overflow-auto" style="background-color: blueviolet;" id="sentFriendRequests"></div>
+                    <div class="tab-pane" style="height: 100%;" id="innerFriendRequests" role="tabpanel" aria-labelledby="innerFriendRequests-tab">
+                        <div class="d-flex flex-column h-100">
+
+                            <form id="requestFriendship" class="flex-shrink-0 d-flex gap-1 mb-1">
+                                <input type="text" placeholder="username" id="friendSearched" class="form-control">
+                                <button id="sendFriendRequest" class="btn btn-dark" style="width: 50%;">send friend request</button>
+                            </form>
+                            
+                            <div id="searchResults" class="flex-shrink-0"></div>
+                            <div class="d-flex flex-column flex-grow-1">
+                                <div class="h-50 d-flex flex-column friend-display">
+                                    <div id="friendRequestsTitle" class="flex-shrink-0">friend requests :</div>
+                                    <div class="overflow-auto flex-grow-1" id="friendRequests"></div>
+                                </div>
+                                <div class="h-50 d-flex flex-column friend-display">
+                                    <div id="sentFriendRequestsTitle" class="flex-shrink-0">sent friend requests:</div>
+                                    <div class="overflow-auto flex-grow-1" id="sentFriendRequests"></div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -47,4 +57,5 @@
     </div>
 </div>
 
+<div _style="/css/friendList.css"></div>
 <div script='/scripts/friendList.js'></div>

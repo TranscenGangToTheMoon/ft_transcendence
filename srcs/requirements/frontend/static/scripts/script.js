@@ -904,3 +904,33 @@ window.indexInit = indexInit;
 window.loadUserProfile = loadUserProfile;
 
 indexInit();
+
+async function temp(ind=25){
+    try{
+        let data = await apiRequest(undefined, `${baseAPIUrl}/auth/guest/`, 'POST');
+            data = await apiRequest(data.access, `${baseAPIUrl}/auth/register/guest/`, 'PUT', undefined, undefined, {
+                'username' : 'flo',
+                'password' : 'flo',
+            })
+    }
+    catch (error){
+        console.log(error);
+    }
+    for (let i = 0; i < ind; i++){
+        try {
+            let data = await apiRequest(undefined, `${baseAPIUrl}/auth/guest/`, 'POST');
+            data = await apiRequest(data.access, `${baseAPIUrl}/auth/register/guest/`, 'PUT', undefined, undefined, {
+                'username' : `${getCurrentState()}user${i}`,
+                'password' : 'user',
+            })
+            data = await apiRequest(data.access, `${baseAPIUrl}/users/me/friend_requests/`, 'POST', undefined, undefined, {
+                'username': userInformations.username,
+            });
+        }
+        catch(error){
+            console.log(error);
+        }
+    }
+}
+
+// temp();
