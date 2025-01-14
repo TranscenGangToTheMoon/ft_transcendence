@@ -59,8 +59,7 @@ class SSEView(APIView):
                         pass
 
         user = get_user(request)
-        if user.connect():
-            Thread(target=ping_loop, args=(user, )).start()
+        launch_ping_loop = user.connect()
         user_id = user.id
         del user
 
@@ -68,6 +67,8 @@ class SSEView(APIView):
             pubsub = redis_client.pubsub()
             channel = f'events:user_{user_id}'
             pubsub.subscribe(channel)
+            if launch_ping_loop:
+                Thread(target=ping_loop, args=(user_id, channel, )).start()
         except redis.exceptions.ConnectionError:
             raise ServiceUnavailable('event-queue')
 
@@ -76,9 +77,11 @@ class SSEView(APIView):
         return response
 
 
-def ping_loop(user):
-    for _ in range(1000000): # TODO fguirama: remake
-        publish_event(user, EventCode.PING, 'PING')
+def ping_loop(user_id, channel):
+    while True:
+        if not redis_client.pubsub_numsub(channel)[0][1]:
+            break
+        publish_event(user_id, EventCode.PING, 'PING')
         time.sleep(1)
 
 

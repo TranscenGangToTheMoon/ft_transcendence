@@ -280,7 +280,6 @@ class Test04_UpdateLobby(UnitTest):
         teams = ['Team A', 'Team A', 'Team A', 'Team B', 'Team B', 'Team B']
         after_teams = ['Team A', 'Spectator', 'Spectator', 'Team B', 'Spectator', 'Spectator']
         for i in range(6):
-            # print(['lobby-update'] * int(bool(i)))
             response = self.user((['lobby-join'] * (5 - i)) + (['lobby-update-participant'] * 4) + (['lobby-update'] * int(bool(i))))
             response['team'] = teams[i]
             response['after_team'] = after_teams[i]
@@ -303,7 +302,6 @@ class Test04_UpdateLobby(UnitTest):
 
         response = self.assertResponse(join_lobby(user1, code, 'GET'), 200)
         for user in response:
-            # print(user['team'], users[user['id']]['after_team'])
             self.assertEqual(user['team'], users[user['id']]['after_team'])
         self.assertThread(*users.values())
 
