@@ -638,10 +638,12 @@ function getBadgesDivs(){
 
 
 function handleFriendRequestNotification(target, img, notification, toastContainer, toastInstance){
+    console.log('je suis passe')
     img.addEventListener('click', async event => {
         event.preventDefault();
         event.stopImmediatePropagation();
         event.stopPropagation();
+        console.log('click ?')
         try {
             let data = await apiRequest(getAccessToken(), target.url, target.method);
             if (target.url.includes('friend_request')){
@@ -683,15 +685,14 @@ async function addTargets(notification, targets, toastInstance, toastContainer){
 
             notificationBody.appendChild(button);
         }
-        
-        if (target.type === 'API') {
+        if (target.type === 'api') {
             handleFriendRequestNotification(target, img, notification, toastContainer, toastInstance);
             // img.addEventListener('click', event => {
             //     notification.clicked = true;
             //     dismissNotification(notification, toastInstance, toastContainer);
             // });
         }
-        else if (target.type === 'URL'){
+        else if (target.type === 'url'){
             button.addEventListener('click', async () => {
                 console.log(target.url.slice(0, -1));
                 await navigateTo(target.url.slice(0, -1));
