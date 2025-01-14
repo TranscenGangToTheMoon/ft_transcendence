@@ -249,8 +249,7 @@ class Game:
             self.finish(FinishReason.PLAYER_NOT_CONNECTED)
             print('game canceled', flush=True)
             return
-        if (self.match.game_mode == 'clash'): #watchout for 'clash'
-            self.canvas = Position(1800, 750)
+        if (self.match.game_mode == 'clash'):
             self.send_rackets()
         self.send_canvas()
         self.send_game_state()

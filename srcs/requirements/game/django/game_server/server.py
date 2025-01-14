@@ -76,7 +76,7 @@ class Server:
 
     @staticmethod
     def create_game(match):
-        canvas = Position(800, 600)
+        canvas = Position(800, 600) if match.game_mode != 'clash' else Position(1800, 750)
         game = Game(Server._sio, match, canvas)
         Server.push_game(match.id, game)
         Thread(target=Server._games[match.id].launch).start()
