@@ -68,16 +68,5 @@ class PongCLI(App):
                     self.connected = False
 
     def on_worker_state_changed(self, event: Worker.StateChanged) -> None:
-        """Called when the worker state changes."""
         self.log(event)
-    # def compose(self) -> ComposeResult:
-    #     yield LoginPage(User)
-    #
-    # def changePage(self, page):
-    #     match page:
-    #         case Page.LoginPage:
-    #             yield LoginPage(self.user)
-    #         case Page.MainPage:
-    #             yield Static("MainPage")
-    #         case Page.GamePage:
-    #             yield Static("GamePage")
+

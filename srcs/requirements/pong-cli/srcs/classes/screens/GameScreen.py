@@ -162,25 +162,24 @@ class GamePage(Screen):
         @self.sio.on('connect')
         async def connect():
             self.connected = True
-            print("Connected to server event!", flush=True)
-            print(self.connected, flush=True)
+            # print("Connected to server event!", flush=True)
+            # print(self.connected, flush=True)
 
         @self.sio.on('disconnect')
         async def disconnect():
             self.connected = False
-            print("Disconnected from server event!", flush=True)
-            print(self.connected, flush=True)
+            # print("Disconnected from server event!", flush=True)
+            # print(self.connected, flush=True)
 
         @self.sio.on('start_game')
         async def startGameAction():
             self.gameStarted = True
-            print("start_game_action", flush=True)
-            print(self.connected, flush=True)
+            # print(self.connected, flush=True)
 
         @self.sio.on('start_countdown')
         async def startCountdownAction():
             await self.app.push_screen(Countdown())
-            print(self.connected, flush=True)
+            # print(self.connected, flush=True)
 
         @self.sio.on('game_state')
         async def gameStateAction(data):
@@ -193,7 +192,6 @@ class GamePage(Screen):
         @self.sio.on('connect_error')
         async def connectErrorAction(data):
             print(f"Connect error received: {data}", flush=True)
-            print(self.connected, flush=True)
 
         @self.sio.on('move_up')
         async def moveUpAction(data):
@@ -214,7 +212,6 @@ class GamePage(Screen):
 
         @self.sio.on('score')
         async def scoreAction(data):
-            print(f"Score action event ====: {data}", flush=True)
             self.aScore = data["team_a"]
             self.bScore = data["team_b"]
             if (User.team == "a"):
@@ -225,7 +222,6 @@ class GamePage(Screen):
                 self.query_one("#scoreRight").update(str(self.bScore))
             self.paddleLeft.reset()
             self.paddleRight.reset()
-            print(self.connected, flush=True)
 
         @self.sio.on('game_over')
         async def game_over_action(data):

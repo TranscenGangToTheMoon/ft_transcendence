@@ -24,6 +24,5 @@ class Countdown(ModalScreen):
         while self.countdown > 0:
             await asyncio.sleep(2/3)
             self.countdown -= 1
-            print(f"Countdown: {self.countdown}")
             self.query_one("#countdown").update(str(self.countdown))
         self.dismiss()

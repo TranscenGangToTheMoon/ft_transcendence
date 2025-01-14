@@ -52,11 +52,9 @@ class LoginPage(Screen):
             try:
                 self.getSSLCertificate()
                 User.loginUser()
-                # User
                 self.query_one("#status").update(f"Status: login succeed!")
-                self.app.startSSE() #maybe is okay bc I add this method to my App
+                self.app.startSSE()
                 self.app.push_screen(MainPage())
-                #exit loop
             except Exception as error:
                 if (User.response is not None):
                     self.query_one("#status").update(f"{error}")
@@ -74,9 +72,8 @@ class LoginPage(Screen):
                 self.getSSLCertificate()
                 User.registerUser()
                 self.query_one("#status").update(f"Status: register succeed!")
-                self.app.startSSE() #maybe is okay bc I add this method to my App
+                self.app.startSSE()
                 self.app.push_screen(MainPage())
-                #exit loop
             except Exception as error:
                 if (User.response is not None):
                     self.query_one("#status").update(f"{error}")
@@ -91,9 +88,8 @@ class LoginPage(Screen):
             try:
                 self.getSSLCertificate()
                 User.guestUser()
-                # self.query_one("#status").update(f"Status: GuestUp succeed!")
+                self.app.startSSE()
                 self.app.push_screen(MainPage())
-                #exit loop
             except Exception as error:
                 if (User.response is not None):
                     self.query_one("#status").update(f"{error}")
