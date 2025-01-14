@@ -82,6 +82,14 @@ class Test01_Play(UnitTest):
         time.sleep(2)
         self.assertThread(user1, user2, user3, user4, user5, user6)
 
+    def test_005_play_duel_guest(self):
+        user1 = self.user(['game-start'])
+        user2 = self.user(['game-start'], guest=True)
+
+        self.assertResponse(play(user1), 201)
+        self.assertResponse(play(user2), 201)
+        self.assertThread(user1, user2)
+
 
 class Test02_PlayError(UnitTest):
 
