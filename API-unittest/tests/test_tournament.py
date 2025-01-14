@@ -28,16 +28,18 @@ class Test01_Tournament(UnitTest):
         self.assertThread(user1, user2)
 
     def test_003_join_two_tournament(self):
-        user1 = self.user(['tournament-join', 'tournament-leave'])
+        user1 = self.user(['tournament-join', 'tournament-leave', 'tournament-join'])
         user2 = self.user()
         user3 = self.user(['tournament-join'])
+        user4 = self.user(guest=True)
 
         code1 = self.assertResponse(create_tournament(user1), 201, get_field='code')
         code2 = self.assertResponse(create_tournament(user3), 201, get_field='code')
         self.assertResponse(join_tournament(user2, code1), 201)
         self.assertResponse(join_tournament(user2, code1, method='DELETE'), 204)
         self.assertResponse(join_tournament(user2, code2), 201)
-        self.assertThread(user1, user2, user3)
+        self.assertResponse(join_tournament(user4, code1), 201)
+        self.assertThread(user1, user2, user3, user4)
 
 
 class Test02_ErrorTournament(UnitTest):
