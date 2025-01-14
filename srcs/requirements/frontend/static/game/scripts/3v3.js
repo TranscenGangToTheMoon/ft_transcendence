@@ -506,8 +506,8 @@ function initSocket(){
     gameSocket.on('game_state', event => {
 		window.PongGame.state.ball.y = event.position_y;
 		window.PongGame.state.ball.x = event.position_x;
-		window.PongGame.state.ball.speedX = event.direction_x;
-		window.PongGame.state.ball.speedY = event.direction_y;
+		window.PongGame.state.ball.speedX = event.speed_x;
+		window.PongGame.state.ball.speedY = event.speed_y;
 		window.PongGame.state.ball.speed = event.speed;
     })
     gameSocket.on('connect_error', (error)=> {
