@@ -33,6 +33,7 @@ class EventCode:
     TOURNAMENT_START_CANCEL = 'tournament-start-cancel'
     TOURNAMENT_MATCH_FINISH = 'tournament-match-finish'
     TOURNAMENT_FINISH = 'tournament-finish'
+    PING = 'ping'
 
     @staticmethod
     def attr():

@@ -116,6 +116,7 @@ class LobbySerializer(serializers.ModelSerializer):
                         p.is_ready = False
                         participant_data['is_ready'] = False
                     p.save()
+                    print('UPDATE', p.user_id, flush=True)
                     send_sse_event(EventCode.LOBBY_UPDATE_PARTICIPANT, p, participant_data, exclude_myself=False)
 
         result = super().update(instance, validated_data)

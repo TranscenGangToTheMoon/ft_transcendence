@@ -38,10 +38,11 @@ class Users(models.Model):
         self.save()
 
     def connect(self):
-        print(f'User {self.id} connected', flush=True)
+        launch_ping_loop = not self.is_online
         self.is_online = True
         self.last_online = datetime.now(timezone.utc)
         self.save()
+        return launch_ping_loop
 
     def disconnect(self):
         print(f'User {self.id} disconnect', flush=True)

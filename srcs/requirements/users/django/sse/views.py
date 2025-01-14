@@ -1,5 +1,6 @@
 import json
 import time
+from threading import Thread
 
 from django.http import StreamingHttpResponse
 from lib_transcendence.exceptions import ServiceUnavailable
@@ -9,6 +10,7 @@ from rest_framework.exceptions import NotFound
 from rest_framework.views import APIView
 import redis
 
+from sse.events import publish_event
 from users.auth import get_user
 
 
@@ -37,18 +39,15 @@ class SSEView(APIView):
         def event_stream(_user_id, _channel):
             try:
                 while True:
-                    message = pubsub.get_message(ignore_subscribe_messages=True)
-                    if message:
-                        event, data = message['data'].decode('utf-8').split(':', 1)
-                        if event == EventCode.DELETE_USER:
-                            raise ConnectionClose
-                        if event == EventCode.GAME_START:
-                            get_user(id=_user_id).set_game_playing(json.loads(data)['data']['code'])
-                    else:
-                        data = 'PING'
-                        event = 'ping'
-                    yield f'event: {event}\ndata: {data}\n\n'
-                    time.sleep(0.1)
+                    for message in pubsub.listen():
+                        if message['type'] == 'message':
+                            print('message', _user_id, message['data'], flush=True)
+                            event, data = message['data'].decode('utf-8').split(':', 1)
+                            if event == EventCode.DELETE_USER:
+                                raise ConnectionClose
+                            if event == EventCode.GAME_START:
+                                get_user(id=_user_id).set_game_playing(json.loads(data)['data']['code'])
+                            yield f'event: {event}\ndata: {data}\n\n'
             except (GeneratorExit, ConnectionClose) as e:
                 pubsub.close()
                 if isinstance(e, GeneratorExit):
@@ -60,7 +59,8 @@ class SSEView(APIView):
                         pass
 
         user = get_user(request)
-        user.connect()
+        if user.connect():
+            Thread(target=ping_loop, args=(user, )).start()
         user_id = user.id
         del user
 
@@ -74,6 +74,12 @@ class SSEView(APIView):
         response = StreamingHttpResponse(event_stream(user_id, channel), content_type='text/event-stream')
         response['Cache-Control'] = 'no-cache'
         return response
+
+
+def ping_loop(user):
+    for _ in range(1000000): # TODO fguirama: remake
+        publish_event(user, EventCode.PING, 'PING')
+        time.sleep(1)
 
 
 sse_view = SSEView.as_view()
