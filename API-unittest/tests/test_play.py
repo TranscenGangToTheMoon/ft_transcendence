@@ -22,10 +22,13 @@ class Test01_Play(UnitTest):
         self.assertThread(user1, user2)
 
     def test_002_play_ranked(self):
-        user1 = self.user()
+        user1 = self.user(['game-start'])
+        user2 = self.user(['game-start'])
 
         self.assertResponse(play(user1, game_mode='ranked'), 201)
-        self.assertThread(user1)
+        self.assertResponse(play(user2, game_mode='ranked'), 201)
+        time.sleep(1)
+        self.assertThread(user1, user2)
 
     def test_003_play_clash(self):
         user1 = self.user([lj, lup, 'game-start'])
