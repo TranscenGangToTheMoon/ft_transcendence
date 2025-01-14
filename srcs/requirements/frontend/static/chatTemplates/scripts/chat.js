@@ -177,6 +177,7 @@ async function createChatUserCard(chatInfo) {
 		e.preventDefault();
 		try {
 			const APIAnswer = await apiRequest(getAccessToken(), `${baseAPIUrl}/chat/${chatInfo.chatId}/`, 'DELETE');
+			if (APIAnswer.detail) return;
 			chatUserCard.remove();
 			console.log('Chat view deleted', lastClick);
 		}catch(error){

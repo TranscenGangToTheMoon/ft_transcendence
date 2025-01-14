@@ -1,6 +1,6 @@
 from django.db import models
 from lib_transcendence.game import GameMode
-from lib_transcendence.Lobby import MatchType, Teams
+from lib_transcendence.lobby import MatchType, Teams
 from lib_transcendence.sse_events import EventCode, create_sse_event
 
 from baning.models import delete_banned
@@ -19,7 +19,7 @@ class Lobby(models.Model):
 
     @property
     def max_team_participants(self):
-        if self.match_type == MatchType.m1v1:
+        if self.match_type == MatchType.M1V1:
             return 1
         return 3
 
@@ -27,7 +27,7 @@ class Lobby(models.Model):
         return self.participants.filter(team=team).count()
 
     def is_team_full(self, team):
-        if team == Teams.spectator:
+        if team == Teams.SPECTATOR:
             return False
         return self.get_team_count(team) >= self.max_team_participants
 
@@ -38,9 +38,9 @@ class Lobby(models.Model):
     @property
     def is_ready(self):
         qs = self.participants
-        if self.game_mode == GameMode.custom_game:
-            qs.exclude(team=Teams.spectator)
-            if not self.is_team_full(Teams.a) or not self.is_team_full(Teams.b):
+        if self.game_mode == GameMode.CUSTOM_GAME:
+            qs.exclude(team=Teams.SPECTATOR)
+            if not self.is_team_full(Teams.A) or not self.is_team_full(Teams.B):
                 return False
         return qs.filter(is_ready=False).count() == 0
 
@@ -51,12 +51,6 @@ class Lobby(models.Model):
     def delete(self, using=None, keep_parents=False):
         delete_banned(self.code)
         super().delete(using=using, keep_parents=keep_parents)
-
-    def __str__(self):
-        name = f'{self.code}/{self.game_mode} ({self.participants.count()}/{self.max_participants})'
-        if self.game_mode == GameMode.custom_game:
-            name += ' {' + self.match_type + '}'
-        return name
 
 
 class LobbyParticipants(models.Model):
@@ -91,13 +85,3 @@ class LobbyParticipants(models.Model):
                 first_join.creator = True
                 first_join.save()
                 send_sse_event(EventCode.LOBBY_UPDATE_PARTICIPANT, first_join, {'creator': True}, exclude_myself=False)
-
-    def __str__(self):
-        name = f'{self.lobby.code}/{self.lobby.game_mode} {self.user_id}'
-        if self.creator:
-            name += '*'
-        if self.is_ready:
-            name += ' ready'
-        if self.team is not None:
-            name += f" '{self.team}'"
-        return name

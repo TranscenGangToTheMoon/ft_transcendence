@@ -5,7 +5,7 @@ from chats.models import ChatParticipants
 
 
 def get_chat_participants(chat_id, user_id, view_chat_required=True):
-    kwargs = {'chat_id': chat_id, 'user_id': user_id, 'chat__blocked': False}
+    kwargs = {'chat_id': chat_id, 'user__id': user_id, 'chat__blocked': False}
     if view_chat_required:
         kwargs['view_chat'] = True
 

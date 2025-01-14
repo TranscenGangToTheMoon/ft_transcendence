@@ -1,19 +1,17 @@
-from datetime import datetime, timezone
-
-import requests
-import asyncio
 from asgiref.sync import async_to_sync
+from datetime import datetime, timezone
 from game_server.match import Match, Player, finish_match
 from game_server.pong_ball import Ball
 from game_server.pong_position import Position
 from game_server.pong_racket import Racket
-from lib_transcendence.game import Reason
+from lib_transcendence.game import FinishReason
 from typing import List
+import asyncio
 import math
 import os
 import random
+import requests
 import time
-
 
 def get_random_direction():
     random_angle = random.random() * 2 * math.pi
@@ -205,7 +203,7 @@ class Game:
         self.handle_goal()
 
     def wait_for_players(self, timeout: float):
-        print(time.time(), "wait_for_players()", flush=True)
+        print("waiting for players", flush=True)
         start_waiting = time.time()
         for team in self.match.teams:
             for player in team.players:
@@ -239,13 +237,16 @@ class Game:
     def launch(self):
         from game_server.server import Server
         timeout = os.environ.get('GAME_PLAYER_CONNECT_TIMEOUT', 5)
-        timeout = 60.
+        try:
+            timeout = float(timeout)
+        except ValueError:
+            timeout = 5
         try:
             self.wait_for_players(timeout)
             print(time.time(), "all players are connected", flush=True)
         except self.PlayerTimeout as e:
             print(e, flush=True)
-            self.finish(Reason.player_not_connected)
+            self.finish(FinishReason.PLAYER_NOT_CONNECTED)
             print('game canceled', flush=True)
             return
         if (self.match.game_mode == 'clash'): #watchout for 'clash'
@@ -268,15 +269,18 @@ class Game:
                 players.append(player)
         Server.disconnect(players, disc_sid)
 
-    def finish(self, reason: str, winner: str | None = None, disconnected_user_id: int | None = None):
+    def finish(self, finish_reason: str, winner: str | None = None, disconnected_user_id: int | None = None):
         from game_server.server import Server
         print('finishing game', flush=True)
-        self.send_finish(reason, winner)
-        self.disconnect_players(disconnected_user_id)
+        self.send_finish(finish_reason, winner)
+        if (finish_reason == FinishReason.PLAYER_ABANDON):
+            self.disconnect_players()
+        else:
+            self.disconnect_players(disconnected_user_id)
         self.finished = True
         Server.delete_game(self.match.id)
         if (disconnected_user_id is not None):
-            finish_match(self.match.id, reason, disconnected_user_id)
+            finish_match(self.match.id, finish_reason, disconnected_user_id)
 
     def reset_game_state(self):
         # print('reset_game_state', flush=True)
@@ -309,12 +313,12 @@ class Game:
                     self.get_player(self.ball.last_touch_team_b).score_goal()
             except self.NoSuchPlayer as e:
                 print(e, flush=True)
-                self.finish(Reason.player_disconnect, team.name)
+                self.finish(FinishReason.PLAYER_DISCONNECT, team.name)
                 return
         self.send_score(team)
         for team in self.match.teams:
             if (team.score == 3):
-                self.finish(Reason.normal_end, team.name)
+                self.finish(FinishReason.NORMAL_END, team.name)
                 return
         self.reset_game_state()
         self.send_game_state()
@@ -335,9 +339,9 @@ class Game:
             'team_b': self.match.teams[1].score,
         }, room=str(self.match.id))
 
-    def send_finish(self, reason: str | None = None, winner: str | None = None):
+    def send_finish(self, finish_reason: str | None = None, winner: str | None = None):
         from game_server.server import Server
-        async_to_sync(Server._sio.emit)('game_over', data={"reason":reason, "winner":winner}, room=str(self.match.id))
+        async_to_sync(Server._sio.emit)('game_over', data={"reason":finish_reason, "winner":winner}, room=str(self.match.id))
 
     def send_start_game(self):
         from game_server.server import Server

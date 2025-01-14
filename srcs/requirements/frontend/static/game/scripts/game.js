@@ -112,17 +112,6 @@
     });
     document.addEventListener("keyup", (e) => (state.keys[e.key] = undefined));
 
-    document.getElementById("replayFront").addEventListener("click", event => {
-        event.target.blur();
-        resumeGame();
-        state.ball.speed = config.defaultBallSpeed;
-        stopGame(true);
-        setTimeout(()=>{
-            resetGame();
-            startGame();
-        }, config.animationDuration + 100);
-    });
-
     function startGame() {
         console.log('game start');
         state.isGameActive = true;
@@ -407,7 +396,7 @@
             }, config.animationDuration + 100);
             return;
         }
-        ctx.clearRect(state.ball.x, state.ball.y, config.ballSize, config.ballSize);
+        // ctx.clearRect(state.ball.x, state.ball.y, config.ballSize, config.ballSize);
         stopGame(true, reason);
     }
 
@@ -625,20 +614,10 @@ function initData(data){
 		console.log('Invalid game data from SSE, cannot launch game');
 		return;
 	}
-    document.getElementById('gameArea').style.display = "block";
+    document.getElementById('gameArea').classList.replace('d-none', 'd-flex');
     document.getElementById('opponentWait').style.display = "none";
 	initSocket();
 }
-
-document.getElementById('playGame').addEventListener('click', async event => {
-	try {
-		let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/play/duel/`, 'POST');
-	}
-	catch(error) {
-		console.log(error);
-	}
-	// initSocket();
-})
 
 document.getElementById('confirmModal').addEventListener('hidden.bs.modal', () => {
     window.PongGame.resumeGame();
@@ -662,7 +641,7 @@ function gameStart(event){
 async function initGame(){
     await indexInit(false);
     if (window.location.pathname === '/') return;
-    document.getElementById('gameArea').style.display = "none";
+    document.getElementById('gameArea').classList.replace('d-flex', 'd-none');
     document.getElementById('opponentWait').style.display = "block";
     try {
         checkGameAuthorization();

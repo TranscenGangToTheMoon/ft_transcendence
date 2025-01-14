@@ -1,13 +1,24 @@
 
-<div id="gameArea">
-    <canvas id="gameCanvas" style="height: 600px; width: 800px;background-color: grey; margin: 50px;">
-    
-    </canvas>
-    <button id="playGame">Play</button>
-    <button id="replayFront">replay front</button>
-    
-    <button id="testA">test</button>
-    <h1>space to pause front game</h1>
+
+<div class="flex-grow-1 d-flex justify-content-center align-items-center">
+    <div id="gameArea">
+        <canvas id="gameCanvas" style="background-color: grey;">
+        </canvas>
+    </div>
+</div>
+
+<div class="modal fade" id="gameModeModal" tabindex="-1" aria-labelledby="gameModeModalLabel" aria-hidden="true">
+    <div class="modal-dialog" style="width: fit-content; top: 30%;">
+        <div class="modal-content" style="width: fit-content; padding: 10px; gap: 5px;">
+            <label for="gameModeSelectionForm">Play Against:</label>
+            <div class="options-container">
+                <div class="option" data-value="friend">Friend</div>
+                <div class="option" data-value="bot">Bot</div>
+            </div>
+            <button class="btn btn-secondary" id="playGameMode" data-bs-dismiss="modal">Play</button>
+            <button class="btn btn-danger" id="quitLocalGame" data-bs-dismiss="modal">Quit</button>
+        </div>
+    </div>
 </div>
 
 <div script="/game/scripts/localgame.js"></div>

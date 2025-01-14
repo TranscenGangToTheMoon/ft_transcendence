@@ -58,11 +58,11 @@ class Server:
                 pass # game has already been deleted
 
     @staticmethod
-    def finish_game(match_id, reason: str, user_id: int | None = None) -> None:
+    def finish_game(match_id, finish_reason: str, user_id: int | None = None) -> None:
         with Server._games_lock:
             game = Server._games[match_id]
         if game.finished is False:
-            game.finish(reason, disconnected_user_id=user_id)
+            game.finish(finish_reason, disconnected_user_id=user_id)
 
     @staticmethod
     def push_game(match_id, game) -> None:
@@ -91,10 +91,13 @@ class Server:
     @staticmethod
     def disconnect(players, disconnected_sid=None):
         for player in players:
+            if player.socket_id == '':
+                continue
             Server._clients.pop(player.socket_id)
-            if player.socket_id == disconnected_sid or player.socket_id == '':
+            if player.socket_id == disconnected_sid:
                 continue
             Server._loop.call_later(0.5, asyncio.create_task, Server._sio.disconnect(player.socket_id))
+            player.socket_id = ''
 
     @staticmethod
     def get_player(user_id: int):
