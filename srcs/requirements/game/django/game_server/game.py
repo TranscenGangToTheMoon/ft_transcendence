@@ -367,16 +367,16 @@ class Game:
             return {
                 'position_x': self.ball.position.x,
                 'position_y': self.ball.position.y,
-                'direction_x': self.ball.speed_x,
-                'direction_y': self.ball.speed_y,
+                'speed_x': self.ball.speed_x,
+                'speed_y': self.ball.speed_y,
                 'speed': self.ball.speed,
             }
         else:
             return {
                 'position_x': self.canvas.x - self.ball.position.x - self.ball.size,
                 'position_y': self.ball.position.y,
-                'direction_x': -self.ball.speed_x,
-                'direction_y': self.ball.speed_y,
+                'speed_x': -self.ball.speed_x,
+                'speed_y': self.ball.speed_y,
                 'speed': self.ball.speed,
             }
 
