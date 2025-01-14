@@ -41,7 +41,6 @@ class SSEView(APIView):
                 while True:
                     for message in pubsub.listen():
                         if message['type'] == 'message':
-                            print('message', _user_id, message['data'], flush=True)
                             event, data = message['data'].decode('utf-8').split(':', 1)
                             if event == EventCode.DELETE_USER:
                                 raise ConnectionClose
@@ -59,8 +58,7 @@ class SSEView(APIView):
                         pass
 
         user = get_user(request)
-        if user.connect():
-            Thread(target=ping_loop, args=(user, )).start()
+        launch_ping_loop = user.connect()
         user_id = user.id
         del user
 
@@ -68,6 +66,8 @@ class SSEView(APIView):
             pubsub = redis_client.pubsub()
             channel = f'events:user_{user_id}'
             pubsub.subscribe(channel)
+            if launch_ping_loop:
+                Thread(target=ping_loop, args=(user_id, channel, )).start()
         except redis.exceptions.ConnectionError:
             raise ServiceUnavailable('event-queue')
 
@@ -76,10 +76,12 @@ class SSEView(APIView):
         return response
 
 
-def ping_loop(user):
-    for _ in range(1000000): # TODO fguirama: remake
-        publish_event(user, EventCode.PING, 'PING')
-        time.sleep(1)
+def ping_loop(user_id, channel):
+    while True:
+        if not redis_client.pubsub_numsub(channel)[0][1]:
+            break
+        publish_event(user_id, EventCode.PING, 'PING')
+        time.sleep(2)
 
 
 sse_view = SSEView.as_view()

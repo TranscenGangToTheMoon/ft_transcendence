@@ -143,27 +143,26 @@ class Events:
 redis_client = redis.StrictRedis(host='event-queue')
 
 
-def publish_event(users: Users | QuerySet[Users] | list[Users], event_code: EventCode, data=None, kwargs=None):
-    print('------------------ publish_event', users, event_code, data, flush=True)
+def publish_event(users: Users | QuerySet[Users] | list[Users] | list[int] | int, event_code: EventCode, data=None, kwargs=None):
     try:
         event = getattr(Events, event_code.replace('-', '_'))
     except AttributeError:
         raise ParseError({'event_code': [MessagesException.ValidationError.INVALID_EVENT_CODE]})
 
-    if isinstance(users, Users):
+    if isinstance(users, Users | int):
         users = [users]
     elif isinstance(users, QuerySet):
         users = list(users)
 
     for user in users:
-        if user.is_online:
-            channel = f'events:user_{user.id}'
+        if isinstance(user, int) or user.is_online:
+            if isinstance(user, int):
+                user_id = user
+            else:
+                user_id = user.id
+            channel = f'events:user_{user_id}'
 
             try:
                 redis_client.publish(channel, event.code + ':' + event.dumps(data, kwargs))
-                print('send to -> ', user, flush=True)
             except redis.exceptions.ConnectionError:
                 raise ServiceUnavailable('event-queue')
-
-
-
