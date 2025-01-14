@@ -27,7 +27,7 @@ class Playground(Widget):
         Config.Console.height = console.height
 
         self.styles.offset = Offset((Config.Console.width - Config.Playground.width) // 2, (Config.Console.height - Config.Playground.height) // 2)
-        self.styles.background = "blue"
+        self.styles.background = "gray"
         # self.styles.border = ("solid", "white")
 
     # def on_resize(self, event: events.Resize):
