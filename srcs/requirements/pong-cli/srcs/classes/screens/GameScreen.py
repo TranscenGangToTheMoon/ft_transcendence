@@ -169,7 +169,7 @@ class GamePage(Screen):
         @self.sio.on('disconnect')
         async def disconnect():
             self.connected = False
-            # print("Disconnected from server event!", flush=True)
+            print("Disconnected from server event!", flush=True)
             # print(self.connected, flush=True)
 
         @self.sio.on('start_game')
@@ -226,7 +226,10 @@ class GamePage(Screen):
 
         @self.sio.on('game_over')
         async def gameOverAction(data):
-            if (data["winner"] == User.team):
+            print(f"Game over event: {data}")
+            if (data["reason"] != "normal-end"):
+                print(f"End: {data['reason']}")
+            elif (data["winner"] == User.team):
                 await self.app.push_screen(GameOver(True))
             else:
                 await self.app.push_screen(GameOver(False))
