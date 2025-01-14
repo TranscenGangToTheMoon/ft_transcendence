@@ -196,8 +196,6 @@ async function loadFriendList(){
     else{
         resultDiv.innerText = "";
         for (let friend of data.results){
-            console.log(friend);
-            
             resultDiv.innerHTML += `<div class="friendRequestBlock knownFriend" id="friend${friend.id}">\
             <img src='/assets/imageNotFound.png'>\
             <div>${friend.friend.username}</div>\
@@ -256,8 +254,9 @@ async function loadReceivedFriendRequests(){
         console.log(error);
     }
     nextFriendRequest = data.next;
+    console.log('dIDJEOJD',data);
     const friendRequestsDiv = document.getElementById('friendRequests');
-    friendRequestsDiv.style.maxHeight = `${friendRequestsDiv.clientHeight}px`;
+    friendRequestsDiv.style.maxHeight = `119px`;
     const friendRequestTitleDiv = document.getElementById('friendRequestsTitle');
     if (data.count === 0){
         friendRequestTitleDiv.innerText = 'no pending friend requests';
@@ -272,6 +271,7 @@ async function loadReceivedFriendRequests(){
             friendRequestsDiv.appendChild(requestDiv);
             await loadContent('/friends/friendRequestBlock.html', `${requestDiv.id}`);
             requestDiv.querySelector('.senderUsername').innerText = result.sender.username;
+            console.log(requestDiv);
         }
     }
 }
@@ -286,7 +286,7 @@ async function loadSentFriendRequests(){
     }
     nextSentFriendRequest = data.next;
     const requestsDiv = document.getElementById('sentFriendRequests');
-    requestsDiv.style.maxHeight = `${requestsDiv.clientHeight}px`;
+    requestsDiv.style.maxHeight = `119px`;
     const requestsDivTitle = document.getElementById('sentFriendRequestsTitle');
     if (data.count === 0){
         requestsDivTitle.innerText = 'no sent friend requests';
@@ -309,6 +309,7 @@ async function  initFriendModal(){
     await loadFriendList();
     const friendRequestsTab = document.getElementById('innerFriendRequests-tab');
     if (friendRequestsTab.classList.contains('active')){
+        console.log('normalement ici');
         await loadReceivedFriendRequests();
         await loadSentFriendRequests();
         friendRequestsTab.clicked = true;

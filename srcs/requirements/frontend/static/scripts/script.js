@@ -638,7 +638,6 @@ function getBadgesDivs(){
 
 
 function handleFriendRequestNotification(target, img, notification, toastContainer, toastInstance){
-    console.log('je suis passe')
     img.addEventListener('click', async event => {
         event.preventDefault();
         event.stopImmediatePropagation();
