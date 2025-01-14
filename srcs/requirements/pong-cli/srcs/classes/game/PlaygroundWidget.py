@@ -8,7 +8,6 @@ from textual.widget     import Widget
 # Local imports
 from classes.utils.config   import Config
 
-
 class Playground(Widget):
     def __init__(self):
         super().__init__()

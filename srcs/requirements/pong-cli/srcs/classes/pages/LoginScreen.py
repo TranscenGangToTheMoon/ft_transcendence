@@ -4,14 +4,14 @@ from urllib.parse import urlparse
 
 # Textual imports
 from textual.app        import ComposeResult
-from textual.containers import Vertical, Horizontal
+from textual.containers import Horizontal, Vertical
 from textual.screen     import Screen
-from textual.widgets    import Input, Header, Button, Static, Footer
+from textual.widgets    import Button, Footer, Header, Input, Static
 
 # Local imports
-from classes.pages.MainScreen   import MainPage
-from classes.utils.user         import User
+from classes.screen.MainScreen  import MainPage
 from classes.utils.config       import SSL_CRT
+from classes.utils.user         import User
 
 class LoginPage(Screen):
     SUB_TITLE = "Login Page"

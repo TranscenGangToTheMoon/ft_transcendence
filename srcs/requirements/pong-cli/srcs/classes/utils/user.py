@@ -5,7 +5,6 @@ import requests
 # Local imports
 from classes.utils.config   import SSL_CRT
 
-
 class User():
     accessToken: str | None = None
     headers = {"Content-Type": "application/json"}

@@ -11,16 +11,17 @@ from rich.console   import Console
 # Textual imports
 from textual            import work
 from textual.app        import ComposeResult
-from textual.containers import Horizontal
 from textual.geometry   import Offset
 from textual.screen     import Screen
-from textual.widgets    import Header, Button, Footer, Static, Digits, Rule
+from textual.widgets    import Button, Digits, Footer, Header
+
 # Local imports
-from classes.game.BallWidget        import Ball
-from classes.game.PaddleWidget      import Paddle
-from classes.game.PlaygroundWidget  import Playground
-from classes.utils.config           import Config, SSL_CRT, SSL_KEY
-from classes.utils.user             import User
+from classes.game.BallWidget                    import Ball
+from classes.game.PaddleWidget                  import Paddle
+from classes.game.PlaygroundWidget              import Playground
+from classes.modalScreen.CountdownModalScreen   import Countdown
+from classes.utils.config                       import Config, SSL_CRT
+from classes.utils.user                         import User
 
 class GamePage(Screen):
     SUB_TITLE = "Game Page"

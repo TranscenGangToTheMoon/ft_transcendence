@@ -1,20 +1,18 @@
 # Python imports
+import httpx
 import json
 import re
-import httpx
 
 # Textual imports
-from textual        import work, log
+from textual        import log, work
 from textual.app    import App
 from textual.worker import Worker
 
 # Local imports
-from classes.pages.GameScreen   import GamePage
-from classes.utils.user         import User
-from classes.pages.LoginScreen  import LoginPage
+from classes.screen.GameScreen  import GamePage
+from classes.screen.LoginScreen import LoginPage
 from classes.utils.config       import SSL_CRT
-
-
+from classes.utils.user         import User
 
 class PongCLI(App):
     SCREENS = {}
