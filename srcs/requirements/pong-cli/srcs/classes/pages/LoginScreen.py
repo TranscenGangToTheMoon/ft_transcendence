@@ -13,7 +13,6 @@ from classes.pages.MainScreen   import MainPage
 from classes.utils.user         import User
 from classes.utils.config       import SSL_CRT
 
-
 class LoginPage(Screen):
     SUB_TITLE = "Login Page"
     CSS_PATH = "styles/LoginPage.tcss"
