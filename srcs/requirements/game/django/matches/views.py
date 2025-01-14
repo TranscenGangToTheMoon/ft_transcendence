@@ -1,5 +1,3 @@
-import itertools
-
 from lib_transcendence.auth import Authentication
 from lib_transcendence.sse_events import create_sse_event, EventCode
 from lib_transcendence.exceptions import MessagesException
