@@ -642,6 +642,7 @@ function handleFriendRequestNotification(target, img, notification, toastContain
         event.preventDefault();
         event.stopImmediatePropagation();
         event.stopPropagation();
+        console.log('click ?')
         try {
             let data = await apiRequest(getAccessToken(), target.url, target.method);
             if (target.url.includes('friend_request')){
@@ -683,15 +684,14 @@ async function addTargets(notification, targets, toastInstance, toastContainer){
 
             notificationBody.appendChild(button);
         }
-        
-        if (target.type === 'API') {
+        if (target.type === 'api') {
             handleFriendRequestNotification(target, img, notification, toastContainer, toastInstance);
             // img.addEventListener('click', event => {
             //     notification.clicked = true;
             //     dismissNotification(notification, toastInstance, toastContainer);
             // });
         }
-        else if (target.type === 'URL'){
+        else if (target.type === 'url'){
             button.addEventListener('click', async () => {
                 console.log(target.url.slice(0, -1));
                 await navigateTo(target.url.slice(0, -1));
@@ -711,7 +711,7 @@ function dismissNotification(notification, toastInstance, toastContainer){
         if (notificationQueue.length){
             let notif= notificationQueue.shift();
             console.log(notificationQueue);
-            displayNotification(notif[0], notif[1], notif[2], notif[3]);
+            displayNotification(notif[0], notif[1], notif[2], notif[3], notif[4]);
         }
     }, 500);
 }
@@ -719,7 +719,7 @@ function dismissNotification(notification, toastInstance, toastContainer){
 async function displayNotification(icon=undefined, title=undefined, body=undefined, mainListener=undefined, target=undefined){
 
     if (displayedNotifications >= MAX_DISPLAYED_NOTIFICATIONS) {
-        notificationQueue.push([icon, title, body, mainListener]);
+        notificationQueue.push([icon, title, body, mainListener, target]);
         return;
     }
     const toastContainer = document.getElementById('toastContainer');
@@ -920,3 +920,33 @@ window.indexInit = indexInit;
 window.loadUserProfile = loadUserProfile;
 
 indexInit();
+
+async function temp(ind=25){
+    try{
+        let data = await apiRequest(undefined, `${baseAPIUrl}/auth/guest/`, 'POST');
+            data = await apiRequest(data.access, `${baseAPIUrl}/auth/register/guest/`, 'PUT', undefined, undefined, {
+                'username' : 'flo',
+                'password' : 'flo',
+            })
+    }
+    catch (error){
+        console.log(error);
+    }
+    for (let i = 0; i < ind; i++){
+        try {
+            let data = await apiRequest(undefined, `${baseAPIUrl}/auth/guest/`, 'POST');
+            data = await apiRequest(data.access, `${baseAPIUrl}/auth/register/guest/`, 'PUT', undefined, undefined, {
+                'username' : `${getCurrentState()}user${i}`,
+                'password' : 'user',
+            })
+            data = await apiRequest(data.access, `${baseAPIUrl}/users/me/friend_requests/`, 'POST', undefined, undefined, {
+                'username': userInformations.username,
+            });
+        }
+        catch(error){
+            console.log(error);
+        }
+    }
+}
+
+// temp();

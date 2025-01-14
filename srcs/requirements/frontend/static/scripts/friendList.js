@@ -47,6 +47,8 @@ if (document.getElementById('modals').friendListened !== true){
 
 function decrementOffset(url) {
     if (!url) return;
+    url = `https://test.fr${url}`;
+    console.log(url);
     const urlObj = new URL(url);
     const params = urlObj.searchParams;
 
@@ -54,7 +56,7 @@ function decrementOffset(url) {
     if (offset > 0) {
         params.set('offset', offset - 1);
     }
-    return urlObj.toString();
+    return urlObj.toString().substring(15);
 }
 
 function getDisplayedFriendRequests(sent) {
@@ -79,7 +81,6 @@ if (typeof loading === undefined)
 
 async function getMoreFriendRequests() {
     if (!nextFriendRequest) return;
-    nextFriendRequest = `${nextFriendRequest.substring(0, 4)}s${nextFriendRequest.substring(4)}`
     try {
         let data = await apiRequest(getAccessToken(), nextFriendRequest);
         const friendRequestsDiv = document.getElementById('friendRequests');
@@ -89,7 +90,8 @@ async function getMoreFriendRequests() {
             requestDiv.id = `fr${result.id}`;
             friendRequestsDiv.appendChild(requestDiv);
             await loadContent('/friends/friendRequestBlock.html', `${requestDiv.id}`);
-            requestDiv.querySelector(`.senderUsernae`).innerText = result.sender.username;
+            console.log(requestDiv);
+            requestDiv.querySelector(`.senderUsername`).innerText = result.sender.username;
         }
     }
     catch (error) {
@@ -99,17 +101,19 @@ async function getMoreFriendRequests() {
 
 async function getMoreFriends() {
     if (!nextFriend) return;
-    nextFriend = `${nextFriend.substring(0, 4)}s${nextFriend.substring(4)}`
     try {
         let data = await apiRequest(getAccessToken(), nextFriend);
         const resultDiv = document.getElementById('knownFriends');
         nextFriend = data.next;
         for (result of data.results){
-            const friend1 = result.friends[0];
-            const friend2 = result.friends[1];
-            resultDiv.innerHTML += `<div class="friendRequestBlock knownFriend" id="friend${result.id}">\
-            <div>${friend1 === userInformations.username ? friend2 : friend1}</div>\
-            <button class='deleteFriend'>delete X</button></div>\n`;
+            addFriend(result);
+            // console.log(result);
+            // const friend1 = result.friends[0];
+            // const friend2 = result.friends[1];
+            // resultDiv.innerHTML += `<div class="friendRequestBlock knownFriend" id="friend${result.id}">\
+            // <img scr='/assets/imageNotFound.png'>
+            // <div>${friend1 === userInformations.username ? friend2 : friend1}</div>\
+            // <button class='deleteFriend'>delete</button></div>\n`;
         }
     }
     catch (error) {
@@ -119,7 +123,6 @@ async function getMoreFriends() {
 
 async function getMoreSentFriendRequests() {
     if (!nextSentFriendRequest) return;
-    nextSentFriendRequest = `${nextSentFriendRequest.substring(0, 4)}s${nextSentFriendRequest.substring(4)}`
     try {
         let data = await apiRequest(getAccessToken(), nextSentFriendRequest);
         const friendRequestsDiv = document.getElementById('sentFriendRequests');
@@ -186,32 +189,30 @@ async function loadFriendList(){
     }
 
     const resultDiv = document.getElementById('knownFriends');
-    resultDiv.style.maxHeight = `${30 * MAX_DISPLAYED_FRIENDS}px`;
+    resultDiv.style.maxHeight = `387px`;
     nextFriend = data.next;
     if (!data.count)
         resultDiv.innerText = "you don't have any friends";
     else{
         resultDiv.innerText = "";
         for (let friend of data.results){
-            console.log(friend)
-            // const friend1 = friend.friends[0].username;
-            // const friend2 = friend.friends[1].username;
             resultDiv.innerHTML += `<div class="friendRequestBlock knownFriend" id="friend${friend.id}">\
+            <img src='/assets/imageNotFound.png'>\
             <div>${friend.friend.username}</div>\
-            <button class='deleteFriend'>delete X</button></div>\n`;
+            <button class='btn btn-danger deleteFriend'>delete</button></div>\n`;
         }
     }
+    loadCSS('/friends/css/friendRequestBlock.css');
 }
 
 function addFriend(friendInstance){
     const friendDiv = document.getElementById('knownFriends');
     if (!friendDiv.querySelector('div'))
         friendDiv.innerText = '';
-    // const friend1 = friendInstance.friends[0].username;
-    // const friend2 = friendInstance.friends[1].username;
     friendDiv.innerHTML += `<div class="friendRequestBlock knownFriend" id="friend${friendInstance.id}">\
+            <img src='/assets/imageNotFound.png'>\
             <div>${friendInstance.friend.username}</div>\
-            <button class='deleteFriend'>delete X</button></div>\n`;
+            <button class='btn btn-danger deleteFriend'>delete</button></div>\n`;
 }
 
 function removeFriend(friendInstance){
@@ -253,8 +254,9 @@ async function loadReceivedFriendRequests(){
         console.log(error);
     }
     nextFriendRequest = data.next;
+    console.log('dIDJEOJD',data);
     const friendRequestsDiv = document.getElementById('friendRequests');
-    friendRequestsDiv.style.maxHeight = `${MAX_DISPLAYED_FRIEND_REQUESTS * 30}px`
+    friendRequestsDiv.style.maxHeight = `119px`;
     const friendRequestTitleDiv = document.getElementById('friendRequestsTitle');
     if (data.count === 0){
         friendRequestTitleDiv.innerText = 'no pending friend requests';
@@ -269,6 +271,7 @@ async function loadReceivedFriendRequests(){
             friendRequestsDiv.appendChild(requestDiv);
             await loadContent('/friends/friendRequestBlock.html', `${requestDiv.id}`);
             requestDiv.querySelector('.senderUsername').innerText = result.sender.username;
+            console.log(requestDiv);
         }
     }
 }
@@ -283,7 +286,7 @@ async function loadSentFriendRequests(){
     }
     nextSentFriendRequest = data.next;
     const requestsDiv = document.getElementById('sentFriendRequests');
-    requestsDiv.style.maxHeight = `${MAX_DISPLAYED_FRIEND_REQUESTS * 30}px`
+    requestsDiv.style.maxHeight = `119px`;
     const requestsDivTitle = document.getElementById('sentFriendRequestsTitle');
     if (data.count === 0){
         requestsDivTitle.innerText = 'no sent friend requests';
@@ -306,6 +309,7 @@ async function  initFriendModal(){
     await loadFriendList();
     const friendRequestsTab = document.getElementById('innerFriendRequests-tab');
     if (friendRequestsTab.classList.contains('active')){
+        console.log('normalement ici');
         await loadReceivedFriendRequests();
         await loadSentFriendRequests();
         friendRequestsTab.clicked = true;
