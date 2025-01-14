@@ -5,6 +5,7 @@ from lib_transcendence.sse_events import EventCode, create_sse_event
 
 from baning.models import delete_banned
 from blocking.utils import delete_player_instance
+from matchmaking.create_match import create_match
 from matchmaking.utils.sse import send_sse_event
 
 
@@ -14,6 +15,7 @@ class Lobby(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     game_mode = models.CharField(max_length=11)
     ready_to_play = models.BooleanField(default=False)
+    is_playing = models.BooleanField(default=False)
 
     match_type = models.CharField(max_length=3)
 
@@ -23,8 +25,15 @@ class Lobby(models.Model):
             return 1
         return 3
 
+    @property
+    def count(self):
+        return self.participants.count()
+
     def get_team_count(self, team):
         return self.participants.filter(team=team).count()
+
+    def get_team_user_id(self, team):
+        return list(self.participants.filter(team=team).values_list('user_id', flat=True))
 
     def is_team_full(self, team):
         if team == Teams.SPECTATOR:
@@ -47,6 +56,15 @@ class Lobby(models.Model):
     def set_ready_to_play(self, value: bool):
         self.ready_to_play = value
         self.save()
+        if self.ready_to_play: # todo handle block user
+            if self.game_mode == GameMode.CUSTOM_GAME:
+                print('COUCOU', flush=True)
+                create_match(GameMode.CUSTOM_GAME, self.get_team_user_id(Teams.A), self.get_team_user_id(Teams.B))
+            else:
+                pass
+            self.is_playing = True
+            self.save()
+            # Lobby.objects.exclude(id=self.id).filter(ready_to_play=True, count=)
 
     def delete(self, using=None, keep_parents=False):
         delete_banned(self.code)

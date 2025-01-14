@@ -38,12 +38,15 @@ class LobbyGetParticipantsSerializer(serializers.ModelSerializer):
 
 class LobbySerializer(serializers.ModelSerializer):
     participants = serializers.SerializerMethodField(read_only=True)
+    match_type = serializers.CharField(max_length=3, required=False)
 
     class Meta:
         model = Lobby
         fields = [
             'id',
             'code',
+            'is_ready',
+            'is_playing',
             'participants',
             'max_participants',
             'created_at',
@@ -53,16 +56,12 @@ class LobbySerializer(serializers.ModelSerializer):
         read_only_fields = [
             'id',
             'code',
+            'is_ready',
+            'is_playing',
             'participants',
             'max_participants',
             'created_at',
         ]
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        if not self.instance:
-            self.fields['match_type'].read_only = True
 
     @staticmethod
     def validate_game_mode(value):
@@ -90,7 +89,8 @@ class LobbySerializer(serializers.ModelSerializer):
             validated_data['match_type'] = MatchType.M3V3
             validated_data['max_participants'] = 3
         else:
-            validated_data['match_type'] = MatchType.M1V1
+            if 'match_type' not in validated_data:
+                validated_data['match_type'] = MatchType.M1V1
             validated_data['max_participants'] = 6
         result = super().create(validated_data)
         creator = create_player_instance(request, LobbyParticipants, lobby_id=result.id, user_id=user['id'], creator=True)
@@ -100,6 +100,9 @@ class LobbySerializer(serializers.ModelSerializer):
         return result
 
     def update(self, instance, validated_data):
+        if instance.is_playing:
+            raise PermissionDenied(MessagesException.PermissionDenied.LOBBY_IN_GAME)
+
         if 'game_mode' in validated_data:
             raise PermissionDenied(MessagesException.PermissionDenied.CANNOT_UPDATE_GAME_MODE)
 
@@ -169,6 +172,9 @@ class LobbyParticipantsSerializer(serializers.ModelSerializer):
         return super().create(validated_data)
 
     def update(self, instance, validated_data):
+        if instance.lobby.is_playing:
+            raise PermissionDenied(MessagesException.PermissionDenied.LOBBY_IN_GAME)
+
         if 'team' in validated_data:
             if instance.lobby.game_mode != GameMode.CUSTOM_GAME:
                 raise PermissionDenied(MessagesException.PermissionDenied.UPDATE_TEAM_CLASH_MODE)

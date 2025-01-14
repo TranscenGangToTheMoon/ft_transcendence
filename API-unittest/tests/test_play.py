@@ -7,6 +7,9 @@ from services.play import play
 from services.tournament import join_tournament, create_tournament
 from utils.my_unittest import UnitTest
 
+lj = 'lobby-join'
+lup = 'lobby-update-participant'
+
 
 class Test01_Play(UnitTest):
 
@@ -23,6 +26,31 @@ class Test01_Play(UnitTest):
 
         self.assertResponse(play(user1, game_mode='ranked'), 201)
         self.assertThread(user1)
+
+    def test_004_play_custom_game(self):
+        user1 = self.user([lj, lj, lj, lj, lj, lup, lup, lup, lup, lup, 'game-start'])
+        user2 = self.user([lj, lj, lj, lj, lup, lup, lup, lup, lup, 'game-start'])
+        user3 = self.user([lj, lj, lj, lup, lup, lup, lup, lup, 'game-start'])
+        user4 = self.user([lj, lj, lup, lup, lup, lup, lup, 'game-start'])
+        user5 = self.user([lj, lup, lup, lup, lup, lup, 'game-start'])
+        user6 = self.user([lup, lup, lup, lup, lup, 'game-start'])
+
+        code = self.assertResponse(create_lobby(user1, data={'game_mode': 'custom_game', 'match_type': '3v3'}), 201, get_field='code')
+        self.assertResponse(join_lobby(user2, code), 201)
+        self.assertResponse(join_lobby(user3, code), 201)
+        self.assertResponse(join_lobby(user4, code), 201)
+        self.assertResponse(join_lobby(user5, code), 201)
+        self.assertResponse(join_lobby(user6, code), 201)
+
+        self.assertResponse(join_lobby(user1, code, data={'is_ready': True}), 200)
+        self.assertResponse(join_lobby(user2, code, data={'is_ready': True}), 200)
+        self.assertResponse(join_lobby(user3, code, data={'is_ready': True}), 200)
+        self.assertResponse(join_lobby(user4, code, data={'is_ready': True}), 200)
+        self.assertResponse(join_lobby(user5, code, data={'is_ready': True}), 200)
+        self.assertResponse(join_lobby(user6, code, data={'is_ready': True}), 200)
+
+        time.sleep(2)
+        self.assertThread(user1, user2, user3, user4, user5, user6)
 
 
 class Test02_PlayError(UnitTest):

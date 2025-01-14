@@ -122,6 +122,7 @@ class MessagesException:
 
         MATCH_NOT_FINISHED = 'Match cannot be set as finished.'
         IN_GAME = 'You cannot perform this action when you playing.'
+        LOBBY_IN_GAME = 'You cannot perform this action the lobby is playing.'
 
     class Conflict:
         DEFAULT = 'Conflict.'
