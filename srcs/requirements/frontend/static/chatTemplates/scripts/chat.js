@@ -78,8 +78,11 @@ function setupSocketListeners(chatInfo)
 		console.log("Message received: ", data);
 		console.log(chatInfo.targetId, chatInfo.target, data.author);
 		if (chatBox === null) return;
-		if (data.author === '')
-			chatBox.insertAdjacentHTML('beforeend', `<div><p><strong>:</strong> ${data.content}</p></div>`);
+		if (data.author === ''){
+			var serverMessage = document.getElementById('serverMessage');
+			if (serverMessage) serverMessage.remove();
+			chatBox.insertAdjacentHTML('beforeend', `<div id='serverMessage'><p><strong>:</strong> ${data.content}</p></div>`);
+		}
 		else{
 			if (data.author === chatInfo.targetId) {
 				chatBox.insertAdjacentHTML('beforeend', `<div><p><strong>${chatInfo.target}:</strong> ${data.content}</p></div>`);
@@ -443,13 +446,13 @@ async function openChatTab(chatInfo)
 		catch (error) {
 			console.log(error);
 		}
-		const chatModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('chatListModal'));
-		chatModal.hide();
-		console.log(chatModal);
 	}
 	else {
 		document.getElementById('chatTab'+chatInfo.target).querySelector('a').click();
 	}
+	const chatModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('chatListModal'));
+	chatModal.hide();
+	console.log(chatModal);
 	if (await connect(getAccessToken(), chatInfo) === false) return;
 	document.getElementById('searchChatForm').reset();
 
