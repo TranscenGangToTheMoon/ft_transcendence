@@ -20,6 +20,7 @@ from classes.game.BallWidget                    import Ball
 from classes.game.PaddleWidget                  import Paddle
 from classes.game.PlaygroundWidget              import Playground
 from classes.modalScreens.CountdownModalScreen  import Countdown
+from classes.modalScreens.GameOverModalScreen   import GameOver
 from classes.utils.config                       import Config, SSL_CRT
 from classes.utils.user                         import User
 
@@ -224,10 +225,12 @@ class GamePage(Screen):
             self.paddleRight.reset()
 
         @self.sio.on('game_over')
-        async def game_over_action(data):
-            print(f"game_over_action: {data}", flush=True)
+        async def gameOverAction(data):
+            if (data["winner"] == User.team):
+                await self.app.push_screen(GameOver(True))
+            else:
+                await self.app.push_screen(GameOver(False))
             await self.sio.disconnect()
-            print(self.connected, flush=True)
 
     async def on_unmount(self) -> None:
         print("Unmounting GamePage")
