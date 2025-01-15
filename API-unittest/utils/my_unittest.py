@@ -14,7 +14,7 @@ from utils.generate_random import rnstr
 
 class UnitTest(unittest.TestCase):
 
-    def user(self, tests_sse: list[str] = None, username=None, password=None, guest=False, sse=True):
+    def user(self, tests_sse: list[str] = None, username=None, password=None, guest=False, sse=True, connect_game=True):
         _new_user = {}
 
         if guest:
@@ -36,7 +36,7 @@ class UnitTest(unittest.TestCase):
         _new_user['username'] = response['username']
         _new_user['is_guest'] = response['is_guest']
         if sse:
-            self.connect_to_sse(_new_user, tests_sse)
+            self.connect_to_sse(_new_user, tests_sse, connect_game=connect_game)
         return _new_user
 
     def assertResponse(self, response, status_code, json_assertion=None, count=None, get_field=None, get_user=False):
@@ -61,13 +61,13 @@ class UnitTest(unittest.TestCase):
         self.assertEqual(responses[0].json['id'], responses[1].json['id'])
         return responses[1].json['id']
 
-    def connect_to_sse(self, user, tests: list[str] = None, status_code=200):
-        user['thread'] = Thread(target=self._thread_connect_to_sse, args=(user, tests, status_code))
+    def connect_to_sse(self, user, tests: list[str] = None, status_code=200, connect_game=True):
+        user['thread'] = Thread(target=self._thread_connect_to_sse, args=(user, tests, status_code, connect_game))
         user['thread'].start()
         time.sleep(0.5)
         return user['thread']
 
-    def _thread_connect_to_sse(self, user, tests, status_code):
+    def _thread_connect_to_sse(self, user, tests, status_code, connect_game):
         if tests is None:
             user['expected_thread_result'] = 0
         else:
@@ -97,7 +97,7 @@ class UnitTest(unittest.TestCase):
                                 continue
                             data = json.loads(data)
                             print(f"SSE RECEIVED {user['username']}: {data}", flush=True)
-                            if data['event_code'] == 'game-start':
+                            if data['event_code'] == 'game-start' and connect_game:
                                 self.assertResponse(is_in_game(user, data['data']['id']), 200)
                             user['thread_assertion'].append(data['event_code'])
                             user['thread_result'] += 1
