@@ -214,22 +214,34 @@ class MatchFinishSerializer(Serializer):
 
 
 class ScoreSerializer(Serializer):
+    id = serializers.SerializerMethodField(read_only=True)
+    finished = serializers.SerializerMethodField(read_only=True)
     own_goal = serializers.BooleanField(required=False)
 
     class Meta:
         model = Players
         fields = [
+            'id',
             'score',
+            'finished',
             'own_goal',
         ]
         read_only_fields = [
+            'id',
             'score',
+            'finished',
         ]
+
+    @staticmethod
+    def get_id(obj):
+        return obj.match.id
+
+    @staticmethod
+    def get_finished(obj):
+        return obj.match.finished
 
     def to_representation(self, instance):
         result = super().to_representation(instance)
-        if instance.match.finished:
-            result['finished'] = True
         if 'own_goal' in result and result['own_goal'] is None:
             result.pop('own_goal')
         return result
