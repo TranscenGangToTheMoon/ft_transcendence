@@ -280,10 +280,10 @@ class Game:
         from game_server.server import Server
         print('finishing game', flush=True)
         self.send_finish(finish_reason, winner)
-        if (finish_reason == FinishReason.PLAYER_DISCONNECT):
-            self.disconnect_players()
-        else:
+        if (finish_reason == FinishReason.PLAYER_DISCONNECT and disconnected_user_id is not None):
             self.disconnect_players(disconnected_user_id)
+        else:
+            self.disconnect_players()
         self.finished = True
         Server.delete_game(self.match.id)
         if (disconnected_user_id is not None):

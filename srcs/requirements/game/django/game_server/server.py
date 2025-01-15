@@ -102,15 +102,21 @@ class Server:
             Server._loop.call_soon_threadsafe(asyncio.create_task, Server._sio.emit(event, data=data, room=room, to=to, skip_sid=skip_sid))
 
     @staticmethod
-    def disconnect(players, disconnected_sid=None):
-        for player in players:
-            if player.socket_id == '':
-                continue
-            Server._clients.pop(player.socket_id)
-            if player.socket_id == disconnected_sid:
-                continue
-            Server._loop.call_later(0.5, asyncio.create_task, Server._sio.disconnect(player.socket_id))
-            player.socket_id = ''
+    def disconnect(players=None, disconnected_sid=None, match_id: int | None = None):
+        if players is None and match_id is None:
+            raise Server.ServerException('No players or match_id provided')
+        if players is None and match_id is not None:
+            with Server._games_lock:
+                players = Server._games[match_id].match.teams[0].players + Server._games[match_id].match.teams[1].players
+        elif players is not None:
+            for player in players:
+                if player.socket_id == '':
+                    continue
+                Server._clients.pop(player.socket_id)
+                if player.socket_id == disconnected_sid:
+                    continue
+                Server._loop.call_later(0.5, asyncio.create_task, Server._sio.disconnect(player.socket_id))
+                player.socket_id = ''
 
     @staticmethod
     def get_player(user_id: int):
