@@ -163,6 +163,8 @@ class Test04_Tournament(UnitTest):
         time.sleep(5)
 
         self.assertResponse(score(user1['id']), 200)
+        self.assertResponse(score(user2['id']), 200)
+        self.assertResponse(score(user2['id']), 200)
         self.assertResponse(score(user1['id']), 200)
         self.assertResponse(score(user1['id']), 200)
 
