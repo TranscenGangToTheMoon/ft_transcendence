@@ -319,6 +319,21 @@ class Test04_Messages(UnitTest):
         self.assertEqual(1, self.assertResponse(me(user1), 200, get_field='notifications')['chats'])
         self.assertThread(user1, user2, user3)
 
+    def test_010_last_message_is_read(self):
+        user1 = self.user()
+        user2 = self.user()
+
+        chat_id = self.send_message(user1, user2)
+        self.assertFalse(self.assertResponse(create_chat(user1, method='GET'), 200)['results'][0]['last_message']['is_read'])
+        self.assertTrue(self.assertResponse(create_chat(user2, method='GET'), 200)['results'][0]['last_message']['is_read'])
+
+        self.assertResponse(create_message(user1, chat_id, method='GET'), 200)
+        self.assertTrue(self.assertResponse(create_chat(user1, method='GET'), 200)['results'][0]['last_message']['is_read'])
+
+        self.assertResponse(create_message(user1, chat_id, data={'content': 'test message', 'is_read': True}), 201)
+        self.assertTrue(self.assertResponse(create_chat(user1, method='GET'), 200)['results'][0]['last_message']['is_read'])
+        self.assertThread(user1, user2)
+
 
 if __name__ == '__main__':
     unittest.main()

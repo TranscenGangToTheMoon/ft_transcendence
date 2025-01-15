@@ -6,11 +6,6 @@ header {
     user-select: none;
 }
 
-button.guest:hover {
-    background-color: purple;
-    transform: scale(1.3);
-}
-
-#friends {
+.no-guest {
     display: none;
 }

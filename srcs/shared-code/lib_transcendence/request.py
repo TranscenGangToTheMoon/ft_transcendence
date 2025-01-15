@@ -2,7 +2,7 @@ import json
 from typing import Literal
 
 from lib_transcendence.utils import datetime_serializer
-from lib_transcendence.exceptions import Conflict, ServiceUnavailable
+from lib_transcendence.exceptions import Conflict, ServiceUnavailable, Throttled
 from rest_framework.exceptions import AuthenticationFailed, PermissionDenied, MethodNotAllowed, NotFound, ParseError
 import requests
 
@@ -43,6 +43,8 @@ def request_service(service: Literal['auth', 'chat', 'game', 'matchmaking', 'use
             raise MethodNotAllowed(method)
         if response.status_code == 409:
             raise Conflict(json_data)
+        if response.status_code == 409:
+            raise Throttled()
         if response.status_code == 503:
             raise ServiceUnavailable(service)
     except (requests.ConnectionError, requests.exceptions.JSONDecodeError):

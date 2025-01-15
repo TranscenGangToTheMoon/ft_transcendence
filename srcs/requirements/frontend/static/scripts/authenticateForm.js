@@ -40,6 +40,7 @@ document.getElementById("loginButton").addEventListener('click', event => {
         .then (async data => {
             if (data.access){
                 await closeGameConnection(window.location.pathname);
+                clearCSS();
                 removeTokens();
                 if (typeof sse !== 'undefined')
                     sse.close();

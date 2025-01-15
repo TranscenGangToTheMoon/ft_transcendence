@@ -1,19 +1,17 @@
-from datetime import datetime, timezone
-
-import requests
-import asyncio
 from asgiref.sync import async_to_sync
+from datetime import datetime, timezone
 from game_server.match import Match, Player, finish_match
 from game_server.pong_ball import Ball
 from game_server.pong_position import Position
 from game_server.pong_racket import Racket
 from lib_transcendence.game import FinishReason
 from typing import List
+import asyncio
 import math
 import os
 import random
+import requests
 import time
-
 
 def get_random_direction():
     random_angle = random.random() * 2 * math.pi
@@ -205,7 +203,7 @@ class Game:
         self.handle_goal()
 
     def wait_for_players(self, timeout: float):
-        print(time.time(), "wait_for_players()", flush=True)
+        print("waiting for players", flush=True)
         start_waiting = time.time()
         for team in self.match.teams:
             for player in team.players:
@@ -239,7 +237,10 @@ class Game:
     def launch(self):
         from game_server.server import Server
         timeout = os.environ.get('GAME_PLAYER_CONNECT_TIMEOUT', 5)
-        timeout = 60.
+        try:
+            timeout = float(timeout)
+        except ValueError:
+            timeout = 5
         try:
             self.wait_for_players(timeout)
             print(time.time(), "all players are connected", flush=True)
@@ -272,7 +273,10 @@ class Game:
         from game_server.server import Server
         print('finishing game', flush=True)
         self.send_finish(finish_reason, winner)
-        self.disconnect_players(disconnected_user_id)
+        if (finish_reason == FinishReason.PLAYER_DISCONNECT):
+            self.disconnect_players()
+        else:
+            self.disconnect_players(disconnected_user_id)
         self.finished = True
         Server.delete_game(self.match.id)
         if (disconnected_user_id is not None):
@@ -363,16 +367,16 @@ class Game:
             return {
                 'position_x': self.ball.position.x,
                 'position_y': self.ball.position.y,
-                'direction_x': self.ball.speed_x,
-                'direction_y': self.ball.speed_y,
+                'speed_x': self.ball.speed_x,
+                'speed_y': self.ball.speed_y,
                 'speed': self.ball.speed,
             }
         else:
             return {
                 'position_x': self.canvas.x - self.ball.position.x - self.ball.size,
                 'position_y': self.ball.position.y,
-                'direction_x': -self.ball.speed_x,
-                'direction_y': self.ball.speed_y,
+                'speed_x': -self.ball.speed_x,
+                'speed_y': self.ball.speed_y,
                 'speed': self.ball.speed,
             }
 

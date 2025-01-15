@@ -112,17 +112,6 @@
     });
     document.addEventListener("keyup", (e) => (state.keys[e.key] = undefined));
 
-    document.getElementById("replayFront").addEventListener("click", event => {
-        event.target.blur();
-        resumeGame();
-        state.ball.speed = config.defaultBallSpeed;
-        stopGame(true);
-        setTimeout(()=>{
-            resetGame();
-            startGame();
-        }, config.animationDuration + 100);
-    });
-
     function startGame() {
         console.log('game start');
         state.isGameActive = true;
@@ -476,7 +465,7 @@ function fillTeamDetail(enemyTeamDetail, playerTeamDetail){
         enemyTeamDetail.setAttribute('data-bs-content', oldContent || '' + `
             <div id=TD-username>${player.username}</div>
         `);
-    }    
+    }
 }
 
 function initSocket(){
@@ -517,8 +506,8 @@ function initSocket(){
 		// console.log('back : ', event.speed);
 		window.PongGame.state.ball.y = event.position_y;
 		window.PongGame.state.ball.x = event.position_x;
-		window.PongGame.state.ball.speedX = event.direction_x;
-		window.PongGame.state.ball.speedY = event.direction_y;
+		window.PongGame.state.ball.speedX = event.speed_x;
+		window.PongGame.state.ball.speedY = event.speed_y;
 		window.PongGame.state.ball.speed = event.speed;
 		// console.log(Date.now());
 		// console.log('front apres : ', window.PongGame.state.ball.speedX);
@@ -625,20 +614,10 @@ function initData(data){
 		console.log('Invalid game data from SSE, cannot launch game');
 		return;
 	}
-    document.getElementById('gameArea').style.display = "block";
+    document.getElementById('gameArea').classList.replace('d-none', 'd-flex');
     document.getElementById('opponentWait').style.display = "none";
 	initSocket();
 }
-
-document.getElementById('playGame').addEventListener('click', async event => {
-	try {
-		let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/play/duel/`, 'POST');
-	}
-	catch(error) {
-		console.log(error);
-	}
-	// initSocket();
-})
 
 document.getElementById('confirmModal').addEventListener('hidden.bs.modal', () => {
     window.PongGame.resumeGame();
@@ -662,7 +641,7 @@ function gameStart(event){
 async function initGame(){
     await indexInit(false);
     if (window.location.pathname === '/') return;
-    document.getElementById('gameArea').style.display = "none";
+    document.getElementById('gameArea').classList.replace('d-flex', 'd-none');
     document.getElementById('opponentWait').style.display = "block";
     try {
         checkGameAuthorization();

@@ -1,14 +1,16 @@
 from lib_transcendence.exceptions import MessagesException
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
+from lib_transcendence.serializer import Serializer
 
 from chat_messages.models import Messages
 from chat_messages.utils import get_chat_participants
 from chats.models import ChatParticipants, Chats
 
 
-class MessagesSerializer(serializers.ModelSerializer):
+class MessagesSerializer(Serializer):
     author = serializers.IntegerField(source='author.id', read_only=True)
+    is_read = serializers.SerializerMethodField()
 
     class Meta:
         model = Messages
@@ -25,6 +27,11 @@ class MessagesSerializer(serializers.ModelSerializer):
             'author',
             'chat_id',
         ]
+
+    def get_is_read(self, obj):
+        if obj.author_id == self.context['auth_user']['id']:
+            return True
+        return obj.is_read
 
     def create(self, validated_data):
         chat_id = self.context['chat_id']

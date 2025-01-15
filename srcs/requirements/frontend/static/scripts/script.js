@@ -177,20 +177,25 @@ function loadScript(scriptSrc, type) {
     });
 }
 
-function loadCSS(cssHref, toUpdate=true) {
+function clearCSS(){
+    const links = document.querySelectorAll('link[clearable]');
+    for (let link of links){
+        console.log('removing', link);
+        link.remove();
+    }
+}
+
+function loadCSS(cssHref) {
     const existingLink = document.querySelector('link[dynamic-css]');
     if (existingLink) {
-        // console.log('deleted', existingLink);
         existingLink.remove();
     }
-    // console.log('will update =', toUpdate);
     const link = document.createElement('link');
     link.rel = 'stylesheet';
     link.href = cssHref;
-    if (toUpdate)
-        link.setAttribute('dynamic-css', 'true');
+    if (cssHref != '/css/styles.css')
+        link.setAttribute('clearable', 'true');
     document.head.appendChild(link);
-    // console.log(`Style ${cssHref} loaded.`)
 }
 
 async function loadContent(url, containerId='content', append=false, container=undefined) {
@@ -242,7 +247,6 @@ async function handleRoute() {
         '/': '/homePage.html',
         '/profile' : 'profile.html',
         '/lobby' : '/lobby.html',
-        '/chat' : '/chatTemplates/chat.html',
 
         '/game/ranked' : '/game/game.html',
         '/game/duel' : '/game/game.html',
@@ -424,37 +428,6 @@ function addFriendSSEListeners(){
         addFriendRequest(event.data);
     });
 
-    sse.addEventListener('send-message', async event => {
-        event = JSON.parse(event.data);
-        console.log(event, 'ai je ce qu il faut ?');
-        chat = event.target[0]['url'];
-        let apiAnswer = undefined;
-        try {
-            apiAnswer = await apiRequest(getAccessToken(), `${baseAPIUrl}${chat}`, 'GET');
-            if (apiAnswer.details) {
-                console.log('Error:',apiAnswer.details);
-                return;
-            }
-        }
-        catch (error){
-            console.log('Error:', error);
-            return;
-        }
-        userInformations.notifications['chats'] += 1;
-        chatInfo = parsChatInfo(apiAnswer);
-        if (pathName === '/chat'){
-            chatUserCardLastMessage = document.getElementById('chatListElement' + chatInfo.target).querySelector('.chatUserCardLastMessage');
-            chatUserCardLastMessage.innerText = (chatInfo.lastMessage);
-            chatUserCardLastMessage.classList.add('chatMessageNotRead');
-        }
-        await displayNotification(undefined, 'message received', event.message, async event => {
-            if (pathName !== '/chat')
-                await navigateTo('/chat');
-            await openChat(chatInfo);
-        });
-        displayBadges();
-    })
-
     sse.addEventListener('accept-friend-request', async event => {
         event = JSON.parse(event.data);
         console.log(event);
@@ -514,11 +487,51 @@ function addInviteSSEListeners(){
 
 }
 
+function addChatSSEListeners(){
+    sse.addEventListener('send-message', async event => {
+        event = JSON.parse(event.data);
+        console.log(event, 'ai je ce qu il faut ?');
+        chat = event.target[0]['url'];
+        let apiAnswer = undefined;
+        try {
+            apiAnswer = await apiRequest(getAccessToken(), `${baseAPIUrl}${chat}`, 'GET');
+            if (apiAnswer.details) {
+                console.log('Error:',apiAnswer.details);
+                return;
+            }
+        }
+        catch (error){
+            console.log('Error:', error);
+            return;
+        }
+        userInformations.notifications['chats'] += 1;
+        chatInfo = {
+            'chatId': apiAnswer.id,
+            'target': apiAnswer.chat_with.username,
+            'targetId': apiAnswer.chat_with.id,
+            'lastMessage': '< Say hi! >',
+            'isLastMessageRead': false,
+            'chatMessageNext': null,
+        };
+        if (apiAnswer.last_message) {
+            if (apiAnswer.last_message.content.length > 37){
+                chatInfo.lastMessage = apiAnswer.last_message.content.slice(0, 37) + '...';
+            }
+            else chatInfo.lastMessage = apiAnswer.last_message.content;
+            chatInfo.isLastMessageRead = apiAnswer.last_message.is_read;
+        }
+        await displayNotification(undefined, 'message received', event.message, async event => {
+            await openChatTab(chatInfo);
+        });
+        displayBadges();
+    })
+}
+
 function addSSEListeners(){
 
     addFriendSSEListeners();
     addInviteSSEListeners();
-    
+    addChatSSEListeners();
 }
 
 function initSSE(){
@@ -629,6 +642,7 @@ function handleFriendRequestNotification(target, img, notification, toastContain
         event.preventDefault();
         event.stopImmediatePropagation();
         event.stopPropagation();
+        console.log('click ?')
         try {
             let data = await apiRequest(getAccessToken(), target.url, target.method);
             if (target.url.includes('friend_request')){
@@ -670,15 +684,14 @@ async function addTargets(notification, targets, toastInstance, toastContainer){
 
             notificationBody.appendChild(button);
         }
-        
-        if (target.type === 'API') {
+        if (target.type === 'api') {
             handleFriendRequestNotification(target, img, notification, toastContainer, toastInstance);
             // img.addEventListener('click', event => {
             //     notification.clicked = true;
             //     dismissNotification(notification, toastInstance, toastContainer);
             // });
         }
-        else if (target.type === 'URL'){
+        else if (target.type === 'url'){
             button.addEventListener('click', async () => {
                 console.log(target.url.slice(0, -1));
                 await navigateTo(target.url.slice(0, -1));
@@ -698,7 +711,7 @@ function dismissNotification(notification, toastInstance, toastContainer){
         if (notificationQueue.length){
             let notif= notificationQueue.shift();
             console.log(notificationQueue);
-            displayNotification(notif[0], notif[1], notif[2], notif[3]);
+            displayNotification(notif[0], notif[1], notif[2], notif[3], notif[4]);
         }
     }, 500);
 }
@@ -706,7 +719,7 @@ function dismissNotification(notification, toastInstance, toastContainer){
 async function displayNotification(icon=undefined, title=undefined, body=undefined, mainListener=undefined, target=undefined){
 
     if (displayedNotifications >= MAX_DISPLAYED_NOTIFICATIONS) {
-        notificationQueue.push([icon, title, body, mainListener]);
+        notificationQueue.push([icon, title, body, mainListener, target]);
         return;
     }
     const toastContainer = document.getElementById('toastContainer');
@@ -743,7 +756,7 @@ async function displayNotification(icon=undefined, title=undefined, body=undefin
 // ========================== OTHER UTILS ==========================
 
 async function closeGameConnection(oldUrl){
-    if (!oldUrl.includes('game')) return;
+    if (!oldUrl.includes('game') || oldUrl.includes('local')) return;
     if (typeof gameSocket !== 'undefined'){
         console.log("je close la grosse game socket la");
         gameSocket.close();
@@ -762,7 +775,7 @@ async function fetchUserInfos(forced=false) {
         await generateToken();
     if (!userInformations || forced) {
         try {
-            let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/users/me`);
+            let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/users/me/`);
             userInformations = data;
             console.log(userInformations);
             displayBadges();
@@ -829,6 +842,13 @@ async function loadBlockedModal(){
     await loadContent('/blockedUsers.html', 'modals', true);
 }
 
+async function loadChatListModal(){
+    const chatListModal = document.getElementById('chatListModal')
+    if (chatListModal)
+        chatListModal.remove();
+    await loadContent('/chatTemplates/chatListModal.html', 'modals', true);
+}
+
 async function loadUserProfile(){
     let profileMenu = 'profileMenu.html';
 
@@ -884,6 +904,7 @@ async function  indexInit(auto=true) {
         }
         initSSE();
         await loadFriendListModal();
+        await loadChatListModal();
         document.getElementById('innerFriendRequests-tab').clicked = true;
         addFriendListListener();
         let currentState = getCurrentState();
@@ -899,3 +920,33 @@ window.indexInit = indexInit;
 window.loadUserProfile = loadUserProfile;
 
 indexInit();
+
+async function temp(ind=25){
+    try{
+        let data = await apiRequest(undefined, `${baseAPIUrl}/auth/guest/`, 'POST');
+            data = await apiRequest(data.access, `${baseAPIUrl}/auth/register/guest/`, 'PUT', undefined, undefined, {
+                'username' : 'flo',
+                'password' : 'flo',
+            })
+    }
+    catch (error){
+        console.log(error);
+    }
+    for (let i = 0; i < ind; i++){
+        try {
+            let data = await apiRequest(undefined, `${baseAPIUrl}/auth/guest/`, 'POST');
+            data = await apiRequest(data.access, `${baseAPIUrl}/auth/register/guest/`, 'PUT', undefined, undefined, {
+                'username' : `${getCurrentState()}user${i}`,
+                'password' : 'user',
+            })
+            data = await apiRequest(data.access, `${baseAPIUrl}/users/me/friend_requests/`, 'POST', undefined, undefined, {
+                'username': userInformations.username,
+            });
+        }
+        catch(error){
+            console.log(error);
+        }
+    }
+}
+
+// temp();

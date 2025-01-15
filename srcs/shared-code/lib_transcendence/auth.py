@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 
 from lib_transcendence.endpoints import Auth
 from lib_transcendence.exceptions import MessagesException
-from lib_transcendence.services import request_auth, get_auth_token
+from lib_transcendence.services import request_auth
 from rest_framework import serializers
 from rest_framework.authentication import BaseAuthentication
 from rest_framework.exceptions import AuthenticationFailed, NotAuthenticated, ParseError
@@ -53,6 +53,13 @@ class Authentication(AbstractAuthentication):
 
     def auth_request(self, token):
         return auth_verify(token)
+
+
+def get_auth_token(request):
+    token = request.headers.get('Authorization')
+    if token is not None:
+        return token
+    raise NotAuthenticated(MessagesException.Authentication.NOT_AUTHENTICATED)
 
 
 def get_auth_user(request=None):

@@ -1,5 +1,6 @@
 from django.db.models import Q
 from lib_transcendence import endpoints
+from lib_transcendence.auth import get_auth_token
 from lib_transcendence.pagination import get_all_pagination_items
 from lib_transcendence.services import request_users
 
@@ -7,7 +8,7 @@ from blocking.models import Blocked
 
 
 def create_player_instance(request, instance=None, *args, **kwargs):
-    result = get_all_pagination_items(request_users, 'users', endpoints.Users.blocked, request=request)
+    result = get_all_pagination_items(request_users, 'users', endpoints.Users.blocked, token=get_auth_token(request))
     for blocked_instance in result:
         Blocked.objects.create(user_id=request.user.id, blocked_user_id=blocked_instance['blocked']['id'])
 

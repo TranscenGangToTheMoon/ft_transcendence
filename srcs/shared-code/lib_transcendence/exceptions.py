@@ -78,6 +78,7 @@ class MessagesException:
         NOT_BELONG_TO_CHAT = NOT_BELONG.format(obj='chat')
         NOT_BELONG_LOBBY = NOT_BELONG.format(obj='lobby')
         NOT_BELONG_TOURNAMENT = NOT_BELONG.format(obj='tournament')
+        NOT_BELONG_GAME = NOT_BELONG.format(obj='game')
         NOT_BELONG_BLOCKED = 'This blocked user entry does not belong to you.'
         USER_NOT_BELONG = 'This user does not belong to this {obj}.'
 
@@ -122,6 +123,7 @@ class MessagesException:
 
         MATCH_NOT_FINISHED = 'Match cannot be set as finished.'
         IN_GAME = 'You cannot perform this action when you playing.'
+        LOBBY_IN_GAME = 'You cannot perform this action the lobby is playing.'
 
     class Conflict:
         DEFAULT = 'Conflict.'
@@ -152,8 +154,8 @@ class MessagesException:
         SSE = 'Failed to create SSE event.'
         game = SERVICE_UNAVAILABLE.format(service='game')
 
-    class ValueError:
-        RANGE_VALUE = 'Range lookup requires a tuple of two int.'
+    class ThrottledError:
+        DEFAULT = 'Request was throttled.'
 
 
 class ServiceUnavailable(APIException):
@@ -188,3 +190,9 @@ class Conflict(APIException):
         if detail is None:
             detail = self.default_detail
         self.detail = detail
+
+
+class Throttled(APIException):
+    status_code = status.HTTP_429_TOO_MANY_REQUESTS
+    default_detail = MessagesException.ThrottledError.DEFAULT
+    default_code = 'throttled'

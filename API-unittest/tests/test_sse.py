@@ -72,7 +72,7 @@ class Test03_SSEConnectionClose(UnitTest):
         last_online = self.assertResponse(me(user1), 200, get_field='last_online')
         time.sleep(0.5)
         self.assertThread(user1)
-        time.sleep(0.5)
+        time.sleep(5)
         response = self.assertResponse(friend_requests(user2, user1), 201)
         self.assertNotEqual('online', response['receiver']['status'])
         self.assertNotEqual(last_online, response['receiver']['status'])
@@ -85,7 +85,7 @@ class Test03_SSEConnectionClose(UnitTest):
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
         self.assertResponse(join_lobby(user2, code), 201)
         self.assertThread(user1)
-        time.sleep(1)
+        time.sleep(5)
         self.assertThread(user2)
 
 

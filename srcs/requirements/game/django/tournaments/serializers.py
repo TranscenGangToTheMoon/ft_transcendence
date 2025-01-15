@@ -1,12 +1,13 @@
 from lib_transcendence.users import retrieve_users
 from rest_framework import serializers
+from lib_transcendence.serializer import Serializer
 
 from matches.models import Matches
 from matches.serializers import TournamentMatchSerializer
 from tournaments.models import Tournaments
 
 
-class TournamentSerializer(serializers.ModelSerializer):
+class TournamentSerializer(Serializer):
     id = serializers.IntegerField()
     stages = serializers.ListField(child=serializers.DictField(), write_only=True)
     matches = serializers.SerializerMethodField(read_only=True)

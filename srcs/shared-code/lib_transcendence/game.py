@@ -36,10 +36,10 @@ class GameMode:
 
 
 class FinishReason:
-    NORMAL_END = 'normal-end'
-    PLAYER_ABANDON = 'player-abandon'
-    PLAYER_DISCONNECT = 'player-abandon'
-    PLAYER_NOT_CONNECTED = 'player-not-connected'
+    NORMAL_END = 'The game is over' # todo error
+    PLAYER_DISCONNECT = 'A player has disconnected'
+    PLAYER_NOT_CONNECTED = 'Not all players are connected'
+    PLAYERS_TIMEOUT = 'Players have timed out'
 
     @staticmethod
     def validate(mode):
@@ -47,7 +47,7 @@ class FinishReason:
 
     @staticmethod
     def validate_error(mode):
-        return validate_type(mode, FinishReason, [FinishReason.PLAYER_ABANDON, FinishReason.PLAYER_NOT_CONNECTED])
+        return validate_type(mode, FinishReason, [FinishReason.PLAYER_DISCONNECT, FinishReason.PLAYER_NOT_CONNECTED])
 
     @staticmethod
     def attr():
