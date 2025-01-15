@@ -232,7 +232,7 @@ async function loadContent(url, containerId='content', append=false, container=u
 }
 
 function containsCode(path){
-    const regex = /^\/(game|lobby)\/\d+$/;
+    const regex = /^\/(game|lobby|tournament)\/\d+$/;
     return regex.test(path);
 }
 
@@ -278,9 +278,11 @@ function getCurrentState(){
 async function navigateTo(url, doNavigate=true){
     let currentState = getCurrentState();
     lastState = currentState;
-    await handleSSEListenerRemoval(url);
-    await quitLobbies(window.location.pathname);
-    await closeGameConnection(window.location.pathname);
+    // if (doNavigate){
+        await handleSSEListenerRemoval(url);
+        await quitLobbies(window.location.pathname, url);
+        await closeGameConnection(window.location.pathname);
+    // }
     history.pushState({state: currentState}, '', url);
     console.log(`added ${url} to history with state : ${currentState}`);
     pathName = window.location.pathname;
@@ -339,7 +341,7 @@ window.addEventListener('popstate', async event => {
     console.log(pathName, window.location.pathname);
     if (pathName === '/game')
         return cancelNavigation(event, undefined);
-    await quitLobbies(pathName);
+    await quitLobbies(pathName, window.location.pathname);
     await closeGameConnection(pathName);
     pathName = window.location.pathname;
     if (event.state && event.state.state)
@@ -350,7 +352,7 @@ window.addEventListener('popstate', async event => {
     handleRoute();
 })
 
-async function quitLobbies(oldUrl){
+async function quitLobbies(oldUrl, newUrl){
     if (oldUrl.includes('/lobby')){
         try {
             await apiRequest(getAccessToken(), `${baseAPIUrl}/play${oldUrl}/`, 'DELETE');
@@ -359,8 +361,10 @@ async function quitLobbies(oldUrl){
             console.log(error);
         }
     }
-    if (oldUrl.includes('/tournament') && typeof tournament !== 'undefined' && tournament && !fromTournament){
-        console.log('non normalement non non', fromTournament);
+    if (oldUrl.includes('/tournament') && typeof tournament !== 'undefined' && tournament && (!fromTournament && (
+        containsCode(oldUrl) && !containsCode(newUrl)
+    ))){
+        console.log(fromTournament);
         try {
             await apiRequest(getAccessToken(), `${baseAPIUrl}/play/tournament/${tournament.code}/`, 'DELETE');
         }
@@ -787,6 +791,11 @@ async function fetchUserInfos(forced=false) {
 }
 
 function displayMainAlert(alertTitle, alertContent) {
+    const modalElement = document.getElementById('alertModal');
+    
+    if (modalElement.classList.contains('show')) {
+        return;
+    }
     const alertContentDiv = document.getElementById('alertContent');
     const alertTitleDiv = document.getElementById('alertModalLabel');
     const alertModal = new bootstrap.Modal(document.getElementById('alertModal'));

@@ -13,7 +13,6 @@ from threading import Thread
 from game_server.match import Match
 
 
-# TODO -> change this to use the Server class
 async def connect(sid, environ, auth):
     from game_server.server import Server
     print('trying to connect', flush=True)
@@ -105,15 +104,6 @@ async def stop_moving(sid, data):
             data={'player': player.user_id, 'position': position},
             room=str(player.match_id)
         )
-    except KeyError:
-        pass
-
-# TODO -> make some tests for player abandon while a game is running
-async def ff(sid):
-    from game_server.server import Server
-    try:
-        match_id = Server._clients[sid].match_id
-        await sync_to_async(Server.finish_game)(match_id, FinishReason.PLAYER_DISCONNECT, Server._clients[sid].user_id)
     except KeyError:
         pass
 

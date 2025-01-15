@@ -498,21 +498,12 @@ function initSocket(){
         window.PongGame.startCountdown();
     })
     gameSocket.on('game_state', event => {
-		// console.log('front : ', window.PongGame.state.ball.speedX);
-		// console.log('front : ', window.PongGame.state.ball.speedY);
-		// console.log('front : ', window.PongGame.state.ball.speed);
-		// console.log('back : ', event.direction_x);
-		// console.log('back : ', event.direction_y);
-		// console.log('back : ', event.speed);
+		console.log('received game State');
 		window.PongGame.state.ball.y = event.position_y;
 		window.PongGame.state.ball.x = event.position_x;
 		window.PongGame.state.ball.speedX = event.speed_x;
 		window.PongGame.state.ball.speedY = event.speed_y;
 		window.PongGame.state.ball.speed = event.speed;
-		// console.log(Date.now());
-		// console.log('front apres : ', window.PongGame.state.ball.speedX);
-		// console.log('front apres : ', window.PongGame.state.ball.speedY);
-		// console.log('front apres : ', window.PongGame.state.ball.speed);
     })
     gameSocket.on('connect_error', (error)=> {
         console.log('error', error);
