@@ -14,6 +14,7 @@ function parsChatInfo(chat)
 		}
 		else chatInfo.lastMessage = chat.last_message.content;
 		chatInfo.isLastMessageRead = chat.last_message.is_read;
+		console.log(chatInfo.unread_messages, "to see if it works");
 	}
 	return chatInfo;
 }
@@ -174,8 +175,9 @@ async function createChatUserCard(chatInfo) {
 	console.log(chatUserCard);
 	chatUserCard.querySelector('.chatUserCardTitleUsername').innerText = chatInfo.target + ':';
 	chatUserCard.querySelector('.chatUserCardLastMessage').innerText = (chatInfo.lastMessage);
+	var chatUserCardLastMessage = chatUserCard.querySelector('.chatUserCardLastMessage');
 	if (chatInfo.isLastMessageRead === false)
-		chatUserCard.querySelector('.chatUserCardLastMessage').classList.add('chatMessageNotRead');
+		chatUserCardLastMessage.classList.add('chatMessageNotRead');
 	chatUserCard.querySelector('.chatUserCardButtonDeleteChat').addEventListener('click',async e => {
 		e.preventDefault();
 		try {
@@ -188,9 +190,8 @@ async function createChatUserCard(chatInfo) {
 		}
 	});
 	chatUserCard.addEventListener('click', async e => {
-		if (lastClick === e.target.closest('#chatListElement' + chatInfo.target)) return;
 		if (e.target === chatUserCard.querySelector('.chatUserCardButtonDeleteChat')) return;
-		console.log("lastClickAfter: ",lastClick);
+		chatUserCardLastMessage.classList.remove('chatMessageNotRead');
 		await openChatTab(chatInfo);
 	});
 }
@@ -429,7 +430,7 @@ async function openChatTab(chatInfo)
 {
 	chatTabs = document.getElementById('chatTabs');
 	if (!chatTabs) {
-		await loadContent('/chatTemplates/chatTabs.html', 'content', true);
+		await loadContent('/chatTemplates/chatTabs.html', 'container', true);
 	}
 	else {
 		disconnect();
