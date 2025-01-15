@@ -2,6 +2,7 @@
 import requests
 
 # Textual imports
+from textual            import on
 from textual.app        import ComposeResult
 from textual.screen     import Screen
 from textual.widgets    import Button, Footer, Header, Rule, Static
@@ -27,12 +28,6 @@ class MainPage(Screen):
         yield Button("Cancel Duel", id="cancelDuelGame", variant="error", disabled=True)
         yield Rule()
 
-    def on_button_pressed(self, event: Button.Pressed) -> None:
-        if (event.button.id == "duel"):
-            self.duelAction()
-        elif (event.button.id == "cancelDuelGame"):
-            self.cancelDuelAction()
-
     def on_screen_resume(self) -> None:
         self.query_one("#duel").loading = False
         self.query_one("#duel").variant = "primary"
@@ -40,6 +35,7 @@ class MainPage(Screen):
         self.query_one("#duelResult").update("")
         self.query_one("#cancelDuelResult").update("")
 
+    @on(Button.Pressed, "#duel")
     def duelAction(self):
         try:
             response = requests.post(url=f"{User.server}/api/play/duel/", data="", headers=User.headers, verify=Config.SSL.CRT)
@@ -52,6 +48,7 @@ class MainPage(Screen):
         except Exception as error:
             self.query_one("#duelResult").update(f"POST /api/play/duel/ Error: {error}")
 
+    @on(Button.Pressed, "#cancelDuelGame")
     def cancelDuelAction(self):
         try:
             response = requests.delete(url=f"{User.server}/api/play/duel/", data="", headers=User.headers, verify=Config.SSL.CRT)

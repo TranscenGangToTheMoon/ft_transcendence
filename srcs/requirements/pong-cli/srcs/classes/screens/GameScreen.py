@@ -9,7 +9,7 @@ from pynput import keyboard
 from rich.console   import Console
 
 # Textual imports
-from textual            import work
+from textual            import on, work
 from textual.app        import ComposeResult
 from textual.geometry   import Offset
 from textual.screen     import Screen
@@ -87,9 +87,9 @@ class GamePage(Screen):
         yield Button("Exit Button", id="exitAction")
         yield Footer()
 
-    def on_button_pressed(self, event: Button.Pressed) -> None:
-        if event.button.id == "exitAction":
-            self.dismiss()
+    @on(Button.Pressed, "#exitAction")
+    def exitAction(self) -> None:
+        self.dismiss()
 
     def onPress(self, key):
         try:
