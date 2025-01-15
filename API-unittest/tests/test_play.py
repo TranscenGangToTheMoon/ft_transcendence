@@ -89,6 +89,7 @@ class Test01_Play(UnitTest):
 
         self.assertResponse(play(user1), 201)
         self.assertResponse(play(user2), 201)
+        time.sleep(1)
         self.assertThread(user1, user2)
 
 
