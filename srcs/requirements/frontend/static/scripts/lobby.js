@@ -14,12 +14,6 @@ if (typeof lobby === 'undefined')
     var lobby;
 
 document.getElementById('leaveLobby').addEventListener('click', async () => {
-    try {
-        await apiRequest(getAccessToken(), `${baseAPIUrl}/play/lobby/${code}/`, 'DELETE');
-    }
-    catch(error){
-        console.log(error);
-    }
     await navigateTo('/');
 })
 
