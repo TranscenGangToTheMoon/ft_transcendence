@@ -403,9 +403,10 @@ class Game:
         rackets = {}
         for racket in self.rackets:
             if side == 1:
-                rackets[racket.player_id] = racket.position
+                rackets[racket.player_id] = racket.position.x
             else:
-                rackets[racket.player_id] = racket.position.invert(self.canvas.x)
+                rackets[racket.player_id] = racket.position.invert(self.canvas.x).x
+        return rackets
 
     def send_rackets(self):
         from game_server.server import Server
