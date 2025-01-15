@@ -24,7 +24,7 @@ class CreateMatchView(generics.CreateAPIView):
 
 
 def check_timeout(match_id):
-    time.sleep(os.environ['GAME_PLAYER_CONNECT_TIMEOUT'])
+    time.sleep(int(os.environ['GAME_PLAYER_CONNECT_TIMEOUT']))
     try:
         print('Checking timeout', flush=True)
         match = Matches.objects.get(id=match_id)
