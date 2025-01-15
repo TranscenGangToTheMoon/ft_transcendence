@@ -49,7 +49,7 @@ class GamePage(Screen):
         self.connected = False
         self.gameStarted = False
         SSLContext = ssl.create_default_context()
-        SSLContext.load_verify_locations(SSL_CRT)
+        SSLContext.load_verify_locations(Config.SSL.CRT)
         SSLContext.check_hostname = False
         connector = aiohttp.TCPConnector(ssl=SSLContext)
         self.HTTPSession = aiohttp.ClientSession(connector=connector)
