@@ -97,7 +97,7 @@ async def ff(sid):
     from game_server.server import Server
     try:
         match_id = Server._clients[sid].match_id
-        await sync_to_async(Server.finish_game)(match_id, FinishReason.PLAYER_ABANDON, Server._clients[sid].user_id)
+        await sync_to_async(Server.finish_game)(match_id, FinishReason.PLAYER_DISCONNECT, Server._clients[sid].user_id)
     except KeyError:
         pass
 
@@ -106,6 +106,6 @@ async def disconnect(sid):
     from game_server.server import Server
     try:
         match_id = Server._clients[sid].match_id
-        await sync_to_async(Server.finish_game)(match_id, FinishReason.PLAYER_ABANDON, Server._clients[sid].user_id)
+        await sync_to_async(Server.finish_game)(match_id, FinishReason.PLAYER_DISCONNECT, Server._clients[sid].user_id)
     except KeyError:
         pass # player has already disconnected
