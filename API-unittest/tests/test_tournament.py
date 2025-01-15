@@ -653,7 +653,7 @@ class Test10_FinishTournament(UnitTest):
         user5 = self.user([tj, tj, tsa, tj, ts, gs, tmf, tmf, tmf, tmf, gs, tmf, tmf, tmf, tf])
         user6 = self.user([tj, tsa, tj, ts, gs, tmf, tmf, tmf, tmf, tmf, tmf, tmf, tf])
         user7 = self.user([tsa, tj, ts, gs, tmf, tmf, tmf, tmf, tmf, tmf, tmf, tf])
-        user8 = self.user([ts, gs, tmf, tmf, tmf, tmf, tmf, tmf, tmf, tf])
+        user8 = self.user([gs, tmf, tmf, tmf, tmf, tmf, tmf, tmf, tf])
 
         self.assertResponse(set_trophies(user1, 500), 201)
         self.assertResponse(set_trophies(user2, 400), 201)

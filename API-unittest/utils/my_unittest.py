@@ -109,5 +109,7 @@ class UnitTest(unittest.TestCase):
             if user['thread_tests'] is None:
                 user['thread_tests'] = []
             print('TEST', user['id'], user['username'], flush=True)
+            print('expected', user['thread_tests'], flush=True)
+            print('got     ', user['thread_assertion'], flush=True)
             self.assertListEqual(user['thread_tests'], user['thread_assertion'])
             self.assertEqual(user['expected_thread_result'], user['thread_result'])
