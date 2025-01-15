@@ -6,6 +6,7 @@ class Racket:
     # TODO -> add height and width to racket from env
     height: int
     width: int
+    max_speed: int
     def __init__(self,
                  player: int,
                  position: Position) -> None:
@@ -15,7 +16,6 @@ class Racket:
         self.height = Racket.height
         self.width = Racket.width
         self.block_glide = False
-        self.max_speed = 500
 
     def move_up(self):
         self.velocity = -1
@@ -30,7 +30,7 @@ class Racket:
         return self.position.y
 
     def update(self, ball_size, canvas_height, time_delta):
-        self.position.y += self.velocity * self.max_speed * time_delta
+        self.position.y += self.velocity * Racket.max_speed * time_delta
         if self.block_glide:
             if self.position.y + self.height + ball_size < canvas_height:
                 self.position.y = canvas_height - self.height - ball_size
