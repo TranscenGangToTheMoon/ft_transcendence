@@ -3,7 +3,7 @@ import os
 from urllib.parse import urlparse
 
 # Textual imports
-from textual            import on
+from textual import on, events
 from textual.app        import ComposeResult
 from textual.containers import Horizontal, Vertical
 from textual.screen     import Screen
@@ -30,6 +30,18 @@ class LoginPage(Screen):
                 yield Button("GuestUp", id="guestUpButton", variant="primary")
         yield Static("", id="status")
         yield Footer()
+
+    def on_mount(self) -> None:
+        self.query_one("#server").border_title = "Server"
+        self.query_one("#server").styles.border_title_color = "white 50%"
+        self.query_one("#server").styles.border_title_align = "right"
+        self.query_one("#username").border_title = "Username"
+        self.query_one("#username").styles.border_title_color = "white 50%"
+        self.query_one("#username").styles.border_title_align = "right"
+        self.query_one("#password").border_title = "Password"
+        self.query_one("#password").styles.border_title_color = "white 50%"
+        self.query_one("#password").styles.border_title_align = "right"
+        self.query_one("#AuthenticationBox").border_title = "Authentication"
 
     def getSSLCertificate(self):
         host = urlparse(User.server).hostname
