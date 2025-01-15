@@ -36,7 +36,7 @@ class Game:
         rackets: List[Racket] = []
         try:
             ledge_offset = int(os.environ['GAME_RACKET_LEDGE_OFFSET'])
-            racket_to_racket_offset = int(os.environ['GAME_RACKET_TO_PADDLE_OFFSET'])
+            racket_to_racket_offset = int(os.environ['GAME_RACKET_TO_RACKET_OFFSET'])
         except KeyError:
             ledge_offset = 100
             racket_to_racket_offset = 200
@@ -274,16 +274,16 @@ class Game:
                 if player.user_id == disconnected_user_id:
                     disc_sid = player.socket_id
                 players.append(player)
-        Server.disconnect(players, disc_sid)
+        Server.disconnect(players=players, disconnected_sid=disc_sid)
 
     def finish(self, finish_reason: str, winner: str | None = None, disconnected_user_id: int | None = None):
         from game_server.server import Server
         print('finishing game', flush=True)
         self.send_finish(finish_reason, winner)
-        if (finish_reason == FinishReason.PLAYER_DISCONNECT):
-            self.disconnect_players()
-        else:
+        if (finish_reason == FinishReason.PLAYER_DISCONNECT and disconnected_user_id is not None):
             self.disconnect_players(disconnected_user_id)
+        else:
+            self.disconnect_players()
         self.finished = True
         Server.delete_game(self.match.id)
         if (disconnected_user_id is not None):

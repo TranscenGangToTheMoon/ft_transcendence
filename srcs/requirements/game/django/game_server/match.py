@@ -26,7 +26,7 @@ class Player():
             print(e.detail, flush=True)
         except APIException as e:
             from game_server.server import Server
-            Server.disconnect(str(self.match_id))
+            Server.disconnect(match_id=self.match_id)
         if csc:
             self.csc += 1
         else:
