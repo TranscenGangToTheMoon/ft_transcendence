@@ -180,20 +180,19 @@ function loadScript(scriptSrc, type) {
 function clearCSS(){
     const links = document.querySelectorAll('link[clearable]');
     for (let link of links){
-        console.log('removing', link);
         link.remove();
     }
 }
 
-function loadCSS(cssHref) {
-    const existingLink = document.querySelector('link[dynamic-css]');
+function loadCSS(cssHref, clearable) {
+    const existingLink = document.querySelector(`link[href="${cssHref}"]`);
     if (existingLink) {
         existingLink.remove();
     }
     const link = document.createElement('link');
     link.rel = 'stylesheet';
     link.href = cssHref;
-    if (cssHref != '/css/styles.css')
+    if (clearable)
         link.setAttribute('clearable', 'true');
     document.head.appendChild(link);
 }
@@ -225,8 +224,9 @@ async function loadContent(url, containerId='content', append=false, container=u
         css = contentDiv.querySelector(`[${style}]`);
         // console.log(style, css)
         if (css)
-            loadCSS(css.getAttribute(style));//, !css.getAttribute(style).includes('Guest'));
+            loadCSS(css.getAttribute(style), css.getAttribute('clearable'));//, !css.getAttribute(style).includes('Guest'));
     } catch (error) {
+        console.log(error);
         contentDiv.innerHTML = '<h1>Erreur 404 : Page non trouvée</h1>';
     }
 }

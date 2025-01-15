@@ -29,8 +29,10 @@ async def connect(sid, environ, auth):
         raise ConnectionRefusedError(MessagesException.Authentication.NOT_AUTHENTICATED)
     id = user_data['id']
     print(f'user_id = {id}', flush=True)
+    test = request_game(endpoints.Game.fuser.format(user_id=id), 'GET') #todo protect this
+    print(f'test = {test}', flush=True)
     try:
-        game_data = request_game(endpoints.Game.fmatch_user.format(user_id=id), 'GET')
+        game_data = request_game(endpoints.Game.fmatch_user.format(user_id=id, match_id=test['id']), 'GET')
     except NotFound as e:
         raise ConnectionRefusedError(e.detail)
     except APIException as e:
