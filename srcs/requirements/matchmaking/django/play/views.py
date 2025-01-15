@@ -1,3 +1,5 @@
+from threading import Thread
+
 from lib_transcendence.game import GameMode
 from lib_transcendence.exceptions import MessagesException
 from lib_transcendence.permissions import NotGuest
@@ -19,7 +21,7 @@ class PlayMixin(generics.CreateAPIView, generics.DestroyAPIView):
 
     def perform_create(self, serializer):
         super().perform_create(serializer)
-        Players.tag()
+        Thread(target=serializer.instance.tag).start()
 
 
 class DuelView(PlayMixin):

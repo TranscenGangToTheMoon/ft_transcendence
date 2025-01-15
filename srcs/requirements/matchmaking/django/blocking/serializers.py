@@ -1,8 +1,8 @@
 from typing import Type
 
 from lib_transcendence.exceptions import MessagesException
-from rest_framework import serializers
 from rest_framework.exceptions import NotFound
+from lib_transcendence.serializer import Serializer
 
 from baning.utils import banned
 from blocking.models import Blocked
@@ -11,7 +11,7 @@ from play.models import Players
 from tournament.models import TournamentParticipants
 
 
-class BlockedSerializer(serializers.ModelSerializer):
+class BlockedSerializer(Serializer):
     class Meta:
         model = Blocked
         fields = '__all__'

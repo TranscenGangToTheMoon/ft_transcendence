@@ -4,6 +4,7 @@ from lib_transcendence.generate import generate_code
 from lib_transcendence.game import FinishReason
 from lib_transcendence.users import retrieve_users
 from rest_framework import serializers
+from lib_transcendence.serializer import Serializer
 
 from blocking.utils import create_player_instance
 from matchmaking.utils.participant import get_participants
@@ -12,7 +13,7 @@ from matchmaking.utils.user import verify_user
 from tournament.models import Tournament, TournamentSize, TournamentStage, TournamentParticipants, TournamentMatches
 
 
-class TournamentSerializer(serializers.ModelSerializer):
+class TournamentSerializer(Serializer):
     participants = serializers.SerializerMethodField(read_only=True)
     matches = serializers.SerializerMethodField(read_only=True)
 
@@ -79,7 +80,7 @@ class TournamentSerializer(serializers.ModelSerializer):
         return result
 
 
-class TournamentStageSerializer(serializers.ModelSerializer):
+class TournamentStageSerializer(Serializer):
     class Meta:
         model = TournamentStage
         fields = [
@@ -89,7 +90,7 @@ class TournamentStageSerializer(serializers.ModelSerializer):
         ]
 
 
-class TournamentParticipantsSerializer(serializers.ModelSerializer):
+class TournamentParticipantsSerializer(Serializer):
     id = serializers.IntegerField(source='user_id', read_only=True)
     tournament = serializers.CharField(source='tournament.code', read_only=True)
 
@@ -128,7 +129,7 @@ class TournamentParticipantsSerializer(serializers.ModelSerializer):
         return super().create(validated_data)
 
 
-class TournamentSearchSerializer(serializers.ModelSerializer):
+class TournamentSearchSerializer(Serializer):
     n_participants = serializers.SerializerMethodField()
     created_by = serializers.CharField(source='created_by_username')
 
@@ -148,7 +149,7 @@ class TournamentSearchSerializer(serializers.ModelSerializer):
         return obj.participants.count()
 
 
-class TournamentMatchSerializer(serializers.ModelSerializer):
+class TournamentMatchSerializer(Serializer):
     winner_id = serializers.IntegerField(required=True, write_only=True)
     winner = serializers.IntegerField(source='winner.user_id', read_only=True)
     score_winner = serializers.IntegerField(required=True)

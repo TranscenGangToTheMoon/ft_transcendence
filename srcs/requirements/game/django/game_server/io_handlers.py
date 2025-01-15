@@ -28,9 +28,16 @@ async def connect(sid, environ, auth):
     if user_data is None:
         raise ConnectionRefusedError(MessagesException.Authentication.NOT_AUTHENTICATED)
     id = user_data['id']
-    print(f'user_id = {id}', flush=True)
     try:
-        game_data = request_game(endpoints.Game.fmatch_user.format(user_id=id), 'GET')
+        match = request_game(endpoints.Game.fuser.format(user_id=id), 'GET')
+    except NotFound as e:
+        raise ConnectionRefusedError(e.detail)
+    except APIException as e:
+        raise ConnectionRefusedError(MessagesException.ServiceUnavailable.game)
+    if match is None:
+        raise ConnectionRefusedError(MessagesException.ServiceUnavailable.game)
+    try:
+        game_data = request_game(endpoints.Game.fmatch_user.format(user_id=id, match_id=match['id']), 'GET')
     except NotFound as e:
         raise ConnectionRefusedError(e.detail)
     except APIException as e:
@@ -55,49 +62,58 @@ async def connect(sid, environ, auth):
 
 async def move_up(sid):
     from game_server.server import Server
-    player = Server._clients[sid]
-    await Server._sio.emit(
-        'move_up',
-        data={'player': player.user_id},
-        room=str(player.match_id),
-        skip_sid=sid)
-    player.racket.move_up()
+    try:
+        player = Server._clients[sid]
+        await Server._sio.emit(
+            'move_up',
+            data={'player': player.user_id},
+            room=str(player.match_id),
+            skip_sid=sid)
+        player.racket.move_up()
+    except KeyError:
+        pass
 
 
 async def move_down(sid):
     from game_server.server import Server
-    player = Server._clients[sid]
-    await Server._sio.emit(
-        'move_down',
-        data={'player': player.user_id},
-        room=str(player.match_id),
-        skip_sid=sid
-    )
-    player.racket.move_down()
+    try:
+        player = Server._clients[sid]
+        await Server._sio.emit(
+            'move_down',
+            data={'player': player.user_id},
+            room=str(player.match_id),
+            skip_sid=sid
+        )
+        player.racket.move_down()
+    except KeyError:
+        pass
 
 
 async def stop_moving(sid, data):
     from game_server.server import Server
-    player = Server._clients[sid]
     try:
-        position = data['position']
+        player = Server._clients[sid]
+        try:
+            position = data['position']
+        except KeyError:
+            error('Need position data for event stop_moving')
+            await Server._sio.emit('error', data={'message': 'Need position data for event stop_moving'}, to=sid)
+            return
+        position = player.racket.stop_moving(position)
+        await Server._sio.emit(
+            'stop_moving',
+            data={'player': player.user_id, 'position': position},
+            room=str(player.match_id)
+        )
     except KeyError:
-        error('Need position data for event stop_moving')
-        await Server._sio.emit('error', data={'message': 'Need position data for event stop_moving'}, to=sid)
-        return
-    position = player.racket.stop_moving(position)
-    await Server._sio.emit(
-        'stop_moving',
-        data={'player': player.user_id, 'position': position},
-        room=str(player.match_id)
-    )
+        pass
 
 # TODO -> make some tests for player abandon while a game is running
 async def ff(sid):
     from game_server.server import Server
     try:
         match_id = Server._clients[sid].match_id
-        await sync_to_async(Server.finish_game)(match_id, FinishReason.PLAYER_ABANDON, Server._clients[sid].user_id)
+        await sync_to_async(Server.finish_game)(match_id, FinishReason.PLAYER_DISCONNECT, Server._clients[sid].user_id)
     except KeyError:
         pass
 
@@ -106,6 +122,6 @@ async def disconnect(sid):
     from game_server.server import Server
     try:
         match_id = Server._clients[sid].match_id
-        await sync_to_async(Server.finish_game)(match_id, FinishReason.PLAYER_ABANDON, Server._clients[sid].user_id)
+        await sync_to_async(Server.finish_game)(match_id, FinishReason.PLAYER_DISCONNECT, Server._clients[sid].user_id)
     except KeyError:
         pass # player has already disconnected

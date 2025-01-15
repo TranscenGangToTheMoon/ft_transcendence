@@ -5,6 +5,7 @@ from lib_transcendence.services import request_chat
 from lib_transcendence.game import GameMode
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied, APIException
+from lib_transcendence.serializer import Serializer
 
 from friends.serializers import FriendsSerializer
 from friends.utils import get_friendship
@@ -13,7 +14,7 @@ from users.auth import auth_update
 from users.models import Users
 
 
-class UsersMeSerializer(serializers.ModelSerializer):
+class UsersMeSerializer(Serializer):
     accept_friend_request = serializers.BooleanField()
     notifications = serializers.SerializerMethodField(read_only=True)
     password = serializers.CharField(write_only=True)
@@ -77,7 +78,7 @@ class UsersMeSerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
 
 
-class UsersSerializer(serializers.ModelSerializer):
+class UsersSerializer(Serializer):
     status = serializers.SerializerMethodField(read_only=True)
     friends = FriendsSerializer(source='get_friends', read_only=True)
     trophies = serializers.SerializerMethodField(read_only=True)
@@ -125,7 +126,7 @@ class UsersSerializer(serializers.ModelSerializer):
         return friendship
 
 
-class ManageUserSerializer(serializers.ModelSerializer):
+class ManageUserSerializer(Serializer):
 
     class Meta:
         model = Users

@@ -19,7 +19,6 @@ class Config:
     class Ball:
         cWidth = 20
         cHeight = 20
-        speed = 1 #convert
         width = 4
         height = 2
     class Cell:

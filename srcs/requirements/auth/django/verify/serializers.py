@@ -1,10 +1,11 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
+from lib_transcendence.serializer import Serializer
 
 from guest.group import is_guest
 
 
-class VerifyUserSerializer(serializers.ModelSerializer):
+class VerifyUserSerializer(Serializer):
     is_guest = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
