@@ -7,6 +7,7 @@ from threading import Thread
 import httpx
 
 from services.auth import register, create_guest
+from services.game import is_in_game
 from services.user import me
 from utils.generate_random import rnstr
 
@@ -96,6 +97,8 @@ class UnitTest(unittest.TestCase):
                                 continue
                             data = json.loads(data)
                             print(f"SSE RECEIVED {user['username']}: {data}", flush=True)
+                            if data['event_code'] == 'game-start':
+                                self.assertResponse(is_in_game(user, data['data']['id']), 200)
                             user['thread_assertion'].append(data['event_code'])
                             user['thread_result'] += 1
         print(f"SSE DISCONNECTING {user['username']}...\n", flush=True)
