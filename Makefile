@@ -5,13 +5,15 @@ NAME		:=	ft_transcendence
 
 SRCS_D		:=	srcs
 
-SECRETS_D	:=	secrets/
+SECRETS_D	:=	secrets
 
 ENV_EXEMPLE	:=	.env_exemple
 
-ENV_FILE	:=	./$(SRCS_D)/.env
+ENV_FILE	:=	$(SRCS_D)/.env
 
-COMPOSE_F	:=	./$(SRCS_D)/docker-compose-dev.yml
+CONFIG_F	:=	gameConfig.json
+
+COMPOSE_F	:=	$(SRCS_D)/docker-compose-dev.yml
 
 SERVICE		?=	#Leave blank
 
@@ -42,7 +44,7 @@ RESET		:=	\001\033[0m\002
 .PHONY: all
 all			:	banner $(NAME)
 
-$(NAME)		:	secrets
+$(NAME)		:	secrets config
 			$(COMPOSE) $(FLAGS) up --build $(SERVICE)
 
 .PHONY: build
@@ -87,6 +89,11 @@ secrets		:	$(ENV_EXEMPLE)
 			./launch.d/02set-hostname.sh
 			./launch.d/03genreateSSL.sh
 
+config		:	$(CONFIG_F)
+			cp $(CONFIG_F) $(SRCS_D)/requirements/pong-cli/$(CONFIG_F)
+			cp $(CONFIG_F) $(SRCS_D)/requirements/game/django/game_server/$(CONFIG_F)
+			cp $(CONFIG_F) $(SRCS_D)/requirements/frontend/static/$(CONFIG_F)
+
 .PHONY: clean
 clean		:
 			$(COMPOSE) $(FLAGS) down --rmi local --remove-orphans
@@ -108,6 +115,9 @@ fclean		:	dusting
 			rm -rf ./srcs/shared-code/lib_transcendence.egg-info/ # todo remove in prod
 			rm -rf ./srcs/shared-code/build/ # todo remove in prod
 			rm -rf $(SECRETS_D)
+			rm -rf $(SRCS_D)/requirements/pong-cli/$(CONFIG_F)
+			rm -rf $(SRCS_D)/requirements/game/django/game_server/$(CONFIG_F)
+			rm -rf $(SRCS_D)/requirements/frontend/static/$(CONFIG_F)
 
 .PHONY: dusting
 dusting		:

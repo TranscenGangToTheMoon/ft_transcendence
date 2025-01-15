@@ -9,20 +9,23 @@ from pynput import keyboard
 from rich.console   import Console
 
 # Textual imports
-from textual            import work
+from textual            import on, work
 from textual.app        import ComposeResult
 from textual.geometry   import Offset
 from textual.screen     import Screen
 from textual.widgets    import Button, Digits, Footer, Header
 
 # Local imports
-from classes.game.BallWidget                    import Ball
-from classes.game.PaddleWidget                  import Paddle
-from classes.game.PlaygroundWidget              import Playground
-from classes.modalScreens.CountdownModalScreen  import Countdown
-from classes.modalScreens.GameOverModalScreen   import GameOver
-from classes.utils.config                       import Config, SSL_CRT
-from classes.utils.user                         import User
+from classes.game.BallWidget                        import Ball
+from classes.game.PaddleWidget                      import Paddle
+from classes.game.PlaygroundWidget                  import Playground
+from classes.modalScreens.CountdownModalScreen      import Countdown
+from classes.modalScreens.GameOverModalScreen       import GameEnd
+from classes.screens.MainScreen                     import MainPage
+from classes.utils.config                           import Config
+from classes.utils.user                             import User
+
+
 
 class GamePage(Screen):
     SUB_TITLE = "Game Page"
@@ -39,14 +42,12 @@ class GamePage(Screen):
         self.aScore = 0
         self.bScore = 0
 
-        self.styles.layers = "1 2"
-
         self.pressedKeys = set()
         self.listener = None
         self.connected = False
         self.gameStarted = False
         SSLContext = ssl.create_default_context()
-        SSLContext.load_verify_locations(SSL_CRT)
+        SSLContext.load_verify_locations(Config.SSL.CRT)
         SSLContext.check_hostname = False
         connector = aiohttp.TCPConnector(ssl=SSLContext)
         self.HTTPSession = aiohttp.ClientSession(connector=connector)
@@ -61,18 +62,9 @@ class GamePage(Screen):
         console = Console()
         Config.Console.width = console.width
         Config.Console.height = console.height
-        # Score board
-        self.scoreLeft.styles.border = ("vkey", "white")
-        self.scoreLeft.styles.layer = "1"
-        self.scoreLeft.styles.color = "red"
-        self.scoreLeft.styles.width = "auto"
-        self.scoreLeft.styles.offset = Offset(Config.Console.width // 4, 5)
 
-        self.scoreRight.styles.border = ("vkey", "white")
-        self.scoreRight.styles.layer = "2"
-        self.scoreRight.styles.color = "blue"
-        self.scoreRight.styles.width = "auto"
-        self.scoreRight.styles.offset = Offset(Config.Console.width // 4 * 3 - 5, 5)
+        self.scoreLeft.styles.offset = Offset(Config.Console.width // 4, 5)
+        self.scoreRight.styles.offset = Offset(Config.Console.width // 4 * 3 - 4, 5)
 
         # Key handling
         self.listener = keyboard.Listener(
@@ -95,9 +87,9 @@ class GamePage(Screen):
         yield Button("Exit Button", id="exitAction")
         yield Footer()
 
-    def on_button_pressed(self, event: Button.Pressed) -> None:
-        if event.button.id == "exitAction":
-            self.dismiss()
+    @on(Button.Pressed, "#exitAction")
+    def exitAction(self) -> None:
+        self.dismiss()
 
     def onPress(self, key):
         try:
@@ -227,12 +219,8 @@ class GamePage(Screen):
         @self.sio.on('game_over')
         async def gameOverAction(data):
             print(f"Game over event: {data}")
-            if (data["reason"] != "normal-end"):
-                print(f"End: {data['reason']}")
-            elif (data["winner"] == User.team):
-                await self.app.push_screen(GameOver(True))
-            else:
-                await self.app.push_screen(GameOver(False))
+            if (await self.app.push_screen_wait(GameEnd(data["reason"], data["winner"] == User.team)) == "main"):
+                await self.app.switch_screen(MainPage())
             await self.sio.disconnect()
 
     async def on_unmount(self) -> None:

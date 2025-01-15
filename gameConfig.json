@@ -1,0 +1,29 @@
+{
+    "canvas": {
+        "normal": {
+            "width":800,
+            "height":600
+        },
+        "clash": {
+            "width":1800,
+            "height":750
+        }
+    },
+    "paddle": {
+        "width":30,
+        "height":200,
+        "speed":500,
+        "ledgeOffset":100,
+        "paddleOffset":200
+    },
+    "ball": {
+        "size":20,
+        "speed":240,
+        "speedIncrement":30,
+        "maxSpeed":1500,
+        "maxBounceAngle":1.2566370614359172
+    },
+    "score": {
+        "max":3
+    }
+}
