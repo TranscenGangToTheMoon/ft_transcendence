@@ -104,6 +104,7 @@ services:
       POSTGRES_HOST: ${POSTGRES_GAME_HOST}
       GAME_PLAYER_CONNECT_TIMEOUT:
       GAME_SERVER_PORT:
+      GAME_MAX_SCORE:
     networks:
       - transcendence-network
       - game-network
