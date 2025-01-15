@@ -42,8 +42,6 @@ class GamePage(Screen):
         self.aScore = 0
         self.bScore = 0
 
-        self.styles.layers = "1 2"
-
         self.pressedKeys = set()
         self.listener = None
         self.connected = False
@@ -64,18 +62,9 @@ class GamePage(Screen):
         console = Console()
         Config.Console.width = console.width
         Config.Console.height = console.height
-        # Score board
-        self.scoreLeft.styles.border = ("vkey", "white")
-        self.scoreLeft.styles.layer = "1"
-        self.scoreLeft.styles.color = "red"
-        self.scoreLeft.styles.width = "auto"
-        self.scoreLeft.styles.offset = Offset(Config.Console.width // 4, 5)
 
-        self.scoreRight.styles.border = ("vkey", "white")
-        self.scoreRight.styles.layer = "2"
-        self.scoreRight.styles.color = "blue"
-        self.scoreRight.styles.width = "auto"
-        self.scoreRight.styles.offset = Offset(Config.Console.width // 4 * 3 - 5, 5)
+        self.scoreLeft.styles.offset = Offset(Config.Console.width // 4, 5)
+        self.scoreRight.styles.offset = Offset(Config.Console.width // 4 * 3 - 4, 5)
 
         # Key handling
         self.listener = keyboard.Listener(
