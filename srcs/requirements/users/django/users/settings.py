@@ -145,14 +145,6 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
-    'DEFAULT_THROTTLE_CLASSES': [
-        'rest_framework.throttling.AnonRateThrottle',
-        'rest_framework.throttling.UserRateThrottle',
-    ],
-    'DEFAULT_THROTTLE_RATES': {
-        'anon': '1/second',  # 10 requests per minute for anonymous users
-        'user': '1/second',   # 100 requests per hour for authenticated users
-    },
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'lib_transcendence.auth.Authentication',
     ],
