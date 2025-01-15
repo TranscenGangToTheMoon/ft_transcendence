@@ -2,12 +2,14 @@ from aiohttp import web
 from game_server import io_handlers
 from game_server.match import Player
 from game_server.game import Game
+from game_server.pong_racket import Racket
 from game_server.pong_position import Position
 from threading import Lock, Thread
 from typing import Dict
 import logging
 import asyncio
 import socketio
+import os
 import time
 
 
@@ -40,6 +42,18 @@ class Server:
         Server._games_lock = Lock()
         Server._loop_lock = Lock()
         Server._sio_lock = Lock()
+        try:
+            Game.default_ball_speed = int(os.environ['GAME_DEFAULT_BALL_SPEED'])
+            Game.ball_size = int(os.environ['GAME_BALL_SIZE'])
+            Racket.width = int(os.environ['GAME_RACKET_WIDTH'])
+            Racket.height = int(os.environ['GAME_RACKET_HEIGHT'])
+            Racket.max_speed = int(os.environ['GAME_RACKET_MAX_SPEED'])
+        except KeyError:
+            Game.default_ball_speed = 240
+            Game.ball_size = 20
+            Racket.width = 30
+            Racket.height = 200
+            Racket.max_speed = 500
         port = 5500
         print(f"SocketIO server running on port {port}", flush=True)
         web.run_app(Server._app, host='0.0.0.0', port=port, loop=Server._loop)
@@ -76,8 +90,7 @@ class Server:
 
     @staticmethod
     def create_game(match):
-        canvas = Position(800, 600)
-        game = Game(Server._sio, match, canvas)
+        game = Game(Server._sio, match)
         Server.push_game(match.id, game)
         Thread(target=Server._games[match.id].launch).start()
 
