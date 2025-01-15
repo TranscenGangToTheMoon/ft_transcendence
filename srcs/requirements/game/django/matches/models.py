@@ -1,3 +1,4 @@
+import os
 from datetime import timedelta, datetime, timezone
 
 from lib_transcendence.exceptions import ServiceUnavailable
@@ -66,7 +67,7 @@ class Teams(models.Model):
     def scored(self):
         self.score += 1
         self.save()
-        if self.score == 3:
+        if self.score == os.environ['GAME_MAX_SCORE']:
             self.match.finish()
 
 
