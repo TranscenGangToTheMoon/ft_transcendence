@@ -19,9 +19,9 @@ from textual.widgets    import Button, Digits, Footer, Header
 from classes.game.BallWidget                        import Ball
 from classes.game.PaddleWidget                      import Paddle
 from classes.game.PlaygroundWidget                  import Playground
-from classes.modalScreens.AbnormalEndModalScreen    import AbnormalEnd
 from classes.modalScreens.CountdownModalScreen      import Countdown
-from classes.modalScreens.GameOverModalScreen       import GameOver
+from classes.modalScreens.GameOverModalScreen       import GameEnd
+from classes.screens.MainScreen                     import MainPage
 from classes.utils.config                           import Config
 from classes.utils.user                             import User
 
@@ -219,13 +219,8 @@ class GamePage(Screen):
         @self.sio.on('game_over')
         async def gameOverAction(data):
             print(f"Game over event: {data}")
-            if (data["reason"] == Config.FinishReason.NORMAL_END):
-                if (data["winner"] == User.team):
-                    await self.app.push_screen(GameOver(True))
-                else:
-                    await self.app.push_screen(GameOver(False))
-            else:
-                await self.app.push_screen(AbnormalEnd(data["reason"]))
+            if (await self.app.push_screen_wait(GameEnd(data["reason"], data["winner"] == User.team)) == "main"):
+                await self.app.switch_screen(MainPage())
             await self.sio.disconnect()
 
     async def on_unmount(self) -> None:
