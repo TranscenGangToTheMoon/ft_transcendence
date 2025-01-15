@@ -6,11 +6,10 @@ from textual.widgets    import Static
 from textual.screen     import ModalScreen
 
 class GameOver(ModalScreen):
-    # CSS_PATH = "styles/GameOverModalScreen.tcss"
+    # CSS_PATH = "styles/GameOver.tcss"
     DEFAULT_CSS = """
         GameOver {
             align: center middle;
-            background: red 15%;
         }
         Static {
             align: center middle;

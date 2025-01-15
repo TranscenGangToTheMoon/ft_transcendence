@@ -16,13 +16,16 @@ from textual.screen     import Screen
 from textual.widgets    import Button, Digits, Footer, Header
 
 # Local imports
-from classes.game.BallWidget                    import Ball
-from classes.game.PaddleWidget                  import Paddle
-from classes.game.PlaygroundWidget              import Playground
-from classes.modalScreens.CountdownModalScreen  import Countdown
-from classes.modalScreens.GameOverModalScreen   import GameOver
-from classes.utils.config                       import Config, SSL_CRT
-from classes.utils.user                         import User
+from classes.game.BallWidget                        import Ball
+from classes.game.PaddleWidget                      import Paddle
+from classes.game.PlaygroundWidget                  import Playground
+from classes.modalScreens.AbnormalEndModalScreen    import AbnormalEnd
+from classes.modalScreens.CountdownModalScreen      import Countdown
+from classes.modalScreens.GameOverModalScreen       import GameOver
+from classes.utils.config                           import Config
+from classes.utils.user                             import User
+
+
 
 class GamePage(Screen):
     SUB_TITLE = "Game Page"
@@ -227,12 +230,13 @@ class GamePage(Screen):
         @self.sio.on('game_over')
         async def gameOverAction(data):
             print(f"Game over event: {data}")
-            if (data["reason"] != "normal-end"):
-                print(f"End: {data['reason']}")
-            elif (data["winner"] == User.team):
-                await self.app.push_screen(GameOver(True))
+            if (data["reason"] == Config.FinishReason.NORMAL_END):
+                if (data["winner"] == User.team):
+                    await self.app.push_screen(GameOver(True))
+                else:
+                    await self.app.push_screen(GameOver(False))
             else:
-                await self.app.push_screen(GameOver(False))
+                await self.app.push_screen(AbnormalEnd(data["reason"]))
             await self.sio.disconnect()
 
     async def on_unmount(self) -> None:
