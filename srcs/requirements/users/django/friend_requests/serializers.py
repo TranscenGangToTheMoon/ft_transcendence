@@ -1,4 +1,5 @@
 from lib_transcendence.exceptions import MessagesException, ResourceExists
+from lib_transcendence.serializer import Serializer
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
 
@@ -8,7 +9,7 @@ from users.auth import get_user, get_valid_user
 from users.serializers_utils import SmallUsersSerializer
 
 
-class FriendRequestsSerializer(serializers.ModelSerializer):
+class FriendRequestsSerializer(Serializer):
     username = serializers.CharField(write_only=True)
     sender = SmallUsersSerializer(read_only=True)
     receiver = SmallUsersSerializer(read_only=True)

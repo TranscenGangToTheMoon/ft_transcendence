@@ -1,12 +1,13 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
 from lib_transcendence.generate import generate_guest_username
+from lib_transcendence.serializer import Serializer
 
 from auth.utils import create_user_get_token
 from guest.group import get_group_guest
 
 
-class GuestTokenSerializer(serializers.ModelSerializer):
+class GuestTokenSerializer(Serializer):
     access = serializers.CharField(read_only=True)
     refresh = serializers.CharField(read_only=True)
 

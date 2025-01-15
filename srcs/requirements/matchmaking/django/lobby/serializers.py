@@ -6,6 +6,7 @@ from lib_transcendence.generate import generate_code
 from lib_transcendence.sse_events import EventCode, create_sse_event
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
+from lib_transcendence.serializer import Serializer
 
 from blocking.utils import create_player_instance
 from lobby.models import Lobby, LobbyParticipants
@@ -15,7 +16,7 @@ from matchmaking.utils.sse import send_sse_event
 from matchmaking.utils.user import verify_user
 
 
-class LobbyGetParticipantsSerializer(serializers.ModelSerializer):
+class LobbyGetParticipantsSerializer(Serializer):
     id = serializers.IntegerField(source='user_id')
 
     class Meta:
@@ -36,7 +37,7 @@ class LobbyGetParticipantsSerializer(serializers.ModelSerializer):
         return representation
 
 
-class LobbySerializer(serializers.ModelSerializer):
+class LobbySerializer(Serializer):
     participants = serializers.SerializerMethodField(read_only=True)
     match_type = serializers.CharField(max_length=3, required=False)
 
@@ -126,7 +127,7 @@ class LobbySerializer(serializers.ModelSerializer):
         return result
 
 
-class LobbyParticipantsSerializer(serializers.ModelSerializer):
+class LobbyParticipantsSerializer(Serializer):
     creator = serializers.BooleanField(read_only=True)
     id = serializers.IntegerField(source='user_id', read_only=True)
 

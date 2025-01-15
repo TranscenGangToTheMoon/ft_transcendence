@@ -154,8 +154,8 @@ class MessagesException:
         SSE = 'Failed to create SSE event.'
         game = SERVICE_UNAVAILABLE.format(service='game')
 
-    class ValueError:
-        RANGE_VALUE = 'Range lookup requires a tuple of two int.'
+    class ThrottledError:
+        DEFAULT = 'Request was throttled.'
 
 
 class ServiceUnavailable(APIException):
@@ -190,3 +190,9 @@ class Conflict(APIException):
         if detail is None:
             detail = self.default_detail
         self.detail = detail
+
+
+class Throttled(APIException):
+    status_code = status.HTTP_429_TOO_MANY_REQUESTS
+    default_detail = MessagesException.ThrottledError.DEFAULT
+    default_code = 'throttled'

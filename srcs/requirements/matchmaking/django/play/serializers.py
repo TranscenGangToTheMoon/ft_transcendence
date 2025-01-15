@@ -1,15 +1,13 @@
-from lib_transcendence.game import GameMode
 from lib_transcendence.auth import get_auth_user
-from lib_transcendence.exceptions import MessagesException
 from rest_framework import serializers
-from rest_framework.exceptions import PermissionDenied
+from lib_transcendence.serializer import Serializer
 
 from blocking.utils import create_player_instance
 from matchmaking.utils.user import verify_user
 from play.models import Players
 
 
-class PlayersSerializer(serializers.ModelSerializer):
+class PlayersSerializer(Serializer):
     id = serializers.IntegerField(source='user_id', read_only=True)
 
     class Meta:

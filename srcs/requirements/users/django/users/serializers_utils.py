@@ -1,10 +1,11 @@
 from rest_framework import serializers
+from lib_transcendence.serializer import Serializer
 
 from stats.utils import get_trophies
 from users.models import Users
 
 
-class SmallUsersSerializer(serializers.ModelSerializer):
+class SmallUsersSerializer(Serializer):
     status = serializers.SerializerMethodField(read_only=True)
     trophies = serializers.SerializerMethodField(read_only=True)
 

@@ -4,6 +4,7 @@ from lib_transcendence.services import request_users
 from lib_transcendence.users import retrieve_users
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
+from lib_transcendence.serializer import Serializer
 
 from chat_messages.serializers import MessagesSerializer
 from chats.models import Chats, ChatParticipants
@@ -11,7 +12,7 @@ from chats.utils import get_chat_together
 from user_management.models import Users
 
 
-class ChatsSerializer(serializers.ModelSerializer):
+class ChatsSerializer(Serializer):
     username = serializers.CharField(write_only=True)
     chat_with = serializers.SerializerMethodField(read_only=True)
     unread_messages = serializers.SerializerMethodField(read_only=True)

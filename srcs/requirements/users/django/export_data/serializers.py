@@ -1,8 +1,8 @@
 from lib_transcendence import endpoints
-from lib_transcendence.pagination import get_all_pagination_items
 from lib_transcendence.services import request_chat, request_game
 from rest_framework import serializers
 from rest_framework.exceptions import APIException
+from lib_transcendence.serializer import Serializer
 
 from blocking.serializers import BlockedSerializer
 from friend_requests.serializers import FriendRequestsSerializer
@@ -12,7 +12,7 @@ from users.models import Users
 from users.serializers import UsersMeSerializer
 
 
-class FriendDataSerializer(serializers.ModelSerializer):
+class FriendDataSerializer(Serializer):
     friends = FriendsSerializer(many=True)
     friend_requests_sent = FriendRequestsSerializer(many=True)
     friend_requests_received = FriendRequestsSerializer(many=True)
@@ -28,7 +28,7 @@ class FriendDataSerializer(serializers.ModelSerializer):
         ]
 
 
-class DownloadDataSerializer(serializers.ModelSerializer):
+class DownloadDataSerializer(Serializer):
     user_data = UsersMeSerializer(source='*')
     friend_data = FriendDataSerializer(source='*')
     stats_data = StatsSerializer(source='stats', many=True)

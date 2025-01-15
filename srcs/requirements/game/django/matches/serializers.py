@@ -4,6 +4,7 @@ from lib_transcendence.exceptions import MessagesException, Conflict, ResourceEx
 from lib_transcendence.users import retrieve_users
 from rest_framework import serializers
 from rest_framework.exceptions import NotFound, PermissionDenied
+from lib_transcendence.serializer import Serializer
 
 from matches.models import Matches, Teams, Players
 
@@ -38,7 +39,7 @@ class TeamsSerializer(serializers.Serializer):
         return attr
 
 
-class MatchSerializer(serializers.ModelSerializer):
+class MatchSerializer(Serializer):
     teams = TeamsSerializer(write_only=True)
     score_winner = serializers.IntegerField(read_only=True)
     score_looser = serializers.IntegerField(read_only=True)
@@ -134,7 +135,7 @@ class MatchSerializer(serializers.ModelSerializer):
         return match
 
 
-class TournamentMatchSerializer(serializers.ModelSerializer):
+class TournamentMatchSerializer(Serializer):
     n = serializers.IntegerField(source='tournament_n')
     score_winner = serializers.IntegerField(source='winner.score')
     score_looser = serializers.IntegerField(source='looser.score')
@@ -173,7 +174,7 @@ class TournamentMatchSerializer(serializers.ModelSerializer):
         return {'id': obj.winner.players.first().user_id}
 
 
-class MatchFinishSerializer(serializers.ModelSerializer):
+class MatchFinishSerializer(Serializer):
     user_id = serializers.IntegerField(required=True, write_only=True)
     finish_reason = serializers.CharField(required=True)
 
@@ -212,7 +213,7 @@ class MatchFinishSerializer(serializers.ModelSerializer):
         return result
 
 
-class ScoreSerializer(serializers.ModelSerializer):
+class ScoreSerializer(Serializer):
     own_goal = serializers.BooleanField(required=False)
 
     class Meta:
