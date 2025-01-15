@@ -1,0 +1,13 @@
+Countdown {
+    align: center middle;
+    background: black 0%;
+}
+
+#countdown {
+    align: center middle;
+    width: 10;
+    height: auto;
+    border: round white;
+    background: gray;
+    padding: 1 2;
+}
