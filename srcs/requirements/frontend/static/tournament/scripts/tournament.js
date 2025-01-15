@@ -505,10 +505,6 @@ async function initTournament(){
     await indexInit(false);
 	if (window.location.pathname === '/')
 		return;
-	if (userInformations.is_guest){
-		await navigateTo('/');
-		return displayMainAlert('Error', 'You do not have permission to play in tournaments');
-	}
 	loadCSS('/tournament/css/tournament.css', false);
 	setTournamentOptions();
 
