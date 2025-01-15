@@ -1,10 +1,10 @@
 from lib_transcendence import endpoints
-from lib_transcendence.auth import get_auth_user
 from lib_transcendence.exceptions import MessagesException, ResourceExists
 from lib_transcendence.services import request_users
 from lib_transcendence.users import retrieve_users
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
+from lib_transcendence.serializer import Serializer
 
 from chat_messages.serializers import MessagesSerializer
 from chats.models import Chats, ChatParticipants
@@ -12,7 +12,7 @@ from chats.utils import get_chat_together
 from user_management.models import Users
 
 
-class ChatsSerializer(serializers.ModelSerializer):
+class ChatsSerializer(Serializer):
     username = serializers.CharField(write_only=True)
     chat_with = serializers.SerializerMethodField(read_only=True)
     unread_messages = serializers.SerializerMethodField(read_only=True)
@@ -39,22 +39,15 @@ class ChatsSerializer(serializers.ModelSerializer):
         ]
 
     def get_chat_with(self, obj):
-        request = self.context.get('request')
-        if request is None:
-            raise serializers.ValidationError(MessagesException.ValidationError.REQUEST_REQUIRED)
-        chat_with = obj.participants.exclude(user__id=get_auth_user(request)['id']).first()
+        chat_with = obj.participants.exclude(user__id=self.context['auth_user']['id']).first()
         chat_with_user = retrieve_users(chat_with.user.id)
         return chat_with_user[0]
 
     def get_unread_messages(self, obj):
-        request = self.context.get('request')
-        if request is None:
-            raise serializers.ValidationError(MessagesException.ValidationError.REQUEST_REQUIRED)
-        return obj.messages.exclude(author__id=get_auth_user(request)['id']).filter(is_read=False).count()
+        return obj.messages.exclude(author__id=self.context['auth_user']['id']).filter(is_read=False).count()
 
     def create(self, validated_data):
-        request = self.context.get('request')
-        user = get_auth_user(request)
+        user = self.context['auth_user']
 
         username = validated_data.pop('username')
         if username == user['username']:
@@ -63,7 +56,7 @@ class ChatsSerializer(serializers.ModelSerializer):
         if get_chat_together(user['username'], username):
             raise ResourceExists(MessagesException.ResourceExists.CHAT)
 
-        user2 = request_users(endpoints.Users.fchat.format(user1_id=user['id'], username2=username), 'GET', request)
+        user2 = request_users(endpoints.Users.fchat.format(user1_id=user['id'], username2=username), 'GET')
         result = super().create(validated_data)
         for u in (user, user2):
             user_instance, created = Users.objects.get_or_create(id=u['id'], username=u['username'])

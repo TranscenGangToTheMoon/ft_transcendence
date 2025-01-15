@@ -4,12 +4,13 @@ from lib_transcendence.exceptions import MessagesException
 from lib_transcendence.services import request_chat
 from rest_framework import serializers
 from rest_framework.exceptions import APIException
+from lib_transcendence.serializer import Serializer
 
 from auth.validators import validate_username, set_password
 from guest.group import is_guest
 
 
-class UpdateSerializer(serializers.ModelSerializer):
+class UpdateSerializer(Serializer):
     username = serializers.CharField(write_only=True, validators=[validate_username])
     password = serializers.CharField(write_only=True)
     old_password = serializers.CharField(write_only=True, required=False)

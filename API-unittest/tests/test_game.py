@@ -63,6 +63,26 @@ class Test01_Game(UnitTest):
     def test_006_no_teams(self):
         self.assertResponse(create_game(data={'game_mode': 'ranked'}), 400, {'teams': ['This field is required.']})
 
+    def test_007_game_timeout(self):
+        user1 = self.user(['game-start'])
+        user2 = self.user(['game-start'])
+
+        self.assertResponse(create_game(user1, user2), 201)
+        self.assertResponse(is_in_game(user1), 200)
+        time.sleep(15)
+        self.assertResponse(is_in_game(user1), 404)
+        self.assertThread(user1, user2)
+
+    def test_008_game_does_not_timeout(self):
+        user1 = self.user(['game-start'])
+        user2 = self.user(['game-start'])
+
+        id = self.assertResponse(create_game(user1, user2), 201, get_field=True)
+        self.assertResponse(is_in_game(user1, id), 200)
+        time.sleep(15)
+        self.assertResponse(is_in_game(user1), 200)
+        self.assertThread(user1, user2)
+
 
 class Test02_Score(UnitTest):
 

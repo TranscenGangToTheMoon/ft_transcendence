@@ -273,7 +273,7 @@ class Game:
         from game_server.server import Server
         print('finishing game', flush=True)
         self.send_finish(finish_reason, winner)
-        if (finish_reason == FinishReason.PLAYER_ABANDON):
+        if (finish_reason == FinishReason.PLAYER_DISCONNECT):
             self.disconnect_players()
         else:
             self.disconnect_players(disconnected_user_id)

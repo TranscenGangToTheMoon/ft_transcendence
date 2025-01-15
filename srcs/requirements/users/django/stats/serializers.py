@@ -1,12 +1,13 @@
 from rest_framework import serializers
 from lib_transcendence.game import GameMode
 from rest_framework.exceptions import APIException
+from lib_transcendence.serializer import Serializer
 
 from stats.models import GameModeStats, RankedStats
 from users.auth import get_user
 
 
-class StatsSerializer(serializers.ModelSerializer):
+class StatsSerializer(Serializer):
     class Meta:
         model = GameModeStats
         fields = [
@@ -29,7 +30,7 @@ class StatsSerializer(serializers.ModelSerializer):
         return representation
 
 
-class RankedStatsSerializer(serializers.ModelSerializer):
+class RankedStatsSerializer(Serializer):
     class Meta:
         model = RankedStats
         fields = '__all__'

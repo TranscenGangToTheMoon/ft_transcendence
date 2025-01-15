@@ -28,16 +28,18 @@ class Test01_Tournament(UnitTest):
         self.assertThread(user1, user2)
 
     def test_003_join_two_tournament(self):
-        user1 = self.user(['tournament-join', 'tournament-leave'])
+        user1 = self.user(['tournament-join', 'tournament-leave', 'tournament-join'])
         user2 = self.user()
         user3 = self.user(['tournament-join'])
+        user4 = self.user(guest=True)
 
         code1 = self.assertResponse(create_tournament(user1), 201, get_field='code')
         code2 = self.assertResponse(create_tournament(user3), 201, get_field='code')
         self.assertResponse(join_tournament(user2, code1), 201)
         self.assertResponse(join_tournament(user2, code1, method='DELETE'), 204)
         self.assertResponse(join_tournament(user2, code2), 201)
-        self.assertThread(user1, user2, user3)
+        self.assertResponse(join_tournament(user4, code1), 201)
+        self.assertThread(user1, user2, user3, user4)
 
 
 class Test02_ErrorTournament(UnitTest):
@@ -651,7 +653,7 @@ class Test10_FinishTournament(UnitTest):
         user5 = self.user([tj, tj, tsa, tj, ts, gs, tmf, tmf, tmf, tmf, gs, tmf, tmf, tmf, tf])
         user6 = self.user([tj, tsa, tj, ts, gs, tmf, tmf, tmf, tmf, tmf, tmf, tmf, tf])
         user7 = self.user([tsa, tj, ts, gs, tmf, tmf, tmf, tmf, tmf, tmf, tmf, tf])
-        user8 = self.user([ts, gs, tmf, tmf, tmf, tmf, tmf, tmf, tmf, tf])
+        user8 = self.user([gs, tmf, tmf, tmf, tmf, tmf, tmf, tmf, tf])
 
         self.assertResponse(set_trophies(user1, 500), 201)
         self.assertResponse(set_trophies(user2, 400), 201)
