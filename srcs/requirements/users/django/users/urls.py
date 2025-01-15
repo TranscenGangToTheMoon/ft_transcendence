@@ -43,8 +43,6 @@ urlpatterns = [
     path(UsersManagement.manage_user, manage_user_view),
 ]
 
-# todo fix github issue
-
 # --- OTHER ---
 # todo test tournament with ui
 # todo test tournament abandon
