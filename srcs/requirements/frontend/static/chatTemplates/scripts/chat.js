@@ -3,7 +3,7 @@ function parsChatInfo(chat) {
 		'chatId': chat.id,
 		'target': chat.chat_with.username,
 		'targetId': chat.chat_with.id,
-		'lastMessage': '< Say hi! >',
+		'lastMessage': null,
 		'isLastMessageRead': false,
 		'chatMessageNext': null,
 	};
@@ -37,18 +37,18 @@ function displayChatError(error, idDiv) {
 	}
 }
 
-function disconnect() {
+async function disconnect() {
 	if (typeof window.socket === 'undefined')	return;
 	if (socket === null)	return;
 	console.log("Chat: Closing the connection to the server...");
 	socket.off();
-	socket.disconnect();
+	await socket.disconnect();
 	socket = null;
 }
 
 async function connect(token, chatInfo) {
 	clearChatError();
-	if(typeof window.socket !== 'undefined')	disconnect();
+	if(typeof window.socket !== 'undefined')	await disconnect();
 	let socket = await io("/", {
 		path: "/ws/chat/",
 		transports: ['websocket'],
@@ -87,7 +87,6 @@ function setupSocketListeners(chatInfo)
 	
 	socket.on("disconnect", () => {
 		console.log("Chat: Disconnected from the server");
-		closeChatTab(chatInfo);
 	});
 	
 	socket.on("message", (data) => {
@@ -117,6 +116,7 @@ function setupSocketListeners(chatInfo)
 		else {
 			console.log('Error chat:', data);
 			if (data.message === undefined) data.message = 'Error with chat server';
+			closeChatTab(chatInfo);
 			displayChatError(data.message, 'container');
 		}
 	});
@@ -160,7 +160,7 @@ async function loadOldMessages(chatInfo){
 	try {
 		clearChatError();
 		console.log('Chat: Loading old messages', chatInfo);
-		var apiAnswer = await apiRequest(getAccessToken(), `${baseAPIUrl}/chat/${chatInfo.chatId}/messages`, 'GET');
+		var apiAnswer = await apiRequest(getAccessToken(), `${baseAPIUrl}/chat/${chatInfo.chatId}/messages/`, 'GET');
 		if (apiAnswer.detail){
 			return {'code': 400, 'detail': apiAnswer.detail};
 		};
@@ -193,7 +193,12 @@ async function createChatUserCard(chatInfo) {
 
 	await loadContent('/chatTemplates/chatUserCard.html', chatUserCard.id);
 	chatUserCard.querySelector('.chatUserCardTitleUsername').innerText = chatInfo.target + ':';
-	chatUserCard.querySelector('.chatUserCardLastMessage').innerText = (chatInfo.lastMessage);
+	if (chatInfo.lastMessage === null) {
+		chatUserCard.querySelector('.chatUserCardLastMessage').innerText = 'Start the conversation ;)';
+	}
+	else {
+		chatUserCard.querySelector('.chatUserCardLastMessage').innerText = (chatInfo.lastMessage);
+	}
 	var chatUserCardLastMessage = chatUserCard.querySelector('.chatUserCardLastMessage');
 	if (chatInfo.isLastMessageRead === false)
 		chatUserCardLastMessage.classList.add('chatMessageNotRead');
@@ -310,7 +315,7 @@ async function searchChatButton(username) {
 		console.log('Chat: Chat already exist => loading chat');
 		try {
 			clearChatError();
-			var chatRequest = await apiRequest(getAccessToken(), `${baseAPIUrl}/chat/${apiAnswer.results[0].id}`, 'GET');
+			var chatRequest = await apiRequest(getAccessToken(), `${baseAPIUrl}/chat/${apiAnswer.results[0].id}/`, 'GET');
 			if (chatRequest.detail){
 				throw {'code': 400, 'detail': chatRequest.detail};
 			}
@@ -340,12 +345,12 @@ async function closeChatTab(chatInfo, )
 	openChat['chatTab' + chatInfo.target] = undefined;
 	let lastTab = document.getElementById('chatTabs').lastElementChild;
 	if (!lastTab) {
-		disconnect();
+		await disconnect();
 		console.log('Chat: No more chat', lastTab);
 		document.getElementById('chatView').remove();
 	}
 	else if (isTabActive) {
-		disconnect();
+		await disconnect();
 		lastTab.querySelector('a').click();
 		await connect(getAccessToken(), openChat[lastTab.id]);
 		lastClick = lastTab;
@@ -459,9 +464,6 @@ async function openChatTab(chatInfo)
 	if (!chatTabs) {
 		await loadContent('/chatTemplates/chatTabs.html', 'container', true);
 	}
-	else {
-		disconnect();
-	}
 	if (!document.getElementById('chatTab'+chatInfo.target))
 	{
 		openChat['chatTab' + chatInfo.target] = chatInfo;
@@ -488,10 +490,10 @@ async function openChatTab(chatInfo)
 	await connect(getAccessToken(), chatInfo);
 	document.getElementById('searchChatForm').reset();
 
-	document.getElementById('logOut').addEventListener('click', () => {
-		disconnect();
+	document.getElementById('logOut').addEventListener('click', async () => {
+		await disconnect();
 		openChat = {};
-		document.getElementById('chatView').remove();
+		document.getElementById('chatTabs').remove();
 	});
 
 	messagesDiv = document.getElementById('messages'+chatInfo.target);
