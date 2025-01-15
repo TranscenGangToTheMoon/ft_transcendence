@@ -511,6 +511,23 @@ async function openChatTab(chatInfo)
 	});
 }
 
+async function displayGameInviteInChat(inviteInfo) {
+	messagesDiv = document.getElementById('messages'+inviteInfo.user);
+	console.log('Chat: Displaying game invite in chat', inviteInfo, messagesDiv);
+	if (!messagesDiv) {
+		console.log('Error chat: messagesDiv not found');
+		return;
+	}
+	var chatInviteGameBox = document.getElementById('chatInviteGameBox' + inviteInfo.user);
+	if (chatInviteGameBox) chatInviteGameBox.remove();
+	chatInviteGameBox = document.createElement('div');
+	messagesDiv.appendChild(chatInviteGameBox);
+	messageDiv.scrollTop = messageDiv.scrollHeight;
+	chatInviteGameBox.id = 'chatInviteGameBox' + inviteInfo.user;
+	chatInviteGameBox.classList.add('chatInviteGameBox');
+	await loadContent('/chatTemplates/chatInviteGameBox.html', 'chatInviteGameBox' + inviteInfo.user);
+}
+
 var lastClick = undefined;
 if (typeof openChat === 'undefined')
 	var openChat = {};
