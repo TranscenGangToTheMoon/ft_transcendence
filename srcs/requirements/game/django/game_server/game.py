@@ -36,7 +36,7 @@ class Game:
         rackets: List[Racket] = []
         try:
             ledge_offset = int(os.environ['GAME_RACKET_LEDGE_OFFSET'])
-            racket_to_racket_offset = int(os.environ['GAME_RACKET_TO_PADDLE_OFFSET'])
+            racket_to_racket_offset = int(os.environ['GAME_RACKET_TO_RACKET_OFFSET'])
         except KeyError:
             ledge_offset = 100
             racket_to_racket_offset = 200
