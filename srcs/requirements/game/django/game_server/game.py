@@ -274,7 +274,7 @@ class Game:
                 if player.user_id == disconnected_user_id:
                     disc_sid = player.socket_id
                 players.append(player)
-        Server.disconnect(players, disc_sid)
+        Server.disconnect(players=players, disconnected_sid=disc_sid)
 
     def finish(self, finish_reason: str, winner: str | None = None, disconnected_user_id: int | None = None):
         from game_server.server import Server
