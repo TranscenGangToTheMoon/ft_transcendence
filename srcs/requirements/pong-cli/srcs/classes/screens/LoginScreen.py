@@ -10,7 +10,7 @@ from textual.widgets    import Button, Footer, Header, Input, Static
 
 # Local imports
 from classes.screens.MainScreen import MainPage
-from classes.utils.config       import SSL_CRT
+from classes.utils.config       import Config
 from classes.utils.user         import User
 
 class LoginPage(Screen):
@@ -42,7 +42,7 @@ class LoginPage(Screen):
         host = urlparse(User.server).hostname
         port = urlparse(User.server).port
         if (host and port):
-            os.system(f"openssl s_client -connect {host}:{port} -servername {host} </dev/null 2>/dev/null | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > {SSL_CRT}")
+            os.system(f"openssl s_client -connect {host}:{port} -servername {host} </dev/null 2>/dev/null | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > {Config.SSL.CRT}")
 
     def loginAction(self):
         if (self.query_one("#server").value and self.query_one("#username").value and self.query_one("#password").value):

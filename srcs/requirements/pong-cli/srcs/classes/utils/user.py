@@ -3,7 +3,7 @@ import json
 import requests
 
 # Local imports
-from classes.utils.config   import SSL_CRT
+from classes.utils.config   import Config
 
 class User():
     accessToken: str | None = None
@@ -22,7 +22,7 @@ class User():
             raise (Exception("Hostname not define"))
 
         data = json.dumps( {"username": User.username, "password": User.password})
-        User.response = requests.post(url=f"{User.server}/api/auth/login/", data=data, headers=User.headers, verify=SSL_CRT)
+        User.response = requests.post(url=f"{User.server}/api/auth/login/", data=data, headers=User.headers, verify=Config.SSL.CRT)
         print(User.response.json())
         if (User.response.status_code >= 300):
             if (User.response.json()["detail"] is not None):
@@ -38,7 +38,7 @@ class User():
         if (User.server is None):
             raise (Exception("Hostname not define"))
 
-        User.response = requests.post(url=f"{User.server}/api/auth/guest/", data={}, headers=User.headers, verify=SSL_CRT)
+        User.response = requests.post(url=f"{User.server}/api/auth/guest/", data={}, headers=User.headers, verify=Config.SSL.CRT)
         if (User.response.status_code >= 300):
             raise (Exception("Guest failed " + str(User.response.status_code)))
 
@@ -52,7 +52,7 @@ class User():
             raise (Exception("Hostname not define"))
 
         data = json.dumps({"username": User.username, "password": User.password})
-        User.response = requests.post(url=f"{User.server}/api/auth/register/", data=data, headers=User.headers, verify=SSL_CRT)
+        User.response = requests.post(url=f"{User.server}/api/auth/register/", data=data, headers=User.headers, verify=Config.SSL.CRT)
         print(User.response.json())
         if (User.response.status_code >= 300):
             if (User.response.status_code == 401 and User.response.json()["code"] is not None):
@@ -74,7 +74,7 @@ class User():
             raise (Exception("Tokens not sets, please guest"))
 
         data = json.dumps({"username": User.username, "password": User.password})
-        User.response = requests.put(url=f"{User.server}/api/auth/register/guest/", data=data, headers=User.headers, verify=SSL_CRT)
+        User.response = requests.put(url=f"{User.server}/api/auth/register/guest/", data=data, headers=User.headers, verify=Config.SSL.CRT)
         if (User.response.status_code >= 300):
             if (User.response.json()["username"] is not None):
                 reason = User.response.json()["username"]

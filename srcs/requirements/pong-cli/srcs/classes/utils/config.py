@@ -24,7 +24,7 @@ class Config:
     class Cell:
         width = 7
         height = 15
+    class SSL:
+        CRT = "ft_transcendence.crt"
+        KEY = "ft_transcendence.key"
     frameRate = 60
-
-SSL_CRT = "./ft_transcendence.crt"
-SSL_KEY = "./ft_transcendence.key"
