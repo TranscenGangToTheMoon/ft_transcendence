@@ -154,15 +154,18 @@
     function resetGame(){
         state.playerScore = 0;
         state.enemyScore = 0;
-        state.ball =  {
+        state.ball = {
             x: config.canvasWidth / 2 - config.ballSize / 2,
             y: config.canvasHeight / 2 - config.ballSize / 2,
             speedX: config.defaultBallSpeed,
             speedY: config.defaultBallSpeed,
             speed: config.defaultBallSpeed,
-        },
-        state.paddles.left.y = (config.canvasHeight - config.paddleHeight) / 2;
-        state.paddles.right.y = state.paddles.left.y;
+        }
+
+        for (let paddle in state.paddles){
+            paddle = state.paddles[paddle];
+            paddle.y = (config.canvasHeight - config.paddleHeight) / 2;
+        }
     }
 
     function stopGame(animate=false, reason=undefined) {
@@ -222,8 +225,13 @@
     function animatePaddlesToMiddle(){
         // state.isCountDownActive = true;
         const startTime = performance.now();
-        const startLeft = state.paddles.left.y;
-        const startRight = state.paddles.right.y;
+        const startPositions = {};
+        for (let paddle in state.paddles){
+            // paddle = state.paddles[paddle];
+            startPositions[paddle] = state.paddles[paddle].y;
+        }
+        // const startLeft = state.paddles.left.y;
+        // const startRight = state.paddles[userInformations.id].y;
         const target = (config.canvasHeight - config.paddleHeight) / 2;
 
         function updatePaddleAnimation(currentTime) {
@@ -234,8 +242,11 @@
 
             const easeOutProgress = 1 - Math.pow(1 - progress, 3);
 
-            state.paddles.left.y = startLeft + (target - startLeft) * easeOutProgress;
-            state.paddles.right.y = startRight + (target - startRight) * easeOutProgress;
+            for (let i in startPositions){
+                state.paddles[i].y = startPositions[i] + (target - startLeft) * easeOutProgress;
+            }
+            // state.paddles.left.y = startLeft + (target - startLeft) * easeOutProgress;
+            // state.paddles[userInformations.id].y = startRight + (target - startRight) * easeOutProgress;
 
             drawPaddleReturn();
 
@@ -252,20 +263,8 @@
         for (paddle in state.paddles){
             paddle = state.paddles[paddle];
             ctx.clearRect(paddle.x, 0, config.paddleWidth, config.canvasHeight);
+            ctx.drawImage(paddle.x, paddle.y, config.paddleWidth, config.paddleHeight);
         }
-
-        ctx.drawImage(
-            paddleImage, state.paddles.left.x, state.paddles.left.y,
-            config.paddleWidth, config.paddleHeight
-        );
-
-        ctx.drawImage(
-            paddleImage,
-            state.paddles.right.x,
-            state.paddles.right.y,
-            config.paddleWidth,
-            config.paddleHeight
-        );
     }
 
     function moveUp(paddle){
@@ -286,41 +285,41 @@
 
     function handlePaddleInput(){
         if (state.keys['ArrowUp'] && state.keys['ArrowDown']){
-            if (state.paddles.right.speed != 0){
+            if (state.paddles[userInformations.id].speed != 0){
                 if (typeof gameSocket !== 'undefined'){
                     // console.log('emitting stop_moving');
-                    gameSocket.emit('stop_moving', {'position': state.paddles.right.y});
+                    gameSocket.emit('stop_moving', {'position': state.paddles[userInformations.id].y});
                 }
-                state.paddles.right.speed = 0;
+                state.paddles[userInformations.id].speed = 0;
             }
             return;
         }
-        if (state.keys["ArrowUp"] && state.paddles.right.speed != -1){
+        if (state.keys["ArrowUp"] && state.paddles[userInformations.id].speed != -1){
             if (typeof gameSocket !== 'undefined'){
-                if (state.paddles.right.speed === 1){
-                		gameSocket.emit('stop_moving', {'position': state.paddles.right.y});
+                if (state.paddles[userInformations.id].speed === 1){
+                		gameSocket.emit('stop_moving', {'position': state.paddles[userInformations.id].y});
                   	// console.log('emitting stop_moving');
                 }
                 gameSocket.emit('move_up');
                 // console.log('emitting move_up')
             }
-            state.paddles.right.speed = -1;
+            state.paddles[userInformations.id].speed = -1;
         }
-        if (state.keys["ArrowDown"] && state.paddles.right.speed != 1){
+        if (state.keys["ArrowDown"] && state.paddles[userInformations.id].speed != 1){
             if (typeof gameSocket !== 'undefined'){
-                if (state.paddles.right.speed === -1){
-                    gameSocket.emit('stop_moving', {'position': state.paddles.right.y});
+                if (state.paddles[userInformations.id].speed === -1){
+                    gameSocket.emit('stop_moving', {'position': state.paddles[userInformations.id].y});
                     // console.log('emitting move_stop');
                 }
                 gameSocket.emit('move_down');
                 // console.log('emitting move_down')
             }
-            state.paddles.right.speed = 1;
+            state.paddles[userInformations.id].speed = 1;
         }
-        if (!state.keys["ArrowDown"] && !state.keys['ArrowUp'] && state.paddles.right.speed != 0){
-            state.paddles.right.speed = 0;
+        if (!state.keys["ArrowDown"] && !state.keys['ArrowUp'] && state.paddles[userInformations.id].speed != 0){
+            state.paddles[userInformations.id].speed = 0;
             if (typeof gameSocket !== 'undefined'){
-                gameSocket.emit('stop_moving', {'position': state.paddles.right.y});
+                gameSocket.emit('stop_moving', {'position': state.paddles[userInformations.id].y});
                 // console.log('emitting stop_moving');
             }
         }
@@ -492,7 +491,13 @@ function initSocket(){
     gameSocket.on('rackets', event => {
         console.log('received rackets');
         console.log(event);
-        // for (racket in event.)
+        window.PongGame.state.paddles = {};
+        for (player_id, position in event){
+            window.PongGame.state.paddles[player_id].x = position;
+            window.PongGame.state.paddles[player_id].y = (config.canvasHeight - config.paddleHeight) / 2;
+            window.PongGame.state.paddles[player_id].blockGlide = false;
+            window.PongGame.state.paddles[player_id].speed = 0;
+        }
     })
     gameSocket.on('start_game', event => {
         // console.log('received start_game');
@@ -516,20 +521,20 @@ function initSocket(){
     gameSocket.on('move_up', event => {
         console.log('move_up received', event.player);
         if (event.player !== userInformations.id)
-            window.PongGame.state.paddles.left.speed = -1;
+            window.PongGame.state.paddles[event.player].speed = -1;
     })
     gameSocket.on('move_down', event => {
         console.log('move_down received', event.player);
         if (event.player !== userInformations.id)
-            window.PongGame.state.paddles.left.speed = 1;
+            window.PongGame.state.paddles[event.player].speed = 1;
     })
     gameSocket.on('stop_moving', event => {
 		console.log('received stop_moving', event.player);
         if (event.player == userInformations.id)
-	        window.PongGame.state.paddles.right.y = event.position;
+	        window.PongGame.state.paddles[userInformations.id].y = event.position;
 		else {
-        	window.PongGame.state.paddles.left.speed = 0;
-	        window.PongGame.state.paddles.left.y = event.position;
+        	window.PongGame.state.paddles[event.player].speed = 0;
+	        window.PongGame.state.paddles[event.player].y = event.position;
     	}
     })
     gameSocket.on('score', event => {
@@ -603,8 +608,6 @@ function checkGameAuthorization(){
 async function initGame(){
     await indexInit(false);
     if (window.location.pathname === '/') return;
-    // document.getElementById('gameArea').style.display = "none";
-    // document.getElementById('opponentWait').style.display = "block";
     try {
         checkGameAuthorization();
         if (window.location.pathname === '/game/tournament')
