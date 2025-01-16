@@ -288,13 +288,15 @@ function getCurrentState(){
     return localStorage.getItem('currentState');
 }
 
-async function navigateTo(url, doNavigate=true){
+async function navigateTo(url, doNavigate=true, dontQuit=false){
     let currentState = getCurrentState();
     lastState = currentState;
     // if (doNavigate){
+    if (!dontQuit){
         await handleSSEListenerRemoval(url);
         await quitLobbies(window.location.pathname, url);
         await closeGameConnection(window.location.pathname);
+    }
     // }
     history.pushState({state: currentState}, '', url);
     console.log(`added ${url} to history with state : ${currentState}`);

@@ -12,6 +12,8 @@ if (typeof creator === 'undefined')
     var creator;
 if (typeof lobby === 'undefined')
     var lobby;
+if (typeof fromLobby === 'undefined')
+    var fromLobby;
 
 document.getElementById('leaveLobby').addEventListener('click', async () => {
     await navigateTo('/');
@@ -507,6 +509,12 @@ async function lobbyDestroyed(event){
 async function lobbyGameStart(event){
     event = JSON.parse(event.data);
     console.log(event);
+
+    if (gameMode === '3v3'){
+        await navigateTo('/game/3v3', true, true);
+        fromLobby = true;
+        userInformations.lobbyData = event.data;
+    }
 }
 
 function initLobbySSEListeners(){
@@ -554,6 +562,7 @@ function initLobbySSEListeners(){
 
 async function lobbyInit() {
     await indexInit(false);
+    fromLobby = false;
     code = window.location.pathname.split('/')[2];
     if (window.location.pathname === '/') return;
     initLobbySSEListeners();

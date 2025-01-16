@@ -32,8 +32,10 @@ class Game:
         return Ball(Position(int(canvas.x / 2 - (Game.ball_size / 2)), int(canvas.y / 2 - (Game.ball_size / 2))), direction_x, direction_y, Game.default_ball_speed, Game.ball_size)
 
     @staticmethod
-    def create_rackets(match, canvas) -> List[Racket]:
+    def create_rackets(match, canvas, game_mode) -> List[Racket]:
         rackets: List[Racket] = []
+        ledge_offset = 100
+        racket_to_racket_offset = 200
         try:
             ledge_offset = int(os.environ['GAME_RACKET_LEDGE_OFFSET'])
             racket_to_racket_offset = int(os.environ['GAME_RACKET_TO_RACKET_OFFSET'])
@@ -41,16 +43,22 @@ class Game:
             ledge_offset = 100
             racket_to_racket_offset = 200
         # create rackets for right players
+        racket_height = Racket.height
+        if game_mode == 'custom_game':
+            racket_height = 100
+        racket_offset = ledge_offset
         for player in match.teams[0].players:
-            racket_offset = ledge_offset
-            racket = Racket(player.user_id, Position(canvas.x - Racket.width - racket_offset, int(canvas.y / 2 - Racket.height / 2)))
+            racket = Racket(player.user_id, Position(canvas.x - Racket.width - racket_offset, int(canvas.y / 2 - racket_height / 2)))
+            racket.height = racket_height
             player.racket = racket
             rackets.append(racket)
             racket_offset += racket_to_racket_offset
+            print(f"{racket_offset}")
         # create rackets for left players
+        racket_offset = ledge_offset
         for player in match.teams[1].players:
-            racket_offset = ledge_offset
-            racket = Racket(player.user_id, Position(racket_offset, int(canvas.y / 2 - Racket.height / 2)))
+            racket = Racket(player.user_id, Position(racket_offset, int(canvas.y / 2 - racket_height / 2)))
+            racket.height = racket_height
             player.racket = racket
             rackets.append(racket)
             racket_offset += racket_to_racket_offset
@@ -66,7 +74,7 @@ class Game:
             self.max_ball_speed = float(os.environ['GAME_MAX_BALL_SPEED'])
             self.speed_increment = float(os.environ['GAME_SPEED_INCREMENT'])
             self.max_score = int(os.environ['GAME_MAX_SCORE'])
-            if self.match.game_mode == GameMode.CLASH:
+            if self.match.game_mode == 'custom_game':
                 self.canvas = Position(
                     int(os.environ['GAME_CANVAS_SIZE_X_CLASH']),
                     int(os.environ['GAME_CANVAS_SIZE_Y_CLASH'])
@@ -82,12 +90,14 @@ class Game:
             self.max_ball_speed = 1500
             self.speed_increment = 30
             self.max_score = 3
-            if self.match.game_mode == GameMode.CLASH:
+            if self.match.game_mode == 'custom_game':
                 self.canvas = Position(1800, 750)
             else:
                 self.canvas = Position(800, 600)
         self.ball = self.create_ball(self.canvas)
-        self.rackets = self.create_rackets(self.match, self.canvas)
+        self.rackets = self.create_rackets(self.match, self.canvas, self.match.game_mode)
+        
+
         self.ball.last_touch_team_a = self.match.teams[0].players[0].user_id
         self.ball.last_touch_team_b = self.match.teams[1].players[0].user_id
 
@@ -139,8 +149,8 @@ class Game:
         relativeY = (paddleY + paddleHeight / 2) - ballY
         return relativeY / (paddleHeight / 2)
 
-    def calculateNewBallDirection(self, paddleY):
-        impactPosition = self.calculateImpactPosition(self.ball.position.y + self.ball.size / 2, paddleY, Racket.height)
+    def calculateNewBallDirection(self, paddleY, height):
+        impactPosition = self.calculateImpactPosition(self.ball.position.y + self.ball.size / 2, paddleY, height)
         bounceAngle = impactPosition * self.max_bounce_angle
 
         speed = self.ball.speed
@@ -162,7 +172,7 @@ class Game:
             self.ball.speed_x = -self.ball.speed_x
             self.ball.direction_x = -self.ball.direction_x
             self.ball.increment_speed(self.max_ball_speed, self.speed_increment)
-            self.calculateNewBallDirection(racket.position.y)
+            self.calculateNewBallDirection(racket.position.y, racket.height)
 
     @staticmethod
     def is_in_team(player_id, team):
@@ -260,7 +270,8 @@ class Game:
             self.finish(FinishReason.PLAYER_NOT_CONNECTED, disconnected_user_id=e.args[0])
             print('game canceled', flush=True)
             return
-        if (self.match.game_mode == 'clash'): #watchout for 'clash'
+        print(f"game_mode = {self.match.game_mode}, 'custom_game' = {'custom_game'}", flush=True)
+        if (self.match.game_mode == 'custom_game'): #todo fix foeewf
             self.canvas = Position(1800, 750)
             self.send_rackets()
         self.send_canvas()
@@ -431,10 +442,12 @@ class Game:
     def get_rackets(self, side: int):
         rackets = {}
         for racket in self.rackets:
+            print(f"racket = {racket.position.x}", flush=True)
             if side == 1:
-                rackets[racket.player_id] = racket.position
+                rackets[racket.player_id] = racket.position.x
             else:
-                rackets[racket.player_id] = racket.position.invert(self.canvas.x)
+                rackets[racket.player_id] = racket.position.invert(self.canvas.x).x - racket.width
+        return rackets
 
     def send_rackets(self):
         from game_server.server import Server
