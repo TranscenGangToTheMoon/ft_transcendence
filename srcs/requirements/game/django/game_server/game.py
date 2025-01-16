@@ -334,15 +334,15 @@ class Game:
 
     def score(self, team):
         scorer = self.get_scorer(team)
-        if scorer == None:
+        if scorer is None:
             return # game finished
         scorer, csc = scorer
         updated_game_instance = scorer.score_goal(csc)
-        if updated_game_instance is not None:
-            team.score += 1
-        else:
+        if updated_game_instance is None:
             self.finish('Server Error', team.name, error=True)
             return
+        self.match.teams[0].score = updated_game_instance['teams']['a']['score']
+        self.match.teams[1].score = updated_game_instance['teams']['b']['score']
         self.send_score(updated_game_instance)
         if updated_game_instance['winner'] != None:
             self.finish(FinishReason.NORMAL_END, updated_game_instance['winner'])
