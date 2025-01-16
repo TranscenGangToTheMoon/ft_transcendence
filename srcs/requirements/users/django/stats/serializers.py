@@ -43,9 +43,14 @@ class UserFinishMatchSerializer(serializers.Serializer):
     trophies = serializers.IntegerField(required=False)
 
 
+class TeamFinishMatchSerializer(serializers.Serializer):
+    score = serializers.IntegerField()
+    players = UserFinishMatchSerializer(many=True)
+
+
 class TeamsFinishMatchSerializer(serializers.Serializer):
-    a = UserFinishMatchSerializer(many=True)
-    b = UserFinishMatchSerializer(many=True)
+    a = TeamFinishMatchSerializer()
+    b = TeamFinishMatchSerializer()
 
 
 class FinishMatchSerializer(serializers.Serializer):
@@ -59,21 +64,22 @@ class FinishMatchSerializer(serializers.Serializer):
         return GameMode.validate(value)
 
     def create(self, validated_data):
-        for team_name, team_users in validated_data['teams'].items():
-            for user_json in team_users:
-                try:
-                    if validated_data['game_mode'] == GameMode.CLASH and 'own_goals' in user_json:
-                        own_goals = validated_data['own_goals']
-                    else:
-                        own_goals = None
-                    user = get_user(id=user_json['id'])
-                    user.set_game_playing()
-                    stat = user.stats.get(game_mode=validated_data['game_mode'])
-                    stat.log(user_json['score'], team_name == validated_data['winner'], own_goals)
-                    if validated_data['game_mode'] == GameMode.RANKED and 'trophies' in user_json:
-                        RankedStats.log(user, user_json['trophies'])
-                except APIException:
-                    pass
+        if validated_data['game_mode'] != GameMode.CUSTOM_GAME:
+            for team_name, team_users in validated_data['teams'].items():
+                for user_json in team_users['players']:
+                    try:
+                        if validated_data['game_mode'] == GameMode.CLASH and 'own_goals' in user_json:
+                            own_goals = validated_data['own_goals']
+                        else:
+                            own_goals = None
+                        user = get_user(id=user_json['id'])
+                        user.set_game_playing()
+                        stat = user.stats.get(game_mode=validated_data['game_mode'])
+                        stat.log(user_json['score'], team_name == validated_data['winner'], own_goals)
+                        if validated_data['game_mode'] == GameMode.RANKED and 'trophies' in user_json:
+                            RankedStats.log(user, user_json['trophies'])
+                    except APIException:
+                        pass
         return validated_data
 
 
