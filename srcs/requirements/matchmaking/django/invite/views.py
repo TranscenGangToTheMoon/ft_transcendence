@@ -39,7 +39,7 @@ class InviteMixin(generics.CreateAPIView):
         else:
             event = EventCode.INVITE_3V3
 
-        create_sse_event(self.kwargs['user_id'], event, {'code': place.code}, kwargs={'username': user_id})
+        create_sse_event(self.kwargs['user_id'], event, {'id': user_id, 'code': place.code}, kwargs={'username': user_id})
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 

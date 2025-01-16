@@ -319,7 +319,7 @@ class Test04_Messages(UnitTest):
         self.assertEqual(1, self.assertResponse(me(user1), 200, get_field='notifications')['chats'])
         self.assertThread(user1, user2, user3)
 
-    def test_010_last_message_is_read(self):
+    def test_010_last_message_is_read(self): # todo that stupid
         user1 = self.user()
         user2 = self.user()
 

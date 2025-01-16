@@ -56,13 +56,13 @@ class TournamentSerializer(Serializer):
             for stage in obj.stages.all():
                 result = TournamentMatchSerializer(stage.matches.all().order_by('n'), many=True, context={'users': self.context['participants']}).data
                 matches[stage.label] = result
-            return matches
-        else:
-            return None
+            if matches:
+                return matches
+        return None
 
     def to_representation(self, instance):
         result = super().to_representation(instance)
-        if instance.is_started:
+        if result['matches'] is not None:
             result.pop('participants')
         return result
 
