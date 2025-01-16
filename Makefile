@@ -101,8 +101,6 @@ $(CONFIG_F)	:	$(CONFIG)
 .PHONY: clean
 clean		:
 			$(COMPOSE) $(FLAGS) down --rmi local --remove-orphans
-#			rm -rf $(ENV_FILE)
-#			rm -rf $(SECRETS_D)
 
 .PHONY: vclean
 vclean		:
