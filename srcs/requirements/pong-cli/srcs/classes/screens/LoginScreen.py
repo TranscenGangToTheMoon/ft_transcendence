@@ -7,7 +7,7 @@ from textual import on, events
 from textual.app        import ComposeResult
 from textual.containers import Horizontal, Vertical
 from textual.screen     import Screen
-from textual.widgets    import Button, Footer, Header, Input, Static
+from textual.widgets    import Button, Footer, Header, Input, Label
 
 # Local imports
 from classes.screens.MainScreen import MainPage
@@ -20,28 +20,22 @@ class LoginPage(Screen):
 
     def compose(self) -> ComposeResult:
         yield Header()
-        with Vertical(id="AuthenticationBox"):
+        with Vertical(id="authenticationBox"):
             yield Input(placeholder="Server", id="server", value="https://localhost:4443")
             yield Input(placeholder="Username", id="username", value="xcharra1234")
             yield Input(placeholder="Password", password=True, id="password", value="!@#$(90-9875trgfvcmntr")
-            with Horizontal(id="ButtonBox"):
+            with Horizontal(id="buttonBox"):
                 yield Button("Login", id="loginButton", variant="primary")
                 yield Button("Register", id="registerButton", variant="primary")
                 yield Button("GuestUp", id="guestUpButton", variant="primary")
-        yield Static("", id="status")
+        yield Label("", id="status")
         yield Footer()
 
     def on_mount(self) -> None:
         self.query_one("#server").border_title = "Server"
-        self.query_one("#server").styles.border_title_color = "white 50%"
-        self.query_one("#server").styles.border_title_align = "right"
         self.query_one("#username").border_title = "Username"
-        self.query_one("#username").styles.border_title_color = "white 50%"
-        self.query_one("#username").styles.border_title_align = "right"
         self.query_one("#password").border_title = "Password"
-        self.query_one("#password").styles.border_title_color = "white 50%"
-        self.query_one("#password").styles.border_title_align = "right"
-        self.query_one("#AuthenticationBox").border_title = "Authentication"
+        self.query_one("#authenticationBox").border_title = "Authentication"
 
     def getSSLCertificate(self):
         User.host = urlparse(User.server).hostname
@@ -58,12 +52,12 @@ class LoginPage(Screen):
             try:
                 self.getSSLCertificate()
                 User.loginUser()
-                self.query_one("#status").update(f"Status: login succeed!")
                 self.app.startSSE()
                 self.app.push_screen(MainPage())
             except Exception as error:
                 if (User.response is not None):
                     self.query_one("#status").update(f"{error}")
+                    self.query_one("#status").styles.color = "red"
                 else:
                     self.query_one("#status").update(f"(666): {error}")
         else:
@@ -78,12 +72,12 @@ class LoginPage(Screen):
             try:
                 self.getSSLCertificate()
                 User.registerUser()
-                self.query_one("#status").update(f"Status: register succeed!")
                 self.app.startSSE()
                 self.app.push_screen(MainPage())
             except Exception as error:
                 if (User.response is not None):
                     self.query_one("#status").update(f"{error}")
+                    self.query_one("#status").styles.color = "red"
                 else:
                     self.query_one("#status").update(f"(666): {error}")
         else:
@@ -101,6 +95,7 @@ class LoginPage(Screen):
             except Exception as error:
                 if (User.response is not None):
                     self.query_one("#status").update(f"{error}")
+                    self.query_one("#status").styles.color = "red"
                 else:
                     self.query_one("#status").update(f"(666): {error}")
         else:
