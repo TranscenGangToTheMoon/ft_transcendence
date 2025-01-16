@@ -54,7 +54,7 @@ class PongCLI(App):
                                     dataJson = None
                                     if (event == "game-start"):# game start
                                         dataJson = json.loads(data)
-                                        if (dataJson["data"]["teams"]["a"][0]["id"] == User.id):
+                                        if (dataJson["data"]["teams"]["a"]["players"][0]["id"] == User.id):
                                             User.team = "a"
                                         else:
                                             User.team = "b"

@@ -11,7 +11,14 @@ ENV_EXEMPLE	:=	.env_exemple
 
 ENV_FILE	:=	$(SRCS_D)/.env
 
-CONFIG_F	:=	gameConfig.json
+CONFIG		:=	gameConfig.json
+
+CONFIG_T	:=	\
+				$(SRCS_D)/requirements/pong-cli/ \
+				$(SRCS_D)/requirements/game/django/game_server/ \
+				$(SRCS_D)/requirements/frontend/static/
+
+CONFIG_F	:=	$(addsuffix $(CONFIG), $(CONFIG_T))
 
 COMPOSE_F	:=	$(SRCS_D)/docker-compose-dev.yml
 
@@ -44,24 +51,17 @@ RESET		:=	\001\033[0m\002
 .PHONY: all
 all			:	banner $(NAME)
 
-$(NAME)		:	secrets config
+$(NAME)		:	secrets $(CONFIG_F)
 			$(COMPOSE) $(FLAGS) up --build $(SERVICE)
 
-.PHONY: build
-build		:
+CMDS		:=	up build down ps ls images events top
+.PHONY: $(CMDS)
+$(CMDS)		:
 			$(COMPOSE) $(FLAGS) $@ $(SERVICE)
 
-.PHONY: up
-up			:	build
-			$(COMPOSE) $(FLAGS) $@ $(SERVICE)
-
-.PHONY: down
-down		:
-			$(COMPOSE) $(FLAGS) $@ $(SERVICE)
-
-.PHONY: dettach
-dettach		:	build
-			$(COMPOSE) $(FLAGS) up -d $(SERVICE)
+.PHONY: detach
+detach		:
+			$(COMPOSE) $(FLAGS) up --$@ $(SERVICE)
 
 .PHONY: logs
 logs		:	build
@@ -85,39 +85,31 @@ banner		:
 
 secrets		:	$(ENV_EXEMPLE)
 			mkdir -p $@
-			./launch.d/01passwords.sh $(ENV_EXEMPLE) $(ENV_FILE)
-			./launch.d/02set-hostname.sh
-			./launch.d/03genreateSSL.sh
+			./launch.d/01generatePasswordsAndKeys.sh
+			./launch.d/02genreateSSL.sh
 
-config		:	$(CONFIG_F)
-			cp $(CONFIG_F) $(SRCS_D)/requirements/pong-cli/$(CONFIG_F)
-			cp $(CONFIG_F) $(SRCS_D)/requirements/game/django/game_server/$(CONFIG_F)
-			cp $(CONFIG_F) $(SRCS_D)/requirements/frontend/static/$(CONFIG_F)
+$(CONFIG_F)	:	$(CONFIG)
+			cp $< $@
 
 .PHONY: clean
 clean		:
 			$(COMPOSE) $(FLAGS) down --rmi local --remove-orphans
-#			rm -rf $(ENV_FILE)
-#			rm -rf $(SECRETS_D)
 
 .PHONY: vclean
 vclean		:
 			$(COMPOSE) $(FLAGS) down -v --remove-orphans
-#			rm -rf $(ENV_FILE)
-#			rm -rf $(SECRETS_D)
+			rm -rf $(ENV_FILE)
+			rm -rf $(SECRETS_D)
 
 .PHONY: fclean
 fclean		:	dusting
 			$(COMPOSE) $(FLAGS) down -v --rmi all --remove-orphans
 			docker system prune -af
-			rm -rf $(VOLS_PATH)
-			rm -rf $(ENV_FILE)
 			rm -rf ./srcs/shared-code/lib_transcendence.egg-info/ # todo remove in prod
 			rm -rf ./srcs/shared-code/build/ # todo remove in prod
+			rm -rf $(ENV_FILE)
 			rm -rf $(SECRETS_D)
-			rm -rf $(SRCS_D)/requirements/pong-cli/$(CONFIG_F)
-			rm -rf $(SRCS_D)/requirements/game/django/game_server/$(CONFIG_F)
-			rm -rf $(SRCS_D)/requirements/frontend/static/$(CONFIG_F)
+			rm -rf $(CONFIG_F)
 
 .PHONY: dusting
 dusting		:
@@ -139,7 +131,7 @@ image-rm	:
 container-ls:
 			docker container ls -a
 container-rm:
-			echo docker container rm `docker container ls -qa`
+			docker container rm `docker container ls -qa`
 
 .PHONY: volume-ls volume-rm
 volume-ls	:

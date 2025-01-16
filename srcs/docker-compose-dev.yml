@@ -2,7 +2,6 @@ x-django-env: &django-env
   TZ: Europe/Paris
   DEBUG: "True" # True or False
   MIGRATION: "true" # true or false
-  HOSTNAME: ${HOSTNAME}
 
 x-pgsql-healtcheck: &healthcheck
   test: ["CMD-SHELL", "pg_isready --dbname=$$POSTGRES_DB --username=$$POSTGRES_USER"]
@@ -38,6 +37,7 @@ services:
       POSTGRES_USER: ${POSTGRES_AUTH_USER}
       POSTGRES_PASSWORD: ${POSTGRES_AUTH_PASSWORD}
       POSTGRES_HOST: ${POSTGRES_AUTH_HOST}
+      SECRET_KEY: ${DJANGO_AUTH_SECRET_KEY}
     networks:
       - transcendence-network
       - auth-network
@@ -61,6 +61,7 @@ services:
       POSTGRES_USER: ${POSTGRES_CHAT_USER}
       POSTGRES_PASSWORD: ${POSTGRES_CHAT_PASSWORD}
       POSTGRES_HOST: ${POSTGRES_CHAT_HOST}
+      SECRET_KEY: ${DJANGO_CHAT_SECRET_KEY}
     networks:
       - transcendence-network
       - chat-network
@@ -102,6 +103,7 @@ services:
       POSTGRES_USER: ${POSTGRES_GAME_USER}
       POSTGRES_PASSWORD: ${POSTGRES_GAME_PASSWORD}
       POSTGRES_HOST: ${POSTGRES_GAME_HOST}
+      SECRET_KEY: ${DJANGO_GAME_SECRET_KEY}
       GAME_PLAYER_CONNECT_TIMEOUT: ${GAME_PLAYER_CONNECT_TIMEOUT}
       GAME_SERVER_PORT: ${GAME_SERVER_PORT}
       GAME_MAX_SCORE: ${GAME_MAX_SCORE}
@@ -128,6 +130,7 @@ services:
       POSTGRES_USER: ${POSTGRES_MATCHMAKING_USER}
       POSTGRES_PASSWORD: ${POSTGRES_MATCHMAKING_PASSWORD}
       POSTGRES_HOST: ${POSTGRES_MATCHMAKING_HOST}
+      SECRET_KEY: ${DJANGO_MATCHMAKING_SECRET_KEY}
     networks:
       - transcendence-network
       - matchmaking-network
@@ -153,6 +156,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USERS_USER}
       POSTGRES_PASSWORD: ${POSTGRES_USERS_PASSWORD}
       POSTGRES_HOST: ${POSTGRES_USERS_HOST}
+      SECRET_KEY: ${DJANGO_USERS_SECRET_KEY}
     networks:
       - transcendence-network
       - redis-network
