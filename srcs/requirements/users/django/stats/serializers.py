@@ -52,8 +52,6 @@ class FinishMatchSerializer(serializers.Serializer):
     game_mode = serializers.CharField(max_length=20)
     winner = serializers.CharField(max_length=1)
     looser = serializers.CharField(max_length=1)
-    score_winner = serializers.IntegerField()
-    score_looser = serializers.IntegerField()
     teams = TeamsFinishMatchSerializer()
 
     @staticmethod

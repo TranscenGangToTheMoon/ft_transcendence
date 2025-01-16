@@ -41,8 +41,6 @@ class TeamsSerializer(serializers.Serializer):
 
 class MatchSerializer(Serializer):
     teams = TeamsSerializer(write_only=True)
-    score_winner = serializers.IntegerField(read_only=True)
-    score_looser = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Matches
@@ -58,16 +56,12 @@ class MatchSerializer(Serializer):
             'teams',
             'winner',
             'looser',
-            'score_winner',
-            'score_looser',
         ]
         read_only_fields = [
             'id',
             'created_at',
             'winner',
             'looser',
-            'score_winner',
-            'score_looser',
         ]
         write_only_fields = [
             'game_mode'
@@ -104,8 +98,6 @@ class MatchSerializer(Serializer):
             representation.pop('code')
             representation['winner'] = instance.winner.name
             representation['looser'] = instance.looser.name
-            representation['score_winner'] = instance.winner.score
-            representation['score_looser'] = instance.looser.score
         if representation['tournament_id'] is None:
             representation.pop('tournament_id')
         return representation
@@ -146,8 +138,6 @@ class MatchSerializer(Serializer):
 
 class TournamentMatchSerializer(Serializer):
     n = serializers.IntegerField(source='tournament_n')
-    score_winner = serializers.IntegerField(source='winner.score')
-    score_looser = serializers.IntegerField(source='looser.score')
     winner = serializers.SerializerMethodField()
     looser = serializers.SerializerMethodField()
 
@@ -159,8 +149,6 @@ class TournamentMatchSerializer(Serializer):
             'game_duration',
             'winner',
             'looser',
-            'score_winner',
-            'score_looser',
         ]
         read_only_fields = [
             'id',
@@ -168,8 +156,6 @@ class TournamentMatchSerializer(Serializer):
             'game_duration',
             'winner',
             'looser',
-            'score_winner',
-            'score_looser',
         ]
 
     def get_winner(self, obj):
@@ -223,31 +209,17 @@ class MatchFinishSerializer(Serializer):
 
 
 class ScoreSerializer(Serializer):
-    id = serializers.SerializerMethodField(read_only=True)
-    finished = serializers.SerializerMethodField(read_only=True)
     own_goal = serializers.BooleanField(required=False)
 
     class Meta:
         model = Players
         fields = [
-            'id',
             'score',
-            'finished',
             'own_goal',
         ]
         read_only_fields = [
-            'id',
             'score',
-            'finished',
         ]
-
-    @staticmethod
-    def get_id(obj):
-        return obj.match.id
-
-    @staticmethod
-    def get_finished(obj):
-        return obj.match.finished
 
     def to_representation(self, instance):
         result = super().to_representation(instance)

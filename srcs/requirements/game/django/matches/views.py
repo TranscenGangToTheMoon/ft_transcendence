@@ -26,10 +26,8 @@ class CreateMatchView(generics.CreateAPIView):
 def check_timeout(match_id):
     time.sleep(int(os.environ['GAME_PLAYER_CONNECT_TIMEOUT']))
     try:
-        print('Checking timeout', flush=True)
         match = Matches.objects.get(id=match_id)
         if not match.game_start:
-            print('it FINISH', flush=True)
             match.finish(FinishReason.PLAYERS_TIMEOUT)
     except Matches.DoesNotExist:
         pass

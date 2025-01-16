@@ -20,9 +20,6 @@ DELETE FROM matches_teams WHERE match_id IN (SELECT id FROM matches_matches WHER
 DELETE FROM matches_matches WHERE finished = FALSE;
 "
 
-GAME_MAX_SCORE=$(jq '.score.max' 'game_server/gameConfig.json')
-export GAME_MAX_SCORE
-
 python socket_server.py &
 
 exec "$@"
