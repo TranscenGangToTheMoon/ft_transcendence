@@ -93,6 +93,8 @@ class Players(models.Model):
         self.team.scored()
 
     def score_own_goal(self):
+        self.own_goal += 1
+        self.save()
         other_team = self.match.teams.exclude(id=self.team.id).first()
         other_team.scored()
 
