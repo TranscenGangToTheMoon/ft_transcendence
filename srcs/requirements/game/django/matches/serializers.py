@@ -222,10 +222,7 @@ class ScoreSerializer(Serializer):
         ]
 
     def to_representation(self, instance):
-        result = super().to_representation(instance)
-        if 'own_goal' in result and result['own_goal'] is None:
-            result.pop('own_goal')
-        return result
+        return MatchSerializer(instance.match, context={'retrieve_users': False}).data
 
     def update(self, instance, validated_data):
         if validated_data.pop('own_goal', None) is True:
