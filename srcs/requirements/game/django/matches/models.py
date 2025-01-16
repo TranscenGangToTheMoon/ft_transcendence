@@ -85,7 +85,7 @@ class Players(models.Model):
     team = models.ForeignKey(Teams, on_delete=models.CASCADE, related_name='players')
     score = models.IntegerField(default=0)
     trophies = models.IntegerField(null=True, default=None)
-    own_goal = models.IntegerField(null=True, default=None)
+    own_goal = models.IntegerField(default=0)
 
     def scored(self):
         self.score += 1
