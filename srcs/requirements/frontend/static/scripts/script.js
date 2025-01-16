@@ -257,7 +257,6 @@ async function handleRoute() {
     if (containsCode(path))
         path = "/" + path.split("/")[1];
     const routes = {
-        '/login': '/authentication.html',
         '/': '/homePage.html',
         '/profile' : 'profile.html',
         '/lobby' : '/lobby.html',
