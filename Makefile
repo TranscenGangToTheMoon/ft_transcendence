@@ -54,20 +54,13 @@ all			:	banner $(NAME)
 $(NAME)		:	secrets $(CONFIG_F)
 			$(COMPOSE) $(FLAGS) up --build $(SERVICE)
 
-.PHONY: build
-build		:
-			$(COMPOSE) $(FLAGS) $@ $(SERVICE)
-
-.PHONY: up
-up			:	build
-			$(COMPOSE) $(FLAGS) $@ $(SERVICE)
-
-.PHONY: down
-down		:
+CMDS		:=	up build down ps ls images events top
+.PHONY: $(CMDS)
+$(CMDS)		:
 			$(COMPOSE) $(FLAGS) $@ $(SERVICE)
 
 .PHONY: detach
-detach		:	build
+detach		:
 			$(COMPOSE) $(FLAGS) up --$@ $(SERVICE)
 
 .PHONY: logs
@@ -138,7 +131,7 @@ image-rm	:
 container-ls:
 			docker container ls -a
 container-rm:
-			echo docker container rm `docker container ls -qa`
+			docker container rm `docker container ls -qa`
 
 .PHONY: volume-ls volume-rm
 volume-ls	:
