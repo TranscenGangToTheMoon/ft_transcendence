@@ -1,3 +1,5 @@
+import os
+
 from lib_transcendence.game import GameMode, FinishReason
 from lib_transcendence.generate import generate_code
 from lib_transcendence.exceptions import MessagesException, Conflict, ResourceExists
@@ -41,8 +43,6 @@ class TeamsSerializer(serializers.Serializer):
 
 class MatchSerializer(Serializer):
     teams = TeamsSerializer(write_only=True)
-    score_winner = serializers.IntegerField(read_only=True)
-    score_looser = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Matches
@@ -58,16 +58,12 @@ class MatchSerializer(Serializer):
             'teams',
             'winner',
             'looser',
-            'score_winner',
-            'score_looser',
         ]
         read_only_fields = [
             'id',
             'created_at',
             'winner',
             'looser',
-            'score_winner',
-            'score_looser',
         ]
         write_only_fields = [
             'game_mode'
@@ -89,19 +85,21 @@ class MatchSerializer(Serializer):
             users = {}
         teams = {}
         for team in ('a', 'b'):
-            teams[team] = []
+            teams[team] = {'score': instance.teams.get(name=team).score, 'players': []}
             for player in instance.teams.get(name=team).players.all():
                 add_user = users.get(player.user_id)
                 if add_user is None:
                     add_user = {'id': player.user_id}
-                teams[team].append({**add_user, 'score': player.score})
+                if instance.game_mode == GameMode.RANKED:
+                    add_user['trophies'] = player.trophies
+                if instance.game_mode == GameMode.CLASH:
+                    add_user['own_goal'] = player.own_goal
+                teams[team]['players'].append({**add_user, 'score': player.score})
         representation['teams'] = teams
         if instance.finished:
             representation.pop('code')
             representation['winner'] = instance.winner.name
             representation['looser'] = instance.looser.name
-            representation['score_winner'] = instance.winner.score
-            representation['score_looser'] = instance.looser.score
         if representation['tournament_id'] is None:
             representation.pop('tournament_id')
         return representation
@@ -128,17 +126,20 @@ class MatchSerializer(Serializer):
             validated_data['tournament_stage_id'] = None
             validated_data['tournament_n'] = None
         match = super().create(validated_data)
+        kwargs = {}
+        if match.game_mode == GameMode.RANKED:
+            kwargs['trophies'] = 0
+        if match.game_mode == GameMode.CLASH:
+            kwargs['own_goal'] = 0
         for name_team, players in teams.items():
             new_team = Teams.objects.create(match=match, name=name_team)
             for user in players:
-                Players.objects.create(user_id=user, match=match, team=new_team)
+                Players.objects.create(user_id=user, match=match, team=new_team, **kwargs)
         return match
 
 
 class TournamentMatchSerializer(Serializer):
     n = serializers.IntegerField(source='tournament_n')
-    score_winner = serializers.IntegerField(source='winner.score')
-    score_looser = serializers.IntegerField(source='looser.score')
     winner = serializers.SerializerMethodField()
     looser = serializers.SerializerMethodField()
 
@@ -150,8 +151,6 @@ class TournamentMatchSerializer(Serializer):
             'game_duration',
             'winner',
             'looser',
-            'score_winner',
-            'score_looser',
         ]
         read_only_fields = [
             'id',
@@ -159,8 +158,6 @@ class TournamentMatchSerializer(Serializer):
             'game_duration',
             'winner',
             'looser',
-            'score_winner',
-            'score_looser',
         ]
 
     def get_winner(self, obj):
@@ -205,7 +202,7 @@ class MatchFinishSerializer(Serializer):
         player.team.score = 0
         player.save()
         winner = instance.players.exclude(user_id=player.user_id).first()
-        winner.team.score = 3
+        winner.team.score = int(os.environ['GAME_MAX_SCORE'])
         winner.save()
         validated_data['finished'] = True
         result = super().update(instance, validated_data)
@@ -227,12 +224,7 @@ class ScoreSerializer(Serializer):
         ]
 
     def to_representation(self, instance):
-        result = super().to_representation(instance)
-        if instance.match.finished:
-            result['finished'] = True
-        if 'own_goal' in result and result['own_goal'] is None:
-            result.pop('own_goal')
-        return result
+        return MatchSerializer(instance.match, context={'retrieve_users': False}).data
 
     def update(self, instance, validated_data):
         if validated_data.pop('own_goal', None) is True:

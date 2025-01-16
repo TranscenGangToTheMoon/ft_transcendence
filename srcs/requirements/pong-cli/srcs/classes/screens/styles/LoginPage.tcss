@@ -1,23 +1,24 @@
 LoginPage {
     border: blue;
-    width:auto;
-    align-vertical: middle;
-    align-horizontal: center;
+    align: center middle;
     /*align: center bottom;*/
 }
 
 #AuthenticationBox {
-    align-vertical: middle;
-    align-horizontal: center;
-    /*align: center middle;*/
+
+    align: center middle;
     /*content-align: center middle;*/
+    /*align-horizontal: center;*/
     width: 52;
     height: auto;
     border: green;
     padding: 0;
 }
 
-
+#status {
+    border: aqua;
+    width: 52;
+}
 #ButtonBox {
     height: 3;
     /*width: auto;*/

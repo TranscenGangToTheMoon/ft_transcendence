@@ -45,13 +45,11 @@ def set_trophies(user, trophies):
         'game_duration': '00:00:05.206017',
         'teams':
             {
-                'a': [{'id': user['id'], 'trophies': trophies, 'score': 3}],
-                'b': [{'id': 732, 'trophies': 0, 'score': 0}]
+                'a': {'players': [{'id': user['id'], 'trophies': trophies, 'score': 3}], 'score': 3},
+                'b': {'players': [{'id': 732, 'trophies': 0, 'score': 0}], 'score': 0},
             },
         'winner': 'a',
         'looser': 'b',
-        'score_winner': 3,
-        'score_looser': 0
     }
     return make_request(
         endpoint='private/users/result-match/',
