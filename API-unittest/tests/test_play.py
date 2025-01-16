@@ -188,7 +188,7 @@ class Test02_PlayError(UnitTest):
         time.sleep(1)
         self.assertResponse(is_in_game(user1), 404)
         self.assertResponse(play(user3, game_mode='ranked'), 201)
-        self.assertResponse(play(user1, game_mode='ranked'), 201)
+        self.assertResponse(play(user4, game_mode='ranked'), 201)
         time.sleep(1)
         self.assertThread(user1, user2, user3, user4)
 
