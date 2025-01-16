@@ -227,6 +227,7 @@ class TournamentMatches(models.Model):
             return # TODO fguirama: handle
         self.finished = True
         self.winner = winner
+        self.match_code = None
         self.save()
         tournament = self.tournament
         if validated_data is None:
