@@ -58,6 +58,8 @@ async function apiRequest(token, endpoint, method="GET", authType="Bearer",
             return data;
         })
         .catch(error =>{
+            if (error.message === 'relog')
+                return apiRequest(getAccessToken(), endpoint, method, authType, contentType, body);
             if (error.code === 500 || error.message === 'Failed to fetch')
                 document.getElementById('container').innerText = `alala pas bien ${error.code? `: ${error.code}` : ''} (jcrois c'est pas bon)`;
             throw error;
@@ -109,6 +111,16 @@ async function generateToken() {
     }
 }
 
+async function relog(){
+    // if (window.location.pathname !== '/')
+    //     await navigateTo('/');
+    await generateToken();
+    displayMainAlert("Unable to retrieve your account/guest profile","We're sorry your account has been permanently deleted and cannot be recovered.");
+    throw new Error('relog');
+    // await fetchUserInfos();
+    // await loadUserProfile();
+}
+
 async function refreshToken(token) {
     var refresh = getRefreshToken();
     try {
@@ -121,16 +133,18 @@ async function refreshToken(token) {
             return token;
         }
         else {
-            if (userInformations.is_guest === true){
-                return forceReloadGuestToken();
-            }
             console.log('refresh token expired must relog')
-            relog();
-            return undefined;
+            // if (userInformations && userInformations.is_guest === true){
+            //     return forceReloadGuestToken();
+            // }
+            await relog();
         }
     }
     catch (error) {
-        console.log("ERROR", error);
+        if (error.message === 'relog')
+            throw error;
+        else
+            console.log("ERROR", error);
     }
 }
 
@@ -785,6 +799,8 @@ async function fetchUserInfos(forced=false) {
             displayBadges();
         }
         catch (error) {
+            if (error.message === 'relog')
+                throw error;
             console.log(error);
         }
     }
@@ -858,7 +874,7 @@ async function loadChatListModal(){
     await loadContent('/chatTemplates/chatListModal.html', 'modals', true);
 }
 
-async function loadUserProfile(){
+async function  loadUserProfile(){
     let profileMenu = 'profileMenu.html';
 
     document.getElementById('username').innerText = userInformations.username;
@@ -909,7 +925,6 @@ async function  indexInit(auto=true) {
             await generateToken();
             await fetchUserInfos(true);
             displayMainAlert("Unable to retrieve your account/guest profile","We're sorry your account has been permanently deleted and cannot be recovered.");
-            return navigateTo('/');
         }
         initSSE();
         await loadFriendListModal();
