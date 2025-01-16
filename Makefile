@@ -66,9 +66,9 @@ up			:	build
 down		:
 			$(COMPOSE) $(FLAGS) $@ $(SERVICE)
 
-.PHONY: dettach
-dettach		:	build
-			$(COMPOSE) $(FLAGS) up -d $(SERVICE)
+.PHONY: detach
+detach		:	build
+			$(COMPOSE) $(FLAGS) up --$@ $(SERVICE)
 
 .PHONY: logs
 logs		:	build
