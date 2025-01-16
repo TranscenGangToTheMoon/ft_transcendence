@@ -20,8 +20,10 @@ document.getElementById("loginButton").addEventListener('click', event => {
     const loginButton = document.getElementById("loginButton");
     const usernameField = document.getElementById('usernameLogin');
     const passwordField = document.getElementById('passwordLogin');
-    usernameField.style = 'none';
-    passwordField.style = 'none';
+    const contextErrorDiv = document.getElementById('loginFormContextError');
+    contextErrorDiv.classList.add('d-none');
+    usernameField.classList.remove('is-invalid');
+    passwordField.classList.remove('is-invalid');
     const userInfo = {
         'username': usernameField.value,
         'password': passwordField.value
@@ -55,15 +57,23 @@ document.getElementById("loginButton").addEventListener('click', event => {
                 return;
             }
             if (data.username) {
-                document.getElementById('container').innerText = data.username[0];
-                usernameField.style = "background-color:red;"
+                console.log(usernameField.parentElement.querySelector('.invalid-feedback'));
+                const feedbackDiv = usernameField.parentElement.querySelector('.invalid-feedback');
+                feedbackDiv.innerText = data.username[0];
+                usernameField.classList.add('is-invalid');
             }
             if (data.password) {
-                document.getElementById('container').innerText = data.password[0];
-                passwordField.style = "background-color:red;"
+                const feedbackDiv = passwordField.parentElement.querySelector('.invalid-feedback');
+                feedbackDiv.innerText = data.password[0];
+                passwordField.classList.add('is-invalid');
             }
             if (data.detail) {
-                document.getElementById('container').innerText = data.detail;
+                const feedbackDiv = passwordField.parentElement.querySelector('.invalid-feedback');
+                feedbackDiv.innerText = data.detail;
+                usernameFeedback = usernameField.parentElement.querySelector('.invalid-feedback');
+                usernameFeedback.innerText = '';
+                usernameField.classList.add('is-invalid');
+                passwordField.classList.add('is-invalid');
             }
             else
                 console.log('error a gerer', data);
