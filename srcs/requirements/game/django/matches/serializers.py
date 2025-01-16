@@ -89,12 +89,15 @@ class MatchSerializer(Serializer):
             users = {}
         teams = {}
         for team in ('a', 'b'):
-            teams[team] = []
+            teams[team] = {'score': instance.teams.get(name=team).score, 'players': []}
             for player in instance.teams.get(name=team).players.all():
                 add_user = users.get(player.user_id)
                 if add_user is None:
                     add_user = {'id': player.user_id}
                 teams[team].append({**add_user, 'score': player.score})
+                if instance.game_mode == GameMode.RANKED:
+                    add_user['trophies'] = player.trophies
+                teams[team]['players'].append({**add_user, 'score': player.score})
         representation['teams'] = teams
         if instance.finished:
             representation.pop('code')
@@ -128,10 +131,13 @@ class MatchSerializer(Serializer):
             validated_data['tournament_stage_id'] = None
             validated_data['tournament_n'] = None
         match = super().create(validated_data)
+        kwargs = {}
+        if match.game_mode == GameMode.RANKED:
+            kwargs['trophies'] = 0
         for name_team, players in teams.items():
             new_team = Teams.objects.create(match=match, name=name_team)
             for user in players:
-                Players.objects.create(user_id=user, match=match, team=new_team)
+                Players.objects.create(user_id=user, match=match, team=new_team, **kwargs)
         return match
 
 

@@ -4,11 +4,12 @@ from datetime import timedelta, datetime, timezone
 from lib_transcendence.exceptions import ServiceUnavailable
 from lib_transcendence.services import request_matchmaking
 from lib_transcendence import endpoints
-from lib_transcendence.game import FinishReason
+from lib_transcendence.game import FinishReason, GameMode
 from django.db import models
 from rest_framework.exceptions import APIException
+from lib_transcendence.users import retrieve_users
 
-from matches.utils import send_match_result
+from matches.utils import send_match_result, compute_trophies
 
 
 class Matches(models.Model):
@@ -52,6 +53,13 @@ class Matches(models.Model):
                 request_matchmaking(endpoints.Matchmaking.ftournament_result_match.format(match_id=self.id), 'PUT', data)
             except APIException:
                 raise ServiceUnavailable('matchmaking')
+        if self.game_mode == GameMode.RANKED:
+            player = retrieve_users(list(self.players.all().values_list('user_id', flat=True)), return_type=dict)
+            winner = self.winner.players.first()
+            looser = self.winner.players.first()
+            winner_trophies, looser_trophies = compute_trophies(player[winner.user_id]['trophies'], player[looser.user_id]['trophies'])
+            winner.set_trophies(winner_trophies)
+            winner.set_trophies(looser_trophies)
         send_match_result(self)
 
 
@@ -76,6 +84,7 @@ class Players(models.Model):
     match = models.ForeignKey(Matches, on_delete=models.CASCADE, related_name='players')
     team = models.ForeignKey(Teams, on_delete=models.CASCADE, related_name='players')
     score = models.IntegerField(default=0)
+    trophies = models.IntegerField(null=True, default=None)
 
     def scored(self):
         self.score += 1
@@ -85,3 +94,7 @@ class Players(models.Model):
     def score_own_goal(self):
         other_team = self.match.teams.exclude(id=self.team.id).first()
         other_team.scored()
+
+    def set_trophies(self, trophies):
+        self.trophies = trophies
+        self.save()
