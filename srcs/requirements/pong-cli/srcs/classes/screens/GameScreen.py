@@ -25,8 +25,6 @@ from classes.screens.MainScreen                 import MainPage
 from classes.utils.config                       import Config
 from classes.utils.user                         import User
 
-
-
 class GamePage(Screen):
     SUB_TITLE = "Game Page"
     CSS_PATH = "styles/GamePage.tcss"
@@ -48,6 +46,7 @@ class GamePage(Screen):
         self.gameStarted = False
         SSLContext = ssl.create_default_context()
         SSLContext.load_verify_locations(Config.SSL.CRT)
+        SSLContext.check_hostname = False
         connector = aiohttp.TCPConnector(ssl=SSLContext)
         self.HTTPSession = aiohttp.ClientSession(connector=connector)
         self.sio = socketio.AsyncClient(
@@ -112,17 +111,25 @@ class GamePage(Screen):
 #        print(f"Connected: {self.connected}, Game started: {self.gameStarted}")
         while (self.connected and self.gameStarted):
             # Move right paddle
+            if (keyboard.Key.up in self.pressedKeys and keyboard.Key.down in self.pressedKeys):
+                if (self.paddleRight.direction != 0):
+                    await self.sio.emit('stop_moving', {"position": self.paddleRight.cY})
+                    self.paddleRight.direction = 0
+                await asyncio.sleep(1 / Config.frameRate)
+                continue
             if (keyboard.Key.up in self.pressedKeys):
-                if self.paddleRight.direction == 1:
+                if (self.paddleRight.direction == 1):
                     await self.sio.emit('stop_moving', {"position": self.paddleRight.cY})
+                if (self.paddleRight.direction != -1):
+                    await self.sio.emit('move_up')
                 self.paddleRight.moveUp()
-                await self.sio.emit('move_up')
             elif (keyboard.Key.down in self.pressedKeys):
-                if self.paddleRight.direction == -1:
+                if (self.paddleRight.direction == -1):
                     await self.sio.emit('stop_moving', {"position": self.paddleRight.cY})
+                if self.paddleRight.direction != 1:
+                    await self.sio.emit('move_down')
                 self.paddleRight.moveDown()
-                await self.sio.emit('move_down')
-            else:
+            elif (self.paddleRight.direction != 0):
                 await self.sio.emit('stop_moving', {"position": self.paddleRight.cY})
                 self.paddleRight.direction = 0
 
