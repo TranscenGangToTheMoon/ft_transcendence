@@ -75,7 +75,7 @@ class Teams(models.Model):
     def scored(self):
         self.score += 1
         self.save()
-        if self.score == os.environ['GAME_MAX_SCORE']:
+        if self.score == int(os.environ['GAME_MAX_SCORE']):
             self.match.finish()
 
 
