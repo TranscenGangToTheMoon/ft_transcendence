@@ -212,6 +212,8 @@ class Game:
         self.send_game_state()
         self.handle_goal()
 
+################--------game events handling--------################
+
     def wait_for_players(self, timeout: float):
         print("waiting for players", flush=True)
         start_waiting = time.time()
@@ -219,12 +221,12 @@ class Game:
             for player in team.players:
                 while player.socket_id == '':
                     if time.time() - start_waiting > timeout:
-                        raise self.PlayerTimeout('player socketio connection timed out')
+                        exception = self.PlayerTimeout('player socketio connection timed out')
+                        exception.args = (player.user_id,)
+                        raise exception
                     time.sleep(0.1)
                 print(time.time(),flush=True)
                 print(f'player {player.user_id} has join in!', flush=True)
-
-################--------game events handling--------################
 
     def play(self):
         start_time = time.perf_counter()
@@ -255,7 +257,7 @@ class Game:
             print(time.time(), "all players are connected", flush=True)
         except self.PlayerTimeout as e:
             print(e, flush=True)
-            self.finish(FinishReason.PLAYER_NOT_CONNECTED)
+            self.finish(FinishReason.PLAYER_NOT_CONNECTED, disconnected_user_id=e.args[0])
             print('game canceled', flush=True)
             return
         if (self.match.game_mode == 'clash'): #watchout for 'clash'
