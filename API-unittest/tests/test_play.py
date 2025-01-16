@@ -122,7 +122,10 @@ class Test02_PlayError(UnitTest):
         self.assertThread(user1)
 
     def test_004_user_in_lobby(self):
-        user1 = self.user()
+        user1 = self.user(['game-start'])
+        user2 = self.user(['game-start'])
+
+        self.assertResponse(play(user2), 201)
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
 
@@ -132,7 +135,10 @@ class Test02_PlayError(UnitTest):
         self.assertThread(user1)
 
     def test_005_user_in_tournament(self):
-        user1 = self.user()
+        user1 = self.user(['game-start'])
+        user2 = self.user(['game-start'])
+
+        self.assertResponse(play(user2), 201)
 
         code = self.assertResponse(create_tournament(user1), 201, get_field='code')
 
@@ -167,38 +173,44 @@ class Test02_PlayError(UnitTest):
         self.assertResponse(play(user1), 401, {'code': 'sse_connection_required', 'detail': 'You need to be connected to SSE to access this resource.'})
 
     def test_008_ranked_trophies(self):
-        user1 = self.user()
+        user1 = self.user(['game-start'])
         user2 = self.user(['game-start'])
         user3 = self.user(['game-start'])
+        user4 = self.user(['game-start'])
 
         self.assertResponse(set_trophies(user1, 1000), 201)
         self.assertResponse(set_trophies(user2, 900), 201)
         self.assertResponse(set_trophies(user3, 870), 201)
+        self.assertResponse(set_trophies(user4, 1000), 201)
 
         self.assertResponse(play(user1, game_mode='ranked'), 201)
         self.assertResponse(play(user2, game_mode='ranked'), 201)
         time.sleep(1)
         self.assertResponse(is_in_game(user1), 404)
         self.assertResponse(play(user3, game_mode='ranked'), 201)
+        self.assertResponse(play(user1, game_mode='ranked'), 201)
         time.sleep(1)
-        self.assertThread(user1, user2, user3)
+        self.assertThread(user1, user2, user3, user4)
 
     def test_009_ranked_trophies_closer(self):
-        user1 = self.user()
+        user1 = self.user(['game-start'])
         user2 = self.user(['game-start'])
         user3 = self.user(['game-start'])
+        user4 = self.user(['game-start'])
 
         self.assertResponse(set_trophies(user1, 1000), 201)
         self.assertResponse(set_trophies(user2, 949), 201)
         self.assertResponse(set_trophies(user3, 960), 201)
+        self.assertResponse(set_trophies(user4, 1000), 201)
 
         self.assertResponse(play(user1, game_mode='ranked'), 201)
         self.assertResponse(play(user2, game_mode='ranked'), 201)
         time.sleep(1)
         self.assertResponse(is_in_game(user1), 404)
         self.assertResponse(play(user3, game_mode='ranked'), 201)
+        self.assertResponse(play(user4, game_mode='ranked'), 201)
         time.sleep(1)
-        self.assertThread(user1, user2, user3)
+        self.assertThread(user1, user2, user3, user4)
 
 
 if __name__ == '__main__':
