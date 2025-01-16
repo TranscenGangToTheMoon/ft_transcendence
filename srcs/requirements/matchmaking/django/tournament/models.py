@@ -5,6 +5,7 @@ from threading import Thread
 
 from django.db import models
 from django.db.models.functions import Random
+from lib_transcendence.game import FinishReason
 from lib_transcendence.sse_events import create_sse_event, EventCode
 from lib_transcendence.validate_type import validate_type, surchage_list
 from rest_framework.exceptions import APIException
@@ -229,9 +230,8 @@ class TournamentMatches(models.Model):
         self.save()
         tournament = self.tournament
         if validated_data is None:
-            validated_data = {}
+            validated_data = {'score_winner': 3, 'score_looser': 0, 'finish_reason': FinishReason.GAME_NOT_PLAYED}
         else:
-            print('validated_data', validated_data, flush=True)
             validated_data.pop('winner_id')
         winner_user_id = winner.user_id
         create_sse_event(tournament.users_id(), EventCode.TOURNAMENT_MATCH_FINISH, {'id': self.id, 'winner': winner_user_id, **validated_data}, {'winner': winner_user_id, 'looser': looser if looser is None else looser.user_id, 'score_winner': validated_data['score_winner'], 'score_looser': validated_data['score_looser']})
