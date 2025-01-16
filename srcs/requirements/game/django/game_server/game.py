@@ -348,15 +348,15 @@ class Game:
         if scorer == None:
             return # game finished
         scorer, csc = scorer
-        instance = scorer.score_goal(csc)
-        if instance is not None:
+        updated_game_instance = scorer.score_goal(csc)
+        if updated_game_instance is not None:
             team.score += 1
         else:
             self.finish('Server Error', team.name, error=True)
             return
-        self.send_score(team)
-        if instance['winner'] != None:
-            self.finish(FinishReason.NORMAL_END, instance['winner'])
+        self.send_score(updated_game_instance)
+        if updated_game_instance['winner'] != None:
+            self.finish(FinishReason.NORMAL_END, updated_game_instance['winner'])
         else:
             # launch a new point
             self.reset_game_state()
@@ -371,11 +371,11 @@ class Game:
 
 ################--------senders--------################
 
-    def send_score(self, scorer_team):
+    def send_score(self, game_instance):
         from game_server.server import Server
         Server.emit('score', data={
-            'team_a': self.match.teams[0].score,
-            'team_b': self.match.teams[1].score,
+            'team_a': game_instance['teams']['a']['score'],
+            'team_b': game_instance['teams']['b']['score'],
         }, room=str(self.match.id))
 
     def send_finish(self, finish_reason: str | None = None, winner: str | None = None):
