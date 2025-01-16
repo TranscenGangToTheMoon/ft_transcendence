@@ -94,9 +94,10 @@ class MatchSerializer(Serializer):
                 add_user = users.get(player.user_id)
                 if add_user is None:
                     add_user = {'id': player.user_id}
-                teams[team].append({**add_user, 'score': player.score})
                 if instance.game_mode == GameMode.RANKED:
                     add_user['trophies'] = player.trophies
+                if instance.game_mode == GameMode.CLASH:
+                    add_user['own_goal'] = player.own_goal
                 teams[team]['players'].append({**add_user, 'score': player.score})
         representation['teams'] = teams
         if instance.finished:
@@ -134,6 +135,8 @@ class MatchSerializer(Serializer):
         kwargs = {}
         if match.game_mode == GameMode.RANKED:
             kwargs['trophies'] = 0
+        if match.game_mode == GameMode.CLASH:
+            kwargs['own_goal'] = 0
         for name_team, players in teams.items():
             new_team = Teams.objects.create(match=match, name=name_team)
             for user in players:
