@@ -139,7 +139,7 @@ class GamePage(Screen):
         try:
             self.setHandler()
             await self.sio.connect(
-                "wss://localhost:4443/",
+                f"wss://{User.host}:{User.port}/",
                 socketio_path="/ws/game/",
                 transports=["websocket"],
                 auth={

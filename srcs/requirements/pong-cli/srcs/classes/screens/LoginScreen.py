@@ -44,10 +44,10 @@ class LoginPage(Screen):
         self.query_one("#AuthenticationBox").border_title = "Authentication"
 
     def getSSLCertificate(self):
-        host = urlparse(User.server).hostname
-        port = urlparse(User.server).port
-        if (host and port):
-            os.system(f"openssl s_client -connect {host}:{port} -servername {host} </dev/null 2>/dev/null | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > {Config.SSL.CRT}")
+        User.host = urlparse(User.server).hostname
+        User.port = urlparse(User.server).port
+        if (User.host and User.port):
+            os.system(f"openssl s_client -connect {User.host}:{User.port} -servername {User.host} </dev/null 2>/dev/null | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > {Config.SSL.CRT}")
 
     @on(Button.Pressed, "#loginButton")
     def loginAction(self):

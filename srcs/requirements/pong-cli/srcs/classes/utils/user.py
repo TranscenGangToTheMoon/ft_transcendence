@@ -15,6 +15,8 @@ class User():
     server: str | None = None
     team: str | None = None
     username: str | None = None
+    host: str | None = None
+    port: int | None = None
 
     @staticmethod
     def loginUser():
