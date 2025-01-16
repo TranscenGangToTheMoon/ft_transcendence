@@ -1,3 +1,5 @@
+import os
+
 from lib_transcendence.game import GameMode, FinishReason
 from lib_transcendence.generate import generate_code
 from lib_transcendence.exceptions import MessagesException, Conflict, ResourceExists
