@@ -129,10 +129,12 @@ async def message(sid, data):
             to=sid
         )
         print(f"Error: {e}")
+        usersConnected.remove_user(sid)
         await sio.disconnect(sid)
     except AuthenticationFailed:
         print(f"Authentification failed : {sid}")
         if data.get('retry'):
+            usersConnected.remove_user(sid)
             await sio.disconnect(sid)
         await sio.emit(
             'error',
@@ -146,6 +148,7 @@ async def message(sid, data):
             {'error': 404, 'message': 'User not found'},
             to=sid
         )
+        usersConnected.remove_user(sid)
         await sio.disconnect(sid)
     except APIException:
         print(f"API error : {sid}")
@@ -154,6 +157,7 @@ async def message(sid, data):
             {'error': 500, 'message': 'error'},
             to=sid
         )
+        usersConnected.remove_user(sid)
         await sio.disconnect(sid)
 
 async def message_lobby(sid, data):

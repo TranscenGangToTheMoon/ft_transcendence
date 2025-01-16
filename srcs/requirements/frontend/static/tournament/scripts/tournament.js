@@ -5,6 +5,35 @@ if (typeof tournament === 'undefined')
 if (typeof selectedValue === 'undefined')
 	var selectedValue;
 
+async function joinTournament(code){
+	console.log('je passe');
+	try {
+		let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/play/tournament/${code}/`, 'POST');
+		// const tournamentDiv = document.getElementById(`tournamentDiv${tournament.id}`);
+		// console.log(tournament);
+		// if (tournamentDiv)
+		// 	tournamentDiv.innerText = `${tournament.name} (${tournament.n_participants + 1}/${tournament.size})`;
+		// tournament = data;
+		if (data.detail){
+			document.getElementById('searchTournamentContextError').innerText = data.detail;
+			return 0;
+		}
+		if (window.location.pathname !== '/tournament/' + code)
+			navigateTo('/tournament/' + code, false);
+		document.getElementById('chatsListView').style.display = 'none';
+		document.getElementById('leaveTournament').style.display = 'block';
+		tournament = data;
+		setBanOption();
+		loadTournament(data);
+	}
+	catch (error){
+		displayMainAlert('Error', 'This tournament does not exists.');
+		console.log(error);
+		return 0;
+	}
+	return 1;
+}
+
 document.getElementById('searchTournamentForm').addEventListener('keyup', async (e) => {
 	e.preventDefault();
 	if (e.key === 'Enter') return;
@@ -15,30 +44,22 @@ document.getElementById('searchTournamentForm').addEventListener('keyup', async 
 		if (data.count){
 			for (i in data.results){
 				let tournament = data.results[i];
+				console.log(tournament);
 				let tournamentDiv = document.createElement('div');
 				tournamentDiv.classList.add('tournament-div');
-				tournamentDiv.id = `tournamentDiv${tournament.id}`
+				tournamentDiv.id = `tournamentDiv${tournament.code}`
 				tournamentDiv.innerText = `${tournament.name} (${tournament.n_participants}/${tournament.size})`;
-				tournamentDiv.addEventListener('click', async () => {
-					console.log('hehe');
-					try {
-						let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/play/tournament/${tournament.code}/`, 'POST');
-						const tournamentDiv = document.getElementById(`tournamentDiv${tournament.id}`);
-						console.log(tournament);
-						if (tournamentDiv)
-							tournamentDiv.innerText = `${tournament.name} (${tournament.n_participants + 1}/${tournament.size})`;
-						tournament = data;
-						setBanOption();
-						loadTournament(data);
-					}
-					catch (error){	
-						console.log(error);
-					}
-				})
 				tempDiv.appendChild(tournamentDiv);
 			}
 		}
 		document.getElementById('tournamentsList').innerHTML = tempDiv.innerHTML;
+		const tournamentDivs = document.querySelectorAll('.tournament-div');
+		for (tournamentDiv of tournamentDivs){
+			tournamentDiv.addEventListener('click', function () {
+				const code = this.id.slice(-4);
+				joinTournament(code);
+			})
+		}
 	}
 	catch (error){
 		console.log(error);
@@ -389,20 +410,7 @@ document.getElementById('searchTournamentForm').addEventListener('submit', async
 		for (i in tournaments.results){
 			let tournament = tournaments.results[i];
 			if (tournament.name === tournamentName){
-				try {
-					let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/play/tournament/${tournament.code}/`, 'POST');
-					const tournamentDiv = document.getElementById(`tournamentDiv${tournament.id}`);
-					console.log(tournament);
-					if (tournamentDiv)
-						tournamentDiv.innerText = `${tournament.name} (${tournament.n_participants + 1}/${tournament.size})`;
-					tournament = data;
-					setBanOption();
-					loadTournament(data);
-				}
-				catch (error){	
-					console.log(error);
-				}
-				return;
+				return joinTournament(tournament.code);
 			}
 		}
 	}
@@ -433,8 +441,12 @@ document.getElementById('createTournament').addEventListener('click', async even
 			}, 2500);
 			return;
 		}
+		document.getElementById('chatsListView').style.display = 'none';
+		document.getElementById('leaveTournament').style.display = 'block';
 		createTournamentModal.hide();
 		tournament = data;
+		if (window.location.pathname !== '/tournament/' + tournament.code)
+			navigateTo('/tournament/' + tournament.code, false);
 		setBanOption();
 		loadTournament(data);
 	}
@@ -451,12 +463,15 @@ async function leaveTournament(){
 	if (!tournament) return;
 	const tournamentViewDiv = document.getElementById('tournamentView');
 	if (tournamentViewDiv) tournamentViewDiv.innerHTML = '';
-	try {
-		await apiRequest(getAccessToken(), `${baseAPIUrl}/play/tournament/${tournament.code}/`, 'DELETE');
-	}
-	catch (error){
-		console.log(error);
-	}
+	navigateTo('/tournament');
+	// try {
+	// 	await apiRequest(getAccessToken(), `${baseAPIUrl}/play/tournament/${tournament.code}/`, 'DELETE');
+	// 	document.getElementById('chatsListView').style.display = 'block';
+	// 	document.getElementById('leaveTournament').style.display = 'none';
+	// }
+	// catch (error){
+	// 	console.log(error);
+	// }
 }
 
 function setTournamentOptions(){
@@ -491,15 +506,13 @@ async function gameStart(event) {
 }
 
 async function initTournament(){
+	document.getElementById('chatsListView').style.display = 'block';
+	document.getElementById('leaveTournament').style.display = 'none';
 	fromTournament = false;
 	userInformations.cancelReturn = false;
     await indexInit(false);
 	if (window.location.pathname === '/')
 		return;
-	if (userInformations.is_guest){
-		await navigateTo('/');
-		return displayMainAlert('Error', 'You do not have permission to play in tournaments');
-	}
 	loadCSS('/tournament/css/tournament.css', false);
 	setTournamentOptions();
 
@@ -511,37 +524,28 @@ async function initTournament(){
 	SSEListeners.set('game-start', gameStart);
 	sse.addEventListener('game-start', gameStart);
 
-	document.getElementById('tournamentsList').addEventListener('click', async (e) => {
-		const tournamentDiv = e.target.closest('.tournament-div');
-		if (!tournamentDiv) return;
-		
-		const cTournament = tournaments.results.find(t => 
-			`tournamentDiv${t.id}` === tournamentDiv.id
-		);
-		if (!cTournament) return;
-		
-		try {
-			let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/play/tournament/${cTournament.code}/`, 'POST');
-			tournamentDiv.innerText = `${cTournament.name} (${cTournament.n_participants + 1}/${cTournament.size})`;
-			if (data.detail)
-				console.log(data.detail);
-			else{
-				tournament = data;
-				setBanOption();
-				loadTournament(data);
-			}
-		} catch (error) {
-			console.log(error);
-		}
-	});
+	let tournamentCode = window.location.pathname.split('/')[2];
+	// if (tournamentCode && !isNaN(parseInt(tournamentCode))){
+	// 	if (await joinTournament(tournamentCode))
+	// 		return;
+	// 	return navigateTo('/tournament', false);
+	// }
 	try {
 		let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/play/tournament/`);
 		tournament = data;
+		if (window.location.pathname !== '/tournament/' + tournament.code)
+			navigateTo('/tournament/' + tournament.code, false);
 		setBanOption()
 		console.log(data);
 		loadTournament(data);
+		document.getElementById('chatsListView').style.display = 'none';
+		document.getElementById('leaveTournament').style.display = 'block';
 	}
 	catch(error) {
+		if (error.code === 404 && tournamentCode){
+			if (!await joinTournament(tournamentCode))
+				navigateTo('/');
+		}
 		console.log(error);
 	}
 	// createBracket(dataTest);

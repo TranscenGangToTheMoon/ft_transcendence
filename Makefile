@@ -85,9 +85,8 @@ banner		:
 
 secrets		:	$(ENV_EXEMPLE)
 			mkdir -p $@
-			./launch.d/01passwords.sh $(ENV_EXEMPLE) $(ENV_FILE)
-			./launch.d/02set-hostname.sh
-			./launch.d/03genreateSSL.sh
+			./launch.d/01generatePasswordsAndKeys.sh
+			./launch.d/02genreateSSL.sh
 
 config		:	$(CONFIG_F)
 			cp $(CONFIG_F) $(SRCS_D)/requirements/pong-cli/$(CONFIG_F)
