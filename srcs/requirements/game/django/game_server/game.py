@@ -224,6 +224,8 @@ class Game:
                 print(time.time(),flush=True)
                 print(f'player {player.user_id} has join in!', flush=True)
 
+################--------game events handling--------################
+
     def play(self):
         start_time = time.perf_counter()
         self.send_start_countdown()
@@ -276,7 +278,11 @@ class Game:
                 players.append(player)
         Server.disconnect(players=players, disconnected_sid=disc_sid)
 
-    def finish(self, finish_reason: str, winner: str | None = None, disconnected_user_id: int | None = None):
+    def finish(self,
+            finish_reason: str,
+            winner: str | None = None,
+            disconnected_user_id: int | None = None,
+            error=False):
         from game_server.server import Server
         print('finishing game', flush=True)
         self.send_finish(finish_reason, winner)
@@ -286,7 +292,7 @@ class Game:
             self.disconnect_players()
         self.finished = True
         Server.delete_game(self.match.id)
-        if (disconnected_user_id is not None):
+        if (disconnected_user_id is not None and error == False):
             finish_match(self.match.id, finish_reason, disconnected_user_id)
 
     def reset_game_state(self):
@@ -299,43 +305,56 @@ class Game:
             racket.velocity = 0
             racket.block_glide = False
 
-    def score(self, team):
-        from game_server.server import Server
+    def get_scorer(self, team):
         last_touch = self.ball.last_racket_touched
         if last_touch is not None:
             last_touch = self.get_player(last_touch)
             if last_touch.team == team:
                 # last player to touch the ball was from the scoring team
-                last_touch.score_goal()
+                return last_touch, False
             else:
                 # last player to touch the ball self scored
-                last_touch.score_goal(csc=True)
-                team.score += 1
+                return last_touch, True
         else:
             # handle case where no one touched the ball
             try:
                 if (team.name == 'a'):
-                    self.get_player(self.ball.last_touch_team_a).score_goal()
+                    return self.get_player(self.ball.last_touch_team_a), False
                 else:
-                    self.get_player(self.ball.last_touch_team_b).score_goal()
+                    return self.get_player(self.ball.last_touch_team_b), False
             except self.NoSuchPlayer as e:
                 print(e, flush=True)
                 self.finish(FinishReason.PLAYER_DISCONNECT, team.name)
                 return
+
+    def get_other_team(self, team):
+        return self.match.teams[0] if team == self.match.teams[1] else self.match.teams[1]
+
+    def score(self, team):
+        scorer = self.get_scorer(team)
+        if scorer == None:
+            return # game finished
+        scorer, csc = scorer
+        instance = scorer.score_goal(csc)
+        if instance is not None:
+            team.score += 1
+        else:
+            self.finish('Server Error', team.name, error=True)
+            return
         self.send_score(team)
-        for team in self.match.teams:
-            if (team.score == self.max_score):
-                self.finish(FinishReason.NORMAL_END, team.name)
-                return
-        self.reset_game_state()
-        self.send_game_state()
-        start_time = time.perf_counter()
-        self.send_start_countdown()
-        effective_start_time = start_time + 2
-        self.last_update = 0
-        while time.perf_counter() < effective_start_time:
-            time.sleep(1 / 120)
-        self.send_start_game()
+        if instance['winner'] != None:
+            self.finish(FinishReason.NORMAL_END, instance['winner'])
+        else:
+            # launch a new point
+            self.reset_game_state()
+            self.send_game_state()
+            start_time = time.perf_counter()
+            self.send_start_countdown()
+            effective_start_time = start_time + 2
+            self.last_update = 0
+            while time.perf_counter() < effective_start_time:
+                time.sleep(1 / 120)
+            self.send_start_game()
 
 ################--------senders--------################
 
