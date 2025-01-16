@@ -16,14 +16,14 @@ from textual.screen     import Screen
 from textual.widgets    import Button, Digits, Footer, Header
 
 # Local imports
-from classes.game.BallWidget                        import Ball
-from classes.game.PaddleWidget                      import Paddle
-from classes.game.PlaygroundWidget                  import Playground
-from classes.modalScreens.CountdownModalScreen      import Countdown
-from classes.modalScreens.GameOverModalScreen       import GameEnd
-from classes.screens.MainScreen                     import MainPage
-from classes.utils.config                           import Config
-from classes.utils.user                             import User
+from classes.game.BallWidget                    import Ball
+from classes.game.PaddleWidget                  import Paddle
+from classes.game.PlaygroundWidget              import Playground
+from classes.modalScreens.CountdownModalScreen  import Countdown
+from classes.modalScreens.GameOverModalScreen   import GameEnd
+from classes.screens.MainScreen                 import MainPage
+from classes.utils.config                       import Config
+from classes.utils.user                         import User
 
 
 
@@ -48,7 +48,6 @@ class GamePage(Screen):
         self.gameStarted = False
         SSLContext = ssl.create_default_context()
         SSLContext.load_verify_locations(Config.SSL.CRT)
-        SSLContext.check_hostname = False
         connector = aiohttp.TCPConnector(ssl=SSLContext)
         self.HTTPSession = aiohttp.ClientSession(connector=connector)
         self.sio = socketio.AsyncClient(
