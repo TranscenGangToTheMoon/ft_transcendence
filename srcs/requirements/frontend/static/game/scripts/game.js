@@ -275,9 +275,8 @@
                 }
                 state.paddles.right.speed = 0;
             }
-            return;
         }
-        if (state.keys["ArrowUp"] && state.paddles.right.speed != -1){
+        else if (state.keys["ArrowUp"] && state.paddles.right.speed != -1){
             if (typeof gameSocket !== 'undefined'){
                 if (state.paddles.right.speed === 1){
                 		gameSocket.emit('stop_moving', {'position': state.paddles.right.y});
@@ -288,7 +287,7 @@
             }
             state.paddles.right.speed = -1;
         }
-        if (state.keys["ArrowDown"] && state.paddles.right.speed != 1){
+        else if (state.keys["ArrowDown"] && state.paddles.right.speed != 1){
             if (typeof gameSocket !== 'undefined'){
                 if (state.paddles.right.speed === -1){
                     gameSocket.emit('stop_moving', {'position': state.paddles.right.y});
@@ -299,14 +298,13 @@
             }
             state.paddles.right.speed = 1;
         }
-        if (!state.keys["ArrowDown"] && !state.keys['ArrowUp'] && state.paddles.right.speed != 0){
+        else if (!state.keys["ArrowDown"] && !state.keys['ArrowUp'] && state.paddles.right.speed != 0){
             state.paddles.right.speed = 0;
             if (typeof gameSocket !== 'undefined'){
                 gameSocket.emit('stop_moving', {'position': state.paddles.right.y});
                 // console.log('emitting stop_moving');
             }
         }
-
         for (let paddle in state.paddles){
             paddle = state.paddles[paddle];
             if (paddle.speed === 1 && paddle.y + config.paddleHeight < config.canvasHeight)
