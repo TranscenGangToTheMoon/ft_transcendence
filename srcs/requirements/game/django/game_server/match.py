@@ -21,17 +21,17 @@ class Player():
 
     def score_goal(self, csc=False):
         try:
-            request_game(endpoints.Game.fscore.format(user_id=self.user_id), 'PUT', data={'own_goal': csc})
+            instance = request_game(endpoints.Game.fscore.format(user_id=self.user_id), 'PUT', data={'own_goal': csc})
         except NotFound as e:
             print(e.detail, flush=True)
+            return None
         except APIException as e:
-            from game_server.server import Server
-            Server.disconnect(match_id=self.match_id)
+            return None
         if csc:
             self.csc += 1
         else:
             self.score += 1
-            self.team.score += 1
+        return instance
 
     def __str__(self) -> str:
         return str(self.user_id)
@@ -57,7 +57,7 @@ class Match():
         self.game_mode = game_data['game_mode']
         teams = game_data['teams']
         for team_name, team in teams.items():
-            self.teams.append(Team(team, self.id, team_name))
+            self.teams.append(Team(team['players'], self.id, team_name))
 
 
 def finish_match(match_id, finish_reason: str, user_id: int):

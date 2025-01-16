@@ -587,13 +587,13 @@ document.getElementById('gameOverModalQuit').addEventListener('click', async () 
 function initData(data){
     try {
         console.log(data);
-		if (data.teams.a.some(player => player.id == userInformations.id)) {
+		if (data.teams.a.players.some(player => player.id == userInformations.id)) {
 			window.PongGame.info.myTeam.name = 'A';
 			window.PongGame.info.myTeam.players = data.teams.a;
 			window.PongGame.info.enemyTeam.name = 'B';
 			window.PongGame.info.enemyTeam.players = data.teams.b;
 		}
-		else if (data.teams.b.some(player => player.id == userInformations.id)) {
+		else if (data.teams.b.players.some(player => player.id == userInformations.id)) {
 			window.PongGame.info.myTeam.name = 'B';
 			window.PongGame.info.myTeam.players = data.teams.b;
 			window.PongGame.info.enemyTeam.name = 'A';
