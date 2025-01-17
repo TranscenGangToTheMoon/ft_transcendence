@@ -147,7 +147,6 @@ function setupSocketListeners(chatInfo)
 function displayMessages(chatInfo, chatMessages, method='afterbegin'){
 	const chatBox = document.getElementById('messages'+chatInfo.target);
 	chatMessages.forEach(element => {
-		console.log(element);
 		if (element.author !== chatInfo.targetId) {
 			chatBox.insertAdjacentHTML(method, `<div><p><strong>You:</strong> ${element.content}</p></div>`);
 		} else {
@@ -177,7 +176,7 @@ async function getMoreOldsMessages(chatInfo){
 async function loadOldMessages(chatInfo){
 	try {
 		clearChatError();
-		console.log('Chat: Loading old messages', chatInfo);
+		console.log('Chat: Loading old messages');
 		var apiAnswer = await apiRequest(getAccessToken(), `${baseAPIUrl}/chat/${chatInfo.chatId}/messages/`, 'GET');
 		if (apiAnswer.detail){
 			return {'code': 400, 'detail': apiAnswer.detail};
@@ -427,7 +426,6 @@ async function chatTabListener(chatInfo)
 {
 	document.getElementById('chatTab' + chatInfo.target).addEventListener('click', async e => {
 		e.preventDefault();
-		console.log('Chat: you\'ve clicked on the tab right here: ', e.target.id);
 		if (e.target.id === 'chatTab' + chatInfo.target + 'Button') {
 			closeChatTab(chatInfo);
 			return;
@@ -441,7 +439,6 @@ async function chatTabListener(chatInfo)
 }
 
 function sendMessageListener(target) {
-	console.log('Chat: Adding listener to chatForm', target);
     const chatForm = document.getElementById('sendMessageForm'+target);
     if (!chatForm.hasAttribute('data-listener-added')) {
         chatForm.setAttribute('data-listener-added', 'true');
@@ -450,7 +447,6 @@ function sendMessageListener(target) {
             const message = this.querySelector('input').value;
 			if (message === '') return;
             socket.emit('message', {'content': message, 'token' : 'Bearer ' + getAccessToken()});
-            console.log('Chat: Message sent: ', message);
             chatForm.reset();
         });
     }
@@ -472,12 +468,10 @@ async function openChatTab(chatId)
 {
 	chat = await getChatInstance(chatId);
 	if (!chat) return;
-	console.log('Chat: Chat loaded nyanyanyanya:', chat);
 	userInformations.notifications['chats'] -= chat.unread_messages;
-	console.log('ici', chat.unread_messages, userInformations.notifications['chats']);
 	if (!userInformations.notifications['chats'])
 		removeBadges('chats');
-	else    
+	else
 		displayBadges();
 	chatInfo = parsChatInfo(chat);
 	chatTabs = document.getElementById('chatTabs');
@@ -586,5 +580,4 @@ document.getElementById('chatsList').addEventListener('scroll', async event => {
 		await getMoreChats();
 		loading = false;
 	}
-	console.log('scrolling in chatsList');
 }, true);
