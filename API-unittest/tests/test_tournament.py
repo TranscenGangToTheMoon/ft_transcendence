@@ -645,7 +645,7 @@ class Test10_FinishTournament(UnitTest):
 
         self.assertThread(user1, user2, user3, user4)
 
-    def test_002_finish_8_seeding(self):
+    def test_002_finish_8_seeding(self): # todo fix
         user1 = self.user([tj, tj, tj, tj, tj, tj, tsa, tj, ts, gs, tmf, tmf, tmf, tmf, gs, tmf, tmf, gs, tmf, tf])
         user2 = self.user([tj, tj, tj, tj, tj, tsa, tj, ts, gs, tmf, tmf, tmf, tmf, gs, tmf, tmf, tmf, tf])
         user3 = self.user([tj, tj, tj, tj, tsa, tj, ts, gs, tmf, tmf, tmf, tmf, gs, tmf, tmf, gs, tmf, tf])
@@ -719,7 +719,7 @@ class Test10_FinishTournament(UnitTest):
 
         self.assertThread(user1, user2, user3, user4, user5, user6, user7, user8)
 
-    def test_003_finish_7_seeding(self):
+    def test_003_finish_7_seeding(self): # todo fix
         user1 = self.user([tj, tj, tj, tj, tj, tj, tsa, ts, tmf, tmf, tmf, tmf, gs, tmf, tmf, gs, tmf, tf])
         user2 = self.user([tj, tj, tj, tj, tj, tsa, ts, tmf, gs, tmf, tmf, tmf, gs, tmf, tmf, tmf, tf])
         user3 = self.user([tj, tj, tj, tj, tsa, ts, tmf, gs, tmf, tmf, tmf, gs, tmf, tmf, gs, tmf, tf])
