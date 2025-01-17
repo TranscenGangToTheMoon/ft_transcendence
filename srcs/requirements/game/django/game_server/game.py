@@ -140,7 +140,7 @@ class Game:
     def handle_racket_bounce(self, racket):
         if (racket.block_glide):
             self.ball.speed_y = -self.ball.speed_y
-            if (abs(self.ball.position.y - racket.position.y + racket.height) <
+            if (abs(self.ball.position.y - (racket.position.y + racket.height)) <
                 abs(self.ball.position.y - racket.position.y)):
                 self.ball.position.y = racket.position.y + racket.height
             else:
@@ -188,10 +188,10 @@ class Game:
             self.last_update = time.perf_counter()
         time_delta = time.perf_counter() - self.last_update
         self.last_update = time.perf_counter()
-        for racket in self.rackets:
-            racket.update(self.ball.size, self.canvas.y, time_delta)
         self.ball.position.x += self.ball.speed_x * time_delta
         self.ball.position.y += self.ball.speed_y * time_delta
+        for racket in self.rackets:
+            racket.update(self.ball.size, self.canvas.y, time_delta)
         self.handle_wall_bounce()
         for racket in self.rackets:
             self.handle_racket_collision(racket)
