@@ -341,6 +341,14 @@ async function tournamentMatchFinished(event){
 	}
 }
 
+async function tournamentFinished(event){
+	event = JSON.parse(event.data);
+	console.log('received tournament-finish');
+	console.log(event);
+	await navigateTo('/', true, true); //todo replace by tournament history
+	displayNotification(undefined, 'tournament finished', event.message, undefined, undefined); //todo add target 
+}
+
 function addTournamentSSEListeners(){
 	if (!SSEListeners.has('tournament-join')){
         SSEListeners.set('tournament-join', tournamentJoined);
@@ -380,6 +388,11 @@ function addTournamentSSEListeners(){
 	if (!SSEListeners.has('tournament-match-finish')){
 		SSEListeners.set('tournament-match-finish', tournamentMatchFinished);
         sse.addEventListener('tournament-match-finish', tournamentMatchFinished);
+	}
+
+	if (!SSEListeners.has('tournament-finish')){
+		SSEListeners.set('tournament-finish', tournamentFinished);
+        sse.addEventListener('tournament-finish', tournamentFinished);
 	}
 }
 
