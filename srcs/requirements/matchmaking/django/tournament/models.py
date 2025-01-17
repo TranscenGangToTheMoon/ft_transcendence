@@ -15,6 +15,7 @@ from blocking.utils import delete_player_instance
 from matchmaking.create_match import create_tournament_match
 from matchmaking.utils.sse import send_sse_event, start_tournament_sse
 from tournament.sse import send_sse_event_finish_match
+from tournament.utils import create_match_new_stage
 
 
 class TournamentSize:
@@ -253,12 +254,6 @@ class TournamentMatches(models.Model):
         if finished is not None:
             from tournament.utils import finish_tournament
 
-            finish_tournament(self.tournament, winner_user_id)
+            finish_tournament(self.tournament.id, winner_user_id)
         else:
-            if not current_stage.matches.filter(finished=False).exists():
-                participants = tournament.participants.filter(still_in=True).order_by('index')
-                ct = participants.count()
-
-                for i in range(0, ct, 2):
-                    match = tournament.matches.create(n=tournament.get_nb_matches(), stage=winner.stage, user_1=participants[i], user_2=participants[i + 1])
-                    match.post()
+            Thread(target=create_match_new_stage, args=(current_stage, winner)).start()
