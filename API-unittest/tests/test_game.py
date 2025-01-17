@@ -127,8 +127,7 @@ class Test03_Finish(UnitTest):
         match_id = self.assertResponse(create_game(user1, user2), 201, get_field=True)
         for _ in range(2):
             self.assertResponse(score(user1['id']), 200)
-        # self.assertResponse(finish_match(match_id, 'player-disconnect', user2['id']), 200) todo fix
-        self.assertResponse(finish_match(match_id, 'A player has disconnected', user2['id']), 200)
+        self.assertResponse(finish_match(match_id, 'player-disconnect', user2['id']), 200)
         self.assertThread(user1, user2)
 
     def test_003_finish_clash(self):
