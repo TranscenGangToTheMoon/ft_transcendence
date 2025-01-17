@@ -510,8 +510,13 @@ async function lobbyGameStart(event){
     event = JSON.parse(event.data);
     console.log(event);
 
-    if (gameMode === '3v3'){
+    if (matchType === '3v3'){
         await navigateTo('/game/3v3', true, true);
+        fromLobby = true;
+        userInformations.lobbyData = event.data;
+    }
+    else{
+        await navigateTo('/game/1v1', true, true);
         fromLobby = true;
         userInformations.lobbyData = event.data;
     }
