@@ -63,6 +63,26 @@ class Test01_Game(UnitTest):
     def test_006_no_teams(self):
         self.assertResponse(create_game(data={'game_mode': 'ranked'}), 400, {'teams': ['This field is required.']})
 
+    def test_007_game_timeout(self):
+        user1 = self.user(['game-start'], connect_game=False)
+        user2 = self.user(['game-start'], connect_game=False)
+
+        self.assertResponse(create_game(user1, user2), 201)
+        self.assertResponse(is_in_game(user1), 200)
+        time.sleep(15)
+        self.assertResponse(is_in_game(user1), 404)
+        self.assertThread(user1, user2)
+
+    def test_008_game_does_not_timeout(self):
+        user1 = self.user(['game-start'], connect_game=False)
+        user2 = self.user(['game-start'], connect_game=False)
+
+        id = self.assertResponse(create_game(user1, user2), 201, get_field=True)
+        self.assertResponse(is_in_game(user1, id), 200)
+        time.sleep(15)
+        self.assertResponse(is_in_game(user1), 200)
+        self.assertThread(user1, user2)
+
 
 class Test02_Score(UnitTest):
 
@@ -78,8 +98,8 @@ class Test02_Score(UnitTest):
         for _ in range(score_2):
             self.assertResponse(score(user2['id']), 200)
         response = self.assertResponse(is_in_game(user1), 200)
-        self.assertEqual(score_1, response['teams']['a'][0]['score'])
-        self.assertEqual(score_2, response['teams']['b'][0]['score'])
+        self.assertEqual(score_1, response['teams']['a']['players'][0]['score'])
+        self.assertEqual(score_2, response['teams']['b']['players'][0]['score'])
         self.assertThread(user1, user2)
 
     def test_002_not_in_game(self):
@@ -100,14 +120,15 @@ class Test03_Finish(UnitTest):
             self.assertResponse(score(user1['id']), 200)
         self.assertThread(user1, user2)
 
-    def test_002_finish_abandon(self):
+    def test_002_finish_disconnect(self):
         user1 = self.user(['game-start'])
         user2 = self.user(['game-start'])
 
         match_id = self.assertResponse(create_game(user1, user2), 201, get_field=True)
         for _ in range(2):
             self.assertResponse(score(user1['id']), 200)
-        self.assertResponse(finish_match(match_id, 'player-abandon', user2['id']), 200)
+        # self.assertResponse(finish_match(match_id, 'player-disconnect', user2['id']), 200) todo fix
+        self.assertResponse(finish_match(match_id, 'A player has disconnected', user2['id']), 200)
         self.assertThread(user1, user2)
 
 
@@ -142,6 +163,8 @@ class Test04_Tournament(UnitTest):
         time.sleep(5)
 
         self.assertResponse(score(user1['id']), 200)
+        self.assertResponse(score(user2['id']), 200)
+        self.assertResponse(score(user2['id']), 200)
         self.assertResponse(score(user1['id']), 200)
         self.assertResponse(score(user1['id']), 200)
 

@@ -50,7 +50,6 @@ document.addEventListener('scroll', async event => {
 
 async function getMoreBlocked(){
     if (!nextBlocked) return;
-    nextBlocked = `${nextBlocked.substring(0, 4)}s${nextBlocked.substring(4)}`;
     try {
         let data = await apiRequest(getAccessToken(), nextBlocked, 'GET');
         const blockedUsersDiv = document.getElementById('blockedUsersList');

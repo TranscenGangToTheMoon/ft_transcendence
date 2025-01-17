@@ -5,18 +5,27 @@ import aiohttp
 import socketio
 from pynput import keyboard
 
+# Rich imports
+from rich.console   import Console
+
 # Textual imports
-from textual            import work
+from textual            import on, work
 from textual.app        import ComposeResult
+from textual.geometry   import Offset
 from textual.screen     import Screen
-from textual.widgets    import Header, Button, Footer
+from textual.widgets    import Button, Digits, Footer, Header
 
 # Local imports
-from classes.game.BallWidget        import Ball
-from classes.game.PaddleWidget      import Paddle
-from classes.game.PlaygroundWidget  import Playground
-from classes.utils.config           import Config, SSL_CRT, SSL_KEY
-from classes.utils.user             import User
+from classes.game.BallWidget                        import Ball
+from classes.game.PaddleWidget                      import Paddle
+from classes.game.PlaygroundWidget                  import Playground
+from classes.modalScreens.CountdownModalScreen      import Countdown
+from classes.modalScreens.GameOverModalScreen       import GameEnd
+from classes.screens.MainScreen                     import MainPage
+from classes.utils.config                           import Config
+from classes.utils.user                             import User
+
+
 
 class GamePage(Screen):
     SUB_TITLE = "Game Page"
@@ -28,19 +37,35 @@ class GamePage(Screen):
         self.paddleLeft = Paddle("left")
         self.paddleRight = Paddle("right")
         self.ball = Ball()
+        self.scoreLeft = Digits("0", id="scoreLeft")
+        self.scoreRight = Digits("0", id="scoreRight")
+        self.aScore = 0
+        self.bScore = 0
+
         self.pressedKeys = set()
         self.listener = None
         self.connected = False
         self.gameStarted = False
-
         SSLContext = ssl.create_default_context()
-        SSLContext.load_verify_locations(SSL_CRT)
+        SSLContext.load_verify_locations(Config.SSL.CRT)
+        SSLContext.check_hostname = False
         connector = aiohttp.TCPConnector(ssl=SSLContext)
         self.HTTPSession = aiohttp.ClientSession(connector=connector)
+        self.sio = socketio.AsyncClient(
+            http_session=self.HTTPSession,
+            # logger=True,
+            # engineio_logger=True,
+        )
 
-        self.sio = socketio.AsyncClient(http_session=self.HTTPSession)
 
     async def on_mount(self) -> None:
+        console = Console()
+        Config.Console.width = console.width
+        Config.Console.height = console.height
+
+        self.scoreLeft.styles.offset = Offset(Config.Console.width // 4, 5)
+        self.scoreRight.styles.offset = Offset(Config.Console.width // 4 * 3 - 4, 5)
+
         # Key handling
         self.listener = keyboard.Listener(
             on_press=self.onPress,
@@ -52,7 +77,9 @@ class GamePage(Screen):
         self.gameLoop()
 
     def compose(self) -> ComposeResult:
-        yield Header()
+        yield Header(show_clock=True)
+        yield self.scoreLeft
+        yield self.scoreRight
         with self.playground:
             yield self.paddleLeft
             yield self.ball
@@ -60,9 +87,9 @@ class GamePage(Screen):
         yield Button("Exit Button", id="exitAction")
         yield Footer()
 
-    def on_button_pressed(self, event: Button.Pressed) -> None:
-        if event.button.id == "exitAction":
-            self.dismiss()
+    @on(Button.Pressed, "#exitAction")
+    def exitAction(self) -> None:
+        self.dismiss()
 
     def onPress(self, key):
         try:
@@ -83,7 +110,7 @@ class GamePage(Screen):
     async def gameLoop(self):
         while (not self.connected or not self.gameStarted):
             await asyncio.sleep(0.1)
-        print(f"Connected: {self.connected}, Game started: {self.gameStarted}")
+#        print(f"Connected: {self.connected}, Game started: {self.gameStarted}")
         while (self.connected and self.gameStarted):
             # Move right paddle
             if (keyboard.Key.up in self.pressedKeys):
@@ -128,34 +155,36 @@ class GamePage(Screen):
         @self.sio.on('connect')
         async def connect():
             self.connected = True
-            print("Connected to server event!", flush=True)
-            print(self.connected, flush=True)
+            # print("Connected to server event!", flush=True)
+            # print(self.connected, flush=True)
 
         @self.sio.on('disconnect')
         async def disconnect():
             self.connected = False
             print("Disconnected from server event!", flush=True)
-            print(self.connected, flush=True)
+            # print(self.connected, flush=True)
 
         @self.sio.on('start_game')
         async def startGameAction():
             self.gameStarted = True
-            print("start_game_action", flush=True)
-            print(self.connected, flush=True)
+            # print(self.connected, flush=True)
 
         @self.sio.on('start_countdown')
-        async def start_countdown_action():
-            print("start_countdown_action", flush=True)
-            print(self.connected, flush=True)
+        async def startCountdownAction():
+            await self.app.push_screen(Countdown())
+            # print(self.connected, flush=True)
 
         @self.sio.on('game_state')
         async def gameStateAction(data):
+#            print(f"Score Left Region: {self.scoreLeft.region}")
+#            print(f"Score Left Size: {self.scoreLeft.styles.width}")
+#            print(f"Score Right Region: {self.scoreRight.region}")
+#            print(f"Score Right Size: {self.scoreRight.styles.width}")
             self.ball.move(data["position_x"], data["position_y"])
 
         @self.sio.on('connect_error')
         async def connectErrorAction(data):
             print(f"Connect error received: {data}", flush=True)
-            print(self.connected, flush=True)
 
         @self.sio.on('move_up')
         async def moveUpAction(data):
@@ -176,16 +205,23 @@ class GamePage(Screen):
 
         @self.sio.on('score')
         async def scoreAction(data):
-            print(f"Score action event ====: {data}", flush=True)
+            self.aScore = data["team_a"]
+            self.bScore = data["team_b"]
+            if (User.team == "a"):
+                self.query_one("#scoreLeft").update(str(self.bScore))
+                self.query_one("#scoreRight").update(str(self.aScore))
+            else:
+                self.query_one("#scoreLeft").update(str(self.aScore))
+                self.query_one("#scoreRight").update(str(self.bScore))
             self.paddleLeft.reset()
             self.paddleRight.reset()
-            print(self.connected, flush=True)
 
         @self.sio.on('game_over')
-        async def game_over_action(data):
-            print(f"game_over_action: {data}", flush=True)
+        async def gameOverAction(data):
+            print(f"Game over event: {data}")
+            if (await self.app.push_screen_wait(GameEnd(data["reason"], data["winner"] == User.team)) == "main"):
+                await self.app.switch_screen(MainPage())
             await self.sio.disconnect()
-            print(self.connected, flush=True)
 
     async def on_unmount(self) -> None:
         print("Unmounting GamePage")
@@ -194,4 +230,4 @@ class GamePage(Screen):
             print("Unmount disconnect the server!")
         self.connected = False
         self.listener.stop()
-        self.HTTPSession.close()
+        await self.HTTPSession.close()

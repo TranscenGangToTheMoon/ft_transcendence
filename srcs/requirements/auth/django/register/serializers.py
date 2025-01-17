@@ -1,13 +1,14 @@
 from django.contrib.auth.models import User
 from lib_transcendence.exceptions import MessagesException
 from rest_framework import serializers
+from lib_transcendence.serializer import Serializer
 
 from auth.utils import create_user_get_token
 from auth.validators import validate_username, set_password
 from guest.group import get_group_guest
 
 
-class RegisterSerializer(serializers.ModelSerializer):
+class RegisterSerializer(Serializer):
     username = serializers.CharField(write_only=True)
     password = serializers.CharField(write_only=True)
     access = serializers.CharField(read_only=True)

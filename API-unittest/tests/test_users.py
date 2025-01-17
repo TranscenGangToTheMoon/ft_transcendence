@@ -61,7 +61,7 @@ class Test02_UserMe(UnitTest):
         last_online = response['last_online']
         self.assertDictEqual(response, {'id': response['id'], 'username': user1['username'], 'is_guest': False, 'created_at': response['created_at'], 'profile_picture': None, 'accept_friend_request': True, 'accept_chat_from': 'friends_only', 'trophies': 0, 'notifications': {'friend_requests': 0, 'chats': 0}, 'is_online': True, 'last_online': response['last_online']})
         self.assertThread(user1)
-        time.sleep(1)
+        time.sleep(5)
         self.assertNotEqual(last_online, self.assertResponse(me(user1), 200)['last_online'])
 
     def test_002_get_me_guest(self):

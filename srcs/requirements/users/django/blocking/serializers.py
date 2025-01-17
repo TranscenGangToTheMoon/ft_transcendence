@@ -2,6 +2,7 @@ from lib_transcendence.exceptions import MessagesException, ResourceExists
 from lib_transcendence.sse_events import EventCode
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
+from lib_transcendence.serializer import Serializer
 
 from blocking.models import BlockedUsers
 from friends.utils import get_friendship
@@ -11,7 +12,7 @@ from users.auth import get_user, get_valid_user
 from users.serializers_utils import SmallUsersSerializer
 
 
-class BlockedSerializer(serializers.ModelSerializer):
+class BlockedSerializer(Serializer):
     user_id = serializers.IntegerField(write_only=True)
     blocked = SmallUsersSerializer(read_only=True)
 

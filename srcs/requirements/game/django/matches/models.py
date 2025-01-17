@@ -1,13 +1,15 @@
+import os
 from datetime import timedelta, datetime, timezone
 
 from lib_transcendence.exceptions import ServiceUnavailable
 from lib_transcendence.services import request_matchmaking
 from lib_transcendence import endpoints
-from lib_transcendence.game import FinishReason
+from lib_transcendence.game import FinishReason, GameMode
 from django.db import models
 from rest_framework.exceptions import APIException
+from lib_transcendence.users import retrieve_users
 
-from matches.utils import send_match_result
+from matches.utils import send_match_result, compute_trophies
 
 
 class Matches(models.Model):
@@ -20,13 +22,21 @@ class Matches(models.Model):
     tournament_n = models.IntegerField(null=True)
     finish_reason = models.CharField(null=True, default=None, max_length=35)
     finished = models.BooleanField(default=False)
+    game_start = models.BooleanField(default=False)
 
     winner = models.ForeignKey('Teams', null=True, default=None, on_delete=models.SET_NULL, related_name='winner')
     looser = models.ForeignKey('Teams', null=True, default=None, on_delete=models.SET_NULL, related_name='looser')
 
-    def finish(self):
+    def start(self):
+        self.game_start = True
+        self.save()
+
+    def finish(self, finish_reason=FinishReason.NORMAL_END):
         if self.finish_reason is None:
-            self.finish_reason = FinishReason.NORMAL_END
+            self.finish_reason = finish_reason
+        if self.finish_reason == FinishReason.PLAYERS_TIMEOUT:
+            self.delete()
+            return
         self.finished = True
         self.code = None
         self.game_duration = datetime.now(timezone.utc) - self.created_at
@@ -43,6 +53,13 @@ class Matches(models.Model):
                 request_matchmaking(endpoints.Matchmaking.ftournament_result_match.format(match_id=self.id), 'PUT', data)
             except APIException:
                 raise ServiceUnavailable('matchmaking')
+        if self.game_mode == GameMode.RANKED:
+            player = retrieve_users(list(self.players.all().values_list('user_id', flat=True)), return_type=dict)
+            winner = self.winner.players.first()
+            looser = self.winner.players.first()
+            winner_trophies, looser_trophies = compute_trophies(player[winner.user_id]['trophies'], player[looser.user_id]['trophies'])
+            winner.set_trophies(winner_trophies)
+            winner.set_trophies(looser_trophies)
         send_match_result(self)
 
 
@@ -58,7 +75,7 @@ class Teams(models.Model):
     def scored(self):
         self.score += 1
         self.save()
-        if self.score == 3:
+        if self.score == int(os.environ['GAME_MAX_SCORE']):
             self.match.finish()
 
 
@@ -67,6 +84,8 @@ class Players(models.Model):
     match = models.ForeignKey(Matches, on_delete=models.CASCADE, related_name='players')
     team = models.ForeignKey(Teams, on_delete=models.CASCADE, related_name='players')
     score = models.IntegerField(default=0)
+    trophies = models.IntegerField(null=True, default=None)
+    own_goal = models.IntegerField(default=0)
 
     def scored(self):
         self.score += 1
@@ -74,5 +93,11 @@ class Players(models.Model):
         self.team.scored()
 
     def score_own_goal(self):
+        self.own_goal += 1
+        self.save()
         other_team = self.match.teams.exclude(id=self.team.id).first()
         other_team.scored()
+
+    def set_trophies(self, trophies):
+        self.trophies = trophies
+        self.save()

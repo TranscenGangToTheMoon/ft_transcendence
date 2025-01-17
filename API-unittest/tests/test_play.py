@@ -4,8 +4,12 @@ import unittest
 from services.game import create_game, is_in_game
 from services.lobby import create_lobby, join_lobby
 from services.play import play
+from services.stats import set_trophies
 from services.tournament import join_tournament, create_tournament
 from utils.my_unittest import UnitTest
+
+lj = 'lobby-join'
+lup = 'lobby-update-participant'
 
 
 class Test01_Play(UnitTest):
@@ -16,13 +20,77 @@ class Test01_Play(UnitTest):
 
         self.assertResponse(play(user1), 201)
         self.assertResponse(play(user2), 201)
+        time.sleep(1)
         self.assertThread(user1, user2)
 
     def test_002_play_ranked(self):
-        user1 = self.user()
+        user1 = self.user(['game-start'])
+        user2 = self.user(['game-start'])
 
         self.assertResponse(play(user1, game_mode='ranked'), 201)
-        self.assertThread(user1)
+        self.assertResponse(play(user2, game_mode='ranked'), 201)
+        time.sleep(1)
+        self.assertThread(user1, user2)
+
+    def test_003_play_clash(self):
+        user1 = self.user([lj, lup, 'game-start'])
+        user2 = self.user([lup, 'game-start'])
+        user3 = self.user(['game-start'])
+        user4 = self.user([lj, lj, lup, lup, 'game-start'])
+        user5 = self.user([lj, lup, lup, 'game-start'])
+        user6 = self.user([lup, lup, 'game-start'])
+
+        code = self.assertResponse(create_lobby(user1), 201, get_field='code')
+        self.assertResponse(join_lobby(user2, code), 201)
+        self.assertResponse(join_lobby(user1, code, data={'is_ready': True}), 200)
+        self.assertResponse(join_lobby(user2, code, data={'is_ready': True}), 200)
+
+        code = self.assertResponse(create_lobby(user3), 201, get_field='code')
+        self.assertResponse(join_lobby(user3, code, data={'is_ready': True}), 200)
+
+        code = self.assertResponse(create_lobby(user4), 201, get_field='code')
+        self.assertResponse(join_lobby(user5, code), 201)
+        self.assertResponse(join_lobby(user6, code), 201)
+        self.assertResponse(join_lobby(user4, code, data={'is_ready': True}), 200)
+        self.assertResponse(join_lobby(user5, code, data={'is_ready': True}), 200)
+        self.assertResponse(join_lobby(user6, code, data={'is_ready': True}), 200)
+
+        time.sleep(2)
+        self.assertThread(user1, user2, user3, user4, user5, user6)
+
+    def test_004_play_custom_game(self):
+        user1 = self.user([lj, lj, lj, lj, lj, lup, lup, lup, lup, lup, 'game-start'])
+        user2 = self.user([lj, lj, lj, lj, lup, lup, lup, lup, lup, 'game-start'])
+        user3 = self.user([lj, lj, lj, lup, lup, lup, lup, lup, 'game-start'])
+        user4 = self.user([lj, lj, lup, lup, lup, lup, lup, 'game-start'])
+        user5 = self.user([lj, lup, lup, lup, lup, lup, 'game-start'])
+        user6 = self.user([lup, lup, lup, lup, lup, 'game-start'])
+
+        code = self.assertResponse(create_lobby(user1, data={'game_mode': 'custom_game', 'match_type': '3v3'}), 201, get_field='code')
+        self.assertResponse(join_lobby(user2, code), 201)
+        self.assertResponse(join_lobby(user3, code), 201)
+        self.assertResponse(join_lobby(user4, code), 201)
+        self.assertResponse(join_lobby(user5, code), 201)
+        self.assertResponse(join_lobby(user6, code), 201)
+
+        self.assertResponse(join_lobby(user1, code, data={'is_ready': True}), 200)
+        self.assertResponse(join_lobby(user2, code, data={'is_ready': True}), 200)
+        self.assertResponse(join_lobby(user3, code, data={'is_ready': True}), 200)
+        self.assertResponse(join_lobby(user4, code, data={'is_ready': True}), 200)
+        self.assertResponse(join_lobby(user5, code, data={'is_ready': True}), 200)
+        self.assertResponse(join_lobby(user6, code, data={'is_ready': True}), 200)
+
+        time.sleep(2)
+        self.assertThread(user1, user2, user3, user4, user5, user6)
+
+    def test_005_play_duel_guest(self):
+        user1 = self.user(['game-start'])
+        user2 = self.user(['game-start'], guest=True)
+
+        self.assertResponse(play(user1), 201)
+        self.assertResponse(play(user2), 201)
+        time.sleep(1)
+        self.assertThread(user1, user2)
 
 
 class Test02_PlayError(UnitTest):
@@ -54,7 +122,10 @@ class Test02_PlayError(UnitTest):
         self.assertThread(user1)
 
     def test_004_user_in_lobby(self):
-        user1 = self.user()
+        user1 = self.user(['game-start'])
+        user2 = self.user(['game-start'])
+
+        self.assertResponse(play(user2), 201)
 
         code = self.assertResponse(create_lobby(user1), 201, get_field='code')
 
@@ -64,7 +135,10 @@ class Test02_PlayError(UnitTest):
         self.assertThread(user1)
 
     def test_005_user_in_tournament(self):
-        user1 = self.user()
+        user1 = self.user(['game-start'])
+        user2 = self.user(['game-start'])
+
+        self.assertResponse(play(user2), 201)
 
         code = self.assertResponse(create_tournament(user1), 201, get_field='code')
 
@@ -97,6 +171,46 @@ class Test02_PlayError(UnitTest):
         user1 = self.user(sse=False)
 
         self.assertResponse(play(user1), 401, {'code': 'sse_connection_required', 'detail': 'You need to be connected to SSE to access this resource.'})
+
+    def test_008_ranked_trophies(self):
+        user1 = self.user(['game-start'])
+        user2 = self.user(['game-start'])
+        user3 = self.user(['game-start'])
+        user4 = self.user(['game-start'])
+
+        self.assertResponse(set_trophies(user1, 1000), 201)
+        self.assertResponse(set_trophies(user2, 900), 201)
+        self.assertResponse(set_trophies(user3, 870), 201)
+        self.assertResponse(set_trophies(user4, 1000), 201)
+
+        self.assertResponse(play(user1, game_mode='ranked'), 201)
+        self.assertResponse(play(user2, game_mode='ranked'), 201)
+        time.sleep(1)
+        self.assertResponse(is_in_game(user1), 404)
+        self.assertResponse(play(user3, game_mode='ranked'), 201)
+        self.assertResponse(play(user4, game_mode='ranked'), 201)
+        time.sleep(1)
+        self.assertThread(user1, user2, user3, user4)
+
+    def test_009_ranked_trophies_closer(self):
+        user1 = self.user(['game-start'])
+        user2 = self.user(['game-start'])
+        user3 = self.user(['game-start'])
+        user4 = self.user(['game-start'])
+
+        self.assertResponse(set_trophies(user1, 1000), 201)
+        self.assertResponse(set_trophies(user2, 949), 201)
+        self.assertResponse(set_trophies(user3, 960), 201)
+        self.assertResponse(set_trophies(user4, 1000), 201)
+
+        self.assertResponse(play(user1, game_mode='ranked'), 201)
+        self.assertResponse(play(user2, game_mode='ranked'), 201)
+        time.sleep(1)
+        self.assertResponse(is_in_game(user1), 404)
+        self.assertResponse(play(user3, game_mode='ranked'), 201)
+        self.assertResponse(play(user4, game_mode='ranked'), 201)
+        time.sleep(1)
+        self.assertThread(user1, user2, user3, user4)
 
 
 if __name__ == '__main__':

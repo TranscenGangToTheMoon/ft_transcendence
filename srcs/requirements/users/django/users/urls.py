@@ -43,13 +43,6 @@ urlpatterns = [
     path(UsersManagement.manage_user, manage_user_view),
 ]
 
-# TODO fguirama: make matchamking for duel
-# TODO fguirama: make matchamking for clash
-# TODO fguirama: make matchamking for ranked
-
-
-# todo fix github issue
-
 # --- OTHER ---
 # todo test tournament with ui
 # todo test tournament abandon

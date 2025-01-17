@@ -28,16 +28,18 @@ class Test01_Tournament(UnitTest):
         self.assertThread(user1, user2)
 
     def test_003_join_two_tournament(self):
-        user1 = self.user(['tournament-join', 'tournament-leave'])
+        user1 = self.user(['tournament-join', 'tournament-leave', 'tournament-join'])
         user2 = self.user()
         user3 = self.user(['tournament-join'])
+        user4 = self.user(guest=True)
 
         code1 = self.assertResponse(create_tournament(user1), 201, get_field='code')
         code2 = self.assertResponse(create_tournament(user3), 201, get_field='code')
         self.assertResponse(join_tournament(user2, code1), 201)
         self.assertResponse(join_tournament(user2, code1, method='DELETE'), 204)
         self.assertResponse(join_tournament(user2, code2), 201)
-        self.assertThread(user1, user2, user3)
+        self.assertResponse(join_tournament(user4, code1), 201)
+        self.assertThread(user1, user2, user3, user4)
 
 
 class Test02_ErrorTournament(UnitTest):
@@ -651,7 +653,7 @@ class Test10_FinishTournament(UnitTest):
         user5 = self.user([tj, tj, tsa, tj, ts, gs, tmf, tmf, tmf, tmf, gs, tmf, tmf, tmf, tf])
         user6 = self.user([tj, tsa, tj, ts, gs, tmf, tmf, tmf, tmf, tmf, tmf, tmf, tf])
         user7 = self.user([tsa, tj, ts, gs, tmf, tmf, tmf, tmf, tmf, tmf, tmf, tf])
-        user8 = self.user([ts, gs, tmf, tmf, tmf, tmf, tmf, tmf, tmf, tf])
+        user8 = self.user([gs, tmf, tmf, tmf, tmf, tmf, tmf, tmf, tf])
 
         self.assertResponse(set_trophies(user1, 500), 201)
         self.assertResponse(set_trophies(user2, 400), 201)
@@ -716,6 +718,73 @@ class Test10_FinishTournament(UnitTest):
         self.assertResponse(score(user3['id']), 200)
 
         self.assertThread(user1, user2, user3, user4, user5, user6, user7, user8)
+
+    def test_003_finish_7_seeding(self):
+        user1 = self.user([tj, tj, tj, tj, tj, tj, tsa, ts, tmf, tmf, tmf, tmf, gs, tmf, tmf, gs, tmf, tf])
+        user2 = self.user([tj, tj, tj, tj, tj, tsa, ts, tmf, gs, tmf, tmf, tmf, gs, tmf, tmf, tmf, tf])
+        user3 = self.user([tj, tj, tj, tj, tsa, ts, tmf, gs, tmf, tmf, tmf, gs, tmf, tmf, gs, tmf, tf])
+        user4 = self.user([tj, tj, tj, tsa, ts, tmf, gs, tmf, tmf, tmf, tmf, tmf, tmf, tf])
+        user5 = self.user([tj, tj, tsa, ts, tmf, gs, tmf, tmf, tmf, gs, tmf, tmf, tmf, tf])
+        user6 = self.user([tj, tsa, ts, tmf, gs, tmf, tmf, tmf, tmf, tmf, tmf, tf])
+        user7 = self.user([tsa, ts, tmf, gs, tmf, tmf, tmf, tmf, tmf, tmf, tf])
+
+        self.assertResponse(set_trophies(user1, 3000), 201)
+        self.assertResponse(set_trophies(user2, 2500), 201)
+        self.assertResponse(set_trophies(user3, 2000), 201)
+        self.assertResponse(set_trophies(user4, 1500), 201)
+        self.assertResponse(set_trophies(user5, 1000), 201)
+        self.assertResponse(set_trophies(user6, 500), 201)
+        self.assertResponse(set_trophies(user7, 50), 201)
+
+        code = self.assertResponse(create_tournament(user1, size=8), 201, get_field='code')
+        self.assertResponse(join_tournament(user2, code), 201)
+        self.assertResponse(join_tournament(user3, code), 201)
+        self.assertResponse(join_tournament(user4, code), 201)
+        self.assertResponse(join_tournament(user5, code), 201)
+        self.assertResponse(join_tournament(user6, code), 201)
+        self.assertResponse(join_tournament(user7, code), 201)
+
+        time.sleep(30)
+
+        self.assertResponse(score(user7['id']), 200)
+        self.assertResponse(score(user2['id']), 200)
+        self.assertResponse(score(user2['id']), 200)
+        self.assertResponse(score(user2['id']), 200)
+
+        self.assertResponse(score(user6['id']), 200)
+        self.assertResponse(score(user3['id']), 200)
+        self.assertResponse(score(user6['id']), 200)
+        self.assertResponse(score(user3['id']), 200)
+        self.assertResponse(score(user3['id']), 200)
+
+        self.assertResponse(score(user4['id']), 200)
+        self.assertResponse(score(user5['id']), 200)
+        self.assertResponse(score(user4['id']), 200)
+        self.assertResponse(score(user5['id']), 200)
+        self.assertResponse(score(user5['id']), 200)
+
+        time.sleep(2)
+
+        self.assertResponse(score(user5['id']), 200)
+        self.assertResponse(score(user1['id']), 200)
+        self.assertResponse(score(user1['id']), 200)
+        self.assertResponse(score(user5['id']), 200)
+        self.assertResponse(score(user1['id']), 200)
+
+        self.assertResponse(score(user3['id']), 200)
+        self.assertResponse(score(user3['id']), 200)
+        self.assertResponse(score(user2['id']), 200)
+        self.assertResponse(score(user3['id']), 200)
+
+        time.sleep(2)
+
+        self.assertResponse(score(user1['id']), 200)
+        self.assertResponse(score(user3['id']), 200)
+        self.assertResponse(score(user1['id']), 200)
+        self.assertResponse(score(user3['id']), 200)
+        self.assertResponse(score(user3['id']), 200)
+
+        self.assertThread(user1, user2, user3, user4, user5, user6, user7)
 
 
 if __name__ == '__main__':

@@ -58,6 +58,8 @@ async function apiRequest(token, endpoint, method="GET", authType="Bearer",
             return data;
         })
         .catch(error =>{
+            if (error.message === 'relog')
+                return apiRequest(getAccessToken(), endpoint, method, authType, contentType, body);
             if (error.code === 500 || error.message === 'Failed to fetch')
                 document.getElementById('container').innerText = `alala pas bien ${error.code? `: ${error.code}` : ''} (jcrois c'est pas bon)`;
             throw error;
@@ -109,6 +111,16 @@ async function generateToken() {
     }
 }
 
+async function relog(){
+    // if (window.location.pathname !== '/')
+    //     await navigateTo('/');
+    await generateToken();
+    displayMainAlert("Unable to retrieve your account/guest profile","We're sorry your account has been permanently deleted and cannot be recovered.");
+    throw new Error('relog');
+    // await fetchUserInfos();
+    // await loadUserProfile();
+}
+
 async function refreshToken(token) {
     var refresh = getRefreshToken();
     try {
@@ -121,16 +133,18 @@ async function refreshToken(token) {
             return token;
         }
         else {
-            if (userInformations.is_guest === true){
-                return forceReloadGuestToken();
-            }
             console.log('refresh token expired must relog')
-            relog();
-            return undefined;
+            // if (userInformations && userInformations.is_guest === true){
+            //     return forceReloadGuestToken();
+            // }
+            await relog();
         }
     }
     catch (error) {
-        console.log("ERROR", error);
+        if (error.message === 'relog')
+            throw error;
+        else
+            console.log("ERROR", error);
     }
 }
 
@@ -180,20 +194,19 @@ function loadScript(scriptSrc, type) {
 function clearCSS(){
     const links = document.querySelectorAll('link[clearable]');
     for (let link of links){
-        console.log('removing', link);
         link.remove();
     }
 }
 
-function loadCSS(cssHref) {
-    const existingLink = document.querySelector('link[dynamic-css]');
+function loadCSS(cssHref, clearable) {
+    const existingLink = document.querySelector(`link[href="${cssHref}"]`);
     if (existingLink) {
         existingLink.remove();
     }
     const link = document.createElement('link');
     link.rel = 'stylesheet';
     link.href = cssHref;
-    if (cssHref != '/css/styles.css')
+    if (clearable)
         link.setAttribute('clearable', 'true');
     document.head.appendChild(link);
 }
@@ -225,14 +238,15 @@ async function loadContent(url, containerId='content', append=false, container=u
         css = contentDiv.querySelector(`[${style}]`);
         // console.log(style, css)
         if (css)
-            loadCSS(css.getAttribute(style));//, !css.getAttribute(style).includes('Guest'));
+            loadCSS(css.getAttribute(style), css.getAttribute('clearable'));//, !css.getAttribute(style).includes('Guest'));
     } catch (error) {
+        console.log(error);
         contentDiv.innerHTML = '<h1>Erreur 404 : Page non trouvée</h1>';
     }
 }
 
 function containsCode(path){
-    const regex = /^\/(game|lobby)\/\d+$/;
+    const regex = /^\/(game|lobby|tournament)\/\d+$/;
     return regex.test(path);
 }
 
@@ -278,9 +292,11 @@ function getCurrentState(){
 async function navigateTo(url, doNavigate=true){
     let currentState = getCurrentState();
     lastState = currentState;
-    await handleSSEListenerRemoval(url);
-    await quitLobbies(window.location.pathname);
-    await closeGameConnection(window.location.pathname);
+    // if (doNavigate){
+        await handleSSEListenerRemoval(url);
+        await quitLobbies(window.location.pathname, url);
+        await closeGameConnection(window.location.pathname);
+    // }
     history.pushState({state: currentState}, '', url);
     console.log(`added ${url} to history with state : ${currentState}`);
     pathName = window.location.pathname;
@@ -339,7 +355,7 @@ window.addEventListener('popstate', async event => {
     console.log(pathName, window.location.pathname);
     if (pathName === '/game')
         return cancelNavigation(event, undefined);
-    await quitLobbies(pathName);
+    await quitLobbies(pathName, window.location.pathname);
     await closeGameConnection(pathName);
     pathName = window.location.pathname;
     if (event.state && event.state.state)
@@ -350,7 +366,7 @@ window.addEventListener('popstate', async event => {
     handleRoute();
 })
 
-async function quitLobbies(oldUrl){
+async function quitLobbies(oldUrl, newUrl){
     if (oldUrl.includes('/lobby')){
         try {
             await apiRequest(getAccessToken(), `${baseAPIUrl}/play${oldUrl}/`, 'DELETE');
@@ -359,8 +375,10 @@ async function quitLobbies(oldUrl){
             console.log(error);
         }
     }
-    if (oldUrl.includes('/tournament') && typeof tournament !== 'undefined' && tournament && !fromTournament){
-        console.log('non normalement non non', fromTournament);
+    if (oldUrl.includes('/tournament') && typeof tournament !== 'undefined' && tournament && (!fromTournament && (
+        containsCode(oldUrl) && !containsCode(newUrl)
+    ))){
+        console.log(fromTournament);
         try {
             await apiRequest(getAccessToken(), `${baseAPIUrl}/play/tournament/${tournament.code}/`, 'DELETE');
         }
@@ -642,6 +660,7 @@ function handleFriendRequestNotification(target, img, notification, toastContain
         event.preventDefault();
         event.stopImmediatePropagation();
         event.stopPropagation();
+        console.log('click ?')
         try {
             let data = await apiRequest(getAccessToken(), target.url, target.method);
             if (target.url.includes('friend_request')){
@@ -683,15 +702,14 @@ async function addTargets(notification, targets, toastInstance, toastContainer){
 
             notificationBody.appendChild(button);
         }
-        
-        if (target.type === 'API') {
+        if (target.type === 'api') {
             handleFriendRequestNotification(target, img, notification, toastContainer, toastInstance);
             // img.addEventListener('click', event => {
             //     notification.clicked = true;
             //     dismissNotification(notification, toastInstance, toastContainer);
             // });
         }
-        else if (target.type === 'URL'){
+        else if (target.type === 'url'){
             button.addEventListener('click', async () => {
                 console.log(target.url.slice(0, -1));
                 await navigateTo(target.url.slice(0, -1));
@@ -711,7 +729,7 @@ function dismissNotification(notification, toastInstance, toastContainer){
         if (notificationQueue.length){
             let notif= notificationQueue.shift();
             console.log(notificationQueue);
-            displayNotification(notif[0], notif[1], notif[2], notif[3]);
+            displayNotification(notif[0], notif[1], notif[2], notif[3], notif[4]);
         }
     }, 500);
 }
@@ -719,7 +737,7 @@ function dismissNotification(notification, toastInstance, toastContainer){
 async function displayNotification(icon=undefined, title=undefined, body=undefined, mainListener=undefined, target=undefined){
 
     if (displayedNotifications >= MAX_DISPLAYED_NOTIFICATIONS) {
-        notificationQueue.push([icon, title, body, mainListener]);
+        notificationQueue.push([icon, title, body, mainListener, target]);
         return;
     }
     const toastContainer = document.getElementById('toastContainer');
@@ -775,18 +793,25 @@ async function fetchUserInfos(forced=false) {
         await generateToken();
     if (!userInformations || forced) {
         try {
-            let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/users/me`);
+            let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/users/me/`);
             userInformations = data;
             console.log(userInformations);
             displayBadges();
         }
         catch (error) {
+            if (error.message === 'relog')
+                throw error;
             console.log(error);
         }
     }
 }
 
 function displayMainAlert(alertTitle, alertContent) {
+    const modalElement = document.getElementById('alertModal');
+    
+    if (modalElement.classList.contains('show')) {
+        return;
+    }
     const alertContentDiv = document.getElementById('alertContent');
     const alertTitleDiv = document.getElementById('alertModalLabel');
     const alertModal = new bootstrap.Modal(document.getElementById('alertModal'));
@@ -849,7 +874,7 @@ async function loadChatListModal(){
     await loadContent('/chatTemplates/chatListModal.html', 'modals', true);
 }
 
-async function loadUserProfile(){
+async function  loadUserProfile(){
     let profileMenu = 'profileMenu.html';
 
     document.getElementById('username').innerText = userInformations.username;
@@ -900,7 +925,6 @@ async function  indexInit(auto=true) {
             await generateToken();
             await fetchUserInfos(true);
             displayMainAlert("Unable to retrieve your account/guest profile","We're sorry your account has been permanently deleted and cannot be recovered.");
-            return navigateTo('/');
         }
         initSSE();
         await loadFriendListModal();
@@ -920,3 +944,33 @@ window.indexInit = indexInit;
 window.loadUserProfile = loadUserProfile;
 
 indexInit();
+
+async function temp(ind=25){
+    try{
+        let data = await apiRequest(undefined, `${baseAPIUrl}/auth/guest/`, 'POST');
+            data = await apiRequest(data.access, `${baseAPIUrl}/auth/register/guest/`, 'PUT', undefined, undefined, {
+                'username' : 'flo',
+                'password' : 'flo',
+            })
+    }
+    catch (error){
+        console.log(error);
+    }
+    for (let i = 0; i < ind; i++){
+        try {
+            let data = await apiRequest(undefined, `${baseAPIUrl}/auth/guest/`, 'POST');
+            data = await apiRequest(data.access, `${baseAPIUrl}/auth/register/guest/`, 'PUT', undefined, undefined, {
+                'username' : `${getCurrentState()}user${i}`,
+                'password' : 'user',
+            })
+            data = await apiRequest(data.access, `${baseAPIUrl}/users/me/friend_requests/`, 'POST', undefined, undefined, {
+                'username': userInformations.username,
+            });
+        }
+        catch(error){
+            console.log(error);
+        }
+    }
+}
+
+// temp();

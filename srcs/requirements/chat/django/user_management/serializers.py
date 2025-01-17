@@ -1,11 +1,12 @@
 from rest_framework import serializers
+from lib_transcendence.serializer import Serializer
 
 from chat_messages.serializers import MessagesSerializer
 from chats.models import Chats
 from user_management.models import Users
 
 
-class UserDataSerializer(serializers.ModelSerializer):
+class UserDataSerializer(Serializer):
     chat_with = serializers.SerializerMethodField(read_only=True)
     messages = MessagesSerializer(read_only=True, many=True)
     view_chat = serializers.SerializerMethodField(read_only=True)
@@ -30,7 +31,7 @@ class UserDataSerializer(serializers.ModelSerializer):
         return obj.participants.get(user__id=self.context['user_id']).view_chat
 
 
-class UserSerializer(serializers.ModelSerializer):
+class UserSerializer(Serializer):
     class Meta:
         model = Users
         fields = [
@@ -38,7 +39,7 @@ class UserSerializer(serializers.ModelSerializer):
         ]
 
 
-class BlockChatSerializer(serializers.ModelSerializer):
+class BlockChatSerializer(Serializer):
     class Meta:
         model = Chats
         fields = [

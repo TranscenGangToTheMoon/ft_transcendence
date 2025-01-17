@@ -19,13 +19,17 @@ class Config:
     class Ball:
         cWidth = 20
         cHeight = 20
-        speed = 1 #convert
         width = 4
         height = 2
+    class FinishReason:
+        NORMAL_END = 'The game is over'
+        PLAYER_DISCONNECT = 'A player has disconnected'
+        PLAYER_NOT_CONNECTED = 'Not all players are connected'
+        PLAYERS_TIMEOUT = 'Players have timed out'
     class Cell:
         width = 7
         height = 15
+    class SSL:
+        CRT = "ft_transcendence.crt"
+        KEY = "ft_transcendence.key"
     frameRate = 60
-
-SSL_CRT = "./ft_transcendence.crt"
-SSL_KEY = "./ft_transcendence.key"
