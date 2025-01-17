@@ -19,7 +19,8 @@ subjectAltName = @alt_names
 
 [alt_names]
 DNS.1 = localhost
-DNS.2 = $(hostname)" > secrets/ssl.conf
+DNS.2 = $(hostname)
+DNS.3 = $(hostname -s)" > secrets/ssl.conf
 
 echo "IP.1 = 127.0.0.1" >> secrets/ssl.conf
 

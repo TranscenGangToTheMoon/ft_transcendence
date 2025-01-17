@@ -14,7 +14,7 @@ class GameEnd(ModalScreen[str]):
     def __init__(self, reason: str, victory: bool):
         super().__init__()
         if (reason == Config.FinishReason.NORMAL_END):
-            self.result = "You won" if victory else "You lost"
+            self.result = "You win" if victory else "You lose"
             self.styles.background = "blue 15%" if victory else "red 15%"
         else:
             self.result = f"The game did not end as expected\n{reason}"

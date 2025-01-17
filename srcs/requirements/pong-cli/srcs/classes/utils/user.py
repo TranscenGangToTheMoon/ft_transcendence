@@ -15,6 +15,8 @@ class User():
     server: str | None = None
     team: str | None = None
     username: str | None = None
+    host: str | None = None
+    port: int | None = None
 
     @staticmethod
     def loginUser():
@@ -23,7 +25,7 @@ class User():
 
         data = json.dumps( {"username": User.username, "password": User.password})
         User.response = requests.post(url=f"{User.server}/api/auth/login/", data=data, headers=User.headers, verify=Config.SSL.CRT)
-        print(User.response.json())
+        # print(User.response.json())
         if (User.response.status_code >= 300):
             if (User.response.json()["detail"] is not None):
                 reason = User.response.json()["detail"]
@@ -53,7 +55,7 @@ class User():
 
         data = json.dumps({"username": User.username, "password": User.password})
         User.response = requests.post(url=f"{User.server}/api/auth/register/", data=data, headers=User.headers, verify=Config.SSL.CRT)
-        print(User.response.json())
+        # print(User.response.json())
         if (User.response.status_code >= 300):
             if (User.response.status_code == 401 and User.response.json()["code"] is not None):
                 reason = User.response.json()["code"]
@@ -82,7 +84,7 @@ class User():
 
         User.accessToken = User.response.json()["access"]
         User.refreshToken = User.response.json()["refresh"]
-        print(User.headers["Authorization"])
+        # print(User.headers["Authorization"])
         User.headers["Authorization"] = f"Bearer {User.accessToken}"
-        print(User.headers["Authorization"])
+        # print(User.headers["Authorization"])
 

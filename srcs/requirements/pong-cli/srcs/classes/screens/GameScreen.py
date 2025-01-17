@@ -16,16 +16,14 @@ from textual.screen     import Screen
 from textual.widgets    import Button, Digits, Footer, Header
 
 # Local imports
-from classes.game.BallWidget                        import Ball
-from classes.game.PaddleWidget                      import Paddle
-from classes.game.PlaygroundWidget                  import Playground
-from classes.modalScreens.CountdownModalScreen      import Countdown
-from classes.modalScreens.GameOverModalScreen       import GameEnd
-from classes.screens.MainScreen                     import MainPage
-from classes.utils.config                           import Config
-from classes.utils.user                             import User
-
-
+from classes.game.BallWidget                    import Ball
+from classes.game.PaddleWidget                  import Paddle
+from classes.game.PlaygroundWidget              import Playground
+from classes.modalScreens.CountdownModalScreen  import Countdown
+from classes.modalScreens.GameOverModalScreen   import GameEnd
+from classes.screens.MainScreen                 import MainPage
+from classes.utils.config                       import Config
+from classes.utils.user                         import User
 
 class GamePage(Screen):
     SUB_TITLE = "Game Page"
@@ -113,17 +111,25 @@ class GamePage(Screen):
 #        print(f"Connected: {self.connected}, Game started: {self.gameStarted}")
         while (self.connected and self.gameStarted):
             # Move right paddle
+            if (keyboard.Key.up in self.pressedKeys and keyboard.Key.down in self.pressedKeys):
+                if (self.paddleRight.direction != 0):
+                    await self.sio.emit('stop_moving', {"position": self.paddleRight.cY})
+                    self.paddleRight.direction = 0
+                await asyncio.sleep(1 / Config.frameRate)
+                continue
             if (keyboard.Key.up in self.pressedKeys):
-                if self.paddleRight.direction == 1:
+                if (self.paddleRight.direction == 1):
                     await self.sio.emit('stop_moving', {"position": self.paddleRight.cY})
+                if (self.paddleRight.direction != -1):
+                    await self.sio.emit('move_up')
                 self.paddleRight.moveUp()
-                await self.sio.emit('move_up')
             elif (keyboard.Key.down in self.pressedKeys):
-                if self.paddleRight.direction == -1:
+                if (self.paddleRight.direction == -1):
                     await self.sio.emit('stop_moving', {"position": self.paddleRight.cY})
+                if self.paddleRight.direction != 1:
+                    await self.sio.emit('move_down')
                 self.paddleRight.moveDown()
-                await self.sio.emit('move_down')
-            else:
+            elif (self.paddleRight.direction != 0):
                 await self.sio.emit('stop_moving', {"position": self.paddleRight.cY})
                 self.paddleRight.direction = 0
 
@@ -139,7 +145,7 @@ class GamePage(Screen):
         try:
             self.setHandler()
             await self.sio.connect(
-                "wss://localhost:4443/",
+                f"wss://{User.host}:{User.port}/",
                 socketio_path="/ws/game/",
                 transports=["websocket"],
                 auth={
