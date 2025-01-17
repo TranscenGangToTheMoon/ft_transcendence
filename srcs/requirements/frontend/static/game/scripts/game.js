@@ -546,10 +546,9 @@ function initSocket(){
         gameSocket.close();
 		window.PongGame.handleGameOver(event.reason);
         if (fromTournament)
-            // setTimeout(async ()=> {
-            //     if (typeof userInformations.cancelReturn === 'undefined' || !userInformations.cancelReturn)
-                    await navigateTo('/tournament')
-            // }, 500)
+            await navigateTo('/tournament');
+        else if (fromLobby)
+            await navigateTo('/lobby', true, true);
         else {
             document.getElementById('enemyScore').innerText = window.PongGame.state.enemyScore;
             const enemyTeamDetail = document.getElementById('enemyScoreLabel').querySelector('.teamDetail');
@@ -618,6 +617,8 @@ function checkGameAuthorization(){
         throw `${window.location.pathname}`;
     if (window.location.pathname === '/game/tournament' && typeof tournamentData === 'undefined')
         throw `${window.location.pathname}`;
+    if (window.location.pathname === '/game/1v1' && (typeof fromLobby === 'undefined' || !fromLobby))
+        throw `${window.location.pathname}`;
 }
 
 function gameStart(event){
@@ -636,6 +637,8 @@ async function initGame(){
         checkGameAuthorization();
         if (window.location.pathname === '/game/tournament')
             initData(tournamentData);
+        else if (window.location.pathname === '/game/1v1')
+            initData(userInformations.lobbyData);
         else {
             if (SSEListeners.has('game-start')){
                 sse.removeEventListener('game-start', SSEListeners.get('game-start'));
