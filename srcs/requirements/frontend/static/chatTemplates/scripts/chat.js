@@ -71,7 +71,8 @@ async function connect(token, chatInfo) {
 		transports: ['websocket'],
 		auth: {
 			"token": 'Bearer ' + token,
-			"chatId": chatInfo.chatId
+			"chatId": chatInfo.chatId,
+			"chatType": "private_message"
 		}
 	});
 	window.socket = socket;
@@ -147,7 +148,7 @@ function displayMessages(chatInfo, chatMessages, method='afterbegin'){
 	const chatBox = document.getElementById('messages'+chatInfo.target);
 	chatMessages.forEach(element => {
 		console.log(element);
-		if (element.author === chatInfo.targetId) {
+		if (element.author !== chatInfo.targetId) {
 			chatBox.insertAdjacentHTML(method, `<div><p><strong>You:</strong> ${element.content}</p></div>`);
 		} else {
 			chatBox.insertAdjacentHTML(method, `<div><p><strong>${chatInfo.target}:</strong> ${element.content}</p></div>`);
@@ -418,8 +419,6 @@ async function createChatTab(chatInfo) {
 
 	lastClick = chatTabLink;
 
-	// closeTabListener(chatInfo);
-	// switchChatListner(chatInfo);
 	chatTabListener(chatInfo);
 	sendMessageListener(chatInfo.target);
 }
@@ -473,6 +472,13 @@ async function openChatTab(chatId)
 {
 	chat = await getChatInstance(chatId);
 	if (!chat) return;
+	console.log('Chat: Chat loaded nyanyanyanya:', chat);
+	userInformations.notifications['chats'] -= chat.unread_messages;
+	console.log('ici', chat.unread_messages, userInformations.notifications['chats']);
+	if (!userInformations.notifications['chats'])
+		removeBadges('chats');
+	else    
+		displayBadges();
 	chatInfo = parsChatInfo(chat);
 	chatTabs = document.getElementById('chatTabs');
 	if (!chatTabs) {
@@ -510,7 +516,8 @@ async function openChatTab(chatId)
 	document.getElementById('logOut').addEventListener('click', async () => {
 		await disconnect();
 		openChat = {};
-		document.getElementById('chatTabs').remove();
+		chatView = document.getElementById('chatView');
+		if (chatView) chatView.remove();
 	});
 
 	messagesDiv = document.getElementById('messages'+chatInfo.target);

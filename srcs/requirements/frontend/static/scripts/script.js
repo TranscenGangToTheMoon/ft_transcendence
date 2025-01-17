@@ -509,11 +509,11 @@ function addInviteSSEListeners(){
 function addChatSSEListeners(){
     sse.addEventListener('send-message', async event => {
         event = JSON.parse(event.data);
-        console.log(event, 'ai je ce qu il faut ?');
         chatId = event.data.chat_id;
         await displayNotification(undefined, 'message received', event.message, async event => {
             await openChatTab(chatId);
         });
+        userInformations.notifications['chats'] += 1;
         displayBadges();
     })
 }
@@ -556,6 +556,7 @@ function initSSE(){
 
 
 function displayBadges(){
+    console.log('une fois', userInformations.notifications);
     if (userInformations.notifications){
         setTimeout(() => {
             console.log(userInformations.notifications)
