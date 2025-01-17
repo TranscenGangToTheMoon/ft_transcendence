@@ -62,7 +62,6 @@ class MainPage(Screen):
             if (response.status_code >= 400): #if 404 c'est que j'ai join le match maius oas recu le event SSE
                 raise (Exception(f"({response.status_code}) Error: {response.text}"))
             elif (response.status_code == 204):
-                self.query_one("#statusGame").update(f"({response.status_code}) Duel deleted")
                 self.query_one("#duel").loading = False
                 self.query_one("#duel").variant = "primary"
                 self.query_one("#cancelDuelGame").disabled = True
