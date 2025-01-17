@@ -15,7 +15,6 @@ from blocking.utils import delete_player_instance
 from matchmaking.create_match import create_tournament_match
 from matchmaking.utils.sse import send_sse_event, start_tournament_sse
 from tournament.sse import send_sse_event_finish_match
-from tournament.utils import create_match_new_stage
 
 
 class TournamentSize:
@@ -256,4 +255,6 @@ class TournamentMatches(models.Model):
 
             finish_tournament(self.tournament.id, winner_user_id)
         else:
+            from tournament.utils import create_match_new_stage
+
             Thread(target=create_match_new_stage, args=(current_stage, winner)).start()

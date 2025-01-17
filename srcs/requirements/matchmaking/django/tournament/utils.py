@@ -6,11 +6,12 @@ from lib_transcendence.services import request_game, request_users
 from lib_transcendence.sse_events import create_sse_event, EventCode
 from rest_framework.exceptions import APIException
 
-from tournament.models import Tournament
 from tournament.serializers import TournamentSerializer, TournamentStageSerializer
 
 
 def finish_tournament(tournament_id, winner_user_id):
+    from tournament.models import Tournament
+
     try:
         tournament = Tournament.objects.get(id=tournament_id)
     except Tournament.DoesNotExist:
@@ -25,6 +26,7 @@ def finish_tournament(tournament_id, winner_user_id):
 
 
 def create_match_new_stage(tournament_id, current_stage, winner):
+    from tournament.models import Tournament
     time.sleep(3)
 
     try:
