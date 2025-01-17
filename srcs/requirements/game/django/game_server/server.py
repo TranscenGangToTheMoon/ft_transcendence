@@ -47,12 +47,16 @@ class Server:
             Game.ball_size = int(os.environ['GAME_BALL_SIZE'])
             Racket.width = int(os.environ['GAME_RACKET_WIDTH'])
             Racket.height = int(os.environ['GAME_RACKET_HEIGHT'])
+            Racket.width_3v3 = int(os.environ['GAME_RACKET_WIDTH_3V3'])
+            Racket.height_3v3 = int(os.environ['GAME_RACKET_HEIGHT_3V3'])
             Racket.max_speed = int(os.environ['GAME_RACKET_MAX_SPEED'])
         except KeyError:
             Game.default_ball_speed = 240
             Game.ball_size = 20
             Racket.width = 30
             Racket.height = 200
+            Racket.width_3v3 = 30
+            Racket.height_3v3 = 100
             Racket.max_speed = 500
         port = 5500
         print(f"SocketIO server running on port {port}", flush=True)

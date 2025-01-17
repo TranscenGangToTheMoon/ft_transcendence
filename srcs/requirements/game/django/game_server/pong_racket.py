@@ -6,6 +6,8 @@ class Racket:
     # TODO -> add height and width to racket from env
     height: int
     width: int
+    height_3v3: int
+    width_3v3: int
     max_speed: int
     def __init__(self,
                  player: int,
