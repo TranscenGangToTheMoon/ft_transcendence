@@ -561,7 +561,7 @@ async function initTournament(){
 	catch(error) {
 		if (error.code === 404 && tournamentCode){
 			if (!await joinTournament(tournamentCode))
-				navigateTo('/');
+				await navigateTo('/tournament', true, true);
 		}
 		console.log(error);
 	}
