@@ -33,29 +33,26 @@ class Game:
         return Ball(Position(int(canvas.x / 2 - (Game.ball_size / 2)), int(canvas.y / 2 - (Game.ball_size / 2))), direction_x, direction_y, Game.default_ball_speed, Game.ball_size)
 
     @staticmethod
-    def create_rackets(match, canvas, racket_height) -> List[Racket]:
+    def create_rackets(match,
+                       canvas,
+                       racket_height,
+                       racket_width,
+                       ledge_offset,
+                       racket_to_racket_offset) -> List[Racket]:
         rackets: List[Racket] = []
-        ledge_offset = 100
-        racket_to_racket_offset = 200
-        try:
-            ledge_offset = int(os.environ['GAME_RACKET_LEDGE_OFFSET'])
-            racket_to_racket_offset = int(os.environ['GAME_RACKET_TO_RACKET_OFFSET'])
-        except KeyError:
-            ledge_offset = 100
-            racket_to_racket_offset = 200
-        # create rackets for right players
         racket_offset = ledge_offset
+        with open('game_server/gameConfig.json', 'r') as config_file:
+            config = json.load(config_file)
+            racket_max_speed = config['paddle'][match.game_type]['speed']
         for player in match.teams[0].players:
-            racket = Racket(player.user_id, Position(canvas.x - Racket.width - racket_offset, int(canvas.y / 2 - racket_height / 2)))
-            racket.height = racket_height
+            racket = Racket(player.user_id, Position(canvas.x - racket_width - racket_offset, int(canvas.y / 2 - racket_height / 2)), racket_height, racket_width, racket_max_speed)
             player.racket = racket
             rackets.append(racket)
             racket_offset += racket_to_racket_offset
         # create rackets for left players
         racket_offset = ledge_offset
         for player in match.teams[1].players:
-            racket = Racket(player.user_id, Position(racket_offset, int(canvas.y / 2 - racket_height / 2)))
-            racket.height = racket_height
+            racket = Racket(player.user_id, Position(racket_offset, int(canvas.y / 2 - racket_height / 2)), racket_height, racket_width, racket_max_speed)
             player.racket = racket
             rackets.append(racket)
             racket_offset += racket_to_racket_offset
@@ -65,23 +62,21 @@ class Game:
                 sio,
                 match) -> None:
         self.match: Match = match
-        with open('gameConfig.json', 'r') as config_file:
+        with open('game_server/gameConfig.json', 'r') as config_file:
             config = json.load(config_file)
-            if match.game_type == '3v3':
-                self.canvas = Position(config['canvas']['clash']['width'],
-                                        config['canvas']['clash']['height'])
-                self.racket_height = config['paddle']['height_3v3']
-            else:
-                self.canvas = Position(config['canvas']['normal']['width'],
-                                        config['canvas']['normal']['height'])
-                self.racket_height = config['paddle']['height']
+            self.canvas = Position(config['canvas'][self.match.game_type]['width'],
+                                    config['canvas'][self.match.game_type]['height'])
+            self.racket_height = config['paddle'][self.match.game_type]['height']
+            self.racket_width = config['paddle'][self.match.game_type]['width']
             self.max_score = config['score']['max']
-            self.max_bounce_angle = config['ball']['max_bounce_angle']
-            self.max_ball_speed = config['ball']['max_speed']
-            self.speed_increment = config['ball']['speed_increment']
+            self.max_bounce_angle = config['ball']['maxBounceAngle']
+            self.max_ball_speed = config['ball']['maxSpeed']
+            self.speed_increment = config['ball']['speedIncrement']
+            self.ledge_offset = config['paddle'][match.game_type]['ledgeOffset']
+            self.racket_to_racket_offset = config['paddle'][match.game_type]['paddleOffset']
         self.finished = False
         self.ball = self.create_ball(self.canvas)
-        self.rackets = self.create_rackets(self.match, self.canvas, self.racket_height)
+        self.rackets = self.create_rackets(self.match, self.canvas, self.racket_height, self.racket_width, self.ledge_offset, self.racket_to_racket_offset)
         self.ball.last_touch_team_a = self.match.teams[0].players[0].user_id
         self.ball.last_touch_team_b = self.match.teams[1].players[0].user_id
 
@@ -287,7 +282,6 @@ class Game:
             finish_match(self.match.id, finish_reason, disconnected_user_id)
 
     def reset_game_state(self):
-        # print('reset_game_state', flush=True)
         self.ball = self.create_ball(self.canvas)
         self.ball.last_touch_team_a = self.match.teams[0].players[0].user_id
         self.ball.last_touch_team_b = self.match.teams[1].players[0].user_id
