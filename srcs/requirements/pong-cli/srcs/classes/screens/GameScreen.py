@@ -40,6 +40,7 @@ class GamePage(Screen):
         self.aScore = 0
         self.bScore = 0
 
+        self.countdownIsActive = False
         self.pressedKeys = set()
         self.listener = None
         self.connected = False
@@ -110,6 +111,9 @@ class GamePage(Screen):
             await asyncio.sleep(0.1)
 #        print(f"Connected: {self.connected}, Game started: {self.gameStarted}")
         while (self.connected and self.gameStarted):
+            if (self.countdownIsActive == True):
+                await asyncio.sleep(1 / Config.frameRate)
+                continue
             # Move right paddle
             if (keyboard.Key.up in self.pressedKeys and keyboard.Key.down in self.pressedKeys):
                 if (self.paddleRight.direction != 0):
@@ -177,7 +181,9 @@ class GamePage(Screen):
 
         @self.sio.on('start_countdown')
         async def startCountdownAction():
-            await self.app.push_screen(Countdown())
+            self.countdownIsActive = True
+            await self.app.push_screen_wait(Countdown())
+            self.countdownIsActive = False
             # print(self.connected, flush=True)
 
         @self.sio.on('game_state')
