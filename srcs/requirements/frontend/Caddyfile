@@ -1,5 +1,12 @@
 
 
+{
+    log {
+        level ERROR
+        output discard
+    }
+}
+
 :443 {
 	tls /run/secrets/ssl.crt /run/secrets/ssl.key
 

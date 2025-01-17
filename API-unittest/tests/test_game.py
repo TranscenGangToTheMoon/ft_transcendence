@@ -131,6 +131,22 @@ class Test03_Finish(UnitTest):
         self.assertResponse(finish_match(match_id, 'A player has disconnected', user2['id']), 200)
         self.assertThread(user1, user2)
 
+    def test_003_finish_clash(self):
+        user1 = self.user(['game-start'])
+        user2 = self.user(['game-start'])
+        user3 = self.user(['game-start'])
+        user4 = self.user(['game-start'])
+        user5 = self.user(['game-start'])
+        user6 = self.user(['game-start'])
+
+        self.assertResponse(create_game(data={'game_mode': 'clash', 'teams': {'a': [user1['id'], user2['id'], user3['id']], 'b': [user4['id'], user5['id'], user6['id']]}}), 201)
+        self.assertResponse(score(user1['id']), 200)
+        self.assertResponse(score(user2['id'], own_goal=True), 200)
+        self.assertResponse(score(user3['id'], own_goal=True), 200)
+        self.assertResponse(score(user3['id']), 200)
+        self.assertResponse(score(user1['id'], own_goal=False), 200)
+        self.assertThread(user1, user2, user3, user4, user5, user6)
+
 
 class Test04_Tournament(UnitTest):
 
