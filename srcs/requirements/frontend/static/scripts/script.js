@@ -465,7 +465,7 @@ function addInviteSSEListeners(){
     sse.addEventListener('invite-clash', event => {
         event = JSON.parse(event.data);
         displayNotification(undefined, event.service, event.message, undefined, event.target);
-        console.log(event);
+        console.log(event, "thats me thats now");
     })
 
     sse.addEventListener('invite-3v3', event => {
@@ -491,37 +491,9 @@ function addChatSSEListeners(){
     sse.addEventListener('send-message', async event => {
         event = JSON.parse(event.data);
         console.log(event, 'ai je ce qu il faut ?');
-        chat = event.target[0]['url'];
-        let apiAnswer = undefined;
-        try {
-            apiAnswer = await apiRequest(getAccessToken(), `${baseAPIUrl}${chat}`, 'GET');
-            if (apiAnswer.details) {
-                console.log('Error:',apiAnswer.details);
-                return;
-            }
-        }
-        catch (error){
-            console.log('Error:', error);
-            return;
-        }
-        userInformations.notifications['chats'] += 1;
-        chatInfo = {
-            'chatId': apiAnswer.id,
-            'target': apiAnswer.chat_with.username,
-            'targetId': apiAnswer.chat_with.id,
-            'lastMessage': '< Say hi! >',
-            'isLastMessageRead': false,
-            'chatMessageNext': null,
-        };
-        if (apiAnswer.last_message) {
-            if (apiAnswer.last_message.content.length > 37){
-                chatInfo.lastMessage = apiAnswer.last_message.content.slice(0, 37) + '...';
-            }
-            else chatInfo.lastMessage = apiAnswer.last_message.content;
-            chatInfo.isLastMessageRead = apiAnswer.last_message.is_read;
-        }
+        chatId = event.data.chat_id;
         await displayNotification(undefined, 'message received', event.message, async event => {
-            await openChatTab(chatInfo);
+            await openChatTab(chatId);
         });
         displayBadges();
     })

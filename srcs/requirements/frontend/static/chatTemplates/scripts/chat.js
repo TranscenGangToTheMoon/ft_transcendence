@@ -471,7 +471,9 @@ async function updateChatTab(chatInfo) {
 }
 async function openChatTab(chatId)
 {
-	chatInfo = parsChatInfo(await getChatInstance(chatId));
+	chat = await getChatInstance(chatId);
+	if (!chat) return;
+	chatInfo = parsChatInfo(chat);
 	chatTabs = document.getElementById('chatTabs');
 	if (!chatTabs) {
 		await loadContent('/chatTemplates/chatTabs.html', 'container', true);
