@@ -57,6 +57,7 @@ class Matchmaking:
     tournament_ban              = 'api/play/tournament/<str:code>/ban/<int:user_id>/'
     tournament_message          = 'api/play/tournament/<str:code>/message/'
 
+    lobby_finish_match          = 'api/private/lobby/finish-match/'
     ftournament_result_match    = 'api/private/tournament/result-match/{match_id}/'
     tournament_result_match     = 'api/private/tournament/result-match/<int:match_id>/'
 

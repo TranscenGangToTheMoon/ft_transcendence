@@ -31,6 +31,9 @@ class Matches(models.Model):
         self.game_start = True
         self.save()
 
+    def users_id(self):
+        return list(self.players.all().values_list('user_id', flat=True))
+
     def finish(self, finish_reason=FinishReason.NORMAL_END):
         if self.finish_reason is None:
             self.finish_reason = finish_reason
@@ -54,12 +57,17 @@ class Matches(models.Model):
             except APIException:
                 raise ServiceUnavailable('matchmaking')
         if self.game_mode == GameMode.RANKED:
-            player = retrieve_users(list(self.players.all().values_list('user_id', flat=True)), return_type=dict)
+            player = retrieve_users(self.users_id(), return_type=dict)
             winner = self.winner.players.first()
             looser = self.winner.players.first()
             winner_trophies, looser_trophies = compute_trophies(player[winner.user_id]['trophies'], player[looser.user_id]['trophies'])
             winner.set_trophies(winner_trophies)
             winner.set_trophies(looser_trophies)
+        if self.game_mode in [GameMode.CLASH, GameMode.CUSTOM_GAME]:
+            try:
+                request_matchmaking(endpoints.Matchmaking.lobby_finish_match, 'POST', {'players': self.users_id()})
+            except APIException:
+                raise ServiceUnavailable('matchmaking')
         send_match_result(self)
 
 

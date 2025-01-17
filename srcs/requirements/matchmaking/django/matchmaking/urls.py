@@ -5,7 +5,7 @@ from baning.views import lobby_ban_view, tournament_ban_view
 from blocking.views import blocked_user_view
 from chat.views import lobby_message_view, tournament_message_view
 from invite.views import lobby_invite_view, tournament_invite_view
-from lobby.views import lobby_view, lobby_participants_view
+from lobby.views import lobby_view, lobby_participants_view, lobby_finish_match_view
 from play.views import duel_view, ranked_view
 from tournament.views import tournament_view, tournament_search_view, tournament_participants_view, \
     tournament_result_match_view
@@ -17,6 +17,7 @@ urlpatterns = [
 
     path(Matchmaking.lobby, lobby_view),
     path(Matchmaking.lobby_participant, lobby_participants_view),
+    path(Matchmaking.lobby_finish_match, lobby_finish_match_view),
     path(Matchmaking.lobby_invite, lobby_invite_view),
     path(Matchmaking.lobby_ban, lobby_ban_view),
     path(Matchmaking.lobby_message, lobby_message_view),

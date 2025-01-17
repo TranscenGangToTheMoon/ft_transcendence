@@ -1,7 +1,9 @@
+import time
 import unittest
 
 from services.blocked import blocked_user, unblocked_user
 from services.friend import create_friendship
+from services.game import score
 from services.lobby import create_lobby, join_lobby, ban_user, invite_user, post_message
 from utils.my_unittest import UnitTest
 
@@ -581,6 +583,71 @@ class Test09_Message(UnitTest):
         self.assertResponse(post_message(user1, code, data={'content': ['caca', 'pipi']}), 400)
         self.assertResponse(post_message(user1, code, data={'content': {'prout': 48}}), 400)
         self.assertThread(user1)
+
+
+class Test10_FinishMatch(UnitTest):
+
+    def test_001_is_playing(self):
+        user1 = self.user(['lobby-join', 'lobby-update-participant', 'game-start'])
+        user2 = self.user(['lobby-update-participant', 'game-start'])
+
+        code = self.assertResponse(create_lobby(user1, game_mode='custom_game'), 201, get_field='code')
+        self.assertResponse(join_lobby(user2, code), 201)
+
+        self.assertResponse(join_lobby(user1, code, data={'is_ready': True}), 200)
+        self.assertFalse(self.assertResponse(create_lobby(user1, method='GET'), 200, get_field='is_playing'))
+        self.assertResponse(join_lobby(user2, code, data={'is_ready': True}), 200)
+
+        time.sleep(2)
+
+        self.assertResponse(score(user1['id']), 200)
+        self.assertTrue(self.assertResponse(create_lobby(user1, method='GET'), 200, get_field='is_playing'))
+        self.assertResponse(score(user1['id']), 200)
+        self.assertResponse(score(user1['id']), 200)
+
+        self.assertFalse(self.assertResponse(create_lobby(user1, method='GET'), 200, get_field='is_playing'))
+        self.assertThread(user1, user2)
+
+    def test_002_is_playing_from_different_lobby(self):
+        user1 = self.user(['lobby-join', 'lobby-update-participant', 'game-start'])
+        user2 = self.user(['lobby-update-participant', 'game-start'])
+        user3 = self.user(['game-start'])
+        user4 = self.user(['lobby-join', 'lobby-join', 'lobby-update-participant', 'lobby-update-participant', 'game-start'])
+        user5 = self.user(['lobby-join', 'lobby-update-participant', 'lobby-update-participant', 'game-start'])
+        user6 = self.user(['lobby-update-participant', 'lobby-update-participant', 'game-start'])
+
+        code1 = self.assertResponse(create_lobby(user1), 201, get_field='code')
+        self.assertResponse(join_lobby(user2, code1), 201)
+
+        code2 = self.assertResponse(create_lobby(user3), 201, get_field='code')
+
+        code3 = self.assertResponse(create_lobby(user4), 201, get_field='code')
+        self.assertResponse(join_lobby(user5, code3), 201)
+        self.assertResponse(join_lobby(user6, code3), 201)
+
+        self.assertResponse(join_lobby(user1, code1, data={'is_ready': True}), 200)
+        self.assertFalse(self.assertResponse(create_lobby(user1, method='GET'), 200, get_field='is_playing'))
+        self.assertResponse(join_lobby(user2, code1, data={'is_ready': True}), 200)
+
+        self.assertFalse(self.assertResponse(create_lobby(user3, method='GET'), 200, get_field='is_playing'))
+        self.assertResponse(join_lobby(user3, code2, data={'is_ready': True}), 200)
+
+        self.assertResponse(join_lobby(user4, code3, data={'is_ready': True}), 200)
+        self.assertResponse(join_lobby(user5, code3, data={'is_ready': True}), 200)
+        self.assertFalse(self.assertResponse(create_lobby(user4, method='GET'), 200, get_field='is_playing'))
+        self.assertResponse(join_lobby(user6, code3, data={'is_ready': True}), 200)
+
+        time.sleep(2)
+
+        self.assertResponse(score(user1['id']), 200)
+        self.assertResponse(score(user1['id']), 200)
+        self.assertResponse(score(user1['id']), 200)
+
+        self.assertFalse(self.assertResponse(create_lobby(user1, method='GET'), 200, get_field='is_playing'))
+        self.assertFalse(self.assertResponse(create_lobby(user3, method='GET'), 200, get_field='is_playing'))
+        self.assertFalse(self.assertResponse(create_lobby(user5, method='GET'), 200, get_field='is_playing'))
+        self.assertThread(user1, user2, user3, user4, user5, user6)
+
 
 if __name__ == '__main__':
     unittest.main()

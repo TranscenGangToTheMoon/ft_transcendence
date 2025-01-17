@@ -127,6 +127,19 @@ class LobbySerializer(Serializer):
         return result
 
 
+class LobbyFinishMatchSerializer(serializers.Serializer):
+    players = serializers.ListSerializer(child=serializers.IntegerField())
+
+    class Meta:
+        fields = [
+            'players',
+        ]
+
+    def create(self, validated_data):
+        Lobby.objects.filter(participants__user_id__in=validated_data['players']).distinct().update(is_playing=False)
+        return validated_data
+
+
 class LobbyParticipantsSerializer(Serializer):
     creator = serializers.BooleanField(read_only=True)
     id = serializers.IntegerField(source='user_id', read_only=True)
