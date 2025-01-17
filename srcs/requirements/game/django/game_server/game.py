@@ -344,7 +344,7 @@ class Game:
         self.match.teams[0].score = updated_game_instance['teams']['a']['score']
         self.match.teams[1].score = updated_game_instance['teams']['b']['score']
         self.send_score(updated_game_instance)
-        if updated_game_instance['winner'] != None:
+        if updated_game_instance['finished'] == True:
             self.finish(FinishReason.NORMAL_END, updated_game_instance['winner'])
         else:
             # launch a new point
