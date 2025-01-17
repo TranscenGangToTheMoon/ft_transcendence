@@ -55,12 +55,14 @@ class MatchSerializer(Serializer):
             'tournament_id',
             'tournament_stage_id',
             'tournament_n',
+            'finished',
             'teams',
             'winner',
             'looser',
         ]
         read_only_fields = [
             'id',
+            'finished',
             'created_at',
             'winner',
             'looser',
