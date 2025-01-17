@@ -581,7 +581,34 @@ document.getElementById('gameOverModalQuit').addEventListener('click', async () 
     await navigateTo('/');
 })
 
-function initData(data){
+async function initGameConstants(){
+    await fetch('/gameConfig.json')
+        .then(response => response.json())
+        .then(data => {
+            console.log(data);
+            window.PongGame.config.canvasHeight = data.canvas.normal.height;
+            window.PongGame.config.canvasWidth = data.canvas.normal.widht;
+            window.PongGame.config.paddleHeight = data.paddle.normal.height;
+            window.PongGame.config.paddleWidth = data.paddle.normal.widht;
+            window.PongGame.config.maxPaddleSpeed = data.paddle.normal.speed;
+            window.PongGame.state.paddles.left.x = data.paddle.normal.ledgeOffset;
+            window.PongGame.state.paddles.right.x = window.PongGame.config.canvasWidth
+                                - data.paddle.normal.ledgeOffset
+                                - window.PongGame.config.paddleWidth;
+            window.PongGame.config.defaultBallSpeed = data.ball.speed;
+            window.PongGame.config.ballSpeedIncrement = data.ball.ballSpeedIncrement;
+            window.PongGame.config.maxBallSpeed = data.ball.maxSpeed;
+            window.PongGame.config.maxBounceAngle = data.ball.maxBounceAngle;
+            window.PongGame.config.winningScore = data.score.max;
+        })
+        // .catch(error => {
+        //     console.log('caught', error);
+        //     throw error;
+        // })
+}
+
+async function initData(data){
+    await initGameConstants();
     try {
         console.log(data);
 		if (data.teams.a.players.some(player => player.id == userInformations.id)) {
@@ -621,11 +648,17 @@ function checkGameAuthorization(){
         throw `${window.location.pathname}`;
 }
 
-function gameStart(event){
+async function gameStart(event){
     data = JSON.parse(event.data);
     data = data.data;
     console.log('game-start received (game)');
-    initData(data);
+    try {
+        await initData(data);
+    }
+    catch (error){
+        wrongConfigFileError(error);
+    }
+
 }
 
 function forPhoneChanges(){
@@ -700,6 +733,11 @@ function forPhoneChanges(){
     }
 }
 
+function wrongConfigFileError(error){
+    displayMainAlert('Error', 'Erroneous game config file.\n');
+    console.log(error);
+}
+
 async function initGame(){
     await indexInit(false);
     if (window.matchMedia("(hover: none) and (pointer: coarse)").matches)
@@ -712,9 +750,9 @@ async function initGame(){
     try {
         checkGameAuthorization();
         if (window.location.pathname === '/game/tournament')
-            initData(tournamentData);
+            await initData(tournamentData);
         else if (window.location.pathname === '/game/1v1')
-            initData(userInformations.lobbyData);
+            await initData(userInformations.lobbyData);
         else {
             if (SSEListeners.has('game-start')){
                 sse.removeEventListener('game-start', SSEListeners.get('game-start'));
@@ -734,9 +772,15 @@ async function initGame(){
         }
     }
     catch (unauthorized){
-        if (!document.getElementById('alertModal').classList.contains('show'))
-            displayMainAlert("Error", `You don't have permission to play in ${unauthorized}`);
-        await navigateTo('/');
+        console.log('caught', unauthorized);
+        if (unauthorized === window.location.pathname){
+            if (!document.getElementById('alertModal').classList.contains('show'))
+                displayMainAlert("Error", `You don't have permission to play in ${unauthorized}`);
+            await navigateTo('/');
+        }
+        else{
+            wrongConfigFileError(unauthorized);
+        }
     }
 }
 

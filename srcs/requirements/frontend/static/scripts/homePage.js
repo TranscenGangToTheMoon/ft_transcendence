@@ -90,7 +90,6 @@ document.getElementById('chat').addEventListener('click', async e => {
 
 function forPhoneChanges(){
     try {
-        // document.body.style.backgroundColor = 'red';
         document.getElementById('customGame').style.display = 'none';
         document.getElementById('clash').style.display = 'none';
     }
