@@ -27,10 +27,9 @@ class MessagesSerializer(Serializer):
             'chat_id',
         ]
 
-    def get_is_read(self, obj):
-        if obj.author_id == self.context['auth_user']['id']:
-            return True
-        return obj.is_read
+    @staticmethod
+    def validate_content(value):
+        return value.strip()
 
     def create(self, validated_data):
         chat_id = self.context['chat_id']
