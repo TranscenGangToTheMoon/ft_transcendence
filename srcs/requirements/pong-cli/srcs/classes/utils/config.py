@@ -22,10 +22,11 @@ class Config:
         width = 4
         height = 2
     class FinishReason:
-        NORMAL_END = 'The game is over'
-        PLAYER_DISCONNECT = 'A player has disconnected'
-        PLAYER_NOT_CONNECTED = 'Not all players are connected'
-        PLAYERS_TIMEOUT = 'Players have timed out'
+        NORMAL_END = 'normal-end'
+        PLAYER_DISCONNECT = 'player-disconnect'
+        PLAYER_NOT_CONNECTED = 'player-not-connected'
+        PLAYERS_TIMEOUT = 'players-timeout'
+        GAME_NOT_PLAYED = 'game-not-played'
     class Cell:
         width = 7
         height = 15
