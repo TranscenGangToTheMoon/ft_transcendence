@@ -1,19 +1,20 @@
 from asgiref.sync import async_to_sync
 from datetime import datetime, timezone
-
-from lib_transcendence.exceptions import GameMode
 from game_server.match import Match, Player, finish_match
 from game_server.pong_ball import Ball
 from game_server.pong_position import Position
 from game_server.pong_racket import Racket
+from lib_transcendence.exceptions import GameMode
 from lib_transcendence.game import FinishReason
 from typing import List
 import asyncio
+import json
 import math
 import os
 import random
 import requests
 import time
+
 
 def get_random_direction():
     random_angle = random.random() * 2 * math.pi
@@ -32,7 +33,7 @@ class Game:
         return Ball(Position(int(canvas.x / 2 - (Game.ball_size / 2)), int(canvas.y / 2 - (Game.ball_size / 2))), direction_x, direction_y, Game.default_ball_speed, Game.ball_size)
 
     @staticmethod
-    def create_rackets(match, canvas, game_mode) -> List[Racket]:
+    def create_rackets(match, canvas, racket_height) -> List[Racket]:
         rackets: List[Racket] = []
         ledge_offset = 100
         racket_to_racket_offset = 200
@@ -43,9 +44,6 @@ class Game:
             ledge_offset = 100
             racket_to_racket_offset = 200
         # create rackets for right players
-        racket_height = Racket.height
-        if game_mode == 'custom_game':
-            racket_height = 100
         racket_offset = ledge_offset
         for player in match.teams[0].players:
             racket = Racket(player.user_id, Position(canvas.x - Racket.width - racket_offset, int(canvas.y / 2 - racket_height / 2)))
@@ -53,7 +51,6 @@ class Game:
             player.racket = racket
             rackets.append(racket)
             racket_offset += racket_to_racket_offset
-            print(f"{racket_offset}")
         # create rackets for left players
         racket_offset = ledge_offset
         for player in match.teams[1].players:
@@ -68,36 +65,23 @@ class Game:
                 sio,
                 match) -> None:
         self.match: Match = match
+        with open('gameConfig.json', 'r') as config_file:
+            config = json.load(config_file)
+            if match.game_type == '3v3':
+                self.canvas = Position(config['canvas']['clash']['width'],
+                                        config['canvas']['clash']['height'])
+                self.racket_height = config['paddle']['height_3v3']
+            else:
+                self.canvas = Position(config['canvas']['normal']['width'],
+                                        config['canvas']['normal']['height'])
+                self.racket_height = config['paddle']['height']
+            self.max_score = config['score']['max']
+            self.max_bounce_angle = config['ball']['max_bounce_angle']
+            self.max_ball_speed = config['ball']['max_speed']
+            self.speed_increment = config['ball']['speed_increment']
         self.finished = False
-        try:
-            self.max_bounce_angle = float(os.environ['GAME_MAX_BOUNCE_ANGLE'])
-            self.max_ball_speed = float(os.environ['GAME_MAX_BALL_SPEED'])
-            self.speed_increment = float(os.environ['GAME_SPEED_INCREMENT'])
-            self.max_score = int(os.environ['GAME_MAX_SCORE'])
-            if self.match.game_mode == 'custom_game':
-                self.canvas = Position(
-                    int(os.environ['GAME_CANVAS_SIZE_X_CLASH']),
-                    int(os.environ['GAME_CANVAS_SIZE_Y_CLASH'])
-                )
-            else:
-                self.canvas = Position(
-                    int(os.environ['GAME_CANVAS_SIZE_X']),
-                    int(os.environ['GAME_CANVAS_SIZE_Y'])
-                )
-        except KeyError as e :
-            print(f'KeyError: {e}', flush=True)
-            self.max_bounce_angle = 2 * (math.pi / 5)
-            self.max_ball_speed = 1500
-            self.speed_increment = 30
-            self.max_score = 3
-            if self.match.game_mode == 'custom_game':
-                self.canvas = Position(1800, 750)
-            else:
-                self.canvas = Position(800, 600)
         self.ball = self.create_ball(self.canvas)
-        self.rackets = self.create_rackets(self.match, self.canvas, self.match.game_mode)
-
-
+        self.rackets = self.create_rackets(self.match, self.canvas, self.racket_height)
         self.ball.last_touch_team_a = self.match.teams[0].players[0].user_id
         self.ball.last_touch_team_b = self.match.teams[1].players[0].user_id
 
@@ -133,11 +117,9 @@ class Game:
         if ball_pos_y <= 0:
             self.ball.position.y = - ball_pos_y
             self.ball.speed_y = - self.ball.speed_y
-            print('bouncing up', flush=True)
         elif ball_pos_y + self.ball.size >= self.canvas.y:
             self.ball.position.y -= (ball_pos_y + self.ball.size) - self.canvas.y
             self.ball.speed_y = - self.ball.speed_y
-            print('bouncing down', flush=True)
 
     def handle_goal(self):
         if self.ball.position.x + self.ball.size < 0:
@@ -229,7 +211,6 @@ class Game:
 ################--------game events handling--------################
 
     def wait_for_players(self, timeout: float):
-        print("waiting for players", flush=True)
         start_waiting = time.time()
         for team in self.match.teams:
             for player in team.players:
@@ -239,8 +220,6 @@ class Game:
                         exception.args = (player.user_id,)
                         raise exception
                     time.sleep(0.1)
-                print(time.time(),flush=True)
-                print(f'player {player.user_id} has join in!', flush=True)
 
     def play(self):
         start_time = time.perf_counter()
@@ -272,17 +251,13 @@ class Game:
         except self.PlayerTimeout as e:
             print(e, flush=True)
             self.finish(FinishReason.PLAYER_NOT_CONNECTED, disconnected_user_id=e.args[0])
-            print('game canceled', flush=True)
             return
-        print(f"game_mode = {self.match.game_mode}, 'custom_game' = {'custom_game'}", flush=True)
         if (self.match.game_mode == 'custom_game'): #todo fix foeewf
             self.canvas = Position(1800, 750)
             self.send_rackets()
         self.send_canvas()
         self.send_game_state()
-        print('game launched', flush=True)
         self.play()
-        print('game finished', flush=True)
 
     def disconnect_players(self, disconnected_user_id: int | None = None):
         from game_server.server import Server
@@ -301,7 +276,6 @@ class Game:
             disconnected_user_id: int | None = None,
             error=False):
         from game_server.server import Server
-        print('finishing game', flush=True)
         self.send_finish(finish_reason, winner)
         if (finish_reason == FinishReason.PLAYER_DISCONNECT and disconnected_user_id is not None):
             self.disconnect_players(disconnected_user_id)

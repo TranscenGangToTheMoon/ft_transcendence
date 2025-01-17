@@ -12,6 +12,7 @@
     "paddle": {
         "width":30,
         "height":200,
+        "height_3v3":100,
         "speed":500,
         "ledgeOffset":100,
         "paddleOffset":200
