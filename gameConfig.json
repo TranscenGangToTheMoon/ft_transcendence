@@ -10,12 +10,20 @@
         }
     },
     "paddle": {
-        "width":30,
-        "height":200,
-        "height_3v3":100,
-        "speed":500,
-        "ledgeOffset":100,
-        "paddleOffset":200
+        "normal": {
+            "width":30,
+            "height":200,
+            "speed":500,
+            "ledgeOffset":100,
+            "paddleOffset":200
+        },
+        "clash":{
+            "width":30,
+            "height":100,
+            "speed":500,
+            "ledgeOffset":100,
+            "paddleOffset":200
+        }
     },
     "ball": {
         "size":20,
