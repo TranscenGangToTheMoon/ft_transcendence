@@ -545,9 +545,9 @@ function initSocket(){
         console.log('game_over received', event);
         gameSocket.close();
 		window.PongGame.handleGameOver(event.reason);
-        if (fromTournament)
+        if (typeof fromTournament !== 'undefined' && fromTournament)
             await navigateTo('/tournament');
-        else if (fromLobby)
+        else if (typeof fromLobby !== 'undefined' && fromLobby)
             await navigateTo('/lobby', true, true);
         else {
             document.getElementById('enemyScore').innerText = window.PongGame.state.enemyScore;
