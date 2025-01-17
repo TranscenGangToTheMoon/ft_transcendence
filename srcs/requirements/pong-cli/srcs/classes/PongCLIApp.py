@@ -11,7 +11,7 @@ from textual.worker import Worker
 # Local imports
 from classes.screens.GameScreen     import GamePage
 from classes.screens.LoginScreen    import LoginPage
-from classes.utils.config           import SSL_CRT
+from classes.utils.config           import Config
 from classes.utils.user             import User
 
 class PongCLI(App):
@@ -36,7 +36,7 @@ class PongCLI(App):
         log("Start SSE")
         if (not self.isConnected):
             self.connected = True
-            async with httpx.AsyncClient(verify=SSL_CRT) as client:
+            async with httpx.AsyncClient(verify=Config.SSL.CRT) as client:
                 headers = {
                     'Content-Type': 'text/event-stream',
                     'Authorization': f'Bearer {User.accessToken}',
@@ -54,7 +54,7 @@ class PongCLI(App):
                                     dataJson = None
                                     if (event == "game-start"):# game start
                                         dataJson = json.loads(data)
-                                        if (dataJson["data"]["teams"]["a"][0]["id"] == User.id):
+                                        if (dataJson["data"]["teams"]["a"]["players"][0]["id"] == User.id):
                                             User.team = "a"
                                         else:
                                             User.team = "b"

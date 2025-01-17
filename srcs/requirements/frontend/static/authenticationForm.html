@@ -1,8 +1,14 @@
 <form id="loginRegister">
-    <input type="text" name="username" id="usernameLogin" placeholder="username">
-    <input type="password" name="password" id="passwordLogin" placeholder="password">
-    <button type="submit" id="loginButton">Login</button>
-    <a id="switchButton" style="cursor: pointer; user-select: none;">new? create an account</a>
+    <div class="mb-1 text-wrap  " style="text-align: left;">
+        <input class="form-control" type="text" name="username" id="usernameLogin" placeholder="username">
+        <div class="invalid-feedback"></div>
+    </div>
+    <div class="mb-1 " style="text-align: left;">
+        <input class="form-control" type="password" name="password" id="passwordLogin" placeholder="password">
+        <div class="invalid-feedback text-wrap"></div>
+    </div>
+    <button type="submit" class="btn btn-secondary form-control mb-1" id="loginButton">Login</button>
 </form>
-<div id="container"></div>
+<a id="switchButton" style="cursor: pointer; user-select: none;">new? create an account</a>
+<div id="loginFormContextError" class="alert alert-danger d-none"></div>
 <div script="/scripts/authenticateForm.js"></div>

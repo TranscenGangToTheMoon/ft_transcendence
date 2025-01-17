@@ -1,0 +1,17 @@
+GamePage {
+
+}
+
+#scoreLeft {
+    border: vkey white;
+    layer: 1;
+    color: red;
+    width: auto;
+}
+
+#scoreRight {
+    border: vkey white;
+    layer: 2;
+    color: blue;
+    width: auto;
+}

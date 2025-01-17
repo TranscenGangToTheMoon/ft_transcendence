@@ -8,7 +8,7 @@ from textual.widgets    import Digits
 from textual.screen     import ModalScreen
 
 class Countdown(ModalScreen):
-    CSS_PATH = "styles/CountdownModalScreen.tcss"
+    CSS_PATH = "styles/Countdown.tcss"
 
     def __init__(self):
         super().__init__()

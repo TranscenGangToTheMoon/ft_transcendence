@@ -7,7 +7,24 @@ from services.tournament import tj, ts, gs, tmf, tf, join_tournament, create_tou
 from utils.my_unittest import UnitTest
 
 
-validata_data = {'id': 3, 'game_mode': 'duel', 'created_at': '2025-01-09T02:39:48.794986+01:00', 'game_duration': '00:00:05.206017', 'tournament_id': 1, 'tournament_stage_id': 2, 'tournament_n': 3, 'teams': {'a': [{'id': 6, 'username': 'user-UVGIYopESD', 'is_guest': False, 'profile_picture': None, 'status': {'is_online': True, 'game_playing': None, 'last_online': '2025-01-09T01:39:38.791177Z'}, 'trophies': 0, 'score': 0}], 'b': [{'id': 5, 'username': 'user-EXVoWJcIWJ', 'is_guest': False, 'profile_picture': None, 'status': {'is_online': True, 'game_playing': None, 'last_online': '2025-01-09T01:39:37.690417Z'}, 'trophies': 0, 'score': 3}]}, 'winner': 'b', 'looser': 'a', 'score_winner': 3, 'score_looser': 0}
+validata_data = {
+    'id': 3,
+    'game_mode': 'duel',
+    'created_at': '2025-01-09T02:39:48.794986+01:00',
+    'game_duration': '00:00:05.206017',
+    'tournament_id': 1,
+    'tournament_stage_id': 2,
+    'tournament_n': 3,
+    'teams':
+        {
+            'a': {'score': 3, 'players': [{'id': 6, 'username': 'user-UVGIYopESD', 'is_guest': False, 'profile_picture': None, 'status': {'is_online': True, 'game_playing': None, 'last_online': '2025-01-09T01:39:38.791177Z'}, 'trophies': 0, 'score': 0}]},
+            'b': {'score': 3, 'players': [{'id': 5, 'username': 'user-EXVoWJcIWJ', 'is_guest': False, 'profile_picture': None, 'status': {'is_online': True, 'game_playing': None, 'last_online': '2025-01-09T01:39:37.690417Z'}, 'trophies': 0, 'score': 3}]},
+        },
+    'winner': 'b',
+    'looser': 'a',
+    'score_winner': 3,
+    'score_looser': 0
+}
 
 
 class Test01_FinishMatch(UnitTest):
@@ -31,7 +48,7 @@ class Test02_Stats(UnitTest):
         response = self.assertResponse(get_stats(user1), 200)
         self.assertEqual(response[0]['wins'], 0)
         data = validata_data
-        data['teams']['b'][0]['id'] = user1['id']
+        data['teams']['b']['players'][0]['id'] = user1['id']
         self.assertResponse(finish_match_stat(data), 201)
         response = self.assertResponse(get_stats(user1), 200)
         self.assertEqual(response[0]['wins'], 1)
@@ -122,11 +139,11 @@ class Test03_StatsRanked(UnitTest):
 
         self.assertResponse(get_ranked_stats(user1), 200, count=1)
         data = validata_data
-        data['teams']['b'][0]['id'] = user1['id']
-        data['teams']['b'][0]['trophies'] = 30
+        data['teams']['b']['players'][0]['id'] = user1['id']
+        data['teams']['b']['players'][0]['trophies'] = 30
         data['game_mode'] = 'ranked'
         self.assertResponse(finish_match_stat(data), 201)
-        data['teams']['b'][0]['trophies'] = 28
+        data['teams']['b']['players'][0]['trophies'] = 28
         self.assertResponse(finish_match_stat(data), 201)
         response = self.assertResponse(get_ranked_stats(user1), 200, count=3)
         self.assertEqual(response['results'][-1]['total_trophies'], 58)
