@@ -9,8 +9,9 @@ Button {
 }
 
 Rule {
-
     width: 30%;
+    margin: 0;
+    padding: 1 0;
 }
 
 #userMeStatic {
@@ -33,5 +34,5 @@ Rule {
     /*border: green;*/
     content-align: center middle;
     width: 30%;
-    margin: 0 1;
+    margin: 1 0;
 }
