@@ -219,7 +219,11 @@ class Game:
         self.handle_wall_bounce()
         for racket in self.rackets:
             self.handle_racket_collision(racket)
-        self.send_game_state()
+        if self.sending == 0:
+            self.send_game_state()
+            self.sending = 1
+        else:
+            self.sending += 1
         self.handle_goal()
 
 ################--------game events handling--------################
@@ -384,6 +388,7 @@ class Game:
 
     def send_start_game(self):
         from game_server.server import Server
+        self.sending = 0
         Server.emit('start_game', room=str(self.match.id))
 
     def send_start_countdown(self):
