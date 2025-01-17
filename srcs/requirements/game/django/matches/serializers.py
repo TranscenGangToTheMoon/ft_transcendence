@@ -3,6 +3,7 @@ import os
 from lib_transcendence.game import GameMode, FinishReason
 from lib_transcendence.generate import generate_code
 from lib_transcendence.exceptions import MessagesException, Conflict, ResourceExists
+from lib_transcendence.lobby import MatchType
 from lib_transcendence.users import retrieve_users
 from rest_framework import serializers
 from rest_framework.exceptions import NotFound, PermissionDenied
@@ -55,6 +56,7 @@ class MatchSerializer(Serializer):
             'tournament_id',
             'tournament_stage_id',
             'tournament_n',
+            'match_type',
             'finished',
             'teams',
             'winner',
@@ -62,6 +64,7 @@ class MatchSerializer(Serializer):
         ]
         read_only_fields = [
             'id',
+            'match_type',
             'finished',
             'created_at',
             'winner',
@@ -125,6 +128,12 @@ class MatchSerializer(Serializer):
             raise serializers.ValidationError(MessagesException.ValidationError.CLASH_3_PLAYERS)
         if len(teams['b']) == 3 and validated_data['game_mode'] not in (GameMode.CLASH, GameMode.CUSTOM_GAME):
             raise serializers.ValidationError(MessagesException.ValidationError.GAME_MODE_PLAYERS.format(obj=validated_data['game_mode'].replace('_', ' ').capitalize(), n=1))
+
+        if len(teams['a']) == 1:
+            validated_data['match_type'] = MatchType.M1V1
+        else:
+            validated_data['match_type'] = MatchType.M3V3
+
         match = super().create(validated_data)
         kwargs = {}
         if match.game_mode == GameMode.RANKED:
