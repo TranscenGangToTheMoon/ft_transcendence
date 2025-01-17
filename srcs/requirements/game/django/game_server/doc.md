@@ -27,7 +27,6 @@ let socket = io(host, {
     auth : {
         "id": userInformations.id,
         "token": '<token>',
-        "match-code": '<match-code>', //only if you want to spectate
     },
 });
 //This comes from the javascript code included in the frontend

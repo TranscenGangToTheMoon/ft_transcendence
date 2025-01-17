@@ -11,6 +11,7 @@ import asyncio
 import socketio
 import os
 import time
+import json
 
 
 class Server:
@@ -42,18 +43,10 @@ class Server:
         Server._games_lock = Lock()
         Server._loop_lock = Lock()
         Server._sio_lock = Lock()
-        try:
-            Game.default_ball_speed = int(os.environ['GAME_DEFAULT_BALL_SPEED'])
-            Game.ball_size = int(os.environ['GAME_BALL_SIZE'])
-            Racket.width = int(os.environ['GAME_RACKET_WIDTH'])
-            Racket.height = int(os.environ['GAME_RACKET_HEIGHT'])
-            Racket.max_speed = int(os.environ['GAME_RACKET_MAX_SPEED'])
-        except KeyError:
-            Game.default_ball_speed = 240
-            Game.ball_size = 20
-            Racket.width = 30
-            Racket.height = 200
-            Racket.max_speed = 500
+        with open('game_server/gameConfig.json', 'r') as config_file:
+            config = json.load(config_file)
+            Game.default_ball_speed = config['ball']['speed']
+            Game.ball_size = config['ball']['size']
         port = 5500
         print(f"SocketIO server running on port {port}", flush=True)
         web.run_app(Server._app, host='0.0.0.0', port=port, loop=Server._loop)
