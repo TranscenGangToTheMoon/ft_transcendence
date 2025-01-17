@@ -2,7 +2,7 @@ import unittest
 
 from services.blocked import blocked_user, unblocked_user
 from services.friend import create_friendship
-from services.lobby import create_lobby, join_lobby, ban_user, invite_user
+from services.lobby import create_lobby, join_lobby, ban_user, invite_user, post_message
 from utils.my_unittest import UnitTest
 
 
@@ -542,6 +542,45 @@ class Test08_InviteLobby(UnitTest):
         self.assertResponse(invite_user(user2, user3, code), 403, {'detail': 'You do not belong to this lobby.'})
         self.assertThread(user1, user2, user3)
 
+
+class Test09_Message(UnitTest):
+
+    def test_001_test(self):
+        user1 = self.user(['lobby-join', 'lobby-join', 'lobby-message', 'lobby-leave'])
+        user2 = self.user(['lobby-join', 'lobby-message', 'lobby-leave', 'lobby-message'])
+        user3 = self.user([])
+
+        code = self.assertResponse(create_lobby(user1), 201, get_field='code')
+        self.assertResponse(join_lobby(user2, code), 201)
+        self.assertResponse(join_lobby(user3, code), 201)
+        self.assertResponse(post_message(user3, code, '    coucou    '), 201)
+        self.assertResponse(join_lobby(user3, code, method='DELETE'), 204)
+        self.assertResponse(post_message(user3, code, 'coucou failed'), 403)
+        self.assertResponse(post_message(user1, code, 'blip blop'), 201)
+        self.assertThread(user1, user2, user3)
+
+    def test_002_not_in_lobby(self):
+        user1 = self.user()
+        user2 = self.user()
+
+        code = self.assertResponse(create_lobby(user1), 201, get_field='code')
+        self.assertResponse(post_message(user2, code, 'blip blop'), 403)
+        self.assertThread(user1, user2)
+
+    def test_003_lobby_does_not_exist(self):
+        user1 = self.user()
+
+        self.assertResponse(post_message(user1, '1234', 'blip blop'), 403)
+        self.assertThread(user1)
+
+    def test_004_validation_error(self):
+        user1 = self.user()
+
+        code = self.assertResponse(create_lobby(user1), 201, get_field='code')
+        self.assertResponse(post_message(user1, code), 400)
+        self.assertResponse(post_message(user1, code, data={'content': ['caca', 'pipi']}), 400)
+        self.assertResponse(post_message(user1, code, data={'content': {'prout': 48}}), 400)
+        self.assertThread(user1)
 
 if __name__ == '__main__':
     unittest.main()

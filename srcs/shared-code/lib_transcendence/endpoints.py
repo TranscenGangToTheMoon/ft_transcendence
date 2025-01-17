@@ -48,12 +48,14 @@ class Matchmaking:
     lobby_participant           = 'api/play/lobby/<str:code>/'
     lobby_invite                = 'api/play/lobby/<str:code>/invite/<int:user_id>/'
     lobby_ban                   = 'api/play/lobby/<str:code>/ban/<int:user_id>/'
+    lobby_message               = 'api/play/lobby/<str:code>/message/'
 
     tournament                  = 'api/play/tournament/'
     tournament_search           = 'api/play/tournament/search/'
     tournament_participant      = 'api/play/tournament/<str:code>/'
     tournament_invite           = 'api/play/tournament/<str:code>/invite/<int:user_id>/'
     tournament_ban              = 'api/play/tournament/<str:code>/ban/<int:user_id>/'
+    tournament_message          = 'api/play/tournament/<str:code>/message/'
 
     ftournament_result_match    = 'api/private/tournament/result-match/{match_id}/'
     tournament_result_match     = 'api/private/tournament/result-match/<int:match_id>/'
@@ -78,7 +80,7 @@ class Users:
     result_match                = 'api/private/users/result-match/'
     result_tournament           = 'api/private/users/result-tournament/'
 
-    export_data               = 'api/users/me/downalod-data/'
+    export_data                 = 'api/users/me/downalod-data/'
 
     sse                         = 'sse/users/'
     event                       = 'api/private/users/events/'
