@@ -10,7 +10,6 @@ from chats.models import ChatParticipants, Chats
 
 class MessagesSerializer(Serializer):
     author = serializers.IntegerField(source='author.id', read_only=True)
-    is_read = serializers.SerializerMethodField()
 
     class Meta:
         model = Messages
