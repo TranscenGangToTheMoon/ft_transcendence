@@ -27,15 +27,15 @@ class User():
 
         data = json.dumps( {"username": User.username, "password": User.password})
         User.response = requests.post(url=f"{User.server}/api/auth/login/", data=data, headers=User.headers, verify=Config.SSL.CRT)
-        # print(User.response.json())
         if (User.response.status_code != 200):
+            log(User.response.json())
             reason = "Unknown error"
-            if (User.response.json()["detail"] is not None):
-                reason = f"Detail: {User.response.json()['detail']}"
-            elif (User.response.json()["username"] is not None):
-                reason = f"Username: {User.response.json()['username']}"
-            elif (User.response.json()["password"] is not None):
-                reason = f"Password: {User.response.json()['password']}"
+            if (User.response.json().get("detail") is not None):
+                reason = f"{User.response.json()['detail']}"
+            elif (User.response.json().get("username") is not None):
+                reason = f"{User.response.json()['username'][0]}"
+            elif (User.response.json().get("password") is not None):
+                reason = f"{User.response.json()['password'][0]}"
             raise (Exception(f"({User.response.status_code}) {reason}"))
 
         User.accessToken = User.response.json()["access"]
@@ -49,13 +49,14 @@ class User():
 
         User.response = requests.post(url=f"{User.server}/api/auth/guest/", data={}, headers=User.headers, verify=Config.SSL.CRT)
         if (User.response.status_code != 201):
+            log(User.response.json())
             reason = "Unknown error"
-            if (User.response.json()["detail"] is not None):
-                reason = f"Detail: {User.response.json()['detail']}"
-            elif (User.response.json()["username"] is not None):
-                reason = f"Username: {User.response.json()['username']}"
-            elif (User.response.json()["password"] is not None):
-                reason = f"Password: {User.response.json()['password']}"
+            if (User.response.json().get("detail") is not None):
+                reason = f"{User.response.json()['detail']}"
+            elif (User.response.json().get("username") is not None):
+                reason = f"{User.response.json()['username'][0]}"
+            elif (User.response.json().get("password") is not None):
+                reason = f"{User.response.json()['password'][0]}"
             raise (Exception(f"({User.response.status_code}) {reason}"))
 
         User.accessToken = User.response.json()["access"]
@@ -72,14 +73,15 @@ class User():
         print(User.response.json())
 
         if (User.response.status_code != 201):
+            log(User.response.json())
             reason = "Unknown error"
-            if (User.response.status_code == 401):
-                if (User.response.json()["detail"] is not None):
-                    reason = f"Detail: {User.response.json()['detail']}"
-                elif (User.response.json()["username"] is not None):
-                    reason = f"Username: {User.response.json()['username']}"
-                elif (User.response.json()["password"] is not None):
-                    reason = f"Password: {User.response.json()['password']}"
+            # if (User.response.status_code == 401):
+            if (User.response.json().get("detail") is not None):
+                reason = f"{User.response.json()['detail']}"
+            elif (User.response.json().get("username") is not None):
+                reason = f"{User.response.json()['username'][0]}"
+            elif (User.response.json().get("password") is not None):
+                reason = f"{User.response.json()['password'][0]}"
             raise (Exception(f"({User.response.status_code}) {reason}"))
 
         User.accessToken = User.response.json()["access"]
