@@ -44,6 +44,7 @@ class Game:
         with open('game_server/gameConfig.json', 'r') as config_file:
             config = json.load(config_file)
             racket_max_speed = config['paddle'][match.game_type]['speed']
+        # create rackets for right players
         for player in match.teams[0].players:
             racket = Racket(player.user_id, Position(canvas.x - racket_width - racket_offset, int(canvas.y / 2 - racket_height / 2)), racket_height, racket_width, racket_max_speed)
             player.racket = racket
@@ -72,8 +73,8 @@ class Game:
             self.max_bounce_angle = config['ball']['maxBounceAngle']
             self.max_ball_speed = config['ball']['maxSpeed']
             self.speed_increment = config['ball']['speedIncrement']
-            self.ledge_offset = config['paddle'][match.game_type]['ledgeOffset']
-            self.racket_to_racket_offset = config['paddle'][match.game_type]['paddleOffset']
+            self.ledge_offset = config['paddle'][self.match.game_type]['ledgeOffset']
+            self.racket_to_racket_offset = config['paddle'][self.match.game_type]['paddleOffset']
         self.finished = False
         self.ball = self.create_ball(self.canvas)
         self.rackets = self.create_rackets(self.match, self.canvas, self.racket_height, self.racket_width, self.ledge_offset, self.racket_to_racket_offset)
@@ -137,17 +138,15 @@ class Game:
         self.ball.speed_y = yNewSpeed
 
     def handle_racket_bounce(self, racket):
-        if (racket.blockGlide):
+        if (racket.block_glide):
             self.ball.speed_y = -self.ball.speed_y
-            self.ball.direction_y = -self.ball.direction_y
-            if (abs(self.ball.position.y - (racket.position.y + racket.height)) <
-                abs(self.ball.position.y - (racket.position.y))):
+            if (abs(self.ball.position.y - racket.position.y + racket.height) <
+                abs(self.ball.position.y - racket.position.y)):
                 self.ball.position.y = racket.position.y + racket.height
             else:
                 self.ball.position.y = racket.position.y - self.ball.size
         else:
             self.ball.speed_x = -self.ball.speed_x
-            self.ball.direction_x = -self.ball.direction_x
             self.ball.increment_speed(self.max_ball_speed, self.speed_increment)
             self.calculateNewBallDirection(racket.position.y, racket.height)
 
@@ -170,7 +169,7 @@ class Game:
                 self.ball.last_touch_team_a = racket.player_id
             else:
                 self.ball.last_touch_team_b = racket.player_id
-            if (not racket.blockGlide):
+            if (not racket.block_glide):
                 if (self.ball.position.x + self.ball.size > racket.position.x and
                     self.ball.position.x + self.ball.size < racket.position.x + racket.width
                 ):
@@ -180,9 +179,9 @@ class Game:
         else:
             is_ball_x_in_racket_range = self.ball.position.x < racket.position.x + racket.width and self.ball.position.x + self.ball.size > racket.position.x
             if (is_ball_x_in_racket_range):
-                racket.blockGlide = True
+                racket.block_glide = True
             else:
-                racket.blockGlide = False
+                racket.block_glide = False
 
     def update(self):
         if (self.last_update == 0):
@@ -247,8 +246,7 @@ class Game:
             print(e, flush=True)
             self.finish(FinishReason.PLAYER_NOT_CONNECTED, disconnected_user_id=e.args[0])
             return
-        if (self.match.game_mode == 'custom_game'): #todo fix foeewf
-            self.canvas = Position(1800, 750)
+        if (self.match.game_type == '3v3'):
             self.send_rackets()
         self.send_canvas()
         self.send_game_state()
