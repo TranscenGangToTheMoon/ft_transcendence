@@ -136,7 +136,7 @@ class Events:
     tournament_start = Event(Service.TOURNAMENT, EventCode.TOURNAMENT_START, 'Tournament {name} start in 3 seconds.')
     tournament_start_at = Event(Service.TOURNAMENT, EventCode.TOURNAMENT_START_AT, 'Tournament {name} start in 20 seconds.')
     tournament_start_cancel = Event(Service.TOURNAMENT, EventCode.TOURNAMENT_START_CANCEL)
-    tournament_match_finish = Event(Service.TOURNAMENT, EventCode.TOURNAMENT_MATCH_FINISH, '{winner} win against {looser} {score_winner}-{score_looser}.')
+    tournament_match_finish = Event(Service.TOURNAMENT, EventCode.TOURNAMENT_MATCH_FINISH, '{winner} win against {looser} {score_winner}-{score_looser}{finish_reason}.')
     tournament_finish = Event(Service.TOURNAMENT, EventCode.TOURNAMENT_FINISH, 'The tournament {name} is now over. Well done to {username} for his victory!', Target('/history/tournament/{id}/', display_name='view'))
 
 
