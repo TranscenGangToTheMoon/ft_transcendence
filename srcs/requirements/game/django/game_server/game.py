@@ -96,7 +96,7 @@ class Game:
                 self.canvas = Position(800, 600)
         self.ball = self.create_ball(self.canvas)
         self.rackets = self.create_rackets(self.match, self.canvas, self.match.game_mode)
-        
+
 
         self.ball.last_touch_team_a = self.match.teams[0].players[0].user_id
         self.ball.last_touch_team_b = self.match.teams[1].players[0].user_id
@@ -223,7 +223,7 @@ class Game:
             self.send_game_state()
             self.sending = 1
         else:
-            self.sending += 1
+            self.sending = 0
         self.handle_goal()
 
 ################--------game events handling--------################
