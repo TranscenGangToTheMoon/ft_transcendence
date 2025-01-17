@@ -14,6 +14,7 @@ from baning.models import delete_banned
 from blocking.utils import delete_player_instance
 from matchmaking.create_match import create_tournament_match
 from matchmaking.utils.sse import send_sse_event, start_tournament_sse
+from tournament.sse import send_sse_event_finish_match
 
 
 class TournamentSize:
@@ -235,7 +236,15 @@ class TournamentMatches(models.Model):
         else:
             validated_data.pop('winner_id')
         winner_user_id = winner.user_id
-        create_sse_event(tournament.users_id(), EventCode.TOURNAMENT_MATCH_FINISH, {'id': self.id, 'winner': winner_user_id, **validated_data}, {'winner': winner_user_id, 'looser': looser if looser is None else looser.user_id, 'score_winner': validated_data['score_winner'], 'score_looser': validated_data['score_looser']})
+        if validated_data['finish_reason'] == FinishReason.NORMAL_END:
+            finish_reason = ''
+        elif validated_data['finish_reason'] == FinishReason.PLAYER_DISCONNECT:
+            finish_reason = ' (obviously the other player gave up the game)'
+        elif validated_data['finish_reason'] == FinishReason.GAME_NOT_PLAYED:
+            finish_reason = ' (yeah, there just was no game)'
+        else:
+            finish_reason = ' (obviously he played against nobody, not too complicated to win)'
+        send_sse_event_finish_match(tournament, winner_user_id, 'nobody' if looser is None else looser.user_id, validated_data['score_winner'], validated_data['score_looser'], finish_reason)
         current_stage = winner.stage
         finished = winner.win()
         if looser is not None:
