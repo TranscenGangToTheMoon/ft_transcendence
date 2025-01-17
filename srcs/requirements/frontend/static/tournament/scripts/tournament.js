@@ -324,6 +324,10 @@ async function tournamentMatchFinished(event){
 	event = JSON.parse(event.data);
 	console.log('received match finished event');
 	console.log(event);
+	tournament = event.data;
+	setBanOption();
+	loadTournament(tournament);
+	return;
 	try {
 		let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/play/tournament/`);
 		tournament = data;
