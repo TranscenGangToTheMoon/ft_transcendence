@@ -26,11 +26,15 @@ def is_in_game(user1, match_id=None):
     )
 
 
-def score(user_id):
+def score(user_id, own_goal=None):
+    data = {}
+    if own_goal is not None:
+        data['own_goal'] = own_goal
     return make_request(
         endpoint=f'private/match/score/{user_id}/',
         method='PUT',
         port=8003,
+        data=data,
     )
 
 
