@@ -18,7 +18,7 @@ class GameEnd(ModalScreen[str]):
             self.styles.background = "blue 15%" if victory else "red 15%"
         else:
             self.result = f"The game did not end as expected\n{reason}"
-            self.styles.background = "green 15%"
+            self.styles.background = "purple 15%"
 
     @on(Button.Pressed, "#exit")
     def exit(self):
