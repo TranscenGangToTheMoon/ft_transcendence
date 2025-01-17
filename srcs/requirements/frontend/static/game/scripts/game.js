@@ -545,11 +545,10 @@ function initSocket(){
         console.log('game_over received', event);
         gameSocket.close();
 		window.PongGame.handleGameOver(event.reason);
-        if (fromTournament)
-            // setTimeout(async ()=> {
-            //     if (typeof userInformations.cancelReturn === 'undefined' || !userInformations.cancelReturn)
-                    await navigateTo('/tournament')
-            // }, 500)
+        if (typeof fromTournament !== 'undefined' && fromTournament)
+            await navigateTo('/tournament');
+        else if (typeof fromLobby !== 'undefined' && fromLobby)
+            await navigateTo('/lobby', true, true);
         else {
             document.getElementById('enemyScore').innerText = window.PongGame.state.enemyScore;
             const enemyTeamDetail = document.getElementById('enemyScoreLabel').querySelector('.teamDetail');
@@ -618,6 +617,8 @@ function checkGameAuthorization(){
         throw `${window.location.pathname}`;
     if (window.location.pathname === '/game/tournament' && typeof tournamentData === 'undefined')
         throw `${window.location.pathname}`;
+    if (window.location.pathname === '/game/1v1' && (typeof fromLobby === 'undefined' || !fromLobby))
+        throw `${window.location.pathname}`;
 }
 
 function gameStart(event){
@@ -627,8 +628,84 @@ function gameStart(event){
     initData(data);
 }
 
+function forPhoneChanges(){
+    try {
+        document.getElementById('gameCanvas').style.height = '300px';
+        document.getElementById('gameCanvas').style.width = '400px';
+        document.getElementById('gameCanvas').style.backgroundColor = 'blue';
+    
+        
+        function simulateKey(type, keyCode) {
+            const event = new KeyboardEvent(type, {
+                key: keyCode === 38 ? 'ArrowUp' : 'ArrowDown',
+                keyCode: keyCode,
+                code: keyCode === 38 ? 'ArrowUp' : 'ArrowDown',
+                which: keyCode,
+                bubbles: true,
+                cancelable: true
+            });
+            
+            document.dispatchEvent(event);
+        }
+        
+    // Handle touch start
+    let lastTouchY = undefined;
+    function handleTouchStart(event) {
+        const touch = event.touches[0];
+        const screenHeight = window.innerHeight;
+        const touchY = touch.clientY;
+        const threshold = 0.20; // 20% of screen height
+        
+        if (touchY < screenHeight / 2) {
+            if (lastTouchY && lastTouchY >= screenHeight / 2)
+                simulateKey('keyup', 40)
+            // Top touch - simulate arrow up press
+            simulateKey('keydown', 38);
+        } else {
+            if (lastTouchY && lastTouchY < screenHeight / 2)
+                simulateKey('keyup', 38)
+            // Bottom touch - simulate arrow down press
+            simulateKey('keydown', 40);
+        }
+        lastTouchY = touchY;
+    }
+    
+    // Handle touch end - simulates keyup
+    function handleTouchEnd(event) {
+        // When the last touch point is removed, we need to check
+        // what was the last position to know which key to release
+        if (event.changedTouches.length > 0) {
+            const touch = event.changedTouches[0];
+            const screenHeight = window.innerHeight;
+            const touchY = touch.clientY;
+            const threshold = 0.20;
+            
+            if (touchY < screenHeight / 2) {
+                // Release arrow up
+                simulateKey('keyup', 38);
+            } else {
+                // Release arrow down
+                simulateKey('keyup', 40);
+            }
+        }
+    }
+    
+        document.addEventListener('touchstart', handleTouchStart);
+        document.addEventListener('touchmove', handleTouchStart);
+        document.addEventListener('touchend', handleTouchEnd);
+        document.addEventListener('touchmove', event => {event.preventDefault()}, { passive: false });
+    }
+    catch (error){
+        document.getElementById('salut').innerText = error;
+    }
+}
+
 async function initGame(){
     await indexInit(false);
+    if (window.matchMedia("(hover: none) and (pointer: coarse)").matches)
+        forPhoneChanges();
+        
+    // console.log(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent));
     if (window.location.pathname === '/') return;
     document.getElementById('gameArea').classList.replace('d-flex', 'd-none');
     document.getElementById('opponentWait').style.display = "block";
@@ -636,6 +713,8 @@ async function initGame(){
         checkGameAuthorization();
         if (window.location.pathname === '/game/tournament')
             initData(tournamentData);
+        else if (window.location.pathname === '/game/1v1')
+            initData(userInformations.lobbyData);
         else {
             if (SSEListeners.has('game-start')){
                 sse.removeEventListener('game-start', SSEListeners.get('game-start'));

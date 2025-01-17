@@ -2,6 +2,7 @@
 import httpx
 import json
 import re
+import ssl
 
 # Textual imports
 from textual        import log, work
@@ -36,6 +37,9 @@ class PongCLI(App):
         log("Start SSE")
         if (not self.isConnected):
             self.connected = True
+            # SSLContext = ssl.create_default_context()
+            # SSLContext.load_verify_locations(Config.SSL.CRT)
+            # SSLContext.check_hostname = False
             async with httpx.AsyncClient(verify=Config.SSL.CRT) as client:
                 headers = {
                     'Content-Type': 'text/event-stream',

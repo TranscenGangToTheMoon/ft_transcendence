@@ -1,32 +1,44 @@
 LoginPage {
-    border: blue;
     align: center middle;
-    /*align: center bottom;*/
 }
 
-#AuthenticationBox {
-
+#authenticationBox {
     align: center middle;
-    /*content-align: center middle;*/
-    /*align-horizontal: center;*/
-    width: 52;
+    background: grey 50%;
+    width: auto;
     height: auto;
-    border: green;
+    border: thick white 50%;
     padding: 0;
 }
 
-#status {
-    border: aqua;
-    width: 52;
+#server {
+    border-title-color: white 50%;
+    border-title-align: right;
 }
-#ButtonBox {
-    height: 3;
-    /*width: auto;*/
-    /*border: yellow;*/
-    /*align: center middle;*/
-    /*content-align: center middle;*/
-    /*padding: 0;*/
-    /*margin: 0;*/
+
+#username {
+    border-title-color: white 50%;
+    border-title-align: right;
+}
+
+#password {
+    border-title-color: white 50%;
+    border-title-align: right;
+}
+
+#status {
+    content-align: center middle;
+    width: 54;
+    margin: 1 0;
+}
+
+#buttonBox {
+    height: auto;
+    width: auto;
+    align: center middle;
+    content-align: center middle;
+    padding: 0;
+    margin: 0 1;
 }
 
 Input {

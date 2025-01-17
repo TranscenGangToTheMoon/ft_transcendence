@@ -88,8 +88,21 @@ document.getElementById('chat').addEventListener('click', async e => {
     await displayChatsList();
 });
 
+function forPhoneChanges(){
+    try {
+        // document.body.style.backgroundColor = 'red';
+        document.getElementById('customGame').style.display = 'none';
+        document.getElementById('clash').style.display = 'none';
+    }
+    catch(error){
+        document.getElementById('container').innerText = error;
+    }
+}
+
 async function homePageInit() {
     await indexInit(false);
+    if (window.matchMedia("(hover: none) and (pointer: coarse)").matches)
+        forPhoneChanges();
 }
 
 homePageInit();
