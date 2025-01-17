@@ -34,6 +34,8 @@ class Game:
     @staticmethod
     def create_rackets(match, canvas) -> List[Racket]:
         rackets: List[Racket] = []
+        ledge_offset = 100
+        racket_to_racket_offset = 200
         try:
             ledge_offset = int(os.environ['GAME_RACKET_LEDGE_OFFSET'])
             racket_to_racket_offset = int(os.environ['GAME_RACKET_TO_RACKET_OFFSET'])
@@ -41,15 +43,15 @@ class Game:
             ledge_offset = 100
             racket_to_racket_offset = 200
         # create rackets for right players
+        racket_offset = ledge_offset
         for player in match.teams[0].players:
-            racket_offset = ledge_offset
             racket = Racket(player.user_id, Position(canvas.x - Racket.width - racket_offset, int(canvas.y / 2 - Racket.height / 2)))
             player.racket = racket
             rackets.append(racket)
             racket_offset += racket_to_racket_offset
         # create rackets for left players
+        racket_offset = ledge_offset
         for player in match.teams[1].players:
-            racket_offset = ledge_offset
             racket = Racket(player.user_id, Position(racket_offset, int(canvas.y / 2 - Racket.height / 2)))
             player.racket = racket
             rackets.append(racket)
@@ -66,7 +68,7 @@ class Game:
             self.max_ball_speed = float(os.environ['GAME_MAX_BALL_SPEED'])
             self.speed_increment = float(os.environ['GAME_SPEED_INCREMENT'])
             self.max_score = int(os.environ['GAME_MAX_SCORE'])
-            if self.match.game_mode == GameMode.CLASH:
+            if self.match.game_mode == GameMode.CLASH: # game_mode is not 'clash' when it's expected to be
                 self.canvas = Position(
                     int(os.environ['GAME_CANVAS_SIZE_X_CLASH']),
                     int(os.environ['GAME_CANVAS_SIZE_Y_CLASH'])
