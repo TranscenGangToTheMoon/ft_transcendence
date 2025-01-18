@@ -60,7 +60,7 @@ class Lobby(models.Model):
         if self.ready_to_play:
             self.play()
 
-    def make_team(self, team, order_by_count=False):
+    def make_team(self, team, order_by_count=False): # todo resecure this
         remain_player = self.max_participants - len(team)
         while remain_player != 0:
             result = Lobby.objects.exclude(id__in=self.exclude_lobby).filter(ready_to_play=True, count__lte=remain_player)

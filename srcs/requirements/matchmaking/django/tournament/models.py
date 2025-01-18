@@ -253,12 +253,8 @@ class TournamentMatches(models.Model):
         if finished is not None:
             from tournament.utils import finish_tournament
 
-            finish_tournament(self.tournament, winner_user_id)
+            finish_tournament(self.tournament.id, winner_user_id)
         else:
-            if not current_stage.matches.filter(finished=False).exists():
-                participants = tournament.participants.filter(still_in=True).order_by('index')
-                ct = participants.count()
+            from tournament.utils import create_match_new_stage
 
-                for i in range(0, ct, 2):
-                    match = tournament.matches.create(n=tournament.get_nb_matches(), stage=winner.stage, user_1=participants[i], user_2=participants[i + 1])
-                    match.post()
+            Thread(target=create_match_new_stage, args=(current_stage, winner)).start()

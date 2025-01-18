@@ -14,8 +14,10 @@ def send_sse_event(event: EventCode, instance, data=None, exclude_myself=True):
     if other_members:
         if event in (EventCode.LOBBY_UPDATE_PARTICIPANT, EventCode.LOBBY_LEAVE, EventCode.TOURNAMENT_LEAVE):
             data['id'] = instance.user_id
-        if event in (EventCode.LOBBY_JOIN, EventCode.LOBBY_LEAVE, EventCode.TOURNAMENT_JOIN, EventCode.TOURNAMENT_LEAVE):
+        if event in (EventCode.LOBBY_JOIN, EventCode.LOBBY_LEAVE, EventCode.LOBBY_MESSAGE, EventCode.TOURNAMENT_JOIN, EventCode.TOURNAMENT_LEAVE, EventCode.TOURNAMENT_MESSAGE):
             kwargs['username'] = instance.user_id
+        if event in (EventCode.LOBBY_MESSAGE, EventCode.TOURNAMENT_MESSAGE):
+            kwargs['message'] = data.pop('content')
         if event in (EventCode.LOBBY_JOIN, EventCode.TOURNAMENT_JOIN):
             user_instance = retrieve_users(instance.user_id)
             data.update(user_instance[0])

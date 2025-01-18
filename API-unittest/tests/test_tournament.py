@@ -1,3 +1,4 @@
+import json
 import time
 import unittest
 
@@ -6,7 +7,7 @@ from services.friend import create_friendship
 from services.game import score
 from services.stats import set_trophies
 from services.tournament import create_tournament, join_tournament, ban_user, search_tournament, invite_user, tj, ts, \
-    gs, tmf, tf, tsa
+    gs, tmf, tf, tsa, post_message
 from utils.generate_random import rnstr
 from utils.my_unittest import UnitTest
 
@@ -645,7 +646,7 @@ class Test10_FinishTournament(UnitTest):
 
         self.assertThread(user1, user2, user3, user4)
 
-    def test_002_finish_8_seeding(self):
+    def test_002_finish_8_seeding(self): # todo fix
         user1 = self.user([tj, tj, tj, tj, tj, tj, tsa, tj, ts, gs, tmf, tmf, tmf, tmf, gs, tmf, tmf, gs, tmf, tf])
         user2 = self.user([tj, tj, tj, tj, tj, tsa, tj, ts, gs, tmf, tmf, tmf, tmf, gs, tmf, tmf, tmf, tf])
         user3 = self.user([tj, tj, tj, tj, tsa, tj, ts, gs, tmf, tmf, tmf, tmf, gs, tmf, tmf, gs, tmf, tf])
@@ -684,6 +685,9 @@ class Test10_FinishTournament(UnitTest):
         self.assertResponse(score(user2['id']), 200)
         self.assertResponse(score(user2['id']), 200)
 
+        response = self.assertResponse(create_tournament(user6, method='GET'), 200)
+        json.dump(response, open('test.json', 'w'), indent=4)
+
         self.assertResponse(score(user6['id']), 200)
         self.assertResponse(score(user3['id']), 200)
         self.assertResponse(score(user6['id']), 200)
@@ -703,6 +707,9 @@ class Test10_FinishTournament(UnitTest):
         self.assertResponse(score(user1['id']), 200)
         self.assertResponse(score(user5['id']), 200)
         self.assertResponse(score(user1['id']), 200)
+
+        response = self.assertResponse(create_tournament(user6, method='GET'), 200)
+        json.dump(response, open('test2.json', 'w'), indent=4)
 
         self.assertResponse(score(user3['id']), 200)
         self.assertResponse(score(user3['id']), 200)
@@ -719,7 +726,7 @@ class Test10_FinishTournament(UnitTest):
 
         self.assertThread(user1, user2, user3, user4, user5, user6, user7, user8)
 
-    def test_003_finish_7_seeding(self):
+    def test_003_finish_7_seeding(self): # todo fix
         user1 = self.user([tj, tj, tj, tj, tj, tj, tsa, ts, tmf, tmf, tmf, tmf, gs, tmf, tmf, gs, tmf, tf])
         user2 = self.user([tj, tj, tj, tj, tj, tsa, ts, tmf, gs, tmf, tmf, tmf, gs, tmf, tmf, tmf, tf])
         user3 = self.user([tj, tj, tj, tj, tsa, ts, tmf, gs, tmf, tmf, tmf, gs, tmf, tmf, gs, tmf, tf])
@@ -785,6 +792,46 @@ class Test10_FinishTournament(UnitTest):
         self.assertResponse(score(user3['id']), 200)
 
         self.assertThread(user1, user2, user3, user4, user5, user6, user7)
+
+
+class Test11_Message(UnitTest):
+
+    def test_001_test(self):
+        user1 = self.user(['tournament-join', 'tournament-join', 'tournament-message', 'tournament-leave'])
+        user2 = self.user(['tournament-join', 'tournament-message', 'tournament-leave', 'tournament-message'])
+        user3 = self.user([])
+
+        code = self.assertResponse(create_tournament(user1), 201, get_field='code')
+        self.assertResponse(join_tournament(user2, code), 201)
+        self.assertResponse(join_tournament(user3, code), 201)
+        self.assertResponse(post_message(user3, code, '    coucou    '), 201)
+        self.assertResponse(join_tournament(user3, code, method='DELETE'), 204)
+        self.assertResponse(post_message(user3, code, 'coucou failed'), 403)
+        self.assertResponse(post_message(user1, code, 'blip blop'), 201)
+        self.assertThread(user1, user2, user3)
+
+    def test_002_not_in_tournament(self):
+        user1 = self.user()
+        user2 = self.user()
+
+        code = self.assertResponse(create_tournament(user1), 201, get_field='code')
+        self.assertResponse(post_message(user2, code, 'blip blop'), 403)
+        self.assertThread(user1, user2)
+
+    def test_003_tournament_does_not_exist(self):
+        user1 = self.user()
+
+        self.assertResponse(post_message(user1, '1234', 'blip blop'), 403)
+        self.assertThread(user1)
+
+    def test_004_validation_error(self):
+        user1 = self.user()
+
+        code = self.assertResponse(create_tournament(user1), 201, get_field='code')
+        self.assertResponse(post_message(user1, code), 400)
+        self.assertResponse(post_message(user1, code, data={'content': ['caca', 'pipi']}), 400)
+        self.assertResponse(post_message(user1, code, data={'content': {'prout': 48}}), 400)
+        self.assertThread(user1)
 
 
 if __name__ == '__main__':
