@@ -25,15 +25,18 @@
         team: '',
     };
 
-    config.enemyScore = {
-        y : config.canvasHeight / 2,
-        x : config.canvasWidth / 4
+    function setScoreCoords(){
+        config.enemyScore = {
+            y : config.canvasHeight / 2,
+            x : config.canvasWidth / 4
+        }
+    
+        config.playerScore = {
+            y : config.enemyScore.y,
+            x : config.canvasWidth - config.enemyScore.x
+        } 
     }
-
-    config.playerScore = {
-        y : config.enemyScore.y,
-        x : config.enemyScore.x * 3
-    }
+    setScoreCoords();
 
     const info = {
 		myTeam: {
@@ -89,7 +92,7 @@
     };
 
     const canvas = document.getElementById("gameCanvas");
-    const ctx = canvas.getContext("2d");
+    let ctx = canvas.getContext("2d");
     canvas.width = config.canvasWidth;
     canvas.height = config.canvasHeight;
 
@@ -98,10 +101,13 @@
     const ballImage = new Image();
     ballImage.src = "/assets/ball.png";
 
-    ctx.font = config.font;
-    ctx.fillStyle = config.fontColor;
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
+    function setFont(){
+        ctx.font = config.font;
+        ctx.fillStyle = config.fontColor;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+    }
+    setFont();
     state.keys[' '] = false;
 
     document.addEventListener("keydown", (e) => {
@@ -117,7 +123,7 @@
         state.isGameActive = true;
         state.cancelAnimation = false;
         // console.log('game started');
-		state.isCountDownActive = false;
+		state.isCountDownActive = false;a
 		state.lastFrame = 0;
 		// state.ball.speedX = config.defaultBallSpeed;
 		// state.ball.speedY = config.defaultBallSpeed;
@@ -444,27 +450,29 @@
         }
     }
 
-    window.PongGame = {startGame, startCountdown, drawGame, stopGame, state, config, moveUp, moveDown, handleGameOver, resetGame, info, animatePaddlesToMiddle};
+    window.PongGame = {startGame, startCountdown, drawGame, stopGame, state, config, moveUp, moveDown, handleGameOver, resetGame, info, animatePaddlesToMiddle, canvas, ctx, setFont, setScoreCoords};
 })();
 
 function fillTeamDetail(enemyTeamDetail, playerTeamDetail){
-    enemyTeamDetail.title += window.PongGame.info.enemyTeam.name;
-    playerTeamDetail.title += window.PongGame.info.myTeam.name;
-    for (let player in window.PongGame.info.myTeam.players){
-        player = window.PongGame.info.myTeam.players[player];
+    enemyTeamDetail.title += PongGame.info.enemyTeam.name;
+    playerTeamDetail.title += PongGame.info.myTeam.name;
+    for (let player in PongGame.info.myTeam.players){
+        player = PongGame.info.myTeam.players[player];
         const oldContent = playerTeamDetail.getAttribute('data-bs-content');
         playerTeamDetail.setAttribute('data-bs-content', oldContent || '' + `
             <div id=TD-username>${player.username}</div>
         `);
     }
-    for (let player in window.PongGame.info.enemyTeam.players){
-        player = window.PongGame.info.enemyTeam.players[player];
+    for (let player in PongGame.info.enemyTeam.players){
+        player = PongGame.info.enemyTeam.players[player];
         const oldContent = enemyTeamDetail.getAttribute('data-bs-content');
         enemyTeamDetail.setAttribute('data-bs-content', oldContent || '' + `
             <div id=TD-username>${player.username}</div>
         `);
     }
 }
+
+cancelTimeout = false;
 
 function initSocket(){
 	const host = window.location.origin;
@@ -480,28 +488,29 @@ function initSocket(){
     window.gameSocket = gameSocket;
     // console.log(socket)
 	gameSocket.on('connect', () => {
-        // console.log('Connected to socketIO server!');
+        console.log('Connected to socketIO server!');
     });
     gameSocket.on('disconnect', () => {
         gameSocket.close();
         console.log('disconnected from gameSocket');
     })
     gameSocket.on('start_game', event => {
+        cancelTimeout = true;
         // console.log('received start_game');
-        if (!window.PongGame.state.isGameActive)
-            window.PongGame.startGame();
+        if (!PongGame.state.isGameActive)
+            PongGame.startGame();
     })
     gameSocket.on('start_countdown', event => {
         // console.log('received start_countdown');
-        window.PongGame.startCountdown();
+        PongGame.startCountdown();
     })
     gameSocket.on('game_state', event => {
 		console.log('received game State');
-		window.PongGame.state.ball.y = event.position_y;
-		window.PongGame.state.ball.x = event.position_x;
-		window.PongGame.state.ball.speedX = event.speed_x;
-		window.PongGame.state.ball.speedY = event.speed_y;
-		window.PongGame.state.ball.speed = event.speed;
+		PongGame.state.ball.y = event.position_y;
+		PongGame.state.ball.x = event.position_x;
+		PongGame.state.ball.speedX = event.speed_x;
+		PongGame.state.ball.speedY = event.speed_y;
+		PongGame.state.ball.speed = event.speed;
     })
     gameSocket.on('connect_error', (error)=> {
         console.log('error', error);
@@ -509,53 +518,53 @@ function initSocket(){
     gameSocket.on('move_up', event => {
         console.log('move_up received', event.player);
         if (event.player !== userInformations.id)
-            window.PongGame.state.paddles.left.speed = -1;
+            PongGame.state.paddles.left.speed = -1;
     })
     gameSocket.on('move_down', event => {
         console.log('move_down received', event.player);
         if (event.player !== userInformations.id)
-            window.PongGame.state.paddles.left.speed = 1;
+            PongGame.state.paddles.left.speed = 1;
     })
     gameSocket.on('stop_moving', event => {
 		console.log('received stop_moving', event.player);
         if (event.player == userInformations.id)
-	        window.PongGame.state.paddles.right.y = event.position;
+	        PongGame.state.paddles.right.y = event.position;
 		else {
-        	window.PongGame.state.paddles.left.speed = 0;
-	        window.PongGame.state.paddles.left.y = event.position;
+        	PongGame.state.paddles.left.speed = 0;
+	        PongGame.state.paddles.left.y = event.position;
     	}
     })
     gameSocket.on('score', event => {
-        window.PongGame.state.ball.speed = 0;
-		// for (paddle in window.PongGame.state.paddles) {
-            // 	window.PongGame.state.paddles[paddle].y = (window.PongGame.config.canvasHeight - window.PongGame.config.paddleHeight) / 2;
+        PongGame.state.ball.speed = 0;
+		// for (paddle in PongGame.state.paddles) {
+            // 	PongGame.state.paddles[paddle].y = (PongGame.config.canvasHeight - PongGame.config.paddleHeight) / 2;
             // }
-            // window.PongGame.animatePaddlesToMiddle()
-            if (window.PongGame.info.myTeam.name == 'A') {
-                window.PongGame.state.playerScore = event.team_a;
-                window.PongGame.state.enemyScore = event.team_b;
+            // PongGame.animatePaddlesToMiddle()
+            if (PongGame.info.myTeam.name == 'A') {
+                PongGame.state.playerScore = event.team_a;
+                PongGame.state.enemyScore = event.team_b;
             }
             else {
-                window.PongGame.state.playerScore = event.team_b;
-                window.PongGame.state.enemyScore = event.team_a;
+                PongGame.state.playerScore = event.team_b;
+                PongGame.state.enemyScore = event.team_a;
             }
-            window.PongGame.drawGame();
+            PongGame.drawGame();
         })
     gameSocket.on('game_over', async event => {
         console.log('game_over received', event);
         gameSocket.close();
-		window.PongGame.handleGameOver(event.reason);
+		PongGame.handleGameOver(event.reason);
         if (typeof fromTournament !== 'undefined' && fromTournament)
             await navigateTo('/tournament');
         else if (typeof fromLobby !== 'undefined' && fromLobby)
             await navigateTo('/lobby', true, true);
         else {
-            document.getElementById('enemyScore').innerText = window.PongGame.state.enemyScore;
+            document.getElementById('enemyScore').innerText = PongGame.state.enemyScore;
             const enemyTeamDetail = document.getElementById('enemyScoreLabel').querySelector('.teamDetail');
-            enemyTeamDetail.innerText = enemyTeamDetail.innerText.replace('{team-id}', window.PongGame.info.enemyTeam.name);
+            enemyTeamDetail.innerText = enemyTeamDetail.innerText.replace('{team-id}', PongGame.info.enemyTeam.name);
             const playerTeamDetail = document.getElementById('playerScoreLabel').querySelector('.teamDetail');
-            playerTeamDetail.innerText = playerTeamDetail.innerText.replace('{team-id}', window.PongGame.info.myTeam.name);
-            document.getElementById('playerScore').innerText = window.PongGame.state.playerScore;
+            playerTeamDetail.innerText = playerTeamDetail.innerText.replace('{team-id}', PongGame.info.myTeam.name);
+            document.getElementById('playerScore').innerText = PongGame.state.playerScore;
             const gameOverModal = new bootstrap.Modal(document.getElementById('gameOverModal'));
             gameOverModal.show();
             document.getElementById('gameOverModal').addEventListener('hidden.bs.modal', async () => {
@@ -586,20 +595,26 @@ async function initGameConstants(){
         .then(response => response.json())
         .then(data => {
             console.log(data);
-            window.PongGame.config.canvasHeight = data.canvas.normal.height;
-            window.PongGame.config.canvasWidth = data.canvas.normal.widht;
-            window.PongGame.config.paddleHeight = data.paddle.normal.height;
-            window.PongGame.config.paddleWidth = data.paddle.normal.widht;
-            window.PongGame.config.maxPaddleSpeed = data.paddle.normal.speed;
-            window.PongGame.state.paddles.left.x = data.paddle.normal.ledgeOffset;
-            window.PongGame.state.paddles.right.x = window.PongGame.config.canvasWidth
+            PongGame.config.canvasHeight = data.canvas.normal.height;
+            PongGame.config.canvasWidth = data.canvas.normal.width;
+            let canvas = document.getElementById('gameCanvas');
+            PongGame.ctx = canvas.getContext("2d");
+            canvas.width = PongGame.config.canvasWidth;
+            canvas.height = PongGame.config.canvasHeight;
+            PongGame.setFont();
+            PongGame.config.paddleHeight = data.paddle.normal.height;
+            PongGame.config.paddleWidth = data.paddle.normal.width;
+            PongGame.config.maxPaddleSpeed = data.paddle.normal.speed;
+            PongGame.state.paddles.left.x = data.paddle.normal.ledgeOffset;
+            PongGame.state.paddles.right.x = PongGame.config.canvasWidth
                                 - data.paddle.normal.ledgeOffset
-                                - window.PongGame.config.paddleWidth;
-            window.PongGame.config.defaultBallSpeed = data.ball.speed;
-            window.PongGame.config.ballSpeedIncrement = data.ball.ballSpeedIncrement;
-            window.PongGame.config.maxBallSpeed = data.ball.maxSpeed;
-            window.PongGame.config.maxBounceAngle = data.ball.maxBounceAngle;
-            window.PongGame.config.winningScore = data.score.max;
+                                - PongGame.config.paddleWidth;
+            PongGame.config.defaultBallSpeed = data.ball.speed;
+            PongGame.config.ballSpeedIncrement = data.ball.speedIncrement;
+            PongGame.config.maxBallSpeed = data.ball.maxSpeed;
+            PongGame.config.maxBounceAngle = data.ball.maxBounceAngle;
+            PongGame.config.winningScore = data.score.max;
+            PongGame.setScoreCoords();
         })
         // .catch(error => {
         //     console.log('caught', error);
@@ -612,16 +627,16 @@ async function initData(data){
     try {
         console.log(data);
 		if (data.teams.a.players.some(player => player.id == userInformations.id)) {
-			window.PongGame.info.myTeam.name = 'A';
-			window.PongGame.info.myTeam.players = data.teams.a;
-			window.PongGame.info.enemyTeam.name = 'B';
-			window.PongGame.info.enemyTeam.players = data.teams.b;
+			PongGame.info.myTeam.name = 'A';
+			PongGame.info.myTeam.players = data.teams.a;
+			PongGame.info.enemyTeam.name = 'B';
+			PongGame.info.enemyTeam.players = data.teams.b;
 		}
 		else if (data.teams.b.players.some(player => player.id == userInformations.id)) {
-			window.PongGame.info.myTeam.name = 'B';
-			window.PongGame.info.myTeam.players = data.teams.b;
-			window.PongGame.info.enemyTeam.name = 'A';
-			window.PongGame.info.enemyTeam.players = data.teams.a;
+			PongGame.info.myTeam.name = 'B';
+			PongGame.info.myTeam.players = data.teams.b;
+			PongGame.info.enemyTeam.name = 'A';
+			PongGame.info.enemyTeam.players = data.teams.a;
 		}
 	}
 	catch(error) {
@@ -632,10 +647,16 @@ async function initData(data){
     document.getElementById('gameArea').classList.replace('d-none', 'd-flex');
     document.getElementById('opponentWait').style.display = "none";
 	initSocket();
+    setTimeout(async () => {
+        if (!cancelTimeout){
+            displayMainAlert('Error', 'Server took too long to accept connection.');
+            history.go(-1);
+        }
+    }, GAME_CONNECTION_TIMEOUT);
 }
 
 document.getElementById('confirmModal').addEventListener('hidden.bs.modal', () => {
-    window.PongGame.resumeGame();
+    PongGame.resumeGame();
 })
 
 function checkGameAuthorization(){

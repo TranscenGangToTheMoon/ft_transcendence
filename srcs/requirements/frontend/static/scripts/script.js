@@ -4,6 +4,7 @@ const MAX_DISPLAYED_NOTIFICATIONS = 3;
 const MAX_DISPLAYED_FRIENDS = 12;
 const MAX_DISPLAYED_FRIEND_REQUESTS = 5;
 const MAX_DISPLAYED_BLOCKED_USERS = 10;
+const GAME_CONNECTION_TIMEOUT = 5000;
 const DEBOUNCE_TIME = 100;
 const eventTimestamps = new Map();
 const baseAPIUrl = "/api"

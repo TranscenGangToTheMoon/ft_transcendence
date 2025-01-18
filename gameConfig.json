@@ -30,7 +30,8 @@
         "speed":240,
         "speedIncrement":30,
         "maxSpeed":1500,
-        "maxBounceAngle":1.2566370614359172
+        "maxBounceAngle": "don't go over pi/2",
+        "maxBounceAngle": 1.2566370614359172
     },
     "score": {
         "max":3
