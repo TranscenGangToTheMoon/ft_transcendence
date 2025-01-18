@@ -25,7 +25,7 @@ window.pathName = pathName;
 // ========================== API REQUESTS ==========================
 
 async function apiRequest(token, endpoint, method="GET", authType="Bearer",
-    contentType="application/json", body=undefined, currentlyRefreshing=false){
+    contentType="application/json", body=undefined, currentlyRefreshing=false, nav=false){
     let options = {
         method: method,
         headers: {
@@ -58,11 +58,20 @@ async function apiRequest(token, endpoint, method="GET", authType="Bearer",
             }
             return data;
         })
-        .catch(error =>{
+        .catch(async error =>{
             if (error.message === 'relog')
                 return apiRequest(getAccessToken(), endpoint, method, authType, contentType, body);
             if (error.code === 500 || error.message === 'Failed to fetch')
                 document.getElementById('container').innerText = `alala pas bien ${error.code? `: ${error.code}` : ''} (jcrois c'est pas bon)`;
+            if (error.code === 502){
+                pathName = '/502';
+                if (nav)
+                    await navigateTo('/502', true, true);
+                else{
+                    history.replaceState({}, '', '/502');
+                    handleRoute();
+                }
+            }
             throw error;
         })
 }
@@ -259,6 +268,7 @@ async function handleRoute() {
         path = "/" + path.split("/")[1];
     const routes = {
         '/': '/homePage.html',
+        '/502' : '/502.html',
         '/profile' : 'profile.html',
         '/lobby' : '/lobby.html',
 
@@ -377,6 +387,7 @@ window.addEventListener('popstate', async event => {
 })
 
 async function quitLobbies(oldUrl, newUrl){
+    if (oldUrl === '/502') return;
     if (oldUrl.includes('/lobby')){
         try {
             await apiRequest(getAccessToken(), `${baseAPIUrl}/play${oldUrl}/`, 'DELETE');
