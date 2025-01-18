@@ -7,6 +7,10 @@
         "clash": {
             "width":1800,
             "height":750
+        },
+        "local" : {
+            "width":1500,
+            "height":750
         }
     },
     "paddle": {
@@ -20,6 +24,13 @@
         "clash":{
             "width":30,
             "height":100,
+            "speed":500,
+            "ledgeOffset":100,
+            "paddleOffset":200
+        },
+        "local":{
+            "width":30,
+            "height":200,
             "speed":500,
             "ledgeOffset":100,
             "paddleOffset":200
