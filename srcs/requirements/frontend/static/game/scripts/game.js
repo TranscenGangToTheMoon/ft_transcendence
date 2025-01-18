@@ -123,7 +123,7 @@
         state.isGameActive = true;
         state.cancelAnimation = false;
         // console.log('game started');
-		state.isCountDownActive = false;a
+		state.isCountDownActive = false;
 		state.lastFrame = 0;
 		// state.ball.speedX = config.defaultBallSpeed;
 		// state.ball.speedY = config.defaultBallSpeed;
@@ -648,8 +648,8 @@ async function initData(data){
     document.getElementById('opponentWait').style.display = "none";
 	initSocket();
     setTimeout(async () => {
-        if (!cancelTimeout){
-            displayMainAlert('Error', 'Server took too long to accept connection.');
+        if (!cancelTimeout && !isModalOpen()){
+            displayMainAlert('Error', 'Unable to establish connection with socket server');
             history.go(-1);
         }
     }, GAME_CONNECTION_TIMEOUT);

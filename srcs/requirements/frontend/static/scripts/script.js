@@ -4,7 +4,7 @@ const MAX_DISPLAYED_NOTIFICATIONS = 3;
 const MAX_DISPLAYED_FRIENDS = 12;
 const MAX_DISPLAYED_FRIEND_REQUESTS = 5;
 const MAX_DISPLAYED_BLOCKED_USERS = 10;
-const GAME_CONNECTION_TIMEOUT = 5000;
+const GAME_CONNECTION_TIMEOUT = 5500; // min 5500
 const DEBOUNCE_TIME = 100;
 const eventTimestamps = new Map();
 const baseAPIUrl = "/api"
@@ -290,10 +290,16 @@ function getCurrentState(){
     return localStorage.getItem('currentState');
 }
 
+function _cancelTimeout(){
+    if (typeof cancelTimeout !== 'undefined')
+        cancelTimeout = true;
+}
+
 async function navigateTo(url, doNavigate=true, dontQuit=false){
     let currentState = getCurrentState();
     lastState = currentState;
     // if (doNavigate){
+    _cancelTimeout();
     if (!dontQuit){
         await handleSSEListenerRemoval(url);
         await quitLobbies(window.location.pathname, url);
@@ -358,6 +364,7 @@ window.addEventListener('popstate', async event => {
     console.log(pathName, window.location.pathname);
     if (pathName === '/game')
         return cancelNavigation(event, undefined);
+    _cancelTimeout();
     await quitLobbies(pathName, window.location.pathname);
     await closeGameConnection(pathName);
     pathName = window.location.pathname;
