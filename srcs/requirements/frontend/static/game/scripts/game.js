@@ -679,7 +679,6 @@ async function gameStart(event){
     catch (error){
         wrongConfigFileError(error);
     }
-
 }
 
 function forPhoneChanges(){
