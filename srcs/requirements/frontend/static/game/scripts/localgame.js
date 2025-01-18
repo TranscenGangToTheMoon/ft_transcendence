@@ -26,15 +26,18 @@
         }
     };
 
-    config.enemyScore = {
-        y : config.canvasHeight / 2,
-        x : config.canvasWidth / 4
+    function setScoreCoords(){
+        config.enemyScore = {
+            y : config.canvasHeight / 2,
+            x : config.canvasWidth / 4
+        }
+    
+        config.playerScore = {
+            y : config.enemyScore.y,
+            x : config.canvasWidth - config.enemyScore.x
+        } 
     }
-
-    config.playerScore = {
-        y : config.enemyScore.y,
-        x : config.enemyScore.x * 3
-    }
+    setScoreCoords();
 
     const state = {
         isGameActive: false,
@@ -78,10 +81,13 @@
     const ballImage = new Image();
     ballImage.src = "/assets/ball.png";
 
-    ctx.font = config.font;
-    ctx.fillStyle = config.fontColor;
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
+    function setFont(){
+        ctx.font = config.font;
+        ctx.fillStyle = config.fontColor;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+    }
+    setFont();
     state.keys[' '] = false;
 
     document.addEventListener("keydown", (e) => {
@@ -443,12 +449,32 @@
         }
     }
     
-    window.PongGame = {startGame, stopGame, pauseGame, resumeGame, config, resetGame, state};
+    window.PongGame = {startGame, stopGame, pauseGame, resumeGame, config, resetGame, state, setScoreCoords, setFont};
 })();
 
 document.getElementById('confirmModal').addEventListener('hidden.bs.modal', () => {
     window.PongGame.resumeGame();
 })
+
+async function initGameConstants(){
+    await fetch('/gameConfig.json')
+        .then(response => response.json())
+        .then(data => {
+            console.log(data);
+            PongGame.config.canvasHeight = data.canvas.local.height;
+            PongGame.config.canvasWidth = data.canvas.local.width;
+            let canvas = document.getElementById('gameCanvas');
+            PongGame.ctx = canvas.getContext("2d");
+            canvas.width = PongGame.config.canvasWidth;
+            canvas.height = PongGame.config.canvasHeight;
+            PongGame.setFont();
+            PongGame.config.paddleHeight = data.paddle.local.height;
+            PongGame.config.paddleWidth = data.paddle.local.width;
+            PongGame.config.maxBounceAngle = data.ball.maxBounceAngle;
+            PongGame.config.winningScore = data.score.max;
+            PongGame.setScoreCoords();
+        })
+}
 
 function setGameMode(){
 	const options = document.querySelectorAll('.option');
@@ -562,6 +588,12 @@ function forPhoneChanges(){
 
 async function initGame(){
     await indexInit(false);
+    try {
+        initGameConstants();
+    }
+    catch (error){
+        return displayMainAlert('Error', 'Erroneous game config file.\n');
+    }
     if (window.matchMedia("(hover: none) and (pointer: coarse)").matches)
         forPhoneChanges();
     window.PongGame.startGame();
