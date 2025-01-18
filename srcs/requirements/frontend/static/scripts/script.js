@@ -809,12 +809,17 @@ async function fetchUserInfos(forced=false) {
     }
 }
 
+function isModalOpen() {
+    return (
+        document.querySelector('.modal.show') !== null ||
+        document.querySelector('.modal[style*="display: block"]') !== null ||
+        document.querySelector('.modal.fade.in') !== null ||
+        document.querySelector('.modal-backdrop') !== null
+    );
+}
+
 function displayMainAlert(alertTitle, alertContent) {
-    const modalElement = document.getElementById('alertModal');
-    
-    if (modalElement.classList.contains('show')) {
-        return;
-    }
+    if (isModalOpen()) return;
     const alertContentDiv = document.getElementById('alertContent');
     const alertTitleDiv = document.getElementById('alertModalLabel');
     const alertModal = new bootstrap.Modal(document.getElementById('alertModal'));
