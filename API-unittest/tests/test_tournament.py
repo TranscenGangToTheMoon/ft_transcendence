@@ -720,6 +720,173 @@ class Test10_FinishTournament(UnitTest):
 
         self.assertThread(user1, user2, user3, user4, user5, user6, user7, user8)
 
+    def test_003_finish_16_seeding(self):
+        user1 = self.user([tj] * 13 + [tsa, tj, tj, ts, gs] + [tmf] * 8 + [gs] + [tmf] * 4 + [gs, tmf, tmf, gs, tmf, tf])
+        user2 = self.user([tj] * 12 + [tsa, tj, tj, ts, gs] + [tmf] * 8 + [gs] + [tmf] * 4 + [gs, tmf, tmf, gs, tmf, tf])
+        user3 = self.user([tj] * 11 + [tsa, tj, tj, ts, gs] + [tmf] * 8 + [gs] + [tmf] * 4 + [gs, tmf, tmf])
+        user4 = self.user([tj] * 10 + [tsa, tj, tj, ts, gs] + [tmf] * 8 + [gs] + [tmf] * 4 + [gs, tmf, tmf])
+        user5 = self.user([tj] * 9 + [tsa, tj, tj, ts, gs] + [tmf] * 8 + [gs] + [tmf] * 4)
+        user6 = self.user([tj] * 8 + [tsa, tj, tj, ts, gs] + [tmf] * 8 + [gs] + [tmf] * 4)
+        user7 = self.user([tj] * 7 + [tsa, tj, tj, ts, gs] + [tmf] * 8 + [gs] + [tmf] * 4)
+        user8 = self.user([tj] * 6 + [tsa, tj, tj, ts, gs] + [tmf] * 8)
+        user9 = self.user([tj] * 5 + [tsa, tj, tj, ts, gs] + [tmf] * 8 + [gs] + [tmf] * 4)
+        user10 = self.user([tj] * 4 + [tsa, tj, tj, ts, gs] + [tmf] * 8)
+        user11 = self.user([tj] * 3 + [tsa, tj, tj, ts, gs] + [tmf] * 8)
+        user12 = self.user([tj] * 2 + [tsa, tj, tj, ts, gs] + [tmf] * 8)
+        user13 = self.user([tj] * 1 + [tsa, tj, tj, ts, gs] + [tmf] * 8)
+        user14 = self.user([tsa, tj, tj, ts, gs] + [tmf] * 8)
+        user15 = self.user([tj, ts, gs] + [tmf] * 8)
+        user16 = self.user([ts, gs] + [tmf] * 8)
+
+        self.assertResponse(set_trophies(user1, 4000), 201)
+        self.assertResponse(set_trophies(user2, 3750), 201)
+        self.assertResponse(set_trophies(user3, 3500), 201)
+        self.assertResponse(set_trophies(user4, 3250), 201)
+        self.assertResponse(set_trophies(user5, 3000), 201)
+        self.assertResponse(set_trophies(user6, 2750), 201)
+        self.assertResponse(set_trophies(user7, 2500), 201)
+        self.assertResponse(set_trophies(user8, 2250), 201)
+        self.assertResponse(set_trophies(user9, 2000), 201)
+        self.assertResponse(set_trophies(user10, 1750), 201)
+        self.assertResponse(set_trophies(user11, 1500), 201)
+        self.assertResponse(set_trophies(user12, 1250), 201)
+        self.assertResponse(set_trophies(user13, 1000), 201)
+        self.assertResponse(set_trophies(user14, 750), 201)
+        self.assertResponse(set_trophies(user15, 500), 201)
+
+        code = self.assertResponse(create_tournament(user1, size=16), 201, get_field='code')
+        self.assertResponse(join_tournament(user2, code), 201)
+        self.assertResponse(join_tournament(user3, code), 201)
+        self.assertResponse(join_tournament(user4, code), 201)
+        self.assertResponse(join_tournament(user5, code), 201)
+        self.assertResponse(join_tournament(user6, code), 201)
+        self.assertResponse(join_tournament(user7, code), 201)
+        self.assertResponse(join_tournament(user8, code), 201)
+        self.assertResponse(join_tournament(user9, code), 201)
+        self.assertResponse(join_tournament(user10, code), 201)
+        self.assertResponse(join_tournament(user11, code), 201)
+        self.assertResponse(join_tournament(user12, code), 201)
+        self.assertResponse(join_tournament(user13, code), 201)
+        self.assertResponse(join_tournament(user14, code), 201)
+        self.assertResponse(join_tournament(user15, code), 201)
+        self.assertResponse(join_tournament(user16, code), 201)
+
+        time.sleep(5)
+
+# -------------------------------------------------- HUITIEME -------------------------------------------------- #
+
+        # -------- Match 1: 1 vs 16 ------------------------------------- #
+        self.assertResponse(score(user1['id']), 200)
+        self.assertResponse(score(user1['id']), 200)
+        self.assertResponse(score(user1['id']), 200)
+
+        # -------- Match 2: 2 vs 15 ------------------------------------- #
+        self.assertResponse(score(user2['id']), 200)
+        self.assertResponse(score(user2['id']), 200)
+        self.assertResponse(score(user2['id']), 200)
+
+        # -------- Match 3: 3 vs 14 ------------------------------------- #
+        self.assertResponse(score(user3['id']), 200)
+        self.assertResponse(score(user3['id']), 200)
+        self.assertResponse(score(user3['id']), 200)
+
+        # -------- Match 4: 4 vs 13 ------------------------------------- #
+        self.assertResponse(score(user4['id']), 200)
+        self.assertResponse(score(user4['id']), 200)
+        self.assertResponse(score(user4['id']), 200)
+
+        # -------- Match 5: 5 vs 12 ------------------------------------- #
+        self.assertResponse(score(user12['id']), 200)
+        self.assertResponse(score(user5['id']), 200)
+        self.assertResponse(score(user12['id']), 200)
+        self.assertResponse(score(user5['id']), 200)
+        self.assertResponse(score(user5['id']), 200)
+
+        # -------- Match 6: 6 vs 11 ------------------------------------- #
+        self.assertResponse(score(user11['id']), 200)
+        self.assertResponse(score(user6['id']), 200)
+        self.assertResponse(score(user11['id']), 200)
+        self.assertResponse(score(user6['id']), 200)
+        self.assertResponse(score(user6['id']), 200)
+
+        # -------- Match 7: 7 vs 10 ------------------------------------- #
+        self.assertResponse(score(user10['id']), 200)
+        self.assertResponse(score(user7['id']), 200)
+        self.assertResponse(score(user7['id']), 200)
+        self.assertResponse(score(user7['id']), 200)
+
+        # -------- Match 8: 8 vs 9 ------------------------------------- #
+        self.assertResponse(score(user8['id']), 200)
+        self.assertResponse(score(user9['id']), 200)
+        self.assertResponse(score(user9['id']), 200)
+        self.assertResponse(score(user9['id']), 200)
+
+
+# -------------------------------------------------- QUART --------------------------------------------------- #
+        self.assertResponse(join_tournament(user8, code, method='DELETE'), 204)
+        self.assertResponse(join_tournament(user10, code, method='DELETE'), 204)
+        self.assertResponse(join_tournament(user11, code, method='DELETE'), 204)
+        self.assertResponse(join_tournament(user12, code, method='DELETE'), 204)
+        self.assertResponse(join_tournament(user13, code, method='DELETE'), 204)
+        self.assertResponse(join_tournament(user14, code, method='DELETE'), 204)
+        self.assertResponse(join_tournament(user15, code, method='DELETE'), 204)
+        self.assertResponse(join_tournament(user16, code, method='DELETE'), 204)
+        time.sleep(5)
+
+        # -------- Match 9: 1 vs 9 ------------------------------------- #
+        self.assertResponse(score(user1['id']), 200)
+        self.assertResponse(score(user1['id']), 200)
+        self.assertResponse(score(user1['id']), 200)
+
+        # -------- Match 10: 4 vs 5 ------------------------------------- #
+        self.assertResponse(score(user4['id']), 200)
+        self.assertResponse(score(user4['id']), 200)
+        self.assertResponse(score(user5['id']), 200)
+        self.assertResponse(score(user4['id']), 200)
+
+        # -------- Match 11: 2 vs 7 ------------------------------------- #
+        self.assertResponse(score(user2['id']), 200)
+        self.assertResponse(score(user2['id']), 200)
+        self.assertResponse(score(user2['id']), 200)
+
+        # -------- Match 12: 3 vs 6 ------------------------------------- #
+        self.assertResponse(score(user3['id']), 200)
+        self.assertResponse(score(user3['id']), 200)
+        self.assertResponse(score(user6['id']), 200)
+        self.assertResponse(score(user3['id']), 200)
+
+# -------------------------------------------------- SEMI --------------------------------------------------- #
+        self.assertResponse(join_tournament(user5, code, method='DELETE'), 204)
+        self.assertResponse(join_tournament(user6, code, method='DELETE'), 204)
+        self.assertResponse(join_tournament(user7, code, method='DELETE'), 204)
+        self.assertResponse(join_tournament(user9, code, method='DELETE'), 204)
+        time.sleep(5)
+
+        # -------- Match 13: 1 vs 4 ------------------------------------- #
+        self.assertResponse(score(user1['id']), 200)
+        self.assertResponse(score(user4['id']), 200)
+        self.assertResponse(score(user1['id']), 200)
+        self.assertResponse(score(user1['id']), 200)
+
+        # -------- Match 14: 2 vs 3 ------------------------------------- #
+        self.assertResponse(score(user3['id']), 200)
+        self.assertResponse(score(user2['id']), 200)
+        self.assertResponse(score(user2['id']), 200)
+        self.assertResponse(score(user3['id']), 200)
+        self.assertResponse(score(user2['id']), 200)
+
+# -------------------------------------------------- FINAL --------------------------------------------------- #
+        self.assertResponse(join_tournament(user3, code, method='DELETE'), 204)
+        self.assertResponse(join_tournament(user4, code, method='DELETE'), 204)
+        time.sleep(5)
+
+        # -------- Match 15: 1 vs 2 ------------------------------------- #
+        self.assertResponse(score(user1['id']), 200)
+        self.assertResponse(score(user1['id']), 200)
+        self.assertResponse(score(user1['id']), 200)
+
+        self.assertThread(user1, user2, user3, user4, user5, user6, user7, user8, user9, user10, user11, user12, user13, user14, user15, user16)
+
     def test_003_finish_7_seeding(self):
         user1 = self.user([tj, tj, tj, tj, tj, tj, tsa, ts, tmf, tmf, tmf, tmf, gs, tmf, tmf, gs, tmf, tf])
         user2 = self.user([tj, tj, tj, tj, tj, tsa, ts, tmf, gs, tmf, tmf, tmf, gs, tmf, tmf, tmf, tf])
