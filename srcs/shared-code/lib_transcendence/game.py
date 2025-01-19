@@ -36,11 +36,12 @@ class GameMode:
 
 
 class FinishReason:
-    NORMAL_END = 'The game is over' # todo error
-    PLAYER_DISCONNECT = 'A player has disconnected'
-    PLAYER_NOT_CONNECTED = 'Not all players are connected'
-    PLAYERS_TIMEOUT = 'Players have timed out'
+    NORMAL_END = 'normal-end'
+    PLAYER_DISCONNECT = 'player-disconnect'
+    PLAYER_NOT_CONNECTED = 'player-not-connected'
+    PLAYERS_TIMEOUT = 'Players-timeout'
     GAME_NOT_PLAYED = 'game-not-played'
+    NO_GAME = 'no-game'
 
     @staticmethod
     def validate(mode):

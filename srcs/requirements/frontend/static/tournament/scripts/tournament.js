@@ -324,6 +324,10 @@ async function tournamentMatchFinished(event){
 	event = JSON.parse(event.data);
 	console.log('received match finished event');
 	console.log(event);
+	tournament = event.data;
+	setBanOption();
+	loadTournament(tournament);
+	return;
 	try {
 		let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/play/tournament/`);
 		tournament = data;
@@ -335,6 +339,14 @@ async function tournamentMatchFinished(event){
 			document.getElementById('bracket').innerHTML = '';
 		console.log(error);
 	}
+}
+
+async function tournamentFinished(event){
+	event = JSON.parse(event.data);
+	console.log('received tournament-finish');
+	console.log(event);
+	await navigateTo('/', true, true); //todo replace by tournament history
+	displayNotification(undefined, 'tournament finished', event.message, undefined, undefined); //todo add target 
 }
 
 function addTournamentSSEListeners(){
@@ -376,6 +388,11 @@ function addTournamentSSEListeners(){
 	if (!SSEListeners.has('tournament-match-finish')){
 		SSEListeners.set('tournament-match-finish', tournamentMatchFinished);
         sse.addEventListener('tournament-match-finish', tournamentMatchFinished);
+	}
+
+	if (!SSEListeners.has('tournament-finish')){
+		SSEListeners.set('tournament-finish', tournamentFinished);
+        sse.addEventListener('tournament-finish', tournamentFinished);
 	}
 }
 
@@ -544,7 +561,7 @@ async function initTournament(){
 	catch(error) {
 		if (error.code === 404 && tournamentCode){
 			if (!await joinTournament(tournamentCode))
-				navigateTo('/');
+				await navigateTo('/tournament', true, true);
 		}
 		console.log(error);
 	}
