@@ -169,7 +169,7 @@
         // for (racket in state.paddles) {
         // 	racket.y = (config.canvasHeight + config.paddleHeight) / 2
         // }
-        ctx.clearRect(0, 0, config.canvasWidth, config.canvasHeight);
+        // ctx.clearRect(0, 0, config.canvasWidth, config.canvasHeight);
         animatePaddlesToMiddle();
         function step() {
             state.countDown.currentStep--;
@@ -211,7 +211,9 @@
 
             const easeOutProgress = 1 - Math.pow(1 - progress, 3);
 
+            console.log(startPositions);
             for (let i in startPositions){
+                console.log('paddle_id', i);
                 state.paddles[i].y = startPositions[i] + (target - startPositions[i]) * easeOutProgress;
             }
             // state.paddles.left.y = startLeft + (target - startLeft) * easeOutProgress;
@@ -232,7 +234,7 @@
         for (paddle in state.paddles){
             paddle = state.paddles[paddle];
             ctx.clearRect(paddle.x, 0, config.paddleWidth, config.canvasHeight);
-            ctx.drawImage(paddle.x, paddle.y, config.paddleWidth, config.paddleHeight);
+            ctx.drawImage(paddleImage, paddle.x, paddle.y, config.paddleWidth, config.paddleHeight);
         }
     }
 
@@ -525,10 +527,13 @@ function initSocket(){
       	}
     })
     gameSocket.on('game_over', async event => {
+        gameSocket.close();
         console.log('game_over received', event);
 		window.PongGame.handleGameOver(event.reason);
-        if (fromLobby)
+        if (fromLobby){
+            userInformations.lobbyData = undefined;
             await navigateTo('/lobby', true, true);
+        }
     })
 }
 
@@ -629,6 +634,16 @@ async function initGame(){
     if (window.location.pathname === '/') return;
     try {
         checkGameAuthorization();
+        if (userInformations.lobbyData){
+            try {
+                await initData(userInformations.lobbyData);
+                document.getElementById('gameArea').style.display = 'block';
+                document.getElementById('opponentWait').style.display = 'none';
+            }
+            catch (error){
+                wrongConfigFileError(error);
+            }
+        }
         // await initData(userInformations.lobbyData);
     }
     catch (unauthorized){

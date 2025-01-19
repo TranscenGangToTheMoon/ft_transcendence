@@ -490,21 +490,26 @@ function initSocket(){
       auth : {
           "id": userInformations.id,
           "token": token,
-      },
+        },
 	});
     window.gameSocket = gameSocket;
-    // console.log(socket)
 	gameSocket.on('connect', () => {
         cancelTimeout = true;
         console.log('Connected to socketIO server!');
     });
-    gameSocket.on('disconnect', () => {
+    gameSocket.on('connect_error', (error)=> {
+        // console.log('error', error);
+    })
+    gameSocket.on('disconnect', async () => {
         gameSocket.close();
         gameSocket = undefined;
         console.log('disconnected from gameSocket');
+        if (fromTournament)
+            await navigateTo('/tournament', true, true);
+        if (fromLobby)
+            await navigateTo('/lobby', true, true);
     })
     gameSocket.on('start_game', event => {
-        // console.log('received start_game');
         if (!PongGame.state.isGameActive)
             PongGame.startGame();
     })
@@ -519,9 +524,6 @@ function initSocket(){
 		PongGame.state.ball.speedX = event.speed_x;
 		PongGame.state.ball.speedY = event.speed_y;
 		PongGame.state.ball.speed = event.speed;
-    })
-    gameSocket.on('connect_error', (error)=> {
-        console.log('error', error);
     })
     gameSocket.on('move_up', event => {
         console.log('move_up received', event.player);

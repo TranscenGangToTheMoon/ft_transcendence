@@ -430,7 +430,7 @@ async function fillPlayerList(noTeam=false){
             this.innerText = isReady ? 'Ready' : 'Not Ready';
             if (everybodyIsReady()){
                 fromLobby = true;
-                await navigateTo(`/game/${matchType}`);
+                await navigateTo(`/game/${matchType}`, true, true);
             }
         }
         catch (error) {
@@ -485,7 +485,7 @@ async function participantUpdated(event){
                 lobby.participants[participant].is_ready = data.is_ready;
                 if (everybodyIsReady()){
                     fromLobby = true;
-                    return await navigateTo(`/game/${matchType}`);
+                    return await navigateTo(`/game/${matchType}`, true, true);
                 }
             }
             if (data.creator !== undefined){

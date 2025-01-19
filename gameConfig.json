@@ -38,8 +38,8 @@
     },
     "ball": {
         "size":20,
-        "speed":240,
-        "speedIncrement":30,
+        "speed":350,
+        "speedIncrement":60,
         "maxSpeed":1500,
         "maxBounceAngle": "don't go over pi/2",
         "maxBounceAngle": 1.2566370614359172
