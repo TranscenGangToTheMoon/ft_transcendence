@@ -113,9 +113,13 @@ class Game:
         if ball_pos_y <= 0:
             self.ball.position.y = - ball_pos_y
             self.ball.speed_y = - self.ball.speed_y
+            self.send_game_state()
+            self.sending = -1
         elif ball_pos_y + self.ball.size >= self.canvas.y:
             self.ball.position.y -= (ball_pos_y + self.ball.size) - self.canvas.y
             self.ball.speed_y = - self.ball.speed_y
+            self.send_game_state()
+            self.sending = -1
 
     def handle_goal(self):
         if self.ball.position.x + self.ball.size < 0:
@@ -140,7 +144,7 @@ class Game:
     def handle_racket_bounce(self, racket):
         if (racket.block_glide):
             self.ball.speed_y = -self.ball.speed_y
-            if (abs(self.ball.position.y - racket.position.y + racket.height) <
+            if (abs(self.ball.position.y - (racket.position.y + racket.height)) <
                 abs(self.ball.position.y - racket.position.y)):
                 self.ball.position.y = racket.position.y + racket.height
             else:
@@ -149,6 +153,8 @@ class Game:
             self.ball.speed_x = -self.ball.speed_x
             self.ball.increment_speed(self.max_ball_speed, self.speed_increment)
             self.calculateNewBallDirection(racket.position.y, racket.height)
+        self.send_game_state()
+        self.sending = -1
 
     @staticmethod
     def is_in_team(player_id, team):
@@ -188,18 +194,16 @@ class Game:
             self.last_update = time.perf_counter()
         time_delta = time.perf_counter() - self.last_update
         self.last_update = time.perf_counter()
-        for racket in self.rackets:
-            racket.update(self.ball.size, self.canvas.y, time_delta)
         self.ball.position.x += self.ball.speed_x * time_delta
         self.ball.position.y += self.ball.speed_y * time_delta
+        for racket in self.rackets:
+            racket.update(self.ball.size, self.canvas.y, time_delta)
         self.handle_wall_bounce()
         for racket in self.rackets:
             self.handle_racket_collision(racket)
-        if self.sending == 0:
+        if self.sending <= 10:
             self.send_game_state()
-            self.sending = 1
-        else:
-            self.sending = 0
+            self.sending += 1
         self.handle_goal()
 
 ################--------game events handling--------################

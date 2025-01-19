@@ -1,4 +1,3 @@
-import json
 import time
 import unittest
 
@@ -646,7 +645,7 @@ class Test10_FinishTournament(UnitTest):
 
         self.assertThread(user1, user2, user3, user4)
 
-    def test_002_finish_8_seeding(self): # todo fix
+    def test_002_finish_8_seeding(self):
         user1 = self.user([tj, tj, tj, tj, tj, tj, tsa, tj, ts, gs, tmf, tmf, tmf, tmf, gs, tmf, tmf, gs, tmf, tf])
         user2 = self.user([tj, tj, tj, tj, tj, tsa, tj, ts, gs, tmf, tmf, tmf, tmf, gs, tmf, tmf, tmf, tf])
         user3 = self.user([tj, tj, tj, tj, tsa, tj, ts, gs, tmf, tmf, tmf, tmf, gs, tmf, tmf, gs, tmf, tf])
@@ -654,7 +653,7 @@ class Test10_FinishTournament(UnitTest):
         user5 = self.user([tj, tj, tsa, tj, ts, gs, tmf, tmf, tmf, tmf, gs, tmf, tmf, tmf, tf])
         user6 = self.user([tj, tsa, tj, ts, gs, tmf, tmf, tmf, tmf, tmf, tmf, tmf, tf])
         user7 = self.user([tsa, tj, ts, gs, tmf, tmf, tmf, tmf, tmf, tmf, tmf, tf])
-        user8 = self.user([gs, tmf, tmf, tmf, tmf, tmf, tmf, tmf, tf])
+        user8 = self.user([ts, gs, tmf, tmf, tmf, tmf, tmf, tmf, tmf, tf])
 
         self.assertResponse(set_trophies(user1, 500), 201)
         self.assertResponse(set_trophies(user2, 400), 201)
@@ -672,6 +671,7 @@ class Test10_FinishTournament(UnitTest):
         self.assertResponse(join_tournament(user5, code), 201)
         self.assertResponse(join_tournament(user6, code), 201)
         self.assertResponse(join_tournament(user7, code), 201)
+        time.sleep(5)
         self.assertResponse(join_tournament(user8, code), 201)
 
         time.sleep(5)
@@ -685,9 +685,6 @@ class Test10_FinishTournament(UnitTest):
         self.assertResponse(score(user2['id']), 200)
         self.assertResponse(score(user2['id']), 200)
 
-        response = self.assertResponse(create_tournament(user6, method='GET'), 200)
-        json.dump(response, open('test.json', 'w'), indent=4)
-
         self.assertResponse(score(user6['id']), 200)
         self.assertResponse(score(user3['id']), 200)
         self.assertResponse(score(user6['id']), 200)
@@ -700,23 +697,20 @@ class Test10_FinishTournament(UnitTest):
         self.assertResponse(score(user5['id']), 200)
         self.assertResponse(score(user5['id']), 200)
 
-        time.sleep(2)
+        time.sleep(5)
 
         self.assertResponse(score(user5['id']), 200)
         self.assertResponse(score(user1['id']), 200)
         self.assertResponse(score(user1['id']), 200)
         self.assertResponse(score(user5['id']), 200)
         self.assertResponse(score(user1['id']), 200)
-
-        response = self.assertResponse(create_tournament(user6, method='GET'), 200)
-        json.dump(response, open('test2.json', 'w'), indent=4)
 
         self.assertResponse(score(user3['id']), 200)
         self.assertResponse(score(user3['id']), 200)
         self.assertResponse(score(user2['id']), 200)
         self.assertResponse(score(user3['id']), 200)
 
-        time.sleep(2)
+        time.sleep(5)
 
         self.assertResponse(score(user1['id']), 200)
         self.assertResponse(score(user3['id']), 200)
@@ -726,7 +720,7 @@ class Test10_FinishTournament(UnitTest):
 
         self.assertThread(user1, user2, user3, user4, user5, user6, user7, user8)
 
-    def test_003_finish_7_seeding(self): # todo fix
+    def test_003_finish_7_seeding(self):
         user1 = self.user([tj, tj, tj, tj, tj, tj, tsa, ts, tmf, tmf, tmf, tmf, gs, tmf, tmf, gs, tmf, tf])
         user2 = self.user([tj, tj, tj, tj, tj, tsa, ts, tmf, gs, tmf, tmf, tmf, gs, tmf, tmf, tmf, tf])
         user3 = self.user([tj, tj, tj, tj, tsa, ts, tmf, gs, tmf, tmf, tmf, gs, tmf, tmf, gs, tmf, tf])
@@ -770,7 +764,7 @@ class Test10_FinishTournament(UnitTest):
         self.assertResponse(score(user5['id']), 200)
         self.assertResponse(score(user5['id']), 200)
 
-        time.sleep(2)
+        time.sleep(5)
 
         self.assertResponse(score(user5['id']), 200)
         self.assertResponse(score(user1['id']), 200)
@@ -783,7 +777,7 @@ class Test10_FinishTournament(UnitTest):
         self.assertResponse(score(user2['id']), 200)
         self.assertResponse(score(user3['id']), 200)
 
-        time.sleep(2)
+        time.sleep(5)
 
         self.assertResponse(score(user1['id']), 200)
         self.assertResponse(score(user3['id']), 200)

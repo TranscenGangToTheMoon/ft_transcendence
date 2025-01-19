@@ -49,8 +49,9 @@ async def connect(sid, environ, auth):
     if not Server.does_game_exist(game_id):
         match = Match(game_data)
         Server.create_game(match)
-        # TODO -> request game to say the first player is connected
     player = Server.get_player(id)
+    if player.socket_id != '':
+        return False
     print(f"player = {player}")
     print(f"sid = {sid}", flush=True)
     player.socket_id = sid
