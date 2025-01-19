@@ -75,6 +75,10 @@ class Game:
             self.speed_increment = config['ball']['speedIncrement']
             self.ledge_offset = config['paddle'][self.match.game_type]['ledgeOffset']
             self.racket_to_racket_offset = config['paddle'][self.match.game_type]['paddleOffset']
+        self.base_tick_rate = 60
+        self.safe_zone_tick_rate = 15
+        self.tick_rate = self.base_tick_rate
+        self.safe_zone = (self.canvas.x / 2) - (self.ledge_offset + (3 * self.racket_width))
         self.finished = False
         self.ball = self.create_ball(self.canvas)
         self.rackets = self.create_rackets(self.match, self.canvas, self.racket_height, self.racket_width, self.ledge_offset, self.racket_to_racket_offset)
@@ -230,8 +234,12 @@ class Game:
         self.send_start_game()
         while not self.finished:
             self.update()
+            if self.match.game_type == 'clash' and abs(self.ball.position.x - self.canvas.x) < self.safe_zone:
+                self.tick_rate = self.safe_zone_tick_rate
+            else:
+                self.tick_rate = self.base_tick_rate
             elapsed_time = time.perf_counter() - last_frame_time
-            time_to_wait = (1 / 60) - elapsed_time
+            time_to_wait = (1 / self.tick_rate) - elapsed_time
             if time_to_wait > 0:
                 time.sleep(time_to_wait)
             last_frame_time = time.perf_counter()
