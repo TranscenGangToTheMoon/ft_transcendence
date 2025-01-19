@@ -75,8 +75,8 @@ class Game:
             self.speed_increment = config['ball']['speedIncrement']
             self.ledge_offset = config['paddle'][self.match.game_type]['ledgeOffset']
             self.racket_to_racket_offset = config['paddle'][self.match.game_type]['paddleOffset']
-        self.base_tick_rate = 60
-        self.safe_zone_tick_rate = 15
+            self.base_tick_rate = config['server']['tickRate']['base']
+            self.safe_zone_tick_rate = config['server']['tickRate']['safe']
         self.tick_rate = self.base_tick_rate
         self.safe_zone = (self.canvas.x / 2) - (self.ledge_offset + (3 * self.racket_width))
         self.finished = False
@@ -234,7 +234,7 @@ class Game:
         self.send_start_game()
         while not self.finished:
             self.update()
-            if self.match.game_type == 'normal' and abs(self.ball.position.x - self.canvas.x) < self.safe_zone:
+            if self.match.game_type == 'normal' and abs(self.ball.position.x - self.canvas.x / 2) < self.safe_zone:
                 self.tick_rate = self.safe_zone_tick_rate
             else:
                 self.tick_rate = self.base_tick_rate
