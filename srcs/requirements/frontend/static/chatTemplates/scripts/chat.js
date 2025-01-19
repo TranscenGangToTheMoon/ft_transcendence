@@ -1,3 +1,16 @@
+function removeFirstInactiveChatTab() {
+    let chatTabs = document.getElementById('chatTabs');
+    let tabLinks = chatTabs.querySelectorAll('.nav-link');
+    
+    for (let tabLink of tabLinks) {
+        if (!tabLink.classList.contains('active')) {
+			console.log('Chat: Removing first inactive chat tab', tabLink);
+        }
+    }
+    return null;
+}
+
+
 function parsChatInfo(chat) {
 	let chatInfo = {
 		'chatId': chat.id,
@@ -291,7 +304,10 @@ async function displayChatsList(filter='') {
 		console.log('Error chat:', error);
 		if (error.detail === undefined) error.detail = 'Error while loading chats list';
 		displayChatError(error.detail, 'chatsList');
+		if (error.code === 503 || error.code === 502) return;
 	}
+	chatListModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('chatListModal'));
+	if (chatListModal && !chatListModal._isShown) chatListModal.show();
 }
 
 async function searchChatButton(username) {
@@ -416,9 +432,10 @@ async function createChatTab(chatInfo) {
 	const tab = new bootstrap.Tab(chatTabLink);
 	tab.show();
 
-	lastClick = chatTabLink;
+	lastClick = chatTabLink.id;
 
-	chatTabListener(chatInfo);
+	await chatTabListener(chatInfo);
+	await scrollMessagesListener(chatInfo);
 	sendMessageListener(chatInfo.target);
 }
 
@@ -432,8 +449,23 @@ async function chatTabListener(chatInfo)
 		}
 		if (e.target.id === 'chatTab' + chatInfo.target + 'Link') {
 			if (lastClick === e.target.id) return;
-			updateChatTab(chatInfo);
+			openChatTab(chatInfo.chatId);
 			return;
+		}
+	});
+}
+
+async function scrollMessagesListener(chatInfo) {
+	messagesDiv = document.getElementById('messages'+chatInfo.target);
+	messagesDiv.addEventListener('scroll', async event => {
+		const scrollHeight = messagesDiv.scrollHeight;
+		const clientHeight = messagesDiv.clientHeight;
+		const scrollTop = messagesDiv.scrollTop;
+		const scrollPercentage = (scrollTop / (scrollHeight - clientHeight)) * 100;
+		if (scrollPercentage <= 15 && !loading) {
+			loading = true;
+			await getMoreOldsMessages(chatInfo);
+			loading = false;
 		}
 	});
 }
@@ -452,24 +484,12 @@ function sendMessageListener(target) {
     }
 }
 
-async function updateChatTab(chatInfo) {
-
-	if (openChat[chatInfo.chatId] && openChat[chatInfo.chatId].target !== chatInfo.target) {
-		closeChatTab(openChat[chatInfo.chatId]);
-		openChatTab(chatInfo.chatId);
-	}
-	else {
-		lastClick = 'chatTab' + chatInfo.target;
-		await connect(getAccessToken(), chatInfo);
-	}
-
-}
 async function openChatTab(chatId)
 {
 	chat = await getChatInstance(chatId);
 	if (!chat) return;
 	userInformations.notifications['chats'] -= chat.unread_messages;
-	if (!userInformations.notifications['chats'])
+	if (userInformations.notifications['chats'] <= 0)
 		removeBadges('chats');
 	else
 		displayBadges();
@@ -477,10 +497,20 @@ async function openChatTab(chatId)
 	chatTabs = document.getElementById('chatTabs');
 	if (!chatTabs) {
 		await loadContent('/chatTemplates/chatTabs.html', 'container', true);
+		document.getElementById('logOut').addEventListener('click', async () => {
+			await disconnect();
+			openChat = {};
+			chatView = document.getElementById('chatView');
+			if (chatView) chatView.remove();
+		});
 	}
 	if (openChat[chatInfo.chatId] && openChat[chatInfo.chatId].target !== chatInfo.target) {
 		closeChatTab(openChat[chatInfo.chatId]);
 	}
+
+	// console.log('Chat: Someone called me but is it the first or secontime ????', chatTabs.childElementCount);
+	// /if (chatTabs.childElementCount >= 6)
+	
 	if (!document.getElementById('chatTab'+chatInfo.target))
 	{
 		openChat[chatInfo.chatId] = chatInfo;
@@ -499,33 +529,15 @@ async function openChatTab(chatId)
 		}
 	}
 	else {
+		if (!document.getElementById('chatTab'+chatInfo.target).querySelector('a').classList.contains('active'))
 		document.getElementById('chatTab'+chatInfo.target).querySelector('a').click();
 	}
 	const chatModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('chatListModal'));
 	chatModal.hide();
-	console.log(chatModal);
+	if (lastClick == "chatTab" + chatInfo.target + "Link") return;
 	await connect(getAccessToken(), chatInfo);
 	document.getElementById('searchChatForm').reset();
 
-	document.getElementById('logOut').addEventListener('click', async () => {
-		await disconnect();
-		openChat = {};
-		chatView = document.getElementById('chatView');
-		if (chatView) chatView.remove();
-	});
-
-	messagesDiv = document.getElementById('messages'+chatInfo.target);
-	messagesDiv.addEventListener('scroll', async event => {
-		const scrollHeight = messagesDiv.scrollHeight;
-		const clientHeight = messagesDiv.clientHeight;
-		const scrollTop = messagesDiv.scrollTop;
-		const scrollPercentage = (scrollTop / (scrollHeight - clientHeight)) * 100;
-		if (scrollPercentage <= 15 && !loading) {
-			loading = true;
-			await getMoreOldsMessages(chatInfo);
-			loading = false;
-		}
-	});
 }
 
 async function displayGameInviteInChat(inviteInfo) {

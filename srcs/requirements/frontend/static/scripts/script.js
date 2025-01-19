@@ -511,6 +511,7 @@ function addChatSSEListeners(){
     sse.addEventListener('send-message', async event => {
         event = JSON.parse(event.data);
         chatId = event.data.chat_id;
+        console.log(event, "leeeeel");
         await displayNotification(undefined, 'message received', event.message, async event => {
             await openChatTab(chatId);
         });
@@ -557,7 +558,6 @@ function initSSE(){
 
 
 function displayBadges(){
-    console.log('une fois', userInformations.notifications);
     if (userInformations.notifications){
         setTimeout(() => {
             console.log(userInformations.notifications)
