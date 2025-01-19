@@ -25,22 +25,29 @@ def finish_tournament(tournament_id, winner_user_id):
     tournament.delete()
 
 
-def create_match_new_stage(tournament_id, current_stage, winner):
+def create_match_new_stage(tournament_id):
     from tournament.models import Tournament
     time.sleep(3)
 
     try:
-        tournament = Tournament.objects.get(id=tournament_id) # todo remake
+        tournament = Tournament.objects.get(id=tournament_id)
     except Tournament.DoesNotExist:
         return
-    if current_stage.matches.filter(finished=False).exists(): # todo remake
+    if tournament.current_stage.matches.filter(finished=False).exists():
         return
-    participants = tournament.participants.filter(still_in=True).order_by('index')
-    ct = participants.count()
+
+    stage = tournament.stages.get(stage=tournament.current_stage.stage - 1)
 
     try:
-        for i in range(0, ct, 2):
-            match = tournament.matches.create(n=tournament.get_nb_matches(), stage=winner.stage, user_1=participants[i], user_2=participants[i + 1])
+        previous = None
+        for match in tournament.current_stage.matches.all().order_by('n'):
+            if previous is None:
+                previous = match
+                continue
+            match = tournament.matches.create(n=tournament.get_nb_matches(), stage=stage, user_1=previous.winner, user_2=match.winner)
             match.post()
+            previous = None
     except APIException:
-        tournament.delete() # todo test
+        tournament.delete()
+
+    tournament.set_stage(stage)
