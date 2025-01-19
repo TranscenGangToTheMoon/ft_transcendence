@@ -87,9 +87,16 @@ class UnitTest(unittest.TestCase):
             with client.stream('GET', 'https://localhost:4443/sse/users/', headers=headers) as response:
                 self.assertEqual(status_code, response.status_code)
                 if status_code == 200:
+                    buff = None
                     for line in response.iter_text():
                         if user['thread_finish']:
                             break
+                        if buff is not None:
+                            line = buff + line
+                            buff = None
+                        if '\n\n' not in line:
+                            buff = line
+                            continue
                         for event, data in re.findall(r'event: ([a-z0-9\-]+)\ndata: (.+)\n\n', line):
                             if event == 'delete-user':
                                 break
