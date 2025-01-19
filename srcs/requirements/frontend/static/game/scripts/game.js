@@ -472,7 +472,14 @@ function fillTeamDetail(enemyTeamDetail, playerTeamDetail){
     }
 }
 
-cancelTimeout = false;
+async function updateTrophies(){
+    if (window.location.pathname !== '/game/ranked') return;
+    await fetchUserInfos(true);
+    await loadUserProfile(); 
+}
+
+if (typeof cancelTimeout === 'undefined')
+    var cancelTimeout;
 
 function initSocket(){
 	const host = window.location.origin;
@@ -488,14 +495,15 @@ function initSocket(){
     window.gameSocket = gameSocket;
     // console.log(socket)
 	gameSocket.on('connect', () => {
+        cancelTimeout = true;
         console.log('Connected to socketIO server!');
     });
     gameSocket.on('disconnect', () => {
         gameSocket.close();
+        gameSocket = undefined;
         console.log('disconnected from gameSocket');
     })
     gameSocket.on('start_game', event => {
-        cancelTimeout = true;
         // console.log('received start_game');
         if (!PongGame.state.isGameActive)
             PongGame.startGame();
@@ -553,6 +561,8 @@ function initSocket(){
     gameSocket.on('game_over', async event => {
         console.log('game_over received', event);
         gameSocket.close();
+        gameSocket = undefined;
+        updateTrophies();
 		PongGame.handleGameOver(event.reason);
         if (typeof fromTournament !== 'undefined' && fromTournament)
             await navigateTo('/tournament');
@@ -648,7 +658,8 @@ async function initData(data){
     document.getElementById('opponentWait').style.display = "none";
 	initSocket();
     setTimeout(async () => {
-        if (!cancelTimeout && !isModalOpen()){
+        if (!cancelTimeout && gameSocket && !isModalOpen()){
+            console.log('donc',gameSocket);
             displayMainAlert('Error', 'Unable to establish connection with socket server');
             history.go(-1);
         }
@@ -670,6 +681,8 @@ function checkGameAuthorization(){
 }
 
 async function gameStart(event){
+    cancelTimeout = false;
+
     data = JSON.parse(event.data);
     data = data.data;
     console.log('game-start received (game)');
@@ -763,7 +776,6 @@ async function initGame(){
     if (window.matchMedia("(hover: none) and (pointer: coarse)").matches)
         forPhoneChanges();
         
-    // console.log(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent));
     if (window.location.pathname === '/') return;
     document.getElementById('gameArea').classList.replace('d-flex', 'd-none');
     document.getElementById('opponentWait').style.display = "block";

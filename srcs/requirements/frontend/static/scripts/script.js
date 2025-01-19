@@ -800,6 +800,7 @@ async function closeGameConnection(oldUrl){
     if (typeof gameSocket !== 'undefined'){
         console.log("je close la grosse game socket la");
         gameSocket.close();
+        gameSocket = undefined;
     }
     if (fromTournament)return;
     try {
