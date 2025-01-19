@@ -821,7 +821,6 @@ class Test10_FinishTournament(UnitTest):
         self.assertResponse(score(user9['id']), 200)
         self.assertResponse(score(user9['id']), 200)
 
-
 # -------------------------------------------------- QUART --------------------------------------------------- #
         self.assertResponse(join_tournament(user8, code, method='DELETE'), 204)
         self.assertResponse(join_tournament(user10, code, method='DELETE'), 204)
