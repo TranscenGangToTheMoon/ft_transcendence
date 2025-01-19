@@ -44,7 +44,7 @@ class Tournament(models.Model):
     match_order = {
         4: {1: 1, 2: 2},
         8: {1: 1, 2: 3, 3: 4, 4: 2},
-        16: {1: 1, 2: 5, 3: 7, 4: 3, 5: 4, 6: 8},
+        16: {1: 1, 2: 5, 3: 7, 4: 3, 5: 4, 6: 8, 7: 6, 8: 2},
     }
 
     code = models.CharField(max_length=4, unique=True, editable=False)
