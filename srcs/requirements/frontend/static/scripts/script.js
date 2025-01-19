@@ -485,6 +485,7 @@ function addInviteSSEListeners(){
     sse.addEventListener('invite-clash', event => {
         event = JSON.parse(event.data);
         displayNotification(undefined, event.service, event.message, undefined, event.target);
+        displayGameInviteInChat({'user': event.data.id, 'game_mode': 'clash', 'game_code': event.data.code});
         console.log(event, "thats me thats now");
     })
 
