@@ -41,6 +41,7 @@ class FinishReason:
     PLAYER_NOT_CONNECTED = 'player-not-connected'
     PLAYERS_TIMEOUT = 'Players-timeout'
     GAME_NOT_PLAYED = 'game-not-played'
+    NO_GAME = 'no-game'
 
     @staticmethod
     def validate(mode):
