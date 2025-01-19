@@ -485,19 +485,21 @@ function addInviteSSEListeners(){
     sse.addEventListener('invite-clash', event => {
         event = JSON.parse(event.data);
         displayNotification(undefined, event.service, event.message, undefined, event.target);
-        displayGameInviteInChat({'user': event.data.id, 'game_mode': 'clash', 'game_code': event.data.code});
-        console.log(event, "thats me thats now");
+        displayGameInviteInChat({'user': event.data.id, 'game_mode': 'clash', 'game_url': event.target[0].url, 'game_code': event.data.code});
+        console.log(event);
     })
 
     sse.addEventListener('invite-3v3', event => {
         event = JSON.parse(event.data);
         displayNotification(undefined, event.service, event.message, undefined, event.target);
+        displayGameInviteInChat({'user': event.data.id, 'game_mode': 'clash', 'game_url': event.target.url, 'game_code': event.data.code});
         console.log(event);
     })
 
     sse.addEventListener('invite-1v1', event => {
         event = JSON.parse(event.data);
         displayNotification(undefined, event.service, event.message, undefined, event.target);
+        displayGameInviteInChat({'user': event.data.id, 'game_mode': 'clash', 'game_url': event.target[0].url, 'game_code': event.data.code});
         console.log(event);
     })
 

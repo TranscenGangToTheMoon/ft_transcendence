@@ -547,7 +547,7 @@ async function openChatTab(chatId)
 async function displayGameInviteInChat(inviteInfo) {
 	chatInfo = openChat[userChat[inviteInfo.user]];
 	console.log('Chat: Displaying game invite in chat', chatInfo);
-	let messagesDiv = document.getElementById('messages'+chatInfo.target);
+	var messagesDiv = document.getElementById('messages'+chatInfo.target);
 	if (!messagesDiv) {
 		console.log('Error chat: this chat is not oppened');
 		return;
@@ -564,7 +564,8 @@ async function displayGameInviteInChat(inviteInfo) {
 	chatInviteGameBox.querySelector('.chatInviteGameType').innerText = inviteInfo.game_mode;
 	chatInviteGameBox.querySelector('.chatInviteGameButton').addEventListener('click', async e => {
 		e.preventDefault();
-		await navigateTo('/lobby/' + inviteInfo.game_code + '/');
+		console.log('Chat: Accepting game invite', inviteInfo.game_url.slice(0, -1));
+		await navigateTo(inviteInfo.game_url.slice(0, -1));
 	});
 }
 
