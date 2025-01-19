@@ -234,7 +234,7 @@ class Game:
         self.send_start_game()
         while not self.finished:
             self.update()
-            if self.match.game_type == 'clash' and abs(self.ball.position.x - self.canvas.x) < self.safe_zone:
+            if self.match.game_type == 'normal' and abs(self.ball.position.x - self.canvas.x) < self.safe_zone:
                 self.tick_rate = self.safe_zone_tick_rate
             else:
                 self.tick_rate = self.base_tick_rate
@@ -258,7 +258,7 @@ class Game:
             print(e, flush=True)
             self.finish(FinishReason.PLAYER_NOT_CONNECTED, disconnected_user_id=e.args[0])
             return
-        if (self.match.game_type == '3v3'):
+        if (self.match.game_type == 'clash'):
             self.send_rackets()
         self.send_canvas()
         self.send_game_state()
