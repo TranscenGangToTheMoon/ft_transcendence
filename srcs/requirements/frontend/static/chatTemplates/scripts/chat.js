@@ -295,7 +295,8 @@ async function displayChatsList(filter='') {
 		if (error.code === 503 || error.code === 502) return;
 	}
 	chatListModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('chatListModal'));
-	if (chatListModal && !chatListModal._isShown) chatListModal.show();
+	if (chatListModal && !chatListModal._isShown)
+		chatListModal.show();
 }
 
 async function searchChatButton(username) {
