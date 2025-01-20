@@ -602,11 +602,6 @@ function checkGameAuthorization(){
         throw `${window.location.pathname}`;
 }
 
-<<<<<<< HEAD
-=======
-<<<<<<< Updated upstream
-=======
->>>>>>> game_server
 function wrongConfigFileError(error){
     displayMainAlert('Error', 'Erroneous game config file.\n');
     console.log(error);
@@ -619,11 +614,7 @@ async function gameStart(event){
     data = data.data;
     console.log('game-start received (game)');
     try {
-<<<<<<< HEAD
 
-=======
-
->>>>>>> game_server
         await initData(data);
     }
     catch (error){
@@ -631,10 +622,6 @@ async function gameStart(event){
     }
 }
 
-<<<<<<< HEAD
-=======
->>>>>>> Stashed changes
->>>>>>> game_server
 async function initGame(){
     document.getElementById('gameArea').style.display = 'none';
     document.getElementById('opponentWait').style.display = 'block';
