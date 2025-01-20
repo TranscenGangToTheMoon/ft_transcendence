@@ -60,4 +60,3 @@ def verify_place(user, model):
 
     if model.is_full:
         raise PermissionDenied(MessagesException.PermissionDenied.IS_FULL.format(obj=name.title()))
-

@@ -44,7 +44,7 @@ class Tournament(models.Model):
     match_order = {
         4: {1: 1, 2: 2},
         8: {1: 1, 2: 3, 3: 4, 4: 2},
-        16: {1: 1, 2: 5, 3: 7, 4: 3, 5: 4, 6: 8},
+        16: {1: 1, 2: 5, 3: 7, 4: 3, 5: 4, 6: 8, 7: 6, 8: 2},
     }
 
     code = models.CharField(max_length=4, unique=True, editable=False)
@@ -58,9 +58,10 @@ class Tournament(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     created_by = models.IntegerField()
     created_by_username = models.CharField(max_length=30)
+    update_stage = models.BooleanField(default=False)
 
     def users_id(self):
-        return list(self.participants.all().values_list('user_id', flat=True))
+        return list(self.participants.filter(connected=True).values_list('user_id', flat=True))
 
     def start_timer(self):
         self.start_at = datetime.now(timezone.utc) + timedelta(seconds=20)
@@ -87,10 +88,7 @@ class Tournament(models.Model):
     def cancel_start(self):
         self.start_at = None
         self.save()
-        try:
-            create_sse_event(self.users_id(), EventCode.TOURNAMENT_START_CANCEL, {'id': self.id, 'start_at': None})
-        except APIException:
-            pass
+        create_sse_event(self.users_id(), EventCode.TOURNAMENT_START_CANCEL, {'id': self.id, 'start_at': None})
 
     def start(self):
         self.is_started = True
@@ -135,8 +133,8 @@ class Tournament(models.Model):
     def is_enough_players(self):
         return self.start_countdown[self.size] <= self.participants.count()
 
-    def set_stage(self, stage):
-        self.current_stage = stage
+    def set_update_stage(self, value: bool):
+        self.update_stage = value
         self.save()
 
     @property
@@ -164,6 +162,7 @@ class TournamentParticipants(models.Model):
     still_in = models.BooleanField(default=True)
     creator = models.BooleanField(default=False)
     join_at = models.DateTimeField(auto_now_add=True)
+    connected = models.BooleanField(default=True)
 
     @property
     def place(self):
@@ -172,11 +171,12 @@ class TournamentParticipants(models.Model):
     def delete(self, using=None, keep_parents=False):
         tournament = self.tournament
         last_member = tournament.participants.count() == 1
-        if tournament.is_started and self.still_in:
-            self.eliminate()
+
+        if tournament.is_started:
+            self.disconnect()
         else:
             delete_player_instance(self.user_id)
-            if not last_member:
+            if not last_member and not self.tournament.is_started:
                 send_sse_event(EventCode.TOURNAMENT_LEAVE, self)
             super().delete(using=using, keep_parents=keep_parents)
             if last_member:
@@ -193,6 +193,10 @@ class TournamentParticipants(models.Model):
         self.stage = self.tournament.stages.get(stage=cur - 1)
         self.save()
         return False
+
+    def disconnect(self):
+        self.connected = False
+        self.eliminate()
 
 
 class TournamentMatches(models.Model):

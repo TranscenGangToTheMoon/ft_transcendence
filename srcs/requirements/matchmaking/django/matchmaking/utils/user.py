@@ -14,8 +14,8 @@ def verify_user(user_id, created_tournament=False):
         request_game(endpoints.Game.fuser.format(user_id=user_id), method='GET')
     except NotFound:
         try:
-            participant = TournamentParticipants.objects.get(user_id=user_id, still_in=True)
-            if participant.tournament.is_started:
+            participant = TournamentParticipants.objects.get(user_id=user_id, connected=True)
+            if participant.tournament.is_started and participant.still_in:
                 raise Conflict(MessagesException.Conflict.ALREADY_IN_TOURNAMENT)
             if created_tournament and participant.creator:
                 raise PermissionDenied(MessagesException.PermissionDenied.CAN_CREATE_MORE_THAN_ONE_TOURNAMENT)
