@@ -10,15 +10,15 @@ from textual import log
 class User():
     accessToken: str | None = None
     headers = {"Content-Type": "application/json"}
+    host: str | None = None
     id: int | None = None
     password: str | None = None
+    port: int | None = None
     refreshToken: str | None = None
     response: requests.Response | None = None
     server: str | None = None
     team: str | None = None
     username: str | None = None
-    host: str | None = None
-    port: int | None = None
 
     @staticmethod
     def loginUser():
@@ -87,3 +87,17 @@ class User():
         User.accessToken = User.response.json()["access"]
         User.refreshToken = User.response.json()["refresh"]
         User.headers["Authorization"] = f"Bearer {User.accessToken}"
+
+    @staticmethod
+    def reset():
+        User.accessToken = None
+        User.headers = {"Content-Type": "application/json"}
+        User.host = None
+        User.id = None
+        User.password = None
+        User.port = None
+        User.refreshToken = None
+        User.response = None
+        User.server = None
+        User.team = None
+        User.username = None

@@ -56,6 +56,7 @@ class PongCLI(App):
                                 events = self.regex.findall(line)
                                 for event, data in events:
                                     dataJson = None
+                                    # print(f"{event}")
                                     if (event == "game-start"):# game start
                                         dataJson = json.loads(data)
                                         if (dataJson["data"]["teams"]["a"]["players"][0]["id"] == User.id):

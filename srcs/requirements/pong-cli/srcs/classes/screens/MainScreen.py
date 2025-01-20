@@ -7,14 +7,17 @@ from textual.app        import ComposeResult
 from textual.containers import Horizontal
 from textual.screen     import Screen
 from textual.widgets    import Button, Footer, Header, Label, Rule, Static
+from textual.worker     import Worker
 
 # Local imports
 from classes.utils.config   import Config
 from classes.utils.user     import User
 
+
 class MainPage(Screen):
     SUB_TITLE = "Main Page"
     CSS_PATH = "styles/MainPage.tcss"
+    BINDINGS = [("ctrl+l", "logout", "Logout")]
 
     def compose(self) -> ComposeResult:
         yield Header()
@@ -32,7 +35,7 @@ class MainPage(Screen):
         try:
             response = requests.get(url=f"{User.server}/api/users/me/", data={}, headers=User.headers, verify=Config.SSL.CRT)
             User.id = response.json()["id"]
-            self.query_one("#userMeStatic").update(f"Welcolme {response.json()['username']}\n(id: {User.id})")
+            self.query_one("#userMeStatic").update(f"Welcolme {response.json()['username']} (id: {User.id})")
         except Exception as error:
             self.query_one("#userMeStatic").update(f"GET /api/users/me/ Error: {error}")
 
@@ -41,6 +44,15 @@ class MainPage(Screen):
         self.query_one("#duel").variant = "primary"
         self.query_one("#cancelDuelGame").disabled = True
         self.query_one("#statusGame").update("")
+
+    def action_logout(self):
+        User.reset()
+        for worker in self.app.workers:
+            if worker.name == "SSE":
+                print(f"SSE worker cancelled")
+                worker.cancel()
+            print(f"Worker: {worker}")
+        self.app.pop_screen()
 
     @on(Button.Pressed, "#duel")
     def duelAction(self):
@@ -64,6 +76,7 @@ class MainPage(Screen):
             elif (response.status_code == 204):
                 self.query_one("#duel").loading = False
                 self.query_one("#duel").variant = "primary"
+                self.query_one("#statusGame").update("")
                 self.query_one("#cancelDuelGame").disabled = True
 
         except Exception as error:
