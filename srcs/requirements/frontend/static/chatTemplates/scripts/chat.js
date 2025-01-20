@@ -256,10 +256,10 @@ async function getMoreChats() {
 			chatBox = document.getElementById('chatsList');
 			apiAnswer.results.forEach(async element => {
 				data = parsChatInfo(element);
-				await createUserCard(data);
+				await createChatUserCard(data);
 			});
 		}
-		nextMessagesRequest = apiAnswer.next;
+		nextChatsRequest = apiAnswer.next;
 	}
 	catch (error) {
 		console.log('Error chat:', error);
@@ -593,7 +593,6 @@ if (typeof nextChatsRequest === 'undefined')
 document.getElementById('searchChatForm').addEventListener('keyup', (e) => {
 	e.preventDefault();
 	if (e.key === 'Enter') return;
-	if (e.target.value === '' && e.key === 'Backspace') return;
 	displayChatsList(e.target.value);
 });
 
