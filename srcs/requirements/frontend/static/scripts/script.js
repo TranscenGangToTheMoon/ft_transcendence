@@ -505,18 +505,21 @@ function addInviteSSEListeners(){
     sse.addEventListener('invite-clash', event => {
         event = JSON.parse(event.data);
         displayNotification(undefined, event.service, event.message, undefined, event.target);
+        displayGameInviteInChat({'user': event.data.id, 'game_mode': 'clash', 'game_url': event.target[0].url, 'game_code': event.data.code});
         console.log(event);
     })
 
     sse.addEventListener('invite-3v3', event => {
         event = JSON.parse(event.data);
         displayNotification(undefined, event.service, event.message, undefined, event.target);
+        displayGameInviteInChat({'user': event.data.id, 'game_mode': 'clash', 'game_url': event.target.url, 'game_code': event.data.code});
         console.log(event);
     })
 
     sse.addEventListener('invite-1v1', event => {
         event = JSON.parse(event.data);
         displayNotification(undefined, event.service, event.message, undefined, event.target);
+        displayGameInviteInChat({'user': event.data.id, 'game_mode': 'clash', 'game_url': event.target[0].url, 'game_code': event.data.code});
         console.log(event);
     })
 
@@ -530,39 +533,11 @@ function addInviteSSEListeners(){
 function addChatSSEListeners(){
     sse.addEventListener('send-message', async event => {
         event = JSON.parse(event.data);
-        console.log(event, 'ai je ce qu il faut ?');
-        chat = event.target[0]['url'];
-        let apiAnswer = undefined;
-        try {
-            apiAnswer = await apiRequest(getAccessToken(), `${baseAPIUrl}${chat}`, 'GET');
-            if (apiAnswer.details) {
-                console.log('Error:',apiAnswer.details);
-                return;
-            }
-        }
-        catch (error){
-            console.log('Error:', error);
-            return;
-        }
-        userInformations.notifications['chats'] += 1;
-        chatInfo = {
-            'chatId': apiAnswer.id,
-            'target': apiAnswer.chat_with.username,
-            'targetId': apiAnswer.chat_with.id,
-            'lastMessage': '< Say hi! >',
-            'isLastMessageRead': false,
-            'chatMessageNext': null,
-        };
-        if (apiAnswer.last_message) {
-            if (apiAnswer.last_message.content.length > 37){
-                chatInfo.lastMessage = apiAnswer.last_message.content.slice(0, 37) + '...';
-            }
-            else chatInfo.lastMessage = apiAnswer.last_message.content;
-            chatInfo.isLastMessageRead = apiAnswer.last_message.is_read;
-        }
+        chatId = event.data.chat_id;
         await displayNotification(undefined, 'message received', event.message, async event => {
-            await openChatTab(chatInfo);
+            await openChatTab(chatId);
         });
+        userInformations.notifications['chats'] += 1;
         displayBadges();
     })
 }
