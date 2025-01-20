@@ -13,6 +13,10 @@
         "clash": {
             "width":1800,
             "height":750
+        },
+        "local" : {
+            "width":1500,
+            "height":750
         }
     },
     "paddle": {
@@ -29,14 +33,22 @@
             "speed":500,
             "ledgeOffset":100,
             "paddleOffset":200
+        },
+        "local":{
+            "width":30,
+            "height":200,
+            "speed":500,
+            "ledgeOffset":100,
+            "paddleOffset":200
         }
     },
     "ball": {
         "size":20,
-        "speed":240,
-        "speedIncrement":30,
+        "speed":350,
+        "speedIncrement":60,
         "maxSpeed":1500,
-        "maxBounceAngle":1.2566370614359172
+        "maxBounceAngle": "don't go over pi/2",
+        "maxBounceAngle": 1.2566370614359172
     },
     "score": {
         "max":3

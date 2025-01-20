@@ -4,6 +4,7 @@ const MAX_DISPLAYED_NOTIFICATIONS = 3;
 const MAX_DISPLAYED_FRIENDS = 12;
 const MAX_DISPLAYED_FRIEND_REQUESTS = 5;
 const MAX_DISPLAYED_BLOCKED_USERS = 10;
+const GAME_CONNECTION_TIMEOUT = 5500; // min 5500
 const DEBOUNCE_TIME = 100;
 const eventTimestamps = new Map();
 const baseAPIUrl = "/api"
@@ -24,7 +25,7 @@ window.pathName = pathName;
 // ========================== API REQUESTS ==========================
 
 async function apiRequest(token, endpoint, method="GET", authType="Bearer",
-    contentType="application/json", body=undefined, currentlyRefreshing=false){
+    contentType="application/json", body=undefined, currentlyRefreshing=false, nav=false){
     let options = {
         method: method,
         headers: {
@@ -57,11 +58,21 @@ async function apiRequest(token, endpoint, method="GET", authType="Bearer",
             }
             return data;
         })
-        .catch(error =>{
+        .catch(async error =>{
             if (error.message === 'relog')
                 return apiRequest(getAccessToken(), endpoint, method, authType, contentType, body);
             if (error.code === 500 || error.message === 'Failed to fetch')
                 document.getElementById('container').innerText = `alala pas bien ${error.code? `: ${error.code}` : ''} (jcrois c'est pas bon)`;
+            if (error.code === 502 || error.code === 503){
+                pathName = '/service-unavailable';
+                closeExistingModals();
+                if (nav)
+                    await navigateTo('/service-unavailable', true, true);
+                else{
+                    history.replaceState({}, '', '/service-unavailable');
+                    handleRoute();
+                }
+            }
             throw error;
         })
 }
@@ -258,6 +269,7 @@ async function handleRoute() {
         path = "/" + path.split("/")[1];
     const routes = {
         '/': '/homePage.html',
+        '/service-unavailable' : '/503.html',
         '/profile' : 'profile.html',
         '/lobby' : '/lobby.html',
 
@@ -289,10 +301,16 @@ function getCurrentState(){
     return localStorage.getItem('currentState');
 }
 
+function _cancelTimeout(){
+    if (typeof cancelTimeout !== 'undefined')
+        cancelTimeout = true;
+}
+
 async function navigateTo(url, doNavigate=true, dontQuit=false){
     let currentState = getCurrentState();
     lastState = currentState;
     // if (doNavigate){
+    _cancelTimeout();
     if (!dontQuit){
         await handleSSEListenerRemoval(url);
         await quitLobbies(window.location.pathname, url);
@@ -357,6 +375,7 @@ window.addEventListener('popstate', async event => {
     console.log(pathName, window.location.pathname);
     if (pathName === '/game')
         return cancelNavigation(event, undefined);
+    _cancelTimeout();
     await quitLobbies(pathName, window.location.pathname);
     await closeGameConnection(pathName);
     pathName = window.location.pathname;
@@ -369,6 +388,7 @@ window.addEventListener('popstate', async event => {
 })
 
 async function quitLobbies(oldUrl, newUrl){
+    if (oldUrl === '/service-unavailable') return;
     if (oldUrl.includes('/lobby')){
         try {
             await apiRequest(getAccessToken(), `${baseAPIUrl}/play${oldUrl}/`, 'DELETE');
@@ -755,6 +775,7 @@ async function closeGameConnection(oldUrl){
     if (typeof gameSocket !== 'undefined'){
         console.log("je close la grosse game socket la");
         gameSocket.close();
+        gameSocket = undefined;
     }
     if (fromTournament)return;
     try {
@@ -762,6 +783,17 @@ async function closeGameConnection(oldUrl){
     }
     catch(error){
         console.log(error);
+    }
+}
+
+function closeExistingModals(){
+    const modals = document.querySelectorAll('.modal');
+    for (let modal of modals){
+        if (modal.classList.contains('show')){
+            const modalInstance = bootstrap.Modal.getOrCreateInstance(modal);
+            if (modalInstance)
+                modalInstance.hide();
+        }
     }
 }
 
@@ -783,12 +815,17 @@ async function fetchUserInfos(forced=false) {
     }
 }
 
+function isModalOpen() {
+    return (
+        document.querySelector('.modal.show') !== null ||
+        document.querySelector('.modal[style*="display: block"]') !== null ||
+        document.querySelector('.modal.fade.in') !== null ||
+        document.querySelector('.modal-backdrop') !== null
+    );
+}
+
 function displayMainAlert(alertTitle, alertContent) {
-    const modalElement = document.getElementById('alertModal');
-    
-    if (modalElement.classList.contains('show')) {
-        return;
-    }
+    if (isModalOpen()) return;
     const alertContentDiv = document.getElementById('alertContent');
     const alertTitleDiv = document.getElementById('alertModalLabel');
     const alertModal = new bootstrap.Modal(document.getElementById('alertModal'));
