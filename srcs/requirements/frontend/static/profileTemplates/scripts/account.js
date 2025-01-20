@@ -61,10 +61,28 @@ document.getElementById('pChangeNickname').addEventListener('submit', async even
 
 document.getElementById('pDownloadData').addEventListener('click', async () => {
     try {
-        await apiRequest(getAccessToken(), `${baseAPIUrl}/users/me/download-data/`);
-    }
-    catch(error){
-        console.log(error);
+        const response = await fetch('/api/users/me/downalod-data/', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + getAccessToken(),
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`Error while downloading: ${response.statusText}`);
+        }
+        const data = await response.json();
+
+        const file = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const fileURL = URL.createObjectURL(file);
+        const link = document.createElement('a');
+        link.href = fileURL;
+        link.download = 'your_data.json';
+        link.click();
+        URL.revokeObjectURL(fileURL);
+    } catch (error) {
+        console.error('Erreur:', error);
     }
 })
 
