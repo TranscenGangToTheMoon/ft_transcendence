@@ -8,7 +8,7 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 
 from lobby.models import LobbyParticipants
-from lobby.serializers import LobbySerializer, LobbyParticipantsSerializer
+from lobby.serializers import LobbySerializer, LobbyParticipantsSerializer, LobbyFinishMatchSerializer
 from matchmaking.utils.participant import get_lobby_participant
 from matchmaking.utils.place import get_lobby
 from matchmaking.utils.sse import send_sse_event
@@ -53,5 +53,11 @@ class LobbyParticipantsView(SerializerAuthContext, generics.ListCreateAPIView, g
         send_sse_event(EventCode.LOBBY_JOIN, serializer.instance, serializer.data, self.request)
 
 
+class LobbyFinishMatchView(generics.CreateAPIView):
+    authentication_classes = []
+    serializer_class = LobbyFinishMatchSerializer
+
+
 lobby_view = LobbyView.as_view()
 lobby_participants_view = LobbyParticipantsView.as_view()
+lobby_finish_match_view = LobbyFinishMatchView.as_view()

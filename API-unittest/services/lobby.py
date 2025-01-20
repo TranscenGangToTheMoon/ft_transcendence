@@ -41,3 +41,16 @@ def invite_user(user, user_invite, code):
         token=user['token'],
         method='POST',
     )
+
+
+def post_message(user, code, message=None, data=None):
+    if data is None:
+        data = {}
+    if message is not None:
+        data['content'] = message
+    return make_request(
+        endpoint=f'play/lobby/{code}/message/',
+        token=user['token'],
+        method='POST',
+        data=data,
+    )

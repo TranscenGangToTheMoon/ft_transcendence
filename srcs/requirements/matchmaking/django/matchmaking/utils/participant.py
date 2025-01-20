@@ -19,12 +19,14 @@ def get_participants(obj, add_fields: list[str] = None):
 
 
 def get_participant(model, obj, user_id, creator_check=False, from_place=False):
+    kwargs = {'user_id': user_id}
+
     if model is TournamentParticipants:
         name = 'tournament'
+        kwargs['connected'] = True
     else:
         name = 'lobby'
 
-    kwargs = {'user_id': user_id}
     if obj is not None:
         kwargs[name] = obj.id
 

@@ -21,13 +21,15 @@ class EventCode:
     INVITE_TOURNAMENT = 'invite-tournament'
     LOBBY_JOIN = 'lobby-join'
     LOBBY_LEAVE = 'lobby-leave'
+    LOBBY_BANNED = 'lobby-banned'
+    LOBBY_MESSAGE = 'lobby-message'
     LOBBY_UPDATE = 'lobby-update'
     LOBBY_UPDATE_PARTICIPANT = 'lobby-update-participant'
     LOBBY_DESTROY = 'lobby-destroy'
-    LOBBY_BANNED = 'lobby-banned'
     TOURNAMENT_JOIN = 'tournament-join'
     TOURNAMENT_LEAVE = 'tournament-leave'
     TOURNAMENT_BANNED = 'tournament-banned'
+    TOURNAMENT_MESSAGE = 'tournament-message'
     TOURNAMENT_START = 'tournament-start'
     TOURNAMENT_START_AT = 'tournament-start-at'
     TOURNAMENT_START_CANCEL = 'tournament-start-cancel'
@@ -45,6 +47,7 @@ def create_sse_event(
         event_code: EventCode,
         data: dict | None = None,
         kwargs: dict | None = None,
+        raise_exception: bool = False,
 ):
     sse_data = {
         'users_id': [users] if isinstance(users, int) else users,
@@ -60,6 +63,8 @@ def create_sse_event(
     try:
         return request_service('users', endpoints.Users.event, 'POST', sse_data)
     except NotFound as e:
-        raise e
+        if raise_exception:
+            raise e
     except APIException:
-        raise ServiceUnavailable(MessagesException.ServiceUnavailable.SSE)
+        if raise_exception:
+            raise ServiceUnavailable(MessagesException.ServiceUnavailable.SSE)

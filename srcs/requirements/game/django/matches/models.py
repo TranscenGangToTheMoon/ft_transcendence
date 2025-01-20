@@ -16,13 +16,14 @@ class Matches(models.Model):
     code = models.CharField(max_length=4, null=True)
     game_mode = models.CharField(max_length=11)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
+    match_type = models.CharField(max_length=3)
     game_duration = models.DurationField(default=timedelta(minutes=3))
-    tournament_id = models.IntegerField(null=True)
-    tournament_stage_id = models.IntegerField(null=True)
-    tournament_n = models.IntegerField(null=True)
-    finish_reason = models.CharField(null=True, default=None, max_length=35)
-    finished = models.BooleanField(default=False)
+    tournament_id = models.IntegerField(null=True, default=None)
+    tournament_stage_id = models.IntegerField(null=True, default=None)
+    tournament_n = models.IntegerField(null=True, default=None)
     game_start = models.BooleanField(default=False)
+    finished = models.BooleanField(default=False)
+    finish_reason = models.CharField(null=True, default=None, max_length=35)
 
     winner = models.ForeignKey('Teams', null=True, default=None, on_delete=models.SET_NULL, related_name='winner')
     looser = models.ForeignKey('Teams', null=True, default=None, on_delete=models.SET_NULL, related_name='looser')
@@ -30,6 +31,9 @@ class Matches(models.Model):
     def start(self):
         self.game_start = True
         self.save()
+
+    def users_id(self):
+        return list(self.players.all().values_list('user_id', flat=True))
 
     def finish(self, finish_reason=FinishReason.NORMAL_END):
         if self.finish_reason is None:
@@ -54,12 +58,17 @@ class Matches(models.Model):
             except APIException:
                 raise ServiceUnavailable('matchmaking')
         if self.game_mode == GameMode.RANKED:
-            player = retrieve_users(list(self.players.all().values_list('user_id', flat=True)), return_type=dict)
+            player = retrieve_users(self.users_id(), return_type=dict)
             winner = self.winner.players.first()
             looser = self.winner.players.first()
             winner_trophies, looser_trophies = compute_trophies(player[winner.user_id]['trophies'], player[looser.user_id]['trophies'])
             winner.set_trophies(winner_trophies)
             winner.set_trophies(looser_trophies)
+        if self.game_mode in [GameMode.CLASH, GameMode.CUSTOM_GAME]:
+            try:
+                request_matchmaking(endpoints.Matchmaking.lobby_finish_match, 'POST', {'players': self.users_id()})
+            except APIException:
+                raise ServiceUnavailable('matchmaking')
         send_match_result(self)
 
 

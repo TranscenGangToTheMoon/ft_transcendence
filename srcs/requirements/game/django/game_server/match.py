@@ -58,6 +58,7 @@ class Match():
         teams = game_data['teams']
         for team_name, team in teams.items():
             self.teams.append(Team(team['players'], self.id, team_name))
+        self.game_type = 'clash' if game_data['match_type'] == '3v3' else 'normal'
 
 
 def finish_match(match_id, finish_reason: str, user_id: int):
