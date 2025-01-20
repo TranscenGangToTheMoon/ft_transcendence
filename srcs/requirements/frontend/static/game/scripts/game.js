@@ -506,7 +506,7 @@ function initSocket(){
         console.log('disconnected from gameSocket');
         if (fromTournament)
             await navigateTo('/tournament', true, true);
-        if (fromLobby)
+        if (typeof fromLobby !== 'undefined' && fromLobby)
             await navigateTo('/lobby', true, true);
     })
     gameSocket.on('start_game', event => {
