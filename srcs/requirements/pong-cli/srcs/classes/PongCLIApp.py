@@ -5,7 +5,7 @@ import re
 import ssl
 
 # Textual imports
-from textual        import log, work
+from textual        import work
 from textual.app    import App
 from textual.worker import Worker
 
@@ -34,7 +34,6 @@ class PongCLI(App):
 
     @work
     async def SSE(self):
-        log("Start SSE")
         if (not self.isConnected):
             self.connected = True
             # SSLContext = ssl.create_default_context()
@@ -59,14 +58,17 @@ class PongCLI(App):
                                     # print(f"{event}")
                                     if (event == "game-start"):# game start
                                         dataJson = json.loads(data)
+                                        # print(f"{event}: {dataJson}")
                                         if (dataJson["data"]["teams"]["a"]["players"][0]["id"] == User.id):
                                             User.team = "a"
+                                            User.opponent = dataJson["data"]["teams"]["b"]["players"][0]["username"]
                                         else:
                                             User.team = "b"
-                                        log(f"{dataJson}")
+                                            User.opponent = dataJson["data"]["teams"]["a"]["players"][0]["username"]
+                                        # print(f"User opponent: {User.opponent}")
                                         await self.push_screen(GamePage())
                                     elif (event != "game-start" and event != "ping"):
-                                        log(f"{event}: {dataJson}")
+                                        # print(f"{event}: {data}")
                             except (IndexError, ValueError) as error:
                                 continue
                 finally:

@@ -12,6 +12,7 @@ class User():
     headers = {"Content-Type": "application/json"}
     host: str | None = None
     id: int | None = None
+    opponent: str | None = None
     password: str | None = None
     port: int | None = None
     refreshToken: str | None = None
@@ -94,6 +95,7 @@ class User():
         User.headers = {"Content-Type": "application/json"}
         User.host = None
         User.id = None
+        User.opponent = None
         User.password = None
         User.port = None
         User.refreshToken = None

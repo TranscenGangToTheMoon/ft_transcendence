@@ -7,7 +7,6 @@ from textual.app        import ComposeResult
 from textual.containers import Horizontal
 from textual.screen     import Screen
 from textual.widgets    import Button, Footer, Header, Label, Rule, Static
-from textual.worker     import Worker
 
 # Local imports
 from classes.utils.config   import Config
@@ -48,9 +47,11 @@ class MainPage(Screen):
     def action_logout(self):
         User.reset()
         for worker in self.app.workers:
+            #print(f"Worker status: {worker.state}")
             if worker.name == "SSE":
                 print(f"SSE worker cancelled")
                 worker.cancel()
+            #print(f"Worker status: {worker.state}")
             print(f"Worker: {worker}")
         self.app.pop_screen()
 
