@@ -29,7 +29,7 @@ document.getElementById('clash').addEventListener('click', async event => {
     try {
         let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/play/lobby/`, 'POST', undefined, undefined, {
             'game_mode' : 'clash',
-        })
+        }, undefined, true);
         if (data.code)
             await navigateTo(`/lobby/${data.code}`);
         console.log(data);
@@ -61,7 +61,7 @@ document.getElementById('customGame').addEventListener('click', async event => {
     try {
         let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/play/lobby/`, 'POST', undefined, undefined, {
             'game_mode' : 'custom_game',
-        });
+        }, undefined, true);
         if (data.code)
             navigateTo(`/lobby/${data.code}`);
     }
@@ -90,7 +90,6 @@ document.getElementById('chat').addEventListener('click', async e => {
 
 function forPhoneChanges(){
     try {
-        // document.body.style.backgroundColor = 'red';
         document.getElementById('customGame').style.display = 'none';
         document.getElementById('clash').style.display = 'none';
     }
