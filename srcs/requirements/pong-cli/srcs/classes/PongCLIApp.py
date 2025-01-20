@@ -33,7 +33,7 @@ class PongCLI(App):
         self.push_screen(LoginPage())
 
     @work
-    async def startSSE(self):
+    async def SSE(self):
         log("Start SSE")
         if (not self.isConnected):
             self.connected = True

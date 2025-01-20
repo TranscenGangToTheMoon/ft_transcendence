@@ -52,7 +52,7 @@ class LoginPage(Screen):
             try:
                 self.getSSLCertificate()
                 User.loginUser()
-                self.app.startSSE()
+                self.app.SSE()
                 self.app.push_screen(MainPage())
             except Exception as error:
                 if (User.response is not None):
@@ -72,7 +72,7 @@ class LoginPage(Screen):
             try:
                 self.getSSLCertificate()
                 User.registerUser()
-                self.app.startSSE()
+                self.app.SSE()
                 self.app.push_screen(MainPage())
             except Exception as error:
                 if (User.response is not None):
@@ -90,7 +90,7 @@ class LoginPage(Screen):
             try:
                 self.getSSLCertificate()
                 User.guestUser()
-                self.app.startSSE()
+                self.app.SSE()
                 self.app.push_screen(MainPage())
             except Exception as error:
                 if (User.response is not None):
