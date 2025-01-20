@@ -290,9 +290,9 @@ async function displayChatsList(filter='') {
 	}
 	catch(error) {
 		console.log('Error chat:', error);
+		if (error.code === 503 || error.code === 502) return;
 		if (error.detail === undefined) error.detail = 'Error while loading chats list';
 		displayChatError(error.detail, 'chatsList');
-		if (error.code === 503 || error.code === 502) return;
 	}
 	chatListModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('chatListModal'));
 	if (chatListModal && !chatListModal._isShown)
