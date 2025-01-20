@@ -28,9 +28,9 @@ class Game:
     ball_size: int
 
     @staticmethod
-    def create_ball(canvas: Position):
+    def create_ball(canvas: Position, ledge_offset, racket_width):
         direction_x, direction_y = get_random_direction()
-        return Ball(Position(int(canvas.x / 2 - (Game.ball_size / 2)), int(canvas.y / 2 - (Game.ball_size / 2))), direction_x, direction_y, Game.default_ball_speed, Game.ball_size)
+        return Ball(Position(int(canvas.x / 2 - (Game.ball_size / 2)), int(canvas.y / 2 - (Game.ball_size / 2))), direction_x, direction_y, Game.default_ball_speed, Game.ball_size, ledge_offset, racket_width, canvas)
 
     @staticmethod
     def create_rackets(match,
@@ -78,9 +78,10 @@ class Game:
             self.base_tick_rate = config['server']['tickRate']['base']
             self.safe_zone_tick_rate = config['server']['tickRate']['safe']
         self.tick_rate = self.base_tick_rate
-        self.safe_zone = (self.canvas.x / 2) - (self.ledge_offset + (3 * self.racket_width))
+        self.safe_zone_width = (self.canvas.x / 2) - (self.ledge_offset + (3 * self.racket_width))
+        self.safe_zone_height = (self.canvas.y / 2) - (3 * Game.ball_size)
         self.finished = False
-        self.ball = self.create_ball(self.canvas)
+        self.ball = self.create_ball(self.canvas, self.ledge_offset, self.racket_width)
         self.rackets = self.create_rackets(self.match, self.canvas, self.racket_height, self.racket_width, self.ledge_offset, self.racket_to_racket_offset)
         self.ball.last_touch_team_a = self.match.teams[0].players[0].user_id
         self.ball.last_touch_team_b = self.match.teams[1].players[0].user_id
@@ -117,13 +118,9 @@ class Game:
         if ball_pos_y <= 0:
             self.ball.position.y = - ball_pos_y
             self.ball.speed_y = - self.ball.speed_y
-            self.send_game_state()
-            self.sending = -1
         elif ball_pos_y + self.ball.size >= self.canvas.y:
             self.ball.position.y -= (ball_pos_y + self.ball.size) - self.canvas.y
             self.ball.speed_y = - self.ball.speed_y
-            self.send_game_state()
-            self.sending = -1
 
     def handle_goal(self):
         if self.ball.position.x + self.ball.size < 0:
@@ -234,7 +231,7 @@ class Game:
         self.send_start_game()
         while not self.finished:
             self.update()
-            if self.match.game_type == 'normal' and abs(self.ball.position.x - self.canvas.x / 2) < self.safe_zone:
+            if self.match.game_type == 'normal' and self.ball.is_in_safe_zone():
                 self.tick_rate = self.safe_zone_tick_rate
             else:
                 self.tick_rate = self.base_tick_rate
@@ -292,7 +289,7 @@ class Game:
             finish_match(self.match.id, finish_reason, disconnected_user_id)
 
     def reset_game_state(self):
-        self.ball = self.create_ball(self.canvas)
+        self.ball = self.create_ball(self.canvas, self.ledge_offset, self.racket_width)
         self.ball.last_touch_team_a = self.match.teams[0].players[0].user_id
         self.ball.last_touch_team_b = self.match.teams[1].players[0].user_id
         for racket in self.rackets:
@@ -362,7 +359,12 @@ class Game:
 
     def send_finish(self, finish_reason: str | None = None, winner: str | None = None):
         from game_server.server import Server
-        async_to_sync(Server._sio.emit)('game_over', data={"reason":finish_reason, "winner":winner}, room=str(self.match.id))
+        Server.emit('game_over', data={
+            "reason": finish_reason,
+            "winner": winner,
+            'team_a': self.match.teams[0].score,
+            'team_b': self.match.teams[1].score,
+        }, room=str(self.match.id))
 
     def send_start_game(self):
         from game_server.server import Server
