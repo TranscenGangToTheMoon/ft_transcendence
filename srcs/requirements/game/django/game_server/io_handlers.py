@@ -15,7 +15,6 @@ from game_server.match import Match
 
 async def connect(sid, environ, auth):
     from game_server.server import Server
-    print('trying to connect', flush=True)
     token = auth.get('token')
     if token is None:
         raise ConnectionRefusedError(MessagesException.Authentication.NOT_AUTHENTICATED)
@@ -43,17 +42,13 @@ async def connect(sid, environ, auth):
         raise ConnectionRefusedError(MessagesException.ServiceUnavailable.game)
     if game_data is None:
         raise ConnectionRefusedError(MessagesException.ServiceUnavailable.game)
-    print(f"game_data = {game_data}", flush=True)
     game_id = game_data['id']
-    print(f"game_id = {game_id}", flush=True)
     if not Server.does_game_exist(game_id):
         match = Match(game_data)
         Server.create_game(match)
     player = Server.get_player(id)
-    if player.socket_id != '':
-        return False
-    print(f"player = {player}")
-    print(f"sid = {sid}", flush=True)
+    if player.socket_id != '' and player.socket_id != sid:
+        Server._sio.disconnect(player.socket_id)
     player.socket_id = sid
     Server._clients[sid] = player
     await Server._sio.enter_room(sid, str(game_id))
