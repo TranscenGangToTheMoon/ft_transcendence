@@ -32,8 +32,7 @@ class Paddle(Widget):
             )
 
     def render(self):
-        return " " * Config.Paddle.height * Config.Paddle.width
-        # return "█" * Config.Paddle.height * Config.Paddle.width
+        return ""
 
     def reset(self):
         self.cY = (Config.Playground.cHeight - Config.Paddle.cHeight) // 2
