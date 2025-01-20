@@ -26,7 +26,7 @@ class Racket:
 
     def stop_moving(self, y):
         if self.velocity != 0:
-            if (abs(y - self.position.y) < 20):
+            if (abs(y - self.position.y) < 30):
                 self.position.y = y
         self.velocity = 0
         return self.position.y
