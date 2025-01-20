@@ -111,7 +111,7 @@ class GamePage(Screen):
     async def gameLoop(self):
         while (not self.connected or not self.gameStarted):
             await asyncio.sleep(0.1)
-#        print(f"Connected: {self.connected}, Game started: {self.gameStarted}")
+
         while (self.connected and self.gameStarted):
             if (self.lastFrame == 0):
                 self.lastFrame = time.perf_counter()
@@ -121,14 +121,12 @@ class GamePage(Screen):
             if (self.countdownIsActive == True):
                 await asyncio.sleep(1 / Config.frameRate)
                 continue
+
             # Move right paddle
             if (keyboard.Key.up in self.pressedKeys and keyboard.Key.down in self.pressedKeys):
                 if (self.paddleRight.direction != 0):
                     await self.sio.emit('stop_moving', {"position": self.paddleRight.cY})
-                    self.paddleRight.direction = 0
-                await asyncio.sleep(1 / Config.frameRate)
-                continue
-            if (keyboard.Key.up in self.pressedKeys):
+            elif (keyboard.Key.up in self.pressedKeys):
                 if (self.paddleRight.direction == 1):
                     await self.sio.emit('stop_moving', {"position": self.paddleRight.cY})
                 if (self.paddleRight.direction != -1):
@@ -156,8 +154,10 @@ class GamePage(Screen):
             # Check wall bounce
             if (self.ball.cY <= 0):
                 self.ball.cdY *= -1
+                self.ball.cY *= -1
             elif (self.ball.cY + Config.Ball.cHeight > Config.Playground.cHeight):
                 self.ball.cdY *= -1
+                self.ball.cY -= self.ball.cY + Config.Ball.cHeight - Config.Playground.cHeight
 
             self.lastFrame = time.perf_counter()
             await asyncio.sleep(1 / Config.frameRate)
