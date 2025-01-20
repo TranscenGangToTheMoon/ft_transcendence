@@ -32,7 +32,6 @@ class Ball(Widget):
         )
 
     def render(self):
-        # return "▄▄\n▀▀"
         return ""
 
     def move(self, dT: float):
