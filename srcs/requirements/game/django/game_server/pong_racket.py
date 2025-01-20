@@ -25,9 +25,10 @@ class Racket:
         self.velocity = 1
 
     def stop_moving(self, y):
+        if self.velocity != 0:
+            if (abs(y - self.position.y) < 20):
+                self.position.y = y
         self.velocity = 0
-        if (abs(y - self.position.y) < 20):
-            self.position.y = y
         return self.position.y
 
     def update(self, ball_size, canvas_height, time_delta):
