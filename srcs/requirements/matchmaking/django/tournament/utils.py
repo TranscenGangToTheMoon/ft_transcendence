@@ -27,20 +27,22 @@ def finish_tournament(tournament_id, winner_user_id):
 
 def create_match_new_stage(tournament_id):
     from tournament.models import Tournament
-    time.sleep(3)
 
     try:
         tournament = Tournament.objects.get(id=tournament_id)
     except Tournament.DoesNotExist:
         return
-    if tournament.current_stage.matches.filter(finished=False).exists():
+    matches = tournament.current_stage.matches.all()
+    if tournament.update_stage or matches.filter(finished=False).exists():
         return
 
+    tournament.set_update_stage(True)
+    time.sleep(3)
     stage = tournament.stages.get(stage=tournament.current_stage.stage - 1)
 
     try:
         previous = None
-        for match in tournament.current_stage.matches.all().order_by('n'):
+        for match in matches.order_by('n'):
             if previous is None:
                 previous = match
                 continue
@@ -50,4 +52,5 @@ def create_match_new_stage(tournament_id):
     except APIException:
         tournament.delete()
 
-    tournament.set_stage(stage)
+    tournament.current_stage = stage
+    tournament.set_update_stage(False)

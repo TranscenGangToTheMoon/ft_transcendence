@@ -47,6 +47,7 @@ def create_sse_event(
         event_code: EventCode,
         data: dict | None = None,
         kwargs: dict | None = None,
+        raise_exception: bool = False,
 ):
     sse_data = {
         'users_id': [users] if isinstance(users, int) else users,
@@ -62,6 +63,8 @@ def create_sse_event(
     try:
         return request_service('users', endpoints.Users.event, 'POST', sse_data)
     except NotFound as e:
-        raise e
+        if raise_exception:
+            raise e
     except APIException:
-        raise ServiceUnavailable(MessagesException.ServiceUnavailable.SSE)
+        if raise_exception:
+            raise ServiceUnavailable(MessagesException.ServiceUnavailable.SSE)

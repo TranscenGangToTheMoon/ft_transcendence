@@ -27,7 +27,4 @@ def send_sse_event(event: EventCode, instance, data=None, exclude_myself=True):
 def start_tournament_sse(instance):
     from tournament.serializers import TournamentSerializer
 
-    try:
-        create_sse_event(instance.users_id(), EventCode.TOURNAMENT_START, TournamentSerializer(instance).data, {'name': instance.name})
-    except APIException:
-        pass
+    create_sse_event(instance.users_id(), EventCode.TOURNAMENT_START, TournamentSerializer(instance).data, {'name': instance.name})
