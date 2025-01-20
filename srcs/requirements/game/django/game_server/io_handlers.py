@@ -112,7 +112,9 @@ async def stop_moving(sid, data):
 async def disconnect(sid):
     from game_server.server import Server
     try:
-        match_id = Server._clients[sid].match_id
-        await sync_to_async(Server.finish_game)(match_id, FinishReason.PLAYER_DISCONNECT, Server._clients[sid].user_id)
+        client = Server._clients[sid]
+        client.socket_id = ''
+        client.racket.stop_moving(client.racket.position.y)
+        Server._clients.pop(sid)
     except KeyError:
         pass # player has already disconnected
