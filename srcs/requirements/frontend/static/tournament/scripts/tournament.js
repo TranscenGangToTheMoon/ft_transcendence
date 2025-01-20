@@ -197,7 +197,7 @@ function tournamentStartCancel(){
 function createBracket(data) {
 	const bracketDiv = document.getElementById('bracket');
 	bracketDiv.innerHTML = '';
-	const rounds = ['sixteenth-final' ,'eighth-final', 'quarter-final', 'semi-final', 'final'];
+	const rounds = ['round of 16', 'quarter-final', 'semi-final', 'final'];
 	let firstPassed = false;
 
 	rounds.forEach(roundName => {
@@ -404,12 +404,23 @@ function loadTournament(tournament){
 	}
 	addTournamentSSEListeners();
 	if (tournament.matches){
-		if (!tournament.matches['semi-final']|| !tournament.matches['semi-final'].length){
+		if ((!tournament.matches['quarter-final']|| !tournament.matches['quarter-final'].length)
+			&& tournament.matches['round of 16']
+		){
+			tournament.matches['quarter-final'] = [];
+			for (i = 0; i < tournament.matches['round of 16'].length / 2; ++i)
+				tournament.matches['quarter-final'].push(null);
+		} 
+		if ((!tournament.matches['semi-final']|| !tournament.matches['semi-final'].length)
+			&& tournament.matches['quarter-final']
+		){
 			tournament.matches['semi-final'] = [];
 			for (i = 0; i < tournament.matches['quarter-final'].length / 2; ++i)
 				tournament.matches['semi-final'].push(null);
 		}
-		if (!tournament.matches['final'] || !tournament.matches['final'].length){
+		if ((!tournament.matches['final'] || !tournament.matches['final'].length)
+			&& tournament.matches['semi-final']
+		){
 			tournament.matches['final'] = [];
 			for (i = 0; i < tournament.matches['semi-final'].length / 2; ++i)
 				tournament.matches['final'].push(null);
