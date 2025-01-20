@@ -14,7 +14,7 @@ from textual            import on, work
 from textual.app        import ComposeResult
 from textual.geometry   import Offset
 from textual.screen     import Screen
-from textual.widgets    import Button, Digits, Footer, Header
+from textual.widgets    import Button, Digits, Footer, Header, Label
 
 # Local imports
 from classes.game.BallWidget                    import Ball
@@ -38,6 +38,7 @@ class GamePage(Screen):
         self.ball = Ball()
         self.scoreLeft = Digits("0", id="scoreLeft")
         self.scoreRight = Digits("0", id="scoreRight")
+        self.opponentLabel = Label(User.opponent, id="opponentLabel")
         self.aScore = 0
         self.bScore = 0
 
@@ -66,6 +67,11 @@ class GamePage(Screen):
 
         self.scoreLeft.styles.offset = Offset(Config.Console.width // 4, 5)
         self.scoreRight.styles.offset = Offset(Config.Console.width // 4 * 3 - 4, 5)
+        self.opponentLabel.styles.layer = "4"
+        self.opponentLabel.styles.offset = Offset(
+            self.playground.offset.x,
+            self.playground.offset.y + Config.Playground.height + 1
+        )
 
         # Key handling
         self.listener = keyboard.Listener(
@@ -85,7 +91,7 @@ class GamePage(Screen):
             yield self.paddleLeft
             yield self.ball
             yield self.paddleRight
-        yield Button("Exit Button", id="exitAction")
+        yield self.opponentLabel
         yield Footer()
 
     @on(Button.Pressed, "#exitAction")
