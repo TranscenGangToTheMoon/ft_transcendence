@@ -3,7 +3,7 @@ import os
 from urllib.parse import urlparse
 
 # Textual imports
-from textual import on, events
+from textual            import on
 from textual.app        import ComposeResult
 from textual.containers import Horizontal, Vertical
 from textual.screen     import Screen
