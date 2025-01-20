@@ -1,16 +1,3 @@
-function removeFirstInactiveChatTab() {
-    let chatTabs = document.getElementById('chatTabs');
-    let tabLinks = chatTabs.querySelectorAll('.nav-link');
-    
-    for (let tabLink of tabLinks) {
-        if (!tabLink.classList.contains('active')) {
-			console.log('Chat: Removing first inactive chat tab', tabLink);
-        }
-    }
-    return null;
-}
-
-
 function parsChatInfo(chat) {
 	let chatInfo = {
 		'chatId': chat.id,
@@ -100,7 +87,7 @@ function setupSocketListeners(chatInfo)
 	socket.off();
 	
 	socket.on("connect", () => {
-		console.log("Chat: Connected to the chat server to chat with", chatInfo.target);
+		console.log("Chat: Connected to the chat server to talk with", chatInfo.target);
 	});
 
 	socket.on("connect_error", async (data) => {
@@ -110,7 +97,7 @@ function setupSocketListeners(chatInfo)
 		}
 		else {
 			console.log('Error chat:', data);
-			closeChatTab(chatInfo);
+			await closeChatTab(chatInfo);
 			if (data.message === undefined) data.message = 'Error while connecting to the chat server';
 			displayChatError(data.message, 'container');
 		}
@@ -147,7 +134,7 @@ function setupSocketListeners(chatInfo)
 		else {
 			console.log('Error chat:', data);
 			if (data.message === undefined) data.message = 'Error with chat server';
-			closeChatTab(chatInfo);
+			await closeChatTab(chatInfo);
 			displayChatError(data.message, 'container');
 		}
 	});
@@ -160,12 +147,14 @@ function setupSocketListeners(chatInfo)
 function displayMessages(chatInfo, chatMessages, method='afterbegin'){
 	const chatBox = document.getElementById('messages'+chatInfo.target);
 	chatMessages.forEach(element => {
+		console.log('Chat: Displaying message:', element);
 		if (element.author !== chatInfo.targetId) {
 			chatBox.insertAdjacentHTML(method, `<div><p><strong>You:</strong> ${element.content}</p></div>`);
 		} else {
 			chatBox.insertAdjacentHTML(method, `<div><p><strong>${chatInfo.target}:</strong> ${element.content}</p></div>`);
 		}
 	});
+	chatBox.scrollTop = chatBox.scrollHeight;
 }
 
 async function getMoreOldsMessages(chatInfo){
@@ -241,7 +230,7 @@ async function createChatUserCard(chatInfo) {
 			console.log('Chat: Chat deleted:', APIAnswer);
 			if (APIAnswer && APIAnswer.detail) throw {'code': 400, 'detail': APIAnswer.detail};
 			chatUserCard.remove();
-			closeChatTab(chatInfo);
+			await closeChatTab(chatInfo);
 		} catch(error) {
 			console.log('Error chat:', error);
 			if (error.detail === undefined) error.detail = 'Error when attempting to delete chat';
@@ -289,7 +278,6 @@ async function displayChatsList(filter='') {
 			throw {'code': 400, 'detail': apiAnswer.detail};
 		}
 		if (apiAnswer.count > 0) {
-			console.log('Chat: Chats found');
 			apiAnswer.results.forEach(async element => {
 				data = parsChatInfo(element);
 				await createChatUserCard(data);
@@ -347,13 +335,32 @@ async function searchChatButton(username) {
 		console.log('Chat: New chat created:', chatRequest);
 	}
 	else {
+		if (lastClick === 'chatTab' + apiAnswer.results[0].chat_with.username + 'Link') {
+			console.log('Chat: Chat already open');
+			const chatModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('chatListModal'));
+			chatModal.hide();
+			return;
+		}
 		console.log('Chat: Chat already exist => loading chat');
 		chatInfo = parsChatInfo(apiAnswer.results[0]);
-		console.log('Chat: Chat loaded:', chatRequest);
 	}
 	document.getElementById('searchChatForm').reset();
 	await displayChatsList();
 	await openChatTab(chatInfo.chatId);
+}
+
+function removeFirstInactiveChatTab() {
+    let chatTabs = document.getElementById('chatTabs');
+    let tabLinks = chatTabs.querySelectorAll('.nav-link');
+
+    for (let tabLink of tabLinks) {
+        if (!tabLink.classList.contains('active')) {
+			console.log('Chat: Removing first inactive chat tab', tabLink.id.slice(0, -4));
+			chatTabs.querySelector('#' + tabLink.id.slice(0, -4) + "Button").click();
+			return ;
+        }
+    }
+    return null;
 }
 
 async function closeChatTab(chatInfo, )
@@ -445,7 +452,7 @@ async function chatTabListener(chatInfo)
 	document.getElementById('chatTab' + chatInfo.target).addEventListener('click', async e => {
 		e.preventDefault();
 		if (e.target.id === 'chatTab' + chatInfo.target + 'Button') {
-			closeChatTab(chatInfo);
+			await closeChatTab(chatInfo);
 			return;
 		}
 		if (e.target.id === 'chatTab' + chatInfo.target + 'Link') {
@@ -487,7 +494,6 @@ function sendMessageListener(target) {
 
 async function openChatTab(chatId)
 {
-	console.log('Chat: Opening chat tab', chatId);
 	chat = await getChatInstance(chatId);
 	if (!chat) return;
 	userInformations.notifications['chats'] -= chat.unread_messages;
@@ -507,12 +513,14 @@ async function openChatTab(chatId)
 			if (chatView) chatView.remove();
 		});
 	}
-	if (openChat[chatInfo.chatId] && openChat[chatInfo.chatId].target !== chatInfo.target) {
-		closeChatTab(openChat[chatInfo.chatId]);
+	else {
+		if (openChat[chatInfo.chatId] && openChat[chatInfo.chatId].target !== chatInfo.target) {
+			await closeChatTab(openChat[chatInfo.chatId]);
+		}
+		if (!openChat[chatId] && chatTabs.childElementCount >= 4){
+			removeFirstInactiveChatTab();
+		}
 	}
-
-	// console.log('Chat: Someone called me but is it the first or secontime ????', chatTabs.childElementCount);
-	// /if (chatTabs.childElementCount >= 6)
 	
 	if (!document.getElementById('chatTab'+chatInfo.target))
 	{
@@ -527,12 +535,11 @@ async function openChatTab(chatId)
 		}
 		catch (error) {
 			console.log('Error chat:', error);
-			closeChatTab(chatInfo);
+			await closeChatTab(chatInfo);
 			if (error.detail === undefined) error.detail = 'Error while loading old messages';
 			displayChatError(error.detail, 'container');
 			return;
 		}
-		console.log('Chat: Chat tab created');
 	}
 	else {
 		if (!document.getElementById('chatTab'+chatInfo.target).querySelector('a').classList.contains('active'))
@@ -546,17 +553,14 @@ async function openChatTab(chatId)
 
 async function displayGameInviteInChat(inviteInfo) {
 	chatInfo = openChat[userChat[inviteInfo.user]];
-	console.log('Chat: Displaying game invite in chat', chatInfo);
 	var messagesDiv = document.getElementById('messages'+chatInfo.target);
 	if (!messagesDiv) {
-		console.log('Error chat: this chat is not oppened');
 		return;
 	}
 	var chatInviteGameBox = document.getElementById('chatInviteGameBox' + inviteInfo.user);
 	if (chatInviteGameBox) chatInviteGameBox.remove();
 	chatInviteGameBox = document.createElement('div');
 	messagesDiv.appendChild(chatInviteGameBox);
-	messagesDiv.scrollTop = messagesDiv.scrollHeight;
 	chatInviteGameBox.id = 'chatInviteGameBox' + inviteInfo.user;
 	chatInviteGameBox.classList.add('chatInviteGameBox');
 	await loadContent('/chatTemplates/chatInviteGameBox.html', 'chatInviteGameBox' + inviteInfo.user);
@@ -564,9 +568,14 @@ async function displayGameInviteInChat(inviteInfo) {
 	chatInviteGameBox.querySelector('.chatInviteGameType').innerText = inviteInfo.game_mode;
 	chatInviteGameBox.querySelector('.chatInviteGameButton').addEventListener('click', async e => {
 		e.preventDefault();
-		console.log('Chat: Accepting game invite', inviteInfo.game_url.slice(0, -1));
+		console.log('Chat: Accepting game invite');
 		await navigateTo(inviteInfo.game_url.slice(0, -1));
 	});
+	chatInviteGameBox.querySelector('.chatInviteGameDelete').addEventListener('click', async e => {
+		e.preventDefault();
+		e.target.parentElement.parentElement.remove();
+	});
+	messagesDiv.scrollTop = messagesDiv.scrollHeight;
 }
 
 var lastClick = undefined;

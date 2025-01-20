@@ -68,7 +68,7 @@ async def connect(sid, environ, auth):
     else:
         print(f"Connection failed : {sid}")
         raise ConnectionRefusedError({"error": 400, "message": "Missing args"})
-    await sio.emit('message', {'author':'', 'content': 'You\'re now connected'}, to=sid)
+    await sio.emit('debug', {'content': 'You\'re now connected'}, to=sid)
 
 
 
