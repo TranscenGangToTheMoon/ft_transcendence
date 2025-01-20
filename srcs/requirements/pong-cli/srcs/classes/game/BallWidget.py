@@ -24,6 +24,8 @@ class Ball(Widget):
         self.styles.background = "white"
         self.cX = Config.Playground.cWidth / 2 - (Config.Ball.cWidth / 2)
         self.cY = Config.Playground.cHeight / 2 - (Config.Ball.cHeight / 2)
+        self.cdX = 0
+        self.cdY = 0
         self.offset = Offset(
             int(self.cX  * Config.Playground.width / Config.Playground.cWidth),
             int(self.cY * Config.Playground.height / Config.Playground.cHeight)
@@ -33,7 +35,15 @@ class Ball(Widget):
         # return "▄▄\n▀▀"
         return ""
 
-    def move(self, cX: float, cY: float):
+    def move(self, dT: float):
+        self.cX += self.cdX / dT
+        self.cY += self.cdY / dT
+        self.offset = Offset(
+            int(self.cX  * Config.Playground.width / Config.Playground.cWidth),
+            int(self.cY * Config.Playground.height / Config.Playground.cHeight)
+        )
+
+    def moveTo(self, cX: float, cY: float):
         self.cX = cX
         self.cY = cY
         self.offset = Offset(

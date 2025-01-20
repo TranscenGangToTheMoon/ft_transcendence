@@ -1,6 +1,7 @@
 # Python imports
 import asyncio
 import ssl
+import time
 import aiohttp
 import socketio
 from pynput import keyboard
@@ -40,6 +41,7 @@ class GamePage(Screen):
         self.aScore = 0
         self.bScore = 0
 
+        self.lastFrame = 0
         self.countdownIsActive = False
         self.pressedKeys = set()
         self.listener = None
@@ -111,6 +113,11 @@ class GamePage(Screen):
             await asyncio.sleep(0.1)
 #        print(f"Connected: {self.connected}, Game started: {self.gameStarted}")
         while (self.connected and self.gameStarted):
+            if (self.lastFrame == 0):
+                self.lastFrame = time.perf_counter()
+                await asyncio.sleep(1 / Config.frameRate)
+                continue
+            dTime = time.perf_counter() - self.lastFrame
             if (self.countdownIsActive == True):
                 await asyncio.sleep(1 / Config.frameRate)
                 continue
@@ -126,23 +133,33 @@ class GamePage(Screen):
                     await self.sio.emit('stop_moving', {"position": self.paddleRight.cY})
                 if (self.paddleRight.direction != -1):
                     await self.sio.emit('move_up')
-                self.paddleRight.moveUp()
+                self.paddleRight.moveUp(1 / dTime)
             elif (keyboard.Key.down in self.pressedKeys):
                 if (self.paddleRight.direction == -1):
                     await self.sio.emit('stop_moving', {"position": self.paddleRight.cY})
                 if self.paddleRight.direction != 1:
                     await self.sio.emit('move_down')
-                self.paddleRight.moveDown()
+                self.paddleRight.moveDown(1 / dTime)
             elif (self.paddleRight.direction != 0):
                 await self.sio.emit('stop_moving', {"position": self.paddleRight.cY})
                 self.paddleRight.direction = 0
 
             # Move left paddle
             if (self.paddleLeft.direction == -1):
-                self.paddleLeft.moveUp()
+                self.paddleLeft.moveUp(1 / dTime)
             if (self.paddleLeft.direction == 1):
-                self.paddleLeft.moveDown()
+                self.paddleLeft.moveDown(1 / dTime)
 
+            # Move ball
+            self.ball.move(1 / dTime)
+
+            # Check wall bounce
+            if (self.ball.cY <= 0):
+                self.ball.cdY *= -1
+            elif (self.ball.cY + Config.Ball.cHeight > Config.Playground.cHeight):
+                self.ball.cdY *= -1
+
+            self.lastFrame = time.perf_counter()
             await asyncio.sleep(1 / Config.frameRate)
 
     async def launchSocketIO(self):
@@ -176,6 +193,7 @@ class GamePage(Screen):
 
         @self.sio.on('start_game')
         async def startGameAction():
+            self.lastFrame = 0
             self.gameStarted = True
             # print(self.connected, flush=True)
 
@@ -188,11 +206,9 @@ class GamePage(Screen):
 
         @self.sio.on('game_state')
         async def gameStateAction(data):
-#            print(f"Score Left Region: {self.scoreLeft.region}")
-#            print(f"Score Left Size: {self.scoreLeft.styles.width}")
-#            print(f"Score Right Region: {self.scoreRight.region}")
-#            print(f"Score Right Size: {self.scoreRight.styles.width}")
-            self.ball.move(data["position_x"], data["position_y"])
+            self.ball.cdX = data["speed_x"]
+            self.ball.cdY = data["speed_y"]
+            self.ball.moveTo(data["position_x"], data["position_y"])
 
         @self.sio.on('connect_error')
         async def connectErrorAction(data):
