@@ -68,7 +68,7 @@ class PongCLI(App):
                                         # print(f"User opponent: {User.opponent}")
                                         await self.push_screen(GamePage())
                                     elif (event != "game-start" and event != "ping"):
-                                        # print(f"{event}: {data}")
+                                    #   print(f"{event}: {data}")
                             except (IndexError, ValueError) as error:
                                 continue
                 finally:

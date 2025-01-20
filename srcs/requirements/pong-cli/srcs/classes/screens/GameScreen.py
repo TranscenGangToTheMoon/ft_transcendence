@@ -29,7 +29,10 @@ from classes.utils.user                         import User
 class GamePage(Screen):
     SUB_TITLE = "Game Page"
     CSS_PATH = "styles/GamePage.tcss"
-
+    BINDINGS = [
+        ("^q", "exit", "Exit"),
+        # ("", "forfeit", "Forfeit")
+    ]
     def __init__(self):
         super().__init__()
         self.playground = Playground()
@@ -59,6 +62,8 @@ class GamePage(Screen):
             # engineio_logger=True,
         )
 
+    def action_forfeit(self):
+        self.dismiss()
 
     async def on_mount(self) -> None:
         console = Console()
@@ -93,10 +98,6 @@ class GamePage(Screen):
             yield self.paddleRight
         yield self.opponentLabel
         yield Footer()
-
-    @on(Button.Pressed, "#exitAction")
-    def exitAction(self) -> None:
-        self.dismiss()
 
     def onPress(self, key):
         try:
