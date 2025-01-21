@@ -56,6 +56,9 @@ class SSEView(APIView):
                             get_user(id=_user_id).disconnect()
                     except (IndexError, NotFound):
                         pass
+            except redis.exceptions.ConnectionError:
+                get_user(id=_user_id).disconnect()
+                raise ServiceUnavailable('event-queue')
 
         user = get_user(request)
         launch_ping_loop = user.connect()

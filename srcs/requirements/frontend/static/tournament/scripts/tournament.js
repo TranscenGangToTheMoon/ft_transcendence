@@ -132,20 +132,21 @@ function addParticipant(participant){
 	const tournamentViewDiv = document.getElementById('tournamentView');
 	const participantDiv = document.createElement('div');
 	console.log('participant',participant)
+	participantDiv.id = `tParticipant${participant.id}`;
+	participantDiv.className = 'tournament-participant';
 	participantDiv.innerHTML = `
-	<div class='tournament-participant' id="tParticipant${participant.id}">
 		<img class="profile-pic-medium" src="${participant['profile_picture']}" 
 		onerror="this.onerror=null; this.src='/assets/imageNotFound.png'" 
 		alt="profile pic">
 		<div class='trunc-username'>
 			${participant.username}
 		</div>
-	</div>
 	`
 	tournamentViewDiv.appendChild(participantDiv);
 	if (participant.id !== userInformations.id){
 		participantDiv.addEventListener('contextmenu', function(e) {
 			e.preventDefault();
+			console.log('test');
 			clickedUserDiv = this;
 			const contextMenu = document.getElementById('contextMenu');
 			contextMenu.style.left = `${e.pageX}px`;
