@@ -30,11 +30,10 @@
             y : config.canvasHeight / 2,
             x : config.canvasWidth / 4
         }
-    
         config.playerScore = {
             y : config.enemyScore.y,
             x : config.canvasWidth - config.enemyScore.x
-        } 
+        }
     }
     setScoreCoords();
 
@@ -258,7 +257,7 @@
         if (state.keys['ArrowUp'] && state.keys['ArrowDown']){
             if (state.paddles[userInformations.id].speed != 0){
                 if (typeof gameSocket !== 'undefined'){
-                    // console.log('emitting stop_moving');
+                    console.log('emitting stop_moving');
                     gameSocket.emit('stop_moving', {'position': state.paddles[userInformations.id].y});
                 }
                 state.paddles[userInformations.id].speed = 0;
@@ -269,10 +268,11 @@
             if (typeof gameSocket !== 'undefined'){
                 if (state.paddles[userInformations.id].speed === 1){
                 		gameSocket.emit('stop_moving', {'position': state.paddles[userInformations.id].y});
-                  	// console.log('emitting stop_moving');
+                  	console.log('emitting stop_moving');
                 }
                 gameSocket.emit('move_up');
-                // console.log('emitting move_up')
+				console.log('connection_status: ',gameSocket.connected);
+                console.log('emitting move_up')
             }
             state.paddles[userInformations.id].speed = -1;
         }
@@ -280,10 +280,11 @@
             if (typeof gameSocket !== 'undefined'){
                 if (state.paddles[userInformations.id].speed === -1){
                     gameSocket.emit('stop_moving', {'position': state.paddles[userInformations.id].y});
-                    // console.log('emitting move_stop');
+                    console.log('emitting move_stop');
                 }
                 gameSocket.emit('move_down');
-                // console.log('emitting move_down')
+                console.log('connection_status: ',gameSocket.connected);
+                console.log('emitting move_down')
             }
             state.paddles[userInformations.id].speed = 1;
         }
@@ -291,7 +292,7 @@
             state.paddles[userInformations.id].speed = 0;
             if (typeof gameSocket !== 'undefined'){
                 gameSocket.emit('stop_moving', {'position': state.paddles[userInformations.id].y});
-                // console.log('emitting stop_moving');
+                console.log('emitting stop_moving');
             }
         }
 
@@ -454,7 +455,7 @@ function initSocket(){
     window.gameSocket = gameSocket;
     // console.log(socket)
 	gameSocket.on('connect', () => {
-        // console.log('Connected to socketIO server!');
+        console.log('Connected to socketIO server!');
     });
     gameSocket.on('disconnect', () => {
         console.log('disconnected from gameSocket');
@@ -613,7 +614,7 @@ async function gameStart(event){
     data = data.data;
     console.log('game-start received (game)');
     try {
-        
+
         await initData(data);
     }
     catch (error){

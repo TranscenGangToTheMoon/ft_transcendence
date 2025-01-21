@@ -2,6 +2,10 @@
     font-family: 'Marker Felt, fantasy';
 }
 
+body {
+    background-image: url("/assets/background.png")
+}
+
 .dropdown-item:active {
     background-color: unset;
     color: unset;
