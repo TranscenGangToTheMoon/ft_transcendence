@@ -214,13 +214,16 @@ function createButtonClose(id){
 }
 
 async function createChatUserCard(chatInfo) {
+	verifChatCard = document.getElementById('chatListElement' + chatInfo.target);
+	if (verifChatCard) return;
+	if (!chatInfo) return;
 	let chatUserCard = document.createElement('div');
 	chatUserCard.id = 'chatListElement' + chatInfo.target;
 	chatUserCard.classList.add('chatUserCard');
 	chatsList.appendChild(chatUserCard);
+	console.log('Chat: Creating chat user card laaaaaaaaa:', chatInfo);
 
 	await loadContent('/chatTemplates/chatUserCard.html', chatUserCard.id);
-	if (!chatUserCard.querySelector('.chatUserCardTitleUsername') || !chatInfo.target) return;
 	chatUserCard.querySelector('.chatUserCardTitleUsername').innerText = chatInfo.target + ':';
 	if (chatInfo.lastMessage === null) {
 		chatUserCard.querySelector('.chatUserCardLastMessage').innerText = 'Start the conversation ;)';
@@ -287,10 +290,11 @@ async function displayChatsList(filter='') {
 			throw {'code': 400, 'detail': apiAnswer.detail};
 		}
 		if (apiAnswer.count > 0) {
-			apiAnswer.results.forEach(async element => {
+			for(element of apiAnswer.results) {
+				console.log('Chat: Displaying chat:', element);
 				data = parsChatInfo(element);
 				await createChatUserCard(data);
-			});
+			}
 			nextChatsRequest = apiAnswer.next;
 		}
 		else {
