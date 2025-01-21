@@ -24,9 +24,9 @@
     </div>
     <div id="pPassword">
         Password
-        <form id="pChangePassword" class="d-flex">
+        <form class="d-flex">
             <input class="form-control" type="password" id="pPasswordInput" placeholder="new password">
-            <button class="btn btn-dark mx-2" type="submit">change password</button>
+            <button class="btn btn-dark mx-2" id="pChangePassword" type="submit">change password</button>
         </form>
         <div id="pChangePasswordError" class="inputError"></div>
     </div>
@@ -52,11 +52,31 @@
             <div class="modal-body">
                 Are you sure you want to delete your account? This action is permanent and cannot be undone.
                 To confirm your request, please re-enter your password below:
-                <form id="test">
+                <form id="deleteAccountConfirm">
                     <input type="password" id="pConfirmDeletion">
                     <button type="submit" class="btn btn-danger">Confirm</button>
                 </form>
                 <div id="pContextError" class="inputError"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="pChangePasswordModal" tabindex="-1" aria-labelledby="pChangePasswordModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="pChangePasswordModalLabel">Change password</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to change your password? This action is permanent and cannot be undone.
+                To confirm your request, please re-enter your password below:
+                <form id="changePasswordConfirm">
+                    <input type="password" id="pConfirmPassword">
+                    <button type="submit" class="btn btn-danger">Confirm</button>
+                </form>
+                <div id="pChangeContextError" class="inputError"></div>
             </div>
         </div>
     </div>
