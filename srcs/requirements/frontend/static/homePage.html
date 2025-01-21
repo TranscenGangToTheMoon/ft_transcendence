@@ -6,20 +6,23 @@
 
 <h1>========================================================</h1> -->
 
-<h1>play</h1>
-<div id="interface">
-    <div id="gamemodes">
-        <button class="btn btn-outline-dark" id="local">local</button>
-        <button class="btn btn-outline-dark game" id="duel">duel</button>
-        <button class="btn btn-outline-dark game no-guest" id="ranked">ranked</button>
-        <button class="btn btn-outline-dark game" id="clash">clash</button>
-        <button class="btn btn-outline-dark game" id="customGame">Custom Game</button>
-        <button class="btn btn-outline-dark game" id="tournament">tournament</button>
+<div class="container">
+    <h1>play</h1>
+    <div id="interface" class="d-flex">
+        <select class="form-select" aria-label="Select Game Mode" id="gameModeSelect">
+            <option value="0" class="" id="local">local</option>
+            <option value="1" class="game" id="duel">duel</option>
+            <option value="2" class="game no-guest" id="ranked">ranked</option>
+            <option value="3" class="game" id="clash">clash</option>
+            <option value="4" class="game" id="customGame">Custom Game</option>
+            <option value="5" class="game" id="tournament">tournament</option>
+        </select>
+        <button id="playGame" class="btn btn-dark">Play</button>
         <button class="btn btn-warning no-user" onclick="navigateTo('/profile')">guest profile</button>
-    </div>
-    <div id="actions">
-        <button id="chat" class="btn btn-outline-dark chat-badges no-guest" type="button">chat</button>
-        <button class="btn btn-outline-dark friend-badges no-guest" id="friends" type="button" data-bs-toggle="modal" data-bs-target="#friendListModal">friends</button>
+        <div id="actions">
+            <button id="chat" class="btn btn-outline-dark chat-badges no-guest w-100" type="button">chat</button>
+            <button class="btn btn-outline-dark friend-badges no-guest w-100" id="friends" type="button" data-bs-toggle="modal" data-bs-target="#friendListModal">friends</button>
+        </div>
     </div>
 </div>
 

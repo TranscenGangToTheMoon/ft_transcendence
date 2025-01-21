@@ -1,13 +1,13 @@
 
-document.getElementById('ranked').addEventListener('click', async event => {
+async function playRanked(){
     await navigateTo('/game/ranked');
-})
+}
 
-document.getElementById('duel').addEventListener('click', async event => {
+async function playDuel(){
     await navigateTo('/game/duel');
-})
+}
 
-document.getElementById('clash').addEventListener('click', async event => {
+async function playClash(event) {
     event.preventDefault();
     if (userInformations.is_guest){
         document.getElementById('lobbyCodeContextError').innerText = '';
@@ -37,9 +37,9 @@ document.getElementById('clash').addEventListener('click', async event => {
     catch (error){
         console.log(error);
     }
-})
+}
 
-document.getElementById('customGame').addEventListener('click', async event => {
+async function playCustomGame(event){
     event.preventDefault();
     if (userInformations.is_guest){
         document.getElementById('lobbyCodeContextError').innerText = '';
@@ -68,25 +68,27 @@ document.getElementById('customGame').addEventListener('click', async event => {
     catch(error){
         console.log(error);
     }
-})
+}
 
-document.getElementById('tournament').addEventListener('click', async event => {
-    // try {
-        await navigateTo('/tournament');
-    // }
-    // catch(error){
-    //     console.log(error);
-    // }
-})
+async function playTournament(){
+    await navigateTo('/tournament');
+}
 
-document.getElementById('local').addEventListener('click', async () => {
+async function playLocal(){
     await navigateTo('/game/local');
-})
+}
 
 document.getElementById('chat').addEventListener('click', async e => {
 	e.preventDefault();
     await displayChatsList();
 });
+
+document.getElementById('playGame').addEventListener('click', async e => {
+    const gameModeFunctions = [playLocal, playDuel, playRanked, playClash, playCustomGame, playTournament];
+    const selectorValue = document.getElementById('gameModeSelect').value;
+
+    await gameModeFunctions[selectorValue](e);
+})
 
 function forPhoneChanges(){
     try {

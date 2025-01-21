@@ -1,7 +1,7 @@
 async function loadRankedStats(){
     try {
         let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/users/me/stats/ranked/`);
-        console.log(data);
+        console.log('cestla',data);
     }
     catch (error){
         console.log(error);
