@@ -8,6 +8,9 @@ body {
     background-size: cover;
     background-attachment: fixed;
     min-height: 100vh;
+    height: 100vh;
+    max-height: 100vh;
+    overflow: hidden;
 }
 
 .dropdown-item:active {
@@ -99,4 +102,9 @@ body {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+.tab-content{
+    background-color: white;
+    /* border-radius: 10px; */
 }
