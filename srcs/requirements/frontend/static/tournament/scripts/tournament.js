@@ -131,9 +131,17 @@ document.getElementById('cBlock').addEventListener('click', async () => {
 function addParticipant(participant){
 	const tournamentViewDiv = document.getElementById('tournamentView');
 	const participantDiv = document.createElement('div');
-	participantDiv.id = `tParticipant${participant.id}`;
-	participantDiv.classList.add('tournament-participant');
-	participantDiv.innerText = participant.username;
+	console.log('participant',participant)
+	participantDiv.innerHTML = `
+	<div class='tournament-participant' id="tParticipant${participant.id}">
+		<img class="profile-pic-medium" src="${participant['profile_picture']}" 
+		onerror="this.onerror=null; this.src='/assets/imageNotFound.png'" 
+		alt="profile pic">
+		<div class='trunc-username'>
+			${participant.username}
+		</div>
+	</div>
+	`
 	tournamentViewDiv.appendChild(participantDiv);
 	if (participant.id !== userInformations.id){
 		participantDiv.addEventListener('contextmenu', function(e) {
