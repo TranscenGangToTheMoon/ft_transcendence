@@ -96,10 +96,12 @@
     canvas.width = config.canvasWidth;
     canvas.height = config.canvasHeight;
 
-    const paddleImage = new Image();
-    paddleImage.src = "/assets/paddle.png";
+    const rightPaddleImage = new Image();
+    rightPaddleImage.src = "/assets/paddle_right.png";
+    const leftPaddleImage = new Image();
+    leftPaddleImage.src = "/assets/paddle_left.png";
     const ballImage = new Image();
-    ballImage.src = "/assets/ball.png";
+    ballImage.src = "/assets/ball2.png";
 
     function setFont(){
         ctx.font = config.font;
@@ -436,7 +438,10 @@
     function drawPaddles(){
         for (let paddle in state.paddles){
             paddle = state.paddles[paddle];
-            ctx.drawImage(paddleImage, paddle.x, paddle.y, config.paddleWidth, config.paddleHeight);
+            if (paddle.x < config.canvasWidth / 2)
+	            ctx.drawImage(leftPaddleImage, paddle.x, paddle.y, config.paddleWidth, config.paddleHeight);
+			else
+	            ctx.drawImage(rightPaddleImage, paddle.x, paddle.y, config.paddleWidth, config.paddleHeight);
         }
     }
 
