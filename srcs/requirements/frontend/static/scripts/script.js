@@ -64,14 +64,9 @@ async function apiRequest(token, endpoint, method="GET", authType="Bearer",
             if (error.code === 500 || error.message === 'Failed to fetch')
                 document.getElementById('container').innerText = `alala pas bien ${error.code? `: ${error.code}` : ''} (jcrois c'est pas bon)`;
             if (error.code === 502 || error.code === 503){
-                pathName = '/service-unavailable';
                 closeExistingModals();
-                if (nav)
-                    await navigateTo('/service-unavailable', true, true);
-                else{
-                    history.replaceState({}, '', '/service-unavailable');
-                    handleRoute();
-                }
+                console.log('service unavailable');
+                // todo add triggerAlert
             }
             throw error;
         })
@@ -268,10 +263,9 @@ async function handleRoute() {
     if (containsCode(path))
         path = "/" + path.split("/")[1];
     const routes = {
-        '/': '/homePage.html',
-        '/service-unavailable' : '/503.html',
-        '/profile' : 'profile.html',
-        '/lobby' : '/lobby.html',
+        '/': '/homePage/homePage.html',
+        '/profile' : '/profile/profile.html',
+        '/lobby' : '/lobby/lobby.html',
 
         '/game/ranked' : '/game/game.html',
         '/game/duel' : '/game/game.html',
@@ -283,7 +277,7 @@ async function handleRoute() {
         '/tournament' : '/tournament/tournament.html'
     };
 
-    const page = routes[path] || '/404.html';
+    const page = routes[path] || '/errors/404.html';
     await loadContent(page);
 }
 
@@ -739,7 +733,7 @@ async function displayNotification(icon=undefined, title=undefined, body=undefin
     }
     const toastContainer = document.getElementById('toastContainer');
 
-    await loadContent('/notification.html', 'toastContainer', true);
+    await loadContent('/notification/notification.html', 'toastContainer', true);
     const notification = document.getElementById('notification');
     notification.id = `notification${notificationIdentifier}`;
     if (icon)
@@ -871,14 +865,14 @@ async function loadFriendListModal() {
     const friendModal = document.getElementById('friendListModal');
     if (friendModal)
         friendModal.remove();
-    await loadContent('/friendList.html', 'modals', true);
+    await loadContent('/friends/friendList.html', 'modals', true);
 }
 
 async function loadBlockedModal(){
     const friendModal = document.getElementById('blockedUsersModal')
     if (friendModal)
         friendModal.remove();
-    await loadContent('/blockedUsers.html', 'modals', true);
+    await loadContent('/blockedUsers/blockedUsers.html', 'modals', true);
 }
 
 async function loadChatListModal(){
@@ -889,11 +883,11 @@ async function loadChatListModal(){
 }
 
 async function  loadUserProfile(){
-    let profileMenu = 'profileMenu.html';
+    let profileMenu = 'profileMenu/profileMenu.html';
 
     document.getElementById('username').innerText = userInformations.username;
     if (userInformations.is_guest){
-        profileMenu = 'guestProfileMenu.html'
+        profileMenu = 'profileMenu/guestProfileMenu.html'
         document.getElementById('trophies').innerText = "";
     }
     else {

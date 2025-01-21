@@ -1,9 +1,9 @@
 async function loadTabs() {
     const tabFiles = {
-        'account' : 'profileTemplates/account.html',
-        'friends' : 'profileTemplates/friends.html',
-        'statistics': 'profileTemplates/statistics.html',
-        'history' : 'profileTemplates/matchHistory.html',
+        'account' : '/profile/profileTemplates/account.html',
+        'friends' : '/profile/profileTemplates/friends.html',
+        'statistics': '/profile/profileTemplates/statistics.html',
+        'history' : '/profile/profileTemplates/matchHistory.html',
     }
 
     for (const key in tabFiles){
