@@ -66,27 +66,37 @@ document.getElementById('pDownloadData').addEventListener('click', async () => {
         const response = await fetch('/api/users/me/downalod-data/', {
             method: 'GET',
             headers: {
+                Authorization: 'Bearer ' + getAccessToken(),
                 'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + getAccessToken(),
+                // Remove Content-Type since we're expecting a file, not JSON
             }
         });
 
         if (!response.ok) {
             throw new Error(`Error while downloading: ${response.statusText}`);
         }
-        const data = await response.json();
 
-        const file = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-        const fileURL = URL.createObjectURL(file);
+        // Get the file directly as blob instead of parsing as JSON
+        const blob = await response.blob();
+        
+        // Create download link
+        const fileURL = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = fileURL;
-        link.download = 'your_data.json';
+        
+        // Get filename from Content-Disposition header if available
+        const contentDisposition = response.headers.get('Content-Disposition');
+        const filename = contentDisposition
+            ? contentDisposition.split('filename=')[1].replace(/["']/g, '')
+            : 'your_data.json';
+            
+        link.download = filename;
         link.click();
         URL.revokeObjectURL(fileURL);
     } catch (error) {
         console.error('Erreur:', error);
     }
-})
+});
 
 document.getElementById('pChangePassword').addEventListener('submit', async event => {
     event.preventDefault();
