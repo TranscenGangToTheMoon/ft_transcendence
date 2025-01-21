@@ -19,8 +19,10 @@ async function deleteAccount(password) {
             }
             else if (!data){
                 deleteModal.hide();
+                sse.close();
                 removeTokens();
                 await generateToken();
+                initSSE();
                 await fetchUserInfos(true);
                 await navigateTo('/');
                 displayMainAlert('Account deleted', 'Your account has been successfully deleted. You have been redirected to homepage.');
