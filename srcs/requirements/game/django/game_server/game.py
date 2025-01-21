@@ -292,7 +292,6 @@ class Game:
         self.ball.last_touch_team_b = self.match.teams[1].players[0].user_id
         for racket in self.rackets:
             racket.position.y = int(self.canvas.y - racket.height) // 2
-            Server.emit('stop_moving', data={'player': racket.player_id, 'position': racket.position.y}, room=str(self.match.id))
             racket.velocity = 0
             racket.block_glide = False
 

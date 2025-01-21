@@ -245,12 +245,12 @@
         }
 
         ctx.drawImage(
-            paddleImage, state.paddles.left.x, state.paddles.left.y,
+            leftPaddleImage, state.paddles.left.x, state.paddles.left.y,
             config.paddleWidth, config.paddleHeight
         );
 
         ctx.drawImage(
-            paddleImage,
+            rightPaddleImage,
             state.paddles.right.x,
             state.paddles.right.y,
             config.paddleWidth,
