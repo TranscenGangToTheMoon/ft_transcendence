@@ -12,5 +12,11 @@ class ExportDataView(generics.RetrieveAPIView):
     def get_object(self):
         return get_user(self.request)
 
+    def retrieve(self, request, *args, **kwargs):
+        response = super().retrieve(request, args, kwargs)
+        file_name = f'user_{self.request.user.id}_data.json'
+        response['Content-Disposition'] = f'attachment; filename="{file_name}"'
+        return response
+
 
 export_data_view = ExportDataView.as_view()
