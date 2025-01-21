@@ -65,7 +65,7 @@ async function disconnect() {
 
 async function connect(token, chatInfo) {
 	clearChatError();
-	if(typeof window.socket !== 'undefined' && window.socket.connected) await disconnect();
+	if(typeof window.socket !== 'undefined' && window.socket != null && window.socket.connected) await disconnect();
 	let socket = await io("/", {
 		path: "/ws/chat/",
 		transports: ['websocket'],
@@ -155,7 +155,6 @@ function displayMessages(chatInfo, chatMessages, method='afterbegin'){
 		if (element.author !== chatInfo.targetId) {
 			chatBox.insertAdjacentHTML(method, `<div><p><strong>You:</strong> ${element.content}</p></div>`);
 		} else {
-			// chatBox.insertAdjacentHTML(method, `<div><p><strong>${chatInfo.target}:</strong> ${element.content}</p></div>`);
 			if (element.is_read === false) {
 				chatBox.insertAdjacentHTML(method, `<div><p class="chatMessageNotRead"><strong>${chatInfo.target}:</strong> ${element.content}</p></div>`);
 			}
@@ -461,12 +460,14 @@ async function chatTabListener(chatInfo)
 {
 	document.getElementById('chatTab' + chatInfo.target).addEventListener('click', async e => {
 		e.preventDefault();
+		console.log('Chat: Click on chat tab', chatInfo.target);
 		if (e.target.id === 'chatTab' + chatInfo.target + 'Button') {
 			await closeChatTab(chatInfo);
 			return;
 		}
 		if (e.target.id === 'chatTab' + chatInfo.target + 'Link') {
 			if (lastClick === e.target.id) return;
+			lastClick = e.target.id;
 			openChatTab(chatInfo.chatId);
 			return;
 		}
