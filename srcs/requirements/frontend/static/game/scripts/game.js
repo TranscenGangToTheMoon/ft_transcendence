@@ -348,9 +348,15 @@
         // console.log(state.ball.speedX, state.ball.speedY);
     }
 
+    function applyRacketSpeed(paddle){
+        const isOnBottom = state.ball.y > paddle.y;
+        if ((isOnBottom && state.ball.speedY < 0) || (!isOnBottom && state.ball.speedY > 0))
+            state.ball.speedY = -state.ball.speedY;
+    }
+
     function handlePaddleBounce(paddle){
         if (paddle.blockGlide){
-            state.ball.speedY = -state.ball.speedY;
+            applyRacketSpeed(paddle);
             if (Math.abs(state.ball.y - (paddle.y + config.paddleHeight)) <
                 Math.abs(state.ball.y - (paddle.y)))
                 state.ball.y = paddle.y + config.paddleHeight;
