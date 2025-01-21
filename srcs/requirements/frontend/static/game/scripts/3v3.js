@@ -25,15 +25,17 @@
         team: '',
     };
 
-    config.enemyScore = {
-        y : config.canvasHeight / 2,
-        x : config.canvasWidth / 4
+    function setScoreCoords(){
+        config.enemyScore = {
+            y : config.canvasHeight / 2,
+            x : config.canvasWidth / 4
+        }
+        config.playerScore = {
+            y : config.enemyScore.y,
+            x : config.canvasWidth - config.enemyScore.x
+        }
     }
-
-    config.playerScore = {
-        y : config.enemyScore.y,
-        x : config.enemyScore.x * 3
-    }
+    setScoreCoords();
 
     const info = {
 		myTeam: {
@@ -80,10 +82,13 @@
     const ballImage = new Image();
     ballImage.src = "/assets/ball.png";
 
-    ctx.font = config.font;
-    ctx.fillStyle = config.fontColor;
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
+    function setFont(){
+        ctx.font = config.font;
+        ctx.fillStyle = config.fontColor;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+    }
+    setFont();
     state.keys[' '] = false;
 
     document.addEventListener("keydown", (e) => {
@@ -163,7 +168,7 @@
         // for (racket in state.paddles) {
         // 	racket.y = (config.canvasHeight + config.paddleHeight) / 2
         // }
-        ctx.clearRect(0, 0, config.canvasWidth, config.canvasHeight);
+        // ctx.clearRect(0, 0, config.canvasWidth, config.canvasHeight);
         animatePaddlesToMiddle();
         function step() {
             state.countDown.currentStep--;
@@ -205,7 +210,9 @@
 
             const easeOutProgress = 1 - Math.pow(1 - progress, 3);
 
+            console.log(startPositions);
             for (let i in startPositions){
+                console.log('paddle_id', i);
                 state.paddles[i].y = startPositions[i] + (target - startPositions[i]) * easeOutProgress;
             }
             // state.paddles.left.y = startLeft + (target - startLeft) * easeOutProgress;
@@ -226,7 +233,7 @@
         for (paddle in state.paddles){
             paddle = state.paddles[paddle];
             ctx.clearRect(paddle.x, 0, config.paddleWidth, config.canvasHeight);
-            ctx.drawImage(paddle.x, paddle.y, config.paddleWidth, config.paddleHeight);
+            ctx.drawImage(paddleImage, paddle.x, paddle.y, config.paddleWidth, config.paddleHeight);
         }
     }
 
@@ -250,7 +257,7 @@
         if (state.keys['ArrowUp'] && state.keys['ArrowDown']){
             if (state.paddles[userInformations.id].speed != 0){
                 if (typeof gameSocket !== 'undefined'){
-                    // console.log('emitting stop_moving');
+                    console.log('emitting stop_moving');
                     gameSocket.emit('stop_moving', {'position': state.paddles[userInformations.id].y});
                 }
                 state.paddles[userInformations.id].speed = 0;
@@ -261,10 +268,11 @@
             if (typeof gameSocket !== 'undefined'){
                 if (state.paddles[userInformations.id].speed === 1){
                 		gameSocket.emit('stop_moving', {'position': state.paddles[userInformations.id].y});
-                  	// console.log('emitting stop_moving');
+                  	console.log('emitting stop_moving');
                 }
                 gameSocket.emit('move_up');
-                // console.log('emitting move_up')
+				console.log('connection_status: ',gameSocket.connected);
+                console.log('emitting move_up')
             }
             state.paddles[userInformations.id].speed = -1;
         }
@@ -272,10 +280,11 @@
             if (typeof gameSocket !== 'undefined'){
                 if (state.paddles[userInformations.id].speed === -1){
                     gameSocket.emit('stop_moving', {'position': state.paddles[userInformations.id].y});
-                    // console.log('emitting move_stop');
+                    console.log('emitting move_stop');
                 }
                 gameSocket.emit('move_down');
-                // console.log('emitting move_down')
+                console.log('connection_status: ',gameSocket.connected);
+                console.log('emitting move_down')
             }
             state.paddles[userInformations.id].speed = 1;
         }
@@ -283,7 +292,7 @@
             state.paddles[userInformations.id].speed = 0;
             if (typeof gameSocket !== 'undefined'){
                 gameSocket.emit('stop_moving', {'position': state.paddles[userInformations.id].y});
-                // console.log('emitting stop_moving');
+                console.log('emitting stop_moving');
             }
         }
 
@@ -428,7 +437,7 @@
         }
     }
 
-    window.PongGame = {startGame, startCountdown, stopGame, state, config, moveUp, moveDown, handleGameOver, resetGame, info, animatePaddlesToMiddle};
+    window.PongGame = {startGame, startCountdown, stopGame, state, config, moveUp, moveDown, handleGameOver, resetGame, info, animatePaddlesToMiddle, setFont, setScoreCoords};
 })();
 
 
@@ -446,7 +455,7 @@ function initSocket(){
     window.gameSocket = gameSocket;
     // console.log(socket)
 	gameSocket.on('connect', () => {
-        // console.log('Connected to socketIO server!');
+        console.log('Connected to socketIO server!');
     });
     gameSocket.on('disconnect', () => {
         console.log('disconnected from gameSocket');
@@ -519,14 +528,42 @@ function initSocket(){
       	}
     })
     gameSocket.on('game_over', async event => {
+        gameSocket.close();
         console.log('game_over received', event);
 		window.PongGame.handleGameOver(event.reason);
-        if (fromLobby)
+        if (fromLobby){
+            userInformations.lobbyData = undefined;
             await navigateTo('/lobby', true, true);
+        }
     })
 }
 
-function initData(data){
+async function initGameConstants(){
+    await fetch('/gameConfig.json')
+        .then(response => response.json())
+        .then(data => {
+            console.log(data);
+            PongGame.config.canvasHeight = data.canvas.clash.height;
+            PongGame.config.canvasWidth = data.canvas.clash.width;
+            let canvas = document.getElementById('gameCanvas');
+            PongGame.ctx = canvas.getContext("2d");
+            canvas.width = PongGame.config.canvasWidth;
+            canvas.height = PongGame.config.canvasHeight;
+            PongGame.setFont();
+            PongGame.config.paddleHeight = data.paddle.clash.height;
+            PongGame.config.paddleWidth = data.paddle.clash.width;
+            PongGame.config.maxPaddleSpeed = data.paddle.clash.speed;
+            PongGame.config.defaultBallSpeed = data.ball.speed;
+            PongGame.config.ballSpeedIncrement = data.ball.speedIncrement;
+            PongGame.config.maxBallSpeed = data.ball.maxSpeed;
+            PongGame.config.maxBounceAngle = data.ball.maxBounceAngle;
+            PongGame.config.winningScore = data.score.max;
+            PongGame.setScoreCoords();
+        })
+}
+
+async function initData(data){
+    await initGameConstants();
     try {
 		if (data.teams.a.players.some(player => player.id == userInformations.id)) {
 			window.PongGame.info.myTeam.name = 'team_a';
@@ -565,17 +602,58 @@ function checkGameAuthorization(){
         throw `${window.location.pathname}`;
 }
 
+function wrongConfigFileError(error){
+    displayMainAlert('Error', 'Erroneous game config file.\n');
+    console.log(error);
+}
+
+async function gameStart(event){
+    document.getElementById('gameArea').style.display = 'block';
+    document.getElementById('opponentWait').style.display = 'none';
+    data = JSON.parse(event.data);
+    data = data.data;
+    console.log('game-start received (game)');
+    try {
+
+        await initData(data);
+    }
+    catch (error){
+        wrongConfigFileError(error);
+    }
+}
+
 async function initGame(){
+    document.getElementById('gameArea').style.display = 'none';
+    document.getElementById('opponentWait').style.display = 'block';
+    if (SSEListeners.has('game-start')){
+        sse.removeEventListener('game-start', SSEListeners.get('game-start'));
+        SSEListeners.delete('game-start');
+    }
+    SSEListeners.set('game-start', gameStart);
+    sse.addEventListener('game-start', gameStart);
     await indexInit(false);
     if (window.location.pathname === '/') return;
     try {
         checkGameAuthorization();
-        initData(userInformations.lobbyData);
+        if (userInformations.lobbyData){
+            try {
+                await initData(userInformations.lobbyData);
+                document.getElementById('gameArea').style.display = 'block';
+                document.getElementById('opponentWait').style.display = 'none';
+            }
+            catch (error){
+                wrongConfigFileError(error);
+            }
+        }
+        // await initData(userInformations.lobbyData);
     }
     catch (unauthorized){
-        if (!document.getElementById('alertModal').classList.contains('show'))
+        // if (unauthorized === window.location.pathname){
             displayMainAlert("Error", `You don't have permission to play in ${unauthorized}`);
-        await navigateTo('/');
+            await navigateTo('/');
+        // }
+        // else
+        //     wrongConfigFileError(error);
     }
 }
 

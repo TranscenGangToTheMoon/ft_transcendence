@@ -428,6 +428,10 @@ async function fillPlayerList(noTeam=false){
                 if (lobby.participants[participant].id === userInformations.id)
                     lobby.participants[participant].is_ready = isReady;
             this.innerText = isReady ? 'Ready' : 'Not Ready';
+            if (everybodyIsReady()){
+                fromLobby = true;
+                await navigateTo(`/game/${matchType}`, true, true);
+            }
         }
         catch (error) {
             console.log('error');
@@ -456,6 +460,15 @@ async function lobbyLeaved(event){
     await fillPlayerList();
 }
 
+function everybodyIsReady(){
+    if (lobby.participants.length !== lobby.max_participants) return;
+    for (participant in lobby.participants){
+        if (!lobby.participants[participant].is_ready)
+            return 0;
+    }
+    return 1;
+}
+
 async function participantUpdated(event){
     event = JSON.parse(event.data);
     console.log(event);
@@ -468,8 +481,13 @@ async function participantUpdated(event){
                 if (data.id === userInformations.id)
                     team = data.team;
             }
-            if (data.is_ready !== undefined)
+            if (data.is_ready !== undefined){
                 lobby.participants[participant].is_ready = data.is_ready;
+                if (everybodyIsReady()){
+                    fromLobby = true;
+                    return await navigateTo(`/game/${matchType}`, true, true);
+                }
+            }
             if (data.creator !== undefined){
                 lobby.participants[participant].creator = data.creator;
                 if (data.id === userInformations.id)
@@ -563,7 +581,6 @@ function initLobbySSEListeners(){
     SSEListeners.set('game-start', lobbyGameStart);
     sse.addEventListener('game-start', lobbyGameStart);
 }
-
 
 async function lobbyInit() {
     await indexInit(false);
