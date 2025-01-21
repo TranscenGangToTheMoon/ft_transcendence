@@ -58,7 +58,7 @@ async function getMoreBlocked(){
             const blockedUserDiv = document.createElement('div');
             blockedUserDiv.id = `blocked${blockedUser.id}`;
             blockedUsersDiv.appendChild(blockedUserDiv);
-            await loadContent('/blockedUserBlock.html', `${blockedUserDiv.id}`);
+            await loadContent('/blockedUsers/blockedUserBlock.html', `${blockedUserDiv.id}`);
             blockedUserDiv.querySelector('.blockedUsername').innerText = blockedUser.blocked.username;
         }
     }
@@ -105,7 +105,7 @@ async function initBlockedUsers() {
                 const blockedUserDiv = document.createElement('div');
                 blockedUserDiv.id = `blocked${blockedUser.id}`;
                 blockedUsersDiv.appendChild(blockedUserDiv);
-                await loadContent('/blockedUserBlock.html', `${blockedUserDiv.id}`);
+                await loadContent('/blockedUsers/blockedUserBlock.html', `${blockedUserDiv.id}`);
                 blockedUserDiv.querySelector('.blockedUsername').innerText = blockedUser.blocked.username;
             }
         }
