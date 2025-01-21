@@ -243,11 +243,8 @@ class Game:
 
     def launch(self):
         from game_server.server import Server
-        timeout = os.environ.get('GAME_PLAYER_CONNECT_TIMEOUT', 5)
-        try:
-            timeout = float(timeout)
-        except ValueError:
-            timeout = 5
+        timeout = int(os.environ['GAME_PLAYER_CONNECT_TIMEOUT'])
+
         try:
             self.wait_for_players(timeout)
             print(time.time(), "all players are connected", flush=True)
