@@ -119,17 +119,17 @@ function addFriendListListener(){
 }
 
 async function  indexInit(auto=true) {
-    await loadScript('/scripts/singlePageApplicationUtils.js');
-    await loadScript('/scripts/api.js');
-    await loadScript('/scripts/token.js');
-    await loadScript('/scripts/serverSentEventsUtils.js');
-    await loadScript('/notification/scripts/notificationUtils.js');
-    await loadScript('/scripts/utils.js');
     if (!auto){
         await loadUserProfile();
         getBadgesDivs();
     }
     else{
+        await loadScript('/scripts/singlePageApplicationUtils.js');
+        await loadScript('/scripts/api.js');
+        await loadScript('/scripts/token.js');
+        await loadScript('/scripts/serverSentEventsUtils.js');
+        await loadScript('/notification/scripts/notificationUtils.js');
+        await loadScript('/scripts/utils.js');
         await fetchUserInfos();
         if (userInformations.code === 'user_not_found'){
             console.log('user was deleted from database, switching to guest mode');
