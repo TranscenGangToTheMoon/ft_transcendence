@@ -63,7 +63,7 @@ document.getElementById('pChangeNickname').addEventListener('submit', async even
 
 document.getElementById('pDownloadData').addEventListener('click', async () => {
     try {
-        const response = await fetch('/api/users/me/downalod-data/', {
+        const response = await fetch('/api/users/me/download-data/', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
