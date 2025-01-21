@@ -1,4 +1,4 @@
-#friends-tab,#ranked-tab,#statistics-tab,#pAcceptChat,#pDelete {
-    display: none;
+#friends-tab,#ranked-tab,#statistics-tab,#pAcceptChat,#pDelete, #pDownload, #pPassword{
+    display: none !important;
 }
 
