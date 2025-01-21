@@ -1,19 +1,21 @@
 
-<button id="leaveTournament" class="btn btn-danger">Leave Tournament</button>
 
-<div id="chatSection" style="display:flex;">
-	<div id="chatsListView">
-		<form id="searchTournamentForm">
-			<input id="searchTournament" placeholder="tournament name" type="text" autocomplete="off">
-			<button type="submit">Join / Create tournament</button>
-		</form>
-		<div id="searchTournamentContextError"></div>
-		<div id="tournamentsList"></div>
+<div class="container">
+	<button id="leaveTournament" class="btn btn-danger">Leave Tournament</button>
+	<div id="chatSection" style="display:flex;">
+		<div id="chatsListView">
+			<form id="searchTournamentForm" class="d-flex">
+				<input id="searchTournament" class="form-control" placeholder="tournament name" type="text" autocomplete="off">
+				<button type="submit" class="btn btn-dark">Join / Create tournament</button>
+			</form>
+			<div id="searchTournamentContextError"></div>
+			<div id="tournamentsList"></div>
+		</div>
+		<div id="tournamentView" class="d-flex"></div>
+		<div id="bracket" class="tournament-bracket"></div>
 	</div>
-	<div id="tournamentView">
-	</div>
-	<div id="bracket" class="tournament-bracket"></div>
 </div>
+
 
 <div class="modal fade" id="createTournamentModal" tabindex="-1" aria-labelledby="createTournamentModalLabel" aria-hidden="true">
 	<div class="modal-dialog">
