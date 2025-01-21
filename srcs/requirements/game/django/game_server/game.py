@@ -286,11 +286,13 @@ class Game:
             finish_match(self.match.id, finish_reason, disconnected_user_id)
 
     def reset_game_state(self):
+        from game_server.server import Server
         self.ball = self.create_ball(self.canvas, self.ledge_offset, self.racket_width)
         self.ball.last_touch_team_a = self.match.teams[0].players[0].user_id
         self.ball.last_touch_team_b = self.match.teams[1].players[0].user_id
         for racket in self.rackets:
             racket.position.y = int(self.canvas.y - racket.height) // 2
+            Server.emit('stop_moving', data={'player': racket.player_id, 'position': racket.position.y}, room=str(self.match.id))
             racket.velocity = 0
             racket.block_glide = False
 
