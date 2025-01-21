@@ -25,7 +25,7 @@ def me(user, method: Literal['GET', 'DELETE', 'PATCH'] = 'GET', data=None, passw
 
 def get_data(user):
     return make_request(
-        endpoint=f'users/me/downalod-data/',
+        endpoint=f'users/me/download-data/',
         token=user['token'],
     )
 
