@@ -4,8 +4,6 @@ import requests
 
 # Local imports
 from classes.utils.config   import Config
-from textual import log
-
 
 class User():
     accessToken: str | None = None
@@ -27,9 +25,15 @@ class User():
             raise (Exception("Hostname not define"))
 
         data = json.dumps( {"username": User.username, "password": User.password})
-        User.response = requests.post(url=f"{User.server}/api/auth/login/", data=data, headers=User.headers, verify=Config.SSL.CRT)
+        User.response = requests.post(
+            url=f"{User.server}/api/auth/login/",
+            data=data,
+            headers=User.headers,
+            verify=Config.SSL.CRT
+        )
+        print(User.response.json())
+
         if (User.response.status_code != 200):
-            log(User.response.json())
             reason = "Unknown error"
             if (User.response.json().get("detail") is not None):
                 reason = f"{User.response.json()['detail']}"
@@ -48,9 +52,15 @@ class User():
         if (User.server is None):
             raise (Exception("Hostname not define"))
 
-        User.response = requests.post(url=f"{User.server}/api/auth/guest/", data={}, headers=User.headers, verify=Config.SSL.CRT)
+        User.response = requests.post(
+            url=f"{User.server}/api/auth/guest/",
+            data={},
+            headers=User.headers,
+            verify=Config.SSL.CRT
+        )
+        print(User.response.json())
+
         if (User.response.status_code != 201):
-            log(User.response.json())
             reason = "Unknown error"
             if (User.response.json().get("detail") is not None):
                 reason = f"{User.response.json()['detail']}"
@@ -70,13 +80,16 @@ class User():
             raise (Exception("Hostname not define"))
 
         data = json.dumps({"username": User.username, "password": User.password})
-        User.response = requests.post(url=f"{User.server}/api/auth/register/", data=data, headers=User.headers, verify=Config.SSL.CRT)
+        User.response = requests.post(
+            url=f"{User.server}/api/auth/register/",
+            data=data,
+            headers=User.headers,
+            verify=Config.SSL.CRT
+        )
         print(User.response.json())
 
         if (User.response.status_code != 201):
-            log(User.response.json())
             reason = "Unknown error"
-            # if (User.response.status_code == 401):
             if (User.response.json().get("detail") is not None):
                 reason = f"{User.response.json()['detail']}"
             elif (User.response.json().get("username") is not None):
