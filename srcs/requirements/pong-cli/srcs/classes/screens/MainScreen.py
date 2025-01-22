@@ -36,9 +36,12 @@ class MainPage(Screen):
             self.query_one("#userMeStatic").update(f"Welcome {User.username} (id: {User.id})")
         except Exception as error:
             self.query_one("#userMeStatic").styles.color = "red"
-            if (User.response is not None and User.response.status_code != 401):
+            if (User.response is not None and User.response.status_code == 401):
+                code = User.response.json().get("code")
+                if (code is not None and code == "token_not_valid"):
+                    self.query_one("#userMeStatic").update("Tokens have expired please reconnect")
+            else:
                 self.query_one("#userMeStatic").update(f"{error}")
-            self.query_one("#userMeStatic").update("Tokens have expired please reconnect")
 
     def on_screen_resume(self) -> None:
         self.query_one("#duel").loading = False
@@ -69,9 +72,12 @@ class MainPage(Screen):
 
         except Exception as error:
             self.query_one("#statusGame").styles.color = "red"
-            if (User.response is not None and User.response.status_code != 401):
+            if (User.response is not None and User.response.status_code == 401):
+                code = User.response.json().get("code")
+                if (code is not None and code == "token_not_valid"):
+                    self.query_one("#statusGame").update("Tokens have expired please reconnect")
+            else:
                 self.query_one("#statusGame").update(f"{error}")
-            self.query_one("#statusGame").update("Tokens have expired please reconnect")
 
     @on(Button.Pressed, "#cancelDuelGame")
     def cancelDuelAction(self):
@@ -87,6 +93,9 @@ class MainPage(Screen):
 
         except Exception as error:
             self.query_one("#statusGame").styles.color = "red"
-            if (User.response is not None and User.response.status_code != 401):
+            if (User.response is not None and User.response.status_code == 401):
+                code = User.response.json().get("code")
+                if (code is not None and code == "token_not_valid"):
+                    self.query_one("#statusGame").update("Tokens have expired please reconnect")
+            else:
                 self.query_one("#statusGame").update(f"{error}")
-            self.query_one("#statusGame").update("Tokens have expired please reconnect")
