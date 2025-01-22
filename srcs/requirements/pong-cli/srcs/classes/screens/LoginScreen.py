@@ -46,7 +46,11 @@ class LoginPage(Screen):
 
     @on(Button.Pressed, "#loginButton")
     def loginAction(self):
-        if (self.query_one("#server").value and self.query_one("#username").value and self.query_one("#password").value):
+        if (
+            self.query_one("#server").value
+            and self.query_one("#username").value
+            and self.query_one("#password").value
+        ):
             User.server = self.query_one("#server").value
             User.username = self.query_one("#username").value
             User.password = self.query_one("#password").value
@@ -66,7 +70,11 @@ class LoginPage(Screen):
 
     @on(Button.Pressed, "#registerButton")
     def registerAction(self):
-        if (self.query_one("#server").value and self.query_one("#username").value and self.query_one("#password").value):
+        if (
+            self.query_one("#server").value
+            and self.query_one("#username").value
+            and self.query_one("#password").value
+        ):
             User.server = self.query_one("#server").value
             User.username = self.query_one("#username").value
             User.password = self.query_one("#password").value
