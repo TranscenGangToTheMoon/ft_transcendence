@@ -2,8 +2,6 @@
 import asyncio
 import ssl
 import time
-from time import sleep
-
 import aiohttp
 import socketio
 from pynput import keyboard
@@ -31,7 +29,10 @@ from classes.utils.user                         import User
 class GamePage(Screen):
     SUB_TITLE = "Game Page"
     CSS_PATH = "styles/GamePage.tcss"
-    BINDINGS = [("^q", "exit", "Exit"),]
+    BINDINGS = [
+        ("^q", "exit", "Exit"),
+        ("f", "forfeit", "Forfeit")
+    ]
 
     def __init__(self):
         super().__init__()
@@ -84,6 +85,12 @@ class GamePage(Screen):
         # Game handling
         await self.launchSocketIO()
         self.gameLoop()
+
+    def action_forfeit(self):
+        while (self.countdownIsActive == True):
+            asyncio.sleep(1 / 10)
+        self.dismiss()
+        self.sio.disconnect()
 
     def compose(self) -> ComposeResult:
         yield Header(show_clock=True)
