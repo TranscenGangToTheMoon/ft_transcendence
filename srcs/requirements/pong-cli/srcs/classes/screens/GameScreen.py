@@ -207,7 +207,6 @@ class GamePage(Screen):
             self.countdownIsActive = True
             await self.app.push_screen_wait(Countdown())
             self.countdownIsActive = False
-            # print(self.connected, flush=True)
 
         @self.sio.on('game_state')
         async def gameStateAction(data):
@@ -251,9 +250,10 @@ class GamePage(Screen):
 
         @self.sio.on('game_over')
         async def gameOverAction(data):
-            print(f"Game over event: {data}")
+            print(f"Game over event: {data}", flush=True)
+            while (self.countdownIsActive == True):
+                await asyncio.sleep(1/10)
             if (await self.app.push_screen_wait(GameEnd(data["reason"], data["winner"] == User.team)) == "main"):
-                sleep(1)
                 self.dismiss()
             await self.sio.disconnect()
 

@@ -11,7 +11,10 @@ from classes.utils.user import User
 class MainPage(Screen):
     SUB_TITLE = "Main Page"
     CSS_PATH = "styles/MainPage.tcss"
-    BINDINGS = [("^q", "exit", "Exit"), ("ctrl+l", "logout", "Logout")]
+    BINDINGS = [
+        ("^q", "exit", "Exit"),
+        ("ctrl+l", "logout", "Logout")
+    ]
 
     def __init__(self):
         super().__init__()
