@@ -6,12 +6,16 @@ from textual.screen     import Screen
 from textual.widgets    import Button, Footer, Header, Label, Rule, Static
 
 # Local imports
-from classes.utils.user     import User
+from classes.utils.user import User
 
 class MainPage(Screen):
     SUB_TITLE = "Main Page"
     CSS_PATH = "styles/MainPage.tcss"
-    BINDINGS = [("^q", "exit", "Exit"), ]
+    BINDINGS = [("^q", "exit", "Exit"), ("ctrl+l", "logout", "Logout")]
+
+    def __init__(self):
+        super().__init__()
+        self.searchDuel = False
 
     def compose(self) -> ComposeResult:
         yield Header()
@@ -39,7 +43,15 @@ class MainPage(Screen):
         self.query_one("#duel").loading = False
         self.query_one("#duel").variant = "primary"
         self.query_one("#cancelDuelGame").disabled = True
-        # self.query_one("#statusGame").update("")
+        self.query_one("#statusGame").update("")
+
+    def action_logout(self):
+        if (self.searchDuel):
+            self.cancelDuelAction()
+        if (self.app.SSEConnected):
+            self.app.stopSSE()
+        User.logout()
+        self.app.pop_screen()
 
     @on(Button.Pressed, "#duel")
     def duelAction(self):
@@ -48,6 +60,7 @@ class MainPage(Screen):
                 raise (Exception("SSE not connected ! Reconnect and try again."))
             User.duel()
 
+            self.searchDuel = True
             self.query_one("#duel").loading = True
             self.query_one("#duel").variant = "default"
             self.query_one("#cancelDuelGame").disabled = False
@@ -65,7 +78,7 @@ class MainPage(Screen):
             if (not self.app.SSEConnected):
                 raise (Exception("SSE not connected ! Reconnect and try again."))
             User.cancelDuel()
-
+            self.searchDuel = False
             self.query_one("#duel").loading = False
             self.query_one("#duel").variant = "primary"
             self.query_one("#statusGame").update("")

@@ -206,7 +206,7 @@ class User():
         User.headers["Authorization"] = f"Bearer {User.accessToken}"
 
     @staticmethod
-    def reset():
+    def logout():
         User.accessToken = None
         User.headers = {"Content-Type": "application/json"}
         User.host = None

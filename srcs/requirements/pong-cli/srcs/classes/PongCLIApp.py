@@ -74,6 +74,14 @@ class PongCLI(App):
                 finally:
                     self.SSEConnected = False
 
+    def stopSSE(self):
+        if (self.SSEConnected == False):
+            return
+        for worker in self.workers:
+            if (worker.name == "SSE"):
+                self.SSEConnected = False
+                worker.cancel()
+
     def on_worker_state_changed(self, event: Worker.StateChanged) -> None:
         if (event.worker.state == WorkerState.ERROR):
             print(f"Error from {event.worker.error}")
