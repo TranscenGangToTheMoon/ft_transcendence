@@ -65,7 +65,7 @@ async function disconnect() {
 
 async function connect(token, chatInfo) {
 	clearChatError();
-	if(typeof window.socket !== 'undefined')	await disconnect();
+	if(typeof window.socket !== 'undefined' && window.socket != null && window.socket.connected) await disconnect();
 	let socket = await io("/", {
 		path: "/ws/chat/",
 		transports: ['websocket'],
@@ -109,6 +109,10 @@ function setupSocketListeners(chatInfo)
 	
 	socket.on("message", (data) => {
 		console.log("Message received: ", data);
+		messagesNotRead = chatBox.querySelectorAll('.chatMessageNotRead');
+		for (let message of messagesNotRead) {
+			message.classList.remove('chatMessageNotRead');
+		}
 		if (chatBox === null) return;
 		if (data.author === ''){
 			var serverMessage = document.getElementById('serverMessage');
@@ -151,7 +155,12 @@ function displayMessages(chatInfo, chatMessages, method='afterbegin'){
 		if (element.author !== chatInfo.targetId) {
 			chatBox.insertAdjacentHTML(method, `<div><p><strong>You:</strong> ${element.content}</p></div>`);
 		} else {
-			chatBox.insertAdjacentHTML(method, `<div><p><strong>${chatInfo.target}:</strong> ${element.content}</p></div>`);
+			if (element.is_read === false) {
+				chatBox.insertAdjacentHTML(method, `<div><p class="chatMessageNotRead"><strong>${chatInfo.target}:</strong> ${element.content}</p></div>`);
+			}
+			else {
+				chatBox.insertAdjacentHTML(method, `<div><p><strong>${chatInfo.target}:</strong> ${element.content}</p></div>`);
+			}
 		}
 	});
 	chatBox.scrollTop = chatBox.scrollHeight;
@@ -205,13 +214,16 @@ function createButtonClose(id){
 }
 
 async function createChatUserCard(chatInfo) {
+	verifChatCard = document.getElementById('chatListElement' + chatInfo.target);
+	if (verifChatCard) return;
+	if (!chatInfo) return;
 	let chatUserCard = document.createElement('div');
 	chatUserCard.id = 'chatListElement' + chatInfo.target;
 	chatUserCard.classList.add('chatUserCard');
 	chatsList.appendChild(chatUserCard);
+	console.log('Chat: Creating chat user card laaaaaaaaa:', chatInfo);
 
 	await loadContent('/chatTemplates/chatUserCard.html', chatUserCard.id);
-	if (!chatUserCard.querySelector('.chatUserCardTitleUsername') || !chatInfo.target) return;
 	chatUserCard.querySelector('.chatUserCardTitleUsername').innerText = chatInfo.target + ':';
 	if (chatInfo.lastMessage === null) {
 		chatUserCard.querySelector('.chatUserCardLastMessage').innerText = 'Start the conversation ;)';
@@ -278,10 +290,11 @@ async function displayChatsList(filter='') {
 			throw {'code': 400, 'detail': apiAnswer.detail};
 		}
 		if (apiAnswer.count > 0) {
-			apiAnswer.results.forEach(async element => {
+			for(element of apiAnswer.results) {
+				console.log('Chat: Displaying chat:', element);
 				data = parsChatInfo(element);
 				await createChatUserCard(data);
-			});
+			}
 			nextChatsRequest = apiAnswer.next;
 		}
 		else {
@@ -375,13 +388,12 @@ async function closeChatTab(chatInfo, )
 	openChat[chatInfo.chatId] = undefined;
 	userChat[chatInfo.targetId] = undefined;
 	let lastTab = document.getElementById('chatTabs').lastElementChild;
+	await disconnect();
 	if (!lastTab) {
-		await disconnect();
-		console.log('Chat: No more chat', lastTab);
+		console.log('Chat: Closing chat view', lastTab);
 		document.getElementById('chatView').remove();
 	}
 	else if (isTabActive) {
-		await disconnect();
 		lastTab.querySelector('a').click();
 	}
 }
@@ -445,19 +457,21 @@ async function createChatTab(chatInfo) {
 
 	await chatTabListener(chatInfo);
 	await scrollMessagesListener(chatInfo);
-	sendMessageListener(chatInfo.target);
+	sendMessageListener(chatInfo);
 }
 
 async function chatTabListener(chatInfo)
 {
 	document.getElementById('chatTab' + chatInfo.target).addEventListener('click', async e => {
 		e.preventDefault();
+		console.log('Chat: Click on chat tab', chatInfo.target);
 		if (e.target.id === 'chatTab' + chatInfo.target + 'Button') {
 			await closeChatTab(chatInfo);
 			return;
 		}
 		if (e.target.id === 'chatTab' + chatInfo.target + 'Link') {
 			if (lastClick === e.target.id) return;
+			lastClick = e.target.id;
 			openChatTab(chatInfo.chatId);
 			return;
 		}
@@ -479,12 +493,15 @@ async function scrollMessagesListener(chatInfo) {
 	});
 }
 
-function sendMessageListener(target) {
-    const chatForm = document.getElementById('sendMessageForm'+target);
+function sendMessageListener(chatInfo) {
+    const chatForm = document.getElementById('sendMessageForm'+chatInfo.target);
     if (!chatForm.hasAttribute('data-listener-added')) {
         chatForm.setAttribute('data-listener-added', 'true');
-        chatForm.addEventListener('submit', function (e) {
+        chatForm.addEventListener('submit', async function (e) {
             e.preventDefault();
+			if (socket && socket.disconnected === true) {
+				await connect(getAccessToken(), chatInfo);
+			}
             const message = this.querySelector('input').value;
 			if (message === '') return;
             socket.emit('message', {'content': message, 'token' : 'Bearer ' + getAccessToken()});
