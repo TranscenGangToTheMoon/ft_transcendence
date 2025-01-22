@@ -3,6 +3,8 @@
 ########################################################################################################################
 NAME		:=	pongCLI
 
+SRCS_D		:=	srcs
+
 REQ_FILES	:=	requirements.txt
 
 VENV		:=	.venv
@@ -10,6 +12,8 @@ VENV		:=	.venv
 TERMINAL	:=	gnome-terminal
 
 SHELL		:=	/bin/zsh
+
+SOURCE		:=	source $(VENV)/bin/activate
 
 ARGS		?=	# Leave empty
 ########################################################################################################################
@@ -29,34 +33,44 @@ RESET		:=	\001\033[0m\002
 .DEFAULT_GOAL = all
 
 .PHONY: all
-all			:	banner .venv
+all			:	.venv
 
-$(VENV)		:	$(VENV)/ts
+$(VENV)		:	$(VENV)/ts banner
 
 $(VENV)/ts	:	$(REQ_FILES)
-			python3 -m venv $(VENV)
-			source $(VENV)/bin/activate ; pip install -r $(REQ_FILES)
-			touch $(VENV)/ts
+			python3 -m venv $(@D)
+			$(SOURCE); pip install -r $<
+			touch $@
 
 .PHONY: run
 run			:	.venv
-			python srcs/$(NAME).py
+			$(SOURCE); python srcs/$(NAME).py
 
 .PHONY: debug
 debug		:	.venv
-			textual run --dev srcs/$(NAME).py
-
-.PHONY: debug-cons
-debug-cons	:	.venv console
-			textual run --dev srcs/$(NAME).py
-
-.PHONY: console-here
-console-here:
-			textual console $(ARGS)
+			$(SOURCE); textual run --dev srcs/$(NAME).py
 
 .PHONY: console
 console		:	.venv
-			$(TERMINAL) -- $(SHELL) -c "printf \"\\e[8;60;150t\"; source $(VENV)/bin/activate ; textual console $(ARGS)"
+			$(SOURCE); textual console $(ARGS)
+
+.PHONY: free-run
+free-run	:	.venv
+			$(TERMINAL) -- $(SHELL) -c "$(SOURCE); python srcs/$(NAME).py"
+
+.PHONY: free-debug
+free-debug	:	.venv
+			$(TERMINAL) -- $(SHELL) -c "$(SOURCE); textual run --dev srcs/$(NAME).py"
+
+.PHONY: free-console
+free-console:	.venv
+			$(TERMINAL) -- $(SHELL) -c "$(SOURCE); textual console $(ARGS)"
+
+.PHONY: debug-cons
+debug-cons	:	.venv free-console debug
+
+.PHONY: cons-debug
+cons-debug	:	.venv free-debug console
 
 ########################################################################################################################
 #                                                    MISCELLANEOUS                                                     #
