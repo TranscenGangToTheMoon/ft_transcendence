@@ -4,7 +4,7 @@ function parsChatInfo(chat) {
 		'target': chat.chat_with.username,
 		'targetId': chat.chat_with.id,
 		'lastMessage': null,
-		'isLastMessageRead': false,
+		'lastMessagesNotRead': 0,
 		'chatMessageNext': null,
 	};
 	if (chat.last_message) {
@@ -12,7 +12,7 @@ function parsChatInfo(chat) {
 			chatInfo.lastMessage = chat.last_message.content.slice(0, 37) + '...';
 		}
 		else chatInfo.lastMessage = chat.last_message.content;
-		chatInfo.isLastMessageRead = chat.unread_messages === 0;
+		chatInfo.lastMessagesNotRead = chat.unread_messages;
 	}
 	return chatInfo;
 }
@@ -235,7 +235,7 @@ async function createChatUserCard(chatInfo) {
 		chatUserCard.querySelector('.chatUserCardLastMessage').innerText = (chatInfo.lastMessage);
 	}
 	var chatUserCardLastMessage = chatUserCard.querySelector('.chatUserCardLastMessage');
-	if (chatInfo.isLastMessageRead === false)
+	if (chatInfo.lastMessagesNotRead)
 		chatUserCardLastMessage.classList.add('chatMessageNotRead');
 	chatUserCard.querySelector('.chatUserCardButtonDeleteChat').addEventListener('click',async e => {
 		e.preventDefault();
@@ -244,6 +244,11 @@ async function createChatUserCard(chatInfo) {
 			const APIAnswer = await apiRequest(getAccessToken(), `${baseAPIUrl}/chat/${chatInfo.chatId}/`, 'DELETE');
 			console.log('Chat: Chat deleted:', APIAnswer);
 			if (APIAnswer && APIAnswer.detail) throw {'code': 400, 'detail': APIAnswer.detail};
+			userInformations.notifications['chats'] -= chatInfo.lastMessagesNotRead;
+			if (userInformations.notifications['chats'] <= 0)
+				removeBadges('chats');
+			else
+				displayBadges();
 			chatUserCard.remove();
 			await closeChatTab(chatInfo);
 			displayChatsList();
