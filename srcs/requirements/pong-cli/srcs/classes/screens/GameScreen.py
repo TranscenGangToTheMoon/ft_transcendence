@@ -29,10 +29,8 @@ from classes.utils.user                         import User
 class GamePage(Screen):
     SUB_TITLE = "Game Page"
     CSS_PATH = "styles/GamePage.tcss"
-    BINDINGS = [
-        ("^q", "exit", "Exit"),
-        # ("", "forfeit", "Forfeit")
-    ]
+    BINDINGS = [("^q", "exit", "Exit"),]
+
     def __init__(self):
         super().__init__()
         self.playground = Playground()
@@ -61,9 +59,6 @@ class GamePage(Screen):
             # logger=True,
             # engineio_logger=True,
         )
-
-    def action_forfeit(self):
-        self.dismiss()
 
     async def on_mount(self) -> None:
         console = Console()

@@ -1,6 +1,3 @@
-# Python imports
-import requests
-
 # Textual imports
 from textual            import on
 from textual.app        import ComposeResult
@@ -12,11 +9,10 @@ from textual.widgets    import Button, Footer, Header, Label, Rule, Static
 from classes.utils.config   import Config
 from classes.utils.user     import User
 
-
 class MainPage(Screen):
     SUB_TITLE = "Main Page"
     CSS_PATH = "styles/MainPage.tcss"
-    BINDINGS = [("ctrl+l", "logout", "Logout")]
+    BINDINGS = [("^q", "exit", "Exit"), ]
 
     def compose(self) -> ComposeResult:
         yield Header()
@@ -42,18 +38,7 @@ class MainPage(Screen):
         self.query_one("#duel").loading = False
         self.query_one("#duel").variant = "primary"
         self.query_one("#cancelDuelGame").disabled = True
-        self.query_one("#statusGame").update("")
-
-    def action_logout(self):
-        User.reset()
-        for worker in self.app.workers:
-            #print(f"Worker status: {worker.state}")
-            if worker.name == "SSE":
-                print(f"SSE worker cancelled")
-                worker.cancel()
-            #print(f"Worker status: {worker.state}")
-            print(f"Worker: {worker}")
-        self.app.pop_screen()
+        # self.query_one("#statusGame").update("")
 
     @on(Button.Pressed, "#duel")
     def duelAction(self):

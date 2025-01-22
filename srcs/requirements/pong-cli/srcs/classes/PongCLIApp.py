@@ -17,8 +17,7 @@ from classes.utils.user             import User
 
 class PongCLI(App):
     SCREENS = {}
-
-    BINDINGS = [("d", "toggle_dark", "Toggle dark mode")]
+    BINDINGS = [("^q", "exit", "Exit"), ]
 
     def __init__(self) -> None:
         super().__init__()

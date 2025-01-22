@@ -17,6 +17,7 @@ from classes.utils.user         import User
 class LoginPage(Screen):
     SUB_TITLE = "Login Page"
     CSS_PATH = "styles/LoginPage.tcss"
+    BINDINGS = [("^q", "exit", "Exit"), ]
 
     def compose(self) -> ComposeResult:
         yield Header()
