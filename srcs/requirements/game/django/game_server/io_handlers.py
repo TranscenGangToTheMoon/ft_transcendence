@@ -29,7 +29,16 @@ async def connect(sid, environ, auth):
     try:
         match = request_game(endpoints.Game.fuser.format(user_id=id), 'GET')
     except NotFound as e:
-        raise ConnectionRefusedError(e.detail)
+        match_code = auth.get('match_code')
+        if match_code is None:
+            raise ConnectionRefusedError(e.detail)
+        try:
+            game = Server.get_game(match_code)
+        except Server.NotFound:
+            raise ConnectionRefusedError(e.detail)
+        game.add_spectator(id, sid)
+        await Server._sio.enter_room(sid, str(game.match.id))
+        return
     except APIException as e:
         raise ConnectionRefusedError(MessagesException.ServiceUnavailable.game)
     if match is None:

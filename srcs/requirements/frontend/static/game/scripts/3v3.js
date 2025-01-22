@@ -638,7 +638,7 @@ async function initGame(){
         if (userInformations.lobbyData){
             try {
                 await initData(userInformations.lobbyData);
-                document.getElementById('gameArea').style.display = 'block';
+                document.getElementById('gameArea').style.display = 'flex';
                 document.getElementById('opponentWait').style.display = 'none';
             }
             catch (error){
