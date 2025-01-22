@@ -6,7 +6,6 @@ from textual.screen     import Screen
 from textual.widgets    import Button, Footer, Header, Label, Rule, Static
 
 # Local imports
-from classes.utils.config   import Config
 from classes.utils.user     import User
 
 class MainPage(Screen):
@@ -31,7 +30,10 @@ class MainPage(Screen):
             User.me()
             self.query_one("#userMeStatic").update(f"Welcome {User.username} (id: {User.id})")
         except Exception as error:
-            self.query_one("#userMeStatic").update(f"GET /api/users/me/ Error: {error}")
+            self.query_one("#statusGame").styles.color = "red"
+            if (User.response is not None and User.response.status_code != 401):
+                self.query_one("#statusGame").update(f"{error}")
+            self.query_one("#statusGame").update("Tokens have expired please reconnect")
 
     def on_screen_resume(self) -> None:
         self.query_one("#duel").loading = False
@@ -49,9 +51,13 @@ class MainPage(Screen):
             self.query_one("#duel").loading = True
             self.query_one("#duel").variant = "default"
             self.query_one("#cancelDuelGame").disabled = False
-            self.query_one("#statusGame").update(f"({response.status_code}) Searching for an opponent")
+            self.query_one("#statusGame").update(f"({User.response.status_code}) Searching for an opponent")
+
         except Exception as error:
-            self.query_one("#statusGame").update(f"POST /api/play/duel/ Error: {error}")
+            self.query_one("#statusGame").styles.color = "red"
+            if (User.response is not None and User.response.status_code != 401):
+                self.query_one("#statusGame").update(f"{error}")
+            self.query_one("#statusGame").update("Tokens have expired please reconnect")
 
     @on(Button.Pressed, "#cancelDuelGame")
     def cancelDuelAction(self):
@@ -66,4 +72,7 @@ class MainPage(Screen):
             self.query_one("#cancelDuelGame").disabled = True
 
         except Exception as error:
-            self.query_one("#cancelDuelResult").update(f"DELETE /api/play/duel/ Error: {error}")
+            self.query_one("#statusGame").styles.color = "red"
+            if (User.response is not None and User.response.status_code != 401):
+                self.query_one("#statusGame").update(f"{error}")
+            self.query_one("#statusGame").update("Tokens have expired please reconnect")
