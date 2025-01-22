@@ -151,7 +151,7 @@ function setupSocketListeners(chatInfo)
 	});
 }
 
-function displayMessages(chatInfo, chatMessages, method='afterbegin'){
+function displayMessages(chatInfo, chatMessages, isMore = false, method='afterbegin'){
 	const chatBox = document.getElementById('messages'+chatInfo.target);
 	chatMessages.forEach(element => {
 		console.log('Chat: Displaying message:', element);
@@ -166,7 +166,8 @@ function displayMessages(chatInfo, chatMessages, method='afterbegin'){
 			}
 		}
 	});
-	chatBox.scrollTop = chatBox.scrollHeight;
+	if (!isMore)
+		chatBox.scrollTop = chatBox.scrollHeight;
 }
 
 async function getMoreOldsMessages(chatInfo){
@@ -177,7 +178,7 @@ async function getMoreOldsMessages(chatInfo){
 		if (apiAnswer.detail){
 			throw {'code': 400, 'detail': apiAnswer.detail};
 		}
-		if (apiAnswer.count !== 0) displayMessages(chatInfo, apiAnswer.results);
+		if (apiAnswer.count !== 0) displayMessages(chatInfo, apiAnswer.results, true);
 		chatInfo.chatMessageNext = apiAnswer.next;
 	}
 	catch (error) {
