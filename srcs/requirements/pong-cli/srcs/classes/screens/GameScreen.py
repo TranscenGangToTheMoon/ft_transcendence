@@ -2,6 +2,8 @@
 import asyncio
 import ssl
 import time
+from time import sleep
+
 import aiohttp
 import socketio
 from pynput import keyboard
@@ -250,7 +252,8 @@ class GamePage(Screen):
         async def gameOverAction(data):
             print(f"Game over event: {data}")
             if (await self.app.push_screen_wait(GameEnd(data["reason"], data["winner"] == User.team)) == "main"):
-                await self.app.switch_screen(MainPage())
+                sleep(1)
+                self.dismiss()
             await self.sio.disconnect()
 
     async def on_unmount(self) -> None:
