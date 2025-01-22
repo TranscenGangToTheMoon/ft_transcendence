@@ -23,7 +23,7 @@ body {
     user-select: none;
 }
 
-.friend-badges, .all-badges{
+.friend-badges, .chat-badges, .all-badges{
     display: flex;
 }
 
