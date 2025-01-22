@@ -180,7 +180,8 @@ class GamePage(Screen):
             )
             print("Connected to server!")
         except Exception as error:
-            print(f"From event: {error}")
+            print(f"From socketio launching: {error}")
+            self.dismiss()
 
     def setHandler(self):
         @self.sio.on('connect')
