@@ -45,6 +45,7 @@ async def connect(sid, environ, auth):
             user = auth_verify(token)
             if (usersConnected.is_user_connected(user['id'])):
                 print(f"User already connected : {sid}")
+                await sio.emit('error', {'error':409, 'message':'User already connected'}, to=usersConnected.get_user_sid(user['id']))
                 await sio.disconnect(usersConnected.get_user_sid(user['id']))
             if chat_type == 'private_message':
                 chat = request_chat(endpoint_chat.fchat.format(chat_id=chatId), 'GET', None, token)

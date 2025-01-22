@@ -135,6 +135,9 @@ function setupSocketListeners(chatInfo)
 		if (data.error === 401){
 			socket.emit('message', {'content': data.retry_content, 'token' : 'Bearer ' + await refreshToken(), 'retry': true});
 		}
+		else if (data.error === 409){
+			await closeChatTab(chatInfo);
+		}
 		else {
 			console.log('Error chat:', data);
 			if (data.message === undefined) data.message = 'Error with chat server';
