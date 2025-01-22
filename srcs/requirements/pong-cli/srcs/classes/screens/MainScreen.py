@@ -32,12 +32,13 @@ class MainPage(Screen):
     def on_mount(self):
         try:
             User.me()
+            self.query_one("#userMeStatic").styles.color = "white"
             self.query_one("#userMeStatic").update(f"Welcome {User.username} (id: {User.id})")
         except Exception as error:
-            self.query_one("#statusGame").styles.color = "red"
+            self.query_one("#userMeStatic").styles.color = "red"
             if (User.response is not None and User.response.status_code != 401):
-                self.query_one("#statusGame").update(f"{error}")
-            self.query_one("#statusGame").update("Tokens have expired please reconnect")
+                self.query_one("#userMeStatic").update(f"{error}")
+            self.query_one("#userMeStatic").update("Tokens have expired please reconnect")
 
     def on_screen_resume(self) -> None:
         self.query_one("#duel").loading = False
