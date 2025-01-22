@@ -210,9 +210,9 @@
 
             const easeOutProgress = 1 - Math.pow(1 - progress, 3);
 
-            console.log(startPositions);
+            // console.log(startPositions);
             for (let i in startPositions){
-                console.log('paddle_id', i);
+                // console.log('paddle_id', i);
                 state.paddles[i].y = startPositions[i] + (target - startPositions[i]) * easeOutProgress;
             }
             // state.paddles.left.y = startLeft + (target - startLeft) * easeOutProgress;
@@ -484,6 +484,7 @@ function initSocket(){
         window.PongGame.startCountdown();
     })
     gameSocket.on('game_state', event => {
+        console.log('game_state received', Date.now());
 		window.PongGame.state.ball.y = event.position_y;
 		window.PongGame.state.ball.x = event.position_x;
 		window.PongGame.state.ball.speedX = event.speed_x;
@@ -494,17 +495,17 @@ function initSocket(){
         console.log('error', error);
     })
     gameSocket.on('move_up', event => {
-        console.log('move_up received', event.player);
+        // console.log('move_up received', event.player);
         if (event.player !== userInformations.id)
             window.PongGame.state.paddles[event.player].speed = -1;
     })
     gameSocket.on('move_down', event => {
-        console.log('move_down received', event.player);
+        // console.log('move_down received', event.player);
         if (event.player !== userInformations.id)
             window.PongGame.state.paddles[event.player].speed = 1;
     })
     gameSocket.on('stop_moving', event => {
-		console.log('received stop_moving', event.player);
+		// console.log('received stop_moving', event.player);
         if (event.player == userInformations.id)
 	        window.PongGame.state.paddles[userInformations.id].y = event.position;
 		else {
@@ -513,17 +514,14 @@ function initSocket(){
     	}
     })
     gameSocket.on('score', event => {
+        console.log('score received', Data.now());
         window.PongGame.state.ball.speed = 0;
     	if (window.PongGame.info.myTeam.name == 'team_a') {
 			window.PongGame.state.playerScore = event.team_a;
-            // document.getElementById('playerScore').innerText = event.team_a;
-            // document.getElementById('enemyScore').innerText = event.team_b;
 			window.PongGame.state.enemyScore = event.team_b;
      	}
      	else {
 			window.PongGame.state.playerScore = event.team_b;
-            // document.getElementById('playerScore').innerText = event.team_b;
-            // document.getElementById('enemyScore').innerText = event.team_a;
 			window.PongGame.state.enemyScore = event.team_a;
       	}
     })
