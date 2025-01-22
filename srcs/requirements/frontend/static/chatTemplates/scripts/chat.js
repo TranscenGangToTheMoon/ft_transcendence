@@ -364,9 +364,11 @@ async function searchChatButton(username) {
 	document.getElementById('searchChatForm').reset();
 	await displayChatsList();
 	let buttonCollapseChat = document.getElementById('chatTabsCollapse');
-	if (buttonCollapseChat.getAttribute('aria-expanded') === 'false') {
-		lastClick = undefined;
-		buttonCollapseChat.click();
+	if (buttonCollapseChat) {
+		if (buttonCollapseChat.getAttribute('aria-expanded') === 'false') {
+			lastClick = undefined;
+			buttonCollapseChat.click();
+		}
 	}
 	await openChatTab(chatInfo.chatId);
 }
@@ -385,7 +387,7 @@ function removeFirstInactiveChatTab() {
     return null;
 }
 
-async function closeChatTab(chatInfo, )
+async function closeChatTab(chatInfo)
 {
 	var isTabActive = false;
 	let chatActiveTab = document.querySelector('#chatTabs .nav-link.active');
@@ -632,6 +634,7 @@ async function displayGameInviteInChat(inviteInfo) {
 	});
 	messagesDiv.scrollTop = messagesDiv.scrollHeight;
 }
+
 
 var lastClick = undefined;
 if (typeof openChat === 'undefined')
