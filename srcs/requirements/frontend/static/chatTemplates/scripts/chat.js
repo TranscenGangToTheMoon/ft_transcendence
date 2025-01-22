@@ -221,7 +221,6 @@ async function createChatUserCard(chatInfo) {
 	chatUserCard.id = 'chatListElement' + chatInfo.target;
 	chatUserCard.classList.add('chatUserCard');
 	chatsList.appendChild(chatUserCard);
-	console.log('Chat: Creating chat user card laaaaaaaaa:', chatInfo);
 
 	await loadContent('/chatTemplates/chatUserCard.html', chatUserCard.id);
 	chatUserCard.querySelector('.chatUserCardTitleUsername').innerText = chatInfo.target + ':';
@@ -360,6 +359,11 @@ async function searchChatButton(username) {
 	}
 	document.getElementById('searchChatForm').reset();
 	await displayChatsList();
+	let buttonCollapseChat = document.getElementById('chatTabsCollapse');
+	if (buttonCollapseChat.getAttribute('aria-expanded') === 'false') {
+		lastClick = undefined;
+		buttonCollapseChat.click();
+	}
 	await openChatTab(chatInfo.chatId);
 }
 
@@ -381,6 +385,7 @@ async function closeChatTab(chatInfo, )
 {
 	var isTabActive = false;
 	let chatActiveTab = document.querySelector('#chatTabs .nav-link.active');
+	let buttonCollapseChat = document.getElementById('chatTabsCollapse');
 	if (!chatActiveTab) return;
 	if (chatActiveTab.id === 'chatTab' + chatInfo.target + 'Link') isTabActive = true;
 	document.getElementById('chatTab' + chatInfo.target).remove();
@@ -394,7 +399,10 @@ async function closeChatTab(chatInfo, )
 		document.getElementById('chatView').remove();
 	}
 	else if (isTabActive) {
-		lastTab.querySelector('a').click();
+		if (buttonCollapseChat.getAttribute('aria-expanded') === 'true')
+			lastTab.querySelector('a').click();
+		else 
+			lastClick = lastTab.querySelector('a').id;
 	}
 }
 
@@ -427,7 +435,6 @@ async function createChatTab(chatInfo) {
     chatTabLink.setAttribute('href', "#" + idChatBox);
 	chatTabLink.setAttribute('aria-controls', idChatBox);
 	chatTabLink.setAttribute('aria-selected', 'true');
-    // chatTabLink.style = 'display:flex';
     chatTabLink.className = 'nav-link active';
 
     let chatTabButton = createButtonClose(idChatTab + "Button");
@@ -466,12 +473,16 @@ async function chatTabListener(chatInfo)
 {
 	document.getElementById('chatTab' + chatInfo.target).addEventListener('click', async e => {
 		e.preventDefault();
-		console.log('Chat: Click on chat tab', chatInfo.target);
 		if (e.target.id === 'chatTab' + chatInfo.target + 'Button') {
 			await closeChatTab(chatInfo);
 			return;
 		}
 		if (e.target.id === 'chatTab' + chatInfo.target + 'Link') {
+			let buttonCollapseChat = document.getElementById('chatTabsCollapse');
+			if (buttonCollapseChat.getAttribute('aria-expanded') === 'false') {
+				lastClick = undefined;
+				buttonCollapseChat.click();
+			}
 			if (lastClick === e.target.id) return;
 			lastClick = e.target.id;
 			openChatTab(chatInfo.chatId);
@@ -512,6 +523,33 @@ function sendMessageListener(chatInfo) {
     }
 }
 
+async function setChatView()
+{
+	await loadContent('/chatTemplates/chatTabs.html', 'container', true);
+	let buttonCollapseChat = document.getElementById('chatTabsCollapse');
+	buttonCollapseChat.addEventListener('click', async e => {
+		e.preventDefault();
+		if (buttonCollapseChat.getAttribute('aria-expanded') === 'true') {
+			if (!lastClick) return;
+			let lastTab = document.getElementById(lastClick);
+			if (lastTab) {
+				lastClick = undefined;
+				lastTab.click();
+			}
+		}
+		else {
+			await disconnect();
+		}
+	});
+	document.getElementById('logOut').addEventListener('click', async () => {
+		await disconnect();
+		openChat = {};
+		userChat = {};
+		chatView = document.getElementById('chatView');
+		if (chatView) chatView.remove();
+	});
+}
+
 async function openChatTab(chatId)
 {
 	chat = await getChatInstance(chatId);
@@ -524,14 +562,7 @@ async function openChatTab(chatId)
 	chatInfo = parsChatInfo(chat);
 	chatTabs = document.getElementById('chatTabs');
 	if (!chatTabs) {
-		await loadContent('/chatTemplates/chatTabs.html', 'container', true);
-		document.getElementById('logOut').addEventListener('click', async () => {
-			await disconnect();
-			openChat = {};
-			userChat = {};
-			chatView = document.getElementById('chatView');
-			if (chatView) chatView.remove();
-		});
+		await setChatView();
 	}
 	else {
 		if (openChat[chatInfo.chatId] && openChat[chatInfo.chatId].target !== chatInfo.target) {
