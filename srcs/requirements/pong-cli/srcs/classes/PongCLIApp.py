@@ -22,22 +22,18 @@ class PongCLI(App):
     def __init__(self) -> None:
         super().__init__()
         self.regex = re.compile(r'event: ([a-z\-]+)\ndata: (.+)\n\n')
-        self.connected = False
-
-    @property
-    def isConnected(self):
-        return (self.connected)
+        self.SSEConnected = False
 
     def on_mount(self) -> None:
         self.push_screen(LoginPage())
 
     @work
     async def SSE(self):
-        if (not self.isConnected):
-            self.connected = True
+        if (not self.SSEConnected):
             # SSLContext = ssl.create_default_context()
             # SSLContext.load_verify_locations(Config.SSL.CRT)
             # SSLContext.check_hostname = False
+            self.SSEConnected = True
             async with httpx.AsyncClient(verify=Config.SSL.CRT) as client:
                 headers = {
                     'Content-Type': 'text/event-stream',
@@ -47,32 +43,37 @@ class PongCLI(App):
                 try:
                     async with client.stream('GET', f"{User.server}/sse/users/", headers=headers) as response:
                         if (response.status_code >= 400):
-                            raise (Exception(f"({response.status_code}) SSE connection prout! {response.text}"))
-
-                        async for line in response.aiter_text():
-                            try:
-                                events = self.regex.findall(line)
-                                for event, data in events:
-                                    dataJson = None
-                                    # print(f"{event}")
-                                    if (event == "game-start"):# game start
-                                        dataJson = json.loads(data)
-                                        # print(f"{event}: {dataJson}")
-                                        if (dataJson["data"]["teams"]["a"]["players"][0]["id"] == User.id):
-                                            User.team = "a"
-                                            User.opponent = dataJson["data"]["teams"]["b"]["players"][0]["username"]
-                                        else:
-                                            User.team = "b"
-                                            User.opponent = dataJson["data"]["teams"]["a"]["players"][0]["username"]
-                                        # print(f"User opponent: {User.opponent}")
-                                        await self.push_screen(GamePage())
-                                    elif (event != "game-start" and event != "ping"):
-                                    #   print(f"{event}: {data}")
-                            except (IndexError, ValueError) as error:
-                                continue
+                            self.SSEConnected = False
+                            raise (Exception(f"({response.status_code}) SSE stream failed {response.text}"))
+                        # self.SSEConnected = False
+                        # raise (Exception("Prout"))
+                        try:
+                            async for line in response.aiter_text():
+                                try:
+                                    events = self.regex.findall(line)
+                                    for event, data in events:
+                                        if (event == "game-start"):
+                                            dataJson = json.loads(data)
+                                            # print(f"{event}: {dataJson}")
+                                            if (dataJson["data"]["teams"]["a"]["players"][0]["id"] == User.id):
+                                                User.team = "a"
+                                                User.opponent = dataJson["data"]["teams"]["b"]["players"][0]["username"]
+                                            else:
+                                                User.team = "b"
+                                                User.opponent = dataJson["data"]["teams"]["a"]["players"][0]["username"]
+                                            await self.push_screen(GamePage())
+                                        elif (event != "game-start" and event != "ping"):
+                                            print(f"{event}: {data}")
+                                except (IndexError, ValueError) as _:
+                                    continue
+                        except Exception as error:
+                            self.SSEConnected = False
+                            raise (Exception(f"Response aiter : {error}"))
+                except Exception as _:
+                    self.notify("SSE disconnected", severity="error", timeout=10)
                 finally:
-                    self.connected = False
+                    self.SSEConnected = False
 
     def on_worker_state_changed(self, event: Worker.StateChanged) -> None:
-        self.log(event)
-
+        if (event.worker.state == WorkerState.ERROR):
+            print(f"Error from {event.worker.error}")
