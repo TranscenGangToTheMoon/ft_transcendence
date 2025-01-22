@@ -7,7 +7,7 @@ import ssl
 # Textual imports
 from textual        import work
 from textual.app    import App
-from textual.worker import Worker
+from textual.worker import Worker, WorkerState
 
 # Local imports
 from classes.screens.GameScreen     import GamePage
