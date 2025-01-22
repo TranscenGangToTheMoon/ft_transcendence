@@ -1,7 +1,17 @@
-<div id="chatView" class="position-absolute bottom-0">
-	<div id="chatHeader">
-		<ul id="chatTabs" class="nav nav-tabs">
+<style>
+	#chatBody {
+		width: 45vh;
+		word-wrap: break-word;
+	}
+</style>
+
+<div id="chatView" class="position-absolute bottom-0 start-0">
+	<div id="chatHeader" style="display: flex;">
+		<ul id="chatTabs" class="nav nav-tabs" role="tablist">
 		</ul>
+		<button id="chatTabsCollapse" class="btn btn-light" type="button" data-bs-toggle="collapse" data-bs-target="#chatBody" aria-expanded="true" aria-controls="chatBody">
+			v
+		</button>
 	</div>
-	<div id="chatBody" class="tab-content py-2"></div>
+	<div id="chatBody" class="tab-content mt-0 show"></div>
 </div>
