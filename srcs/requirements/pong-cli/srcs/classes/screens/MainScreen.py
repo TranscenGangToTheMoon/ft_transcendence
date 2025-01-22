@@ -28,9 +28,8 @@ class MainPage(Screen):
 
     def on_mount(self):
         try:
-            response = requests.get(url=f"{User.server}/api/users/me/", data={}, headers=User.headers, verify=Config.SSL.CRT)
-            User.id = response.json()["id"]
-            self.query_one("#userMeStatic").update(f"Welcolme {response.json()['username']} (id: {User.id})")
+            User.me()
+            self.query_one("#userMeStatic").update(f"Welcome {User.username} (id: {User.id})")
         except Exception as error:
             self.query_one("#userMeStatic").update(f"GET /api/users/me/ Error: {error}")
 
@@ -43,9 +42,10 @@ class MainPage(Screen):
     @on(Button.Pressed, "#duel")
     def duelAction(self):
         try:
-            response = requests.post(url=f"{User.server}/api/play/duel/", data="", headers=User.headers, verify=Config.SSL.CRT)
-            if (response.status_code >= 400):
-                raise (Exception(f"({response.status_code}) Error: {response.text}"))
+            if (not self.app.SSEConnected):
+                raise (Exception("SSE not connected ! Reconnect and try again."))
+            User.duel()
+
             self.query_one("#duel").loading = True
             self.query_one("#duel").variant = "default"
             self.query_one("#cancelDuelGame").disabled = False
@@ -56,14 +56,14 @@ class MainPage(Screen):
     @on(Button.Pressed, "#cancelDuelGame")
     def cancelDuelAction(self):
         try:
-            response = requests.delete(url=f"{User.server}/api/play/duel/", data="", headers=User.headers, verify=Config.SSL.CRT)
-            if (response.status_code >= 400): #if 404 c'est que j'ai join le match maius oas recu le event SSE
-                raise (Exception(f"({response.status_code}) Error: {response.text}"))
-            elif (response.status_code == 204):
-                self.query_one("#duel").loading = False
-                self.query_one("#duel").variant = "primary"
-                self.query_one("#statusGame").update("")
-                self.query_one("#cancelDuelGame").disabled = True
+            if (not self.app.SSEConnected):
+                raise (Exception("SSE not connected ! Reconnect and try again."))
+            User.cancelDuel()
+
+            self.query_one("#duel").loading = False
+            self.query_one("#duel").variant = "primary"
+            self.query_one("#statusGame").update("")
+            self.query_one("#cancelDuelGame").disabled = True
 
         except Exception as error:
             self.query_one("#cancelDuelResult").update(f"DELETE /api/play/duel/ Error: {error}")
