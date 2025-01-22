@@ -70,7 +70,6 @@ async function chatTabListener(gameInfo)
 			}
 			if (lastClick === e.target.id) return;
 			lastClick = e.target.id;
-			openGameChatTab(gameInfo);
 			return;
 		}
 	});
@@ -100,7 +99,6 @@ async function closeChatTab(gameInfo)
 	document.getElementById('chatGameTab').remove();
 	document.getElementById('chatGameBox').remove();
 	let lastTab = document.getElementById('chatTabs').lastElementChild;
-	await disconnect();
 	if (!lastTab) {
 		console.log('Chat: Closing chat view', lastTab);
 		document.getElementById('chatView').remove();
@@ -118,5 +116,6 @@ async function openGameChatTab(gameInfo) {
 	if (!chatTabs) {
 		await setChatView();
 	}
-	if ()
+	if (document.getElementById('chatGameTab')) return;
+	await createGameChatTab(gameInfo);
 }

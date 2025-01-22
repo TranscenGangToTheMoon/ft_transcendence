@@ -246,6 +246,7 @@ async function createChatUserCard(chatInfo) {
 			if (APIAnswer && APIAnswer.detail) throw {'code': 400, 'detail': APIAnswer.detail};
 			chatUserCard.remove();
 			await closeChatTab(chatInfo);
+			displayChatsList();
 		} catch(error) {
 			console.log('Error chat:', error);
 			if (error.detail === undefined) error.detail = 'Error when attempting to delete chat';
@@ -401,10 +402,12 @@ async function closeChatTab(chatInfo)
 	let lastTab = document.getElementById('chatTabs').lastElementChild;
 	await disconnect();
 	if (!lastTab) {
+		lastClick = undefined;
 		console.log('Chat: Closing chat view', lastTab);
 		document.getElementById('chatView').remove();
 	}
 	else if (isTabActive) {
+		lastClick = undefined;
 		if (buttonCollapseChat.getAttribute('aria-expanded') === 'true')
 			lastTab.querySelector('a').click();
 		else 
@@ -598,14 +601,12 @@ async function openChatTab(chatId)
 			return;
 		}
 	}
-	else {
-		if (!document.getElementById('chatTab'+chatInfo.target).querySelector('a').classList.contains('active'))
-		document.getElementById('chatTab'+chatInfo.target).querySelector('a').click();
-	}
 	const chatModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('chatListModal'));
-	chatModal.hide();
+	if (chatModal && chatModal._isShown) {
+		chatModal.hide();
+		document.getElementById('searchChatForm').reset();
+	}
 	await connect(getAccessToken(), chatInfo);
-	document.getElementById('searchChatForm').reset();
 }
 
 async function displayGameInviteInChat(inviteInfo) {
