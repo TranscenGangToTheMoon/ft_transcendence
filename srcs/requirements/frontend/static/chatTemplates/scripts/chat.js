@@ -416,7 +416,7 @@ async function createChatTab(chatInfo) {
 
     let chatTab = document.createElement('li');
     chatTab.id = idChatTab;
-    chatTab.className = 'nav-item';
+    chatTab.className = 'chatTab nav-item';
     chatTabs.setAttribute('role', 'presentation');
 
     let chatTabLink = document.createElement('a');
@@ -425,7 +425,9 @@ async function createChatTab(chatInfo) {
     chatTabLink.setAttribute('data-bs-toggle', 'tab');
     chatTabLink.setAttribute('role', 'tab');
     chatTabLink.setAttribute('href', "#" + idChatBox);
-    chatTabLink.style = 'display:flex';
+	chatTabLink.setAttribute('aria-controls', idChatBox);
+	chatTabLink.setAttribute('aria-selected', 'true');
+    // chatTabLink.style = 'display:flex';
     chatTabLink.className = 'nav-link active';
 
     let chatTabButton = createButtonClose(idChatTab + "Button");
