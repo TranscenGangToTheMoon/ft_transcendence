@@ -33,7 +33,6 @@ async function fetchUserInfos(forced=false) {
             let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/users/me/`);
             userInformations = data;
             console.log(userInformations);
-            displayBadges();
         }
         catch (error) {
             if (error.message === 'relog')

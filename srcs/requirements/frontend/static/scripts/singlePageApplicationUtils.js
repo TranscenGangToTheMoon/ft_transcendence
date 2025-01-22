@@ -34,6 +34,10 @@ async function loadContent(url, containerId='content', append=false, container=u
             contentDiv.insertAdjacentHTML('beforeend', `\n${html}`);
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = html;
+        getBadgesDivs(contentDiv);
+        badgesDivs['friend_requests'] = contentDiv.querySelectorAll('.friend-badges');
+        displayBadges();
+
         const script = tempDiv.querySelector('[script]');
         if (script)
             await loadScript(script.getAttribute('script'), script.getAttribute('type'));
@@ -103,6 +107,7 @@ function _cancelTimeout(){
 }
 
 async function navigateTo(url, doNavigate=true, dontQuit=false){
+    if (url === window.location.pathname) return;
     let currentState = getCurrentState();
     lastState = currentState;
     // if (doNavigate){
@@ -122,8 +127,6 @@ async function navigateTo(url, doNavigate=true, dontQuit=false){
 }
 
 function confirmPopstate() {
-    // const confirmModal = document.getElementById('confirmModal');
-    // confirmModal.removeAttribute('style');
     pathName = "";
     if (direction > 0){
         history.forward();

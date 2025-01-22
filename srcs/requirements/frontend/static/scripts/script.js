@@ -121,7 +121,6 @@ function addFriendListListener(){
 async function  indexInit(auto=true) {
     if (!auto){
         await loadUserProfile();
-        getBadgesDivs();
     }
     else{
         await loadScript('/scripts/singlePageApplicationUtils.js');

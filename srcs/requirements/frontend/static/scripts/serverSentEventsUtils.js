@@ -47,6 +47,7 @@ function addFriendSSEListeners(){
                 document.getElementById('innerFriendRequests-tab').click();
             }, event.target);
             userInformations.notifications['friend_requests'] += 1;
+            getBadgesDivs(document);
             displayBadges();
         }
         addFriendRequest(event.data);
@@ -68,8 +69,10 @@ function addFriendSSEListeners(){
             userInformations.notifications['friend_requests'] -= 1;
         if (!userInformations.notifications['friend_requests'])
             removeBadges('friend_requests');
-        else    
+        else{
+            getBadgesDivs(document);
             displayBadges();
+        }
         removeFriendRequest(event.data.id);
     })
 
@@ -122,6 +125,7 @@ function addChatSSEListeners(){
             await openChatTab(chatId);
         });
         userInformations.notifications['chats'] += 1;
+        getBadgesDivs(document);
         displayBadges();
     })
 }

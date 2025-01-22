@@ -19,8 +19,6 @@ function initSwitch(){
 
 async function initFriendsTemplate() {
     await loadBlockedModal();
-    getBadgesDivs();
-    displayBadges();
     initSwitch();
 }
 

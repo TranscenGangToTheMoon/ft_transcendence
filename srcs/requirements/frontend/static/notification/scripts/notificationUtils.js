@@ -1,29 +1,29 @@
 
 function displayBadges(){
     if (userInformations.notifications){
-        setTimeout(() => {
-            console.log(userInformations.notifications)
-            let totalNotifications = 0;
-            for (let type in userInformations.notifications){
-                if (!userInformations.notifications[type] || type === 'all') continue;
-                totalNotifications += userInformations.notifications[type];
-                for (let badgeDiv of badgesDivs[type]){
-                    addNotificationIndicator(badgeDiv, userInformations.notifications[type]);
-                }
+        console.log(userInformations.notifications)
+        let totalNotifications = 0;
+        for (let type in userInformations.notifications){
+            if (!userInformations.notifications[type] || type === 'all') continue;
+            totalNotifications += userInformations.notifications[type];
+            for (let badgeDiv of badgesDivs[type]){
+                addNotificationIndicator(badgeDiv, userInformations.notifications[type]);
             }
-            console.log(totalNotifications);
-            userInformations.notifications['all'] = totalNotifications;
-            if (!totalNotifications) return;
-            for (let allBadgesDiv of badgesDivs['all']){
-                addNotificationIndicator(allBadgesDiv, totalNotifications);
-            }
-        }, 70);
+        }
+        console.log(totalNotifications);
+        userInformations.notifications['all'] = totalNotifications;
+        if (!totalNotifications) return;
+        for (let allBadgesDiv of badgesDivs['all']){
+            addNotificationIndicator(allBadgesDiv, totalNotifications);
+        }
     }
 }
 
 function removeBadges(type){
+    console.log('je remove pourtant')
     let toDelete = 0;
     userInformations.notifications[type] = 0;
+    getBadgesDivs(document);
     for (let badgeDiv of badgesDivs[type]){
         let indicator = badgeDiv.querySelector(`.indicator`);
         if (indicator){
@@ -54,6 +54,7 @@ function removeBadges(type){
 }
 
 function addNotificationIndicator(div, number){
+    // console.log(div.cloneNode(true));
     if (!div.querySelector('.indicator')){
         const indicator = document.createElement('div');
         indicator.classList.add('indicator');
@@ -65,10 +66,10 @@ function addNotificationIndicator(div, number){
     }
 }
 
-function getBadgesDivs(){
-    badgesDivs['all'] = document.querySelectorAll('.all-badges');
-    badgesDivs['friend_requests'] = document.querySelectorAll('.friend-badges');
-    badgesDivs['chats'] = document.querySelectorAll('.chat-badges');
+function getBadgesDivs(container){
+    badgesDivs['all'] = container.querySelectorAll('.all-badges');
+    badgesDivs['friend_requests'] = container.querySelectorAll('.friend-badges');
+    badgesDivs['chats'] = container.querySelectorAll('.chat-badges');
 }
 
 
@@ -77,7 +78,6 @@ function handleFriendRequestNotification(target, img, notification, toastContain
         event.preventDefault();
         event.stopImmediatePropagation();
         event.stopPropagation();
-        console.log('click ?')
         try {
             let data = await apiRequest(getAccessToken(), target.url, target.method);
             if (target.url.includes('friend_request')){
