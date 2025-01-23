@@ -135,6 +135,9 @@ function setupSocketListeners(chatInfo)
 		if (data.error === 401){
 			socket.emit('message', {'content': data.retry_content, 'token' : 'Bearer ' + await refreshToken(), 'retry': true});
 		}
+		else if (data.error === 409){
+			await closeChatTab(chatInfo);
+		}
 		else {
 			console.log('Error chat:', data);
 			if (data.message === undefined) data.message = 'Error with chat server';
@@ -148,7 +151,7 @@ function setupSocketListeners(chatInfo)
 	});
 }
 
-function displayMessages(chatInfo, chatMessages, method='afterbegin'){
+function displayMessages(chatInfo, chatMessages, isMore = false, method='afterbegin'){
 	const chatBox = document.getElementById('messages'+chatInfo.target);
 	chatMessages.forEach(element => {
 		console.log('Chat: Displaying message:', element);
@@ -163,7 +166,8 @@ function displayMessages(chatInfo, chatMessages, method='afterbegin'){
 			}
 		}
 	});
-	chatBox.scrollTop = chatBox.scrollHeight;
+	if (!isMore)
+		chatBox.scrollTop = chatBox.scrollHeight;
 }
 
 async function getMoreOldsMessages(chatInfo){
@@ -174,7 +178,7 @@ async function getMoreOldsMessages(chatInfo){
 		if (apiAnswer.detail){
 			throw {'code': 400, 'detail': apiAnswer.detail};
 		}
-		if (apiAnswer.count !== 0) displayMessages(chatInfo, apiAnswer.results);
+		if (apiAnswer.count !== 0) displayMessages(chatInfo, apiAnswer.results, true);
 		chatInfo.chatMessageNext = apiAnswer.next;
 	}
 	catch (error) {
@@ -221,7 +225,6 @@ async function createChatUserCard(chatInfo) {
 	chatUserCard.id = 'chatListElement' + chatInfo.target;
 	chatUserCard.classList.add('chatUserCard');
 	chatsList.appendChild(chatUserCard);
-	console.log('Chat: Creating chat user card laaaaaaaaa:', chatInfo);
 
 	await loadContent('/chatTemplates/chatUserCard.html', chatUserCard.id);
 	chatUserCard.querySelector('.chatUserCardTitleUsername').innerText = chatInfo.target + ':';
@@ -243,6 +246,7 @@ async function createChatUserCard(chatInfo) {
 			if (APIAnswer && APIAnswer.detail) throw {'code': 400, 'detail': APIAnswer.detail};
 			chatUserCard.remove();
 			await closeChatTab(chatInfo);
+			displayChatsList();
 		} catch(error) {
 			console.log('Error chat:', error);
 			if (error.detail === undefined) error.detail = 'Error when attempting to delete chat';
@@ -360,6 +364,13 @@ async function searchChatButton(username) {
 	}
 	document.getElementById('searchChatForm').reset();
 	await displayChatsList();
+	let buttonCollapseChat = document.getElementById('chatTabsCollapse');
+	if (buttonCollapseChat) {
+		if (buttonCollapseChat.getAttribute('aria-expanded') === 'false') {
+			lastClick = undefined;
+			buttonCollapseChat.click();
+		}
+	}
 	await openChatTab(chatInfo.chatId);
 }
 
@@ -377,10 +388,11 @@ function removeFirstInactiveChatTab() {
     return null;
 }
 
-async function closeChatTab(chatInfo, )
+async function closeChatTab(chatInfo)
 {
 	var isTabActive = false;
 	let chatActiveTab = document.querySelector('#chatTabs .nav-link.active');
+	let buttonCollapseChat = document.getElementById('chatTabsCollapse');
 	if (!chatActiveTab) return;
 	if (chatActiveTab.id === 'chatTab' + chatInfo.target + 'Link') isTabActive = true;
 	document.getElementById('chatTab' + chatInfo.target).remove();
@@ -390,11 +402,16 @@ async function closeChatTab(chatInfo, )
 	let lastTab = document.getElementById('chatTabs').lastElementChild;
 	await disconnect();
 	if (!lastTab) {
+		lastClick = undefined;
 		console.log('Chat: Closing chat view', lastTab);
 		document.getElementById('chatView').remove();
 	}
 	else if (isTabActive) {
-		lastTab.querySelector('a').click();
+		lastClick = undefined;
+		if (buttonCollapseChat.getAttribute('aria-expanded') === 'true')
+			lastTab.querySelector('a').click();
+		else 
+			lastClick = lastTab.querySelector('a').id;
 	}
 }
 
@@ -416,7 +433,7 @@ async function createChatTab(chatInfo) {
 
     let chatTab = document.createElement('li');
     chatTab.id = idChatTab;
-    chatTab.className = 'nav-item';
+    chatTab.className = 'chatTab nav-item';
     chatTabs.setAttribute('role', 'presentation');
 
     let chatTabLink = document.createElement('a');
@@ -425,7 +442,8 @@ async function createChatTab(chatInfo) {
     chatTabLink.setAttribute('data-bs-toggle', 'tab');
     chatTabLink.setAttribute('role', 'tab');
     chatTabLink.setAttribute('href', "#" + idChatBox);
-    chatTabLink.style = 'display:flex';
+	chatTabLink.setAttribute('aria-controls', idChatBox);
+	chatTabLink.setAttribute('aria-selected', 'true');
     chatTabLink.className = 'nav-link active';
 
     let chatTabButton = createButtonClose(idChatTab + "Button");
@@ -464,12 +482,16 @@ async function chatTabListener(chatInfo)
 {
 	document.getElementById('chatTab' + chatInfo.target).addEventListener('click', async e => {
 		e.preventDefault();
-		console.log('Chat: Click on chat tab', chatInfo.target);
 		if (e.target.id === 'chatTab' + chatInfo.target + 'Button') {
 			await closeChatTab(chatInfo);
 			return;
 		}
 		if (e.target.id === 'chatTab' + chatInfo.target + 'Link') {
+			let buttonCollapseChat = document.getElementById('chatTabsCollapse');
+			if (buttonCollapseChat.getAttribute('aria-expanded') === 'false') {
+				lastClick = undefined;
+				buttonCollapseChat.click();
+			}
 			if (lastClick === e.target.id) return;
 			lastClick = e.target.id;
 			openChatTab(chatInfo.chatId);
@@ -510,6 +532,33 @@ function sendMessageListener(chatInfo) {
     }
 }
 
+async function setChatView()
+{
+	await loadContent('/chatTemplates/chatTabs.html', 'container', true);
+	let buttonCollapseChat = document.getElementById('chatTabsCollapse');
+	buttonCollapseChat.addEventListener('click', async e => {
+		e.preventDefault();
+		if (buttonCollapseChat.getAttribute('aria-expanded') === 'true') {
+			if (!lastClick) return;
+			let lastTab = document.getElementById(lastClick);
+			if (lastTab) {
+				lastClick = undefined;
+				lastTab.click();
+			}
+		}
+		else {
+			await disconnect();
+		}
+	});
+	document.getElementById('logOut').addEventListener('click', async () => {
+		await disconnect();
+		openChat = {};
+		userChat = {};
+		chatView = document.getElementById('chatView');
+		if (chatView) chatView.remove();
+	});
+}
+
 async function openChatTab(chatId)
 {
 	chat = await getChatInstance(chatId);
@@ -522,14 +571,7 @@ async function openChatTab(chatId)
 	chatInfo = parsChatInfo(chat);
 	chatTabs = document.getElementById('chatTabs');
 	if (!chatTabs) {
-		await loadContent('/chatTemplates/chatTabs.html', 'container', true);
-		document.getElementById('logOut').addEventListener('click', async () => {
-			await disconnect();
-			openChat = {};
-			userChat = {};
-			chatView = document.getElementById('chatView');
-			if (chatView) chatView.remove();
-		});
+		await setChatView();
 	}
 	else {
 		if (openChat[chatInfo.chatId] && openChat[chatInfo.chatId].target !== chatInfo.target) {
@@ -559,14 +601,12 @@ async function openChatTab(chatId)
 			return;
 		}
 	}
-	else {
-		if (!document.getElementById('chatTab'+chatInfo.target).querySelector('a').classList.contains('active'))
-		document.getElementById('chatTab'+chatInfo.target).querySelector('a').click();
-	}
 	const chatModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('chatListModal'));
-	chatModal.hide();
+	if (chatModal && chatModal._isShown) {
+		chatModal.hide();
+		document.getElementById('searchChatForm').reset();
+	}
 	await connect(getAccessToken(), chatInfo);
-	document.getElementById('searchChatForm').reset();
 }
 
 async function displayGameInviteInChat(inviteInfo) {
@@ -595,6 +635,7 @@ async function displayGameInviteInChat(inviteInfo) {
 	});
 	messagesDiv.scrollTop = messagesDiv.scrollHeight;
 }
+
 
 var lastClick = undefined;
 if (typeof openChat === 'undefined')
