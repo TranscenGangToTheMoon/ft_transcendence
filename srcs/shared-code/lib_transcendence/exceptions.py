@@ -59,6 +59,9 @@ class MessagesException:
         TRUE_ONLY = 'This field must be True.'
         NOT_BELONG_MATCH = 'This user does not belong to this match.'
 
+        MISSING_KWARGS = 'Missing required kwargs.'
+        MISSING_DATA = 'Missing required data.'
+
     class Authentication:
         NOT_CONNECTED_SSE = {'detail': 'You need to be connected to SSE to access this resource.', 'code': 'sse_connection_required'}
         AUTHENTICATION_FAILED = {'detail': 'Incorrect authentication credentials.', 'code': 'authentication_failed'}

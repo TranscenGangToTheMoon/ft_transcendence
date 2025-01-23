@@ -81,7 +81,7 @@ class Users:
     result_match                = 'api/private/users/result-match/'
     result_tournament           = 'api/private/users/result-tournament/'
 
-    export_data                 = 'api/users/me/downalod-data/'
+    export_data                 = 'api/users/me/download-data/'
 
     sse                         = 'sse/users/'
     event                       = 'api/private/users/events/'

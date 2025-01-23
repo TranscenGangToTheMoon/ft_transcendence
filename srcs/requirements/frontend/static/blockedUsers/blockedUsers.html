@@ -1,0 +1,22 @@
+<div class="modal fade" id="blockedUsersModal" tabindex="-1" aria-labelledby="blockedUsersModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="blockedUsersModalLabel">Blocked Users</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+            <div id="blockedTitle"></div>
+            <div id="blockedUsersList" class="overflow-auto">
+                
+            </div>
+            <input type="text" id="blockedNb" placeholder="nb">
+            <button id="simulateBlock">simulate block</button>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div script='/blockedUsers/scripts/blockedUsers.js'></div>

@@ -45,6 +45,7 @@ async def connect(sid, environ, auth):
             user = auth_verify(token)
             if (usersConnected.is_user_connected(user['id'])):
                 print(f"User already connected : {sid}")
+                await sio.emit('error', {'error':409, 'message':'User already connected'}, to=usersConnected.get_user_sid(user['id']))
                 await sio.disconnect(usersConnected.get_user_sid(user['id']))
             if chat_type == 'private_message':
                 chat = request_chat(endpoint_chat.fchat.format(chat_id=chatId), 'GET', None, token)
@@ -111,7 +112,7 @@ async def message(sid, data):
             )
             try:
                 print(f"User not connected, sending sse {usersConnected.get_chat_with_id(sid)}")
-                await sync_to_async(create_sse_event, thread_sensitive=False)(usersConnected.get_chat_with_id(sid), EventCode.SEND_MESSAGE, answerAPI,{'username':usersConnected.get_user_id(sid),'message':content})
+                await sync_to_async(create_sse_event, thread_sensitive=False)(usersConnected.get_chat_with_id(sid), EventCode.RECEIVE_MESSAGE, answerAPI,{'username':usersConnected.get_user_id(sid),'message':content})
             except (PermissionDenied, AuthenticationFailed, NotFound, APIException) as e:
                 print(f"Error SSE: {e}")
         else:

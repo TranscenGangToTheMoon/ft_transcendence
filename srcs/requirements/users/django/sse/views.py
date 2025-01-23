@@ -42,11 +42,14 @@ class SSEView(APIView):
                     for message in pubsub.listen():
                         if message['type'] == 'message':
                             event, data = message['data'].decode('utf-8').split(':', 1)
+                            try:
+                                if event == EventCode.GAME_START:
+                                    get_user(id=_user_id).set_game_playing(json.loads(data)['data']['code'])
+                            except (NotFound, json.decoder.JSONDecodeError, KeyError):
+                                pass
+                            yield f'event: {event}\ndata: {data}\n\n'
                             if event == EventCode.DELETE_USER:
                                 raise ConnectionClose
-                            if event == EventCode.GAME_START:
-                                get_user(id=_user_id).set_game_playing(json.loads(data)['data']['code'])
-                            yield f'event: {event}\ndata: {data}\n\n'
             except (GeneratorExit, ConnectionClose) as e:
                 pubsub.close()
                 if isinstance(e, GeneratorExit):
@@ -56,6 +59,9 @@ class SSEView(APIView):
                             get_user(id=_user_id).disconnect()
                     except (IndexError, NotFound):
                         pass
+            except redis.exceptions.ConnectionError:
+                get_user(id=_user_id).disconnect()
+                raise ServiceUnavailable('event-queue')
 
         user = get_user(request)
         launch_ping_loop = user.connect()
