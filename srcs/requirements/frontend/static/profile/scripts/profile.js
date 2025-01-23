@@ -2,6 +2,7 @@ async function loadTabs() {
     const tabFiles = {
         'account' : '/profile/profileTemplates/account.html',
         'friends' : '/profile/profileTemplates/friends.html',
+        'ranked' : '/profile/profileTemplates/ranked.html',
         'statistics': '/profile/profileTemplates/statistics.html',
         'history' : '/profile/profileTemplates/matchHistory.html',
     }

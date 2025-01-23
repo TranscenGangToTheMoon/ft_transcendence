@@ -104,3 +104,7 @@ body {
     background-color: white;
     /* border-radius: 10px; */
 }
+
+.max-vh-75 {
+    max-height: 75vh !important;
+}
