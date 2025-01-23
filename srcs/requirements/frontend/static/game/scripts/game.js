@@ -30,11 +30,11 @@
             y : config.canvasHeight / 2,
             x : config.canvasWidth / 4
         }
-    
+
         config.playerScore = {
             y : config.enemyScore.y,
             x : config.canvasWidth - config.enemyScore.x
-        } 
+        }
     }
     setScoreCoords();
 
@@ -455,8 +455,6 @@
         if (!state.isCountDownActive) {
             ctx.clearRect(0, 0, config.canvasWidth, config.canvasHeight);
             drawPaddles();
-            ctx.fillText(`${state.playerScore}`, config.playerScore.x, config.playerScore.y);
-            ctx.fillText(`${state.enemyScore}`, config.enemyScore.x, config.enemyScore.y);
             ctx.drawImage(ballImage, state.ball.x, state.ball.y, config.ballSize, config.ballSize);
         }
     }
@@ -486,7 +484,7 @@ function fillTeamDetail(enemyTeamDetail, playerTeamDetail){
 async function updateTrophies(){
     if (window.location.pathname !== '/game/ranked') return;
     await fetchUserInfos(true);
-    await loadUserProfile(); 
+    await loadUserProfile();
 }
 
 if (typeof cancelTimeout === 'undefined')
@@ -718,8 +716,8 @@ function forPhoneChanges(){
         document.getElementById('gameCanvas').style.height = '300px';
         document.getElementById('gameCanvas').style.width = '400px';
         document.getElementById('gameCanvas').style.backgroundColor = 'blue';
-    
-        
+
+
         function simulateKey(type, keyCode) {
             const event = new KeyboardEvent(type, {
                 key: keyCode === 38 ? 'ArrowUp' : 'ArrowDown',
@@ -729,10 +727,10 @@ function forPhoneChanges(){
                 bubbles: true,
                 cancelable: true
             });
-            
+
             document.dispatchEvent(event);
         }
-        
+
     // Handle touch start
     let lastTouchY = undefined;
     function handleTouchStart(event) {
@@ -740,7 +738,7 @@ function forPhoneChanges(){
         const screenHeight = window.innerHeight;
         const touchY = touch.clientY;
         const threshold = 0.20; // 20% of screen height
-        
+
         if (touchY < screenHeight / 2) {
             if (lastTouchY && lastTouchY >= screenHeight / 2)
                 simulateKey('keyup', 40)
@@ -754,7 +752,7 @@ function forPhoneChanges(){
         }
         lastTouchY = touchY;
     }
-    
+
     // Handle touch end - simulates keyup
     function handleTouchEnd(event) {
         // When the last touch point is removed, we need to check
@@ -764,7 +762,7 @@ function forPhoneChanges(){
             const screenHeight = window.innerHeight;
             const touchY = touch.clientY;
             const threshold = 0.20;
-            
+
             if (touchY < screenHeight / 2) {
                 // Release arrow up
                 simulateKey('keyup', 38);
@@ -774,7 +772,7 @@ function forPhoneChanges(){
             }
         }
     }
-    
+
         document.addEventListener('touchstart', handleTouchStart);
         document.addEventListener('touchmove', handleTouchStart);
         document.addEventListener('touchend', handleTouchEnd);
@@ -794,7 +792,7 @@ async function initGame(){
     await indexInit(false);
     if (window.matchMedia("(hover: none) and (pointer: coarse)").matches)
         forPhoneChanges();
-        
+
     if (window.location.pathname === '/') return;
     document.getElementById('gameArea').classList.replace('d-flex', 'd-none');
     document.getElementById('opponentWait').style.display = "block";
