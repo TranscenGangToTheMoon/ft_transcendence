@@ -1,6 +1,5 @@
 # Python imports
 import json
-from os import system
 
 class Config:
     configJson = {}
@@ -59,9 +58,9 @@ class Config:
         height: int = 0
 
     class Playground:
-        cWidth: int = 800
+        cWidth: int = 1000
         cHeight: int = 600
-        width: int = 114
+        width: int = 142
         height: int = 40
 
         @classmethod
@@ -76,11 +75,9 @@ class Config:
         cGap: int = 100
         cWidth: int = 30
         cHeight: int = 200
-        cSpeed: int = 500
         gap: int = 14
         width: int = 4
         height: int = 13
-        speed: int = 33
 
         @classmethod
         def load(cls):
