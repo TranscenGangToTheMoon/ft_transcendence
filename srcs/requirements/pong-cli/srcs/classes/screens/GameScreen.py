@@ -22,7 +22,6 @@ from classes.game.PaddleWidget                  import Paddle
 from classes.game.PlaygroundWidget              import Playground
 from classes.modalScreens.CountdownModalScreen  import Countdown
 from classes.modalScreens.GameOverModalScreen   import GameEnd
-from classes.screens.MainScreen                 import MainPage
 from classes.utils.config                       import Config
 from classes.utils.user                         import User
 
@@ -68,6 +67,7 @@ class GamePage(Screen):
         Config.Console.width = console.width
         Config.Console.height = console.height
 
+        # Score handling
         self.scoreLeft.styles.offset = Offset(Config.Console.width // 4, 5)
         self.scoreRight.styles.offset = Offset(Config.Console.width // 4 * 3 - 4, 5)
         self.opponentLabel.styles.layer = "4"
@@ -170,8 +170,9 @@ class GamePage(Screen):
                 self.ball.cdY *= -1
                 self.ball.cY -= self.ball.cY + Config.Ball.cHeight - Config.Playground.cHeight
 
+            elapsedTime = time.perf_counter() - self.lastFrame
             self.lastFrame = time.perf_counter()
-            await asyncio.sleep(1 / Config.frameRate)
+            await asyncio.sleep(1 / (Config.frameRate - elapsedTime))
 
     async def launchSocketIO(self):
         try:
@@ -194,20 +195,17 @@ class GamePage(Screen):
         @self.sio.on('connect')
         async def connect():
             self.connected = True
-            # print("Connected to server event!", flush=True)
-            # print(self.connected, flush=True)
+            print("Connected to server event!", flush=True)
 
         @self.sio.on('disconnect')
         async def disconnect():
             self.connected = False
             print("Disconnected from server event!", flush=True)
-            # print(self.connected, flush=True)
 
         @self.sio.on('start_game')
         async def startGameAction():
             self.lastFrame = 0
             self.gameStarted = True
-            # print(self.connected, flush=True)
 
         @self.sio.on('start_countdown')
         async def startCountdownAction():
