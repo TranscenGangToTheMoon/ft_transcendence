@@ -534,6 +534,14 @@ function addChatSSEListeners(){
         userInformations.notifications['chats'] += 1;
         displayBadges();
     })
+    sse.addEventListener('lobby-message', async event => {
+        event = JSON.parse(event.data);
+        // displayGameChatMessage(evemt.content);
+    })
+    sse.addEventListener('tournament-message', async event => {
+        event = JSON.parse(event.data);
+        // displayGameChatMessage(event.content);
+    })
 }
 
 function addSSEListeners(){

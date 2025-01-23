@@ -1,3 +1,14 @@
+function displayGameChatMessage(message){
+	if (message === undefined) return;
+	let messageDiv = document.createElement('div');
+	messageDiv.className = 'messageGame';
+	messageDiv.innerHTML = message;
+	let chatBox = document.getElementById('messagesGame');
+	if (chatBox) {
+		chatBox.appendChild(messageDiv);
+	}
+}
+
 async function createGameChatTab(gameInfo) {
 	let idChatTab = "chatGameTab";
     let idChatBox = "chatGameBox";
@@ -54,11 +65,11 @@ async function createGameChatTab(gameInfo) {
 
 	lastClick = chatTabLink.id;
 
-	await chatTabListener(gameInfo);
+	await chatTabListener();
 	sendMessageListener(gameInfo);
 }
 
-async function chatTabListener(gameInfo)
+async function chatTabListener()
 {
 	document.getElementById('chatGameTab').addEventListener('click', async e => {
 		e.preventDefault();
@@ -84,6 +95,12 @@ function sendMessageListener(gameInfo) {
             const message = this.querySelector('input').value;
 			if (message === '') return;
 			//send message to server
+			// if (gameInfo.type === 'lobby'){
+			// 	await apiRequest('POST', )
+			// 	'api/play/lobby/<str:code>/message/'
+			// }
+			// else if (gameInfo.type === 'tournament'){
+			// 	'api/play/tournament/<str:code>/message/'
             chatForm.reset();
         });
     }
@@ -104,10 +121,12 @@ async function closeChatTab(gameInfo)
 		document.getElementById('chatView').remove();
 	}
 	else if (isTabActive) {
-		if (buttonCollapseChat.getAttribute('aria-expanded') === 'true')
+		if (buttonCollapseChat.getAttribute('aria-expanded') === 'true') {
 			lastTab.querySelector('a').click();
-		else 
+		}
+		else {
 			lastClick = lastTab.querySelector('a').id;
+		}
 	}
 }
 

@@ -384,7 +384,7 @@ function removeFirstInactiveChatTab() {
     let tabLinks = chatTabs.querySelectorAll('.nav-link');
 
     for (let tabLink of tabLinks) {
-        if (!tabLink.classList.contains('active')) {
+        if (!tabLink.classList.contains('active') && tabLinks.id !== 'chatGameTabLink') {
 			console.log('Chat: Removing first inactive chat tab', tabLink.id.slice(0, -4));
 			chatTabs.querySelector('#' + tabLink.id.slice(0, -4) + "Button").click();
 			return ;
@@ -413,10 +413,12 @@ async function closeChatTab(chatInfo)
 	}
 	else if (isTabActive) {
 		lastClick = undefined;
-		if (buttonCollapseChat.getAttribute('aria-expanded') === 'true')
+		if (buttonCollapseChat.getAttribute('aria-expanded') === 'true') {
 			lastTab.querySelector('a').click();
-		else 
+		}
+		else {
 			lastClick = lastTab.querySelector('a').id;
+		}
 	}
 }
 
@@ -454,7 +456,12 @@ async function createChatTab(chatInfo) {
     let chatTabButton = createButtonClose(idChatTab + "Button");
     chatTabLink.appendChild(chatTabButton);
     chatTab.appendChild(chatTabLink);
-    chatTabs.appendChild(chatTab);
+	gameChatTab = chatTabs.querySelector('#chatGameTab');
+	if (gameChatTab) {
+		chatTabs.insertBefore(chatTab, gameChatTab);
+	} else {
+		chatTabs.appendChild(chatTab);
+	}
 
     let chatBody = document.getElementById('chatBody');
     let chatBox = document.createElement('div');
@@ -653,6 +660,8 @@ if (typeof nextMessagesRequest === 'undefined')
 	var nextMessagesRequest = undefined;
 if (typeof nextChatsRequest === 'undefined')
 	var nextChatsRequest = undefined;
+
+await loadScript(script.getAttribute('script'), script.getAttribute('type'));
 
 document.getElementById('searchChatForm').addEventListener('keyup', (e) => {
 	e.preventDefault();

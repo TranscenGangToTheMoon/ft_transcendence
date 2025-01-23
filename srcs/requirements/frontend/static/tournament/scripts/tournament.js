@@ -35,6 +35,7 @@ async function joinTournament(code){
 		tournament = data;
 		setBanOption();
 		loadTournament(data);
+		openGameChatTab({'type': 'tournament', 'code': code});
 	}
 	catch (error){
 		displayMainAlert('Error', 'This tournament does not exists.');
