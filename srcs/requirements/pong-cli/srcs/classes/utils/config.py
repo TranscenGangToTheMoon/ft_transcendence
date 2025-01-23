@@ -13,6 +13,7 @@ class Config:
                 cls.configJson = json.load(configFile)
         except FileNotFoundError:
             cls.configJson = {}
+            print("Invalid configuration file, using basic configuration.")
         Config.Playground.load()
         Config.Paddle.load()
         Config.Ball.load()
@@ -44,11 +45,9 @@ class Config:
 
     @classmethod
     def get(cls, *keys, default: int | None =None):
-        print(f"Keys: {keys}")
         value = cls.configJson
         for key in keys:
             value = value.get(key, {})
-        print(f"Value: {value}")
         return (value if value != {} else default)
 
     class Cell:
