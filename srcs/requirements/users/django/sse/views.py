@@ -48,6 +48,8 @@ class SSEView(APIView):
                             except (NotFound, json.decoder.JSONDecodeError, KeyError):
                                 pass
                             yield f'event: {event}\ndata: {data}\n\n'
+                            if event == EventCode.DELETE_USER:
+                                raise ConnectionClose
             except (GeneratorExit, ConnectionClose) as e:
                 pubsub.close()
                 if isinstance(e, GeneratorExit):
