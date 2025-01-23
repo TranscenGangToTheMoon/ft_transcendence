@@ -166,9 +166,9 @@ class GamePage(Screen):
             if (self.ball.cY <= 0):
                 self.ball.cdY *= -1
                 self.ball.cY *= -1
-            elif (self.ball.cY + Config.Ball.cHeight > Config.Playground.cHeight):
+            elif (self.ball.cY + Config.Ball.cSize > Config.Playground.cHeight):
                 self.ball.cdY *= -1
-                self.ball.cY -= self.ball.cY + Config.Ball.cHeight - Config.Playground.cHeight
+                self.ball.cY -= self.ball.cY + Config.Ball.cSize - Config.Playground.cHeight
 
             elapsedTime = time.perf_counter() - self.lastFrame
             self.lastFrame = time.perf_counter()
