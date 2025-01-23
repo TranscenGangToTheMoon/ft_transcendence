@@ -148,9 +148,14 @@ class Game:
         self.ball.speed_x = -xNewSpeed if self.ball.speed_x < 0 else xNewSpeed
         self.ball.speed_y = yNewSpeed
 
+    def applyRacketSpeed(self, racket):
+        is_on_bottom = self.ball.position.y > racket.position.y
+        if ((is_on_bottom and self.ball.speed_y < 0) or (not is_on_bottom and self.ball.speed_y > 0)) :
+            self.ball.speed_y = -self.ball.speed_y
+
     def handle_racket_bounce(self, racket):
         if (racket.block_glide):
-            self.ball.speed_y = -self.ball.speed_y
+            self.applyRacketSpeed(racket)
             if (abs(self.ball.position.y - (racket.position.y + racket.height)) <
                 abs(self.ball.position.y - racket.position.y)):
                 self.ball.position.y = racket.position.y + racket.height

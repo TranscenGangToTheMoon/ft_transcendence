@@ -1,60 +1,65 @@
-<div id="lobbyHeader">
-    <div id="leaveLobby">[insert leave game icon]</div>
-    <div id="gameInfos">
-        <div id="gameType">[insert game type]</div>
-        <div id="gameId">Lobby code :</div>
+<div class="container">
+    <div id="lobbyHeader" class="d-flex flex-column row">
+        <button id="leaveLobby" class="btn btn-danger col-2">Leave Lobby</button>
+        <div id="gameInfos" class="col-2 align-items-center">
+            <div id="gameType">[insert game type]</div>
+            <div id="gameId">Lobby code :</div>
+        </div>
     </div>
-</div>
-<div id="lobbyInterface">
-    <form id="joinGameField">
-        <label for="joinCode">Join Lobby</label>
-        <input type="text" id="joinCode" placeholder="code">
-        <button id="joinLobby">Join</button>
-        <div class="inputError" id="joinLobbyError"></div>
-        <div class="dropdown">
-            <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" id="inviteFriends">
-              Invite Friends
-            </button>
-            <div id="feedback" style="display: none;">Link copied to clipboard</div>
-            <ul class="dropdown-menu">
-                <li><button class="dropdown-item" id="copyLink">Copy Invite Link</button></li>
-                <div id="iFriends">
-                    <li><hr class="dropdown-divider"></li>
-                    <li><h6 class="dropdown-header">Online Friends</h6></li>
-                    <div id="iOnlineFriends">
-                        
+    <div id="lobbyInterface" class="row">
+        <form id="joinGameField" class="col-2">
+            <label for="joinCode">Join Lobby</label>
+            <div class="d-flex">
+                <input class="form-control" type="text" id="joinCode" placeholder="code">
+                <button class="btn btn-secondary" id="joinLobby">Join</button>
+            </div>
+            <div class="inputError" id="joinLobbyError"></div>
+            <div class="dropdown">
+                <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" id="inviteFriends">
+                  Invite Friends
+                </button>
+                <div id="feedback" style="display: none;">Link copied to clipboard</div>
+                <ul class="dropdown-menu">
+                    <li><button class="dropdown-item" id="copyLink">Copy Invite Link</button></li>
+                    <div id="iFriends">
+                        <li><hr class="dropdown-divider"></li>
+                        <li><h6 class="dropdown-header">Online Friends</h6></li>
+                        <div id="iOnlineFriends">
+                            
+                        </div>
+                    </div>
+                </ul>
+              </div>
+        </form>
+        <div id="lobbyOptions" class="col">
+            <div id="teamSelector">
+                <div class="team" id="teamA">
+                    <label for="teamADisplay" id="teamALabel">Team A</label>
+                    <div id="teamADisplay" class="teamDisplay dropzone"></div>
+                </div>
+                <div class="team" id="teamB">
+                    <label for="teamBDisplay" id="teamALabel">Team B</label>
+                    <div id="teamBDisplay" class="teamDisplay dropzone"></div>
+                </div>
+                <div id="bench">
+                    <label for="benchPlayerList" id="benchPlayerListLabel">Bench</label>
+                    <div id="benchPlayerList" class="dropzone">
                     </div>
                 </div>
-            </ul>
-          </div>
-    </form>
-    <div id="lobbyOptions">
-        <div id="teamSelector">
-            <div class="team" id="teamA">
-                <label for="teamADisplay" id="teamALabel">Team A</label>
-                <div id="teamADisplay" class="teamDisplay dropzone"></div>
             </div>
-            <div class="team" id="teamB">
-                <label for="teamBDisplay" id="teamALabel">Team B</label>
-                <div id="teamBDisplay" class="teamDisplay dropzone"></div>
-            </div>
-            <div id="bench">
-                <label for="benchPlayerList" id="benchPlayerListLabel">Bench</label>
-                <div id="benchPlayerList" class="dropzone">
-                </div>
-            </div>
+            <div id="teamDisplay"></div>
+            <button id="settingsButton">1v1</button>
         </div>
-        <div id="teamDisplay"></div>
-        <button id="settingsButton">1v1</button>
     </div>
-</div>
+    
+    <div id="contextMenu" class="custom-context-menu dropdown-menu">
+        <button id="cBan" class="dropdown-item">ban</button>
+        <button id="cFriendRequest" class="dropdown-item" style="display: flex;">Send friend request<div id="friendRequestValidator" style="display: none;margin-left: 5px;"> V</div></button>
+        <button id="cBlock" class="dropdown-item">block</button>
+    </div>
 
-<div id="contextMenu" class="custom-context-menu dropdown-menu">
-    <button id="cBan" class="dropdown-item">ban</button>
-    <button id="cFriendRequest" class="dropdown-item" style="display: flex;">Send friend request<div id="friendRequestValidator" style="display: none;margin-left: 5px;"> V</div></button>
-    <button id="cBlock" class="dropdown-item">block</button>
 </div>
 
 <div script="/lobby/scripts/lobby.js"></div>
-<!-- <div _style="/lobby/css/lobby.css"></div>
-<div guestStyle="/lobby/css/lobby.css"></div> -->   
+<div _style="/lobby/css/lobby.css"></div>
+<div guestStyle="/lobby/css/lobby.css"></div> 
