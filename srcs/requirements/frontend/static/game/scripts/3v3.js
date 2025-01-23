@@ -262,9 +262,8 @@
                 }
                 state.paddles[userInformations.id].speed = 0;
             }
-            return;
         }
-        if (state.keys["ArrowUp"] && state.paddles[userInformations.id].speed != -1){
+        else if (state.keys["ArrowUp"] && state.paddles[userInformations.id].speed != -1){
             if (typeof gameSocket !== 'undefined'){
                 if (state.paddles[userInformations.id].speed === 1){
                 		gameSocket.emit('stop_moving', {'position': state.paddles[userInformations.id].y});
@@ -276,7 +275,7 @@
             }
             state.paddles[userInformations.id].speed = -1;
         }
-        if (state.keys["ArrowDown"] && state.paddles[userInformations.id].speed != 1){
+        else if (state.keys["ArrowDown"] && state.paddles[userInformations.id].speed != 1){
             if (typeof gameSocket !== 'undefined'){
                 if (state.paddles[userInformations.id].speed === -1){
                     gameSocket.emit('stop_moving', {'position': state.paddles[userInformations.id].y});
@@ -288,7 +287,7 @@
             }
             state.paddles[userInformations.id].speed = 1;
         }
-        if (!state.keys["ArrowDown"] && !state.keys['ArrowUp'] && state.paddles[userInformations.id].speed != 0){
+        else if (!state.keys["ArrowDown"] && !state.keys['ArrowUp'] && state.paddles[userInformations.id].speed != 0){
             state.paddles[userInformations.id].speed = 0;
             if (typeof gameSocket !== 'undefined'){
                 gameSocket.emit('stop_moving', {'position': state.paddles[userInformations.id].y});
@@ -448,14 +447,14 @@ function fillTeamDetail(enemyTeamDetail, playerTeamDetail){
     for (let player in PongGame.info.myTeam.players.players){
         player = PongGame.info.myTeam.players.players[player];
         const oldContent = playerTeamDetail.getAttribute('data-bs-content');
-        playerTeamDetail.setAttribute('data-bs-content', oldContent || '' + `
+        playerTeamDetail.setAttribute('data-bs-content', (oldContent || '') + `
             <div id=TD-username>${player.username}</div>
         `);
     }
     for (let player in PongGame.info.enemyTeam.players.players){
         player = PongGame.info.enemyTeam.players.players[player];
         const oldContent = enemyTeamDetail.getAttribute('data-bs-content');
-        enemyTeamDetail.setAttribute('data-bs-content', oldContent || '' + `
+        enemyTeamDetail.setAttribute('data-bs-content', (oldContent || '') + `
             <div id=TD-username>${player.username}</div>
         `);
     }
@@ -614,16 +613,16 @@ async function initData(data){
     await initGameConstants();
     try {
 		if (data.teams.a.players.some(player => player.id == userInformations.id)) {
-			window.PongGame.info.myTeam.name = 'team_a';
-			window.PongGame.info.myTeam.players = data.teams.team_a;
-			window.PongGame.info.enemyTeam.name = 'team_b';
-			window.PongGame.info.enemyTeam.players = data.teams.team_b;
+			window.PongGame.info.myTeam.name = 'A';
+			window.PongGame.info.myTeam.players = data.teams.a;
+			window.PongGame.info.enemyTeam.name = 'B';
+			window.PongGame.info.enemyTeam.players = data.teams.b;
 		}
 		else if (data.teams.b.players.some(player => player.id == userInformations.id)) {
-			window.PongGame.info.myTeam.name = 'team_b';
-			window.PongGame.info.myTeam.players = data.teams.team_b;
-			window.PongGame.info.enemyTeam.name = 'team_a';
-			window.PongGame.info.enemyTeam.players = data.teams.team_a;
+			window.PongGame.info.myTeam.name = 'B';
+			window.PongGame.info.myTeam.players = data.teams.b;
+			window.PongGame.info.enemyTeam.name = 'A';
+			window.PongGame.info.enemyTeam.players = data.teams.a;
 		}
 	}
 	catch(error) {
