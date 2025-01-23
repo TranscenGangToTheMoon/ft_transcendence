@@ -16,7 +16,12 @@ class Playground(Widget):
         self.styles.layers = "1 2"
 
     def render(self):
-        return "                                                        ||\n" * Config.Playground.width
+        if (Config.Playground.width % 2 == 0):
+            width = (Config.Playground.width - 2) // 2
+            return ((" " * width + "▐▌\n") * Config.Playground.height)
+        else:
+            width = (Config.Playground.width - 1) // 2
+            return ((" " * width + "█\n") * Config.Playground.height)
 
     def on_mount(self):
         console = Console()
@@ -25,6 +30,3 @@ class Playground(Widget):
 
         self.styles.offset = Offset((Config.Console.width - Config.Playground.width) // 2, (Config.Console.height - Config.Playground.height) // 2)
         self.styles.background = "gray"
-
-    # def on_resize(self, event: events.Resize):
-    #     pass
