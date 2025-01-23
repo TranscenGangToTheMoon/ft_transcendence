@@ -531,7 +531,7 @@ function addInviteSSEListeners(){
 }
 
 function addChatSSEListeners(){
-    sse.addEventListener('send-message', async event => {
+    sse.addEventListener('receive-message', async event => {
         event = JSON.parse(event.data);
         chatId = event.data.chat_id;
         await displayNotification(undefined, 'message received', event.message, async event => {

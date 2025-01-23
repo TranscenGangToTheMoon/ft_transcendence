@@ -108,7 +108,7 @@ class Events:
     ping = Event(Service.AUTH, EventCode.PING)
     delete_user = Event(Service.AUTH, EventCode.DELETE_USER)
 
-    send_message = Event(Service.CHAT, EventCode.SEND_MESSAGE, '{username}: {message}', Target('/chat/{chat_id}/'))
+    receive_message = Event(Service.CHAT, EventCode.RECEIVE_MESSAGE, '{username}: {message}', Target('/chat/{chat_id}/'))
 
     accept_friend_request = Event(Service.FRIENDS, EventCode.ACCEPT_FRIEND_REQUEST, '{username} has accepted your friend request.', type=SSEType.NOTIFICATION)
     receive_friend_request = Event(Service.FRIENDS, EventCode.RECEIVE_FRIEND_REQUEST, '{username} wants to be friends with you.', [Target('/api/users/me/friend_requests/{id}/', 'POST', display_icon='/icon/accept.png'), Target('/api/users/me/friend_requests/{id}/', 'DELETE', display_icon='/icon/decline.png')])
