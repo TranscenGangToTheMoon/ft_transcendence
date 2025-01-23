@@ -28,8 +28,8 @@ def validate_user_id(value, return_match=False, kwargs=None):
 
 
 class TeamsSerializer(serializers.Serializer):
-    a = serializers.ListSerializer(child=serializers.IntegerField(validators=[validate_user_id]))
-    b = serializers.ListSerializer(child=serializers.IntegerField(validators=[validate_user_id]))
+    a = serializers.ListSerializer(child=serializers.IntegerField())
+    b = serializers.ListSerializer(child=serializers.IntegerField())
 
     def validate(self, attrs):
         attr = super().validate(attrs)
@@ -39,6 +39,8 @@ class TeamsSerializer(serializers.Serializer):
             raise serializers.ValidationError(MessagesException.ValidationError.ONLY_1V1_3V3_ALLOWED)
         if len(attr['a'] + attr['b']) != len(set(attr['a'] + attr['b'])):
             raise serializers.ValidationError(MessagesException.ValidationError.IN_BOTH_TEAMS)
+        for user in attr['a'] + attr['b']:
+            validate_user_id(user)
         return attr
 
 

@@ -403,7 +403,7 @@ class Test06_download_data(UnitTest):
             time.sleep(1)
 
         self.assertResponse(get_game_data(user1), 200)
-        self.assertThread(user1, user3)
+        self.assertThread(user1, user2, user3)
 
 
 if __name__ == '__main__':
