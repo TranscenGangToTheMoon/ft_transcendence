@@ -18,7 +18,8 @@ function initSwitch(){
 }
 
 async function initFriendsTemplate() {
-    await loadBlockedModal();
+    if (!userInformations.is_guest)
+        await loadBlockedModal();
     initSwitch();
 }
 
