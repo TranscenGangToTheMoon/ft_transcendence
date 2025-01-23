@@ -30,11 +30,11 @@
             y : config.canvasHeight / 2,
             x : config.canvasWidth / 4
         }
-    
+
         config.playerScore = {
             y : config.enemyScore.y,
             x : config.canvasWidth - config.enemyScore.x
-        } 
+        }
     }
     setScoreCoords();
 
@@ -275,44 +275,6 @@
     }
 
     function handlePaddleInput(){
-        if (state.keys['ArrowUp'] && state.keys['ArrowDown']){
-            if (state.paddles.right.speed != 0){
-                if (typeof gameSocket !== 'undefined'){
-                    // console.log('emitting stop_moving');
-                    gameSocket.emit('stop_moving', {'position': state.paddles.right.y});
-                }
-                state.paddles.right.speed = 0;
-            }
-        }
-        else if (state.keys["ArrowUp"] && state.paddles.right.speed != -1){
-            if (typeof gameSocket !== 'undefined'){
-                if (state.paddles.right.speed === 1){
-                		gameSocket.emit('stop_moving', {'position': state.paddles.right.y});
-                  	// console.log('emitting stop_moving');
-                }
-                gameSocket.emit('move_up');
-                // console.log('emitting move_up')
-            }
-            state.paddles.right.speed = -1;
-        }
-        else if (state.keys["ArrowDown"] && state.paddles.right.speed != 1){
-            if (typeof gameSocket !== 'undefined'){
-                if (state.paddles.right.speed === -1){
-                    gameSocket.emit('stop_moving', {'position': state.paddles.right.y});
-                    // console.log('emitting move_stop');
-                }
-                gameSocket.emit('move_down');
-                // console.log('emitting move_down')
-            }
-            state.paddles.right.speed = 1;
-        }
-        else if (!state.keys["ArrowDown"] && !state.keys['ArrowUp'] && state.paddles.right.speed != 0){
-            state.paddles.right.speed = 0;
-            if (typeof gameSocket !== 'undefined'){
-                gameSocket.emit('stop_moving', {'position': state.paddles.right.y});
-                // console.log('emitting stop_moving');
-            }
-        }
         for (let paddle in state.paddles){
             paddle = state.paddles[paddle];
             if (paddle.speed === 1 && paddle.y + config.paddleHeight < config.canvasHeight)
@@ -348,15 +310,9 @@
         // console.log(state.ball.speedX, state.ball.speedY);
     }
 
-    function applyRacketSpeed(paddle){
-        const isOnBottom = state.ball.y > paddle.y;
-        if ((isOnBottom && state.ball.speedY < 0) || (!isOnBottom && state.ball.speedY > 0))
-            state.ball.speedY = -state.ball.speedY;
-    }
-
     function handlePaddleBounce(paddle){
         if (paddle.blockGlide){
-            applyRacketSpeed(paddle);
+            state.ball.speedY = -state.ball.speedY;
             if (Math.abs(state.ball.y - (paddle.y + config.paddleHeight)) <
                 Math.abs(state.ball.y - (paddle.y)))
                 state.ball.y = paddle.y + config.paddleHeight;
@@ -486,13 +442,13 @@ function fillTeamDetail(enemyTeamDetail, playerTeamDetail){
 async function updateTrophies(){
     if (window.location.pathname !== '/game/ranked') return;
     await fetchUserInfos(true);
-    await loadUserProfile(); 
+    await loadUserProfile();
 }
 
 if (typeof cancelTimeout === 'undefined')
     var cancelTimeout;
 
-function initSocket(match_code){
+function initSocket(match_code, spectateModal=0){
 	const host = window.location.origin;
 	const token = getAccessToken();
 	let gameSocket = io(host, {
@@ -501,16 +457,21 @@ function initSocket(match_code){
       auth : {
           "id": userInformations.id,
           "token": token,
+          "match_code": match_code
         },
 	});
     window.gameSocket = gameSocket;
 	gameSocket.on('connect', () => {
         cancelTimeout = true;
         console.log('Connected to socketIO server!');
-        document.getElementById('matchCode').innerText = match_code;
+        if (spectateModal !== 0)
+			spectateModal.hide();
+		document.getElementById('gameArea').classList.replace('d-none', 'd-flex');
+		document.getElementById('playerUsername').innerText = 'Team A';
+		document.getElementById('enemyUsername').innerText = 'Team B';
     });
     gameSocket.on('connect_error', (error)=> {
-        // console.log('error', error);
+		document.getElementById('spectateError').innerText = 'Impossible to spectate that game';
     })
     gameSocket.on('disconnect', async () => {
         gameSocket.close();
@@ -558,22 +519,12 @@ function initSocket(match_code){
     })
     gameSocket.on('score', event => {
         PongGame.state.ball.speed = 0;
-		// for (paddle in PongGame.state.paddles) {
-            // 	PongGame.state.paddles[paddle].y = (PongGame.config.canvasHeight - PongGame.config.paddleHeight) / 2;
-            // }
-            // PongGame.animatePaddlesToMiddle()
-            if (PongGame.info.myTeam.name == 'A') {
-                PongGame.state.playerScore = event.team_a;
-                PongGame.state.enemyScore = event.team_b;
-            }
-            else {
-                PongGame.state.playerScore = event.team_b;
-                PongGame.state.enemyScore = event.team_a;
-            }
-            document.getElementById('playerScore').innerText = '' + PongGame.state.playerScore;
-            document.getElementById('enemyScore').innerText = '' + PongGame.state.enemyScore;
-            PongGame.drawGame();
-        })
+        PongGame.state.playerScore = event.team_a;
+        PongGame.state.enemyScore = event.team_b;
+        document.getElementById('playerScore').innerText = '' + PongGame.state.playerScore;
+        document.getElementById('enemyScore').innerText = '' + PongGame.state.enemyScore;
+        PongGame.drawGame();
+    })
     gameSocket.on('game_over', async event => {
         console.log('game_over received', event);
         gameSocket.close();
@@ -587,9 +538,9 @@ function initSocket(match_code){
         else {
             document.getElementById('enemyScoreInModal').innerText = PongGame.state.enemyScore;
             const enemyTeamDetail = document.getElementById('enemyScoreLabel').querySelector('.teamDetail');
-            enemyTeamDetail.innerText = enemyTeamDetail.innerText = PongGame.info.myTeam.players.players[0].username;
+            enemyTeamDetail.innerText = enemyTeamDetail.innerText.replace('{team-id}', 'B');
             const playerTeamDetail = document.getElementById('playerScoreLabel').querySelector('.teamDetail');
-            playerTeamDetail.innerText = playerTeamDetail.innerText = PongGame.info.enemyTeam.players.players[0].username;
+            playerTeamDetail.innerText = playerTeamDetail.innerText.replace('{team-id}', 'A');
             document.getElementById('playerScoreInModal').innerText = PongGame.state.playerScore;
             const gameOverModal = new bootstrap.Modal(document.getElementById('gameOverModal'));
             gameOverModal.show();
@@ -672,10 +623,7 @@ async function initData(data){
 	}
     document.getElementById('gameArea').classList.replace('d-none', 'd-flex');
     document.getElementById('opponentWait').style.display = "none";
-	console.log(userInformations.username);
-    document.getElementById('playerUsername').innerText = userInformations.username;
-    document.getElementById('enemyUsername').innerText = PongGame.info.enemyTeam.players.players[0].username;
-	initSocket(data.code);
+	initSocket();
     setTimeout(async () => {
         if (!cancelTimeout && gameSocket && !isModalOpen()){
             console.log('donc',gameSocket);
@@ -718,8 +666,8 @@ function forPhoneChanges(){
         document.getElementById('gameCanvas').style.height = '300px';
         document.getElementById('gameCanvas').style.width = '400px';
         document.getElementById('gameCanvas').style.backgroundColor = 'blue';
-    
-        
+
+
         function simulateKey(type, keyCode) {
             const event = new KeyboardEvent(type, {
                 key: keyCode === 38 ? 'ArrowUp' : 'ArrowDown',
@@ -729,10 +677,10 @@ function forPhoneChanges(){
                 bubbles: true,
                 cancelable: true
             });
-            
+
             document.dispatchEvent(event);
         }
-        
+
     // Handle touch start
     let lastTouchY = undefined;
     function handleTouchStart(event) {
@@ -740,7 +688,7 @@ function forPhoneChanges(){
         const screenHeight = window.innerHeight;
         const touchY = touch.clientY;
         const threshold = 0.20; // 20% of screen height
-        
+
         if (touchY < screenHeight / 2) {
             if (lastTouchY && lastTouchY >= screenHeight / 2)
                 simulateKey('keyup', 40)
@@ -754,7 +702,7 @@ function forPhoneChanges(){
         }
         lastTouchY = touchY;
     }
-    
+
     // Handle touch end - simulates keyup
     function handleTouchEnd(event) {
         // When the last touch point is removed, we need to check
@@ -764,7 +712,7 @@ function forPhoneChanges(){
             const screenHeight = window.innerHeight;
             const touchY = touch.clientY;
             const threshold = 0.20;
-            
+
             if (touchY < screenHeight / 2) {
                 // Release arrow up
                 simulateKey('keyup', 38);
@@ -774,7 +722,7 @@ function forPhoneChanges(){
             }
         }
     }
-    
+
         document.addEventListener('touchstart', handleTouchStart);
         document.addEventListener('touchmove', handleTouchStart);
         document.addEventListener('touchend', handleTouchEnd);
@@ -794,44 +742,22 @@ async function initGame(){
     await indexInit(false);
     if (window.matchMedia("(hover: none) and (pointer: coarse)").matches)
         forPhoneChanges();
-        
-    if (window.location.pathname === '/') return;
-    document.getElementById('gameArea').classList.replace('d-flex', 'd-none');
-    document.getElementById('opponentWait').style.display = "block";
-    try {
-        checkGameAuthorization();
-        if (window.location.pathname === '/game/tournament')
-            await initData(tournamentData);
-        else if (window.location.pathname === '/game/1v1')
-            await initData(userInformations.lobbyData);
-        else {
-            if (SSEListeners.has('game-start')){
-                sse.removeEventListener('game-start', SSEListeners.get('game-start'));
-                SSEListeners.delete('game-start');
-            }
-            SSEListeners.set('game-start', gameStart);
-            sse.addEventListener('game-start', gameStart);
-            try {
-                let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/play/${window.location.pathname.split('/')[2]}/`, 'POST');
-                console.log(data);
-                if (data.detail)
-                    document.getElementById('opponentWait').innerText = data.detail;
-            }
-            catch(error) {
-                console.log(error);
-            }
-        }
+    if (window.location.pathname === '/')
+    	return;
+    if (containsCode(window.location.pathname)) {
+    	var match_code = window.location.pathname.split('/').pop()
+		console.log('match_code', match_code);
+		initSocket(match_code);
     }
-    catch (unauthorized){
-        console.log('caught', unauthorized);
-        if (unauthorized === window.location.pathname){
-            if (!document.getElementById('alertModal').classList.contains('show'))
-                displayMainAlert("Error", `You don't have permission to play in ${unauthorized}`);
-            await navigateTo('/');
-        }
-        else{
-            wrongConfigFileError(unauthorized);
-        }
+    else {
+		const spectatePromptModal = new bootstrap.Modal(document.getElementById('spectatePromptModal'));
+		spectatePromptModal.show();
+	    document.getElementById('gameArea').classList.replace('d-flex', 'd-none');
+		document.getElementById('codeSubmit').addEventListener('click', async (event) => {
+			event.preventDefault();
+			var match_code = document.getElementById('spectateInput').value;
+			initSocket(match_code, spectatePromptModal);
+		})
     }
 }
 

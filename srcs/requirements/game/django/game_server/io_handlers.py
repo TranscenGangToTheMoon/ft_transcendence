@@ -26,6 +26,7 @@ async def connect(sid, environ, auth):
     if user_data is None:
         raise ConnectionRefusedError(MessagesException.Authentication.NOT_AUTHENTICATED)
     id = user_data['id']
+    print(f'User {id} connecting...{sid}', flush=True)
     try:
         match = request_game(endpoints.Game.fuser.format(user_id=id), 'GET')
     except NotFound as e:
@@ -35,10 +36,13 @@ async def connect(sid, environ, auth):
         try:
             game = Server.get_game(match_code)
         except Server.NotFound:
-            raise ConnectionRefusedError(e.detail)
-        game.add_spectator(id, sid)
-        await Server._sio.enter_room(sid, str(game.match.id))
-        return
+            return False
+        if game.match.game_type == 'normal':
+            game.add_spectator(id, sid)
+            await Server._sio.enter_room(sid, str(game.match.id))
+            return True
+        else:
+            return False
     except APIException as e:
         raise ConnectionRefusedError(MessagesException.ServiceUnavailable.game)
     if match is None:
@@ -56,8 +60,13 @@ async def connect(sid, environ, auth):
         match = Match(game_data)
         Server.create_game(match)
     player = Server.get_player(id)
-    if player.socket_id != '' and player.socket_id != sid:
-        Server._sio.disconnect(player.socket_id)
+    player_sid = player.socket_id
+    print(f'player sid: {player_sid}', flush=True)
+    if player_sid != '' and player_sid != sid:
+        await Server._sio.leave_room(player_sid, str(player.match_id))
+        with Server._dsids_lock:
+            Server._disconnected_sids.append(player_sid)
+        await Server._sio.disconnect(player_sid)
     player.socket_id = sid
     Server._clients[sid] = player
     await Server._sio.enter_room(sid, str(game_id))
@@ -115,6 +124,11 @@ async def stop_moving(sid, data):
 
 async def disconnect(sid):
     from game_server.server import Server
+    with Server._dsids_lock:
+        for search in Server._disconnected_sids:
+            if search == sid:
+                Server._disconnected_sids.remove(sid)
+                return
     try:
         match_id = Server._clients[sid].match_id
         await sync_to_async(Server.finish_game)(match_id, FinishReason.PLAYER_DISCONNECT, Server._clients[sid].user_id)

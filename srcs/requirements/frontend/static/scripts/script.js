@@ -92,7 +92,7 @@ async function  loadUserProfile(){
     }
     await loadContent(`/${profileMenu}`, 'profileMenu');
     // if (!userInformations.is_guest)
-        
+
 }
 
 document.getElementById('home').addEventListener('click', async event => {
