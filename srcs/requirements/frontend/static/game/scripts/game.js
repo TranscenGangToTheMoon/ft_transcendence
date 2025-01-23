@@ -486,7 +486,7 @@ async function updateTrophies(){
 if (typeof cancelTimeout === 'undefined')
     var cancelTimeout;
 
-function initSocket(){
+function initSocket(match_code){
 	const host = window.location.origin;
 	const token = getAccessToken();
 	let gameSocket = io(host, {
@@ -501,6 +501,7 @@ function initSocket(){
 	gameSocket.on('connect', () => {
         cancelTimeout = true;
         console.log('Connected to socketIO server!');
+        document.getElementById('matchCode').innerText = match_code;
     });
     gameSocket.on('connect_error', (error)=> {
         // console.log('error', error);
@@ -563,6 +564,8 @@ function initSocket(){
                 PongGame.state.playerScore = event.team_b;
                 PongGame.state.enemyScore = event.team_a;
             }
+            document.getElementById('playerScore').innerText = '' + PongGame.state.playerScore;
+            document.getElementById('enemyScore').innerText = '' + PongGame.state.enemyScore;
             PongGame.drawGame();
         })
     gameSocket.on('game_over', async event => {
@@ -576,12 +579,12 @@ function initSocket(){
         else if (typeof fromLobby !== 'undefined' && fromLobby)
             await navigateTo('/lobby', true, true);
         else {
-            document.getElementById('enemyScore').innerText = PongGame.state.enemyScore;
+            document.getElementById('enemyScoreInModal').innerText = PongGame.state.enemyScore;
             const enemyTeamDetail = document.getElementById('enemyScoreLabel').querySelector('.teamDetail');
-            enemyTeamDetail.innerText = enemyTeamDetail.innerText.replace('{team-id}', PongGame.info.enemyTeam.name);
+            enemyTeamDetail.innerText = enemyTeamDetail.innerText = PongGame.info.myTeam.players.players[0].username;
             const playerTeamDetail = document.getElementById('playerScoreLabel').querySelector('.teamDetail');
-            playerTeamDetail.innerText = playerTeamDetail.innerText.replace('{team-id}', PongGame.info.myTeam.name);
-            document.getElementById('playerScore').innerText = PongGame.state.playerScore;
+            playerTeamDetail.innerText = playerTeamDetail.innerText = PongGame.info.enemyTeam.players.players[0].username;
+            document.getElementById('playerScoreInModal').innerText = PongGame.state.playerScore;
             const gameOverModal = new bootstrap.Modal(document.getElementById('gameOverModal'));
             gameOverModal.show();
             document.getElementById('gameOverModal').addEventListener('hidden.bs.modal', async () => {
@@ -663,7 +666,10 @@ async function initData(data){
 	}
     document.getElementById('gameArea').classList.replace('d-none', 'd-flex');
     document.getElementById('opponentWait').style.display = "none";
-	initSocket();
+	console.log(userInformations.username);
+    document.getElementById('playerUsername').innerText = userInformations.username;
+    document.getElementById('enemyUsername').innerText = PongGame.info.enemyTeam.players.players[0].username;
+	initSocket(data.code);
     setTimeout(async () => {
         if (!cancelTimeout && gameSocket && !isModalOpen()){
             console.log('donc',gameSocket);

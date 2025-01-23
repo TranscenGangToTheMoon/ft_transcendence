@@ -36,7 +36,7 @@ async def connect(sid, environ, auth):
         try:
             game = Server.get_game(match_code)
         except Server.NotFound:
-            raise ConnectionRefusedError(e.detail)
+            return False
         if game.match.game_type == 'normal':
             game.add_spectator(id, sid)
             await Server._sio.enter_room(sid, str(game.match.id))

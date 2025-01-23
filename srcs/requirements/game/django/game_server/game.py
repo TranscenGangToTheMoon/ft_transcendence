@@ -445,7 +445,6 @@ class Game:
                     data=game_state,
                     to=player.socket_id
                 )
-                print(f"sending game_state to {player.user_id}", flush=True)
             side = -1
         game_state = self.get_game_state(1)
         for spectator in self.spectators:
