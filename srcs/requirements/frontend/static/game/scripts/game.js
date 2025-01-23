@@ -467,15 +467,16 @@
 function fillTeamDetail(enemyTeamDetail, playerTeamDetail){
     enemyTeamDetail.title += PongGame.info.enemyTeam.name;
     playerTeamDetail.title += PongGame.info.myTeam.name;
-    for (let player in PongGame.info.myTeam.players){
-        player = PongGame.info.myTeam.players[player];
+    console.log()
+    for (let player in PongGame.info.myTeam.players.players){
+        player = PongGame.info.myTeam.players.players[player];
         const oldContent = playerTeamDetail.getAttribute('data-bs-content');
         playerTeamDetail.setAttribute('data-bs-content', oldContent || '' + `
             <div id=TD-username>${player.username}</div>
         `);
     }
-    for (let player in PongGame.info.enemyTeam.players){
-        player = PongGame.info.enemyTeam.players[player];
+    for (let player in PongGame.info.enemyTeam.players.players){
+        player = PongGame.info.enemyTeam.players.players[player];
         const oldContent = enemyTeamDetail.getAttribute('data-bs-content');
         enemyTeamDetail.setAttribute('data-bs-content', oldContent || '' + `
             <div id=TD-username>${player.username}</div>
@@ -577,32 +578,47 @@ function initSocket(){
         gameSocket = undefined;
         updateTrophies();
 		PongGame.handleGameOver(event.reason);
-        if (typeof fromTournament !== 'undefined' && fromTournament)
+        if (typeof fromTournament !== 'undefined' && fromTournament){
+            document.getElementById('gameOverModal').querySelector('.modal-footer').classList.add('d-none');
             await navigateTo('/tournament');
-        else if (typeof fromLobby !== 'undefined' && fromLobby)
+
+        }
+        else if (typeof fromLobby !== 'undefined' && fromLobby){
+            document.getElementById('gameOverModal').querySelector('.modal-footer').classList.add('d-none');
             await navigateTo('/lobby', true, true);
-        else {
-            document.getElementById('enemyScore').innerText = PongGame.state.enemyScore;
-            const enemyTeamDetail = document.getElementById('enemyScoreLabel').querySelector('.teamDetail');
-            enemyTeamDetail.innerText = enemyTeamDetail.innerText.replace('{team-id}', PongGame.info.enemyTeam.name);
-            const playerTeamDetail = document.getElementById('playerScoreLabel').querySelector('.teamDetail');
-            playerTeamDetail.innerText = playerTeamDetail.innerText.replace('{team-id}', PongGame.info.myTeam.name);
-            document.getElementById('playerScore').innerText = PongGame.state.playerScore;
-            const gameOverModal = new bootstrap.Modal(document.getElementById('gameOverModal'));
-            gameOverModal.show();
+        }
+        else{
+            document.getElementById('gameOverModal').querySelector('.modal-footer').classList.remove('d-none');
             document.getElementById('gameOverModal').addEventListener('hidden.bs.modal', async () => {
                 await handleRoute();
             });
-            fillTeamDetail(enemyTeamDetail, playerTeamDetail);
-            console.log(enemyTeamDetail);
-            const popovers = document.querySelectorAll('.teamDetail');
-            popovers.forEach(element => {
-                new bootstrap.Popover(element, {
-                html: true
-                });
-            });
         }
+        if (event.reason === 'normal-end'){
+            addScore();
+        }
+        else
+            document.getElementById('gameOverContent').innerHTML = `${event.reason}`;
+        const gameOverModal = new bootstrap.Modal(document.getElementById('gameOverModal'));
+        gameOverModal.show();
+        
+        fillTeamDetail(enemyTeamDetail, playerTeamDetail);
+        console.log(enemyTeamDetail);
+        const popovers = document.querySelectorAll('.teamDetail');
+        popovers.forEach(element => {
+            new bootstrap.Popover(element, {
+                html: true
+            });
+        });
     })
+}
+
+function addScore(){
+    document.getElementById('enemyScore').innerText = PongGame.state.enemyScore;
+    const enemyTeamDetail = document.getElementById('enemyScoreLabel').querySelector('.teamDetail');
+    enemyTeamDetail.innerText = enemyTeamDetail.innerText.replace('{team-id}', PongGame.info.enemyTeam.name);
+    const playerTeamDetail = document.getElementById('playerScoreLabel').querySelector('.teamDetail');
+    playerTeamDetail.innerText = playerTeamDetail.innerText.replace('{team-id}', PongGame.info.myTeam.name);
+    document.getElementById('playerScore').innerText = PongGame.state.playerScore;
 }
 
 document.getElementById('gameOverModalPlayAgain').addEventListener('click', async () => {
@@ -821,7 +837,8 @@ async function initGame(){
         if (unauthorized === window.location.pathname){
             if (!document.getElementById('alertModal').classList.contains('show'))
                 displayMainAlert("Error", `You don't have permission to play in ${unauthorized}`);
-            await navigateTo('/');
+            // await navigateTo('/');
+            history.go(-1);
         }
         else{
             wrongConfigFileError(unauthorized);
