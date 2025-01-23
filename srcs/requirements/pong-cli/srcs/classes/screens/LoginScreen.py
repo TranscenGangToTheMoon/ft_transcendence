@@ -38,6 +38,10 @@ class LoginPage(Screen):
         self.query_one("#password").border_title = "Password"
         self.query_one("#authenticationBox").border_title = "Authentication"
 
+    def on_screen_resume(self) -> None:
+        self.query_one("#status").styles.color = "white"
+        self.query_one("#status").update("")
+
     def getSSLCertificate(self):
         User.host = urlparse(User.server).hostname
         User.port = urlparse(User.server).port
