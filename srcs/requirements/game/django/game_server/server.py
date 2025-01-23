@@ -23,6 +23,8 @@ class Server:
     _loop_lock: Lock
     _sio_lock: Lock
     _loop: asyncio.AbstractEventLoop
+    _dsids_lock: Lock
+    _disconnected_sids = []
 
     @staticmethod
     def serve():
@@ -43,6 +45,7 @@ class Server:
         Server._games_lock = Lock()
         Server._loop_lock = Lock()
         Server._sio_lock = Lock()
+        Server._dsids_lock = Lock()
         with open('game_server/gameConfig.json', 'r') as config_file:
             config = json.load(config_file)
             Game.default_ball_speed = config['ball']['speed']
