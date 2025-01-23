@@ -101,9 +101,16 @@ function addTournamentDisplayOption(detailDiv, tournamentId){
     button.className  = 'btn btn-secondary';
     button.innerText = 'See Tournament Bracket';
     row.appendChild(button);
-    button.addEventListener('click', (event) => {
-        console.log('clickkkkk');
-        console.log(tournamentId);
+    button.addEventListener('click', async event => {
+        try {
+            let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/game/tournaments/${tournamentId}/`);
+            createBracket(data, true);
+            const bracketModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('tournamentBracket'));
+            bracketModal.show();
+        }
+        catch (error) {
+            console.log(error);
+        }
     })
 }
 
@@ -148,6 +155,8 @@ function addMatchDetail(){
 }
 
 async function initHistory(){
+    await loadScript('/tournament/scripts/createBracket.js');
+    loadCSS('/tournament/css/tournament.css');
     await loadMatches();
     addMatchDetail();
 }
