@@ -86,6 +86,18 @@ class GamePage(Screen):
         await self.launchSocketIO()
         self.gameLoop()
 
+    def on_resize(self) -> None:
+        console = Console()
+        Config.Console.width = console.width
+        Config.Console.height = console.height
+        self.playground.styles.offset = Offset((Config.Console.width - Config.Playground.width) // 2, (Config.Console.height - Config.Playground.height) // 2)
+        self.scoreLeft.styles.offset = Offset(Config.Console.width // 4, 5)
+        self.scoreRight.styles.offset = Offset(Config.Console.width // 4 * 3 - 4, 5)
+        self.opponentLabel.styles.offset = Offset(
+            self.playground.offset.x,
+            self.playground.offset.y + Config.Playground.height + 1
+        )
+
     def action_forfeit(self):
         while (self.countdownIsActive == True):
             asyncio.sleep(1 / 10)
