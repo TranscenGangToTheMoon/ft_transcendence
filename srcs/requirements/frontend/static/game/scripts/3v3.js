@@ -441,6 +441,26 @@
 })();
 
 
+function fillTeamDetail(enemyTeamDetail, playerTeamDetail){
+    enemyTeamDetail.title += PongGame.info.enemyTeam.name;
+    playerTeamDetail.title += PongGame.info.myTeam.name;
+    console.log()
+    for (let player in PongGame.info.myTeam.players.players){
+        player = PongGame.info.myTeam.players.players[player];
+        const oldContent = playerTeamDetail.getAttribute('data-bs-content');
+        playerTeamDetail.setAttribute('data-bs-content', oldContent || '' + `
+            <div id=TD-username>${player.username}</div>
+        `);
+    }
+    for (let player in PongGame.info.enemyTeam.players.players){
+        player = PongGame.info.enemyTeam.players.players[player];
+        const oldContent = enemyTeamDetail.getAttribute('data-bs-content');
+        enemyTeamDetail.setAttribute('data-bs-content', oldContent || '' + `
+            <div id=TD-username>${player.username}</div>
+        `);
+    }
+}
+
 function initSocket(){
 	const host = window.location.origin;
 	const token = getAccessToken();
@@ -531,13 +551,39 @@ function initSocket(){
     })
     gameSocket.on('game_over', async event => {
         gameSocket.close();
+        gameSocket = undefined;
         console.log('game_over received', event);
 		window.PongGame.handleGameOver(event.reason);
+        if (event.reason === 'normal-end'){
+            addScore();
+        }
+        else
+            document.getElementById('gameOverContent').innerHTML = `${event.reason}`;
+        const gameOverModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('gameOverModal'));
+        console.log(gameOverModal);
+        gameOverModal.show();
+        
+        const popovers = document.querySelectorAll('.teamDetail');
+        popovers.forEach(element => {
+            new bootstrap.Popover(element, {
+                html: true
+            });
+        });
         if (fromLobby){
             userInformations.lobbyData = undefined;
             await navigateTo('/lobby', true, true);
         }
     })
+}
+
+function addScore(){
+    document.getElementById('enemyScore').innerText = PongGame.state.enemyScore;
+    const enemyTeamDetail = document.getElementById('enemyScoreLabel').querySelector('.teamDetail');
+    enemyTeamDetail.innerText = enemyTeamDetail.innerText.replace('{team-id}', PongGame.info.enemyTeam.name);
+    const playerTeamDetail = document.getElementById('playerScoreLabel').querySelector('.teamDetail');
+    playerTeamDetail.innerText = playerTeamDetail.innerText.replace('{team-id}', PongGame.info.myTeam.name);
+    document.getElementById('playerScore').innerText = PongGame.state.playerScore;
+    fillTeamDetail(enemyTeamDetail, playerTeamDetail);
 }
 
 async function initGameConstants(){
@@ -652,7 +698,8 @@ async function initGame(){
     catch (unauthorized){
         // if (unauthorized === window.location.pathname){
             displayMainAlert("Error", `You don't have permission to play in ${unauthorized}`);
-            await navigateTo('/');
+            // await navigateTo('/');
+            history.go(-1);
         // }
         // else
         //     wrongConfigFileError(error);

@@ -601,8 +601,6 @@ function initSocket(){
         const gameOverModal = new bootstrap.Modal(document.getElementById('gameOverModal'));
         gameOverModal.show();
         
-        fillTeamDetail(enemyTeamDetail, playerTeamDetail);
-        console.log(enemyTeamDetail);
         const popovers = document.querySelectorAll('.teamDetail');
         popovers.forEach(element => {
             new bootstrap.Popover(element, {
@@ -619,6 +617,7 @@ function addScore(){
     const playerTeamDetail = document.getElementById('playerScoreLabel').querySelector('.teamDetail');
     playerTeamDetail.innerText = playerTeamDetail.innerText.replace('{team-id}', PongGame.info.myTeam.name);
     document.getElementById('playerScore').innerText = PongGame.state.playerScore;
+    fillTeamDetail(enemyTeamDetail, playerTeamDetail);
 }
 
 document.getElementById('gameOverModalPlayAgain').addEventListener('click', async () => {

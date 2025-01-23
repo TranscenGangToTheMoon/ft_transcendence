@@ -22,6 +22,37 @@
     </div> -->
 </div>
 
+<div class="modal fade" id="gameOverModal" tabindex="-1" aria-labelledby="gameOverModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="gameOverModalLabel">Game over</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="gameOverContent">
+                <label for="playerScore" id="playerScoreLabel">
+                    <a class="teamDetail"
+                        data-bs-toggle="popover" 
+                        data-bs-trigger="hover"
+                        data-bs-html="true"
+                        title="Team ">
+                    Team {team-id}</a> Score:
+                </label>
+                <div id="playerScore">-</div>
+                <label for="enemyScore" id="enemyScoreLabel">
+                <a class="teamDetail"
+                    data-bs-toggle="popover" 
+                    data-bs-trigger="hover"
+                    data-bs-html="true"
+                    title="Team ">
+                    Team {team-id}</a> Score:
+                </label>
+                <div id="enemyScore">-</div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <h5 class="align-self-center" id="opponentWait">Waiting for an opponent...</h5>
 
 <div script="/game/scripts/3v3.js"></div>
