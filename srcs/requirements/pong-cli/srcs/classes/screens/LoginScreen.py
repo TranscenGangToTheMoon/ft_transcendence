@@ -18,13 +18,19 @@ class LoginPage(Screen):
     SUB_TITLE = "Login Page"
     CSS_PATH = "styles/LoginPage.tcss"
     BINDINGS = [("^q", "exit", "Exit"), ]
+    def __init__(self):
+        super().__init__()
+
+        self.server = f"{User.server}:{User.port}" if (User.server is not None and User.port is not None) else ""
+        self.username = User.username if (User.username is not None) else ""
+        self.password = User.password if (User.password is not None) else ""
 
     def compose(self) -> ComposeResult:
         yield Header()
         with Vertical(id="authenticationBox"):
-            yield Input(placeholder="Server", id="server", value="https://localhost:4443")
-            yield Input(placeholder="Username", id="username", value="xcharra1234")
-            yield Input(placeholder="Password", password=True, id="password", value="!@#$(90-9875trgfvcmntr")
+            yield Input(placeholder="Server", id="server", value=f"{self.server}")
+            yield Input(placeholder="Username", id="username", value=f"{self.username}")
+            yield Input(placeholder="Password", password=True, id="password", value=f"{self.password}")
             with Horizontal(id="buttonBox"):
                 yield Button("Login", id="loginButton", variant="primary")
                 yield Button("Register", id="registerButton", variant="primary")

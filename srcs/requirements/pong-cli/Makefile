@@ -15,7 +15,9 @@ SHELL		:=	/bin/zsh
 
 SOURCE		:=	source $(VENV)/bin/activate
 
-ARGS		?=	# Leave empty
+C_ARGS		?=	# Leave empty
+
+CLI_FLAGS	?=	-c gameConfig.json -u xcharra -PConnessor85* -s https://localhost -p 4443# Leave empty
 ########################################################################################################################
 #                                                        COLORS                                                        #
 ########################################################################################################################
@@ -44,27 +46,27 @@ $(VENV)/ts	:	$(REQ_FILES)
 
 .PHONY: run
 run			:	.venv
-			$(SOURCE); python srcs/$(NAME).py
+			$(SOURCE); python srcs/$(NAME).py $(CLI_FLAGS)
 
 .PHONY: debug
 debug		:	.venv
-			$(SOURCE); textual run --dev srcs/$(NAME).py
+			$(SOURCE); textual run --dev "srcs/$(NAME).py $(CLI_FLAGS)"
 
 .PHONY: console
 console		:	.venv
-			$(SOURCE); textual console $(ARGS)
+			$(SOURCE); textual console $(C_ARGS)
 
 .PHONY: free-run
 free-run	:	.venv
-			$(TERMINAL) -- $(SHELL) -c "$(SOURCE); python srcs/$(NAME).py"
+			$(TERMINAL) -- $(SHELL) -c "$(SOURCE); python srcs/$(NAME).py $(CLI_FLAGS)"
 
 .PHONY: free-debug
 free-debug	:	.venv
-			$(TERMINAL) -- $(SHELL) -c "$(SOURCE); textual run --dev srcs/$(NAME).py"
+			$(TERMINAL) -- $(SHELL) -c "$(SOURCE); textual run --dev \"srcs/$(NAME).py $(CLI_FLAGS)\""
 
 .PHONY: free-console
 free-console:	.venv
-			$(TERMINAL) -- $(SHELL) -c "$(SOURCE); textual console $(ARGS)"
+			$(TERMINAL) -- $(SHELL) -c "$(SOURCE); textual console $(C_ARGS)"
 
 .PHONY: debug-cons
 debug-cons	:	.venv free-console debug
@@ -90,7 +92,7 @@ banner		:
 
 .PHONY: fclean
 fclean		:
-			$(RM) -rf $(VENV)
+			$(RM) -r $(VENV)
 
 .PHONY: re
 re			:	fclean all
