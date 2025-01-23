@@ -83,22 +83,33 @@ class Event:
         self.target = target
 
     def dumps(self, data=None, kwargs=None):
+        if data is None:
+            data = {}
+
         if self.fmessage is None:
             message = ''
         elif kwargs is not None:
             for name in ('username', 'winner', 'looser'):
                 if name in kwargs:
                     kwargs[name] = get_username(kwargs[name])
-            message = self.fmessage.format(**kwargs)
+            try:
+                message = self.fmessage.format(**kwargs)
+            except KeyError as e:
+                raise ParseError({'kwargs': {e.args[0]: MessagesException.ValidationError.MISSING_KWARGS}})
         else:
             message = self.fmessage
+
+        try:
+            target = None if self.target is None else [t.dumps(data) for t in self.target]
+        except KeyError as e:
+            raise ParseError({'data': {e.args[0]: MessagesException.ValidationError.MISSING_DATA}})
 
         result = {
             'service': self.service,
             'event_code': self.code,
             'type': self.type,
             'message': message,
-            'target': None if self.target is None else [t.dumps(data) for t in self.target],
+            'target': target,
             'data': data,
         }
         return json.dumps(result, default=datetime_serializer)
@@ -166,5 +177,7 @@ def publish_event(users: Users | QuerySet[Users] | list[Users] | list[int] | int
 
             try:
                 redis_client.publish(channel, event.code + ':' + event.dumps(data, kwargs))
+            except KeyError as e:
+                raise ParseError({'kwargs': {e.args[0]: MessagesException.ValidationError.MISSING_KWARGS}})
             except redis.exceptions.ConnectionError:
                 raise ServiceUnavailable('event-queue')
