@@ -463,6 +463,7 @@ function initSocket(){
 
     gameSocket.on('rackets', event => {
         console.log('received rackets');
+        window.PongGame.racketReceived = true;
         console.log(event);
         window.PongGame.state.paddles = {};
         for (let [player_id, position] of Object.entries(event)){
@@ -474,7 +475,11 @@ function initSocket(){
         }
         console.log(window)
     })
-    gameSocket.on('start_game', event => {
+    gameSocket.on('start_game', async event => {
+        if (!window.PongGame.racketReceived){
+            await navigateTo('/lobby', true, true);
+            return gameSocket.close();
+        }
         // console.log('received start_game');
         if (!window.PongGame.state.isGameActive)
             window.PongGame.startGame();
@@ -514,7 +519,6 @@ function initSocket(){
     	}
     })
     gameSocket.on('score', event => {
-        console.log('score received', Data.now());
         window.PongGame.state.ball.speed = 0;
     	if (window.PongGame.info.myTeam.name == 'team_a') {
 			window.PongGame.state.playerScore = event.team_a;
