@@ -1,9 +1,9 @@
 # Python imports
+import aiohttp
 import asyncio
+import socketio
 import ssl
 import time
-import aiohttp
-import socketio
 from pynput import keyboard
 
 # Rich imports
@@ -190,7 +190,7 @@ class GamePage(Screen):
         try:
             self.setHandler()
             await self.sio.connect(
-                f"wss://{User.host}:{User.port}/",
+                f"wss://{User.server}/",
                 socketio_path="/ws/game/",
                 transports=["websocket"],
                 auth={

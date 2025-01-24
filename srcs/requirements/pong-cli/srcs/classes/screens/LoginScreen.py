@@ -1,5 +1,6 @@
 # Python imports
 import os
+import requests
 from urllib.parse import urlparse
 
 # Textual imports
@@ -21,7 +22,7 @@ class LoginPage(Screen):
     def __init__(self):
         super().__init__()
 
-        self.server = f"{User.server}:{User.port}" if (User.server is not None and User.port is not None) else ""
+        self.server = f"https://{User.server}" if (User.server is not None) else ""
         self.username = User.username if (User.username is not None) else ""
         self.password = User.password if (User.password is not None) else ""
 
@@ -48,11 +49,30 @@ class LoginPage(Screen):
         self.query_one("#status").styles.color = "white"
         self.query_one("#status").update("")
 
-    def getSSLCertificate(self):
-        User.host = urlparse(User.server).hostname
-        User.port = urlparse(User.server).port
+    def getSSLAndJSON(self):
+        User.host = urlparse(User.URI).hostname
+        User.port = urlparse(User.URI).port
+        User.server = f"{User.host}:{User.port}"
         if (User.host and User.port):
-            os.system(f"openssl s_client -connect {User.host}:{User.port} -servername {User.host} </dev/null 2>/dev/null | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > {Config.SSL.CRT}")
+            print(f"{User.host}:{User.port}")
+            os.system(f"echo | openssl s_client -connect {User.host}:{User.port} -servername {User.host} 2>/dev/null | sed -ne '/-----BEGIN CERTIFICATE-----/,/-----END CERTIFICATE-----/p' > {Config.SSL.CRT}")
+
+            result = os.system(f"openssl x509 -in {Config.SSL.CRT} -noout 2>/dev/null")
+            if (result != 0):
+                raise (Exception(f"Certificate retrieval failed"))
+        jsonData = {}
+
+        response = requests.get(
+            url=f"https://{User.server}/gameConfig.json",
+            verify=Config.SSL.CRT
+        )
+        if (
+            response is not None
+            and response.status_code == 200
+            and response.headers["Content-Type"] == "application/json"
+        ):
+            jsonData = response.json()
+        Config.load(jsonData)
 
     @on(Button.Pressed, "#loginButton")
     def loginAction(self):
@@ -61,11 +81,11 @@ class LoginPage(Screen):
             and self.query_one("#username").value
             and self.query_one("#password").value
         ):
-            User.server = self.query_one("#server").value
+            User.URI = self.query_one("#server").value
             User.username = self.query_one("#username").value
             User.password = self.query_one("#password").value
             try:
-                self.getSSLCertificate()
+                self.getSSLAndJSON()
                 User.loginUser()
                 self.app.SSE()
                 self.app.push_screen(MainPage())
@@ -85,11 +105,11 @@ class LoginPage(Screen):
             and self.query_one("#username").value
             and self.query_one("#password").value
         ):
-            User.server = self.query_one("#server").value
+            User.URI = self.query_one("#server").value
             User.username = self.query_one("#username").value
             User.password = self.query_one("#password").value
             try:
-                self.getSSLCertificate()
+                self.getSSLAndJSON()
                 User.registerUser()
                 self.app.SSE()
                 self.app.push_screen(MainPage())
@@ -105,9 +125,9 @@ class LoginPage(Screen):
     @on(Button.Pressed, "#guestUpButton")
     def guestUpAction(self):
         if (self.query_one("#server").value):
-            User.server = self.query_one("#server").value
+            User.URI = self.query_one("#server").value
             try:
-                self.getSSLCertificate()
+                self.getSSLAndJSON()
                 User.guestUser()
                 self.app.SSE()
                 self.app.push_screen(MainPage())

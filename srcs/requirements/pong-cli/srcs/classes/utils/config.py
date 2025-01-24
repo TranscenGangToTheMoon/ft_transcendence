@@ -6,13 +6,12 @@ class Config:
     frameRate: int = 60
 
     @classmethod
-    def load(cls, configFilePath):
-        try:
-            with open(configFilePath, 'r') as configFile:
-                cls.configJson = json.load(configFile)
-        except FileNotFoundError:
-            cls.configJson = {}
+    def load(cls, configJson = None):
+        if (configJson is not None and configJson != {}):
+            cls.configJson = configJson
+        else:
             print("Invalid configuration file, using basic configuration.")
+            cls.configJson = {}
         Config.Playground.load()
         Config.Paddle.load()
         Config.Ball.load()
@@ -32,11 +31,9 @@ class Config:
             f"Paddle.cGap:......... {cls.Paddle.cGap}\n"
             f"Paddle.cWidth:....... {cls.Paddle.cWidth}\n"
             f"Paddle.cHeight:...... {cls.Paddle.cHeight}\n"
-            f"Paddle.cSpeed:....... {cls.Paddle.cSpeed}\n"
             f"Paddle.gap:.......... {cls.Paddle.gap}\n"
             f"Paddle.width:........ {cls.Paddle.width}\n"
             f"Paddle.height:....... {cls.Paddle.height}\n"
-            f"Paddle.speed:........ {cls.Paddle.speed}\n"
             f"Ball.cSize:.......... {cls.Ball.cSize}\n"
             f"Ball.width:.......... {cls.Ball.width}\n"
             f"Ball.height:......... {cls.Ball.height}\n"
