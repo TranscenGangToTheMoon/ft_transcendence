@@ -20,7 +20,7 @@
             steps : 3,
             delay : 2000,
         },
-        maxBounceAngle : 2 * (Math.PI / 5),
+        maxBounceAngle : 1.0471975511965976,
         displayDemo: false,
         team: '',
     };
@@ -603,7 +603,7 @@ async function initGameConstants(){
             PongGame.config.defaultBallSpeed = data.ball.speed;
             PongGame.config.ballSpeedIncrement = data.ball.speedIncrement;
             PongGame.config.maxBallSpeed = data.ball.maxSpeed;
-            PongGame.config.maxBounceAngle = data.ball.maxBounceAngle;
+            PongGame.config.maxBounceAngle = data.ball.maxBounceAngle3v3;
             PongGame.config.winningScore = data.score.max;
             PongGame.setScoreCoords();
         })

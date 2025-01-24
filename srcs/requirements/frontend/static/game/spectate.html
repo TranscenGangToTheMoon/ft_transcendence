@@ -1,9 +1,6 @@
-
 <div id="gameArea" class="d-none justify-content-center align-items-center user-select-none w-100">
     <div id="gameAreaOverlay" class="flex-column">
-        <div id="scoreArea" class="d-flex justify-content-between 3 w-100">
-            <div id="matchCodeArea" class="fs-2 fw-bold justify-content-center w-100">Match Code: <p id="matchCode" class="fs-2 fw-bold user-select-all"></p></div>
-        </div>
+        <div class="fs-2 fw-bold justify-content-center w-100">Spectating</div>
         <div id="scoreArea" class="d-flex justify-content-between 3 w-100" style="background-color: grey;">
             <div id="enemyScoreArea" class="d-flex w-50 justify-content-between align-items-center bg-danger h-100">
                 <div id="enemyUsername" class="fs-2 fw-bold p-2">Enemy</div>
@@ -19,8 +16,22 @@
     </div>
 </div>
 
-<h1 id="opponentWait">Waiting for an opponent...</h1>
 <div id="salut"></div>
+
+<div class="modal fade" id="spectatePromptModal" tabindex="-1" data-bs-backdrop="static" aria-labelledby="spectateModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header flex-column align-items-center">
+                <h5 class="modal-title" id="spectateModalLabel">Spectate</h5>
+                <form id="spectateForm">
+                    <input type="text" id="spectateInput" class="form-control" placeholder="Enter a match code">
+                    <button id="codeSubmit" class="btn btn-primary">Spectate</button>
+                    <p id="spectateError" class="text-danger"></p>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 
 <div class="modal fade" id="gameOverModal" tabindex="-1" aria-labelledby="gameOverModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -32,20 +43,20 @@
             <div class="modal-body" id="gameOverContent">
                 <label for="playerScore" id="playerScoreLabel">
                     <a class="teamDetail"
-                        data-bs-toggle="popover" 
+                        data-bs-toggle="popover"
                         data-bs-trigger="hover"
                         data-bs-html="true"
                         title="Team ">
-                        username</a> Score:
+                    Team {team-id}</a> Score:
                 </label>
                 <div id="playerScoreInModal">-</div>
                 <label for="enemyScore" id="enemyScoreLabel">
                 <a class="teamDetail"
-                    data-bs-toggle="popover" 
+                    data-bs-toggle="popover"
                     data-bs-trigger="hover"
                     data-bs-html="true"
                     title="Team ">
-                    username</a> Score:
+                    Team {team-id}</a> Score:
                 </label>
                 <div id="enemyScoreInModal">-</div>
             </div>
@@ -57,4 +68,4 @@
     </div>
 </div>
 
-<div script="/game/scripts/game.js"></div>
+<div script="/game/scripts/spectate.js"></div>
