@@ -63,9 +63,3 @@ class ConnectedUsers:
             if searched_user and searched_user['chat_id'] == user['chat_id']:
                 return True
         return False
-    
-    def is_private_chat(self, sid):
-        user = self.users_sid.get(sid)
-        if user and user['chat_type'] == 'private_message':
-            return True
-        return False
