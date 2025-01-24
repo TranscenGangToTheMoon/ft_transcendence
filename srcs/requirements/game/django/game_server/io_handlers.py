@@ -129,8 +129,13 @@ async def disconnect(sid):
             if search == sid:
                 Server._disconnected_sids.remove(sid)
                 return
+                ''' the client did try to connect with two
+                different sids simultaneously,
+                causing the first to be disconnected,
+                no need to finish the game
+                '''
     try:
         match_id = Server._clients[sid].match_id
         await sync_to_async(Server.finish_game)(match_id, FinishReason.PLAYER_DISCONNECT, Server._clients[sid].user_id)
     except KeyError:
-        pass # player has already disconnected
+        pass # the client was a spectator or has already been disconnected, nothing alarming

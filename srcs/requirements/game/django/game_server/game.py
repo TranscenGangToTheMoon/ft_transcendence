@@ -100,7 +100,9 @@ class Game:
 
     def add_spectator(self, user_id: int, sid: str):
         self.spectators.append(Spectator(user_id, sid))
-        self.send_score()
+        self.send_score(sid=sid)
+        self.send_canvas(sid)
+        self.send_rackets(sid)
         if self.last_update != 0:
             self.send_start_game(sid)
         self.send_game_state(sid)
@@ -361,18 +363,24 @@ class Game:
 
 ################--------senders--------################
 
-    def send_score(self, game_instance=None):
+    def send_score(self, game_instance=None, sid=None):
         from game_server.server import Server
-        if game_instance is not None:
-            Server.emit('score', data={
-                'team_a': game_instance['teams']['a']['score'],
-                'team_b': game_instance['teams']['b']['score'],
-            }, room=str(self.match.id))
+        if sid is None:
+            if game_instance is not None:
+                Server.emit('score', data={
+                    'team_a': game_instance['teams']['a']['score'],
+                    'team_b': game_instance['teams']['b']['score'],
+                }, room=str(self.match.id))
+            else:
+                Server.emit('score', data={
+                        'team_a': self.match.teams[0].score,
+                        'team_b': self.match.teams[1].score,
+                    }, room=str(self.match.id))
         else:
             Server.emit('score', data={
                     'team_a': self.match.teams[0].score,
                     'team_b': self.match.teams[1].score,
-                }, room=str(self.match.id))
+                }, to=sid)
 
     def send_finish(self, finish_reason: str | None = None, winner: str | None = None):
         from game_server.server import Server
@@ -395,16 +403,26 @@ class Game:
         from game_server.server import Server
         Server.emit('start_countdown', room=str(self.match.id))
 
-    def send_canvas(self):
+    def send_canvas(self, sid=None):
         from game_server.server import Server
-        Server.emit(
-            'canvas',
-            data={
-                'canvas_width': self.canvas.x,
-                'canvas_height': self.canvas.y
-            },
-            room=str(self.match.id)
-        )
+        if sid is None:
+            Server.emit(
+                'canvas',
+                data={
+                    'canvas_width': self.canvas.x,
+                    'canvas_height': self.canvas.y
+                },
+                room=str(self.match.id)
+            )
+        else:
+            Server.emit(
+                'canvas',
+                data={
+                    'canvas_width': self.canvas.x,
+                    'canvas_height': self.canvas.y
+                },
+                to=sid
+            )
 
     def get_game_state(self, side: int):
         if side == 1:
@@ -469,23 +487,31 @@ class Game:
                 rackets[racket.player_id] = racket.position.invert(self.canvas.x).x - racket.width
         return rackets
 
-    def send_rackets(self):
+    def send_rackets(self, sid=None):
         from game_server.server import Server
         side = 1
-        for team in self.match.teams:
-            rackets = self.get_rackets(side)
-            for player in team.players:
-                Server.emit(
-                    'rackets',
-                    data=rackets,
-                    to=player.socket_id
-                )
-            side = -1
-        if self.spectators != []:
+        if sid is None:
+            for team in self.match.teams:
+                rackets = self.get_rackets(side)
+                for player in team.players:
+                    Server.emit(
+                        'rackets',
+                        data=rackets,
+                        to=player.socket_id
+                    )
+                side = -1
+            if self.spectators != []:
+                rackets = self.get_rackets(1)
+                for spectator in self.spectators:
+                    Server.emit(
+                        'rackets',
+                        data=rackets,
+                        to=spectator.socket_id
+                    )
+        else:
             rackets = self.get_rackets(1)
-            for spectator in self.spectators:
-                Server.emit(
-                    'rackets',
-                    data=rackets,
-                    to=spectator.socket_id
-                )
+            Server.emit(
+                'rackets',
+                data=rackets,
+                to=sid
+            )
