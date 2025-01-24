@@ -98,6 +98,7 @@
 
     function resizeCanvas() {
         const container = document.getElementById('canvas-container');
+        if (!container) return;
         const windowWidth = window.innerWidth;
         const windowHeight = window.innerHeight - document.querySelector('header').offsetHeight;
   
@@ -609,7 +610,7 @@ function initSocket(match_code, socketPath, socketMode){
 		PongGame.handleGameOver(event.reason);
         if (typeof fromTournament !== 'undefined' && fromTournament){
             document.getElementById('gameOverModal').querySelector('.modal-footer').classList.add('d-none');
-            await navigateTo('/tournament');
+            await navigateTo('/tournament', true, true);
 
         }
         else if (typeof fromLobby !== 'undefined' && fromLobby){
@@ -838,8 +839,20 @@ async function initGame(){
     document.getElementById('opponentWait').style.display = "block";
     try {
         checkGameAuthorization();
-        if (window.location.pathname === '/game/tournament')
+        if (window.location.pathname === '/game/tournament'){
+            async function tournamentFinished(event){
+                event = JSON.parse(event.data);
+                console.log('received tournament-finish');
+                console.log(event);
+                await navigateTo('/', true, true); //todo replace by tournament history
+                displayNotification(undefined, 'tournament finished', event.message, undefined, undefined); //todo add target 
+            }
+            if (!SSEListeners.has('tournament-finish')){
+                SSEListeners.set('tournament-finish', tournamentFinished);
+                sse.addEventListener('tournament-finish', tournamentFinished);
+            }
             await initData(...tournamentData);
+        }
         else if (window.location.pathname === '/game/1v1')
             await initData(...(userInformations.lobbyData));
         else {

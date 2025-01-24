@@ -609,6 +609,8 @@ async function lobbyInit() {
             document.getElementById('gameType').innerText = gameMode;
             document.getElementById('gameId').innerText = lobby.code;
             await fillPlayerList();
+            window.lobbyCode = '/lobby/' + lobby.code;
+            localStorage.setItem('lobbyCode', '/lobby/' + code);
         }
     }
     catch(error){
@@ -633,6 +635,8 @@ async function lobbyInit() {
                 document.getElementById('gameType').innerText = gameMode;
                 document.getElementById('gameId').innerText = lobby.code;
                 await fillPlayerList();
+                localStorage.setItem('lobbyCode', '/lobby/' + code);
+                window.lobbyCode = '/lobby/' + lobby.code;
             }
             if (lobby.detail === 'Lobby is full.')
                 throw {code:404}

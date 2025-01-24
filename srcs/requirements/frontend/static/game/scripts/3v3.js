@@ -79,6 +79,7 @@
 
     function resizeCanvas() {
         const container = document.getElementById('canvas-container');
+        if (!container) return;
         const windowWidth = window.innerWidth;
         const windowHeight = window.innerHeight - document.querySelector('header').offsetHeight;
   

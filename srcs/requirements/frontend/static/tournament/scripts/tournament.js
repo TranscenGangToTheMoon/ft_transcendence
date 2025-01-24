@@ -29,7 +29,7 @@ async function joinTournament(code){
 			return 0;
 		}
 		if (window.location.pathname !== '/tournament/' + code)
-			navigateTo('/tournament/' + code, false);
+			navigateTo('/tournament/' + code, false, true);
 		document.getElementById('chatsListView').style.display = 'none';
 		document.getElementById('leaveTournament').style.display = 'block';
 		tournament = data;
@@ -81,6 +81,7 @@ if (typeof clickedUserDiv === 'undefined')
 
 function setBanOption(){
 	const banDiv = document.getElementById('cBan');
+	if (!banDiv) return;
 	if (tournament.created_by !== userInformations.id){
 		banDiv.classList.add('disabled');
 	}
@@ -240,6 +241,7 @@ async function tournamentMatchFinished(event){
 	console.log('received match finished event');
 	console.log(event);
 	tournament = event.data;
+	await displayNotification(undefined, 'Match finished', event.message);
 	setBanOption();
 	loadTournament(tournament);
 }
@@ -324,6 +326,8 @@ function getMatch(i, lastRound, tournament){
 }
 
 function loadTournament(tournament){
+	localStorage.setItem('lobbyCode', '/tournament/' + tournament.code);
+	if (window.location.pathname === '/game/tournament') return;
 	document.getElementById('tournamentView').innerHTML = '';
 	for (i in tournament.participants){
 		let participant = tournament.participants[i];
@@ -395,7 +399,7 @@ document.getElementById('createTournament').addEventListener('click', async even
 		createTournamentModal.hide();
 		tournament = data;
 		if (window.location.pathname !== '/tournament/' + tournament.code)
-			navigateTo('/tournament/' + tournament.code, false);
+			navigateTo('/tournament/' + tournament.code, false, true);
 		setBanOption();
 		loadTournament(data);
 	}
@@ -443,7 +447,7 @@ async function gameStart(event) {
 		userInformations.cancelReturn = true;
 	fromTournament = true;
 	tournamentData = [event.data, event.target[0].url, event.target[0].type];
-	await navigateTo('/game/tournament');
+	await navigateTo('/game/tournament', true, true);
 }
 
 async function initTournament(){
@@ -471,7 +475,7 @@ async function initTournament(){
 		let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/play/tournament/`);
 		tournament = data;
 		if (window.location.pathname !== '/tournament/' + tournament.code)
-			navigateTo('/tournament/' + tournament.code, false);
+			navigateTo('/tournament/' + tournament.code, false, true);
 		setBanOption()
 		loadTournament(data);
 		document.getElementById('chatsListView').style.display = 'none';
