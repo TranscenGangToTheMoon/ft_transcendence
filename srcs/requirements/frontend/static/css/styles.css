@@ -23,16 +23,12 @@ body {
     user-select: none;
 }
 
-.friend-badges, .all-badges{
+.friend-badges, .chat-badges, .all-badges{
     display: flex;
 }
 
 .toast-container {
     right: 20px;
-}
-
-.toast-body {
-    display: flex;
 }
 
 .notif-img {
@@ -109,4 +105,6 @@ body {
     /* border-radius: 10px; */
 }
 
-
+.max-vh-75 {
+    max-height: 75vh !important;
+}

@@ -1,3 +1,14 @@
+function displayGameChatMessage(event){
+	event = JSON.parse(event.data);
+	let messageDiv = document.createElement('div');
+	messageDiv.className = 'messageGame';
+	messageDiv.innerHTML = event.message;
+	let chatBox = document.getElementById('messagesGame');
+	if (chatBox) {
+		chatBox.appendChild(messageDiv);
+	}
+}
+
 async function createGameChatTab(gameInfo) {
 	let idChatTab = "chatGameTab";
     let idChatBox = "chatGameBox";
@@ -54,11 +65,11 @@ async function createGameChatTab(gameInfo) {
 
 	lastClick = chatTabLink.id;
 
-	await chatTabListener(gameInfo);
-	sendMessageListener(gameInfo);
+	await chatGameTabListener();
+	sendGameMessageListener(gameInfo);
 }
 
-async function chatTabListener(gameInfo)
+async function chatGameTabListener()
 {
 	document.getElementById('chatGameTab').addEventListener('click', async e => {
 		e.preventDefault();
@@ -75,39 +86,66 @@ async function chatTabListener(gameInfo)
 	});
 }
 
-function sendMessageListener(gameInfo) {
+function sendGameMessageListener(gameInfo) {
     const chatForm = document.getElementById('sendGameMessageForm');
-    if (!chatForm.hasAttribute('data-listener-added')) {
-        chatForm.setAttribute('data-listener-added', 'true');
-        chatForm.addEventListener('submit', async function (e) {
-            e.preventDefault();
-            const message = this.querySelector('input').value;
-			if (message === '') return;
-			//send message to server
-            chatForm.reset();
-        });
-    }
+	chatForm.addEventListener('submit', async function (e) {
+		e.preventDefault();
+		const message = this.querySelector('input').value;
+		if (message === '') return;
+		try {
+			var apiAnswer = undefined;
+			if (gameInfo.type === 'lobby'){
+				apiAnswer = await apiRequest(getAccessToken(), `/api/play/lobby/${gameInfo.code}/message/`, 'POST', undefined, undefined, {
+					'content': message,
+				});
+			}
+			else if (gameInfo.type === 'tournament'){
+				apiAnswer = await apiRequest(getAccessToken(), `/api/play/tournament/${gameInfo.code}/message/`, 'POST', undefined, undefined, {
+					'content': message,
+				});
+			}
+			if (apiAnswer.detail) {
+				throw {'code': 400, 'detail': apiAnswer.detail};
+			}
+			let messageDiv = document.createElement('div');
+			messageDiv.className = 'messageGame';
+			messageDiv.innerHTML = "You: " + message;
+			let chatBox = document.getElementById('messagesGame');
+			if (chatBox) {
+				chatBox.appendChild(messageDiv);
+			}
+			chatForm.reset();
+		} catch (error) {
+			console.log('Error game chat:', error);
+			displayChatError(error, 'messagesGame');
+		}
+	});
 }
 
-async function closeChatTab(gameInfo)
+async function closeGameChatTab()
 {
 	var isTabActive = false;
 	let chatActiveTab = document.querySelector('#chatTabs .nav-link.active');
 	let buttonCollapseChat = document.getElementById('chatTabsCollapse');
 	if (!chatActiveTab) return;
-	if (chatActiveTab.id === 'chatGameTab') isTabActive = true;
-	document.getElementById('chatGameTab').remove();
-	document.getElementById('chatGameBox').remove();
+	if (chatActiveTab.id === 'chatGameTabLink') isTabActive = true;
+	let chatGameTab = document.getElementById('chatGameTab');
+	let chatGameBox = document.getElementById('chatGameBox');
+	if (chatGameTab) chatGameTab.remove();
+	if (chatGameBox) chatGameBox.remove();
 	let lastTab = document.getElementById('chatTabs').lastElementChild;
 	if (!lastTab) {
-		console.log('Chat: Closing chat view', lastTab);
+		lastClick = undefined;
 		document.getElementById('chatView').remove();
 	}
 	else if (isTabActive) {
-		if (buttonCollapseChat.getAttribute('aria-expanded') === 'true')
+		lastClick = undefined;
+		if (buttonCollapseChat.getAttribute('aria-expanded') === 'true') {
 			lastTab.querySelector('a').click();
-		else 
+		}
+		else {
 			lastClick = lastTab.querySelector('a').id;
+		}
 	}
 }
 
@@ -116,6 +154,10 @@ async function openGameChatTab(gameInfo) {
 	if (!chatTabs) {
 		await setChatView();
 	}
-	if (document.getElementById('chatGameTab')) return;
+	if (document.getElementById('chatGameTab')) 
+	{
+		document.getElementById('messagesGame').innerHTML = '';
+		return;
+	}
 	await createGameChatTab(gameInfo);
 }

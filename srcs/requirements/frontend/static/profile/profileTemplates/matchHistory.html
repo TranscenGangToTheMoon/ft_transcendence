@@ -1,4 +1,24 @@
-<div id="historyContainer">
+<div class="d-flex">
+    <div id="historyContainer" class="col d-flex flex-column max-vh-75 overflow-auto">
     
+    </div>
+    <div class="col d-none">
+        <div class="row">
+            <div class="col-8">team members</div>
+            <div class="col">score</div>
+        </div>
+        <div class="row" id="matchTeamDetail">
+
+        </div>
+    </div>
 </div>
+
+<div class="modal modal-lg fade my-2" id="tournamentBracket" tabindex="-1" aria-labelledby="tournamentBracketLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content d-flex">
+            <div id="bracket" class="d-flex row p-3"></div>
+        </div>
+    </div>
+</div>
+
 <div script="/profile/profileTemplates/scripts/matchHistory.js"></div>

@@ -42,10 +42,9 @@
     gap: 10px;
 }
 
-.match {
+.t-match {
     position: relative;
     width: 200px;
-    /* margin-bottom: 50px; */
 }
 
 .winner {
