@@ -609,9 +609,8 @@ function initSocket(match_code, socketPath, socketMode){
         updateTrophies();
 		PongGame.handleGameOver(event.reason);
         if (typeof fromTournament !== 'undefined' && fromTournament){
-            document.getElementById('gameOverModal').querySelector('.modal-footer').classList.add('d-none');
             await navigateTo('/tournament', true, true);
-
+            return;
         }
         else if (typeof fromLobby !== 'undefined' && fromLobby){
             document.getElementById('gameOverModal').querySelector('.modal-footer').classList.add('d-none');
