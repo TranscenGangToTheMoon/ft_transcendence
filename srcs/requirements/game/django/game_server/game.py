@@ -100,7 +100,10 @@ class Game:
 
     def add_spectator(self, user_id: int, sid: str):
         self.spectators.append(Spectator(user_id, sid))
-        self.send_start_game(sid)
+        self.send_score()
+        if self.last_update != 0:
+            self.send_start_game(sid)
+        self.send_game_state(sid)
 
 ################--------getters--------################
 
@@ -165,7 +168,6 @@ class Game:
             self.ball.speed_x = -self.ball.speed_x
             self.ball.increment_speed(self.max_ball_speed, self.speed_increment)
             self.calculateNewBallDirection(racket.position.y, racket.height)
-        self.send_game_state()
         self.sending = -1
 
     @staticmethod
@@ -213,7 +215,7 @@ class Game:
         self.handle_wall_bounce()
         for racket in self.rackets:
             self.handle_racket_collision(racket)
-        if self.sending <= 10 or self.sending % 15 == 0:
+        if self.sending <= 10 or self.sending % 2 == 0:
             self.send_game_state()
         self.sending += 1
         self.handle_goal()
@@ -332,6 +334,7 @@ class Game:
         return self.match.teams[0] if team == self.match.teams[1] else self.match.teams[1]
 
     def score(self, team):
+        self.last_update = 0
         scorer = self.get_scorer(team)
         if scorer is None:
             return # game finished
@@ -352,19 +355,24 @@ class Game:
             start_time = time.perf_counter()
             self.send_start_countdown()
             effective_start_time = start_time + 2
-            self.last_update = 0
             while time.perf_counter() < effective_start_time:
                 time.sleep(1 / 120)
             self.send_start_game()
 
 ################--------senders--------################
 
-    def send_score(self, game_instance):
+    def send_score(self, game_instance=None):
         from game_server.server import Server
-        Server.emit('score', data={
-            'team_a': game_instance['teams']['a']['score'],
-            'team_b': game_instance['teams']['b']['score'],
-        }, room=str(self.match.id))
+        if game_instance is not None:
+            Server.emit('score', data={
+                'team_a': game_instance['teams']['a']['score'],
+                'team_b': game_instance['teams']['b']['score'],
+            }, room=str(self.match.id))
+        else:
+            Server.emit('score', data={
+                    'team_a': self.match.teams[0].score,
+                    'team_b': self.match.teams[1].score,
+                }, room=str(self.match.id))
 
     def send_finish(self, finish_reason: str | None = None, winner: str | None = None):
         from game_server.server import Server
@@ -424,9 +432,16 @@ class Game:
                 Server.emit('team_id', data={'team': team_str}, to=player.socket_id)
             team_str = 'team_b'
 
-    def send_game_state(self):
+    def send_game_state(self, sid=None):
         from game_server.server import Server
         side = 1
+        if sid is not None:
+            Server.emit(
+                'game_state',
+                data=self.get_game_state(1),
+                to=sid
+            )
+            return
         for team in self.match.teams:
             game_state = self.get_game_state(side)
             for player in team.players:

@@ -15,6 +15,8 @@ function checkEventDuplication(data){
     // console.log(lastTimeStamp);f
     if (lastTimeStamp && (now - lastTimeStamp < DEBOUNCE_TIME)){
         console.log('skip', data);
+        if (data.event_code === 'lobby-update-participant' && data.data && data.data.team === 'Spectator')
+            return 1;
         return 0;
     }
 

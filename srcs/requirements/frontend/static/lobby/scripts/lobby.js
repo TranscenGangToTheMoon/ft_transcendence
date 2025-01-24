@@ -594,7 +594,7 @@ async function lobbyInit() {
         if (lobby.code && lobby.code != code && code !== undefined)
             throw {code:404};
         if (lobby.code && code === undefined)
-            await navigateTo(`/lobby/${lobby.code}`, false);
+            await navigateTo(`/lobby/${lobby.code}`, false, true);
         if (lobby.code) {
             code = lobby.code;
             matchType = lobby.match_type;

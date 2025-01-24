@@ -20,7 +20,7 @@
             steps : 3,
             delay : 2000,
         },
-        maxBounceAngle : 2 * (Math.PI / 5),
+        maxBounceAngle : 1.0471975511965976,
         displayDemo: false,
         team: '',
     };
@@ -76,6 +76,29 @@
     const ctx = canvas.getContext("2d");
     canvas.width = config.canvasWidth;
     canvas.height = config.canvasHeight;
+
+    function resizeCanvas() {
+        const container = document.getElementById('canvas-container');
+        const windowWidth = window.innerWidth;
+        const windowHeight = window.innerHeight - document.querySelector('header').offsetHeight;
+  
+        const baseWidth = config.canvasWidth;
+        const baseHeight = config.canvasHeight + document.getElementById('gameInfo').offsetHeight;
+        console.log('BASE HEIGHT', baseHeight);
+  
+        let scale = Math.min(windowWidth / baseWidth, windowHeight / baseHeight);
+        
+        if (scale > 1)
+            scale = 1;
+        container.style.transform = `scale(${scale})`;
+        container.style.width = `${baseWidth}px`;
+        container.style.height = `${baseHeight}px`;
+        container.style.marginLeft = `${(windowWidth - baseWidth * scale) / 2}px`;
+        container.style.marginTop = `${(windowHeight - baseHeight * scale) / 2}px`;
+    }
+    
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
 
     const paddleImage = new Image();
     paddleImage.src = "/assets/paddle.png";
@@ -262,9 +285,8 @@
                 }
                 state.paddles[userInformations.id].speed = 0;
             }
-            return;
         }
-        if (state.keys["ArrowUp"] && state.paddles[userInformations.id].speed != -1){
+        else if (state.keys["ArrowUp"] && state.paddles[userInformations.id].speed != -1){
             if (typeof gameSocket !== 'undefined'){
                 if (state.paddles[userInformations.id].speed === 1){
                 		gameSocket.emit('stop_moving', {'position': state.paddles[userInformations.id].y});
@@ -276,7 +298,7 @@
             }
             state.paddles[userInformations.id].speed = -1;
         }
-        if (state.keys["ArrowDown"] && state.paddles[userInformations.id].speed != 1){
+        else if (state.keys["ArrowDown"] && state.paddles[userInformations.id].speed != 1){
             if (typeof gameSocket !== 'undefined'){
                 if (state.paddles[userInformations.id].speed === -1){
                     gameSocket.emit('stop_moving', {'position': state.paddles[userInformations.id].y});
@@ -288,7 +310,7 @@
             }
             state.paddles[userInformations.id].speed = 1;
         }
-        if (!state.keys["ArrowDown"] && !state.keys['ArrowUp'] && state.paddles[userInformations.id].speed != 0){
+        else if (!state.keys["ArrowDown"] && !state.keys['ArrowUp'] && state.paddles[userInformations.id].speed != 0){
             state.paddles[userInformations.id].speed = 0;
             if (typeof gameSocket !== 'undefined'){
                 gameSocket.emit('stop_moving', {'position': state.paddles[userInformations.id].y});
@@ -437,9 +459,29 @@
         }
     }
 
-    window.PongGame = {startGame, startCountdown, stopGame, state, config, moveUp, moveDown, handleGameOver, resetGame, info, animatePaddlesToMiddle, setFont, setScoreCoords};
+    window.PongGame = {startGame, startCountdown, stopGame, state, config, moveUp, moveDown, handleGameOver, resetGame, info, animatePaddlesToMiddle, setFont, setScoreCoords, resizeCanvas};
 })();
 
+
+function fillTeamDetail(enemyTeamDetail, playerTeamDetail){
+    enemyTeamDetail.title += PongGame.info.enemyTeam.name;
+    playerTeamDetail.title += PongGame.info.myTeam.name;
+    console.log()
+    for (let player in PongGame.info.myTeam.players.players){
+        player = PongGame.info.myTeam.players.players[player];
+        const oldContent = playerTeamDetail.getAttribute('data-bs-content');
+        playerTeamDetail.setAttribute('data-bs-content', (oldContent || '') + `
+            <div id=TD-username>${player.username}</div>
+        `);
+    }
+    for (let player in PongGame.info.enemyTeam.players.players){
+        player = PongGame.info.enemyTeam.players.players[player];
+        const oldContent = enemyTeamDetail.getAttribute('data-bs-content');
+        enemyTeamDetail.setAttribute('data-bs-content', (oldContent || '') + `
+            <div id=TD-username>${player.username}</div>
+        `);
+    }
+}
 
 function initSocket(){
 	const host = window.location.origin;
@@ -456,6 +498,7 @@ function initSocket(){
     // console.log(socket)
 	gameSocket.on('connect', () => {
         console.log('Connected to socketIO server!');
+        window.PongGame.resizeCanvas();
     });
     gameSocket.on('disconnect', () => {
         console.log('disconnected from gameSocket');
@@ -489,7 +532,7 @@ function initSocket(){
         window.PongGame.startCountdown();
     })
     gameSocket.on('game_state', event => {
-        console.log('game_state received', Date.now());
+        // console.log('game_state received', Date.now());
 		window.PongGame.state.ball.y = event.position_y;
 		window.PongGame.state.ball.x = event.position_x;
 		window.PongGame.state.ball.speedX = event.speed_x;
@@ -531,13 +574,39 @@ function initSocket(){
     })
     gameSocket.on('game_over', async event => {
         gameSocket.close();
+        gameSocket = undefined;
         console.log('game_over received', event);
 		window.PongGame.handleGameOver(event.reason);
+        if (event.reason === 'normal-end'){
+            addScore();
+        }
+        else
+            document.getElementById('gameOverContent').innerHTML = `${event.reason}`;
+        const gameOverModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('gameOverModal'));
+        console.log(gameOverModal);
+        gameOverModal.show();
+        
+        const popovers = document.querySelectorAll('.teamDetail');
+        popovers.forEach(element => {
+            new bootstrap.Popover(element, {
+                html: true
+            });
+        });
         if (fromLobby){
             userInformations.lobbyData = undefined;
             await navigateTo('/lobby', true, true);
         }
     })
+}
+
+function addScore(){
+    document.getElementById('enemyScore').innerText = PongGame.state.enemyScore;
+    const enemyTeamDetail = document.getElementById('enemyScoreLabel').querySelector('.teamDetail');
+    enemyTeamDetail.innerText = enemyTeamDetail.innerText.replace('{team-id}', PongGame.info.enemyTeam.name);
+    const playerTeamDetail = document.getElementById('playerScoreLabel').querySelector('.teamDetail');
+    playerTeamDetail.innerText = playerTeamDetail.innerText.replace('{team-id}', PongGame.info.myTeam.name);
+    document.getElementById('playerScore').innerText = PongGame.state.playerScore;
+    fillTeamDetail(enemyTeamDetail, playerTeamDetail);
 }
 
 async function initGameConstants(){
@@ -558,9 +627,10 @@ async function initGameConstants(){
             PongGame.config.defaultBallSpeed = data.ball.speed;
             PongGame.config.ballSpeedIncrement = data.ball.speedIncrement;
             PongGame.config.maxBallSpeed = data.ball.maxSpeed;
-            PongGame.config.maxBounceAngle = data.ball.maxBounceAngle;
+            PongGame.config.maxBounceAngle = data.ball.maxBounceAngle3v3;
             PongGame.config.winningScore = data.score.max;
             PongGame.setScoreCoords();
+            PongGame.resizeCanvas();
         })
 }
 
@@ -568,16 +638,16 @@ async function initData(data){
     await initGameConstants();
     try {
 		if (data.teams.a.players.some(player => player.id == userInformations.id)) {
-			window.PongGame.info.myTeam.name = 'team_a';
-			window.PongGame.info.myTeam.players = data.teams.team_a;
-			window.PongGame.info.enemyTeam.name = 'team_b';
-			window.PongGame.info.enemyTeam.players = data.teams.team_b;
+			window.PongGame.info.myTeam.name = 'A';
+			window.PongGame.info.myTeam.players = data.teams.a;
+			window.PongGame.info.enemyTeam.name = 'B';
+			window.PongGame.info.enemyTeam.players = data.teams.b;
 		}
 		else if (data.teams.b.players.some(player => player.id == userInformations.id)) {
-			window.PongGame.info.myTeam.name = 'team_b';
-			window.PongGame.info.myTeam.players = data.teams.team_b;
-			window.PongGame.info.enemyTeam.name = 'team_a';
-			window.PongGame.info.enemyTeam.players = data.teams.team_a;
+			window.PongGame.info.myTeam.name = 'B';
+			window.PongGame.info.myTeam.players = data.teams.b;
+			window.PongGame.info.enemyTeam.name = 'A';
+			window.PongGame.info.enemyTeam.players = data.teams.a;
 		}
 	}
 	catch(error) {
@@ -610,7 +680,7 @@ function wrongConfigFileError(error){
 }
 
 async function gameStart(event){
-    document.getElementById('gameArea').style.display = 'block';
+    document.getElementById('gameArea').classList.replace('d-none', 'd-flex');
     document.getElementById('opponentWait').style.display = 'none';
     data = JSON.parse(event.data);
     data = data.data;
@@ -625,7 +695,7 @@ async function gameStart(event){
 }
 
 async function initGame(){
-    document.getElementById('gameArea').style.display = 'none';
+    document.getElementById('gameArea').classList.replace('d-flex', 'd-none');
     document.getElementById('opponentWait').style.display = 'block';
     if (SSEListeners.has('game-start')){
         sse.removeEventListener('game-start', SSEListeners.get('game-start'));
@@ -640,7 +710,7 @@ async function initGame(){
         if (userInformations.lobbyData){
             try {
                 await initData(userInformations.lobbyData);
-                document.getElementById('gameArea').style.display = 'flex';
+                document.getElementById('gameArea').classList.replace('d-none', 'd-flex');
                 document.getElementById('opponentWait').style.display = 'none';
             }
             catch (error){
@@ -652,7 +722,8 @@ async function initGame(){
     catch (unauthorized){
         // if (unauthorized === window.location.pathname){
             displayMainAlert("Error", `You don't have permission to play in ${unauthorized}`);
-            await navigateTo('/');
+            // await navigateTo('/');
+            history.go(-1);
         // }
         // else
         //     wrongConfigFileError(error);

@@ -78,13 +78,17 @@ async function playLocal(){
     await navigateTo('/game/local');
 }
 
+async function spectate(){
+    await navigateTo('/spectate');
+}
+
 document.getElementById('chat').addEventListener('click', async e => {
 	e.preventDefault();
     await displayChatsList();
 });
 
 document.getElementById('playGame').addEventListener('click', async e => {
-    const gameModeFunctions = [playLocal, playDuel, playRanked, playClash, playCustomGame, playTournament];
+    const gameModeFunctions = [playLocal, playDuel, playRanked, playClash, playCustomGame, playTournament, spectate];
     const selectorValue = document.getElementById('gameModeSelect').value;
 
     await gameModeFunctions[selectorValue](e);
