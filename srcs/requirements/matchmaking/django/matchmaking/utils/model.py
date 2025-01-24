@@ -1,7 +1,4 @@
-from django.db import models
-
-
-class ParticipantsPlace(models.Model):
+class ParticipantsPlace:
     creator = None
     user_id = None
 

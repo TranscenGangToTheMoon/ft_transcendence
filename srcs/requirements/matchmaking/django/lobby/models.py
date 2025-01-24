@@ -114,7 +114,7 @@ class Lobby(models.Model):
         super().delete(using=using, keep_parents=keep_parents)
 
 
-class LobbyParticipants(ParticipantsPlace):
+class LobbyParticipants(ParticipantsPlace, models.Model):
     lobby = models.ForeignKey(Lobby, on_delete=models.CASCADE, related_name='participants')
     is_guest = models.BooleanField(default=False)
     user_id = models.IntegerField(unique=True)

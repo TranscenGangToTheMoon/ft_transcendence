@@ -8,7 +8,7 @@ from matchmaking.utils.model import ParticipantsPlace
 RANGE = 50
 
 
-class Players(ParticipantsPlace):
+class Players(ParticipantsPlace, models.Model):
     user_id = models.IntegerField(unique=True)
     trophies = models.IntegerField()
     game_mode = models.CharField(max_length=10)

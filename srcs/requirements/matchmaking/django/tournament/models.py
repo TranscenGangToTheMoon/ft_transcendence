@@ -153,7 +153,7 @@ class TournamentStage(models.Model):
     stage = models.IntegerField()
 
 
-class TournamentParticipants(ParticipantsPlace):
+class TournamentParticipants(ParticipantsPlace, models.Model):
     user_id = models.IntegerField()
     tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE, related_name='participants')
     stage = models.ForeignKey(TournamentStage, on_delete=models.CASCADE, default=None, null=True, related_name='participants')
