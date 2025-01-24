@@ -26,8 +26,6 @@ services:
       auth-db:
         condition: service_healthy
     restart: on-failure
-    volumes:
-      - shared-code-volume:/shared
     environment:
       <<: *django-env
       POSTGRES_DB: ${POSTGRES_AUTH_DB_NAME}
@@ -47,8 +45,6 @@ services:
       chat-db:
         condition: service_healthy
     restart: on-failure
-    volumes:
-      - shared-code-volume:/shared
     environment:
       <<: *django-env
       POSTGRES_DB: ${POSTGRES_CHAT_DB_NAME}
@@ -83,8 +79,6 @@ services:
       game-db:
         condition: service_healthy
     restart: on-failure
-    volumes:
-      - shared-code-volume:/shared
     environment:
       <<: *django-env
       POSTGRES_DB: ${POSTGRES_GAME_DB_NAME}
@@ -106,8 +100,6 @@ services:
       matchmaking-db:
         condition: service_healthy
     restart: on-failure
-    volumes:
-      - shared-code-volume:/shared
     environment:
       <<: *django-env
       POSTGRES_DB: ${POSTGRES_MATCHMAKING_DB_NAME}
@@ -129,8 +121,6 @@ services:
       event-queue:
         condition: service_healthy
     restart: on-failure
-    volumes:
-      - shared-code-volume:/shared
     environment:
       <<: *django-env
       POSTGRES_DB: ${POSTGRES_USERS_DB_NAME}
@@ -273,12 +263,3 @@ volumes:
 
   users-db-volume:
     name: "users-db-volume"
-
-#####Shared Code Volume
-  shared-code-volume:
-    name: shared-code-volume
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: "./shared-code"

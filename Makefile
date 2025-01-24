@@ -105,8 +105,6 @@ vclean		:
 fclean		:	dusting
 			$(COMPOSE) $(FLAGS) down -v --rmi all --remove-orphans
 			docker system prune -af
-			rm -rf ./srcs/shared-code/lib_transcendence.egg-info/ # todo remove in prod
-			rm -rf ./srcs/shared-code/build/ # todo remove in prod
 			rm -rf $(ENV_FILE)
 			rm -rf $(SECRETS_D)
 			rm -rf $(CONFIG_F)
