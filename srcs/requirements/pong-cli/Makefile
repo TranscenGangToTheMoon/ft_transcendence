@@ -93,6 +93,7 @@ banner		:
 .PHONY: fclean
 fclean		:
 			$(RM) -r $(VENV)
+			$(RM) ft_transcendence.crt
 
 .PHONY: re
 re			:	fclean all
