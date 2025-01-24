@@ -163,6 +163,31 @@ function removeParticipant(id){
 		participantDiv.remove();
 }
 
+function displayCountdown(){
+	// return;
+	const countdownElement = document.getElementById('tMainCountdown');
+	const backdrop = document.getElementById('tBackdrop');
+
+	let counter = 2;
+
+        // Show the backdrop
+	backdrop.classList.replace('d-none', 'd-flex');
+
+	// Start the countdown
+	const interval = setInterval(() => {
+		countdownElement.textContent = counter;
+		counter--;
+
+		if (counter < 0) {
+			clearInterval(interval);
+
+			// Hide the backdrop when countdown ends
+			backdrop.classList.replace('d-flex', 'd-none');
+			// alert('Tournament Started!');
+		}
+	}, 1000); // Update every 1 second
+}
+
 function tournamentJoined(event){
 	event = JSON.parse(event.data);
 	addParticipant(event.data);
@@ -214,8 +239,9 @@ function tournamentStartCancel(){
 }
 
 function tournamentStart(event){
+	displayCountdown();
 	event = JSON.parse(event.data);
-	console.log(event);
+	console.log('tournament start:', event);
 	loadTournament(event.data);
 }
 
