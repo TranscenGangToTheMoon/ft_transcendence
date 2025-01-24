@@ -6,6 +6,7 @@ import requests
 from classes.utils.config   import Config
 
 class User():
+    URI = None
     accessToken: str | None = None
     headers = {"Content-Type": "application/json"}
     host: str | None = None
@@ -26,7 +27,7 @@ class User():
 
         data = json.dumps( {"username": User.username, "password": User.password})
         User.response = requests.post(
-            url=f"{User.server}/api/auth/login/",
+            url=f"https://{User.server}/api/auth/login/",
             data=data,
             headers=User.headers,
             verify=Config.SSL.CRT
@@ -48,13 +49,14 @@ class User():
         User.headers["Authorization"] = f"Bearer {User.accessToken}"
 
     @staticmethod
-    def guestUser():
+    def registerUser():
         if (User.server is None):
             raise (Exception("Hostname not define"))
 
+        data = json.dumps({"username": User.username, "password": User.password})
         User.response = requests.post(
-            url=f"{User.server}/api/auth/guest/",
-            data={},
+            url=f"https://{User.server}/api/auth/register/",
+            data=data,
             headers=User.headers,
             verify=Config.SSL.CRT
         )
@@ -75,14 +77,13 @@ class User():
         User.headers["Authorization"] = f"Bearer {User.accessToken}"
 
     @staticmethod
-    def registerUser():
+    def guestUser():
         if (User.server is None):
             raise (Exception("Hostname not define"))
 
-        data = json.dumps({"username": User.username, "password": User.password})
         User.response = requests.post(
-            url=f"{User.server}/api/auth/register/",
-            data=data,
+            url=f"https://{User.server}/api/auth/guest/",
+            data={},
             headers=User.headers,
             verify=Config.SSL.CRT
         )
@@ -106,7 +107,7 @@ class User():
     def me():
         print("Me")
         User.response = requests.get(
-            url=f"{User.server}/api/users/me/",
+            url=f"https://{User.server}/api/users/me/",
             data={},
             headers=User.headers,
             verify=Config.SSL.CRT
@@ -120,7 +121,7 @@ class User():
             if (code is not None and code == "token_not_valid"):
                 User.refresh()
                 User.response = requests.get(
-                    url=f"{User.server}/api/users/me/",
+                    url=f"https://{User.server}/api/users/me/",
                     data={},
                     headers=User.headers,
                     verify=Config.SSL.CRT
@@ -137,7 +138,7 @@ class User():
     def duel():
         print("Duel")
         User.response = requests.post(
-            url=f"{User.server}/api/play/duel/",
+            url=f"https://{User.server}/api/play/duel/",
             data="",
             headers=User.headers,
             verify=Config.SSL.CRT
@@ -151,7 +152,7 @@ class User():
             if (code is not None and code == "token_not_valid"):
                 User.refresh()
                 User.response = requests.post(
-                    url=f"{User.server}/api/play/duel/",
+                    url=f"https://{User.server}/api/play/duel/",
                     data="",
                     headers=User.headers,
                     verify=Config.SSL.CRT
@@ -165,7 +166,7 @@ class User():
     def cancelDuel():
         print("Cancel duel")
         User.response = requests.delete(
-            url=f"{User.server}/api/play/duel/",
+            url=f"https://{User.server}/api/play/duel/",
             data="",
             headers=User.headers,
             verify=Config.SSL.CRT
@@ -178,7 +179,7 @@ class User():
             if (code is not None and code == "token_not_valid"):
                 User.refresh()
                 User.response = requests.delete(
-                    url=f"{User.server}/api/play/duel/",
+                    url=f"https://{User.server}/api/play/duel/",
                     data="",
                     headers=User.headers,
                     verify=Config.SSL.CRT
@@ -192,7 +193,7 @@ class User():
         print("Refresh token")
         data = json.dumps({"refresh": User.refreshToken})
         User.response = requests.post(
-            url=f"{User.server}/api/auth/refresh/",
+            url=f"https://{User.server}/api/auth/refresh/",
             data=data,
             headers=User.headers,
             verify=Config.SSL.CRT
@@ -208,6 +209,7 @@ class User():
 
     @staticmethod
     def logout():
+        User.URI = None
         User.accessToken = None
         User.headers = {"Content-Type": "application/json"}
         User.host = None
