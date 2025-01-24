@@ -116,8 +116,9 @@ class Test03_Finish(UnitTest):
         user2 = self.user(['game-start'])
 
         self.assertResponse(create_game(user1, user2), 201)
-        for _ in range(3):
+        for _ in range(5):
             self.assertResponse(score(user1['id']), 200)
+        self.assertResponse(is_in_game(user1), 404)
         self.assertThread(user1, user2)
 
     def test_002_finish_disconnect(self):

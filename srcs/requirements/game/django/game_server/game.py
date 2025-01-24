@@ -1,6 +1,6 @@
 from asgiref.sync import async_to_sync
 from datetime import datetime, timezone
-from game_server.match import Match, Player, finish_match
+from game_server.match import Match, Player, Spectator, finish_match
 from game_server.pong_ball import Ball
 from game_server.pong_position import Position
 from game_server.pong_racket import Racket
@@ -71,6 +71,8 @@ class Game:
             self.racket_width = config['paddle'][self.match.game_type]['width']
             self.max_score = config['score']['max']
             self.max_bounce_angle = config['ball']['maxBounceAngle']
+            if self.match.game_type == 'clash':
+                self.max_bounce_angle = config['ball']['maxBounceAngle3v3']
             self.max_ball_speed = config['ball']['maxSpeed']
             self.speed_increment = config['ball']['speedIncrement']
             self.ledge_offset = config['paddle'][self.match.game_type]['ledgeOffset']
@@ -81,6 +83,7 @@ class Game:
         self.safe_zone_width = (self.canvas.x / 2) - (self.ledge_offset + (3 * self.racket_width))
         self.safe_zone_height = (self.canvas.y / 2) - (3 * Game.ball_size)
         self.finished = False
+        self.spectators: List[Spectator] = []
         self.ball = self.create_ball(self.canvas, self.ledge_offset, self.racket_width)
         self.rackets = self.create_rackets(self.match, self.canvas, self.racket_height, self.racket_width, self.ledge_offset, self.racket_to_racket_offset)
         self.ball.last_touch_team_a = self.match.teams[0].players[0].user_id
@@ -95,6 +98,9 @@ class Game:
     class NoSuchRacket(Exception):
         pass
 
+    def add_spectator(self, user_id: int, sid: str):
+        self.spectators.append(Spectator(user_id, sid))
+        self.send_start_game(sid)
 
 ################--------getters--------################
 
@@ -142,9 +148,14 @@ class Game:
         self.ball.speed_x = -xNewSpeed if self.ball.speed_x < 0 else xNewSpeed
         self.ball.speed_y = yNewSpeed
 
+    def applyRacketSpeed(self, racket):
+        is_on_bottom = self.ball.position.y > racket.position.y
+        if ((is_on_bottom and self.ball.speed_y < 0) or (not is_on_bottom and self.ball.speed_y > 0)) :
+            self.ball.speed_y = -self.ball.speed_y
+
     def handle_racket_bounce(self, racket):
         if (racket.block_glide):
-            self.ball.speed_y = -self.ball.speed_y
+            self.applyRacketSpeed(racket)
             if (abs(self.ball.position.y - (racket.position.y + racket.height)) <
                 abs(self.ball.position.y - racket.position.y)):
                 self.ball.position.y = racket.position.y + racket.height
@@ -202,9 +213,9 @@ class Game:
         self.handle_wall_bounce()
         for racket in self.rackets:
             self.handle_racket_collision(racket)
-        if self.sending <= 10:
+        if self.sending <= 10 or self.sending % 15 == 0:
             self.send_game_state()
-            self.sending += 1
+        self.sending += 1
         self.handle_goal()
 
 ################--------game events handling--------################
@@ -364,10 +375,13 @@ class Game:
             'team_b': self.match.teams[1].score,
         }, room=str(self.match.id))
 
-    def send_start_game(self):
+    def send_start_game(self, sid=None):
         from game_server.server import Server
         self.sending = 0
-        Server.emit('start_game', room=str(self.match.id))
+        if sid is None:
+            Server.emit('start_game', room=str(self.match.id))
+        else:
+            Server.emit('start_game', to=sid)
 
     def send_start_countdown(self):
         from game_server.server import Server
@@ -414,13 +428,21 @@ class Game:
         from game_server.server import Server
         side = 1
         for team in self.match.teams:
+            game_state = self.get_game_state(side)
             for player in team.players:
                 Server.emit(
                     'game_state',
-                    data=self.get_game_state(side),
+                    data=game_state,
                     to=player.socket_id
                 )
             side = -1
+        game_state = self.get_game_state(1)
+        for spectator in self.spectators:
+            Server.emit(
+                'game_state',
+                data=game_state,
+                to=spectator.socket_id
+            )
 
     def get_rackets(self, side: int):
         rackets = {}
@@ -436,10 +458,19 @@ class Game:
         from game_server.server import Server
         side = 1
         for team in self.match.teams:
+            rackets = self.get_rackets(side)
             for player in team.players:
                 Server.emit(
                     'rackets',
-                    data=self.get_rackets(side),
+                    data=rackets,
                     to=player.socket_id
                 )
             side = -1
+        if self.spectators != []:
+            rackets = self.get_rackets(1)
+            for spectator in self.spectators:
+                Server.emit(
+                    'rackets',
+                    data=rackets,
+                    to=spectator.socket_id
+                )

@@ -54,6 +54,9 @@ class Server:
     class ServerException(Exception):
         pass
 
+    class NotFound(Exception):
+        pass
+
     @staticmethod
     def delete_game(match_id) -> None:
         with Server._games_lock:
@@ -119,4 +122,11 @@ class Server:
                     for player in team.players:
                         if player.user_id == user_id:
                             return player
-        raise Exception(f'No player with id {user_id} is awaited on this server')
+        raise Server.NotFound(f'No player with id {user_id} is awaited on this server')
+
+    def get_game(match_code):
+        with Server._games_lock:
+            for match_id in Server._games:
+                if Server._games[match_id].match.code == match_code:
+                    return Server._games[match_id]
+        raise Server.NotFound(f'No match with code {match_code} is running on this server')

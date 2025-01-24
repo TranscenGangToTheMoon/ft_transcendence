@@ -65,11 +65,11 @@ async function createGameChatTab(gameInfo) {
 
 	lastClick = chatTabLink.id;
 
-	await chatTabListener();
-	sendMessageListener(gameInfo);
+	await chatGameTabListener();
+	sendGameMessageListener(gameInfo);
 }
 
-async function chatTabListener()
+async function chatGameTabListener()
 {
 	document.getElementById('chatGameTab').addEventListener('click', async e => {
 		e.preventDefault();
@@ -86,41 +86,41 @@ async function chatTabListener()
 	});
 }
 
-function sendMessageListener(gameInfo) {
+function sendGameMessageListener(gameInfo) {
     const chatForm = document.getElementById('sendGameMessageForm');
-    if (!chatForm.hasAttribute('data-listener-added')) {
-        chatForm.setAttribute('data-listener-added', 'true');
-        chatForm.addEventListener('submit', async function (e) {
-            e.preventDefault();
-            const message = this.querySelector('input').value;
-			if (message === '') return;
-			//send message to server
-			// if (gameInfo.type === 'lobby'){
-			// 	await apiRequest('POST', )
-			// 	'api/play/lobby/<str:code>/message/'
-			// }
-			// else if (gameInfo.type === 'tournament'){
-			// 	'api/play/tournament/<str:code>/message/'
-            chatForm.reset();
-        });
-    }
+	chatForm.addEventListener('submit', async function (e) {
+		e.preventDefault();
+		const message = this.querySelector('input').value;
+		if (message === '') return;
+		//send message to server
+		// if (gameInfo.type === 'lobby'){
+		// 	await apiRequest('POST', )
+		// 	'api/play/lobby/<str:code>/message/'
+		// }
+		// else if (gameInfo.type === 'tournament'){
+		// 	'api/play/tournament/<str:code>/message/'
+		chatForm.reset();
+	});
 }
 
-async function closeChatTab(gameInfo)
+async function closeGameChatTab()
 {
 	var isTabActive = false;
 	let chatActiveTab = document.querySelector('#chatTabs .nav-link.active');
 	let buttonCollapseChat = document.getElementById('chatTabsCollapse');
 	if (!chatActiveTab) return;
-	if (chatActiveTab.id === 'chatGameTab') isTabActive = true;
-	document.getElementById('chatGameTab').remove();
-	document.getElementById('chatGameBox').remove();
+	if (chatActiveTab.id === 'chatGameTabLink') isTabActive = true;
+	let chatGameTab = document.getElementById('chatGameTab');
+	let chatGameBox = document.getElementById('chatGameBox');
+	if (chatGameTab) chatGameTab.remove();
+	if (chatGameBox) chatGameBox.remove();
 	let lastTab = document.getElementById('chatTabs').lastElementChild;
 	if (!lastTab) {
-		console.log('Chat: Closing chat view', lastTab);
+		lastClick = undefined;
 		document.getElementById('chatView').remove();
 	}
 	else if (isTabActive) {
+		lastClick = undefined;
 		if (buttonCollapseChat.getAttribute('aria-expanded') === 'true') {
 			lastTab.querySelector('a').click();
 		}
@@ -131,10 +131,15 @@ async function closeChatTab(gameInfo)
 }
 
 async function openGameChatTab(gameInfo) {
+	console.log('Chat: OpenGameChatTab ahhhhhhhhhhhhhhhhhh');
 	chatTabs = document.getElementById('chatTabs');
 	if (!chatTabs) {
 		await setChatView();
 	}
-	if (document.getElementById('chatGameTab')) return;
+	if (document.getElementById('chatGameTab')) 
+	{
+		document.getElementById('messagesGame').innerHTML = '';
+		return;
+	}
 	await createGameChatTab(gameInfo);
 }

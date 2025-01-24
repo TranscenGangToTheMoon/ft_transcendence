@@ -610,6 +610,7 @@ async function lobbyInit() {
             document.getElementById('gameId').innerText = lobby.code;
             await fillPlayerList();
         }
+        openGameChatTab({type: 'lobby'});
     }
     catch(error){
         try {

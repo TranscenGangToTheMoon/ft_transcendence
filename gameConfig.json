@@ -47,9 +47,10 @@
         "speed":350,
         "speedIncrement":60,
         "maxSpeed":1500,
-        "maxBounceAngle": 1.2566370614359172
+        "maxBounceAngle": 1.2566370614359172,
+        "maxBounceAngle3v3": 1.0471975511965976
     },
     "score": {
-        "max":3
+        "max":5
     }
 }

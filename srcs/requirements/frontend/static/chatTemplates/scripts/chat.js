@@ -408,7 +408,6 @@ async function closeChatTab(chatInfo)
 	await disconnect();
 	if (!lastTab) {
 		lastClick = undefined;
-		console.log('Chat: Closing chat view', lastTab);
 		document.getElementById('chatView').remove();
 	}
 	else if (isTabActive) {
@@ -529,19 +528,16 @@ async function scrollMessagesListener(chatInfo) {
 
 function sendMessageListener(chatInfo) {
     const chatForm = document.getElementById('sendMessageForm'+chatInfo.target);
-    if (!chatForm.hasAttribute('data-listener-added')) {
-        chatForm.setAttribute('data-listener-added', 'true');
-        chatForm.addEventListener('submit', async function (e) {
-            e.preventDefault();
-			if (socket && socket.disconnected === true) {
-				await connect(getAccessToken(), chatInfo);
-			}
-            const message = this.querySelector('input').value;
-			if (message === '') return;
-            socket.emit('message', {'content': message, 'token' : 'Bearer ' + getAccessToken()});
-            chatForm.reset();
-        });
-    }
+	chatForm.addEventListener('submit', async function (e) {
+		e.preventDefault();
+		if (socket && socket.disconnected === true) {
+			await connect(getAccessToken(), chatInfo);
+		}
+		const message = this.querySelector('input').value;
+		if (message === '') return;
+		socket.emit('message', {'content': message, 'token' : 'Bearer ' + getAccessToken()});
+		chatForm.reset();
+	});
 }
 
 async function setChatView()
@@ -661,7 +657,7 @@ if (typeof nextMessagesRequest === 'undefined')
 if (typeof nextChatsRequest === 'undefined')
 	var nextChatsRequest = undefined;
 
-await loadScript(script.getAttribute('script'), script.getAttribute('type'));
+loadScript('/chatTemplates/scripts/chatGame.js');
 
 document.getElementById('searchChatForm').addEventListener('keyup', (e) => {
 	e.preventDefault();
