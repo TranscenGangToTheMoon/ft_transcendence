@@ -6,9 +6,6 @@ import ssl
 import time
 from pynput import keyboard
 
-# Rich imports
-from rich.console   import Console
-
 # Textual imports
 from textual            import on, work
 from textual.app        import ComposeResult
@@ -63,9 +60,7 @@ class GamePage(Screen):
         )
 
     async def on_mount(self) -> None:
-        console = Console()
-        Config.Console.width = console.width
-        Config.Console.height = console.height
+        Config.Console.reload()
 
         # Score handling
         self.scoreLeft.styles.offset = Offset(Config.Console.width // 4, 5)
@@ -87,9 +82,8 @@ class GamePage(Screen):
         self.gameLoop()
 
     def on_resize(self) -> None:
-        console = Console()
-        Config.Console.width = console.width
-        Config.Console.height = console.height
+        Config.Console.reload()
+
         self.playground.styles.offset = Offset((Config.Console.width - Config.Playground.width) // 2, (Config.Console.height - Config.Playground.height) // 2)
         self.scoreLeft.styles.offset = Offset(Config.Console.width // 4, 5)
         self.scoreRight.styles.offset = Offset(Config.Console.width // 4 * 3 - 4, 5)
