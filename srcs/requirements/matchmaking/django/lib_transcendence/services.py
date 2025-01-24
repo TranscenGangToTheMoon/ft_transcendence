@@ -15,7 +15,7 @@ def request_users(endpoint: Literal['users/me/', 'validate/chat/', 'blocked/<>/'
     return request_service('users', endpoint, method, **kwargs)
 
 
-def request_matchmaking(endpoint: str, method: Literal['POST', 'PUT', 'DELETE'], data=None):
+def request_matchmaking(endpoint: str, method: Literal['POST', 'PUT', 'DELETE'] | str, data=None):
     return request_service('matchmaking', endpoint, method, data)
 
 

@@ -7,7 +7,7 @@ from rest_framework.exceptions import AuthenticationFailed, PermissionDenied, Me
 import requests
 
 
-def request_service(service: Literal['auth', 'chat', 'game', 'matchmaking', 'users'], endpoint: str, method: Literal['GET', 'POST', 'PUT', 'PATCH', 'DELETE'], data=None, token=None):
+def request_service(service: Literal['auth', 'chat', 'game', 'matchmaking', 'users'], endpoint: str, method: Literal['GET', 'POST', 'PUT', 'PATCH', 'DELETE'] | str, data=None, token=None):
     if data is not None:
         data = json.dumps(data, default=datetime_serializer)
 
@@ -25,12 +25,11 @@ def request_service(service: Literal['auth', 'chat', 'game', 'matchmaking', 'use
         )
 
         if response.status_code == 204:
-            print()
+            print('', flush=True)
             return
 
         json_data = response.json()
-        print(f'JSON[{response.status_code}] =', json_data, flush=True)
-        print()
+        print(f'JSON[{response.status_code}] =', json_data, end='\n\n', flush=True)
         if response.status_code == 400:
             raise ParseError(json_data)
         if response.status_code == 401:
