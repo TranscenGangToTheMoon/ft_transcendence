@@ -571,6 +571,11 @@ function initLobbySSEListeners(){
         sse.addEventListener('lobby-destroy', lobbyDestroyed);
     }
 
+    if(!SSEListeners.has('lobby-message')){
+        SSEListeners.set('lobby-message', displayGameChatMessage);
+        sse.addEventListener('lobby-message', displayGameChatMessage);
+    }
+
     if (SSEListeners.has('game-start')){
         sse.removeEventListener('game-start', SSEListeners.get('game-start'));
         SSEListeners.delete('game-start');
@@ -594,7 +599,7 @@ async function lobbyInit() {
         if (lobby.code && lobby.code != code && code !== undefined)
             throw {code:404};
         if (lobby.code && code === undefined)
-            await navigateTo(`/lobby/${lobby.code}`, false);
+            await navigateTo(`/lobby/${lobby.code}`, false, true);
         if (lobby.code) {
             code = lobby.code;
             matchType = lobby.match_type;
@@ -609,6 +614,7 @@ async function lobbyInit() {
             document.getElementById('gameType').innerText = gameMode;
             document.getElementById('gameId').innerText = lobby.code;
             await fillPlayerList();
+            openGameChatTab({type: 'lobby', 'code': lobby.code});
         }
     }
     catch(error){

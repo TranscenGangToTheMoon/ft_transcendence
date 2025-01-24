@@ -212,75 +212,6 @@ function tournamentStartCancel(){
 		countdownDiv.remove();
 }
 
-
-function createBracket(data) {
-	const bracketDiv = document.getElementById('bracket');
-	bracketDiv.innerHTML = '';
-	const rounds = ['round of 16', 'quarter-final', 'semi-final', 'final'];
-	let firstPassed = false;
-
-	rounds.forEach(roundName => {
-		const matches = data.matches[roundName] || [];
-		if (matches.length)
-			firstPassed = true;
-
-		if (firstPassed){
-			var roundDiv = document.createElement('div');
-			roundDiv.className = 'round';
-	
-			var titleDiv = document.createElement('h5');
-			titleDiv.className = 'text-center mb-4';
-			titleDiv.textContent = roundName.replace('-', ' ').toUpperCase();
-			roundDiv.appendChild(titleDiv);
-			var roundInsideDiv = document.createElement('div');
-			roundInsideDiv.className = 'round-inside';
-			roundDiv.appendChild(roundInsideDiv);
-		}
-
-		matches.forEach(match => {
-			const matchDiv = document.createElement('div');
-			matchDiv.className = 'match';
-			const card = document.createElement('div');
-			card.className = 'card';
-			
-			let score = match.winner === match.user_1?.id ? match.score_winner : match.score_looser;
-			if (score === null)
-				score = '';
-			const player1Div = document.createElement('div');
-			player1Div.className = `card-body border-bottom ${match.winner !== undefined
-									&& match.winner === match.user_1?.id ? 'winner' : ''}`;
-			player1Div.innerHTML = `
-				<div class="d-flex justify-content-between">
-					${match.user_1? '<img class="tournament-participant-pp" src="/assets/imageNotFound.png"></img>' : ''}
-					<span>${match.user_1?.username ?? 'to be defined'}</span>
-					<span class="fw-bold">${score}</span>
-				</div>
-			`;
-
-			score = match.winner === match.user_2?.id ? match.score_winner : match.score_looser;
-			if (score === null)
-				score = '';
-			const player2Div = document.createElement('div');
-			player2Div.className = `card-body border-bottom ${match.winner !== undefined
-									&& match.winner === match.user_2?.id ? 'winner' : ''}`;
-			player2Div.innerHTML = `
-				<div class="d-flex justify-content-between">
-				${match.user_2? '<img class="tournament-participant-pp" src="/assets/imageNotFound.png"></img>' : ''}
-					<span>${match.user_2?.username ?? 'to be defined'}</span>
-					<span class="fw-bold">${score}</span>
-				</div>
-			`;
-
-			card.appendChild(player1Div);
-			card.appendChild(player2Div);
-			matchDiv.appendChild(card);
-			roundInsideDiv.appendChild(matchDiv);
-		});
-		if (firstPassed)
-			bracketDiv.appendChild(roundDiv);
-	});
-}
-
 function tournamentStart(event){
 	event = JSON.parse(event.data);
 	console.log(event);
@@ -330,6 +261,11 @@ function addTournamentSSEListeners(){
 	if (!SSEListeners.has('tournament-leave')){
         SSEListeners.set('tournament-leave', tournamentLeaved);
         sse.addEventListener('tournament-leave', tournamentLeaved);
+    }
+
+	if(!SSEListeners.has('tournament-message')){
+        SSEListeners.set('tournament-message', displayGameChatMessage);
+        sse.addEventListener('tournament-message', displayGameChatMessage);
     }
 
 	if (!SSEListeners.has('tournament-banned')){
@@ -399,6 +335,7 @@ function loadTournament(tournament){
 		addParticipant(participant);
 	}
 	addTournamentSSEListeners();
+	openGameChatTab({'type': 'tournament', 'code': tournament.code});
 	if (tournament.matches != null){
 		if ((!tournament.matches['quarter-final']|| !tournament.matches['quarter-final'].length)
 			&& tournament.matches['round of 16']
@@ -516,6 +453,7 @@ async function gameStart(event) {
 }
 
 async function initTournament(){
+	await loadScript('/tournament/scripts/createBracket.js');
 	document.getElementById('chatsListView').style.display = 'block';
 	document.getElementById('leaveTournament').style.display = 'none';
 	fromTournament = false;
