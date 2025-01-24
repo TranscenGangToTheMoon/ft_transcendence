@@ -5,6 +5,7 @@ from rest_framework.exceptions import NotFound
 
 from baning.models import Banned
 from lobby.models import LobbyParticipants
+from matchmaking.utils.model import ParticipantsPlace
 from tournament.models import TournamentParticipants
 
 
@@ -16,7 +17,7 @@ def is_banned(code: str, user_id: int) -> bool:
         return False
 
 
-def banned(banned_participants: LobbyParticipants | TournamentParticipants, create_ban: bool = True):
+def banned(banned_participants: ParticipantsPlace, create_ban: bool = True):
     if create_ban:
         Banned.objects.create(code=banned_participants.place.code, banned_user_id=banned_participants.user_id)
     if isinstance(banned_participants, LobbyParticipants):

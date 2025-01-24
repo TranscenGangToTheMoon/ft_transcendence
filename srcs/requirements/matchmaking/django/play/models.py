@@ -3,11 +3,12 @@ from lib_transcendence.game import GameMode
 
 from blocking.utils import delete_player_instance
 from matchmaking.create_match import create_match
+from matchmaking.utils.model import ParticipantsPlace
 
 RANGE = 50
 
 
-class Players(models.Model):
+class Players(ParticipantsPlace):
     user_id = models.IntegerField(unique=True)
     trophies = models.IntegerField()
     game_mode = models.CharField(max_length=10)

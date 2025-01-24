@@ -13,6 +13,7 @@ from rest_framework.exceptions import APIException
 from baning.models import delete_banned
 from blocking.utils import delete_player_instance
 from matchmaking.create_match import create_tournament_match
+from matchmaking.utils.model import ParticipantsPlace
 from matchmaking.utils.sse import send_sse_event, start_tournament_sse
 from tournament.sse import send_sse_event_finish_match
 
@@ -152,7 +153,7 @@ class TournamentStage(models.Model):
     stage = models.IntegerField()
 
 
-class TournamentParticipants(models.Model):
+class TournamentParticipants(ParticipantsPlace):
     user_id = models.IntegerField()
     tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE, related_name='participants')
     stage = models.ForeignKey(TournamentStage, on_delete=models.CASCADE, default=None, null=True, related_name='participants')

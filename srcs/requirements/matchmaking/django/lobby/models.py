@@ -6,6 +6,7 @@ from lib_transcendence.sse_events import EventCode, create_sse_event
 from baning.models import delete_banned
 from blocking.utils import delete_player_instance
 from matchmaking.create_match import create_match
+from matchmaking.utils.model import ParticipantsPlace
 from matchmaking.utils.sse import send_sse_event
 
 
@@ -113,7 +114,7 @@ class Lobby(models.Model):
         super().delete(using=using, keep_parents=keep_parents)
 
 
-class LobbyParticipants(models.Model):
+class LobbyParticipants(ParticipantsPlace):
     lobby = models.ForeignKey(Lobby, on_delete=models.CASCADE, related_name='participants')
     is_guest = models.BooleanField(default=False)
     user_id = models.IntegerField(unique=True)
