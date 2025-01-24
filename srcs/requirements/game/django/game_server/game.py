@@ -1,19 +1,14 @@
-from asgiref.sync import async_to_sync
-from datetime import datetime, timezone
-from game_server.match import Match, Player, Spectator, finish_match
-from game_server.pong_ball import Ball
-from game_server.pong_position import Position
-from game_server.pong_racket import Racket
-from lib_transcendence.exceptions import GameMode
-from lib_transcendence.game import FinishReason
-from typing import List
-import asyncio
 import json
 import math
 import os
 import random
-import requests
 import time
+from game_server.match import Match, Player, Spectator, finish_match
+from game_server.pong_ball import Ball
+from game_server.pong_position import Position
+from game_server.pong_racket import Racket
+from lib_transcendence.game import FinishReason
+from typing import List
 
 
 def get_random_direction():
@@ -30,7 +25,18 @@ class Game:
     @staticmethod
     def create_ball(canvas: Position, ledge_offset, racket_width):
         direction_x, direction_y = get_random_direction()
-        return Ball(Position(int(canvas.x / 2 - (Game.ball_size / 2)), int(canvas.y / 2 - (Game.ball_size / 2))), direction_x, direction_y, Game.default_ball_speed, Game.ball_size, ledge_offset, racket_width, canvas)
+        return Ball(
+            Position(
+                int(canvas.x / 2 - (Game.ball_size / 2)),
+                int(canvas.y / 2 - (Game.ball_size / 2))
+            ),
+            direction_x, direction_y,
+            Game.default_ball_speed,
+            Game.ball_size,
+            ledge_offset,
+            racket_width,
+            canvas
+        )
 
     @staticmethod
     def create_rackets(match,
@@ -41,32 +47,50 @@ class Game:
                        racket_to_racket_offset) -> List[Racket]:
         rackets: List[Racket] = []
         racket_offset = ledge_offset
-        with open('game_server/gameConfig.json', 'r') as config_file:
+        with open('game_server/gameConfig.json', 'r', encoding='utf-8') as config_file:
             config = json.load(config_file)
             racket_max_speed = config['paddle'][match.game_type]['speed']
         # create rackets for right players
         for player in match.teams[0].players:
-            racket = Racket(player.user_id, Position(canvas.x - racket_width - racket_offset, int(canvas.y / 2 - racket_height / 2)), racket_height, racket_width, racket_max_speed)
+            racket = Racket(
+                player.user_id,
+                Position(
+                    canvas.x - racket_width - racket_offset,
+                    int(canvas.y / 2 - racket_height / 2)
+                ),
+                racket_height,
+                racket_width,
+                racket_max_speed
+            )
             player.racket = racket
             rackets.append(racket)
             racket_offset += racket_to_racket_offset
         # create rackets for left players
         racket_offset = ledge_offset
         for player in match.teams[1].players:
-            racket = Racket(player.user_id, Position(racket_offset, int(canvas.y / 2 - racket_height / 2)), racket_height, racket_width, racket_max_speed)
+            racket = Racket(player.user_id,
+                Position(
+                    racket_offset,
+                    int(canvas.y / 2 - racket_height / 2)
+                ),
+                racket_height,
+                racket_width,
+                racket_max_speed
+            )
             player.racket = racket
             rackets.append(racket)
             racket_offset += racket_to_racket_offset
         return rackets
 
     def __init__(self,
-                sio,
                 match) -> None:
         self.match: Match = match
-        with open('game_server/gameConfig.json', 'r') as config_file:
+        with open('game_server/gameConfig.json', 'r', encoding='utf-8') as config_file:
             config = json.load(config_file)
-            self.canvas = Position(config['canvas'][self.match.game_type]['width'],
-                                    config['canvas'][self.match.game_type]['height'])
+            self.canvas = Position(
+                config['canvas'][self.match.game_type]['width'],
+                config['canvas'][self.match.game_type]['height']
+            )
             self.racket_height = config['paddle'][self.match.game_type]['height']
             self.racket_width = config['paddle'][self.match.game_type]['width']
             self.max_score = config['score']['max']
@@ -84,8 +108,21 @@ class Game:
         self.safe_zone_height = (self.canvas.y / 2) - (3 * Game.ball_size)
         self.finished = False
         self.spectators: List[Spectator] = []
-        self.ball = self.create_ball(self.canvas, self.ledge_offset, self.racket_width)
-        self.rackets = self.create_rackets(self.match, self.canvas, self.racket_height, self.racket_width, self.ledge_offset, self.racket_to_racket_offset)
+        self.sending = 0
+        self.last_update = 0
+        self.ball = self.create_ball(
+            self.canvas,
+            self.ledge_offset,
+            self.racket_width
+        )
+        self.rackets = self.create_rackets(
+            self.match,
+            self.canvas,
+            self.racket_height,
+            self.racket_width,
+            self.ledge_offset,
+            self.racket_to_racket_offset
+        )
         self.ball.last_touch_team_a = self.match.teams[0].players[0].user_id
         self.ball.last_touch_team_b = self.match.teams[1].players[0].user_id
 
@@ -139,37 +176,41 @@ class Game:
         elif self.ball.position.x > self.canvas.x:
             self.score(self.match.teams[1])
 
-    def calculateImpactPosition(self, ballY, paddleY, paddleHeight):
-        relativeY = (paddleY + paddleHeight / 2) - ballY
-        return relativeY / (paddleHeight / 2)
+    def calculate_impact_position(self, ball_y, paddle_y, paddle_height):
+        relative_y = (paddle_y + paddle_height / 2) - ball_y
+        return relative_y / (paddle_height / 2)
 
-    def calculateNewBallDirection(self, paddleY, height):
-        impactPosition = self.calculateImpactPosition(self.ball.position.y + self.ball.size / 2, paddleY, height)
-        bounceAngle = impactPosition * self.max_bounce_angle
+    def calculate_newBall_direction(self, paddle_y, height):
+        impact_position = self.calculate_impact_position(
+            self.ball.position.y + self.ball.size / 2,
+            paddle_y,
+            height
+        )
+        bounce_angle = impact_position * self.max_bounce_angle
 
         speed = self.ball.speed
-        xNewSpeed = speed * math.cos(bounceAngle)
-        yNewSpeed = speed * -math.sin(bounceAngle)
-        self.ball.speed_x = -xNewSpeed if self.ball.speed_x < 0 else xNewSpeed
-        self.ball.speed_y = yNewSpeed
+        x_new_speed = speed * math.cos(bounce_angle)
+        y_new_speed = speed * -math.sin(bounce_angle)
+        self.ball.speed_x = -x_new_speed if self.ball.speed_x < 0 else x_new_speed
+        self.ball.speed_y = y_new_speed
 
-    def applyRacketSpeed(self, racket):
+    def apply_racket_speed(self, racket):
         is_on_bottom = self.ball.position.y > racket.position.y
-        if ((is_on_bottom and self.ball.speed_y < 0) or (not is_on_bottom and self.ball.speed_y > 0)) :
+        if (is_on_bottom and self.ball.speed_y < 0) or (not is_on_bottom and self.ball.speed_y > 0):
             self.ball.speed_y = -self.ball.speed_y
 
     def handle_racket_bounce(self, racket):
-        if (racket.block_glide):
-            self.applyRacketSpeed(racket)
-            if (abs(self.ball.position.y - (racket.position.y + racket.height)) <
-                abs(self.ball.position.y - racket.position.y)):
+        if racket.block_glide:
+            self.apply_racket_speed(racket)
+            if abs(self.ball.position.y - (racket.position.y + racket.height)) < \
+                abs(self.ball.position.y - racket.position.y):
                 self.ball.position.y = racket.position.y + racket.height
             else:
                 self.ball.position.y = racket.position.y - self.ball.size
         else:
             self.ball.speed_x = -self.ball.speed_x
             self.ball.increment_speed(self.max_ball_speed, self.speed_increment)
-            self.calculateNewBallDirection(racket.position.y, racket.height)
+            self.calculate_newBall_direction(racket.position.y, racket.height)
         self.sending = -1
 
     @staticmethod
@@ -180,33 +221,39 @@ class Game:
         return False
 
     def handle_racket_collision(self, racket):
-        ball_is_right_from_racket = self.ball.position.x < racket.position.x + racket.width and self.ball.position.x > racket.position.x
-        ball_is_left_from_racket = self.ball.position.x + self.ball.size > racket.position.x and self.ball.position.x + self.ball.size < racket.position.x + racket.width
-        is_ball_y_in_paddle_range = self.ball.position.y + self.ball.size > racket.position.y and self.ball.position.y < racket.position.y + racket.height
+        ball_is_right_from_racket = self.ball.position.x < racket.position.x + racket.width \
+        and self.ball.position.x > racket.position.x
+        ball_is_left_from_racket = self.ball.position.x + self.ball.size > racket.position.x \
+        and self.ball.position.x + self.ball.size < racket.position.x + racket.width
+        is_ball_y_in_paddle_range = self.ball.position.y + self.ball.size > racket.position.y \
+        and self.ball.position.y < racket.position.y + racket.height
 
-        if (ball_is_left_from_racket == True or ball_is_right_from_racket == True) and is_ball_y_in_paddle_range == True:
+        if (ball_is_left_from_racket is True \
+            or ball_is_right_from_racket is True) \
+            and is_ball_y_in_paddle_range is True:
             self.handle_racket_bounce(racket)
             self.ball.last_racket_touched = racket.player_id
             if self.is_in_team(racket.player_id, self.match.teams[0]):
                 self.ball.last_touch_team_a = racket.player_id
             else:
                 self.ball.last_touch_team_b = racket.player_id
-            if (not racket.block_glide):
+            if not racket.block_glide:
                 if (self.ball.position.x + self.ball.size > racket.position.x and
                     self.ball.position.x + self.ball.size < racket.position.x + racket.width
                 ):
-                    self.ball.position.x = racket.position.x - self.ball.size;
+                    self.ball.position.x = racket.position.x - self.ball.size
                 else:
-                    self.ball.position.x = racket.position.x + racket.width;
+                    self.ball.position.x = racket.position.x + racket.width
         else:
-            is_ball_x_in_racket_range = self.ball.position.x < racket.position.x + racket.width and self.ball.position.x + self.ball.size > racket.position.x
-            if (is_ball_x_in_racket_range):
+            is_ball_x_in_racket_range = self.ball.position.x < racket.position.x + racket.width \
+            and self.ball.position.x + self.ball.size > racket.position.x
+            if is_ball_x_in_racket_range:
                 racket.block_glide = True
             else:
                 racket.block_glide = False
 
     def update(self):
-        if (self.last_update == 0):
+        if self.last_update == 0:
             self.last_update = time.perf_counter()
         time_delta = time.perf_counter() - self.last_update
         self.last_update = time.perf_counter()
@@ -267,7 +314,7 @@ class Game:
             print(e, flush=True)
             self.finish(FinishReason.PLAYER_NOT_CONNECTED, disconnected_user_id=e.args[0])
             return
-        if (self.match.game_type == 'clash'):
+        if self.match.game_type == 'clash':
             self.send_rackets()
         self.send_canvas()
         self.send_game_state()
@@ -323,10 +370,9 @@ class Game:
         else:
             # handle case where no one touched the ball
             try:
-                if (team.name == 'a'):
+                if team.name == 'a':
                     return self.get_player(self.ball.last_touch_team_a), False
-                else:
-                    return self.get_player(self.ball.last_touch_team_b), False
+                return self.get_player(self.ball.last_touch_team_b), False
             except self.NoSuchPlayer as e:
                 print(e, flush=True)
                 self.finish(FinishReason.PLAYER_DISCONNECT, team.name)
@@ -500,7 +546,7 @@ class Game:
                         to=player.socket_id
                     )
                 side = -1
-            if self.spectators != []:
+            if self.spectators:
                 rackets = self.get_rackets(1)
                 for spectator in self.spectators:
                     Server.emit(
