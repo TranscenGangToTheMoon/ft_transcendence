@@ -4,7 +4,7 @@ function parsChatInfo(chat) {
 		'target': chat.chat_with.username,
 		'targetId': chat.chat_with.id,
 		'lastMessage': null,
-		'isLastMessageRead': false,
+		'lastMessagesNotRead': 0,
 		'chatMessageNext': null,
 	};
 	if (chat.last_message) {
@@ -12,7 +12,7 @@ function parsChatInfo(chat) {
 			chatInfo.lastMessage = chat.last_message.content.slice(0, 37) + '...';
 		}
 		else chatInfo.lastMessage = chat.last_message.content;
-		chatInfo.isLastMessageRead = chat.unread_messages === 0;
+		chatInfo.lastMessagesNotRead = chat.unread_messages;
 	}
 	return chatInfo;
 }
@@ -28,8 +28,9 @@ async function getChatInstance(chatId) {
 	}
 	catch (error) {
 		console.log('Error chat:', error);
+		if (error.code === 404 && error.detail === undefined) error.detail = 'No chat found';
 		if (error.detail === undefined) error.detail = 'Error while loading chat';
-		displayChatError(error.detail, 'container');
+		displayChatError(error, 'container');
 		return undefined;
 	}
 }
@@ -46,7 +47,7 @@ function displayChatError(error, idDiv) {
 		var divError = document.createElement('div');
 		divError.className = 'alert alert-danger';
 		divError.id = 'chatAlert';
-		divError.innerHTML = error;
+		divError.innerHTML = error.code + ": " + error.detail;
 		divToDisplayError.appendChild(divError);
 	}
 	else {
@@ -99,7 +100,7 @@ function setupSocketListeners(chatInfo)
 			console.log('Error chat:', data);
 			await closeChatTab(chatInfo);
 			if (data.message === undefined) data.message = 'Error while connecting to the chat server';
-			displayChatError(data.message, 'container');
+			displayChatError({'code':data.error, 'detail': data.message}, 'container');
 		}
 	});
 	
@@ -142,7 +143,7 @@ function setupSocketListeners(chatInfo)
 			console.log('Error chat:', data);
 			if (data.message === undefined) data.message = 'Error with chat server';
 			await closeChatTab(chatInfo);
-			displayChatError(data.message, 'container');
+			displayChatError({'code':data.error, 'detail': data.message}, 'container');
 		}
 	});
 
@@ -183,8 +184,9 @@ async function getMoreOldsMessages(chatInfo){
 	}
 	catch (error) {
 		console.log('Error chat:', error);
+		if (error.code === 404 && error.detail === undefined) error.detail = 'No chat found';
 		if (error.detail === undefined) error.detail = 'Error while loading more old messages';
-		displayChatError(error.detail, 'messages' + chatInfo.target);
+		displayChatError(error, 'messages' + chatInfo.target);
 	}
 }
 
@@ -235,7 +237,7 @@ async function createChatUserCard(chatInfo) {
 		chatUserCard.querySelector('.chatUserCardLastMessage').innerText = (chatInfo.lastMessage);
 	}
 	var chatUserCardLastMessage = chatUserCard.querySelector('.chatUserCardLastMessage');
-	if (chatInfo.isLastMessageRead === false)
+	if (chatInfo.lastMessagesNotRead)
 		chatUserCardLastMessage.classList.add('chatMessageNotRead');
 	chatUserCard.querySelector('.chatUserCardButtonDeleteChat').addEventListener('click',async e => {
 		e.preventDefault();
@@ -244,13 +246,19 @@ async function createChatUserCard(chatInfo) {
 			const APIAnswer = await apiRequest(getAccessToken(), `${baseAPIUrl}/chat/${chatInfo.chatId}/`, 'DELETE');
 			console.log('Chat: Chat deleted:', APIAnswer);
 			if (APIAnswer && APIAnswer.detail) throw {'code': 400, 'detail': APIAnswer.detail};
+			userInformations.notifications['chats'] -= chatInfo.lastMessagesNotRead;
+			if (userInformations.notifications['chats'] <= 0)
+				removeBadges('chats');
+			else
+				displayBadges();
 			chatUserCard.remove();
 			await closeChatTab(chatInfo);
 			displayChatsList();
 		} catch(error) {
 			console.log('Error chat:', error);
+			if (error.code === 404 && error.detail === undefined) error.detail = 'No chat found';
 			if (error.detail === undefined) error.detail = 'Error when attempting to delete chat';
-			displayChatError(error.detail, 'chatsList');
+			displayChatError(error, 'chatsListError');
 		}
 	});
 	chatUserCard.addEventListener('click', async e => {
@@ -280,7 +288,8 @@ async function getMoreChats() {
 	catch (error) {
 		console.log('Error chat:', error);
 		if (error.detail === undefined) error.detail = 'Error while loading more chats';
-		displayChatError(error.detail, 'chatsList');
+		if (error.code === 404 && error.detail === undefined) error.detail = 'No chat found';
+		displayChatError(error, 'chatsListError');
 	}
 }
 
@@ -309,7 +318,8 @@ async function displayChatsList(filter='') {
 		console.log('Error chat:', error);
 		if (error.code === 503 || error.code === 502) return;
 		if (error.detail === undefined) error.detail = 'Error while loading chats list';
-		displayChatError(error.detail, 'chatsList');
+		if (error.code === 404 && error.detail === undefined) error.detail = 'No chat found';
+		displayChatError(error, 'chatsListError');
 	}
 	chatListModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('chatListModal'));
 	if (chatListModal && !chatListModal._isShown)
@@ -326,8 +336,9 @@ async function searchChatButton(username) {
 	}
 	catch(error) {
 		console.log('Error chat:', error);
+		if (error.code === 404 && error.detail === undefined) error.detail = 'No chat found';
 		if (error.detail === undefined) error.detail = 'Error while searching chat';
-		displayChatError(error.detail, 'searchChatForm');
+		displayChatError(error, 'chatListError');
 		return;
 	}
 
@@ -346,8 +357,9 @@ async function searchChatButton(username) {
 		}
 		catch (error) {
 			console.log('Error chat:', error);
+			if (error.code === 404 && error.detail === undefined) error.detail = 'No User found';
 			if (error.detail === undefined) error.detail = 'Error while creating chat';
-			displayChatError(error.detail, 'searchChatForm');
+			displayChatError(error, 'chatListError');
 			return;
 		}
 		console.log('Chat: New chat created:', chatRequest);
@@ -379,7 +391,7 @@ function removeFirstInactiveChatTab() {
     let tabLinks = chatTabs.querySelectorAll('.nav-link');
 
     for (let tabLink of tabLinks) {
-        if (!tabLink.classList.contains('active')) {
+        if (!tabLink.classList.contains('active') && tabLinks.id !== 'chatGameTabLink') {
 			console.log('Chat: Removing first inactive chat tab', tabLink.id.slice(0, -4));
 			chatTabs.querySelector('#' + tabLink.id.slice(0, -4) + "Button").click();
 			return ;
@@ -403,15 +415,16 @@ async function closeChatTab(chatInfo)
 	await disconnect();
 	if (!lastTab) {
 		lastClick = undefined;
-		console.log('Chat: Closing chat view', lastTab);
 		document.getElementById('chatView').remove();
 	}
 	else if (isTabActive) {
 		lastClick = undefined;
-		if (buttonCollapseChat.getAttribute('aria-expanded') === 'true')
+		if (buttonCollapseChat.getAttribute('aria-expanded') === 'true') {
 			lastTab.querySelector('a').click();
-		else 
+		}
+		else {
 			lastClick = lastTab.querySelector('a').id;
+		}
 	}
 }
 
@@ -449,7 +462,12 @@ async function createChatTab(chatInfo) {
     let chatTabButton = createButtonClose(idChatTab + "Button");
     chatTabLink.appendChild(chatTabButton);
     chatTab.appendChild(chatTabLink);
-    chatTabs.appendChild(chatTab);
+	gameChatTab = chatTabs.querySelector('#chatGameTab');
+	if (gameChatTab) {
+		chatTabs.insertBefore(chatTab, gameChatTab);
+	} else {
+		chatTabs.appendChild(chatTab);
+	}
 
     let chatBody = document.getElementById('chatBody');
     let chatBox = document.createElement('div');
@@ -517,19 +535,16 @@ async function scrollMessagesListener(chatInfo) {
 
 function sendMessageListener(chatInfo) {
     const chatForm = document.getElementById('sendMessageForm'+chatInfo.target);
-    if (!chatForm.hasAttribute('data-listener-added')) {
-        chatForm.setAttribute('data-listener-added', 'true');
-        chatForm.addEventListener('submit', async function (e) {
-            e.preventDefault();
-			if (socket && socket.disconnected === true) {
-				await connect(getAccessToken(), chatInfo);
-			}
-            const message = this.querySelector('input').value;
-			if (message === '') return;
-            socket.emit('message', {'content': message, 'token' : 'Bearer ' + getAccessToken()});
-            chatForm.reset();
-        });
-    }
+	chatForm.addEventListener('submit', async function (e) {
+		e.preventDefault();
+		if (socket && socket.disconnected === true) {
+			await connect(getAccessToken(), chatInfo);
+		}
+		const message = this.querySelector('input').value;
+		if (message === '') return;
+		socket.emit('message', {'content': message, 'token' : 'Bearer ' + getAccessToken()});
+		chatForm.reset();
+	});
 }
 
 async function setChatView()
@@ -596,8 +611,9 @@ async function openChatTab(chatId)
 		catch (error) {
 			console.log('Error chat:', error);
 			await closeChatTab(chatInfo);
+			if (error.code === 404 && error.detail === undefined) error.detail = 'No chat found';
 			if (error.detail === undefined) error.detail = 'Error while loading old messages';
-			displayChatError(error.detail, 'container');
+			displayChatError(error, 'container');
 			return;
 		}
 	}
@@ -648,6 +664,8 @@ if (typeof nextMessagesRequest === 'undefined')
 	var nextMessagesRequest = undefined;
 if (typeof nextChatsRequest === 'undefined')
 	var nextChatsRequest = undefined;
+
+loadScript('/chatTemplates/scripts/chatGame.js');
 
 document.getElementById('searchChatForm').addEventListener('keyup', (e) => {
 	e.preventDefault();

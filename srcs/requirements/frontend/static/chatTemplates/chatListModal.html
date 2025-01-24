@@ -1,6 +1,6 @@
 <style>
 	#chatsList{
-		height: 40vh;
+		max-height: 40vh;
 		overflow-y: auto;
 		flex-direction: column-reverse;
 	}
@@ -19,6 +19,7 @@
 				</form>
 				<button type="button" class="btn btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 			</div>
+			<div id="chatListError"></div>
 			<div class="modal-body" id="chatListModalBody">
 				<div id="chatsList" class="overflow-auto"></div>
 			</div>

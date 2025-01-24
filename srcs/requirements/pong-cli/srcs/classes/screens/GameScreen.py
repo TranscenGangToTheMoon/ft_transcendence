@@ -1,19 +1,17 @@
 # Python imports
-import asyncio
-import ssl
 import aiohttp
+import asyncio
 import socketio
+import ssl
+import time
 from pynput import keyboard
-
-# Rich imports
-from rich.console   import Console
 
 # Textual imports
 from textual            import on, work
 from textual.app        import ComposeResult
 from textual.geometry   import Offset
 from textual.screen     import Screen
-from textual.widgets    import Button, Digits, Footer, Header
+from textual.widgets    import Button, Digits, Footer, Header, Label
 
 # Local imports
 from classes.game.BallWidget                    import Ball
@@ -21,13 +19,16 @@ from classes.game.PaddleWidget                  import Paddle
 from classes.game.PlaygroundWidget              import Playground
 from classes.modalScreens.CountdownModalScreen  import Countdown
 from classes.modalScreens.GameOverModalScreen   import GameEnd
-from classes.screens.MainScreen                 import MainPage
 from classes.utils.config                       import Config
 from classes.utils.user                         import User
 
 class GamePage(Screen):
     SUB_TITLE = "Game Page"
     CSS_PATH = "styles/GamePage.tcss"
+    BINDINGS = [
+        ("^q", "exit", "Exit"),
+        ("f", "forfeit", "Forfeit")
+    ]
 
     def __init__(self):
         super().__init__()
@@ -37,9 +38,12 @@ class GamePage(Screen):
         self.ball = Ball()
         self.scoreLeft = Digits("0", id="scoreLeft")
         self.scoreRight = Digits("0", id="scoreRight")
+        self.opponentLabel = Label(User.opponent, id="opponentLabel")
         self.aScore = 0
         self.bScore = 0
 
+        self.lastFrame = 0
+        self.countdownIsActive = False
         self.pressedKeys = set()
         self.listener = None
         self.connected = False
@@ -55,14 +59,17 @@ class GamePage(Screen):
             # engineio_logger=True,
         )
 
-
     async def on_mount(self) -> None:
-        console = Console()
-        Config.Console.width = console.width
-        Config.Console.height = console.height
+        Config.Console.reload()
 
+        # Score handling
         self.scoreLeft.styles.offset = Offset(Config.Console.width // 4, 5)
         self.scoreRight.styles.offset = Offset(Config.Console.width // 4 * 3 - 4, 5)
+        self.opponentLabel.styles.layer = "4"
+        self.opponentLabel.styles.offset = Offset(
+            self.playground.offset.x,
+            self.playground.offset.y + Config.Playground.height + 1
+        )
 
         # Key handling
         self.listener = keyboard.Listener(
@@ -74,6 +81,23 @@ class GamePage(Screen):
         await self.launchSocketIO()
         self.gameLoop()
 
+    def on_resize(self) -> None:
+        Config.Console.reload()
+
+        self.playground.styles.offset = Offset((Config.Console.width - Config.Playground.width) // 2, (Config.Console.height - Config.Playground.height) // 2)
+        self.scoreLeft.styles.offset = Offset(Config.Console.width // 4, 5)
+        self.scoreRight.styles.offset = Offset(Config.Console.width // 4 * 3 - 4, 5)
+        self.opponentLabel.styles.offset = Offset(
+            self.playground.offset.x,
+            self.playground.offset.y + Config.Playground.height + 1
+        )
+
+    def action_forfeit(self):
+        while (self.countdownIsActive == True):
+            asyncio.sleep(1 / 10)
+        self.dismiss()
+        self.sio.disconnect()
+
     def compose(self) -> ComposeResult:
         yield Header(show_clock=True)
         yield self.scoreLeft
@@ -82,12 +106,8 @@ class GamePage(Screen):
             yield self.paddleLeft
             yield self.ball
             yield self.paddleRight
-        yield Button("Exit Button", id="exitAction")
+        yield self.opponentLabel
         yield Footer()
-
-    @on(Button.Pressed, "#exitAction")
-    def exitAction(self) -> None:
-        self.dismiss()
 
     def onPress(self, key):
         try:
@@ -108,44 +128,63 @@ class GamePage(Screen):
     async def gameLoop(self):
         while (not self.connected or not self.gameStarted):
             await asyncio.sleep(0.1)
-#        print(f"Connected: {self.connected}, Game started: {self.gameStarted}")
+
         while (self.connected and self.gameStarted):
+            if (self.lastFrame == 0):
+                self.lastFrame = time.perf_counter()
+                await asyncio.sleep(1 / Config.frameRate)
+                continue
+            dTime = time.perf_counter() - self.lastFrame
+            if (self.countdownIsActive == True):
+                await asyncio.sleep(1 / Config.frameRate)
+                continue
+
             # Move right paddle
             if (keyboard.Key.up in self.pressedKeys and keyboard.Key.down in self.pressedKeys):
                 if (self.paddleRight.direction != 0):
                     await self.sio.emit('stop_moving', {"position": self.paddleRight.cY})
-                    self.paddleRight.direction = 0
-                await asyncio.sleep(1 / Config.frameRate)
-                continue
-            if (keyboard.Key.up in self.pressedKeys):
+            elif (keyboard.Key.up in self.pressedKeys):
                 if (self.paddleRight.direction == 1):
                     await self.sio.emit('stop_moving', {"position": self.paddleRight.cY})
                 if (self.paddleRight.direction != -1):
                     await self.sio.emit('move_up')
-                self.paddleRight.moveUp()
+                self.paddleRight.moveUp(1 / dTime)
             elif (keyboard.Key.down in self.pressedKeys):
                 if (self.paddleRight.direction == -1):
                     await self.sio.emit('stop_moving', {"position": self.paddleRight.cY})
                 if self.paddleRight.direction != 1:
                     await self.sio.emit('move_down')
-                self.paddleRight.moveDown()
+                self.paddleRight.moveDown(1 / dTime)
             elif (self.paddleRight.direction != 0):
                 await self.sio.emit('stop_moving', {"position": self.paddleRight.cY})
                 self.paddleRight.direction = 0
 
             # Move left paddle
             if (self.paddleLeft.direction == -1):
-                self.paddleLeft.moveUp()
+                self.paddleLeft.moveUp(1 / dTime)
             if (self.paddleLeft.direction == 1):
-                self.paddleLeft.moveDown()
+                self.paddleLeft.moveDown(1 / dTime)
 
-            await asyncio.sleep(1 / Config.frameRate)
+            # Move ball
+            self.ball.move(1 / dTime)
+
+            # Check wall bounce
+            if (self.ball.cY <= 0):
+                self.ball.cdY *= -1
+                self.ball.cY *= -1
+            elif (self.ball.cY + Config.Ball.cSize > Config.Playground.cHeight):
+                self.ball.cdY *= -1
+                self.ball.cY -= self.ball.cY + Config.Ball.cSize - Config.Playground.cHeight
+
+            elapsedTime = time.perf_counter() - self.lastFrame
+            self.lastFrame = time.perf_counter()
+            await asyncio.sleep(1 / (Config.frameRate - elapsedTime))
 
     async def launchSocketIO(self):
         try:
             self.setHandler()
             await self.sio.connect(
-                f"wss://{User.host}:{User.port}/",
+                f"wss://{User.server}/",
                 socketio_path="/ws/game/",
                 transports=["websocket"],
                 auth={
@@ -155,38 +194,36 @@ class GamePage(Screen):
             )
             print("Connected to server!")
         except Exception as error:
-            print(f"From event: {error}")
+            print(f"From socketio launching: {error}")
+            self.dismiss()
 
     def setHandler(self):
         @self.sio.on('connect')
         async def connect():
             self.connected = True
-            # print("Connected to server event!", flush=True)
-            # print(self.connected, flush=True)
+            print("Connected to server event!", flush=True)
 
         @self.sio.on('disconnect')
         async def disconnect():
             self.connected = False
             print("Disconnected from server event!", flush=True)
-            # print(self.connected, flush=True)
 
         @self.sio.on('start_game')
         async def startGameAction():
+            self.lastFrame = 0
             self.gameStarted = True
-            # print(self.connected, flush=True)
 
         @self.sio.on('start_countdown')
         async def startCountdownAction():
-            await self.app.push_screen(Countdown())
-            # print(self.connected, flush=True)
+            self.countdownIsActive = True
+            await self.app.push_screen_wait(Countdown())
+            self.countdownIsActive = False
 
         @self.sio.on('game_state')
         async def gameStateAction(data):
-#            print(f"Score Left Region: {self.scoreLeft.region}")
-#            print(f"Score Left Size: {self.scoreLeft.styles.width}")
-#            print(f"Score Right Region: {self.scoreRight.region}")
-#            print(f"Score Right Size: {self.scoreRight.styles.width}")
-            self.ball.move(data["position_x"], data["position_y"])
+            self.ball.cdX = data["speed_x"]
+            self.ball.cdY = data["speed_y"]
+            self.ball.moveTo(data["position_x"], data["position_y"])
 
         @self.sio.on('connect_error')
         async def connectErrorAction(data):
@@ -224,9 +261,11 @@ class GamePage(Screen):
 
         @self.sio.on('game_over')
         async def gameOverAction(data):
-            print(f"Game over event: {data}")
+            print(f"Game over event: {data}", flush=True)
+            while (self.countdownIsActive == True):
+                await asyncio.sleep(1/10)
             if (await self.app.push_screen_wait(GameEnd(data["reason"], data["winner"] == User.team)) == "main"):
-                await self.app.switch_screen(MainPage())
+                self.dismiss()
             await self.sio.disconnect()
 
     async def on_unmount(self) -> None:

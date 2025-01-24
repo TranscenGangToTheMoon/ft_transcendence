@@ -32,8 +32,7 @@ class Paddle(Widget):
             )
 
     def render(self):
-        return " " * Config.Paddle.height * Config.Paddle.width
-        # return "█" * Config.Paddle.height * Config.Paddle.width
+        return ""
 
     def reset(self):
         self.cY = (Config.Playground.cHeight - Config.Paddle.cHeight) // 2
@@ -42,10 +41,10 @@ class Paddle(Widget):
             round(self.cY * Config.Playground.height / Config.Playground.cHeight)
         )
 
-    def moveUp(self):
+    def moveUp(self, dT: float):
         self.direction = -1
-        if self.cY - Config.Paddle.cSpeed / Config.frameRate > 0:
-            self.cY -= Config.Paddle.cSpeed / Config.frameRate
+        if self.cY - Config.Paddle.cSpeed / dT > 0:
+            self.cY -= Config.Paddle.cSpeed / dT
         else:
             self.cY = 0
         self.offset = Offset(
@@ -53,10 +52,10 @@ class Paddle(Widget):
             round(self.cY * Config.Playground.height / Config.Playground.cHeight)
         )
 
-    def moveDown(self):
+    def moveDown(self, dT: float):
         self.direction = 1
-        if self.cY + Config.Paddle.cSpeed / Config.frameRate < Config.Playground.cHeight - Config.Paddle.cHeight:
-            self.cY += Config.Paddle.cSpeed / Config.frameRate
+        if self.cY + Config.Paddle.cSpeed / dT < Config.Playground.cHeight - Config.Paddle.cHeight:
+            self.cY += Config.Paddle.cSpeed / dT
         else:
             self.cY = Config.Playground.cHeight - Config.Paddle.cHeight
         self.offset = Offset(
