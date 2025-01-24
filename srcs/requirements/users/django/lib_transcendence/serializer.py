@@ -3,6 +3,7 @@ from rest_framework import serializers
 from lib_transcendence.exceptions import Throttled
 from django.db import IntegrityError
 
+
 class SerializerKwargsContext(generics.GenericAPIView):
 
     def get_serializer_context(self):

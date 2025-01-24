@@ -1,5 +1,4 @@
 import json
-import time
 
 import redis
 from django.db.models import QuerySet
@@ -43,7 +42,7 @@ class Service:
 
 class Target:
 
-    def __init__(self, url: str, method: str = None, display_name: str = None, display_icon: str = None, type: UrlType = None):
+    def __init__(self, url: str, method: str = None, display_name: str = None, display_icon: str = None, type: str = None):
         self.url = url
         if type is not None:
             self.type = type
@@ -156,7 +155,7 @@ class Events:
 redis_client = redis.StrictRedis(host='event-queue')
 
 
-def publish_event(users: Users | QuerySet[Users] | list[Users] | list[int] | int, event_code: EventCode, data=None, kwargs=None):
+def publish_event(users: Users | QuerySet[Users] | list[Users] | list[int] | int, event_code: str, data=None, kwargs=None):
     try:
         event = getattr(Events, event_code.replace('-', '_'))
     except AttributeError:
