@@ -28,7 +28,7 @@ LoginPage {
 
 #status {
     content-align: center middle;
-    width: 54;
+    width: 56;
     margin: 1 0;
 }
 

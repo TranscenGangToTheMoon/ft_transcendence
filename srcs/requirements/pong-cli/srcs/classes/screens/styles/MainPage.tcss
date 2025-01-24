@@ -1,4 +1,38 @@
 MainPage {
-    border: blue;
-    /*align: center bottom;*/
+    /*border: blue;*/
+    align: center middle;
+    /*content-align: center middle;*/
+}
+
+Button {
+    margin: 0 1;
+}
+
+Rule {
+    width: 30%;
+    /*margin: 0;*/
+    /*padding: 1 0;*/
+}
+
+#userMeStatic {
+    /*border: aquamarine;*/
+    content-align: center middle;
+    width: 30%;
+}
+
+#buttonBoxGame {
+    /*border: red;*/
+    height: auto;
+    width: 30%;
+    align: center middle;
+    content-align: center middle;
+    padding: 0;
+    margin: 0 1;
+}
+
+#statusGame {
+    /*border: green;*/
+    content-align: center middle;
+    width: 30%;
+    margin: 1 0;
 }

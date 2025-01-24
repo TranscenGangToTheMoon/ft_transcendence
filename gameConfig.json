@@ -1,10 +1,10 @@
 {
-	"server": {
-		"tickRate": {
-			"base": 60,
-			"safe": 15
-		}
-	},
+    "server": {
+        "tickRate": {
+            "base": 60,
+            "safe": 15
+        }
+    },
     "canvas": {
         "normal": {
             "width":1000,
