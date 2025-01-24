@@ -131,7 +131,6 @@ async function closeGameChatTab()
 }
 
 async function openGameChatTab(gameInfo) {
-	console.log('Chat: OpenGameChatTab ahhhhhhhhhhhhhhhhhh');
 	chatTabs = document.getElementById('chatTabs');
 	if (!chatTabs) {
 		await setChatView();
