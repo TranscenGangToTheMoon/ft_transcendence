@@ -1,24 +1,51 @@
+<div class="d-none" id="gameArea">
+    <div id="canvas-container" class="position-relative d-flex flex-column justify-content-center align-items-center overflow-hidden" style="transform-origin: top left;">
+        <div class="d-flex flex-column w-100" id="gameInfo">
+            <!-- <div id="scoreArea" class="d-flex justify-content-between 3 w-100" style="background-color: grey;">
+                <div id="enemyScoreArea" class="d-flex w-50 justify-content-between align-items-center bg-danger h-100">
+                    <div id="enemyUsername" class="fs-2 fw-bold p-2">Enemy</div>
+                    <div>score</div>
+                </div>
+                <div id="playerScoreArea" class="d-flex w-50 justify-content-between align-items-center bg-primary h-100">
+                    <div>score</div>
+                    <div id="yourUsername" class="fs-2 fw-bold p-2">You</div>
+                </div>
+            </div> -->
+        </div>
+        <canvas id="gameCanvas" class="d-block" style="background-color: rgba(128, 128, 128, 0.2);">
+        </canvas>   
+    </div>
+</div>
 
-<div id="gameArea" class="justify-content-center align-items-center user-select-none w-100">
-    <div id="gameAreaOverlay" class="flex-column">
-        <div id="scoreArea" class="d-flex justify-content-between 3 w-100" style="background-color: grey;">
-            <div id="enemyScoreArea" class="d-flex w-50 justify-content-between align-items-center bg-danger h-100">
-                <div id="enemyUsername" class="fs-2 fw-bold p-2">Enemy</div>
-                <div>score</div>
+<div class="modal fade" id="gameOverModal" tabindex="-1" aria-labelledby="gameOverModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="gameOverModalLabel">Game over</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div id="playerScoreArea" class="d-flex w-50 justify-content-between align-items-center bg-primary h-100">
-                <div>score</div>
-                <div id="yourUsername" class="fs-2 fw-bold p-2">You</div>
+            <div class="modal-body" id="gameOverContent">
+                <label for="playerScore" id="playerScoreLabel">
+                    <a class="teamDetail"
+                        data-bs-toggle="popover" 
+                        data-bs-trigger="hover"
+                        data-bs-html="true"
+                        title="Team ">
+                    Team {team-id}</a> Score:
+                </label>
+                <div id="playerScore">-</div>
+                <label for="enemyScore" id="enemyScoreLabel">
+                <a class="teamDetail"
+                    data-bs-toggle="popover" 
+                    data-bs-trigger="hover"
+                    data-bs-html="true"
+                    title="Team ">
+                    Team {team-id}</a> Score:
+                </label>
+                <div id="enemyScore">-</div>
             </div>
         </div>
-        <canvas id="gameCanvas" style="background-color: rgba(128, 128, 128, 0.2);">
-        </canvas>
     </div>
-
-    <!-- <div id="gameInfos">
-        <label for="score">Score:</label>
-        <div class="d-flex"  id="score"><div id="enemyScore">0</div>-<div id="playerScore">0</div></div>
-    </div> -->
 </div>
 
 <h5 class="align-self-center" id="opponentWait">Waiting for an opponent...</h5>

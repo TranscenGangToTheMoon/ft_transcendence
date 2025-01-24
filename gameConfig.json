@@ -7,7 +7,7 @@
 	},
     "canvas": {
         "normal": {
-            "width":800,
+            "width":1000,
             "height":600
         },
         "clash": {
@@ -51,6 +51,6 @@
         "maxBounceAngle3v3": 1.0471975511965976
     },
     "score": {
-        "max":5
+        "max":100
     }
 }

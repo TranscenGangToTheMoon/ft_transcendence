@@ -57,7 +57,7 @@ async function loadContent(url, containerId='content', append=false, container=u
 }
 
 function containsCode(path){
-    const regex = /^\/(game|lobby|tournament)\/\d+$/;
+    const regex = /^\/(game|lobby|tournament|spectate)\/\d+$/;
     return regex.test(path);
 }
 
@@ -79,6 +79,7 @@ async function handleRoute() {
         '/game/tournament' : '/game/game.html',
         '/game/1v1' : '/game/game.html',
         '/game/3v3' : '/game/3v3.html',
+        '/spectate' : '/game/spectate.html',
         '/tournament' : '/tournament/tournament.html'
     };
 
