@@ -43,12 +43,12 @@ class FriendsSerializer(Serializer):
         if request is None:
             raise serializers.ValidationError(MessagesException.ValidationError.REQUEST_REQUIRED)
         if (instance.user_1.id == request.user.id and request.method != 'POST') or (instance.user_1.id != request.user.id and request.method == 'POST'):
-            data['friend_win'] = instance.user2_win
-            data['me_win'] = instance.user1_win
+            data['friend_win'] = instance.user2_wins
+            data['me_win'] = instance.user1_wins
             friend = instance.user_2
         else:
-            data['friend_win'] = instance.user1_win
-            data['me_win'] = instance.user2_win
+            data['friend_win'] = instance.user1_wins
+            data['me_win'] = instance.user2_wins
             friend = instance.user_1
         data['friend'] = SmallUsersSerializer(friend).data
         return data
