@@ -9,12 +9,18 @@ https://docs.djangoproject.com/en/4.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
-
+import json
 from pathlib import Path
 from os import environ
 
+# todo use last version of django in all services
+# Own settings
+with open('game_server/gameConfig.json', encoding='utf-8') as f:
+    GAME_MAX_SCORE = json.load(f)['score']['max'] # todo make by request
 
 APPEND_SLASH = False
+
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 

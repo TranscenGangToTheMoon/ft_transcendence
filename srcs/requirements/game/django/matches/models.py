@@ -1,6 +1,6 @@
-import os
 from datetime import timedelta, datetime, timezone
 
+from django.conf import settings
 from lib_transcendence.exceptions import ServiceUnavailable
 from lib_transcendence.services import request_matchmaking
 from lib_transcendence import endpoints
@@ -84,7 +84,7 @@ class Teams(models.Model):
     def scored(self):
         self.score += 1
         self.save()
-        if self.score == int(os.environ['GAME_MAX_SCORE']):
+        if self.score == settings.GAME_MAX_SCORE:
             self.match.finish()
 
 

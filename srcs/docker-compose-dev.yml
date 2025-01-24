@@ -106,7 +106,6 @@ services:
       SECRET_KEY: ${DJANGO_GAME_SECRET_KEY}
       GAME_PLAYER_CONNECT_TIMEOUT: ${GAME_PLAYER_CONNECT_TIMEOUT}
       GAME_SERVER_PORT: ${GAME_SERVER_PORT}
-      GAME_MAX_SCORE: ${GAME_MAX_SCORE}
     networks:
       - transcendence-network
       - game-network

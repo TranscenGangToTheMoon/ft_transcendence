@@ -1,5 +1,4 @@
-import os
-
+from django.conf import settings
 from lib_transcendence.game import GameMode, FinishReason
 from lib_transcendence.generate import generate_code
 from lib_transcendence.exceptions import MessagesException, Conflict, ResourceExists
@@ -213,7 +212,7 @@ class MatchFinishSerializer(Serializer):
         player.team.score = 0
         player.save()
         winner = instance.players.exclude(user_id=player.user_id).first()
-        winner.team.score = int(os.environ['GAME_MAX_SCORE'])
+        winner.team.score = settings.GAME_MAX_SCORE
         winner.save()
         validated_data['finished'] = True
         result = super().update(instance, validated_data)
