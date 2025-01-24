@@ -15,9 +15,9 @@ SHELL		:=	/bin/zsh
 
 SOURCE		:=	source $(VENV)/bin/activate
 
-C_ARGS		?=	# Leave empty
+ARGS		?=	# Leave empty
 
-CLI_FLAGS	?=	-c gameConfig.json -u xcharra -PConnessor85* -s https://localhost -p 4443# Leave empty
+CLI_FLAGS	?=	-s localhost:4443 -u xcharra -p Connessor85# Leave empty
 ########################################################################################################################
 #                                                        COLORS                                                        #
 ########################################################################################################################
@@ -54,7 +54,7 @@ debug		:	.venv
 
 .PHONY: console
 console		:	.venv
-			$(SOURCE); textual console $(C_ARGS)
+			$(SOURCE); textual console $(ARGS)
 
 .PHONY: free-run
 free-run	:	.venv
@@ -66,7 +66,7 @@ free-debug	:	.venv
 
 .PHONY: free-console
 free-console:	.venv
-			$(TERMINAL) -- $(SHELL) -c "$(SOURCE); textual console $(C_ARGS)"
+			$(TERMINAL) -- $(SHELL) -c "$(SOURCE); textual console $(ARGS)"
 
 .PHONY: debug-cons
 debug-cons	:	.venv free-console debug
