@@ -1,6 +1,7 @@
 # Python imports
-import os
 import argparse
+import os
+from urllib.parse import urlparse
 
 # Local imports
 from classes.PongCLIApp     import PongCLI
@@ -12,12 +13,7 @@ def parser():
     parser.add_argument(
         "-s", "--server",
         type=str,
-        help="Server address",
-    )
-    parser.add_argument(
-        "-p", "--port",
-        type=int,
-        help="Server port",
+        help="Server host (exemple: 127.0.0.1:4443)",
     )
     parser.add_argument(
         "-u", "--user",
@@ -25,34 +21,26 @@ def parser():
         help="User name",
     )
     parser.add_argument(
-        "-P", "--password",
+        "-p", "--password",
         type=str,
         help="Password",
     )
-    parser.add_argument(
-        "-c", "--config",
-        type=str,
-        help="Configuration file",
-        required=True
-    )
-    args = parser.parse_args()
 
+    args = parser.parse_args()
     if (args.server is not None):
         User.server = args.server
-    if (args.port is not None):
-        User.port = args.port
     if (args.user is not None):
         User.username = args.user
     if (args.password is not None):
         User.password = args.password
 
-    Config.load(args.config)
+    User.URI = f"https://{User.server}"
+    User.host = urlparse(User.URI).hostname
+    User.port = urlparse(User.URI).port
 
 if __name__ == '__main__':
     parser()
-    print(Config.__str__())
-
-    Config.Console.width = 150
+    Config.Console.width = 160
     Config.Console.height = 60
     os.system('clear')
     os.system(f'printf "\\e[8;{Config.Console.height};{Config.Console.width}t"')
