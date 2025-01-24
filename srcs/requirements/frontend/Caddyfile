@@ -12,7 +12,6 @@
 
 	handle {
 		@trailing path_regexp trailing ^(/.+)/$
-		@excludeSSE path /sse/*
 		redir @trailing {re.trailing.1} permanent
 		try_files {path} /index.html
 		file_server
@@ -74,6 +73,6 @@
 			reverse_proxy http://users:8000
 		}
 
-		respond "ft_transcendence : api not found" 404 #must serv a 404.html
+		respond "ft_transcendence : api not found" 404
 	}
 }
