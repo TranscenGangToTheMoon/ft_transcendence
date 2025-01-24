@@ -1,5 +1,5 @@
-# Python imports
-import json
+# Rich imports
+from rich.console   import Console
 
 class Config:
     configJson = {}
@@ -55,6 +55,13 @@ class Config:
     class Console:
         width: int = 0
         height: int = 0
+
+        @classmethod
+        def reload(cls):
+            console = Console()
+
+            cls.width = console.width
+            cls.height = console.height
 
     class Playground:
         cWidth: int = 1000
