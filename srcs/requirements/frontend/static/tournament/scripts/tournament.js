@@ -442,7 +442,7 @@ async function gameStart(event) {
 	if (fromTournament)
 		userInformations.cancelReturn = true;
 	fromTournament = true;
-	tournamentData = event.data;
+	tournamentData = [event.data, event.target[0].url, event.target[0].type];
 	await navigateTo('/game/tournament');
 }
 

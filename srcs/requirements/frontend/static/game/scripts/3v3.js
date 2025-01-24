@@ -483,12 +483,12 @@ function fillTeamDetail(enemyTeamDetail, playerTeamDetail){
     }
 }
 
-function initSocket(){
+function initSocket(socketPath, socketMode){
 	const host = window.location.origin;
 	const token = getAccessToken();
 	let gameSocket = io(host, {
-      transports: ["websocket"],
-      path: "/ws/game/",
+      transports: [socketMode],
+      path: socketPath,
       auth : {
           "id": userInformations.id,
           "token": token,
@@ -634,7 +634,7 @@ async function initGameConstants(){
         })
 }
 
-async function initData(data){
+async function initData(data, socketPath, socketMode){
     await initGameConstants();
     try {
 		if (data.teams.a.players.some(player => player.id == userInformations.id)) {
@@ -655,7 +655,7 @@ async function initData(data){
 		console.log('Invalid game data from SSE, cannot launch game');
 		return;
 	}
-	initSocket();
+	initSocket(socketPath, socketMode);
 }
 
 // sse.addEventListener('game-start', event => {
@@ -683,11 +683,9 @@ async function gameStart(event){
     document.getElementById('gameArea').classList.replace('d-none', 'd-flex');
     document.getElementById('opponentWait').style.display = 'none';
     data = JSON.parse(event.data);
-    data = data.data;
     console.log('game-start received (game)');
     try {
-
-        await initData(data);
+        await initData(data.data, data.target[0].url, data.target[0].type);
     }
     catch (error){
         wrongConfigFileError(error);
@@ -709,7 +707,7 @@ async function initGame(){
         checkGameAuthorization();
         if (userInformations.lobbyData){
             try {
-                await initData(userInformations.lobbyData);
+                await initData(...(userInformations.lobbyData));
                 document.getElementById('gameArea').classList.replace('d-none', 'd-flex');
                 document.getElementById('opponentWait').style.display = 'none';
             }
