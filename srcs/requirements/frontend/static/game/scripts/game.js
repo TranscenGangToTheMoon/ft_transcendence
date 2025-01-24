@@ -709,8 +709,8 @@ async function initData(data){
     document.getElementById('gameArea').classList.replace('d-none', 'd-flex');
     document.getElementById('opponentWait').style.display = "none";
 	console.log(userInformations.username);
-    // document.getElementById('playerUsername').innerText = userInformations.username;
-    // document.getElementById('enemyUsername').innerText = PongGame.info.enemyTeam.players.players[0].username;
+    document.getElementById('playerUsername').innerText = userInformations.username;
+    document.getElementById('enemyUsername').innerText = PongGame.info.enemyTeam.players.players[0].username;
 	initSocket(data.code);
     setTimeout(async () => {
         if (!cancelTimeout && gameSocket && !isModalOpen()){
