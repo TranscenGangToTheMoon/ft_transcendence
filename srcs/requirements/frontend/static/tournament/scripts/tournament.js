@@ -263,6 +263,11 @@ function addTournamentSSEListeners(){
         sse.addEventListener('tournament-leave', tournamentLeaved);
     }
 
+	if(!SSEListeners.has('tournament-message')){
+        SSEListeners.set('tournament-message', displayGameChatMessage);
+        sse.addEventListener('tournament-message', displayGameChatMessage);
+    }
+
 	if (!SSEListeners.has('tournament-banned')){
         SSEListeners.set('tournament-banned', tournamentBanned);
         sse.addEventListener('tournament-banned', tournamentBanned);
@@ -330,6 +335,7 @@ function loadTournament(tournament){
 		addParticipant(participant);
 	}
 	addTournamentSSEListeners();
+	openGameChatTab({'type': 'tournament', 'code': tournament.code});
 	if (tournament.matches != null){
 		if ((!tournament.matches['quarter-final']|| !tournament.matches['quarter-final'].length)
 			&& tournament.matches['round of 16']

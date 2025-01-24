@@ -52,6 +52,7 @@ function isModalOpen() {
 }
 
 async function quitLobbies(oldUrl, newUrl){
+    await closeGameChatTab();
     if (oldUrl === '/service-unavailable') return;
     if (oldUrl.includes('/lobby')){
         try {
