@@ -28,8 +28,9 @@ async function getChatInstance(chatId) {
 	}
 	catch (error) {
 		console.log('Error chat:', error);
+		if (error.code === 404 && error.detail === undefined) error.detail = 'No chat found';
 		if (error.detail === undefined) error.detail = 'Error while loading chat';
-		displayChatError(error.detail, 'container');
+		displayChatError(error, 'container');
 		return undefined;
 	}
 }
@@ -46,7 +47,7 @@ function displayChatError(error, idDiv) {
 		var divError = document.createElement('div');
 		divError.className = 'alert alert-danger';
 		divError.id = 'chatAlert';
-		divError.innerHTML = error;
+		divError.innerHTML = error.code + ": " + error.detail;
 		divToDisplayError.appendChild(divError);
 	}
 	else {
@@ -99,7 +100,7 @@ function setupSocketListeners(chatInfo)
 			console.log('Error chat:', data);
 			await closeChatTab(chatInfo);
 			if (data.message === undefined) data.message = 'Error while connecting to the chat server';
-			displayChatError(data.message, 'container');
+			displayChatError({'code':data.error, 'detail': data.message}, 'container');
 		}
 	});
 	
@@ -142,7 +143,7 @@ function setupSocketListeners(chatInfo)
 			console.log('Error chat:', data);
 			if (data.message === undefined) data.message = 'Error with chat server';
 			await closeChatTab(chatInfo);
-			displayChatError(data.message, 'container');
+			displayChatError({'code':data.error, 'detail': data.message}, 'container');
 		}
 	});
 
@@ -183,8 +184,9 @@ async function getMoreOldsMessages(chatInfo){
 	}
 	catch (error) {
 		console.log('Error chat:', error);
+		if (error.code === 404 && error.detail === undefined) error.detail = 'No chat found';
 		if (error.detail === undefined) error.detail = 'Error while loading more old messages';
-		displayChatError(error.detail, 'messages' + chatInfo.target);
+		displayChatError(error, 'messages' + chatInfo.target);
 	}
 }
 
@@ -254,8 +256,9 @@ async function createChatUserCard(chatInfo) {
 			displayChatsList();
 		} catch(error) {
 			console.log('Error chat:', error);
+			if (error.code === 404 && error.detail === undefined) error.detail = 'No chat found';
 			if (error.detail === undefined) error.detail = 'Error when attempting to delete chat';
-			displayChatError(error.detail, 'chatsList');
+			displayChatError(error, 'chatsListError');
 		}
 	});
 	chatUserCard.addEventListener('click', async e => {
@@ -285,7 +288,8 @@ async function getMoreChats() {
 	catch (error) {
 		console.log('Error chat:', error);
 		if (error.detail === undefined) error.detail = 'Error while loading more chats';
-		displayChatError(error.detail, 'chatsList');
+		if (error.code === 404 && error.detail === undefined) error.detail = 'No chat found';
+		displayChatError(error, 'chatsListError');
 	}
 }
 
@@ -314,7 +318,8 @@ async function displayChatsList(filter='') {
 		console.log('Error chat:', error);
 		if (error.code === 503 || error.code === 502) return;
 		if (error.detail === undefined) error.detail = 'Error while loading chats list';
-		displayChatError(error.detail, 'chatsList');
+		if (error.code === 404 && error.detail === undefined) error.detail = 'No chat found';
+		displayChatError(error, 'chatsListError');
 	}
 	chatListModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('chatListModal'));
 	if (chatListModal && !chatListModal._isShown)
@@ -331,8 +336,9 @@ async function searchChatButton(username) {
 	}
 	catch(error) {
 		console.log('Error chat:', error);
+		if (error.code === 404 && error.detail === undefined) error.detail = 'No chat found';
 		if (error.detail === undefined) error.detail = 'Error while searching chat';
-		displayChatError(error.detail, 'searchChatForm');
+		displayChatError(error, 'chatListError');
 		return;
 	}
 
@@ -351,8 +357,9 @@ async function searchChatButton(username) {
 		}
 		catch (error) {
 			console.log('Error chat:', error);
+			if (error.code === 404 && error.detail === undefined) error.detail = 'No User found';
 			if (error.detail === undefined) error.detail = 'Error while creating chat';
-			displayChatError(error.detail, 'searchChatForm');
+			displayChatError(error, 'chatListError');
 			return;
 		}
 		console.log('Chat: New chat created:', chatRequest);
@@ -604,8 +611,9 @@ async function openChatTab(chatId)
 		catch (error) {
 			console.log('Error chat:', error);
 			await closeChatTab(chatInfo);
+			if (error.code === 404 && error.detail === undefined) error.detail = 'No chat found';
 			if (error.detail === undefined) error.detail = 'Error while loading old messages';
-			displayChatError(error.detail, 'container');
+			displayChatError(error, 'container');
 			return;
 		}
 	}

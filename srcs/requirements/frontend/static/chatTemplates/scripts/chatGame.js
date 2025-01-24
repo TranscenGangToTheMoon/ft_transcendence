@@ -1,8 +1,8 @@
-function displayGameChatMessage(message){
-	if (message === undefined) return;
+function displayGameChatMessage(event){
+	event = JSON.parse(event.data);
 	let messageDiv = document.createElement('div');
 	messageDiv.className = 'messageGame';
-	messageDiv.innerHTML = message;
+	messageDiv.innerHTML = event.message;
 	let chatBox = document.getElementById('messagesGame');
 	if (chatBox) {
 		chatBox.appendChild(messageDiv);
@@ -92,14 +92,33 @@ function sendGameMessageListener(gameInfo) {
 		e.preventDefault();
 		const message = this.querySelector('input').value;
 		if (message === '') return;
-		//send message to server
-		// if (gameInfo.type === 'lobby'){
-		// 	await apiRequest('POST', )
-		// 	'api/play/lobby/<str:code>/message/'
-		// }
-		// else if (gameInfo.type === 'tournament'){
-		// 	'api/play/tournament/<str:code>/message/'
-		chatForm.reset();
+		try {
+			var apiAnswer = undefined;
+			if (gameInfo.type === 'lobby'){
+				apiAnswer = await apiRequest(getAccessToken(), `/api/play/lobby/${gameInfo.code}/message/`, 'POST', undefined, undefined, {
+					'content': message,
+				});
+			}
+			else if (gameInfo.type === 'tournament'){
+				apiAnswer = await apiRequest(getAccessToken(), `/api/play/tournament/${gameInfo.code}/message/`, 'POST', undefined, undefined, {
+					'content': message,
+				});
+			}
+			if (apiAnswer.detail) {
+				throw {'code': 400, 'detail': apiAnswer.detail};
+			}
+			let messageDiv = document.createElement('div');
+			messageDiv.className = 'messageGame';
+			messageDiv.innerHTML = "You: " + message;
+			let chatBox = document.getElementById('messagesGame');
+			if (chatBox) {
+				chatBox.appendChild(messageDiv);
+			}
+			chatForm.reset();
+		} catch (error) {
+			console.log('Error game chat:', error);
+			displayChatError(error, 'messagesGame');
+		}
 	});
 }
 
