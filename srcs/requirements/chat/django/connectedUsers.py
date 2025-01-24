@@ -3,12 +3,11 @@ class ConnectedUsers:
         self.users_sid = {}
         self.users_id = {}
 
-    def add_user(self, id, sid, username, chat_id, chat_type, chat_with_id=None):
+    def add_user(self, id, sid, username, chat_id, chat_with_id=None):
         self.users_sid[sid] = {
             'user_id': id,
             'username': username,
             'chat_id': chat_id,
-            'chat_type': chat_type,
             'chat_with_id': chat_with_id,
         }
         self.users_id[id] = {
