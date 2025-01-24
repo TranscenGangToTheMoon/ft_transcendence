@@ -41,7 +41,7 @@ class PongCLI(App):
                 }
 
                 try:
-                    async with client.stream('GET', f"{User.server}/sse/users/", headers=headers) as response:
+                    async with client.stream('GET', f"https://{User.server}/sse/users/", headers=headers) as response:
                         if (response.status_code >= 400):
                             self.SSEConnected = False
                             raise (Exception(f"({response.status_code}) SSE stream failed {response.text}"))
