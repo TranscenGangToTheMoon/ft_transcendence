@@ -453,9 +453,9 @@
         for (let paddle in state.paddles){
             paddle = state.paddles[paddle];
             if (paddle.x < config.canvasWidth / 2)
-	            ctx.drawImage(leftPaddleImage, paddle.x, paddle.y, config.paddleWidth, config.paddleHeight);
+                ctx.drawImage(leftPaddleImage, paddle.x, paddle.y, config.paddleWidth, config.paddleHeight);
             else
-                   ctx.drawImage(rightPaddleImage, paddle.x, paddle.y, config.paddleWidth, config.paddleHeight);
+                ctx.drawImage(rightPaddleImage, paddle.x, paddle.y, config.paddleWidth, config.paddleHeight);
         }
     }
 
