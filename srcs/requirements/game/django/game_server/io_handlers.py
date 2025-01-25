@@ -64,9 +64,13 @@ async def connect(sid, environ, auth):
     print(f'player sid: {player_sid}', flush=True)
     if player_sid != '' and player_sid != sid:
         await Server._sio.leave_room(player_sid, str(player.match_id))
-        with Server._dsids_lock:
-            Server._disconnected_sids.append(player_sid)
-        await Server._sio.disconnect(player_sid)
+        try:
+            await Server._sio.get_session(player_sid) # ckeck if the client is still connected
+            with Server._dsids_lock:
+                Server._disconnected_sids.append(player_sid)
+            await Server._sio.disconnect(player_sid)
+        except KeyError:
+            pass # client has already been disconnected
     player.socket_id = sid
     Server._clients[sid] = player
     await Server._sio.enter_room(sid, str(game_id))
