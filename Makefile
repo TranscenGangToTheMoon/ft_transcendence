@@ -13,10 +13,7 @@ ENV_FILE	:=	$(SRCS_D)/.env
 
 CONFIG		:=	gameConfig.json
 
-CONFIG_T	:=	\
-				$(SRCS_D)/requirements/pong-cli/ \
-				$(SRCS_D)/requirements/game/django/game_server/ \
-				$(SRCS_D)/requirements/frontend/static/
+CONFIG_T	:=	$(SRCS_D)/requirements/frontend/static/
 
 CONFIG_F	:=	$(addsuffix $(CONFIG), $(CONFIG_T))
 
@@ -108,6 +105,8 @@ fclean		:	dusting
 			rm -rf $(ENV_FILE)
 			rm -rf $(SECRETS_D)
 			rm -rf $(CONFIG_F)
+			rm -rf $(SRCS_D)/requirements/game/django/gameConfig.json
+			rm -rf $(SRCS_D)/requirements/pong-cli/gameConfig.json
 			rm -rf $(SRCS_D)/requirements/pong-cli/ft_transcendence.crt
 
 .PHONY: dusting
