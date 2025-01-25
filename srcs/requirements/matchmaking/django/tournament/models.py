@@ -211,7 +211,7 @@ class TournamentMatches(models.Model):
     user_2 = models.ForeignKey(TournamentParticipants, on_delete=models.CASCADE, related_name='matches_2', null=True)
     score_winner = models.IntegerField(null=True, default=None)
     score_looser = models.IntegerField(null=True, default=None)
-    finish_reason = models.CharField(null=True, default=None, max_length=50)
+    finish_reason = models.CharField(max_length=20, null=True, default=None)
     finished = models.BooleanField(default=False)
 
     def post(self):

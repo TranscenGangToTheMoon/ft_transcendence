@@ -23,7 +23,7 @@ class Matches(models.Model):
     tournament_n = models.IntegerField(null=True, default=None)
     game_start = models.BooleanField(default=False)
     finished = models.BooleanField(default=False)
-    finish_reason = models.CharField(null=True, default=None, max_length=35)
+    finish_reason = models.CharField(max_length=20, null=True, default=None)
 
     winner = models.ForeignKey('Teams', null=True, default=None, on_delete=models.SET_NULL, related_name='winner')
     looser = models.ForeignKey('Teams', null=True, default=None, on_delete=models.SET_NULL, related_name='looser')
