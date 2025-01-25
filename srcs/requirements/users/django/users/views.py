@@ -14,6 +14,7 @@ from users.auth import auth_delete, get_valid_user, get_user
 from users.models import Users
 from users.permissions import NotInGame
 from users.serializers import UsersSerializer, UsersMeSerializer, ManageUserSerializer
+from users.serializers_utils import SmallUsersSerializer, LargeUsersSerializer
 
 
 class UsersMeView(generics.RetrieveUpdateDestroyAPIView):
@@ -58,7 +59,7 @@ class UsersMeView(generics.RetrieveUpdateDestroyAPIView):
         return super().destroy(request, *args, **kwargs)
 
 
-class RetrieveUserView(generics.RetrieveAPIView): # TODO fguirama: delete
+class RetrieveUserView(generics.RetrieveAPIView):
     queryset = Users.objects.all()
     serializer_class = UsersSerializer
 
@@ -67,9 +68,14 @@ class RetrieveUserView(generics.RetrieveAPIView): # TODO fguirama: delete
 
 
 class RetrieveUsersView(generics.ListAPIView):
-    serializer_class = UsersSerializer
     pagination_class = None
     authentication_classes = []
+
+    def get_serializer_class(self):
+        size = self.request.data.get('size')
+        if size == 'large':
+            return LargeUsersSerializer
+        return SmallUsersSerializer
 
     def get_queryset(self):
         user_ids = self.request.data.get('user_ids')

@@ -5,12 +5,12 @@ from lib_transcendence.exceptions import MessagesException
 from rest_framework.exceptions import NotFound
 
 
-def retrieve_users(user_id: list[int] | int, return_type=list):
+def retrieve_users(user_id: list[int] | int, return_type=list, size='small') -> dict | list:
     if isinstance(user_id, int):
         user_ids = [user_id]
     else:
         user_ids = user_id
-    response = request_users(endpoints.Users.users, 'GET', data={'user_ids': user_ids})
+    response = request_users(endpoints.Users.users, 'GET', data={'user_ids': user_ids, 'size': size})
     if len(response) == 0:
         raise NotFound(MessagesException.NotFound.USERS)
     if return_type is list:

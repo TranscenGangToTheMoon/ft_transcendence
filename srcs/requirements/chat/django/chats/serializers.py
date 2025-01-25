@@ -40,7 +40,7 @@ class ChatsSerializer(Serializer):
 
     def get_chat_with(self, obj):
         chat_with = obj.participants.exclude(user__id=self.context['auth_user']['id']).first()
-        chat_with_user = retrieve_users(chat_with.user.id)
+        chat_with_user = retrieve_users(chat_with.user.id, size='large')
         return chat_with_user[0]
 
     def get_unread_messages(self, obj):

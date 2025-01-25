@@ -120,10 +120,7 @@ class UsersSerializer(Serializer):
         request = self.context.get('request')
         if request is None or obj.id == request.user.id:
             return None
-        friendship = get_friendship(request.user.id, obj.id)
-        if friendship is None:
-            return None
-        return friendship
+        return get_friendship(request.user.id, obj.id)
 
 
 class ManageUserSerializer(Serializer):

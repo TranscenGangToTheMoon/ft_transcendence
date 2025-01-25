@@ -61,7 +61,7 @@ class Matches(models.Model):
             except APIException:
                 raise ServiceUnavailable('matchmaking')
         if self.game_mode == GameMode.RANKED:
-            player = retrieve_users(self.users_id(), return_type=dict)
+            player = retrieve_users(self.users_id(), return_type=dict, size='large')
             winner = self.winner.players.first()
             looser = self.looser.players.first()
             winner_trophies, looser_trophies = compute_trophies(player[winner.user_id]['trophies'], player[looser.user_id]['trophies'])
