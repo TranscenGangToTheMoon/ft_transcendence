@@ -42,7 +42,7 @@ class Server:
         Server._loop_lock = Lock()
         Server._sio_lock = Lock()
         Server._dsids_lock = Lock()
-        with open('game_server/gameConfig.json', 'r') as config_file:
+        with open('game_server/gameConfig.json', 'r', encoding='utf-8') as config_file:
             config = json.load(config_file)
             Game.default_ball_speed = config['ball']['speed']
             Game.ball_size = config['ball']['size']
