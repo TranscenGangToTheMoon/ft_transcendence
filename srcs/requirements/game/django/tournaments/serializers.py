@@ -47,4 +47,3 @@ class TournamentSerializer(Serializer):
         for stage in stages:
             result.stages.create(**stage)
         return result
-# todo try delete user game instance
