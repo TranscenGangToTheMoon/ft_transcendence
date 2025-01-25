@@ -52,6 +52,7 @@ function isModalOpen() {
 }
 
 async function quitLobbies(oldUrl, newUrl){
+    await closeGameChatTab();
     if (oldUrl === '/service-unavailable') return;
     console.log('je passe pourtant');
     let regex = /\/[A-Za-z]+\/[0-9]+/i;;
