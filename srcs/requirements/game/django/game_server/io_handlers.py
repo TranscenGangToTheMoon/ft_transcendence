@@ -15,7 +15,6 @@ from game_server.match import Match
 
 async def connect(sid, environ, auth):
     from game_server.server import Server
-    print('trying to connect', flush=True)
     token = auth.get('token')
     if token is None:
         raise ConnectionRefusedError(MessagesException.Authentication.NOT_AUTHENTICATED)
@@ -27,10 +26,23 @@ async def connect(sid, environ, auth):
     if user_data is None:
         raise ConnectionRefusedError(MessagesException.Authentication.NOT_AUTHENTICATED)
     id = user_data['id']
+    print(f'User {id} connecting...{sid}', flush=True)
     try:
         match = request_game(endpoints.Game.fuser.format(user_id=id), 'GET')
     except NotFound as e:
-        raise ConnectionRefusedError(e.detail)
+        match_code = auth.get('match_code')
+        if match_code is None:
+            raise ConnectionRefusedError(e.detail)
+        try:
+            game = Server.get_game(match_code)
+        except Server.NotFound:
+            return False
+        if game.match.game_type == 'normal':
+            game.add_spectator(id, sid)
+            await Server._sio.enter_room(sid, str(game.match.id))
+            return True
+        else:
+            return False
     except APIException as e:
         raise ConnectionRefusedError(MessagesException.ServiceUnavailable.game)
     if match is None:
@@ -43,17 +55,18 @@ async def connect(sid, environ, auth):
         raise ConnectionRefusedError(MessagesException.ServiceUnavailable.game)
     if game_data is None:
         raise ConnectionRefusedError(MessagesException.ServiceUnavailable.game)
-    print(f"game_data = {game_data}", flush=True)
     game_id = game_data['id']
-    print(f"game_id = {game_id}", flush=True)
     if not Server.does_game_exist(game_id):
         match = Match(game_data)
         Server.create_game(match)
     player = Server.get_player(id)
-    if player.socket_id != '':
-        return False
-    print(f"player = {player}")
-    print(f"sid = {sid}", flush=True)
+    player_sid = player.socket_id
+    print(f'player sid: {player_sid}', flush=True)
+    if player_sid != '' and player_sid != sid:
+        await Server._sio.leave_room(player_sid, str(player.match_id))
+        with Server._dsids_lock:
+            Server._disconnected_sids.append(player_sid)
+        await Server._sio.disconnect(player_sid)
     player.socket_id = sid
     Server._clients[sid] = player
     await Server._sio.enter_room(sid, str(game_id))
@@ -111,10 +124,20 @@ async def stop_moving(sid, data):
 
 async def disconnect(sid):
     from game_server.server import Server
+    with Server._dsids_lock:
+        for search in Server._disconnected_sids:
+            if search == sid:
+                Server._disconnected_sids.remove(sid)
+                return
+                ''' the client did try to connect with two
+                different sids simultaneously,
+                causing the first to be disconnected,
+                no need to finish the game
+                '''
     try:
         client = Server._clients[sid]
         client.socket_id = ''
         client.racket.stop_moving(client.racket.position.y)
         Server._clients.pop(sid)
     except KeyError:
-        pass # player has already disconnected
+        pass # the client was a spectator or has already been disconnected, nothing alarming

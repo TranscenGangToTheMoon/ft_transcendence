@@ -4,9 +4,19 @@ if (typeof tournament === 'undefined')
 	var tournament;
 if (typeof selectedValue === 'undefined')
 	var selectedValue;
+if (typeof emptyMatch === 'undefined'){
+	var emptyMatch = {
+		"id": 31,
+		"n": 1,
+		"match_code": null,
+		"score_winner": null,
+		"score_looser": null,
+		"finish_reason": null,
+		"finished": false,
+	}
+}
 
 async function joinTournament(code){
-	console.log('je passe');
 	try {
 		let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/play/tournament/${code}/`, 'POST');
 		// const tournamentDiv = document.getElementById(`tournamentDiv${tournament.id}`);
@@ -44,7 +54,7 @@ document.getElementById('searchTournamentForm').addEventListener('keyup', async 
 		if (data.count){
 			for (i in data.results){
 				let tournament = data.results[i];
-				console.log(tournament);
+				// console.log(tournament);
 				let tournamentDiv = document.createElement('div');
 				tournamentDiv.classList.add('tournament-div');
 				tournamentDiv.id = `tournamentDiv${tournament.code}`
@@ -121,13 +131,22 @@ document.getElementById('cBlock').addEventListener('click', async () => {
 function addParticipant(participant){
 	const tournamentViewDiv = document.getElementById('tournamentView');
 	const participantDiv = document.createElement('div');
+	console.log('participant',participant)
 	participantDiv.id = `tParticipant${participant.id}`;
-	participantDiv.classList.add('tournament-participant');
-	participantDiv.innerText = participant.username;
+	participantDiv.className = 'tournament-participant';
+	participantDiv.innerHTML = `
+		<img class="profile-pic-medium" src="${participant['profile_picture']}" 
+		onerror="this.onerror=null; this.src='/assets/imageNotFound.png'" 
+		alt="profile pic">
+		<div class='trunc-username'>
+			${participant.username}
+		</div>
+	`
 	tournamentViewDiv.appendChild(participantDiv);
 	if (participant.id !== userInformations.id){
 		participantDiv.addEventListener('contextmenu', function(e) {
 			e.preventDefault();
+			console.log('test');
 			clickedUserDiv = this;
 			const contextMenu = document.getElementById('contextMenu');
 			contextMenu.style.left = `${e.pageX}px`;
@@ -193,114 +212,10 @@ function tournamentStartCancel(){
 		countdownDiv.remove();
 }
 
-
-function createBracket(data) {
-	const bracketDiv = document.getElementById('bracket');
-	bracketDiv.innerHTML = '';
-	const rounds = ['sixteenth-final' ,'eighth-final', 'quarter-final', 'semi-final', 'final'];
-	let firstPassed = false;
-
-	rounds.forEach(roundName => {
-		const matches = data.matches[roundName] || [];
-		if (matches.length)
-			firstPassed = true;
-
-		if (firstPassed){
-			var roundDiv = document.createElement('div');
-			roundDiv.className = 'round';
-	
-			var titleDiv = document.createElement('h5');
-			titleDiv.className = 'text-center mb-4';
-			titleDiv.textContent = roundName.replace('-', ' ').toUpperCase();
-			roundDiv.appendChild(titleDiv);
-			var roundInsideDiv = document.createElement('div');
-			roundInsideDiv.className = 'round-inside';
-			roundDiv.appendChild(roundInsideDiv);
-		}
-
-		matches.forEach(match => {
-			const matchDiv = document.createElement('div');
-			matchDiv.className = 'match';
-
-			const card = document.createElement('div');
-			card.className = 'card';
-			if (match === null){
-				const player1Div = document.createElement('div');
-				player1Div.className = 'card-body border-bottom';
-				player1Div.innerHTML = `
-					<div class="d-flex justify-content-between">
-						<span>to be defined</span>
-					</div>
-				`;
-	
-				const player2Div = document.createElement('div');
-				player2Div.className = 'card-body';
-				player2Div.innerHTML = `
-					<div class="d-flex justify-content-between">
-						<span>to be defined</span>
-					</div>
-				`;
-	
-				card.appendChild(player1Div);
-				card.appendChild(player2Div);
-				matchDiv.appendChild(card);
-				roundInsideDiv.appendChild(matchDiv);
-			}
-			else {
-				let score = match.winner === match.user_1?.id ? match.score_winner : match.score_looser;
-				if (score === null)
-					score = '';
-				const player1Div = document.createElement('div');
-				player1Div.className = `card-body border-bottom ${match.winner === match.user_1?.id ? 'winner' : ''}`;
-				player1Div.innerHTML = `
-					<div class="d-flex justify-content-between">
-						<img class="tournament-participant-pp" src="/assets/imageNotFound.png"></img>
-						<span>${match.user_1?.username}</span>
-						<span class="fw-bold">${score}</span>
-					</div>
-				`;
-	
-				const player2Div = document.createElement('div');
-				score = match.winner === match.user_2?.id ? match.score_winner : match.score_looser;
-				if (score === null)
-					score = '';
-				player2Div.className = `card-body ${match.winner === match.user_2?.id ? 'winner' : ''}`;
-				player2Div.innerHTML = `
-					<div class="d-flex justify-content-between">
-						<img class="tournament-participant-pp" src="/assets/imageNotFound.png"></img>
-						<span>${match.user_2?.username}</span>
-						<span class="fw-bold">${score}</span>
-					</div>
-				`;
-	
-				card.appendChild(player1Div);
-				card.appendChild(player2Div);
-				matchDiv.appendChild(card);
-				roundInsideDiv.appendChild(matchDiv);
-			}
-		});
-		if (firstPassed)
-			bracketDiv.appendChild(roundDiv);
-	});
-}
-
 function tournamentStart(event){
 	event = JSON.parse(event.data);
 	console.log(event);
 	loadTournament(event.data);
-	// if (!event.data.matches['semi-final']){
-	// 	event.data.matches['semi-final'] = [];
-	// 	for (i = 0; i < event.data.matches['quarter-final'].length / 2; ++i)
-	// 		event.data.matches['semi-final'].push(null);
-	// }
-	// if (!event.data.matches['final']){
-	// 	event.data.matches['final'] = [];
-	// 	for (i = 0; i < event.data.matches['semi-final'].length / 2; ++i)
-	// 		event.data.matches['final'].push(null);
-	// }
-	// console.log(event.data.matches);
-	// document.getElementById('tournamentView').innerHTML = '';
-	// createBracket(event.data);
 }
 
 function updateMatchFromWinnerId(id, data){
@@ -327,18 +242,6 @@ async function tournamentMatchFinished(event){
 	tournament = event.data;
 	setBanOption();
 	loadTournament(tournament);
-	return;
-	try {
-		let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/play/tournament/`);
-		tournament = data;
-		setBanOption()
-		loadTournament(data);
-	}
-	catch(error){
-		if (error.code === 404)
-			document.getElementById('bracket').innerHTML = '';
-		console.log(error);
-	}
 }
 
 async function tournamentFinished(event){
@@ -358,6 +261,11 @@ function addTournamentSSEListeners(){
 	if (!SSEListeners.has('tournament-leave')){
         SSEListeners.set('tournament-leave', tournamentLeaved);
         sse.addEventListener('tournament-leave', tournamentLeaved);
+    }
+
+	if(!SSEListeners.has('tournament-message')){
+        SSEListeners.set('tournament-message', displayGameChatMessage);
+        sse.addEventListener('tournament-message', displayGameChatMessage);
     }
 
 	if (!SSEListeners.has('tournament-banned')){
@@ -396,6 +304,30 @@ function addTournamentSSEListeners(){
 	}
 }
 
+function getMatch(i, lastRound, tournament){
+    let result = {...emptyMatch};
+    const lastRoundMatches = tournament.matches[lastRound];
+    
+    const matchingMatches = [lastRoundMatches[i * 2 - 2], lastRoundMatches[i * 2 - 1]];
+    
+    for (let j in matchingMatches){
+        const match = matchingMatches[j];
+        let matchWinnerId = match.winner;
+        
+        if (!matchWinnerId || matchWinnerId === null){
+            result[`user_${parseInt(j) + 1}`] = null;
+            continue;
+        }
+        if (match.user_1 && match.user_1.id == matchWinnerId) {
+            result[`user_${parseInt(j) + 1}`] = match.user_1;
+        } else if (match.user_2 && match.user_2.id == matchWinnerId) {
+            result[`user_${parseInt(j) + 1}`] = match.user_2;
+        }
+    }
+    
+    return result;
+}
+
 function loadTournament(tournament){
 	document.getElementById('tournamentView').innerHTML = '';
 	for (i in tournament.participants){
@@ -403,18 +335,29 @@ function loadTournament(tournament){
 		addParticipant(participant);
 	}
 	addTournamentSSEListeners();
-	if (tournament.matches){
-		if (!tournament.matches['semi-final']|| !tournament.matches['semi-final'].length){
+	openGameChatTab({'type': 'tournament', 'code': tournament.code});
+	if (tournament.matches != null){
+		if ((!tournament.matches['quarter-final']|| !tournament.matches['quarter-final'].length)
+			&& tournament.matches['round of 16']
+		){
+			tournament.matches['quarter-final'] = [];
+			for (i = 0; i < tournament.matches['round of 16'].length / 2; ++i)
+				tournament.matches['quarter-final'].push(getMatch(i+1, 'round of 16', tournament));
+		} 
+		if ((!tournament.matches['semi-final']|| !tournament.matches['semi-final'].length)
+			&& tournament.matches['quarter-final']
+		){
 			tournament.matches['semi-final'] = [];
 			for (i = 0; i < tournament.matches['quarter-final'].length / 2; ++i)
-				tournament.matches['semi-final'].push(null);
+				tournament.matches['semi-final'].push(getMatch(i+1, 'quarter-final', tournament));
 		}
-		if (!tournament.matches['final'] || !tournament.matches['final'].length){
+		if ((!tournament.matches['final'] || !tournament.matches['final'].length)
+			&& tournament.matches['semi-final']
+		){
 			tournament.matches['final'] = [];
 			for (i = 0; i < tournament.matches['semi-final'].length / 2; ++i)
-				tournament.matches['final'].push(null);
+				tournament.matches['final'].push(getMatch(i+1, 'semi-final', tournament));
 		}
-		console.log(tournament.matches);
 		document.getElementById('tournamentView').innerHTML = '';
 		createBracket(tournament);
 	}
@@ -436,10 +379,6 @@ document.getElementById('searchTournamentForm').addEventListener('submit', async
 	createTournamentModal.show();
 });
 
-// document.getElementById('rangeInput').addEventListener('input', e => {
-// 	document.getElementById('tournamentSize').innerText = `Select size (${e.target.value})`;	
-// })
-
 document.getElementById('createTournament').addEventListener('click', async event => {
 	event.preventDefault();
 	const createTournamentModal = bootstrap.Modal.getOrCreateInstance('#createTournamentModal');
@@ -450,7 +389,6 @@ document.getElementById('createTournament').addEventListener('click', async even
 			'name' : tournamentName,
 			'size' : tournamentSize
 		});
-		console.log(data);
 		if (data.detail || (data.name && !data.id)){
 			document.getElementById('createTournamentError').innerText = data.detail ?? data.name;
 			setTimeout(() => {
@@ -481,14 +419,6 @@ async function leaveTournament(){
 	const tournamentViewDiv = document.getElementById('tournamentView');
 	if (tournamentViewDiv) tournamentViewDiv.innerHTML = '';
 	navigateTo('/tournament');
-	// try {
-	// 	await apiRequest(getAccessToken(), `${baseAPIUrl}/play/tournament/${tournament.code}/`, 'DELETE');
-	// 	document.getElementById('chatsListView').style.display = 'block';
-	// 	document.getElementById('leaveTournament').style.display = 'none';
-	// }
-	// catch (error){
-	// 	console.log(error);
-	// }
 }
 
 function setTournamentOptions(){
@@ -523,6 +453,7 @@ async function gameStart(event) {
 }
 
 async function initTournament(){
+	await loadScript('/tournament/scripts/createBracket.js');
 	document.getElementById('chatsListView').style.display = 'block';
 	document.getElementById('leaveTournament').style.display = 'none';
 	fromTournament = false;
@@ -542,18 +473,12 @@ async function initTournament(){
 	sse.addEventListener('game-start', gameStart);
 
 	let tournamentCode = window.location.pathname.split('/')[2];
-	// if (tournamentCode && !isNaN(parseInt(tournamentCode))){
-	// 	if (await joinTournament(tournamentCode))
-	// 		return;
-	// 	return navigateTo('/tournament', false);
-	// }
 	try {
 		let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/play/tournament/`);
 		tournament = data;
 		if (window.location.pathname !== '/tournament/' + tournament.code)
 			navigateTo('/tournament/' + tournament.code, false);
 		setBanOption()
-		console.log(data);
 		loadTournament(data);
 		document.getElementById('chatsListView').style.display = 'none';
 		document.getElementById('leaveTournament').style.display = 'block';

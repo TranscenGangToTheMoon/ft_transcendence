@@ -2,6 +2,17 @@
     font-family: 'Marker Felt, fantasy';
 }
 
+body {
+    background-image: url("/assets/background.png");
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-attachment: fixed;
+    min-height: 100vh;
+    height: 100vh;
+    max-height: 100vh;
+    overflow: hidden;
+}
+
 .dropdown-item:active {
     background-color: unset;
     color: unset;
@@ -12,16 +23,12 @@
     user-select: none;
 }
 
-.friend-badges, .all-badges{
+.friend-badges, .chat-badges, .all-badges{
     display: flex;
 }
 
 .toast-container {
     right: 20px;
-}
-
-.toast-body {
-    display: flex;
 }
 
 .notif-img {
@@ -71,11 +78,33 @@
 }
 
 .option.selected {
-    background-color: #007bff;
+    border: 2px solid;
+    background-color: black;
     color: white;
-    border-color: #0056b3;
 }
 
 #authenticate {
     text-align: center;
+}
+
+.profile-pic-medium {
+    width: 50px;
+    height: 50px;
+}
+
+.trunc-username{
+    padding-left: 5px;
+    padding-right: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.tab-content{
+    background-color: white;
+    /* border-radius: 10px; */
+}
+
+.max-vh-75 {
+    max-height: 75vh !important;
 }

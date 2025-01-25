@@ -1,0 +1,84 @@
+<div id="banner">
+    <div id="pProfilePicture">
+
+    </div>
+    <div id="pTitle"></div>
+    <div id="pRank"></div>
+</div>
+<div id="options">
+    <div id="pAcceptChat">
+        Accept chats from:
+        <div class="options-container">
+            <div class="option" data-value="none">No one</div>
+            <div class="option" data-value="friends_only">Friends</div>
+            <div class="option" data-value="everyone">Everyone</div>
+        </div>
+    </div>
+    <div id="pNickname">
+        Nickname
+        <form id="pChangeNickname" class="d-flex">
+            <input class="form-control" type="text" id="pNicknameInput">
+            <button class="btn btn-dark mx-2" type="submit">change username</button>
+        </form>
+        <div id="pChangeNicknameError" class="inputError"></div>
+    </div>
+    <div id="pPassword">
+        Password
+        <form class="d-flex">
+            <input class="form-control" type="password" id="pPasswordInput" placeholder="new password">
+            <button class="btn btn-dark mx-2" id="pChangePassword" type="submit">change password</button>
+        </form>
+        <div id="pChangePasswordError" class="inputError"></div>
+    </div>
+    <div id="pDownload" class="d-flex flex-column">
+        Download Account data
+        <div id="pDownloadData" class="btn btn-outline-secondary">
+            download
+        </div>
+    </div>
+    <div id="pDelete" class="d-flex flex-column">
+        Delete Account
+        <div class="btn btn-danger" id="pDeleteAccount">delete account</div>
+    </div>
+</div>
+
+<div class="modal fade" id="pDeleteAccountModal" tabindex="-1" aria-labelledby="pDeleteAccountModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="pDeleteAccountModalLabel">Delete account</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete your account? This action is permanent and cannot be undone.
+                To confirm your request, please re-enter your password below:
+                <form id="deleteAccountConfirm">
+                    <input type="password" id="pConfirmDeletion">
+                    <button type="submit" class="btn btn-danger">Confirm</button>
+                </form>
+                <div id="pContextError" class="inputError"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="pChangePasswordModal" tabindex="-1" aria-labelledby="pChangePasswordModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="pChangePasswordModalLabel">Change password</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to change your password? This action is permanent and cannot be undone.
+                To confirm your request, please re-enter your password below:
+                <form id="changePasswordConfirm">
+                    <input type="password" id="pConfirmPassword">
+                    <button type="submit" class="btn btn-danger">Confirm</button>
+                </form>
+                <div id="pChangeContextError" class="inputError"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<div script="/profile/profileTemplates/scripts/account.js"></div>

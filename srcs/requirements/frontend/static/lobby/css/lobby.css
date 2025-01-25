@@ -1,0 +1,132 @@
+#lobbyHeader {
+    /* background-color: red; */
+    padding: 10px;
+    display: flex;
+}
+
+#lobbyOptions{
+    /* background-color: bisque; */
+    width: 100%;
+    text-align: center;
+}
+
+/* #leaveGame {
+    background-color: green;
+}
+#gameType {
+    background-color: purple;
+}
+
+#gameId {
+    background-color: goldenrod;
+} */
+
+#lobbyInterface {
+    /* background-color: grey; */
+    display: flex;
+}
+
+#joinGameField {
+    /* background-color: cornflowerblue; */
+    /* height: 100%; */
+}
+
+#teamSelector {
+    /* background-color: brown; */
+    display: flex;
+    justify-content: center;
+}
+
+.teamDisplay {
+    display: flex;
+}
+
+#teamDisplay {
+    justify-content: center;
+    display: flex;
+}
+
+#benchPlayerListLabel {
+    width: 100%;
+    text-align: center;
+}
+
+#bench {
+    background-color: aquamarine;
+    position: absolute; /* ou `absolute` si nécessaire */
+    right: 0;
+    margin-right: 0;
+    padding-right: 0;
+}
+
+#playButton {
+    background-color: chocolate;
+}
+
+#settingsButton {
+    background-color: crimson;
+    cursor: pointer;
+    user-select: none;
+}
+
+#benchPlayerList, #teamADisplay, #teamBDisplay {
+    padding: 10px;
+}
+
+#teamA .player{
+    background-color: red !important;
+    outline: auto;
+    outline-color: white;
+    width: 70px;
+    height: 100px;
+}
+
+#teamB .player{
+    background-color: rgb(0, 181, 247) !important;
+    outline: auto;
+    outline-color: white;
+    width: 70px;
+    height: 100px;
+}
+
+#bench .player {
+    background-color: rgb(100, 102, 104);
+    outline: auto;
+    outline-color: white;
+    width: 70px;
+    height: 100px;
+}
+
+#teamALabel {
+    text-align: center;
+    width: 100%;
+}
+
+
+.draggable {
+    cursor: grab;
+}
+.dropzone {
+    min-height: 100px;
+    user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+}
+.dropzone.hovered {
+    background-color: #f8f9fa !important;
+}
+
+.player img {
+    -webkit-user-drag : none;
+    pointer-events: none;
+}
+
+.custom-context-menu {
+    position: absolute;
+    z-index: 1000;
+    display: none;
+    min-width: 150px;
+    background-color: white;
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}

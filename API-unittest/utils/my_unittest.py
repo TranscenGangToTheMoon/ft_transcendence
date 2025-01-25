@@ -68,11 +68,6 @@ class UnitTest(unittest.TestCase):
         return user['thread']
 
     def _thread_connect_to_sse(self, user, tests, status_code, connect_game):
-        if tests is None:
-            user['expected_thread_result'] = 0
-        else:
-            user['expected_thread_result'] = len(tests)
-        user['thread_result'] = 0
         user['thread_tests'] = tests
         user['thread_assertion'] = []
         user['thread_finish'] = False
@@ -98,8 +93,6 @@ class UnitTest(unittest.TestCase):
                             buff = line
                             continue
                         for event, data in re.findall(r'event: ([a-z0-9\-]+)\ndata: (.+)\n\n', line):
-                            if event == 'delete-user':
-                                break
                             if event == 'ping':
                                 continue
                             data = json.loads(data)
@@ -107,7 +100,8 @@ class UnitTest(unittest.TestCase):
                             if data['event_code'] == 'game-start' and connect_game:
                                 self.assertResponse(is_in_game(user, data['data']['id']), 200)
                             user['thread_assertion'].append(data['event_code'])
-                            user['thread_result'] += 1
+                            if event == 'delete-user':
+                                break
         print(f"SSE DISCONNECTING {user['username']}...\n", flush=True)
 
     def assertThread(self, *users):
@@ -122,4 +116,3 @@ class UnitTest(unittest.TestCase):
             print('expected', user['thread_tests'], flush=True)
             print('got     ', user['thread_assertion'], flush=True)
             self.assertListEqual(user['thread_tests'], user['thread_assertion'])
-            self.assertEqual(user['expected_thread_result'], user['thread_result'])

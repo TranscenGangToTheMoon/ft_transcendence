@@ -8,7 +8,7 @@ def send_match_result(match):
     try:
         from matches.serializers import MatchSerializer
 
-        request_users(endpoints.Users.result_match, 'POST', data=MatchSerializer(match).data)
+        request_users(endpoints.Users.result_match, 'POST', data=MatchSerializer(match, context={'retrieve_users': False}).data)
     except APIException:
         raise ServiceUnavailable('users')
 

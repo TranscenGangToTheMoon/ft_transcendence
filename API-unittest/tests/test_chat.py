@@ -334,6 +334,34 @@ class Test04_Messages(UnitTest):
         self.assertTrue(self.assertResponse(create_chat(user1, method='GET'), 200)['results'][0]['last_message']['is_read'])
         self.assertThread(user1, user2)
 
+    def test_011_message_is_read(self):
+        user1 = self.user()
+        user2 = self.user()
+
+        chat_id = self.send_message(user1, user2)
+
+        messages = self.assertResponse(create_message(user1, chat_id, method='GET'), 200, get_field='results')
+        for message in messages:
+            if message['author'] == user2['id']:
+                self.assertFalse(message['is_read'])
+
+        messages = self.assertResponse(create_message(user1, chat_id, method='GET'), 200, get_field='results')
+        for message in messages:
+            if message['author'] == user2['id']:
+                self.assertTrue(message['is_read'])
+
+        messages = self.assertResponse(create_message(user2, chat_id, method='GET'), 200, get_field='results')
+        for message in messages:
+            if message['author'] == user1['id']:
+                self.assertFalse(message['is_read'])
+
+        messages = self.assertResponse(create_message(user2, chat_id, method='GET'), 200, get_field='results')
+        for message in messages:
+            if message['author'] == user1['id']:
+                self.assertTrue(message['is_read'])
+
+        self.assertThread(user1, user2)
+
 
 if __name__ == '__main__':
     unittest.main()

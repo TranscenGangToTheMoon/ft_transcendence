@@ -60,10 +60,10 @@ class Matches(models.Model):
         if self.game_mode == GameMode.RANKED:
             player = retrieve_users(self.users_id(), return_type=dict)
             winner = self.winner.players.first()
-            looser = self.winner.players.first()
+            looser = self.looser.players.first()
             winner_trophies, looser_trophies = compute_trophies(player[winner.user_id]['trophies'], player[looser.user_id]['trophies'])
             winner.set_trophies(winner_trophies)
-            winner.set_trophies(looser_trophies)
+            looser.set_trophies(-looser_trophies)
         if self.game_mode in [GameMode.CLASH, GameMode.CUSTOM_GAME]:
             try:
                 request_matchmaking(endpoints.Matchmaking.lobby_finish_match, 'POST', {'players': self.users_id()})

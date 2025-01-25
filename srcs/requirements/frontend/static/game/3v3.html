@@ -1,14 +1,57 @@
-
-<div id="gameArea">
-    <canvas id="gameCanvas" style="background-color: rgba(128, 128, 128, 0.607);margin: 50px;">
-    
-    </canvas>
-    <!-- <div id="gameInfos">
-        <label for="score">Score:</label>
-        <div class="d-flex"  id="score"><div id="enemyScore">0</div>-<div id="playerScore">0</div></div>
-    </div> -->
+<div class="d-none" id="gameArea">
+    <div id="canvas-container" class="position-relative d-flex flex-column justify-content-center align-items-center overflow-hidden" style="transform-origin: top left;">
+        <div class="d-flex flex-column w-100" id="gameInfo">
+            <div id="scoreArea" class="d-flex justify-content-between w-100">
+                <div id="enemyScoreArea" class="d-flex col align-items-center bg-danger h-100">
+                    <div id="enemyUsername1" class="col text-center fs-2 fw-bold p-2">Enemy</div>
+                    <div id="enemyUsername2" class="col text-center fs-2 fw-bold p-2">Enemy</div>
+                    <div id="enemyUsername3" class="col text-center fs-2 fw-bold p-2">Enemy</div>
+                    <div id="enemyScore" class="col-4 fs-1 fw-bold text-white p-2 text-end">0</div>
+                </div>
+                <div id="playerScoreArea" class="d-flex col justify-content-between align-items-center bg-primary h-100">
+                    <div id="playerScore" class="col-4 text-start fs-1 fw-bold text-white p-2">0</div>
+                    <div id="playerUsername3" class="col text-center fs-2 fw-bold p-2">You</div>
+                    <div id="playerUsername2" class="col text-center fs-2 fw-bold p-2">You</div>
+                    <div id="playerUsername1" class="col text-center fs-2 fw-bold p-2">You</div>
+                </div>
+            </div>
+        </div>
+        <canvas id="gameCanvas" class="d-block" style="background-color: rgba(128, 128, 128, 0.2);">
+        </canvas>
+    </div>
 </div>
 
-<!-- <h5 class="align-self-center" id="opponentWait">Waiting for an opponent...</h5> -->
+<div class="modal fade" id="gameOverModal" tabindex="-1" aria-labelledby="gameOverModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="gameOverModalLabel">Game over</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="gameOverContent">
+                <label for="playerScore" id="playerScoreLabel">
+                    <a class="teamDetail"
+                        data-bs-toggle="popover" 
+                        data-bs-trigger="hover"
+                        data-bs-html="true"
+                        title="Team ">
+                    Team {team-id}</a> Score:
+                </label>
+                <div id="playerScore">-</div>
+                <label for="enemyScore" id="enemyScoreLabel">
+                <a class="teamDetail"
+                    data-bs-toggle="popover" 
+                    data-bs-trigger="hover"
+                    data-bs-html="true"
+                    title="Team ">
+                    Team {team-id}</a> Score:
+                </label>
+                <div id="enemyScore">-</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h5 class="align-self-center" id="opponentWait">Waiting for an opponent...</h5>
 
 <div script="/game/scripts/3v3.js"></div>

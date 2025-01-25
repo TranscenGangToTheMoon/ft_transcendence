@@ -8,6 +8,15 @@ from rest_framework.exceptions import APIException, NotFound
 from game_server.pong_racket import Racket
 
 
+class Spectator():
+    def __init__(self, id, sid):
+        self.user_id: int = id
+        self.socket_id: str = sid
+
+    def __str__(self) -> str:
+        return str(self.user_id) + ' ' + self.socket_id
+
+
 class Player():
     def __init__(self, id, match_id, team):
         self.match_id = match_id
@@ -55,6 +64,7 @@ class Match():
         self.id = game_data['id']
         self.teams: List[Team] = []
         self.game_mode = game_data['game_mode']
+        self.code = game_data['code']
         teams = game_data['teams']
         for team_name, team in teams.items():
             self.teams.append(Team(team['players'], self.id, team_name))
