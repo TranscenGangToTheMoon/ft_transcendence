@@ -31,21 +31,19 @@ async function getMatchesAfter(date){
     }
     let results = [];
     let passed = false;
-    console.log('lordre',[...rankedData.results]);
     rankedData.results.forEach(match => {
         matchDate = new Date(match.at);
         if (matchDate >= date){
             results.push(match);
-            console.log('je push', match);
             if (!passed){
                 passed = true;
                 const index = rankedData.results.findIndex(obj => obj.id === match.id);
                 console.log('index',index);
                 if (index){
                     previousRank = rankedData.results[index - 1];
-                    console.log('je rajoute celui davant:', previousRank);
-                    previousRank.at = date;
-                    results.unshift(previousRank);
+                    let copy = {...previousRank};
+                    copy.at = date;
+                    results.unshift(copy);
                 }
             }
         }
