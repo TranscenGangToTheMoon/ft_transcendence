@@ -173,14 +173,20 @@ class TournamentMatchSerializer(Serializer):
         ]
 
     def get_winner(self, obj):
+        user = obj.winner.players.first()
         if 'users' in self.context:
-            return self.context['users'][obj.winner.players.first().user_id]
-        return {'id': obj.winner.players.first().user_id}
+            base = self.context['users'][user.user_id]
+        else:
+            base = {'id': user.user_id}
+        return {**base, 'score': user.score}
 
     def get_looser(self, obj):
+        user = obj.looser.players.first()
         if 'users' in self.context:
-            return self.context['users'][obj.looser.players.first().user_id]
-        return {'id': obj.winner.players.first().user_id}
+            base = self.context['users'][user.user_id]
+        else:
+            base = {'id': user.user_id}
+        return {**base, 'score': user.score}
 
 
 class MatchFinishSerializer(Serializer):
