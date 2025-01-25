@@ -218,9 +218,9 @@ class MatchFinishSerializer(Serializer):
         except Players.DoesNotExist:
             raise NotFound(MessagesException.NotFound.NOT_BELONG_MATCH)
         player.team.score = 0
-        player.save()
-        winner = instance.players.exclude(user_id=player.user_id).first()
-        winner.team.score = settings.GAME_MAX_SCORE
+        player.team.save()
+        winner = instance.teams.exclude(id=player.team.id).first()
+        winner.score = settings.GAME_MAX_SCORE
         winner.save()
         validated_data['finished'] = True
         result = super().update(instance, validated_data)
