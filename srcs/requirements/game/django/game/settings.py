@@ -15,8 +15,8 @@ from os import environ
 
 # todo use last version of django in all services
 # Own settings
-with open('game_server/gameConfig.json', encoding='utf-8') as f:
-    GAME_MAX_SCORE = json.load(f)['score']['max'] # todo make by request
+with open('gameConfig.json', encoding='utf-8') as f:
+    GAME_MAX_SCORE = json.load(f)['score']['max']
 
 APPEND_SLASH = False
 
