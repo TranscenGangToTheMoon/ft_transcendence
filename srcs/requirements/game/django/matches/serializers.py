@@ -161,6 +161,7 @@ class TournamentMatchSerializer(Serializer):
             'game_duration',
             'winner',
             'looser',
+            'finish_reason',
         ]
         read_only_fields = [
             'id',
@@ -168,6 +169,7 @@ class TournamentMatchSerializer(Serializer):
             'game_duration',
             'winner',
             'looser',
+            'finish_reason',
         ]
 
     def get_winner(self, obj):
