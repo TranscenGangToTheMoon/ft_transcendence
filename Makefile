@@ -108,6 +108,7 @@ fclean		:	dusting
 			rm -rf $(ENV_FILE)
 			rm -rf $(SECRETS_D)
 			rm -rf $(CONFIG_F)
+			rm -rf $(SRCS_D)/requirements/pong-cli/ft_transcendence.crt
 
 .PHONY: dusting
 dusting		:

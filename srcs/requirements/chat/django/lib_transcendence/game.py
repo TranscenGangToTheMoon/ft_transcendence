@@ -39,7 +39,7 @@ class FinishReason:
     NORMAL_END = 'normal-end'
     PLAYER_DISCONNECT = 'player-disconnect'
     PLAYER_NOT_CONNECTED = 'player-not-connected'
-    PLAYERS_TIMEOUT = 'Players-timeout'
+    PLAYERS_TIMEOUT = 'players-timeout'
     GAME_NOT_PLAYED = 'game-not-played'
     NO_GAME = 'no-game'
 
