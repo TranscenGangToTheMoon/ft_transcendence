@@ -1,4 +1,8 @@
 from django.db import models
+from django.db.models import Q
+from rest_framework.exceptions import APIException
+
+from blocking.models import Blocked
 from lib_transcendence.game import GameMode
 from lib_transcendence.lobby import MatchType, Teams
 from lib_transcendence.sse_events import EventCode, create_sse_event
@@ -61,14 +65,21 @@ class Lobby(models.Model):
         if self.ready_to_play:
             self.play()
 
-    def make_team(self, team, order_by_count=False): # todo resecure this
+    def make_team(self, team):
+        def block_relation(result_):
+            for new_user in result_.participants.all():
+                for team_user_id in team:
+                    if Blocked.objects.filter(user_id=new_user.user_id, blocked_user_id=team_user_id).exists():
+                        return True
+            return False
+
         remain_player = self.max_participants - len(team)
         while remain_player != 0:
-            result = Lobby.objects.exclude(id__in=self.exclude_lobby).filter(ready_to_play=True, count__lte=remain_player)
+            blocked_user = Blocked.objects.filter(user_id__in=team).values_list('blocked_user_id', flat=True)
+            result = Lobby.objects.exclude(Q(id__in=self.exclude_lobby) | Q(participants__user_id__in=blocked_user)).filter(ready_to_play=True, count__lte=remain_player)
 
-            if order_by_count:
-                result = result.order_by('count')
-            result = result.last()
+            exclude_lobby = [r.id for r in result if block_relation(r)]
+            result = result.exclude(id__in=exclude_lobby).order_by('count').last()
             if result is None:
                 raise NoLobbyFound()
             team += result.get_user_id()
@@ -82,17 +93,20 @@ class Lobby(models.Model):
         if self.game_mode == GameMode.CUSTOM_GAME:
             team_a = self.get_user_id(Teams.A)
             team_b = self.get_user_id(Teams.B)
-        else: # todo handle block users
+        else:
             team_a = self.get_user_id()
             team_b = []
             self.exclude_lobby = [self.id]
             try:
                 team_a = self.make_team(team_a)
-                team_b = self.make_team(team_b, True)
+                team_b = self.make_team(team_b)
             except NoLobbyFound:
                 return
 
-        create_match(GameMode.CUSTOM_GAME, team_a, team_b)
+        try:
+            create_match(GameMode.CUSTOM_GAME, team_a, team_b)
+        except APIException:
+            return
         for lobby in self.playing_lobby:
             lobby.playing()
 
