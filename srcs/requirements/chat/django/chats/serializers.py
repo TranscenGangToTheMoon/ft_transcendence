@@ -13,7 +13,7 @@ from user_management.models import Users
 
 
 class ChatsSerializer(Serializer):
-    username = serializers.CharField(write_only=True)
+    username = serializers.CharField(max_length=30, write_only=True)
     chat_with = serializers.SerializerMethodField(read_only=True)
     unread_messages = serializers.SerializerMethodField(read_only=True)
     last_message = MessagesSerializer(source='messages.last', read_only=True)

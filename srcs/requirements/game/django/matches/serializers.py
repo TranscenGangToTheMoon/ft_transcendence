@@ -183,7 +183,7 @@ class TournamentMatchSerializer(Serializer):
 
 class MatchFinishSerializer(Serializer):
     user_id = serializers.IntegerField(required=True, write_only=True)
-    finish_reason = serializers.CharField(required=True)
+    finish_reason = serializers.CharField(max_length=20, required=True)
 
     class Meta:
         model = Matches

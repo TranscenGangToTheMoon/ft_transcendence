@@ -17,8 +17,8 @@ from users.models import Users
 class UsersMeSerializer(Serializer):
     accept_friend_request = serializers.BooleanField()
     notifications = serializers.SerializerMethodField(read_only=True)
-    password = serializers.CharField(write_only=True)
-    old_password = serializers.CharField(write_only=True)
+    password = serializers.CharField(max_length=50, write_only=True)
+    old_password = serializers.CharField(max_length=50, write_only=True)
     trophies = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
