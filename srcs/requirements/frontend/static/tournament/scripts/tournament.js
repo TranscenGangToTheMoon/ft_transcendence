@@ -357,6 +357,7 @@ function getMatch(i, lastRound, tournament){
 }
 
 function loadTournament(tournament){
+	addTournamentSSEListeners();
 	localStorage.setItem('lobbyCode', '/tournament/' + tournament.code);
 	if (window.location.pathname === '/game/tournament') return;
 	document.getElementById('tournamentView').innerHTML = '';
@@ -364,7 +365,6 @@ function loadTournament(tournament){
 		let participant = tournament.participants[i];
 		addParticipant(participant);
 	}
-	addTournamentSSEListeners();
 	openGameChatTab({'type': 'tournament', 'code': tournament.code});
 	if (tournament.matches != null){
 		if ((!tournament.matches['quarter-final']|| !tournament.matches['quarter-final'].length)
