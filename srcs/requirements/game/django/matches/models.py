@@ -24,6 +24,7 @@ class Matches(models.Model):
     game_start = models.BooleanField(default=False)
     finished = models.BooleanField(default=False)
     finish_reason = models.CharField(max_length=20, null=True, default=None)
+    finished_at = models.DateTimeField(null=True, default=None)
 
     winner = models.ForeignKey('Teams', null=True, default=None, on_delete=models.SET_NULL, related_name='winner')
     looser = models.ForeignKey('Teams', null=True, default=None, on_delete=models.SET_NULL, related_name='looser')
@@ -41,9 +42,11 @@ class Matches(models.Model):
         if self.finish_reason == FinishReason.PLAYERS_TIMEOUT:
             self.delete()
             return
+        finished_at = datetime.now(timezone.utc)
         self.finished = True
+        self.finished_at = finished_at
         self.code = None
-        self.game_duration = datetime.now(timezone.utc) - self.created_at
+        self.game_duration = finished_at - self.created_at
         self.winner, self.looser = self.teams.order_by('-score')
         self.save()
         if self.tournament_id is not None:
