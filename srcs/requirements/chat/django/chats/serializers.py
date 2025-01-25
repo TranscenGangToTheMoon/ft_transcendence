@@ -60,7 +60,7 @@ class ChatsSerializer(Serializer):
         result = super().create(validated_data)
         for u in (user, user2):
             user_instance, created = Users.objects.get_or_create(id=u['id'], username=u['username'])
-            ChatParticipants.objects.create(user=user_instance, chat_id=result.id)
+            result.participants.create(user=user_instance)
         return result
 
 

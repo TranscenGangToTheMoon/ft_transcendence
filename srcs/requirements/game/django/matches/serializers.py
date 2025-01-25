@@ -8,7 +8,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import NotFound, PermissionDenied
 from lib_transcendence.serializer import Serializer
 
-from matches.models import Matches, Teams, Players
+from matches.models import Matches, Players
 
 
 def validate_user_id(value, return_match=False, kwargs=None):
@@ -142,9 +142,10 @@ class MatchSerializer(Serializer):
         if match.game_mode == GameMode.CLASH:
             kwargs['own_goal'] = 0
         for name_team, players in teams.items():
-            new_team = Teams.objects.create(match=match, name=name_team)
+            new_team = match.teams.create(name=name_team)
             for user in players:
-                Players.objects.create(user_id=user, match=match, team=new_team, **kwargs)
+                match.players.create(user_id=user, team=new_team, **kwargs)
+        return match
         return match
 
 
