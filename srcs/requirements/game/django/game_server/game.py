@@ -137,6 +137,9 @@ class Game:
 
     def add_spectator(self, user_id: int, sid: str):
         self.spectators.append(Spectator(user_id, sid))
+        self.reconnect(user_id, sid)
+
+    def reconnect(self, user_id: int, sid: str):
         self.send_score(sid=sid)
         self.send_canvas(sid)
         self.send_rackets(sid)

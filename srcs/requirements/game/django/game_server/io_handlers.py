@@ -67,6 +67,7 @@ async def connect(sid, environ, auth):
         with Server._dsids_lock:
             Server._disconnected_sids.append(player_sid)
         await Server._sio.disconnect(player_sid)
+        Server.get_game(game_id).reconnect(player.user_id, sid)
     player.socket_id = sid
     Server._clients[sid] = player
     await Server._sio.enter_room(sid, str(game_id))
@@ -126,6 +127,11 @@ async def disconnect(sid):
     from game_server.server import Server
     with Server._dsids_lock:
         for search in Server._disconnected_sids:
+            try:
+                await Server._sio.get_session(search)
+            except KeyError:
+                Server._disconnected_sids.remove(search)
+                continue
             if search == sid:
                 Server._disconnected_sids.remove(sid)
                 return
