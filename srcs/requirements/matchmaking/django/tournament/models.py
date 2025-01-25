@@ -12,7 +12,7 @@ from rest_framework.exceptions import APIException
 
 from baning.models import delete_banned
 from blocking.utils import delete_player_instance
-from matchmaking.create_match import create_tournament_match
+from matchmaking.create_match import create_tournament_match, create_tournament_match_not_played
 from matchmaking.utils.model import ParticipantsPlace
 from matchmaking.utils.sse import send_sse_event, start_tournament_sse
 from tournament.sse import send_sse_event_finish_match
@@ -217,6 +217,7 @@ class TournamentMatches(models.Model):
     def post(self):
         if self.user_2 is not None:
             if not self.user_1.still_in:
+                create_tournament_match_not_played(self.tournament.id, self.stage.id, self.n, self.user_2)
                 self.finish(self.user_2)
             else:
                 try:
@@ -227,6 +228,7 @@ class TournamentMatches(models.Model):
                 except APIException:
                     self.finish(None)
         elif self.user_1 is not None and self.user_1.still_in:
+            create_tournament_match_not_played(self.tournament.id, self.stage.id, self.n, self.user_1)
             self.finish(self.user_1)
         else:
             self.finish(None)
