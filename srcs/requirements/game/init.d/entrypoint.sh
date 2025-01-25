@@ -18,8 +18,6 @@ DELETE FROM matches_teams WHERE match_id IN (SELECT id FROM matches_matches WHER
 DELETE FROM matches_matches WHERE finished = FALSE;
 "
 
-python fetch_game_config.py &
-
 python socket_server.py &
 
 exec "$@"
