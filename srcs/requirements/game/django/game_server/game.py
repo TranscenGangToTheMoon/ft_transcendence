@@ -41,7 +41,7 @@ class Game:
                        racket_to_racket_offset) -> List[Racket]:
         rackets: List[Racket] = []
         racket_offset = ledge_offset
-        with open('game_server/gameConfig.json', 'r') as config_file:
+        with open('gameConfig.json', 'r') as config_file:
             config = json.load(config_file)
             racket_max_speed = config['paddle'][match.game_type]['speed']
         # create rackets for right players
@@ -63,7 +63,7 @@ class Game:
                 sio,
                 match) -> None:
         self.match: Match = match
-        with open('game_server/gameConfig.json', 'r') as config_file:
+        with open('gameConfig.json', 'r') as config_file:
             config = json.load(config_file)
             self.canvas = Position(config['canvas'][self.match.game_type]['width'],
                                     config['canvas'][self.match.game_type]['height'])
