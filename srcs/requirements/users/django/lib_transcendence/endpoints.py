@@ -25,6 +25,7 @@ class Chat:
 
 class Game:
     create_match = 'api/private/match/create/'
+    create_match_not_played = 'api/private/match/create/not-played/'
     ffinish_match = 'api/private/match/finish/{match_id}/'
     finish_match = 'api/private/match/finish/<int:match_id>/'
     fscore = 'api/private/match/score/{user_id}/'

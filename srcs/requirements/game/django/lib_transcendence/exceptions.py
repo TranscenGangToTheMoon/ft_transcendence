@@ -106,6 +106,7 @@ class MessagesException:
         UPDATE_TEAM_CLASH_MODE = f'You cannot update team in {GameMode.CLASH} mode.'
 
         NOT_CREATOR = 'Only creator can update this {obj}.'
+        BAN_NOT_CREATOR = 'Only the {obj} creator can ban a user'
 
         CAN_CREATE_MORE_THAN_ONE_TOURNAMENT = 'You cannot create more than one tournament at the same time.'
 
