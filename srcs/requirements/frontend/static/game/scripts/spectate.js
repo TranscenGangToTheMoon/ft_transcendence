@@ -485,7 +485,10 @@ function initSocket(match_code, spectateModal=0){
 		window.PongGame.drawGame();
 	})
     gameSocket.on('connect_error', (error)=> {
-		document.getElementById('spectateError').innerText = 'Impossible to spectate that game';
+        document.getElementById('spectateError').innerText = 'Impossible to spectate that game';
+        setTimeout(() => {
+            document.getElementById('spectateError').innerText = '';
+        }, 3000)
     })
     gameSocket.on('disconnect', async () => {
         gameSocket.close();
@@ -759,14 +762,7 @@ async function initGame(){
 		initSocket(match_code);
     }
     else {
-		const spectatePromptModal = new bootstrap.Modal(document.getElementById('spectatePromptModal'));
-		spectatePromptModal.show();
-	    document.getElementById('gameArea').classList.replace('d-flex', 'd-none');
-		document.getElementById('codeSubmit').addEventListener('click', async (event) => {
-			event.preventDefault();
-			var match_code = document.getElementById('spectateInput').value;
-			initSocket(match_code, spectatePromptModal);
-		})
+        navigateTo('/');
     }
 	PongGame.resizeCanvas();
 }
