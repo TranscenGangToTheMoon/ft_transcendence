@@ -2,7 +2,6 @@ from lib_transcendence import endpoints
 from lib_transcendence.chat import AcceptChat
 from lib_transcendence.exceptions import MessagesException
 from lib_transcendence.services import request_chat
-from lib_transcendence.game import GameMode
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied, APIException
 from lib_transcendence.serializer import Serializer
@@ -10,6 +9,7 @@ from lib_transcendence.serializer import Serializer
 from friends.serializers import FriendsSerializer
 from friends.utils import get_friendship
 from profile_pictures.create import create_user_profile_pictures
+from stats.create import create_user_stats
 from stats.utils import get_trophies
 from users.auth import auth_update
 from users.models import Users
@@ -136,15 +136,6 @@ class ManageUserSerializer(Serializer):
 
     def create(self, validated_data):
         result = super().create(validated_data)
-        for game_mode in [GameMode.GLOBAL] + GameMode.attr():
-            if game_mode == GameMode.CUSTOM_GAME:
-                continue
-            kwargs = {'game_mode': game_mode}
-            if GameMode.tournament_field(game_mode):
-                kwargs['tournament_wins'] = 0
-            if GameMode.own_goal_field(game_mode):
-                kwargs['own_goals'] = 0
-            result.stats.create(**kwargs)
-        result.ranked_stats.create(trophies=0, total_trophies=0)
+        create_user_stats(result)
         create_user_profile_pictures(result)
         return result
