@@ -120,6 +120,7 @@ function addFriendListListener(){
 
 async function  indexInit(auto=true) {
     if (!auto){
+        console.log('zizi');
         await loadUserProfile();
     }
     else{
@@ -146,8 +147,15 @@ async function  indexInit(auto=true) {
         history.replaceState({state: currentState}, '', window.location.pathname);
         incrementCurrentState();
         loadCSS('/css/styles.css', false);
+        quitLobbies('', window.location.pathname);
         handleRoute();
     }
 }
+
+window.addEventListener("pageshow", (event) => {
+    if (event.persisted) {
+        indexInit();
+    }
+});
 
 indexInit();

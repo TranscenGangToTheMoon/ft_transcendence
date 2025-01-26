@@ -43,18 +43,6 @@ urlpatterns = [
     path(UsersManagement.manage_user, manage_user_view),
 ]
 
-# --- OTHER ---
-# todo test tournament with ui
-# todo test tournament abandon
-# todo test tournament quit tournament via sse
-
-# todo test utilisateur se connecte deux fois au jeux
-# todo si utilisateur se supprime pendant le chat
-# todo chat lobby et tournoi
-# todo return 200 avec data when score (PATCH not PUT)
-
-# --- before push ---
-# todo type all python code (make variable)
-# todo check norm (sort line all import)
-# todo delete __str__ for all models
+# todo test tournament with ui (abandon quit tournament via sse)
 # todo check problem
+# todo sort import

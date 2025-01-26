@@ -1,22 +1,17 @@
-
 import os
 import sys
-import django
-import asyncio
+
 import socketio
 from aiohttp import web
-from asgiref.sync import async_to_sync, sync_to_async
+from asgiref.sync import sync_to_async
+from rest_framework.exceptions import AuthenticationFailed, PermissionDenied, APIException, NotFound
+
 from connectedUsers import ConnectedUsers
+from lib_transcendence import endpoints
 from lib_transcendence.auth import auth_verify
 from lib_transcendence.chat import post_messages
 from lib_transcendence.services import request_chat
-from lib_transcendence.endpoints import Chat as endpoint_chat
 from lib_transcendence.sse_events import create_sse_event, EventCode
-from rest_framework.exceptions import APIException
-from rest_framework.exceptions import PermissionDenied
-from rest_framework.exceptions import AuthenticationFailed
-from rest_framework.exceptions import NotFound
-from socketio.exceptions import ConnectionRefusedError
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_DIR)
@@ -29,8 +24,9 @@ sio.attach(app, socketio_path='/ws/chat/')
 
 usersConnected = ConnectedUsers()
 
+
 @sio.event
-async def connect(sid, environ, auth):
+async def connect(sid, _, auth):
     print(f"Client attempting to connect : {sid}")
     token = auth.get('token')
     chatId = auth.get('chatId')
@@ -40,9 +36,9 @@ async def connect(sid, environ, auth):
         try:
             print(f"Trying to authentificate : {sid}")
             user = auth_verify(token)
-            if (usersConnected.is_user_connected(user['id'])):
+            if usersConnected.is_user_connected(user['id']):
                 print(f"User already connected : {sid}")
-                await sio.emit('error', {'error':409, 'message':'User already connected'}, to=usersConnected.get_user_sid(user['id']))
+                await sio.emit('error', {'error': 409, 'message': 'User already connected'}, to=usersConnected.get_user_sid(user['id']))
                 await sio.disconnect(usersConnected.get_user_sid(user['id']))
             chat = request_chat(endpoint_chat.fchat.format(chat_id=chatId), 'GET', None, token)
             print(f"Connection successeeded {sid}")
@@ -55,7 +51,7 @@ async def connect(sid, environ, auth):
         except AuthenticationFailed:
             print(f"Authentification failed : {sid}")
             raise ConnectionRefusedError({"error": 401, "message": "Invalid token"})
-        except  PermissionDenied:
+        except PermissionDenied:
             print(f"Permission denied : {sid}")
             raise ConnectionRefusedError({"error": 403, "message": "Permission denied"})
         except APIException:
@@ -74,20 +70,22 @@ async def disconnect(sid):
     usersConnected.remove_user(sid)
     print(f"Client disconnected : {sid}")
 
+
 @sio.event
 async def leave(sid, data):
     await sio.leave_room(sid, str(usersConnected.get_chat_id(sid)))
     usersConnected.remove_user(sid)
     await sio.disconnect(sid)
 
+
 @sio.event
 async def message(sid, data):
-    chatId = usersConnected.get_chat_id(sid)
+    chat_id = usersConnected.get_chat_id(sid)
     content = data.get('content')
     token = data.get('token')
-    isChatWithConnected = usersConnected.is_chat_with_connected_with_him(sid)
+    is_chat_with_connected = usersConnected.is_chat_with_connected_with_him(sid)
     print(f"New message from {sid}: {data}")
-    if (content is None or token is None):
+    if content is None or token is None:
         await sio.emit(
             'error',
             {'error': 400, 'message': 'Invalid message format'},
@@ -95,13 +93,13 @@ async def message(sid, data):
         )
         return
     try:
-        answerAPI = await sync_to_async(post_messages, thread_sensitive=False)(chatId, content, token)
+        answer_api = await sync_to_async(post_messages, thread_sensitive=False)(chat_id, content, token)
         await sio.emit(
             'chat-server',
             answerAPI,
             to=sid
         )
-        if (isChatWithConnected == False):
+        if not is_chat_with_connected:
             await sio.emit(
                 'chat-server',
                 {'message': 'The other user is not connected'},
@@ -117,8 +115,8 @@ async def message(sid, data):
             )
         await sio.emit(
             'message',
-            {'author':answerAPI['author'], 'content': content, 'is_read': isChatWithConnected},
-            room=str(chatId)
+            {'author': answer_api['author'], 'content': content, 'is_read': is_chat_with_connected},
+            room=str(chat_id)
         )
         print(f"Message saved and sent from {sid}: {data}")
     except PermissionDenied as e:

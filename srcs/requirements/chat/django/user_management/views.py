@@ -30,7 +30,7 @@ class DownloadDataView(SerializerKwargsContext, generics.ListAPIView):
     def filter_queryset(self, queryset):
         return Chats.objects.filter(participants__user__id=self.kwargs['user_id'])
 
-    def get_serializer_context(self): # todo remake
+    def get_serializer_context(self):
         return {'auth_user': {'id': self.kwargs['user_id']}, 'user_id': self.kwargs['user_id']}
 
 

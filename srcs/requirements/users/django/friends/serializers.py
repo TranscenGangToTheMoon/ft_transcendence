@@ -6,7 +6,7 @@ from lib_transcendence.serializer import Serializer
 from friend_requests.models import FriendRequests
 from friends.models import Friends
 from users.auth import get_user
-from users.serializers_utils import SmallUsersSerializer
+from users.serializers_utils import LargeUsersSerializer
 
 
 class FriendsSerializer(Serializer):
@@ -43,14 +43,14 @@ class FriendsSerializer(Serializer):
         if request is None:
             raise serializers.ValidationError(MessagesException.ValidationError.REQUEST_REQUIRED)
         if (instance.user_1.id == request.user.id and request.method != 'POST') or (instance.user_1.id != request.user.id and request.method == 'POST'):
-            data['friend_win'] = instance.user2_win
-            data['me_win'] = instance.user1_win
+            data['friend_win'] = instance.user2_wins
+            data['me_win'] = instance.user1_wins
             friend = instance.user_2
         else:
-            data['friend_win'] = instance.user1_win
-            data['me_win'] = instance.user2_win
+            data['friend_win'] = instance.user1_wins
+            data['me_win'] = instance.user2_wins
             friend = instance.user_1
-        data['friend'] = SmallUsersSerializer(friend).data
+        data['friend'] = LargeUsersSerializer(friend).data
         return data
 
     def create(self, validated_data):

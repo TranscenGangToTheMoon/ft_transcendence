@@ -10,6 +10,9 @@ from tournaments.serializers import TournamentSerializer
 class SaveTournamentView(generics.CreateAPIView):
     serializer_class = TournamentSerializer
 
+    def get_serializer_context(self):
+        return {'retrieve_users': False}
+
 
 class RetrieveTournamentView(generics.RetrieveAPIView):
     serializer_class = TournamentSerializer

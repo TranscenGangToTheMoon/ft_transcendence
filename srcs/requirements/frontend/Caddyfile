@@ -1,81 +1,78 @@
-
-
 {
-    log {
-        level ERROR
-        output discard
-    }
+	log {
+		level ERROR
+		output discard
+	}
 }
 
 :443 {
 	tls /run/secrets/ssl.crt /run/secrets/ssl.key
 
 	root * /var/www/html
+
 	handle {
 		@trailing path_regexp trailing ^(/.+)/$
-		@excludeSSE path /sse/*
 		redir @trailing {re.trailing.1} permanent
 		try_files {path} /index.html
 		file_server
 	}
 
+	@notJSON {
+		not header Content-Type application/json
+	}
+
 	handle /ws/* {
-        handle /ws/chat/* {
-            reverse_proxy http://chat:8010
-        }
-        handle /ws/game/* {
-            reverse_proxy http://game:5500
-        }
-    }
+		handle /ws/chat/* {
+			reverse_proxy http://chat:8010
+		}
+		handle /ws/game/* {
+			reverse_proxy http://game:5500
+		}
+	}
 
 	handle /sse/* {
-    header {
-        Cache-Control "no-cache"
-        Connection "keep-alive"
-        Content-Type "text/event-stream"
-    }
-
-    handle /sse/users/* {
-        reverse_proxy http://users:8000 {
-            header_up Accept "text/event-stream"
-            header_up Connection "keep-alive"
-            header_up Cache-Control "no-cache"
-			header_down Connection "keep-alive"
-        }
-    }
-}
-
-	handle /api/* {
-		# API route to micro-services
-		@notJSON {
-			not header Content-Type application/json
+		header {
+			Cache-Control "no-cache"
+			Connection "keep-alive"
+			Content-Type "text/event-stream"
 		}
 
+		handle /sse/users/* {
+			reverse_proxy http://users:8000 {
+				header_up Accept "text/event-stream"
+				header_up Connection "keep-alive"
+				header_up Cache-Control "no-cache"
+				header_down Connection "keep-alive"
+			}
+		}
+	}
+
+	handle /api/* {
+		handle @notJSON {
+			respond "Unsupported Media Type" 415
+		}
+
+		# API route to micro-services
 		handle /api/auth/* {
-			respond @notJSON "Unsupported Media Type" 415
 			reverse_proxy http://auth:8000
 		}
 
 		handle /api/chat/* {
-			respond @notJSON "Unsupported Media Type" 415
 			reverse_proxy http://chat:8000
 		}
 
 		handle /api/game/* {
-			respond @notJSON "Unsupported Media Type" 415
 			reverse_proxy http://game:8000
 		}
 
 		handle /api/play/* {
-			respond @notJSON "Unsupported Media Type" 415
 			reverse_proxy http://matchmaking:8000
 		}
 
 		handle /api/users/* {
-			respond @notJSON "Unsupported Media Type" 415
 			reverse_proxy http://users:8000
 		}
 
-		respond "ft_transcendence : api not found" 404 #must serv a 404.html
+		respond "ft_transcendence : api not found" 404
 	}
 }

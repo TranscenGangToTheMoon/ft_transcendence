@@ -187,3 +187,8 @@ async function displayNotification(icon=undefined, title=undefined, body=undefin
         }
     }, 5000);
 }
+
+function emptyNotificationQueue(){
+    notificationQueue = [];
+    document.getElementById('toastContainer').innerHTML = '';
+}

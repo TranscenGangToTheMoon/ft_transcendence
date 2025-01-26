@@ -61,17 +61,8 @@ class TournamentSearchView(generics.ListAPIView):
         return queryset.exclude(id__in=exclude_tournament)
 
 
-class TournamentParticipantsView(SerializerAuthContext, generics.ListCreateAPIView, generics.DestroyAPIView):
-    queryset = TournamentParticipants.objects.all()
+class TournamentParticipantsView(SerializerAuthContext, generics.CreateAPIView, generics.DestroyAPIView):
     serializer_class = TournamentParticipantsSerializer
-    pagination_class = None
-
-    def filter_queryset(self, queryset):
-        tournament = get_tournament(code=self.kwargs['code'])
-        queryset = queryset.filter(tournament_id=tournament.id)
-        if not queryset.filter(user_id=self.request.user.id).exists():
-            raise PermissionDenied(MessagesException.PermissionDenied.NOT_BELONG_TOURNAMENT)
-        return queryset
 
     def get_object(self):
         return get_tournament_participant(get_tournament(code=self.kwargs['code']), self.request.user.id)

@@ -8,8 +8,8 @@ class Friends(models.Model):
     user_2 = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='friend_2')
     friends_since = models.DateTimeField(auto_now_add=True)
     matches_play_against = models.PositiveIntegerField(default=0)
-    user1_win = models.PositiveIntegerField(default=0)
-    user2_win = models.PositiveIntegerField(default=0)
+    user1_wins = models.PositiveIntegerField(default=0)
+    user2_wins = models.PositiveIntegerField(default=0)
     matches_played_together = models.PositiveIntegerField(default=0)
     matches_won_together = models.PositiveIntegerField(default=0)
 
