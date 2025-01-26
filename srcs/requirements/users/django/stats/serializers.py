@@ -2,7 +2,8 @@ from rest_framework import serializers
 from lib_transcendence.game import GameMode
 from rest_framework.exceptions import APIException
 from lib_transcendence.serializer import Serializer
-from profile_pictures.unlock import unlock_tournament_pp, unlock_duel_clash_pp, unlock_ranked_pp
+from profile_pictures.unlock import unlock_tournament_pp, unlock_duel_clash_pp, unlock_game_played_pp, \
+    unlock_score_pp, unlock_winning_streak_pp
 
 from stats.models import GameModeStats, RankedStats
 from users.auth import get_user
@@ -69,21 +70,24 @@ class FinishMatchSerializer(serializers.Serializer):
             for team_name, team_users in validated_data['teams'].items():
                 for user_json in team_users['players']:
                     try:
-                        if validated_data['game_mode'] == GameMode.CLASH and 'own_goals' in user_json:
-                            own_goals = validated_data['own_goals']
-                        else:
-                            own_goals = None
                         user = get_user(id=user_json['id'])
-                        user.set_game_playing()
-                        stat = user.stats.get(game_mode=validated_data['game_mode'])
-                        stat.log(user_json['score'], team_name == validated_data['winner'], own_goals)
-                        if validated_data['game_mode'] in (GameMode.DUEL, GameMode.CLASH):
-                            unlock_duel_clash_pp(user, validated_data['game_mode'].upper())
-                        if validated_data['game_mode'] == GameMode.RANKED and 'trophies' in user_json:
-                            RankedStats.log(user, user_json['trophies'])
-                            unlock_ranked_pp(user)
                     except APIException:
-                        pass
+                        continue
+                    user.set_game_playing()
+                    if validated_data['game_mode'] == GameMode.CLASH and 'own_goals' in user_json:
+                        own_goals = validated_data['own_goals']
+                    else:
+                        own_goals = None
+                    stat = user.stats.get(game_mode=validated_data['game_mode'])
+                    stat.log(user_json['score'], team_name == validated_data['winner'], own_goals)
+                    unlock_winning_streak_pp(user, stat)
+                    if validated_data['game_mode'] in (GameMode.DUEL, GameMode.CLASH):
+                        unlock_duel_clash_pp(user, stat, validated_data['game_mode'])
+                    if validated_data['game_mode'] == GameMode.RANKED and 'trophies' in user_json:
+                        RankedStats.log(user, user_json['trophies'])
+                    unlock_game_played_pp(user)
+                    unlock_score_pp(user)
+
         return validated_data
 
 

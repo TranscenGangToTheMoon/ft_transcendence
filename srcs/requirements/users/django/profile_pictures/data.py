@@ -22,8 +22,10 @@ class ProfilePicture:
     RANKED_MYTHIC = 'Ranked Mythic'
     FUN_PLAYER = 'Fun Player'
     SCORER = 'Scorer'
+    GOD_SCORER = 'God Scorer'
     ONE_FRIEND = 'One Friend'
     POPULAR_GUY = 'Popular Guy'
+    WIN_STREAK_PLAYER = 'Win Streak Player'
 
     def __init__(self, name, unlock_reason):
         self.n = ProfilePicture.global_n
@@ -49,24 +51,26 @@ class ProfilePicture:
 
 
 profile_pictures = [
-    ProfilePicture(ProfilePicture.DEFAULT, 'Default profile picture'),
-    ProfilePicture(ProfilePicture.TOURNAMENT_WINNER, 'Win 1 tournament'),
-    ProfilePicture(ProfilePicture.TOURNAMENT_MASTER, 'Win 10 tournaments'),
-    ProfilePicture(ProfilePicture.TOURNAMENT_GOD, 'Win 100 tournaments'),
+    ProfilePicture(ProfilePicture.DEFAULT, 'Default profile picture.'),
+    ProfilePicture(ProfilePicture.TOURNAMENT_WINNER, 'Win 1 tournament.'),
+    ProfilePicture(ProfilePicture.TOURNAMENT_MASTER, 'Win 10 tournaments.'),
+    ProfilePicture(ProfilePicture.TOURNAMENT_GOD, 'Win 100 tournaments.'),
     ProfilePicture(ProfilePicture.CLASH_WINNER, 'Win 10 clash games.'),
     ProfilePicture(ProfilePicture.CLASH_MASTER, 'Win 50 clash games.'),
     ProfilePicture(ProfilePicture.CLASH_GOD, 'Win 100 clash games.'),
     ProfilePicture(ProfilePicture.DUEL_WINNER, 'Win 10 duel games.'),
     ProfilePicture(ProfilePicture.DUEL_MASTER, 'Win 50 duel games.'),
     ProfilePicture(ProfilePicture.DUEL_GOD, 'Win 100 duel games.'),
-    ProfilePicture(ProfilePicture.RANKED_BRONZE, 'Achieve over 100 trophies in ranked'),
-    ProfilePicture(ProfilePicture.RANKED_SILVER, 'Achieve over 500 trophies in ranked'),
-    ProfilePicture(ProfilePicture.RANKED_GOLD, 'Achieve over 1000 trophies in ranked'),
-    ProfilePicture(ProfilePicture.RANKED_DIAMOND, 'Achieve over 2000 trophies in ranked'),
-    ProfilePicture(ProfilePicture.RANKED_MASTER, 'Achieve over 3000 trophies in ranked'),
-    ProfilePicture(ProfilePicture.RANKED_MYTHIC, 'Achieve over 5000 trophies in ranked'),
-    ProfilePicture(ProfilePicture.FUN_PLAYER, 'Play a match in all game modes'),
-    ProfilePicture(ProfilePicture.SCORER, 'Score 100 goals in any game mode'),
-    ProfilePicture(ProfilePicture.ONE_FRIEND, 'Have at least one friend'),
-    ProfilePicture(ProfilePicture.POPULAR_GUY, 'Have more than 50 friends'),
+    ProfilePicture(ProfilePicture.RANKED_BRONZE, 'Achieve over 100 trophies in ranked.'),
+    ProfilePicture(ProfilePicture.RANKED_SILVER, 'Achieve over 500 trophies in ranked.'),
+    ProfilePicture(ProfilePicture.RANKED_GOLD, 'Achieve over 1000 trophies in ranked.'),
+    ProfilePicture(ProfilePicture.RANKED_DIAMOND, 'Achieve over 2000 trophies in ranked.'),
+    ProfilePicture(ProfilePicture.RANKED_MASTER, 'Achieve over 3000 trophies in ranked.'),
+    ProfilePicture(ProfilePicture.RANKED_MYTHIC, 'Achieve over 5000 trophies in ranked.'),
+    ProfilePicture(ProfilePicture.FUN_PLAYER, 'Play a match in all game modes.'),
+    ProfilePicture(ProfilePicture.SCORER, 'Score 100 goals in any game mode.'),
+    ProfilePicture(ProfilePicture.GOD_SCORER, 'Score 1000 goals in any game mode.'),
+    ProfilePicture(ProfilePicture.ONE_FRIEND, 'Have at least one friend.'),
+    ProfilePicture(ProfilePicture.POPULAR_GUY, 'Have more than 50 friends.'),
+    ProfilePicture(ProfilePicture.WIN_STREAK_PLAYER, 'Win more than 10 games in a row.'),
 ]
