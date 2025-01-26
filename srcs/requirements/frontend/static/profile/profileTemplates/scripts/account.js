@@ -146,7 +146,7 @@ function fillNicknamePlaceholder() {
 }
 
 function setChatAcceptationOptions(){
-	const options = document.querySelectorAll('.option');
+	const options = document.getElementById('options').querySelectorAll('.option');
 	selectedValue = userInformations.accept_chat_from;
 
 	options.forEach(option => {

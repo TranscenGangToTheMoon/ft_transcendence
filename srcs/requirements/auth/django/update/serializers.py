@@ -11,9 +11,9 @@ from guest.group import is_guest
 
 
 class UpdateSerializer(Serializer):
-    username = serializers.CharField(write_only=True, validators=[validate_username])
-    password = serializers.CharField(write_only=True)
-    old_password = serializers.CharField(write_only=True, required=False)
+    username = serializers.CharField(max_length=30, write_only=True, validators=[validate_username])
+    password = serializers.CharField(max_length=50, write_only=True)
+    old_password = serializers.CharField(max_length=50, write_only=True, required=False)
 
     class Meta:
         model = User

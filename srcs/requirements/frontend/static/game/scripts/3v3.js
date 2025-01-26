@@ -79,6 +79,7 @@
 
     function resizeCanvas() {
         const container = document.getElementById('canvas-container');
+        if (!container) return;
         const windowWidth = window.innerWidth;
         const windowHeight = window.innerHeight - document.querySelector('header').offsetHeight;
   
@@ -493,12 +494,12 @@ function fillTeamDetail(enemyTeamDetail, playerTeamDetail){
     }
 }
 
-function initSocket(){
+function initSocket(socketPath, socketMode){
 	const host = window.location.origin;
 	const token = getAccessToken();
 	let gameSocket = io(host, {
-      transports: ["websocket"],
-      path: "/ws/game/",
+      transports: [socketMode],
+      path: socketPath,
       auth : {
           "id": userInformations.id,
           "token": token,
@@ -647,7 +648,7 @@ async function initGameConstants(){
         })
 }
 
-async function initData(data){
+async function initData(data, socketPath, socketMode){
     await initGameConstants();
     try {
 		if (data.teams.a.players.some(player => player.id == userInformations.id)) {
@@ -674,7 +675,7 @@ async function initData(data){
 	document.getElementById('enemyUsername1').innerText = PongGame.info.enemyTeam.players.players[0].username;
 	document.getElementById('enemyUsername2').innerText = PongGame.info.enemyTeam.players.players[1].username;
     document.getElementById('enemyUsername3').innerText = PongGame.info.enemyTeam.players.players[2].username;
-	initSocket();
+	initSocket(socketPath, socketMode);
 }
 
 // sse.addEventListener('game-start', event => {
@@ -702,11 +703,9 @@ async function gameStart(event){
     document.getElementById('gameArea').classList.replace('d-none', 'd-flex');
     document.getElementById('opponentWait').style.display = 'none';
     data = JSON.parse(event.data);
-    data = data.data;
     console.log('game-start received (game)');
     try {
-
-        await initData(data);
+        await initData(data.data, data.target[0].url, data.target[0].type);
     }
     catch (error){
         wrongConfigFileError(error);
@@ -728,7 +727,7 @@ async function initGame(){
         checkGameAuthorization();
         if (userInformations.lobbyData){
             try {
-                await initData(userInformations.lobbyData);
+                await initData(...(userInformations.lobbyData));
                 document.getElementById('gameArea').classList.replace('d-none', 'd-flex');
                 document.getElementById('opponentWait').style.display = 'none';
             }

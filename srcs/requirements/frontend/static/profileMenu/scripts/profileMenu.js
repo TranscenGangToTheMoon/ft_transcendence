@@ -1,6 +1,7 @@
 document.getElementById('logOut').addEventListener('click', async event => {
     event.preventDefault();
     sse.close();
+    emptyNotificationQueue();
     removeTokens();
     await generateToken();
     await fetchUserInfos(true);

@@ -34,7 +34,4 @@ while IFS= read -r line; do
     fi
 done < "$ENV_DEFAULT"
 
-GAME_MAX_SCORE=$(jq '.score.max' 'gameConfig.json')
-echo "GAME_MAX_SCORE=$GAME_MAX_SCORE" >> "$ENV_OUTPUT"
-
 exit 0

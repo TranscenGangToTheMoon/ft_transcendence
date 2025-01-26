@@ -92,7 +92,7 @@ class TournamentStageSerializer(Serializer):
 
 class TournamentParticipantsSerializer(Serializer):
     id = serializers.IntegerField(source='user_id', read_only=True)
-    tournament = serializers.CharField(source='tournament.code', read_only=True)
+    tournament = serializers.CharField(max_length=4, source='tournament.code', read_only=True)
 
     class Meta:
         model = TournamentParticipants
@@ -130,8 +130,8 @@ class TournamentParticipantsSerializer(Serializer):
 
 
 class TournamentSearchSerializer(Serializer):
-    n_participants = serializers.SerializerMethodField()
-    created_by = serializers.CharField(source='created_by_username')
+    n_participants = serializers.SerializerMethodField(read_only=True)
+    created_by = serializers.CharField(source='created_by_username', read_only=True)
 
     class Meta:
         model = Tournament

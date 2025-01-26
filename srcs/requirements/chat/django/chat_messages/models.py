@@ -1,6 +1,6 @@
 from django.db import models
 
-from chats.models import Chats, ChatParticipants
+from chats.models import Chats
 from user_management.models import Users
 
 

@@ -528,15 +528,18 @@ async function lobbyGameStart(event){
     event = JSON.parse(event.data);
     console.log(event);
 
+    // localStorage.setItem('game-event', JSON.stringify(event));
+    // localStorage.setItem('game-target-path', event.target[0].url);
+    // localStorage.setItem('game-target-type', event.target[0].type);
     if (matchType === '3v3'){
         await navigateTo('/game/3v3', true, true);
         fromLobby = true;
-        userInformations.lobbyData = event.data;
+        userInformations.lobbyData = [event.data, event.target[0].url, event.target[0].type];
     }
     else{
         await navigateTo('/game/1v1', true, true);
         fromLobby = true;
-        userInformations.lobbyData = event.data;
+        userInformations.lobbyData = [event.data, event.target[0].url, event.target[0].type];
     }
 }
 
@@ -580,9 +583,6 @@ function initLobbySSEListeners(){
         sse.removeEventListener('game-start', SSEListeners.get('game-start'));
         SSEListeners.delete('game-start');
     }
-    console.log(
-        'je listen'
-    )
     SSEListeners.set('game-start', lobbyGameStart);
     sse.addEventListener('game-start', lobbyGameStart);
 }
@@ -615,6 +615,8 @@ async function lobbyInit() {
             document.getElementById('gameId').innerText = lobby.code;
             await fillPlayerList();
             openGameChatTab({type: 'lobby', 'code': lobby.code});
+            window.lobbyCode = '/lobby/' + lobby.code;
+            localStorage.setItem('lobbyCode', '/lobby/' + code);
         }
     }
     catch(error){
@@ -639,6 +641,8 @@ async function lobbyInit() {
                 document.getElementById('gameType').innerText = gameMode;
                 document.getElementById('gameId').innerText = lobby.code;
                 await fillPlayerList();
+                localStorage.setItem('lobbyCode', '/lobby/' + code);
+                window.lobbyCode = '/lobby/' + lobby.code;
             }
             if (lobby.detail === 'Lobby is full.')
                 throw {code:404}

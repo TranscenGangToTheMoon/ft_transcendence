@@ -1,6 +1,6 @@
-import os
 from datetime import timedelta, datetime, timezone
 
+from django.conf import settings
 from lib_transcendence.exceptions import ServiceUnavailable
 from lib_transcendence.services import request_matchmaking
 from lib_transcendence import endpoints
@@ -23,7 +23,8 @@ class Matches(models.Model):
     tournament_n = models.IntegerField(null=True, default=None)
     game_start = models.BooleanField(default=False)
     finished = models.BooleanField(default=False)
-    finish_reason = models.CharField(null=True, default=None, max_length=35)
+    finish_reason = models.CharField(max_length=20, null=True, default=None)
+    finished_at = models.DateTimeField(null=True, default=None)
 
     winner = models.ForeignKey('Teams', null=True, default=None, on_delete=models.SET_NULL, related_name='winner')
     looser = models.ForeignKey('Teams', null=True, default=None, on_delete=models.SET_NULL, related_name='looser')
@@ -41,9 +42,11 @@ class Matches(models.Model):
         if self.finish_reason == FinishReason.PLAYERS_TIMEOUT:
             self.delete()
             return
+        finished_at = datetime.now(timezone.utc)
         self.finished = True
+        self.finished_at = finished_at
         self.code = None
-        self.game_duration = datetime.now(timezone.utc) - self.created_at
+        self.game_duration = finished_at - self.created_at
         self.winner, self.looser = self.teams.order_by('-score')
         self.save()
         if self.tournament_id is not None:
@@ -58,7 +61,7 @@ class Matches(models.Model):
             except APIException:
                 raise ServiceUnavailable('matchmaking')
         if self.game_mode == GameMode.RANKED:
-            player = retrieve_users(self.users_id(), return_type=dict)
+            player = retrieve_users(self.users_id(), return_type=dict, size='large')
             winner = self.winner.players.first()
             looser = self.looser.players.first()
             winner_trophies, looser_trophies = compute_trophies(player[winner.user_id]['trophies'], player[looser.user_id]['trophies'])
@@ -84,7 +87,7 @@ class Teams(models.Model):
     def scored(self):
         self.score += 1
         self.save()
-        if self.score == int(os.environ['GAME_MAX_SCORE']):
+        if self.score == settings.GAME_MAX_SCORE:
             self.match.finish()
 
 

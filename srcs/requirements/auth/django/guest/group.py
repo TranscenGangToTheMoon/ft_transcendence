@@ -4,11 +4,7 @@ group_guests = 'Guests'
 
 
 def get_group_guest():
-    try:
-        guest_group = Group.objects.get(name=group_guests)
-    except Group.DoesNotExist:
-        guest_group = Group.objects.create(name=group_guests)
-    return guest_group
+    return Group.objects.get_or_create(name=group_guests)[0]
 
 
 def is_guest(request=None, user=None):

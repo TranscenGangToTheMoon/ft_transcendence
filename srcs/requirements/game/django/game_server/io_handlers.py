@@ -64,14 +64,15 @@ async def connect(sid, environ, auth):
     print(f'player sid: {player_sid}', flush=True)
     if player_sid != '' and player_sid != sid:
         await Server._sio.leave_room(player_sid, str(player.match_id))
+        with Server._dsids_lock:
+            Server._disconnected_sids.append(player_sid)
         try:
-            await Server._sio.get_session(player_sid) # ckeck if the client is still connected
-            with Server._dsids_lock:
-                Server._disconnected_sids.append(player_sid)
             await Server._sio.disconnect(player_sid)
-        except KeyError:
-            pass # client has already been disconnected
+        except (KeyError):
+            pass
+        Server.get_game(game_id).reconnect(player.user_id, sid)
     player.socket_id = sid
+    player.game = Server.get_game(game_id)
     Server._clients[sid] = player
     await Server._sio.enter_room(sid, str(game_id))
     print(f'User {id} connected & authenticated', flush=True)
@@ -130,6 +131,11 @@ async def disconnect(sid):
     from game_server.server import Server
     with Server._dsids_lock:
         for search in Server._disconnected_sids:
+            try:
+                await Server._sio.get_session(search)
+            except KeyError:
+                Server._disconnected_sids.remove(search)
+                continue
             if search == sid:
                 Server._disconnected_sids.remove(sid)
                 return
@@ -139,7 +145,13 @@ async def disconnect(sid):
                 no need to finish the game
                 '''
     try:
-        match_id = Server._clients[sid].match_id
-        await sync_to_async(Server.finish_game)(match_id, FinishReason.PLAYER_DISCONNECT, Server._clients[sid].user_id)
+
+        client = Server._clients[sid]
+        print(f"clientferiof{client.game.match.game_mode}", flush=True)
+        if client.game.match.game_mode != 'duel' and client.game.match.game_mode != 'ranked':
+            await sync_to_async(Server.finish_game)(client.game.match.id, FinishReason.PLAYER_DISCONNECT, client.user_id)
+        else:
+            client.racket.stop_moving(client.racket.position.y)
+            Server._clients.pop(sid)
     except KeyError:
         pass # the client was a spectator or has already been disconnected, nothing alarming

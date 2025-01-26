@@ -64,6 +64,7 @@ class Match():
         self.id = game_data['id']
         self.teams: List[Team] = []
         self.game_mode = game_data['game_mode']
+        print(f"game mode {self.game_mode}", flush=True)
         self.code = game_data['code']
         teams = game_data['teams']
         for team_name, team in teams.items():

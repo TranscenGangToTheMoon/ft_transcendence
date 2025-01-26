@@ -13,7 +13,7 @@ from user_management.models import Users
 
 
 class ChatsSerializer(Serializer):
-    username = serializers.CharField(write_only=True)
+    username = serializers.CharField(max_length=30, write_only=True)
     chat_with = serializers.SerializerMethodField(read_only=True)
     unread_messages = serializers.SerializerMethodField(read_only=True)
     last_message = MessagesSerializer(source='messages.last', read_only=True)
@@ -40,7 +40,7 @@ class ChatsSerializer(Serializer):
 
     def get_chat_with(self, obj):
         chat_with = obj.participants.exclude(user__id=self.context['auth_user']['id']).first()
-        chat_with_user = retrieve_users(chat_with.user.id)
+        chat_with_user = retrieve_users(chat_with.user.id, size='large')
         return chat_with_user[0]
 
     def get_unread_messages(self, obj):
@@ -60,7 +60,7 @@ class ChatsSerializer(Serializer):
         result = super().create(validated_data)
         for u in (user, user2):
             user_instance, created = Users.objects.get_or_create(id=u['id'], username=u['username'])
-            ChatParticipants.objects.create(user=user_instance, chat_id=result.id)
+            result.participants.create(user=user_instance)
         return result
 
 

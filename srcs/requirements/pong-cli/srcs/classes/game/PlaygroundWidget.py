@@ -1,6 +1,3 @@
-# Rich imports
-from rich.console   import Console
-
 # Textual imports
 from textual.geometry   import Offset
 from textual.widget     import Widget
@@ -24,9 +21,7 @@ class Playground(Widget):
             return ((" " * width + "█\n") * Config.Playground.height)
 
     def on_mount(self):
-        console = Console()
-        Config.Console.width = console.width
-        Config.Console.height = console.height
+        Config.Console.reload()
 
         self.styles.offset = Offset((Config.Console.width - Config.Playground.width) // 2, (Config.Console.height - Config.Playground.height) // 2)
         self.styles.background = "gray"
