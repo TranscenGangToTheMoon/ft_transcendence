@@ -5,7 +5,6 @@ from aiohttp import web
 from game_server import io_handlers
 from game_server.match import Player
 from game_server.game import Game
-from game_server.pong_position import Position
 from threading import Lock, Thread
 from typing import Dict, List
 
@@ -43,7 +42,7 @@ class Server:
         Server._loop_lock = Lock()
         Server._sio_lock = Lock()
         Server._dsids_lock = Lock()
-        with open('game_server/gameConfig.json', 'r', encoding='utf-8') as config_file:
+        with open('gameConfig.json', 'r', encoding='utf-8') as config_file:
             config = json.load(config_file)
             Server._config = config
             Game.default_ball_speed = config['ball']['speed']
