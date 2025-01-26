@@ -29,7 +29,7 @@ async function joinTournament(code){
 			return 0;
 		}
 		if (window.location.pathname !== '/tournament/' + code)
-			navigateTo('/tournament/' + code, false);
+			navigateTo('/tournament/' + code, false, true);
 		document.getElementById('chatsListView').style.display = 'none';
 		document.getElementById('leaveTournament').style.display = 'block';
 		tournament = data;
@@ -81,6 +81,7 @@ if (typeof clickedUserDiv === 'undefined')
 
 function setBanOption(){
 	const banDiv = document.getElementById('cBan');
+	if (!banDiv) return;
 	if (tournament.created_by !== userInformations.id){
 		banDiv.classList.add('disabled');
 	}
@@ -162,6 +163,31 @@ function removeParticipant(id){
 		participantDiv.remove();
 }
 
+function displayCountdown(){
+	// return;
+	const countdownElement = document.getElementById('tMainCountdown');
+	const backdrop = document.getElementById('tBackdrop');
+
+	let counter = 2;
+
+        // Show the backdrop
+	backdrop.classList.replace('d-none', 'd-flex');
+
+	// Start the countdown
+	const interval = setInterval(() => {
+		countdownElement.textContent = counter;
+		counter--;
+
+		if (counter < 0) {
+			clearInterval(interval);
+
+			// Hide the backdrop when countdown ends
+			backdrop.classList.replace('d-flex', 'd-none');
+			// alert('Tournament Started!');
+		}
+	}, 1000); // Update every 1 second
+}
+
 function tournamentJoined(event){
 	event = JSON.parse(event.data);
 	addParticipant(event.data);
@@ -213,8 +239,9 @@ function tournamentStartCancel(){
 }
 
 function tournamentStart(event){
+	displayCountdown();
 	event = JSON.parse(event.data);
-	console.log(event);
+	console.log('tournament start:', event);
 	loadTournament(event.data);
 }
 
@@ -240,6 +267,7 @@ async function tournamentMatchFinished(event){
 	console.log('received match finished event');
 	console.log(event);
 	tournament = event.data;
+	await displayNotification(undefined, 'Match finished', event.message);
 	setBanOption();
 	loadTournament(tournament);
 }
@@ -329,12 +357,14 @@ function getMatch(i, lastRound, tournament){
 }
 
 function loadTournament(tournament){
+	addTournamentSSEListeners();
+	localStorage.setItem('lobbyCode', '/tournament/' + tournament.code);
+	if (window.location.pathname === '/game/tournament') return;
 	document.getElementById('tournamentView').innerHTML = '';
 	for (i in tournament.participants){
 		let participant = tournament.participants[i];
 		addParticipant(participant);
 	}
-	addTournamentSSEListeners();
 	openGameChatTab({'type': 'tournament', 'code': tournament.code});
 	if (tournament.matches != null){
 		if ((!tournament.matches['quarter-final']|| !tournament.matches['quarter-final'].length)
@@ -401,7 +431,7 @@ document.getElementById('createTournament').addEventListener('click', async even
 		createTournamentModal.hide();
 		tournament = data;
 		if (window.location.pathname !== '/tournament/' + tournament.code)
-			navigateTo('/tournament/' + tournament.code, false);
+			navigateTo('/tournament/' + tournament.code, false, true);
 		setBanOption();
 		loadTournament(data);
 	}
@@ -448,8 +478,8 @@ async function gameStart(event) {
 	if (fromTournament)
 		userInformations.cancelReturn = true;
 	fromTournament = true;
-	tournamentData = event.data;
-	await navigateTo('/game/tournament');
+	tournamentData = [event.data, event.target[0].url, event.target[0].type];
+	await navigateTo('/game/tournament', true, true);
 }
 
 async function initTournament(){
@@ -477,7 +507,7 @@ async function initTournament(){
 		let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/play/tournament/`);
 		tournament = data;
 		if (window.location.pathname !== '/tournament/' + tournament.code)
-			navigateTo('/tournament/' + tournament.code, false);
+			navigateTo('/tournament/' + tournament.code, false, true);
 		setBanOption()
 		loadTournament(data);
 		document.getElementById('chatsListView').style.display = 'none';

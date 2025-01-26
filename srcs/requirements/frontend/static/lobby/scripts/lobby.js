@@ -531,12 +531,12 @@ async function lobbyGameStart(event){
     if (matchType === '3v3'){
         await navigateTo('/game/3v3', true, true);
         fromLobby = true;
-        userInformations.lobbyData = event.data;
+        userInformations.lobbyData = [event.data, event.target[0].url, event.target[0].type];
     }
     else{
         await navigateTo('/game/1v1', true, true);
         fromLobby = true;
-        userInformations.lobbyData = event.data;
+        userInformations.lobbyData = [event.data, event.target[0].url, event.target[0].type];
     }
 }
 
@@ -615,6 +615,8 @@ async function lobbyInit() {
             document.getElementById('gameId').innerText = lobby.code;
             await fillPlayerList();
             openGameChatTab({type: 'lobby', 'code': lobby.code});
+            window.lobbyCode = '/lobby/' + lobby.code;
+            localStorage.setItem('lobbyCode', '/lobby/' + code);
         }
     }
     catch(error){
@@ -639,6 +641,8 @@ async function lobbyInit() {
                 document.getElementById('gameType').innerText = gameMode;
                 document.getElementById('gameId').innerText = lobby.code;
                 await fillPlayerList();
+                localStorage.setItem('lobbyCode', '/lobby/' + code);
+                window.lobbyCode = '/lobby/' + lobby.code;
             }
             if (lobby.detail === 'Lobby is full.')
                 throw {code:404}

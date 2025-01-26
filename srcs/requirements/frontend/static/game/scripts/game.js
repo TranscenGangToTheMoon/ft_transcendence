@@ -98,6 +98,7 @@
 
     function resizeCanvas() {
         const container = document.getElementById('canvas-container');
+        if (!container) return;
         const windowWidth = window.innerWidth;
         const windowHeight = window.innerHeight - document.querySelector('header').offsetHeight;
   
@@ -518,12 +519,12 @@ async function updateTrophies(){
 if (typeof cancelTimeout === 'undefined')
     var cancelTimeout;
 
-function initSocket(match_code){
+function initSocket(match_code, socketPath, socketMode){
 	const host = window.location.origin;
 	const token = getAccessToken();
 	let gameSocket = io(host, {
-      transports: ["websocket"],
-      path: "/ws/game/",
+      transports: [socketMode],
+      path: socketPath,
       auth : {
           "id": userInformations.id,
           "token": token,
@@ -608,9 +609,8 @@ function initSocket(match_code){
         updateTrophies();
 		PongGame.handleGameOver(event.reason);
         if (typeof fromTournament !== 'undefined' && fromTournament){
-            document.getElementById('gameOverModal').querySelector('.modal-footer').classList.add('d-none');
-            await navigateTo('/tournament');
-
+            await navigateTo('/tournament', true, true);
+            return;
         }
         else if (typeof fromLobby !== 'undefined' && fromLobby){
             document.getElementById('gameOverModal').querySelector('.modal-footer').classList.add('d-none');
@@ -686,7 +686,7 @@ async function initGameConstants(){
         })
 }
 
-async function initData(data){
+async function initData(data, socketPath, socketMode){
     await initGameConstants();
     try {
         console.log(data);
@@ -713,7 +713,7 @@ async function initData(data){
 	console.log(userInformations.username);
     // document.getElementById('playerUsername').innerText = userInformations.username;
     // document.getElementById('enemyUsername').innerText = PongGame.info.enemyTeam.players.players[0].username;
-	initSocket(data.code);
+	initSocket(data.code, socketPath, socketMode);
     setTimeout(async () => {
         if (!cancelTimeout && gameSocket && !isModalOpen()){
             console.log('donc',gameSocket);
@@ -741,10 +741,10 @@ async function gameStart(event){
     cancelTimeout = false;
 
     data = JSON.parse(event.data);
-    data = data.data;
-    console.log('game-start received (game)');
+    // data = data.data;
+    console.log('game-start received (game)', JSON.parse(event.data));
     try {
-        await initData(data);
+        await initData(data.data, data.target[0].url, data.target[0].type);
     }
     catch (error){
         wrongConfigFileError(error);
@@ -838,10 +838,22 @@ async function initGame(){
     document.getElementById('opponentWait').style.display = "block";
     try {
         checkGameAuthorization();
-        if (window.location.pathname === '/game/tournament')
-            await initData(tournamentData);
+        if (window.location.pathname === '/game/tournament'){
+            async function tournamentFinished(event){
+                event = JSON.parse(event.data);
+                console.log('received tournament-finish');
+                console.log(event);
+                await navigateTo('/', true, true); //todo replace by tournament history
+                displayNotification(undefined, 'tournament finished', event.message, undefined, undefined); //todo add target 
+            }
+            if (!SSEListeners.has('tournament-finish')){
+                SSEListeners.set('tournament-finish', tournamentFinished);
+                sse.addEventListener('tournament-finish', tournamentFinished);
+            }
+            await initData(...tournamentData);
+        }
         else if (window.location.pathname === '/game/1v1')
-            await initData(userInformations.lobbyData);
+            await initData(...(userInformations.lobbyData));
         else {
             if (SSEListeners.has('game-start')){
                 sse.removeEventListener('game-start', SSEListeners.get('game-start'));

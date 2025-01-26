@@ -54,9 +54,14 @@ function isModalOpen() {
 async function quitLobbies(oldUrl, newUrl){
     await closeGameChatTab();
     if (oldUrl === '/service-unavailable') return;
-    if (oldUrl.includes('/lobby')){
+    console.log('je passe pourtant');
+    let regex = /\/[A-Za-z]+\/[0-9]+/i;;
+    console.log('hey' ,regex.test(newUrl));
+    console.log('hey1' ,localStorage.getItem('lobbyCode'));
+    if (localStorage.getItem('lobbyCode') && !regex.test(newUrl)){
         try {
-            await apiRequest(getAccessToken(), `${baseAPIUrl}/play${oldUrl}/`, 'DELETE');
+            await apiRequest(getAccessToken(), `${baseAPIUrl}/play${localStorage.getItem('lobbyCode')}/`, 'DELETE');
+            localStorage.removeItem('lobbyCode');
         }
         catch (error){
             console.log(error);
