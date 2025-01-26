@@ -103,8 +103,12 @@
 
     const paddleImage = new Image();
     paddleImage.src = "/assets/paddle.png";
+    const rightPaddleImage = new Image();
+    rightPaddleImage.src = "/assets/paddle_right.png";
+    const leftPaddleImage = new Image();
+    leftPaddleImage.src = "/assets/paddle_left.png";
     const ballImage = new Image();
-    ballImage.src = "/assets/ball.png";
+    ballImage.src = "/assets/ball2.png";
 
     function setFont(){
         ctx.font = config.font;
@@ -257,7 +261,10 @@
         for (paddle in state.paddles){
             paddle = state.paddles[paddle];
             ctx.clearRect(paddle.x, 0, config.paddleWidth, config.canvasHeight);
-            ctx.drawImage(paddleImage, paddle.x, paddle.y, config.paddleWidth, config.paddleHeight);
+            if (paddle.x < config.canvasWidth / 2)
+	            ctx.drawImage(leftPaddleImage, paddle.x, paddle.y, config.paddleWidth, config.paddleHeight);
+            else
+	            ctx.drawImage(rightPaddleImage, paddle.x, paddle.y, config.paddleWidth, config.paddleHeight);
         }
     }
 
@@ -446,7 +453,10 @@
     function drawPaddles(){
         for (let paddle in state.paddles){
             paddle = state.paddles[paddle];
-            ctx.drawImage(paddleImage, paddle.x, paddle.y, config.paddleWidth, config.paddleHeight);
+            if (paddle.x < config.canvasWidth / 2)
+                ctx.drawImage(leftPaddleImage, paddle.x, paddle.y, config.paddleWidth, config.paddleHeight);
+            else
+                ctx.drawImage(rightPaddleImage, paddle.x, paddle.y, config.paddleWidth, config.paddleHeight);
         }
     }
 
@@ -564,14 +574,17 @@ function initSocket(socketPath, socketMode){
     })
     gameSocket.on('score', event => {
         window.PongGame.state.ball.speed = 0;
-    	if (window.PongGame.info.myTeam.name == 'team_a') {
+    	if (window.PongGame.info.myTeam.name == 'A') {
 			window.PongGame.state.playerScore = event.team_a;
 			window.PongGame.state.enemyScore = event.team_b;
+
      	}
      	else {
 			window.PongGame.state.playerScore = event.team_b;
 			window.PongGame.state.enemyScore = event.team_a;
       	}
+		document.getElementById('playerScore').innerText = '' + PongGame.state.playerScore;
+		document.getElementById('enemyScore').innerText = '' + PongGame.state.enemyScore;
     })
     gameSocket.on('game_over', async event => {
         gameSocket.close();
@@ -656,6 +669,12 @@ async function initData(data, socketPath, socketMode){
 		console.log('Invalid game data from SSE, cannot launch game');
 		return;
 	}
+	document.getElementById('playerUsername1').innerText = PongGame.info.myTeam.players.players[0].username;
+	document.getElementById('playerUsername2').innerText = PongGame.info.myTeam.players.players[1].username;
+	document.getElementById('playerUsername3').innerText = PongGame.info.myTeam.players.players[2].username;
+	document.getElementById('enemyUsername1').innerText = PongGame.info.enemyTeam.players.players[0].username;
+	document.getElementById('enemyUsername2').innerText = PongGame.info.enemyTeam.players.players[1].username;
+    document.getElementById('enemyUsername3').innerText = PongGame.info.enemyTeam.players.players[2].username;
 	initSocket(socketPath, socketMode);
 }
 

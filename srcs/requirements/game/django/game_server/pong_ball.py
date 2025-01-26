@@ -1,5 +1,6 @@
 from game_server.pong_position import Position
 
+
 class Ball:
     def __init__(self, position: Position, direction_x, direction_y, speed, size, ledge_offset, racket_width, canvas):
         self.position = position

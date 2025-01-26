@@ -261,7 +261,6 @@ class GamePage(Screen):
 
         @self.sio.on('game_over')
         async def gameOverAction(data):
-            print(f"Game over event: {data}", flush=True)
             while (self.countdownIsActive == True):
                 await asyncio.sleep(1/10)
             if (await self.app.push_screen_wait(GameEnd(data["reason"], data["winner"] == User.team)) == "main"):
@@ -269,10 +268,8 @@ class GamePage(Screen):
             await self.sio.disconnect()
 
     async def on_unmount(self) -> None:
-        print("Unmounting GamePage")
         if (self.connected):
             await self.sio.disconnect()
-            print("Unmount disconnect the server!")
         self.connected = False
         self.listener.stop()
         await self.HTTPSession.close()
