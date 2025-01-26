@@ -2,6 +2,7 @@ from rest_framework import serializers
 from lib_transcendence.game import GameMode
 from rest_framework.exceptions import APIException
 from lib_transcendence.serializer import Serializer
+from profile_pictures.unlock import unlock_tournament_pp, unlock_duel_clash_pp, unlock_ranked_pp
 
 from stats.models import GameModeStats, RankedStats
 from users.auth import get_user
@@ -76,8 +77,11 @@ class FinishMatchSerializer(serializers.Serializer):
                         user.set_game_playing()
                         stat = user.stats.get(game_mode=validated_data['game_mode'])
                         stat.log(user_json['score'], team_name == validated_data['winner'], own_goals)
+                        if validated_data['game_mode'] in (GameMode.DUEL, GameMode.CLASH):
+                            unlock_duel_clash_pp(user, validated_data['game_mode'].upper())
                         if validated_data['game_mode'] == GameMode.RANKED and 'trophies' in user_json:
                             RankedStats.log(user, user_json['trophies'])
+                            unlock_ranked_pp(user)
                     except APIException:
                         pass
         return validated_data
@@ -89,4 +93,5 @@ class FinishTournamentSerializer(serializers.Serializer):
     def create(self, validated_data):
         winner = get_user(id=validated_data['winner'])
         winner.stats.get(game_mode=GameMode.TOURNAMENT).win_tournament()
+        unlock_tournament_pp(winner)
         return validated_data
