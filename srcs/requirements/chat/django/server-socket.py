@@ -29,10 +29,8 @@ usersConnected = ConnectedUsers()
 async def connect(sid, _, auth):
     print(f"Client attempting to connect : {sid}")
     token = auth.get('token')
-    chatId = auth.get('chatId')
-    user = None
-    chat = None
-    if token and chatId:
+    chat_id = auth.get('chatId')
+    if token and chat_id:
         try:
             print(f"Trying to authentificate : {sid}")
             user = auth_verify(token)
@@ -40,14 +38,14 @@ async def connect(sid, _, auth):
                 print(f"User already connected : {sid}")
                 await sio.emit('error', {'error': 409, 'message': 'User already connected'}, to=usersConnected.get_user_sid(user['id']))
                 await sio.disconnect(usersConnected.get_user_sid(user['id']))
-            chat = request_chat(endpoint_chat.fchat.format(chat_id=chatId), 'GET', None, token)
+            chat = request_chat(endpoints.Chat.fchat.format(chat_id=chat_id), 'GET', token=token)
             print(f"Connection successeeded {sid}")
             await sio.emit('chat-server', {
                 'content': 'You\'re now connected',
                 'userData': user,
                 'chatData': chat,
                 }, to=sid)
-            await sio.enter_room(sid, str(chatId))
+            await sio.enter_room(sid, str(chat_id))
         except AuthenticationFailed:
             print(f"Authentification failed : {sid}")
             raise ConnectionRefusedError({"error": 401, "message": "Invalid token"})
@@ -57,11 +55,10 @@ async def connect(sid, _, auth):
         except APIException:
             raise ConnectionRefusedError({"error": 400, "message": "error"})
         if user and chat:
-            usersConnected.add_user(user['id'], sid, user['username'], chatId, chat['chat_with'].get('id'))
+            usersConnected.add_user(user['id'], sid, user['username'], chat_id, chat['chat_with']['id'])
     else:
         print(f"Connection failed : {sid}")
         raise ConnectionRefusedError({"error": 400, "message": "Missing args"})
-
 
 
 @sio.event
@@ -72,7 +69,7 @@ async def disconnect(sid):
 
 
 @sio.event
-async def leave(sid, data):
+async def leave(sid, _):
     await sio.leave_room(sid, str(usersConnected.get_chat_id(sid)))
     usersConnected.remove_user(sid)
     await sio.disconnect(sid)
@@ -96,7 +93,7 @@ async def message(sid, data):
         answer_api = await sync_to_async(post_messages, thread_sensitive=False)(chat_id, content, token)
         await sio.emit(
             'chat-server',
-            answerAPI,
+            answer_api,
             to=sid
         )
         if not is_chat_with_connected:
@@ -106,7 +103,7 @@ async def message(sid, data):
                 to=sid
             )
             print(f"User not connected, sending sse {usersConnected.get_chat_with_id(sid)}")
-            await sync_to_async(create_sse_event, thread_sensitive=False)(usersConnected.get_chat_with_id(sid), EventCode.RECEIVE_MESSAGE, answerAPI,{'username':usersConnected.get_user_id(sid),'message':content})
+            await sync_to_async(create_sse_event, thread_sensitive=False)(usersConnected.get_chat_with_id(sid), EventCode.RECEIVE_MESSAGE, answer_api, {'username': usersConnected.get_user_id(sid), 'message': content}, False)
         else:
             await sio.emit(
                 'chat-server',
