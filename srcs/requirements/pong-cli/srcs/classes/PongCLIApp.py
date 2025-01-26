@@ -2,7 +2,6 @@
 import httpx
 import json
 import re
-import ssl
 
 # Textual imports
 from textual        import work
@@ -30,9 +29,6 @@ class PongCLI(App):
     @work
     async def SSE(self):
         if (not self.SSEConnected):
-            # SSLContext = ssl.create_default_context()
-            # SSLContext.load_verify_locations(Config.SSL.CRT)
-            # SSLContext.check_hostname = False
             self.SSEConnected = True
             async with httpx.AsyncClient(verify=Config.SSL.CRT) as client:
                 headers = {
@@ -45,8 +41,6 @@ class PongCLI(App):
                         if (response.status_code >= 400):
                             self.SSEConnected = False
                             raise (Exception(f"({response.status_code}) SSE stream failed {response.text}"))
-                        # self.SSEConnected = False
-                        # raise (Exception("Prout"))
                         try:
                             async for line in response.aiter_text():
                                 try:
