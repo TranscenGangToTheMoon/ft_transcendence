@@ -709,7 +709,7 @@ async function initData(data, socketPath, socketMode){
 		return;
 	}
     document.getElementById('gameArea').classList.replace('d-none', 'd-flex');
-    document.getElementById('opponentWait').style.display = "none";
+    document.getElementById('opponentWait').classList.replace('d-flex', 'd-none');
 	console.log(userInformations.username);
     // document.getElementById('playerUsername').innerText = userInformations.username;
     // document.getElementById('enemyUsername').innerText = PongGame.info.enemyTeam.players.players[0].username;
@@ -835,7 +835,7 @@ async function initGame(){
         
     if (window.location.pathname === '/') return;
     document.getElementById('gameArea').classList.replace('d-flex', 'd-none');
-    document.getElementById('opponentWait').style.display = "block";
+    document.getElementById('opponentWait').classList.replace('d-none', 'd-flex');
     try {
         checkGameAuthorization();
         if (window.location.pathname === '/game/tournament'){
