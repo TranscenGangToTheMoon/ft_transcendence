@@ -1,6 +1,5 @@
 from lib_transcendence.sse_events import EventCode, create_sse_event
 from lib_transcendence.users import retrieve_users
-from rest_framework.exceptions import APIException
 
 
 def send_sse_event(event: EventCode, instance, data=None, exclude_myself=True):

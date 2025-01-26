@@ -1,6 +1,3 @@
-# Rich imports
-from rich.console   import Console
-
 # Textual imports
 from textual.geometry   import Offset
 from textual.widget     import Widget
@@ -16,18 +13,15 @@ class Playground(Widget):
         self.styles.layers = "1 2"
 
     def render(self):
-        # return ""
-        return "                                                        ||\n" * Config.Playground.width
-        # return ".*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.█.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.\n" * self.region.width
+        if (Config.Playground.width % 2 == 0):
+            width = (Config.Playground.width - 2) // 2
+            return ((" " * width + "▐▌\n") * Config.Playground.height)
+        else:
+            width = (Config.Playground.width - 1) // 2
+            return ((" " * width + "█\n") * Config.Playground.height)
 
     def on_mount(self):
-        console = Console()
-        Config.Console.width = console.width
-        Config.Console.height = console.height
+        Config.Console.reload()
 
         self.styles.offset = Offset((Config.Console.width - Config.Playground.width) // 2, (Config.Console.height - Config.Playground.height) // 2)
         self.styles.background = "gray"
-        # self.styles.border = ("solid", "white")
-
-    # def on_resize(self, event: events.Resize):
-    #     pass

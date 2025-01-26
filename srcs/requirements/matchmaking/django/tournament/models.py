@@ -12,7 +12,8 @@ from rest_framework.exceptions import APIException
 
 from baning.models import delete_banned
 from blocking.utils import delete_player_instance
-from matchmaking.create_match import create_tournament_match
+from matchmaking.create_match import create_tournament_match, create_tournament_match_not_played
+from matchmaking.utils.model import ParticipantsPlace
 from matchmaking.utils.sse import send_sse_event, start_tournament_sse
 from tournament.sse import send_sse_event_finish_match
 
@@ -152,7 +153,7 @@ class TournamentStage(models.Model):
     stage = models.IntegerField()
 
 
-class TournamentParticipants(models.Model):
+class TournamentParticipants(ParticipantsPlace, models.Model):
     user_id = models.IntegerField()
     tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE, related_name='participants')
     stage = models.ForeignKey(TournamentStage, on_delete=models.CASCADE, default=None, null=True, related_name='participants')
@@ -210,12 +211,13 @@ class TournamentMatches(models.Model):
     user_2 = models.ForeignKey(TournamentParticipants, on_delete=models.CASCADE, related_name='matches_2', null=True)
     score_winner = models.IntegerField(null=True, default=None)
     score_looser = models.IntegerField(null=True, default=None)
-    finish_reason = models.CharField(null=True, default=None, max_length=50)
+    finish_reason = models.CharField(max_length=20, null=True, default=None)
     finished = models.BooleanField(default=False)
 
     def post(self):
         if self.user_2 is not None:
             if not self.user_1.still_in:
+                create_tournament_match_not_played(self.tournament.id, self.stage.id, self.n, self.user_2)
                 self.finish(self.user_2)
             else:
                 try:
@@ -226,6 +228,7 @@ class TournamentMatches(models.Model):
                 except APIException:
                     self.finish(None)
         elif self.user_1 is not None and self.user_1.still_in:
+            create_tournament_match_not_played(self.tournament.id, self.stage.id, self.n, self.user_1)
             self.finish(self.user_1)
         else:
             self.finish(None)

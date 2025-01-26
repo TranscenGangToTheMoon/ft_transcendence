@@ -6,9 +6,9 @@ EXPOSE 8000
 RUN apt-get update -y
 RUN apt-get upgrade -y
 RUN apt-get install -y postgresql-client
+RUN apt-get install -y jq
 
 COPY init.d /init.d
-# COPY shared-code /shared
 
 RUN pip install --no-cache-dir -r /init.d/requirements.txt
 RUN chmod u+x /init.d/entrypoint.sh

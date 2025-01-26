@@ -3,7 +3,12 @@ RED="\001\033[031m\002"
 BOLD="\001\033[001m\002"
 RESET="\001\033[000m\002"
 
-pip install -e /shared/ # todo remove in prod
+echo -e $BOLD$RED"- Fetching gameConfig.json ..."$RESET
+FILE="gameConfig.json"
+URL="https://frontend:443/$FILE"
+curl -ks "$URL" -o "$FILE" || exit 1
+#GAME_MAX_SCORE=$(jq '.score.max' "$FILE") todo use !
+#export GAME_MAX_SCORE
 
 echo -e $BOLD$RED"- Game migrations processing"$RESET
 

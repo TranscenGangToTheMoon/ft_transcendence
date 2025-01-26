@@ -78,8 +78,12 @@
 
     const paddleImage = new Image();
     paddleImage.src = "/assets/paddle.png";
+    const rightPaddleImage = new Image();
+    rightPaddleImage.src = "/assets/paddle_right.png";
+    const leftPaddleImage = new Image();
+    leftPaddleImage.src = "/assets/paddle_left.png";
     const ballImage = new Image();
-    ballImage.src = "/assets/ball.png";
+    ballImage.src = "/assets/ball2.png";
 
     function setFont(){
         ctx.font = config.font;
@@ -227,12 +231,12 @@
     function drawPaddleReturn(){
         ctx.clearRect(0, 0, config.canvasWidth, config.canvasHeight);
         ctx.drawImage(
-            paddleImage, state.paddles.left.x, state.paddles.left.y,
+            leftPaddleImage, state.paddles.left.x, state.paddles.left.y,
             config.paddleWidth, config.paddleHeight
         );
 
         ctx.drawImage(
-            paddleImage,
+            rightPaddleImage,
             state.paddles.right.x,
             state.paddles.right.y,
             config.paddleWidth,
@@ -431,7 +435,10 @@
     function drawPaddles(){
         for (let paddle in state.paddles){
             paddle = state.paddles[paddle];
-            ctx.drawImage(paddleImage, paddle.x, paddle.y, config.paddleWidth, config.paddleHeight);
+            if (paddle === state.paddles.left)
+				ctx.drawImage(leftPaddleImage, paddle.x, paddle.y, config.paddleWidth, config.paddleHeight);
+			else
+	            ctx.drawImage(rightPaddleImage, paddle.x, paddle.y, config.paddleWidth, config.paddleHeight);
         }
     }
 

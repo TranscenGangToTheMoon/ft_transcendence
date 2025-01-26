@@ -17,8 +17,8 @@ from users.models import Users
 class UsersMeSerializer(Serializer):
     accept_friend_request = serializers.BooleanField()
     notifications = serializers.SerializerMethodField(read_only=True)
-    password = serializers.CharField(write_only=True)
-    old_password = serializers.CharField(write_only=True)
+    password = serializers.CharField(max_length=50, write_only=True)
+    old_password = serializers.CharField(max_length=50, write_only=True)
     trophies = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
@@ -120,10 +120,7 @@ class UsersSerializer(Serializer):
         request = self.context.get('request')
         if request is None or obj.id == request.user.id:
             return None
-        friendship = get_friendship(request.user.id, obj.id)
-        if friendship is None:
-            return None
-        return friendship
+        return get_friendship(request.user.id, obj.id)
 
 
 class ManageUserSerializer(Serializer):

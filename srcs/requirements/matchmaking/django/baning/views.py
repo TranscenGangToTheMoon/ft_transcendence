@@ -24,7 +24,7 @@ class LobbyBanView(BanMixin):
     def get_object(self):
         ban_yourself(self.kwargs['user_id'], self.request.user.id)
         lobby = get_lobby(self.kwargs['code'])
-        get_lobby_participant(lobby, self.request.user.id, True)
+        get_lobby_participant(lobby, self.request.user.id, MessagesException.PermissionDenied.BAN_NOT_CREATOR)
         return get_participants_for_baning(lobby, self.kwargs['user_id'])
 
 
@@ -34,7 +34,7 @@ class TournamentBanView(BanMixin):
     def get_object(self):
         ban_yourself(self.kwargs['user_id'], self.request.user.id)
         tournament = get_tournament(code=self.kwargs.get('code'))
-        get_tournament_participant(tournament, self.request.user.id, True)
+        get_tournament_participant(tournament, self.request.user.id, MessagesException.PermissionDenied.BAN_NOT_CREATOR)
 
         if tournament.is_started:
             raise PermissionDenied(MessagesException.PermissionDenied.BAN_AFTER_START)

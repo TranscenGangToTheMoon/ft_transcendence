@@ -30,7 +30,6 @@ services:
       - "8001:8000"
     volumes:
       - auth-volume:/code
-      - shared-code-volume:/shared
     environment:
       <<: *django-env
       POSTGRES_DB: ${POSTGRES_AUTH_DB_NAME}
@@ -54,7 +53,6 @@ services:
       - "8002:8000"
     volumes:
       - chat-volume:/code
-      - shared-code-volume:/shared
     environment:
       <<: *django-env
       POSTGRES_DB: ${POSTGRES_CHAT_DB_NAME}
@@ -96,7 +94,6 @@ services:
       - "8003:8000"
     volumes:
       - game-volume:/code
-      - shared-code-volume:/shared
     environment:
       <<: *django-env
       POSTGRES_DB: ${POSTGRES_GAME_DB_NAME}
@@ -106,7 +103,6 @@ services:
       SECRET_KEY: ${DJANGO_GAME_SECRET_KEY}
       GAME_PLAYER_CONNECT_TIMEOUT: ${GAME_PLAYER_CONNECT_TIMEOUT}
       GAME_SERVER_PORT: ${GAME_SERVER_PORT}
-      GAME_MAX_SCORE: ${GAME_MAX_SCORE}
     networks:
       - transcendence-network
       - game-network
@@ -123,7 +119,6 @@ services:
       - "8004:8000"
     volumes:
       - matchmaking-volume:/code
-      - shared-code-volume:/shared
     environment:
       <<: *django-env
       POSTGRES_DB: ${POSTGRES_MATCHMAKING_DB_NAME}
@@ -149,7 +144,6 @@ services:
       - "8005:8000"
     volumes:
       - users-volume:/code
-      - shared-code-volume:/shared
     environment:
       <<: *django-env
       POSTGRES_DB: ${POSTGRES_USERS_DB_NAME}
@@ -341,12 +335,3 @@ volumes:
 
   users-db-volume:
     name: "users-db-volume"
-
-#####Shared Code Volume
-  shared-code-volume:
-    name: shared-code-volume
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: "./shared-code"

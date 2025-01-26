@@ -1,5 +1,4 @@
 import json
-import time
 
 import redis
 from django.db.models import QuerySet
@@ -43,7 +42,7 @@ class Service:
 
 class Target:
 
-    def __init__(self, url: str, method: str = None, display_name: str = None, display_icon: str = None, type: UrlType = None):
+    def __init__(self, url: str, method: str = None, display_name: str = None, display_icon: str = None, type: str = None):
         self.url = url
         if type is not None:
             self.type = type
@@ -127,7 +126,7 @@ class Events:
     cancel_friend_request = Event(Service.FRIENDS, EventCode.CANCEL_FRIEND_REQUEST)
     delete_friend = Event(Service.FRIENDS, EventCode.DELETE_FRIEND)
 
-    game_start = Event(Service.GAME, EventCode.GAME_START, 'You play in a game.', Target('/ws/game/', type=UrlType.WS), type=SSEType.EVENT) # todo handle
+    game_start = Event(Service.GAME, EventCode.GAME_START, 'You play in a game.', Target('/ws/game/', type=UrlType.WS), type=SSEType.EVENT)
 
     invite_1v1 = Event(Service.INVITE, EventCode.INVITE_1V1, '{username} has challenged you to a game.', Target('/lobby/{code}/', display_name='join'))
     invite_3v3 = Event(Service.INVITE, EventCode.INVITE_3V3, '{username} inviting you to join an epic 3v3 friendly battle.', Target('/lobby/{code}/', display_name='join'))
@@ -156,7 +155,7 @@ class Events:
 redis_client = redis.StrictRedis(host='event-queue')
 
 
-def publish_event(users: Users | QuerySet[Users] | list[Users] | list[int] | int, event_code: EventCode, data=None, kwargs=None):
+def publish_event(users: Users | QuerySet[Users] | list[Users] | list[int] | int, event_code: str, data=None, kwargs=None):
     try:
         event = getattr(Events, event_code.replace('-', '_'))
     except AttributeError:
