@@ -81,27 +81,25 @@ class Game:
             racket_offset += racket_to_racket_offset
         return rackets
 
-    def __init__(self, match) -> None:
+    def __init__(self, match, config) -> None:
         self.match: Match = match
-        with open('game_server/gameConfig.json', 'r', encoding='utf-8') as config_file:
-            config = json.load(config_file)
-            self.canvas = Position(
-                config['canvas'][self.match.game_type]['width'],
-                config['canvas'][self.match.game_type]['height']
-            )
-            self.racket_height = config['paddle'][self.match.game_type]['height']
-            self.racket_width = config['paddle'][self.match.game_type]['width']
-            self.max_score = config['score']['max']
-            self.max_bounce_angle = config['ball']['maxBounceAngle']
-            if self.match.game_type == 'clash':
-                self.max_bounce_angle = config['ball']['maxBounceAngle3v3']
-            self.max_ball_speed = config['ball']['maxSpeed']
-            self.speed_increment = config['ball']['speedIncrement']
-            self.ledge_offset = config['paddle'][self.match.game_type]['ledgeOffset']
-            self.racket_to_racket_offset = config['paddle'][self.match.game_type]['paddleOffset']
-            self.base_tick_rate = config['server']['tickRate']['base']
-            self.safe_zone_tick_rate = config['server']['tickRate']['safe']
-            self.racket_max_speed = config['paddle'][self.match.game_type]['speed']
+        self.canvas = Position(
+            config['canvas'][self.match.game_type]['width'],
+            config['canvas'][self.match.game_type]['height']
+        )
+        self.racket_height = config['paddle'][self.match.game_type]['height']
+        self.racket_width = config['paddle'][self.match.game_type]['width']
+        self.max_score = config['score']['max']
+        self.max_bounce_angle = config['ball']['maxBounceAngle']
+        if self.match.game_type == 'clash':
+            self.max_bounce_angle = config['ball']['maxBounceAngle3v3']
+        self.max_ball_speed = config['ball']['maxSpeed']
+        self.speed_increment = config['ball']['speedIncrement']
+        self.ledge_offset = config['paddle'][self.match.game_type]['ledgeOffset']
+        self.racket_to_racket_offset = config['paddle'][self.match.game_type]['paddleOffset']
+        self.base_tick_rate = config['server']['tickRate']['base']
+        self.safe_zone_tick_rate = config['server']['tickRate']['safe']
+        self.racket_max_speed = config['paddle'][self.match.game_type]['speed']
         self.tick_rate = self.base_tick_rate
         self.safe_zone_width = (self.canvas.x / 2) - (self.ledge_offset + (3 * self.racket_width))
         self.safe_zone_height = (self.canvas.y / 2) - (3 * Game.ball_size)

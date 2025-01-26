@@ -130,11 +130,6 @@ async def disconnect(sid):
     from game_server.server import Server
     with Server._dsids_lock:
         for search in Server._disconnected_sids:
-            try:
-                await Server._sio.get_session(search)
-            except KeyError:
-                Server._disconnected_sids.remove(search)
-                continue
             if search == sid:
                 Server._disconnected_sids.remove(sid)
                 return
