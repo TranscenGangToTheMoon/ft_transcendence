@@ -65,8 +65,9 @@ def unlock_friends_pp(friend_instance):
     for user in (friend_instance.user_1, friend_instance.user_2):
         for pp_name, required_friends in ((ProfilePicture.ONE_FRIEND, 1), (ProfilePicture.POPULAR_GUY, 50)):
             try:
-                assert user.friends.count() >= required_friends
+                assert (user.friend_1.count() + user.friend_2.count()) >= required_friends
                 pp = user.profile_pictures.get(name=pp_name, is_unlocked=False)
+                print(pp, pp.name, pp.n, flush=True)
                 pp.unlock()
             except (AssertionError, ProfilePictures.DoesNotExist):
                 pass

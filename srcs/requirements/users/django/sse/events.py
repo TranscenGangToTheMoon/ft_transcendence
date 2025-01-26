@@ -2,6 +2,8 @@ import json
 
 import redis
 from django.db.models import QuerySet
+
+from lib_transcendence import endpoints
 from lib_transcendence.exceptions import MessagesException, ServiceUnavailable
 from lib_transcendence.sse_events import EventCode
 from lib_transcendence.utils import datetime_serializer
@@ -38,6 +40,7 @@ class Service:
     INVITE = 'invite'
     LOBBY = 'lobby'
     TOURNAMENT = 'tournament'
+    USER = 'USER'
 
 
 class Target:
@@ -114,24 +117,26 @@ class Event:
         return json.dumps(result, default=datetime_serializer)
 
 
+# todo test all events
 class Events:
     ping = Event(Service.AUTH, EventCode.PING)
-    delete_user = Event(Service.AUTH, EventCode.DELETE_USER)
+    delete_user = Event(Service.USER, EventCode.DELETE_USER)
+    profile_picture_unlocked = Event(Service.USER, EventCode.PROFILE_PICTURE_UNLOCKED, 'You have unlocked new profile pictures!', [Target(endpoints.Users.fprofile_picture, 'PUT', display_name='use'), Target('/profile/pictures', 'PUT', display_name='see all')])
 
-    receive_message = Event(Service.CHAT, EventCode.RECEIVE_MESSAGE, '{username}: {message}', Target('/chat/{chat_id}/'))
+    receive_message = Event(Service.CHAT, EventCode.RECEIVE_MESSAGE, '{username}: {message}', Target('/chat/{chat_id}'))
 
     accept_friend_request = Event(Service.FRIENDS, EventCode.ACCEPT_FRIEND_REQUEST, '{username} has accepted your friend request.', type=SSEType.NOTIFICATION)
-    receive_friend_request = Event(Service.FRIENDS, EventCode.RECEIVE_FRIEND_REQUEST, '{username} wants to be friends with you.', [Target('/api/users/me/friend_requests/{id}/', 'POST', display_icon='/icon/accept.png'), Target('/api/users/me/friend_requests/{id}/', 'DELETE', display_icon='/icon/decline.png')])
+    receive_friend_request = Event(Service.FRIENDS, EventCode.RECEIVE_FRIEND_REQUEST, '{username} wants to be friends with you.', [Target(endpoints.Users.ffriend_request, 'POST', display_icon='/icon/accept.png'), Target(endpoints.Users.ffriend_request, 'DELETE', display_icon='/icon/decline.png')])
     reject_friend_request = Event(Service.FRIENDS, EventCode.REJECT_FRIEND_REQUEST)
     cancel_friend_request = Event(Service.FRIENDS, EventCode.CANCEL_FRIEND_REQUEST)
     delete_friend = Event(Service.FRIENDS, EventCode.DELETE_FRIEND)
 
     game_start = Event(Service.GAME, EventCode.GAME_START, 'You play in a game.', Target('/ws/game/', type=UrlType.WS), type=SSEType.EVENT)
 
-    invite_1v1 = Event(Service.INVITE, EventCode.INVITE_1V1, '{username} has challenged you to a game.', Target('/lobby/{code}/', display_name='join'))
-    invite_3v3 = Event(Service.INVITE, EventCode.INVITE_3V3, '{username} inviting you to join an epic 3v3 friendly battle.', Target('/lobby/{code}/', display_name='join'))
-    invite_clash = Event(Service.INVITE, EventCode.INVITE_CLASH, '{username} inviting you to join a clash game.', Target('/lobby/{code}/', display_name='join'))
-    invite_tournament = Event(Service.INVITE, EventCode.INVITE_TOURNAMENT, '{username} inviting you to join his tournament.', Target('/tournament/{code}/', display_name='join'))
+    invite_1v1 = Event(Service.INVITE, EventCode.INVITE_1V1, '{username} has challenged you to a game.', Target('/lobby/{code}', display_name='join'))
+    invite_3v3 = Event(Service.INVITE, EventCode.INVITE_3V3, '{username} inviting you to join an epic 3v3 friendly battle.', Target('/lobby/{code}', display_name='join'))
+    invite_clash = Event(Service.INVITE, EventCode.INVITE_CLASH, '{username} inviting you to join a clash game.', Target('/lobby/{code}', display_name='join'))
+    invite_tournament = Event(Service.INVITE, EventCode.INVITE_TOURNAMENT, '{username} inviting you to join his tournament.', Target('/tournament/{code}', display_name='join'))
 
     lobby_join = Event(Service.LOBBY, EventCode.LOBBY_JOIN, '{username} have joined the lobby.')
     lobby_leave = Event(Service.LOBBY, EventCode.LOBBY_LEAVE, '{username} have left the lobby.')
@@ -149,7 +154,7 @@ class Events:
     tournament_start_at = Event(Service.TOURNAMENT, EventCode.TOURNAMENT_START_AT, 'Tournament {name} start in 20 seconds.')
     tournament_start_cancel = Event(Service.TOURNAMENT, EventCode.TOURNAMENT_START_CANCEL)
     tournament_match_finish = Event(Service.TOURNAMENT, EventCode.TOURNAMENT_MATCH_FINISH, '{winner} win against {looser} {score_winner}-{score_looser}{finish_reason}.')
-    tournament_finish = Event(Service.TOURNAMENT, EventCode.TOURNAMENT_FINISH, 'The tournament {name} is now over. Well done to {username} for his victory!', Target('/history/tournament/{id}/', display_name='view'))
+    tournament_finish = Event(Service.TOURNAMENT, EventCode.TOURNAMENT_FINISH, 'The tournament {name} is now over. Well done to {username} for his victory!', Target('/history/tournament/{id}', display_name='view'))
 
 
 redis_client = redis.StrictRedis(host='event-queue')

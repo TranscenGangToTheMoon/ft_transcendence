@@ -71,6 +71,7 @@ class Users:
     friends = 'api/users/me/friends/'
     friend = 'api/users/me/friends/<int:friendship_id>/'
     friend_requests = 'api/users/me/friend_requests/'
+    ffriend_request = 'api/users/me/friend_requests/{id}/'
     friend_request = 'api/users/me/friend_requests/<int:friend_request_id>/'
     friend_requests_received = 'api/users/me/friend_requests/received/'
 
@@ -83,6 +84,7 @@ class Users:
     result_tournament = 'api/private/users/result-tournament/'
 
     profile_pictures = 'api/users/profile-pictures/'
+    fprofile_picture = 'api/users/profile-picture/{id}/'
     profile_picture = 'api/users/profile-picture/<int:id>/'
 
     export_data = 'api/users/me/download-data/'

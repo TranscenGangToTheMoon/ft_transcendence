@@ -8,6 +8,7 @@ from lib_transcendence.validate_type import surchage_list
 
 class EventCode:
     DELETE_USER = 'delete-user'
+    PROFILE_PICTURE_UNLOCKED = 'profile-picture-unlocked'
     RECEIVE_MESSAGE = 'receive-message'
     ACCEPT_FRIEND_REQUEST = 'accept-friend-request'
     RECEIVE_FRIEND_REQUEST = 'receive-friend-request'
