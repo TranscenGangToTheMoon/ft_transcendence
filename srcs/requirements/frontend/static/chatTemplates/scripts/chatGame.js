@@ -2,7 +2,7 @@ function displayGameChatMessage(event){
 	event = JSON.parse(event.data);
 	let messageDiv = document.createElement('div');
 	messageDiv.className = 'messageGame';
-	messageDiv.innerHTML = event.message;
+	messageDiv.innerText = event.message;
 	let chatBox = document.getElementById('messagesGame');
 	if (chatBox) {
 		chatBox.appendChild(messageDiv);
@@ -32,7 +32,7 @@ async function createGameChatTab(gameInfo) {
 
     let chatTabLink = document.createElement('a');
     chatTabLink.id = idChatTab + "Link";
-    chatTabLink.innerHTML = "Game";
+    chatTabLink.innerText = "Game";
     chatTabLink.setAttribute('data-bs-toggle', 'tab');
     chatTabLink.setAttribute('role', 'tab');
     chatTabLink.setAttribute('href', "#" + idChatBox);
@@ -109,7 +109,7 @@ function sendGameMessageListener(gameInfo) {
 			}
 			let messageDiv = document.createElement('div');
 			messageDiv.className = 'messageGame';
-			messageDiv.innerHTML = "You: " + message;
+			messageDiv.innerText = "You: " + message;
 			let chatBox = document.getElementById('messagesGame');
 			if (chatBox) {
 				chatBox.appendChild(messageDiv);

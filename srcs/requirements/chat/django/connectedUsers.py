@@ -3,12 +3,11 @@ class ConnectedUsers:
 		self.users_sid = {}
 		self.users_id = {}
 
-	def add_user(self, id, sid, username, chat_id, chat_type, chat_with_id=None):
+	def add_user(self, id, sid, username, chat_id, chat_with_id=None):
 		self.users_sid[sid] = {
 			'user_id': id,
 			'username': username,
 			'chat_id': chat_id,
-			'chat_type': chat_type,
 			'chat_with_id': chat_with_id,
 		}
 		self.users_id[id] = {
@@ -62,10 +61,4 @@ class ConnectedUsers:
 			searched_user =  self.users_id.get(user['chat_with_id'])
 			if searched_user and searched_user['chat_id'] == user['chat_id']:
 				return True
-		return False
-	
-	def is_private_chat(self, sid):
-		user = self.users_sid.get(sid)
-		if user and user['chat_type'] == 'private_message':
-			return True
 		return False
