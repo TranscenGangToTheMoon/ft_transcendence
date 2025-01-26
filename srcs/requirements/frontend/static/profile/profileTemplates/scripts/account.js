@@ -28,6 +28,7 @@ async function deleteAccount(password) {
                 deleteModal.hide();
                 sse.close();
                 removeTokens();
+                closeChatView();
                 await generateToken();
                 initSSE();
                 await fetchUserInfos(true);
