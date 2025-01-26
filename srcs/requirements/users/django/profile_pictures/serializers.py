@@ -15,9 +15,9 @@ class ProfilePicturesSerializer(Serializer):
         fields = [
             'id',
             'name',
-            'unlock_reason',
             'unlock',
             'is_equiped',
+            'unlock_reason',
             'url',
             'small',
             'medium',
@@ -28,6 +28,7 @@ class ProfilePicturesSerializer(Serializer):
             'name',
             'unlock',
             'is_equiped',
+            'unlock_reason',
             'url',
             'small',
             'medium',
@@ -35,7 +36,7 @@ class ProfilePicturesSerializer(Serializer):
         ]
 
     def update(self, instance, validated_data):
-        if instance.is_unlocked:
+        if not instance.is_unlocked:
             raise PermissionDenied(MessagesException.PermissionDenied.PROFILE_PICTURE_LOCKED)
         instance.user.set_profile_picture(instance)
         return instance
