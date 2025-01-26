@@ -133,4 +133,12 @@ class Server:
             for match_id in Server._games:
                 if match_id == game_id:
                     return Server._games[game_id]
-        raise Server.NotFound(f'No match with code {game_id} is running on this server')
+        raise Server.NotFound(f'No match with id {game_id} is running on this server')
+
+    @staticmethod
+    def get_game_from_code(match_code):
+        with Server._games_lock:
+            for game in Server._games.values():
+                if game.match.code == match_code:
+                    return game
+        raise Server.NotFound(f'No match with code {match_code} is running on this server')

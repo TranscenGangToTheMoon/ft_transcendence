@@ -36,6 +36,7 @@ async def connect(sid, environ, auth):
         if game.match.game_type == 'normal':
             game.add_spectator(id, sid)
             await Server._sio.enter_room(sid, str(game.match.id))
+            print('accepting spectator', flush=True)
             return True
         else:
             return False
@@ -59,14 +60,28 @@ async def connect(sid, environ, auth):
     player_sid = player.socket_id
     print(f'player sid: {player_sid}', flush=True)
     if player_sid != '' and player_sid != sid:
-        await Server._sio.leave_room(player_sid, str(player.match_id))
-        with Server._dsids_lock:
-            Server._disconnected_sids.append(player_sid)
-        try:
+        match_code = auth.get('match_code')
+        if match_code is None:
+            await Server._sio.leave_room(player_sid, str(player.match_id))
+            with Server._dsids_lock:
+                Server._disconnected_sids.append(player_sid)
             await Server._sio.disconnect(player_sid)
-        except (KeyError):
-            pass
-        Server.get_game(game_id).reconnect(player.user_id, sid)
+            Server.get_game(game_id).reconnect(player.user_id, sid)
+        else:
+            print('spectator connecting', flush=True)
+            try:
+                game = Server.get_game_from_code(match_code)
+            except Server.NotFound:
+                print('game not found', flush=True)
+                return False
+            if game.match.game_type == 'normal':
+                game.add_spectator(id, sid)
+                await Server._sio.enter_room(sid, str(game.match.id))
+                print('accepting spectator', flush=True)
+                return True
+            else:
+                print('game type is 3v3')
+                return False
     player.socket_id = sid
     player.game = Server.get_game(game_id)
     Server._clients[sid] = player
