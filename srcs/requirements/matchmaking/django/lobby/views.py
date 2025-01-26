@@ -7,7 +7,6 @@ from rest_framework import generics, status
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 
-from lobby.models import LobbyParticipants
 from lobby.serializers import LobbySerializer, LobbyParticipantsSerializer, LobbyFinishMatchSerializer
 from matchmaking.utils.participant import get_lobby_participant
 from matchmaking.utils.place import get_lobby
