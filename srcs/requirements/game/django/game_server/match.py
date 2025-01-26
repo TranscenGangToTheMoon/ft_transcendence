@@ -16,6 +16,7 @@ class Spectator():
     def __str__(self) -> str:
         return str(self.user_id) + ' ' + self.socket_id
 
+
 class Player():
     def __init__(self, id, match_id, team):
         self.match_id = match_id
@@ -63,6 +64,7 @@ class Match():
         self.id = game_data['id']
         self.teams: List[Team] = []
         self.game_mode = game_data['game_mode']
+        print(f"game mode {self.game_mode}", flush=True)
         self.code = game_data['code']
         teams = game_data['teams']
         for team_name, team in teams.items():

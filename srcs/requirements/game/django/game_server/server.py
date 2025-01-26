@@ -1,17 +1,13 @@
+import asyncio
+import socketio
+import json
 from aiohttp import web
 from game_server import io_handlers
 from game_server.match import Player
 from game_server.game import Game
-from game_server.pong_racket import Racket
 from game_server.pong_position import Position
 from threading import Lock, Thread
 from typing import Dict
-import logging
-import asyncio
-import socketio
-import os
-import time
-import json
 
 
 class Server:
@@ -89,13 +85,13 @@ class Server:
 
     @staticmethod
     def create_game(match):
-        game = Game(Server._sio, match)
+        game = Game(match)
         Server.push_game(match.id, game)
         Thread(target=Server._games[match.id].launch).start()
 
     @staticmethod
     def emit(event: str, data=None, room=None, to=None, skip_sid=None):
-        if (room is None) and (to is None):
+        if room is None and to is None:
             raise Server.ServerException('Unauthorized: Emit to all clients is not allowed')
         with Server._loop_lock:
             Server._loop.call_soon_threadsafe(asyncio.create_task, Server._sio.emit(event, data=data, room=room, to=to, skip_sid=skip_sid))
@@ -107,11 +103,14 @@ class Server:
         if players is None and match_id is not None:
             with Server._games_lock:
                 players = Server._games[match_id].match.teams[0].players + Server._games[match_id].match.teams[1].players
-        elif players is not None:
+        if players is not None:
             for player in players:
                 if player.socket_id == '':
                     continue
-                Server._clients.pop(player.socket_id)
+                try:
+                    Server._clients.pop(player.socket_id)
+                except (KeyError):
+                    pass
                 if player.socket_id == disconnected_sid:
                     continue
                 Server._loop.call_later(0.5, asyncio.create_task, Server._sio.disconnect(player.socket_id))
@@ -127,9 +126,10 @@ class Server:
                             return player
         raise Server.NotFound(f'No player with id {user_id} is awaited on this server')
 
-    def get_game(match_code):
+    @staticmethod
+    def get_game(game_id):
         with Server._games_lock:
             for match_id in Server._games:
-                if Server._games[match_id].match.code == match_code:
-                    return Server._games[match_id]
-        raise Server.NotFound(f'No match with code {match_code} is running on this server')
+                if match_id == game_id:
+                    return Server._games[game_id]
+        raise Server.NotFound(f'No match with code {game_id} is running on this server')
