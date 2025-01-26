@@ -36,9 +36,9 @@ async function loadMatches(noRequest=false){
                     enemyTeam = match.teams[i];
                 }
                 const matchDiv = document.createElement('div');
-                matchDiv.style.backgroundColor = 'red';
                 matchDiv.linkedMatchId = match.id;
-                matchDiv.className = 'match d-flex row m-1';
+                matchDiv.className = 'match d-flex row m-1 border border-light border-1';
+                matchDiv.style.backgroundColor = 'rgba(255, 255, 255, 0.361)';
                 matchDiv.innerHTML = `
                 <div class="match-gamemode col d-flex align-items-center">${match.game_mode}</div>
                 <div class="col d-flex align-items-center">${match.winner === playerTeamName ? 'victory' : 'defeat'}</div>
@@ -138,12 +138,12 @@ function addMatchDetail(){
                 team.players.forEach(player => {
                     const playerRow = document.createElement('div');
                     playerRow.className = 'row m-auto';
-                    playerRow.style.backgroundColor = 'blue';
-                        playerRow.innerHTML = `
-                        <img class='col-2 p-1' src='${player['profile-picture']}' onerror="this.onerror=null; this.src='/assets/imageNotFound.png'" 
-                        alt="profile pic"></img>
-                        <div class='col m-auto'>${player.username}</div>
-                        `
+                    playerRow.style.backgroundColor = `${i === 'a' ? 'rgba(255, 0, 0, 0.54)' : 'rgba(0, 77, 255, 0.54)'}`;
+                    playerRow.innerHTML = `
+                    <img class='col-2 p-1' src='${player['profile-picture']}' onerror="this.onerror=null; this.src='/assets/imageNotFound.png'" 
+                    alt="profile pic"></img>
+                    <div class='col m-auto'>${player.username}</div>
+                    `
                     teamPlayersCol.appendChild(playerRow);
                 })
             }
