@@ -16,6 +16,7 @@ class Spectator():
     def __str__(self) -> str:
         return str(self.user_id) + ' ' + self.socket_id
 
+
 class Player():
     def __init__(self, id, match_id, team):
         self.match_id = match_id

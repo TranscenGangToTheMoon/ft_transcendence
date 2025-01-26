@@ -31,6 +31,7 @@ let socket = io(host, {
     auth : {
         "id": userInformations.id,
         "token": '<token>',
+        "match_code": '<match_code>' // if you want to spectate a game
     },
 });
 //This comes from the javascript code included in the frontend
@@ -144,6 +145,7 @@ socket.on('score', event => {
 
 In the 3v3 game mode, the server will send the x coordinates of the 6 players in the game,
 this can be handled like this:
+This code is also needed in spec mode as you want to know which id controls which racket, so you can display it
 ```javascript
 socket.on('rackets', event => {
 	for (let [player_id, position] of Object.entries(event)){

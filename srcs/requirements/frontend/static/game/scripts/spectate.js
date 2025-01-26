@@ -69,19 +69,16 @@
                 x: 100,
                 y: (config.canvasHeight - config.paddleHeight) / 2,
                 blockGlide: false,
-                speed:0
+                speed:0,
+                id: 0,
             },
             right: {
                 x: config.canvasWidth - config.paddleWidth - 100,
                 y: (config.canvasHeight - config.paddleHeight) / 2,
                 blockGlide: false,
-                speed : 0
+                speed : 0,
+                id: 0,
             },
-            // leftRight :{
-            //     x : 100 + 100,
-            //     y : (config.canvasHeight - config.paddleHeight) / 2,
-            //     blockGlide: false,
-            // },
         },
         countDown: {
             currentStep: config.countDown.steps,
@@ -95,6 +92,29 @@
     let ctx = canvas.getContext("2d");
     canvas.width = config.canvasWidth;
     canvas.height = config.canvasHeight;
+
+    function resizeCanvas() {
+        const container = document.getElementById('canvas-container');
+        const windowWidth = window.innerWidth;
+        const windowHeight = window.innerHeight - document.querySelector('header').offsetHeight;
+
+        const baseWidth = config.canvasWidth;
+        const baseHeight = config.canvasHeight + document.getElementById('gameInfo').offsetHeight;
+        console.log('BASE HEIGHT', baseHeight);
+
+        let scale = Math.min(windowWidth / baseWidth, windowHeight / baseHeight);
+
+        if (scale > 1)
+            scale = 1;
+        container.style.transform = `scale(${scale})`;
+        container.style.width = `${baseWidth}px`;
+        container.style.height = `${baseHeight}px`;
+        container.style.marginLeft = `${(windowWidth - baseWidth * scale) / 2}px`;
+        container.style.marginTop = `${(windowHeight - baseHeight * scale) / 2}px`;
+    }
+
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
 
     const rightPaddleImage = new Image();
     rightPaddleImage.src = "/assets/paddle_right.png";
@@ -124,11 +144,8 @@
         console.log('game start');
         state.isGameActive = true;
         state.cancelAnimation = false;
-        // console.log('game started');
 		state.isCountDownActive = false;
 		state.lastFrame = 0;
-		// state.ball.speedX = config.defaultBallSpeed;
-		// state.ball.speedY = config.defaultBallSpeed;
 		state.ball.speed = config.defaultBallSpeed;
 
         function gameLoop(timestamp) {
@@ -158,9 +175,6 @@
     function stopGame(animate=false, reason=undefined) {
         console.log('game stop');
         state.isGameActive = false;
-        // ctx.fillText('Game over', config.canvasWidth / 2, config.canvasHeight / 2);
-        // if (reason)
-        //     ctx.fillText(reason, config.canvasWidth / 2, config.canvasHeight / 2 + 96);
         if (animate){
             animatePaddlesToMiddle();
         }
@@ -183,11 +197,6 @@
 	    state.isGameActive = false;
 	    state.cancelAnimation = false;
         state.isCountDownActive = true;
-
-        // for (racket in state.paddles) {
-        // 	racket.y = (config.canvasHeight + config.paddleHeight) / 2
-        // }
-        // ctx.clearRect(0, 0, config.canvasWidth, config.canvasHeight);
         animatePaddlesToMiddle();
         function step() {
             state.countDown.currentStep--;
@@ -210,7 +219,6 @@
     }
 
     function animatePaddlesToMiddle(){
-        // state.isCountDownActive = true;
         const startTime = performance.now();
         const startLeft = state.paddles.left.y;
         const startRight = state.paddles.right.y;
@@ -297,17 +305,13 @@
 
     function calculateNewBallDirection(paddleY, paddleSpeed=0) {
         const impactPosition = calculateImpactPosition(state.ball.y + config.ballSize/2, paddleY, config.paddleHeight);
-        // console.log(impactPosition);
         const bounceAngle = impactPosition * config.maxBounceAngle;
 
         const speed = state.ball.speed;
-        // console.log(bounceAngle);
         const xNewSpeed = speed * Math.cos(bounceAngle);
         const yNewSpeed = speed * -Math.sin(bounceAngle);
-        // console.log(xNewSpeed, yNewSpeed);
         state.ball.speedX = state.ball.speedX < 0 ? xNewSpeed * -1 : xNewSpeed;
         state.ball.speedY = yNewSpeed;
-        // console.log(state.ball.speedX, state.ball.speedY);
     }
 
     function handlePaddleBounce(paddle){
@@ -364,19 +368,16 @@
             }, config.animationDuration + 100);
             return;
         }
-        // ctx.clearRect(state.ball.x, state.ball.y, config.ballSize, config.ballSize);
         stopGame(true, reason);
     }
 
     function updateGameState(timestamp) {
     	if (state.lastFrame == 0)
     		state.lastFrame = timestamp;
-    	state.deltaTime = (timestamp - state.lastFrame) / 1000;  // Convert to seconds
+    	state.deltaTime = (timestamp - state.lastFrame) / 1000;
     	state.lastFrame = timestamp;
 
-     	// setTimeout(() => {
-      		handlePaddleInput();
-     	// }, 0)
+  		handlePaddleInput();
 
         if (!state.isCountDownActive){
             state.ball.x += state.ball.speedX * state.deltaTime;
@@ -411,13 +412,11 @@
         if (!state.isCountDownActive) {
             ctx.clearRect(0, 0, config.canvasWidth, config.canvasHeight);
             drawPaddles();
-            ctx.fillText(`${state.playerScore}`, config.playerScore.x, config.playerScore.y);
-            ctx.fillText(`${state.enemyScore}`, config.enemyScore.x, config.enemyScore.y);
             ctx.drawImage(ballImage, state.ball.x, state.ball.y, config.ballSize, config.ballSize);
         }
     }
 
-    window.PongGame = {startGame, startCountdown, drawGame, stopGame, state, config, moveUp, moveDown, handleGameOver, resetGame, info, animatePaddlesToMiddle, canvas, ctx, setFont, setScoreCoords};
+    window.PongGame = {startGame, startCountdown, drawGame, stopGame, state, config, moveUp, moveDown, handleGameOver, resetGame, info, animatePaddlesToMiddle, canvas, ctx, setFont, setScoreCoords, resizeCanvas};
 })();
 
 function fillTeamDetail(enemyTeamDetail, playerTeamDetail){
@@ -469,7 +468,22 @@ function initSocket(match_code, spectateModal=0){
 		document.getElementById('gameArea').classList.replace('d-none', 'd-flex');
 		document.getElementById('playerUsername').innerText = 'Team A';
 		document.getElementById('enemyUsername').innerText = 'Team B';
+        window.PongGame.resizeCanvas();
     });
+	gameSocket.on('rackets', event => {
+		console.log('received rackets');
+		for ([paddle_id, position] of Object.entries(event)) {
+			if (position > window.PongGame.config.canvasWidth / 2){
+				window.PongGame.state.paddles.right.id = paddle_id;
+				console.log(window.PongGame.state.paddles.right.id)
+			}
+			else {
+				window.PongGame.state.paddles.left.id = paddle_id;
+				console.log(window.PongGame.state.paddles.left.id)
+			}
+		}
+		window.PongGame.drawGame();
+	})
     gameSocket.on('connect_error', (error)=> {
 		document.getElementById('spectateError').innerText = 'Impossible to spectate that game';
     })
@@ -483,54 +497,60 @@ function initSocket(match_code, spectateModal=0){
             await navigateTo('/lobby', true, true);
     })
     gameSocket.on('start_game', event => {
-        if (!PongGame.state.isGameActive)
-            PongGame.startGame();
+        if (!window.PongGame.state.isGameActive)
+            window.PongGame.startGame();
     })
     gameSocket.on('start_countdown', event => {
-        // console.log('received start_countdown');
-        PongGame.startCountdown();
+        window.PongGame.startCountdown();
     })
     gameSocket.on('game_state', event => {
 		console.log('received game State');
-		PongGame.state.ball.y = event.position_y;
-		PongGame.state.ball.x = event.position_x;
-		PongGame.state.ball.speedX = event.speed_x;
-		PongGame.state.ball.speedY = event.speed_y;
-		PongGame.state.ball.speed = event.speed;
+		window.PongGame.state.ball.y = event.position_y;
+		window.PongGame.state.ball.x = event.position_x;
+		window.PongGame.state.ball.speedX = event.speed_x;
+		window.PongGame.state.ball.speedY = event.speed_y;
+		window.PongGame.state.ball.speed = event.speed;
     })
     gameSocket.on('move_up', event => {
         console.log('move_up received', event.player);
-        if (event.player !== userInformations.id)
-            PongGame.state.paddles.left.speed = -1;
+        if (event.player != window.PongGame.state.paddles.right.id)
+            window.PongGame.state.paddles.left.speed = -1;
+        else
+        	window.PongGame.state.paddles.right.speed = -1;
     })
     gameSocket.on('move_down', event => {
         console.log('move_down received', event.player);
-        if (event.player !== userInformations.id)
-            PongGame.state.paddles.left.speed = 1;
+		console.log(window.PongGame.state.paddles.right.id);
+        if (event.player != window.PongGame.state.paddles.right.id)
+            window.PongGame.state.paddles.left.speed = 1;
+        else
+        	window.PongGame.state.paddles.right.speed = 1;
     })
     gameSocket.on('stop_moving', event => {
 		console.log('received stop_moving', event.player);
-        if (event.player == userInformations.id)
-	        PongGame.state.paddles.right.y = event.position;
+        if (event.player == window.PongGame.state.paddles.right.id) {
+	        window.PongGame.state.paddles.right.speed = 0;
+	        window.PongGame.state.paddles.right.y = event.position;
+        }
 		else {
-        	PongGame.state.paddles.left.speed = 0;
-	        PongGame.state.paddles.left.y = event.position;
+        	window.PongGame.state.paddles.left.speed = 0;
+	        window.PongGame.state.paddles.left.y = event.position;
     	}
     })
     gameSocket.on('score', event => {
-        PongGame.state.ball.speed = 0;
-        PongGame.state.playerScore = event.team_a;
-        PongGame.state.enemyScore = event.team_b;
+        window.PongGame.state.ball.speed = 0;
+        window.PongGame.state.playerScore = event.team_a;
+        window.PongGame.state.enemyScore = event.team_b;
         document.getElementById('playerScore').innerText = '' + PongGame.state.playerScore;
         document.getElementById('enemyScore').innerText = '' + PongGame.state.enemyScore;
-        PongGame.drawGame();
+        window.PongGame.drawGame();
     })
     gameSocket.on('game_over', async event => {
         console.log('game_over received', event);
         gameSocket.close();
         gameSocket = undefined;
         updateTrophies();
-		PongGame.handleGameOver(event.reason);
+		window.PongGame.handleGameOver(event.reason);
         if (typeof fromTournament !== 'undefined' && fromTournament)
             await navigateTo('/tournament');
         else if (typeof fromLobby !== 'undefined' && fromLobby)
@@ -560,7 +580,7 @@ function initSocket(match_code, spectateModal=0){
 }
 
 document.getElementById('gameOverModalPlayAgain').addEventListener('click', async () => {
-    // await handleRoute();
+    await navigateTo('/spectate');
 })
 
 document.getElementById('gameOverModalQuit').addEventListener('click', async () => {
@@ -571,13 +591,13 @@ async function initGameConstants(){
     await fetch('/gameConfig.json')
         .then(response => response.json())
         .then(data => {
-            console.log(data);
             PongGame.config.canvasHeight = data.canvas.normal.height;
             PongGame.config.canvasWidth = data.canvas.normal.width;
             let canvas = document.getElementById('gameCanvas');
             PongGame.ctx = canvas.getContext("2d");
             canvas.width = PongGame.config.canvasWidth;
             canvas.height = PongGame.config.canvasHeight;
+            PongGame.resizeCanvas();
             PongGame.setFont();
             PongGame.config.paddleHeight = data.paddle.normal.height;
             PongGame.config.paddleWidth = data.paddle.normal.width;
@@ -593,10 +613,6 @@ async function initGameConstants(){
             PongGame.config.winningScore = data.score.max;
             PongGame.setScoreCoords();
         })
-        // .catch(error => {
-        //     console.log('caught', error);
-        //     throw error;
-        // })
 }
 
 async function initData(data){
@@ -681,32 +697,26 @@ function forPhoneChanges(){
             document.dispatchEvent(event);
         }
 
-    // Handle touch start
     let lastTouchY = undefined;
     function handleTouchStart(event) {
         const touch = event.touches[0];
         const screenHeight = window.innerHeight;
         const touchY = touch.clientY;
-        const threshold = 0.20; // 20% of screen height
+        const threshold = 0.20;
 
         if (touchY < screenHeight / 2) {
             if (lastTouchY && lastTouchY >= screenHeight / 2)
                 simulateKey('keyup', 40)
-            // Top touch - simulate arrow up press
             simulateKey('keydown', 38);
         } else {
             if (lastTouchY && lastTouchY < screenHeight / 2)
                 simulateKey('keyup', 38)
-            // Bottom touch - simulate arrow down press
             simulateKey('keydown', 40);
         }
         lastTouchY = touchY;
     }
 
-    // Handle touch end - simulates keyup
     function handleTouchEnd(event) {
-        // When the last touch point is removed, we need to check
-        // what was the last position to know which key to release
         if (event.changedTouches.length > 0) {
             const touch = event.changedTouches[0];
             const screenHeight = window.innerHeight;
@@ -714,10 +724,8 @@ function forPhoneChanges(){
             const threshold = 0.20;
 
             if (touchY < screenHeight / 2) {
-                // Release arrow up
                 simulateKey('keyup', 38);
             } else {
-                // Release arrow down
                 simulateKey('keyup', 40);
             }
         }
@@ -744,6 +752,7 @@ async function initGame(){
         forPhoneChanges();
     if (window.location.pathname === '/')
     	return;
+    await initGameConstants();
     if (containsCode(window.location.pathname)) {
     	var match_code = window.location.pathname.split('/').pop()
 		console.log('match_code', match_code);
@@ -759,6 +768,7 @@ async function initGame(){
 			initSocket(match_code, spectatePromptModal);
 		})
     }
+	PongGame.resizeCanvas();
 }
 
 initGame();
