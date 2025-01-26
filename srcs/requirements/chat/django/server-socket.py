@@ -58,6 +58,9 @@ async def connect(sid, environ, auth):
         except  PermissionDenied:
             print(f"Permission denied : {sid}")
             raise ConnectionRefusedError({"error": 403, "message": "Permission denied"})
+        except NotFound:
+            print(f"User not found : {sid}")
+            raise ConnectionRefusedError({"error": 404, "message": "User not found"})
         except APIException:
             raise ConnectionRefusedError({"error": 400, "message": "error"})
         if user and chat:
@@ -153,7 +156,7 @@ async def message(sid, data):
         print(f"API error : {sid}")
         await sio.emit(
             'error',
-            {'error': 500, 'message': 'error'},
+            {'error': 400, 'message': 'error'},
             to=sid
         )
         usersConnected.remove_user(sid)
