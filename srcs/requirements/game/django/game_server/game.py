@@ -1,4 +1,3 @@
-import json
 import math
 import os
 import random
@@ -306,9 +305,7 @@ class Game:
             last_frame_time = time.perf_counter()
 
     def launch(self):
-        from game_server.server import Server
         timeout = int(os.environ['GAME_PLAYER_CONNECT_TIMEOUT'])
-
         try:
             self.wait_for_players(timeout)
             print(time.time(), "all players are connected", flush=True)
@@ -350,7 +347,6 @@ class Game:
             finish_match(self.match.id, finish_reason, disconnected_user_id)
 
     def reset_game_state(self):
-        from game_server.server import Server
         self.ball = self.create_ball(self.canvas, self.ledge_offset, self.racket_width)
         self.ball.last_touch_team_a = self.match.teams[0].players[0].user_id
         self.ball.last_touch_team_b = self.match.teams[1].players[0].user_id
