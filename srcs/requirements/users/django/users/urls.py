@@ -7,7 +7,7 @@ from friend_requests.views import friend_requests_list_create_view, friend_reque
     friend_requests_receive_list_view
 from friends.views import friends_view, friend_view
 from events.views import events_view
-from profile_pictures.views import profile_pictures_view
+from profile_pictures.views import profile_pictures_view, set_profile_picture_view
 from sse.views import sse_view
 from stats.views import finish_match_view, stats_view, stats_ranked_view, finish_tournament_view
 from users.views import users_me_view, retrieve_user_view, retrieve_users_view, manage_user_view
@@ -34,6 +34,7 @@ urlpatterns = [
     path(Users.result_tournament, finish_tournament_view),
 
     path(Users.profile_pictures, profile_pictures_view),
+    path(Users.profile_picture, set_profile_picture_view),
 
     path(Users.export_data, export_data_view),
 
@@ -46,6 +47,6 @@ urlpatterns = [
     path(UsersManagement.manage_user, manage_user_view),
 ]
 
-# todo test tournament with ui (abandon quit tournament via sse)
+# todo test tournament with ui (abandon quit tournament via sse, reocnnect)
 # todo check problem
 # todo sort import

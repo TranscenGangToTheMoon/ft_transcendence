@@ -17,6 +17,7 @@ class MessagesException:
         BLOCKED_INSTANCE = NOT_FOUND.format(obj='Blocked instance')
         MATCH = NOT_FOUND.format(obj='Match')
         CHAT = NOT_FOUND.format(obj='Chat')
+        PROFILE_PICTURE = NOT_FOUND.format(obj='Profile picture')
 
         NOT_BELONG = 'You do not belong to any {obj}.'
         NOT_BELONG_TOURNAMENT = NOT_BELONG.format(obj='tournament')
@@ -76,6 +77,7 @@ class MessagesException:
         GUEST_UPDATE_USERNAME = 'Guest users can only update their username.'
         GUEST_REQUIRED = 'You must be a guest user.'
         ALREADY_AUTHENTICATED = 'You are already authenticated.'
+        PROFILE_PICTURE_LOCKED = 'You did not unlock this profile picture.'
 
         NOT_BELONG = 'You do not belong to this {obj}.'
         NOT_BELONG_TO_CHAT = NOT_BELONG.format(obj='chat')
@@ -93,9 +95,9 @@ class MessagesException:
         BLOCK_YOURSELF = 'You cannot block yourself.'
         SEND_FRIEND_REQUEST_YOURSELF = 'You cannot send a friend request to yourself.'
         FRIEND_YOURSELF = 'You cannot be friends with yourself.'
-        ACCEPT_FRIEND_REQUEST_YOURSELF = {'detail': 'you cannot accept your own friend request.'}
+        ACCEPT_FRIEND_REQUEST_YOURSELF = {'detail': 'you cannot accept your own friend request.'} # todo
 
-        CANNOT_UPDATE_GAME_MODE = 'You cannot update game mode.'
+        CANNOT_UPDATE_GAME_MODE = 'You cannot update game mode.' #todo
 
         IS_FULL = '{obj} is full.'
         TEAM_IS_FULL = IS_FULL.format(obj='Team')

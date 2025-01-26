@@ -1,7 +1,9 @@
 EXT = '.png'
 
 
-class ProfilePictures:
+class ProfilePicture:
+    global_n = 0
+
     DEFAULT = 'Default'
     TOURNAMENT_WINNER = 'Tournament Winner'
     TOURNAMENT_MASTER = 'Tournament Master'
@@ -24,6 +26,8 @@ class ProfilePictures:
     POPULAR_GUY = 'Popular Guy'
 
     def __init__(self, name, unlock_reason):
+        self.n = ProfilePicture.global_n
+        ProfilePicture.global_n += 1
         self.name = name
         self.unlock_reason = unlock_reason
         url = '/assets/profile_pictures/' + name.lower().replace(' ', '_')
@@ -32,8 +36,9 @@ class ProfilePictures:
         self.medium = url + '_medium' + EXT
         self.large = url + '_large' + EXT
 
-    def __dict__(self):
+    def dump(self):
         return {
+            'n': self.n,
             'name': self.name,
             'unlock_reason': self.unlock_reason,
             'url': self.url,
@@ -44,24 +49,24 @@ class ProfilePictures:
 
 
 profile_pictures = [
-    ProfilePictures(ProfilePictures.DEFAULT, 'Default profile picture'),
-    ProfilePictures(ProfilePictures.TOURNAMENT_WINNER, 'Win 1 tournament'),
-    ProfilePictures(ProfilePictures.TOURNAMENT_MASTER, 'Win 10 tournaments'),
-    ProfilePictures(ProfilePictures.TOURNAMENT_GOD, 'Win 100 tournaments'),
-    ProfilePictures(ProfilePictures.CLASH_WINNER, 'Win 10 clash games.'),
-    ProfilePictures(ProfilePictures.CLASH_PLAYER, 'Win 50 clash games.'),
-    ProfilePictures(ProfilePictures.CLASH_GOD, 'Win 100 clash games.'),
-    ProfilePictures(ProfilePictures.DUEL_WINNER, 'Win 10 duel games.'),
-    ProfilePictures(ProfilePictures.DUEL_MASTER, 'Win 50 duel games.'),
-    ProfilePictures(ProfilePictures.DUEL_GOD, 'Win 100 duel games.'),
-    ProfilePictures(ProfilePictures.RANKE_BRONZE, 'Achieve over 100 trophies in ranked'),
-    ProfilePictures(ProfilePictures.RANKE_SILVER, 'Achieve over 500 trophies in ranked'),
-    ProfilePictures(ProfilePictures.RANKE_GOLD, 'Achieve over 1000 trophies in ranked'),
-    ProfilePictures(ProfilePictures.RANKE_DIAMOND, 'Achieve over 2000 trophies in ranked'),
-    ProfilePictures(ProfilePictures.RANKE_MASTER, 'Achieve over 3000 trophies in ranked'),
-    ProfilePictures(ProfilePictures.RANKE_MYTHIC, 'Achieve over 5000 trophies in ranked'),
-    ProfilePictures(ProfilePictures.FUN_PLAYER, 'Play a match in all game modes'),
-    ProfilePictures(ProfilePictures.SCORER, 'Score 100 goals in any game mode'),
-    ProfilePictures(ProfilePictures.ONE_FRIEND, 'Have at least one friend'),
-    ProfilePictures(ProfilePictures.POPULAR_GUY, 'Have more than 50 friends'),
+    ProfilePicture(ProfilePicture.DEFAULT, 'Default profile picture'),
+    ProfilePicture(ProfilePicture.TOURNAMENT_WINNER, 'Win 1 tournament'),
+    ProfilePicture(ProfilePicture.TOURNAMENT_MASTER, 'Win 10 tournaments'),
+    ProfilePicture(ProfilePicture.TOURNAMENT_GOD, 'Win 100 tournaments'),
+    ProfilePicture(ProfilePicture.CLASH_WINNER, 'Win 10 clash games.'),
+    ProfilePicture(ProfilePicture.CLASH_PLAYER, 'Win 50 clash games.'),
+    ProfilePicture(ProfilePicture.CLASH_GOD, 'Win 100 clash games.'),
+    ProfilePicture(ProfilePicture.DUEL_WINNER, 'Win 10 duel games.'),
+    ProfilePicture(ProfilePicture.DUEL_MASTER, 'Win 50 duel games.'),
+    ProfilePicture(ProfilePicture.DUEL_GOD, 'Win 100 duel games.'),
+    ProfilePicture(ProfilePicture.RANKE_BRONZE, 'Achieve over 100 trophies in ranked'),
+    ProfilePicture(ProfilePicture.RANKE_SILVER, 'Achieve over 500 trophies in ranked'),
+    ProfilePicture(ProfilePicture.RANKE_GOLD, 'Achieve over 1000 trophies in ranked'),
+    ProfilePicture(ProfilePicture.RANKE_DIAMOND, 'Achieve over 2000 trophies in ranked'),
+    ProfilePicture(ProfilePicture.RANKE_MASTER, 'Achieve over 3000 trophies in ranked'),
+    ProfilePicture(ProfilePicture.RANKE_MYTHIC, 'Achieve over 5000 trophies in ranked'),
+    ProfilePicture(ProfilePicture.FUN_PLAYER, 'Play a match in all game modes'),
+    ProfilePicture(ProfilePicture.SCORER, 'Score 100 goals in any game mode'),
+    ProfilePicture(ProfilePicture.ONE_FRIEND, 'Have at least one friend'),
+    ProfilePicture(ProfilePicture.POPULAR_GUY, 'Have more than 50 friends'),
 ]
