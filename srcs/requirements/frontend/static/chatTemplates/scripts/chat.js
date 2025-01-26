@@ -55,6 +55,16 @@ function displayChatError(error, idDiv) {
 	}
 }
 
+async function closeChatView() {
+	chatView = document.getElementById('chatView');
+	if (!chatView) return;
+	chatView.remove();
+	await disconnect();
+	openChat = {};
+	userChat = {};
+	chatView = document.getElementById('chatView');
+}
+
 async function disconnect() {
 	if (typeof window.socket === 'undefined')	return;
 	if (socket === null)	return;
@@ -572,11 +582,7 @@ async function setChatView()
 		}
 	});
 	document.getElementById('logOut').addEventListener('click', async () => {
-		await disconnect();
-		openChat = {};
-		userChat = {};
-		chatView = document.getElementById('chatView');
-		if (chatView) chatView.remove();
+		closeChatView();
 	});
 }
 
