@@ -582,9 +582,12 @@ async function setChatView()
 			await disconnect();
 		}
 	});
-	document.getElementById('logOut').addEventListener('click', async () => {
+	logOutButton = document.getElementById('logOut');
+	if (logOutButton) {
+		logOutButton.addEventListener('click', async () => {
 		closeChatView();
-	});
+		});
+	}
 }
 
 async function openChatTab(chatId)
