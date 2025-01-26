@@ -47,7 +47,7 @@ function displayChatError(error, idDiv) {
 		var divError = document.createElement('div');
 		divError.className = 'alert alert-danger';
 		divError.id = 'chatAlert';
-		divError.innerText = error.code + ": " + error.detail;
+		divError.innerText = "Error: " + error.detail;
 		divToDisplayError.appendChild(divError);
 	}
 	else {
