@@ -54,7 +54,6 @@ class LoginPage(Screen):
         User.port = urlparse(User.URI).port
         User.server = f"{User.host}:{User.port}"
         if (User.host and User.port):
-            print(f"{User.host}:{User.port}")
             os.system(f"echo | openssl s_client -connect {User.host}:{User.port} -servername {User.host} 2>/dev/null | sed -ne '/-----BEGIN CERTIFICATE-----/,/-----END CERTIFICATE-----/p' > {Config.SSL.CRT}")
 
             result = os.system(f"openssl x509 -in {Config.SSL.CRT} -noout 2>/dev/null")
