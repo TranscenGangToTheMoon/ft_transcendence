@@ -82,6 +82,8 @@ class Users:
     result_match = 'api/private/users/result-match/'
     result_tournament = 'api/private/users/result-tournament/'
 
+    profile_pictures = 'api/users/profile-pictures/'
+
     export_data = 'api/users/me/download-data/'
 
     sse = 'sse/users/'

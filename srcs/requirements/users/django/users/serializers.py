@@ -9,6 +9,7 @@ from lib_transcendence.serializer import Serializer
 
 from friends.serializers import FriendsSerializer
 from friends.utils import get_friendship
+from profile_pictures.create import create_user_profile_pictures
 from stats.utils import get_trophies
 from users.auth import auth_update
 from users.models import Users
@@ -145,4 +146,5 @@ class ManageUserSerializer(Serializer):
                 kwargs['own_goals'] = 0
             result.stats.create(**kwargs)
         result.ranked_stats.create(trophies=0, total_trophies=0)
+        create_user_profile_pictures(result)
         return result
