@@ -115,7 +115,7 @@ async def message(sid, data):
             )
         await sio.emit(
             'message',
-            {'author': answer_api['author'], 'content': answer_api.content, 'is_read': is_chat_with_connected},
+            {'author': answer_api['author'], 'content': answer_api['content'], 'is_read': is_chat_with_connected},
             room=str(chat_id)
         )
         print(f"Message saved and sent from {sid}: {data}")

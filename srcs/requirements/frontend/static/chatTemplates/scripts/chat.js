@@ -137,6 +137,7 @@ function setupSocketListeners(chatInfo)
 			messageAuthor.innerText = 'You: ';
 		}
 		messageContent.innerText = data.content;
+		chatBox.insertAdjacentElement('beforeend', messageDiv);
 		chatBox.scrollTop = chatBox.scrollHeight;
 	});
 
