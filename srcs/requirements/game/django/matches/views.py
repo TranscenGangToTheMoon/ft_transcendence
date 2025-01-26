@@ -10,7 +10,8 @@ from rest_framework import generics
 from rest_framework.exceptions import NotFound
 
 from matches.models import Matches, Players
-from matches.serializers import MatchSerializer, validate_user_id, MatchFinishSerializer, ScoreSerializer
+from matches.serializers import MatchSerializer, validate_user_id, MatchFinishSerializer, ScoreSerializer, \
+    MatchNotPlayedSerializer
 
 
 class CreateMatchView(generics.CreateAPIView):
@@ -31,6 +32,10 @@ def check_timeout(match_id):
             match.finish(FinishReason.PLAYERS_TIMEOUT)
     except Matches.DoesNotExist:
         pass
+
+
+class CreateMatchNotPlayedView(generics.CreateAPIView):
+    serializer_class = MatchNotPlayedSerializer
 
 
 class FinishMatchView(generics.UpdateAPIView):
@@ -59,7 +64,7 @@ class ListMatchesView(generics.ListAPIView):
     authentication_classes = [Authentication]
 
     def filter_queryset(self, queryset):
-        return queryset.filter(players__user_id=self.kwargs['user_id'], finished=True)
+        return queryset.filter(players__user_id=self.kwargs['user_id'], finished=True).order_by('-finished_at')
 
 
 class UserMatchRetrieveView(generics.RetrieveAPIView):
@@ -79,6 +84,7 @@ class MatchRetrieveView(generics.RetrieveAPIView):
 
 
 create_match_view = CreateMatchView.as_view()
+create_match_not_played_view = CreateMatchNotPlayedView.as_view()
 finish_match_view = FinishMatchView.as_view()
 score_view = ScoreView.as_view()
 list_matches_view = ListMatchesView.as_view()

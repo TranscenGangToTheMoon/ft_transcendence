@@ -25,17 +25,8 @@ class LobbyView(SerializerAuthContext, generics.CreateAPIView, generics.Retrieve
         return participant.lobby
 
 
-class LobbyParticipantsView(SerializerAuthContext, generics.ListCreateAPIView, generics.UpdateAPIView, generics.DestroyAPIView): # TODO fguirama: GET usefull ? also for tournament
-    queryset = LobbyParticipants.objects.all()
+class LobbyParticipantsView(SerializerAuthContext, generics.CreateAPIView, generics.UpdateAPIView, generics.DestroyAPIView):
     serializer_class = LobbyParticipantsSerializer
-    pagination_class = None
-
-    def filter_queryset(self, queryset):
-        lobby = get_lobby(self.kwargs['code'])
-        queryset = queryset.filter(lobby_id=lobby.id)
-        if not queryset.filter(user_id=self.request.user.id).exists():
-            raise PermissionDenied(MessagesException.PermissionDenied.NOT_BELONG_LOBBY)
-        return queryset
 
     def get_object(self):
         return get_lobby_participant(get_lobby(self.kwargs['code']), self.request.user.id)

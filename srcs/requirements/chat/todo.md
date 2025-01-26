@@ -14,7 +14,7 @@
 ### 3) SSE
 
 * When the client is not in the room each message is received by sse event.
-* The notifaction must contained the chat id.
+* The notifaction must contain the chat id.
 * The client can join the room by clicking on the notification.
 
 ### 3) Join Discussion

@@ -1,5 +1,6 @@
-import os
+from datetime import datetime, timezone, timedelta
 
+from django.conf import settings
 from lib_transcendence.game import GameMode, FinishReason
 from lib_transcendence.generate import generate_code
 from lib_transcendence.exceptions import MessagesException, Conflict, ResourceExists
@@ -9,7 +10,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import NotFound, PermissionDenied
 from lib_transcendence.serializer import Serializer
 
-from matches.models import Matches, Teams, Players
+from matches.models import Matches, Players
 
 
 def validate_user_id(value, return_match=False, kwargs=None):
@@ -143,9 +144,51 @@ class MatchSerializer(Serializer):
         if match.game_mode == GameMode.CLASH:
             kwargs['own_goal'] = 0
         for name_team, players in teams.items():
-            new_team = Teams.objects.create(match=match, name=name_team)
+            new_team = match.teams.create(name=name_team)
             for user in players:
-                Players.objects.create(user_id=user, match=match, team=new_team, **kwargs)
+                match.players.create(user_id=user, team=new_team, **kwargs)
+        return match
+
+
+class MatchNotPlayedSerializer(Serializer):
+    user_id = serializers.IntegerField(write_only=True)
+    tournament_id = serializers.IntegerField()
+    tournament_stage_id = serializers.IntegerField()
+    tournament_n = serializers.IntegerField()
+
+    class Meta:
+        model = Matches
+        fields = [
+            'user_id',
+            'id',
+            'game_mode',
+            'created_at',
+            'tournament_id',
+            'tournament_stage_id',
+            'tournament_n',
+            'winner',
+        ]
+        read_only_fields = [
+            'id',
+            'game_mode',
+            'created_at',
+            'winner',
+        ]
+
+    def create(self, validated_data):
+        user_id = validated_data.pop('user_id')
+        validated_data['game_mode'] = GameMode.TOURNAMENT
+        validated_data['match_type'] = MatchType.M1V1
+        validated_data['game_duration'] = timedelta()
+        validated_data['finished'] = True
+        validated_data['finished_at'] = datetime.now(timezone.utc)
+        validated_data['finish_reason'] = FinishReason.GAME_NOT_PLAYED
+        match = super().create(validated_data)
+        winner_team = match.teams.create(name='a')
+        match.teams.create(name='b')
+        match.players.create(user_id=user_id, team=winner_team)
+        match.winner = winner_team
+        match.save()
         return match
 
 
@@ -162,6 +205,7 @@ class TournamentMatchSerializer(Serializer):
             'game_duration',
             'winner',
             'looser',
+            'finish_reason',
         ]
         read_only_fields = [
             'id',
@@ -169,22 +213,31 @@ class TournamentMatchSerializer(Serializer):
             'game_duration',
             'winner',
             'looser',
+            'finish_reason',
         ]
 
     def get_winner(self, obj):
-        if 'users' in self.context:
-            return self.context['users'][obj.winner.players.first().user_id]
-        return {'id': obj.winner.players.first().user_id}
+        user = obj.winner.players.first()
+        if 'users' in self.context and user.user_id in self.context['users']:
+            base = self.context['users'][user.user_id]
+        else:
+            base = {'id': user.user_id}
+        return {**base, 'score': user.score}
 
     def get_looser(self, obj):
-        if 'users' in self.context:
-            return self.context['users'][obj.looser.players.first().user_id]
-        return {'id': obj.winner.players.first().user_id}
+        if obj.looser is None:
+            return None
+        user = obj.looser.players.first()
+        if 'users' in self.context and user.user_id in self.context['users']:
+            base = self.context['users'][user.user_id]
+        else:
+            base = {'id': user.user_id}
+        return {**base, 'score': user.score}
 
 
 class MatchFinishSerializer(Serializer):
     user_id = serializers.IntegerField(required=True, write_only=True)
-    finish_reason = serializers.CharField(required=True)
+    finish_reason = serializers.CharField(max_length=20, required=True)
 
     class Meta:
         model = Matches
@@ -211,9 +264,9 @@ class MatchFinishSerializer(Serializer):
         except Players.DoesNotExist:
             raise NotFound(MessagesException.NotFound.NOT_BELONG_MATCH)
         player.team.score = 0
-        player.save()
-        winner = instance.players.exclude(user_id=player.user_id).first()
-        winner.team.score = int(os.environ['GAME_MAX_SCORE'])
+        player.team.save()
+        winner = instance.teams.exclude(id=player.team.id).first()
+        winner.score = settings.GAME_MAX_SCORE
         winner.save()
         validated_data['finished'] = True
         result = super().update(instance, validated_data)

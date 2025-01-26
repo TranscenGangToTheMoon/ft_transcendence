@@ -18,7 +18,7 @@ def get_participants(obj, add_fields: list[str] = None):
     return results
 
 
-def get_participant(model, obj, user_id, creator_check=False, from_place=False):
+def get_participant(model, obj, user_id, creator_check: bool | str = False, from_place=False):
     kwargs = {'user_id': user_id}
 
     if model is TournamentParticipants:
@@ -33,7 +33,9 @@ def get_participant(model, obj, user_id, creator_check=False, from_place=False):
     try:
         p = model.objects.get(**kwargs)
         if creator_check and not p.creator:
-            raise PermissionDenied(MessagesException.PermissionDenied.NOT_CREATOR.format(obj=name))
+            if creator_check is True:
+                raise PermissionDenied(MessagesException.PermissionDenied.NOT_CREATOR.format(obj=name))
+            raise PermissionDenied(creator_check.format(obj=name))
         return p
     except model.DoesNotExist:
         if from_place:

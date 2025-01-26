@@ -7,6 +7,7 @@ from lib_transcendence.serializer import Serializer
 from baning.utils import banned
 from blocking.models import Blocked
 from lobby.models import LobbyParticipants
+from matchmaking.utils.model import ParticipantsPlace
 from play.models import Players
 from tournament.models import TournamentParticipants
 
@@ -26,6 +27,8 @@ class BlockedSerializer(Serializer):
         return attrs
 
     def create(self, validated_data):
+        model: ParticipantsPlace
+
         for model in (LobbyParticipants, TournamentParticipants, Players):
             user = get_user_from_model(validated_data['user_id'], model)
             if user is not None:
@@ -48,7 +51,7 @@ class BlockedSerializer(Serializer):
         return super().create(validated_data)
 
 
-def get_user_from_model(user_id, model: Type[LobbyParticipants | TournamentParticipants | Players]):
+def get_user_from_model(user_id, model: Type[ParticipantsPlace]):
     try:
         return model.objects.get(user_id=user_id)
     except model.DoesNotExist:
