@@ -108,25 +108,25 @@ function setupSocketListeners(chatInfo)
 	});
 	
 	socket.on("message", (data) => {
+		let messageDiv = document.createElement('div');
+		let messageContent = document.createElement('p');
+		let messageAuthor = document.createElement('strong');
+		messageDiv.appendChild(messageAuthor);
+		messageDiv.appendChild(messageContent);
+		messageDiv.style.display = 'flex';
 		console.log("Message received: ", data);
 		messagesNotRead = chatBox.querySelectorAll('.chatMessageNotRead');
 		for (let message of messagesNotRead) {
 			message.classList.remove('chatMessageNotRead');
 		}
 		if (chatBox === null) return;
-		if (data.author === ''){
-			var serverMessage = document.getElementById('serverMessage');
-			if (serverMessage) serverMessage.remove();
-			chatBox.insertAdjacentHTML('beforeend', `<div id='serverMessage'><p><strong>:</strong> ${data.content}</p></div>`);
+		if (data.author === chatInfo.targetId) {
+			messageAuthor.innerText = chatInfo.target + ': ';
 		}
-		else{
-			if (data.author === chatInfo.targetId) {
-				chatBox.insertAdjacentHTML('beforeend', `<div><p><strong>${chatInfo.target}:</strong> ${data.content}</p></div>`);
-			}
-			else {
-				chatBox.insertAdjacentHTML('beforeend', `<div><p><strong>You:</strong> ${data.content}</p></div>`);
-			}
+		else {
+			messageAuthor.innerText = 'You: ';
 		}
+		messageContent.innerText = data.content;
 		chatBox.scrollTop = chatBox.scrollHeight;
 	});
 
@@ -154,17 +154,23 @@ function setupSocketListeners(chatInfo)
 function displayMessages(chatInfo, chatMessages, isMore = false, method='afterbegin'){
 	const chatBox = document.getElementById('messages'+chatInfo.target);
 	chatMessages.forEach(element => {
+		let messageDiv = document.createElement('div');
+		let messageContent = document.createElement('p');
+		let messageAuthor = document.createElement('strong');
 		console.log('Chat: Displaying message:', element);
 		if (element.author !== chatInfo.targetId) {
-			chatBox.insertAdjacentHTML(method, `<div><p><strong>You:</strong> ${element.content}</p></div>`);
+			messageAuthor.innerText = 'You: ';
 		} else {
+			messageAuthor.innerText = chatInfo.target + ': ';
 			if (element.is_read === false) {
-				chatBox.insertAdjacentHTML(method, `<div><p class="chatMessageNotRead"><strong>${chatInfo.target}:</strong> ${element.content}</p></div>`);
-			}
-			else {
-				chatBox.insertAdjacentHTML(method, `<div><p><strong>${chatInfo.target}:</strong> ${element.content}</p></div>`);
+				messageContent.classList.add('chatMessageNotRead');
 			}
 		}
+		messageContent.innerText = element.content;
+		messageDiv.style.display = 'flex';
+		messageDiv.appendChild(messageAuthor);
+		messageDiv.appendChild(messageContent);
+		chatBox.insertAdjacentElement(method, messageDiv);
 	});
 	if (!isMore)
 		chatBox.scrollTop = chatBox.scrollHeight;
