@@ -105,7 +105,6 @@ class User():
 
     @staticmethod
     def me():
-        print("Me")
         User.response = requests.get(
             url=f"https://{User.server}/api/users/me/",
             data={},
@@ -136,7 +135,6 @@ class User():
 
     @staticmethod
     def duel():
-        print("Duel")
         User.response = requests.post(
             url=f"https://{User.server}/api/play/duel/",
             data="",
@@ -164,7 +162,6 @@ class User():
 
     @staticmethod
     def cancelDuel():
-        print("Cancel duel")
         User.response = requests.delete(
             url=f"https://{User.server}/api/play/duel/",
             data="",
@@ -190,7 +187,6 @@ class User():
 
     @staticmethod
     def refresh():
-        print("Refresh token")
         data = json.dumps({"refresh": User.refreshToken})
         User.response = requests.post(
             url=f"https://{User.server}/api/auth/refresh/",
