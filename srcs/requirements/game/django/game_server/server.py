@@ -107,7 +107,10 @@ class Server:
             for player in players:
                 if player.socket_id == '':
                     continue
-                Server._clients.pop(player.socket_id)
+                try:
+                    Server._clients.pop(player.socket_id)
+                except (KeyError):
+                    pass
                 if player.socket_id == disconnected_sid:
                     continue
                 Server._loop.call_later(0.5, asyncio.create_task, Server._sio.disconnect(player.socket_id))
@@ -124,9 +127,9 @@ class Server:
         raise Server.NotFound(f'No player with id {user_id} is awaited on this server')
 
     @staticmethod
-    def get_game(match_code):
+    def get_game(game_id):
         with Server._games_lock:
             for match_id in Server._games:
-                if Server._games[match_id].match.code == match_code:
-                    return Server._games[match_id]
-        raise Server.NotFound(f'No match with code {match_code} is running on this server')
+                if match_id == game_id:
+                    return Server._games[game_id]
+        raise Server.NotFound(f'No match with code {game_id} is running on this server')

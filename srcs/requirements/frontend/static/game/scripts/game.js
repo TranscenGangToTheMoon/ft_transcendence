@@ -521,12 +521,12 @@ function initSocket(match_code, socketPath, socketMode){
 	const host = window.location.origin;
 	const token = getAccessToken();
 	let gameSocket = io(host, {
-      transports: [socketMode],
-      path: socketPath,
-      auth : {
-          "id": userInformations.id,
-          "token": token,
-        },
+        transports: [socketMode],
+        path: socketPath,
+        auth : {
+            "id": userInformations.id,
+            "token": token,
+            },
 	});
     window.gameSocket = gameSocket;
 	gameSocket.on('connect', () => {
@@ -584,26 +584,23 @@ function initSocket(match_code, socketPath, socketMode){
     })
     gameSocket.on('score', event => {
         PongGame.state.ball.speed = 0;
-		// for (paddle in PongGame.state.paddles) {
-            // 	PongGame.state.paddles[paddle].y = (PongGame.config.canvasHeight - PongGame.config.paddleHeight) / 2;
-            // }
-            // PongGame.animatePaddlesToMiddle()
-            if (PongGame.info.myTeam.name == 'A') {
-                PongGame.state.playerScore = event.team_a;
-                PongGame.state.enemyScore = event.team_b;
-            }
-            else {
-                PongGame.state.playerScore = event.team_b;
-                PongGame.state.enemyScore = event.team_a;
-            }
-            document.getElementById('playerScore').innerText = '' + PongGame.state.playerScore;
-            document.getElementById('enemyScore').innerText = '' + PongGame.state.enemyScore;
-            PongGame.drawGame();
-        })
+        if (PongGame.info.myTeam.name == 'A') {
+            PongGame.state.playerScore = event.team_a;
+            PongGame.state.enemyScore = event.team_b;
+        }
+        else {
+            PongGame.state.playerScore = event.team_b;
+            PongGame.state.enemyScore = event.team_a;
+        }
+        document.getElementById('playerScore').innerText = '' + PongGame.state.playerScore;
+        document.getElementById('enemyScore').innerText = '' + PongGame.state.enemyScore;
+        PongGame.drawGame();
+    })
     gameSocket.on('game_over', async event => {
         console.log('game_over received', event);
         gameSocket.close();
         gameSocket = undefined;
+        localStorage.removeItem('game-event');
         updateTrophies();
 		PongGame.handleGameOver(event.reason);
         if (typeof fromTournament !== 'undefined' && fromTournament){
@@ -646,10 +643,6 @@ function addScore(){
     document.getElementById('playerScoreInModal').innerText = PongGame.state.playerScore;
     fillTeamDetail(enemyTeamDetail, playerTeamDetail);
 }
-
-document.getElementById('gameOverModalPlayAgain').addEventListener('click', async () => {
-    // await handleRoute();
-})
 
 document.getElementById('gameOverModalQuit').addEventListener('click', async () => {
     await navigateTo('/');
@@ -727,6 +720,7 @@ document.getElementById('confirmModal').addEventListener('hidden.bs.modal', () =
 
 function checkGameAuthorization(){
     console.log(window.location.pathname);
+    // if (reconnect()) return;
     if (userInformations.is_guest && window.location.pathname === '/game/ranked')
         throw `${window.location.pathname}`;
     if (window.location.pathname === '/game/tournament' && typeof tournamentData === 'undefined')
@@ -739,9 +733,9 @@ async function gameStart(event){
     cancelTimeout = false;
 
     data = JSON.parse(event.data);
-    // data = data.data;
     console.log('game-start received (game)', JSON.parse(event.data));
     try {
+        localStorage.setItem('game-event', JSON.stringify(data));
         await initData(data.data, data.target[0].url, data.target[0].type);
     }
     catch (error){
@@ -751,8 +745,6 @@ async function gameStart(event){
 
 function forPhoneChanges(){
     try {
-        // document.getElementById('gameCanvas').style.height = '300px';
-        // document.getElementById('gameCanvas').style.width = '400px';
         document.getElementById('gameCanvas').style.backgroundColor = 'blue';
 
 
@@ -768,33 +760,26 @@ function forPhoneChanges(){
 
             document.dispatchEvent(event);
         }
-
-    // Handle touch start
+        
     let lastTouchY = undefined;
     function handleTouchStart(event) {
         const touch = event.touches[0];
         const screenHeight = window.innerHeight;
         const touchY = touch.clientY;
-        const threshold = 0.20; // 20% of screen height
-
+        
         if (touchY < screenHeight / 2) {
             if (lastTouchY && lastTouchY >= screenHeight / 2)
                 simulateKey('keyup', 40)
-            // Top touch - simulate arrow up press
             simulateKey('keydown', 38);
         } else {
             if (lastTouchY && lastTouchY < screenHeight / 2)
                 simulateKey('keyup', 38)
-            // Bottom touch - simulate arrow down press
             simulateKey('keydown', 40);
         }
         lastTouchY = touchY;
     }
-
-    // Handle touch end - simulates keyup
+    
     function handleTouchEnd(event) {
-        // When the last touch point is removed, we need to check
-        // what was the last position to know which key to release
         if (event.changedTouches.length > 0) {
             const touch = event.changedTouches[0];
             const screenHeight = window.innerHeight;
@@ -826,11 +811,25 @@ function wrongConfigFileError(error){
     console.log(error);
 }
 
+function reconnect(){
+    let event = localStorage.getItem('game-event');
+    if (event){
+        event = JSON.parse(event);
+        let gameMode = window.location.pathname.split('/')[2]
+        if (event.data.game_mode === gameMode){
+            initData(event.data, event.target[0].url, event.target[0].type);
+            if (gameMode === 'tournament')
+                fromTournament = true;
+            return 1;
+        }
+    }
+    return 0;
+}
+ 
 async function initGame(){
     await indexInit(false);
     if (window.matchMedia("(hover: none) and (pointer: coarse)").matches)
         forPhoneChanges();
-
     if (window.location.pathname === '/') return;
     document.getElementById('gameArea').classList.replace('d-flex', 'd-none');
     document.getElementById('opponentWait').classList.replace('d-none', 'd-flex');
@@ -862,8 +861,10 @@ async function initGame(){
             try {
                 let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/play/${window.location.pathname.split('/')[2]}/`, 'POST');
                 console.log(data);
-                if (data.detail)
+                if (data.detail){
+                    if (reconnect()) return;
                     document.getElementById('opponentWait').innerText = data.detail;
+                }
             }
             catch(error) {
                 console.log(error);

@@ -143,6 +143,7 @@ class Game:
         self.send_score(sid=sid)
         self.send_canvas(sid)
         self.send_rackets(sid)
+        self.send_stop_movings(sid)
         if self.last_update != 0:
             self.send_start_game(sid)
         self.send_game_state(sid)
@@ -564,3 +565,13 @@ class Game:
                 data=rackets,
                 to=sid
             )
+
+    def send_stop_movings(self, sid):
+        from game_server.server import Server
+        for team in self.match.teams:
+            for player in team.players:
+                Server.emit(
+                    'stop_moving',
+                    data={'player': player.user_id, 'position': self.get_racket(player.user_id).position.y},
+                    to=sid
+                )

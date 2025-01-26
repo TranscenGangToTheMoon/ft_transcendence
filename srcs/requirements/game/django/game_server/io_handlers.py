@@ -66,9 +66,15 @@ async def connect(sid, environ, auth):
         await Server._sio.leave_room(player_sid, str(player.match_id))
         with Server._dsids_lock:
             Server._disconnected_sids.append(player_sid)
-        await Server._sio.disconnect(player_sid)
+        try:
+            await Server._sio.disconnect(player_sid)
+        except (KeyError):
+            pass
+        print('je reconnect', flush=True)
+
         Server.get_game(game_id).reconnect(player.user_id, sid)
     player.socket_id = sid
+    player.game = Server.get_game(game_id)
     Server._clients[sid] = player
     await Server._sio.enter_room(sid, str(game_id))
     print(f'User {id} connected & authenticated', flush=True)
@@ -141,9 +147,13 @@ async def disconnect(sid):
                 no need to finish the game
                 '''
     try:
+        
         client = Server._clients[sid]
-        client.socket_id = ''
-        client.racket.stop_moving(client.racket.position.y)
-        Server._clients.pop(sid)
+        print(f"clientferiof{client.game.match.game_mode}", flush=True)
+        if client.game.match.game_mode != 'duel' and client.game.match.game_mode != 'ranked':
+            await sync_to_async(Server.finish_game)(client.game.match.id, FinishReason.PLAYER_DISCONNECT, client.user_id)
+        else:
+            client.racket.stop_moving(client.racket.position.y)
+            Server._clients.pop(sid)
     except KeyError:
         pass # the client was a spectator or has already been disconnected, nothing alarming
