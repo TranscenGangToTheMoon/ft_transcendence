@@ -535,10 +535,6 @@ async function lobbyGameStart(event){
     // localStorage.setItem('game-target-path', event.target[0].url);
     // localStorage.setItem('game-target-type', event.target[0].type);
 
-    // if player is in bench, then player will spectate the game
-    if (player.team == 'Spectator') {
-        await navigateTo(`/spectate/${event.code}`);
-    }
     if (matchType === '3v3'){
         await navigateTo('/game/3v3', true, true);
         fromLobby = true;
@@ -548,6 +544,16 @@ async function lobbyGameStart(event){
         await navigateTo('/game/1v1', true, true);
         fromLobby = true;
         userInformations.lobbyData = [event.data, event.target[0].url, event.target[0].type];
+    }
+}
+
+async function lobbyGameStart(event){
+    event = JSON.parse(event.data);
+    console.log(event);
+
+    if (matchType === '1v1') { // Spectate mode is not available for 3v3
+        await navigateTo('/spectate/' + event.code, true, true);
+        fromLobby = true;
     }
 }
 
@@ -585,6 +591,11 @@ function initLobbySSEListeners(){
     if(!SSEListeners.has('lobby-message')){
         SSEListeners.set('lobby-message', displayGameChatMessage);
         sse.addEventListener('lobby-message', displayGameChatMessage);
+    }
+    
+    if(!SSEListeners.has('lobby-spectate-game')){
+        SSEListeners.set('lobby-spectate-game', spectateLobbyGame);
+        sse.addEventListener('lobby-spectate-game', spectateLobbyGame);
     }
 
     if (SSEListeners.has('game-start')){
