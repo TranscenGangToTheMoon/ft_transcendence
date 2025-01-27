@@ -89,12 +89,10 @@ class LoginPage(Screen):
                 self.app.SSE()
                 self.app.push_screen(MainPage())
             except Exception as error:
-                if (User.response is not None):
-                    self.query_one("#status").update(f"{error}")
-                    self.query_one("#status").styles.color = "red"
-                else:
-                    self.query_one("#status").update(f"(666): {error}")
+                self.query_one("#status").styles.color = "red"
+                self.query_one("#status").update(f"{error}")
         else:
+            self.query_one("#status").styles.color = "red"
             self.query_one("#status").update(f"Empty fields")
 
     @on(Button.Pressed, "#registerButton")
@@ -113,12 +111,10 @@ class LoginPage(Screen):
                 self.app.SSE()
                 self.app.push_screen(MainPage())
             except Exception as error:
-                if (User.response is not None):
-                    self.query_one("#status").update(f"{error}")
-                    self.query_one("#status").styles.color = "red"
-                else:
-                    self.query_one("#status").update(f"(666): {error}")
+                self.query_one("#status").styles.color = "red"
+                self.query_one("#status").update(f"{error}")
         else:
+            self.query_one("#status").styles.color = "red"
             self.query_one("#status").update(f"Empty fields")
 
     @on(Button.Pressed, "#guestUpButton")
@@ -131,10 +127,8 @@ class LoginPage(Screen):
                 self.app.SSE()
                 self.app.push_screen(MainPage())
             except Exception as error:
-                if (User.response is not None):
-                    self.query_one("#status").update(f"{error}")
-                    self.query_one("#status").styles.color = "red"
-                else:
-                    self.query_one("#status").update(f"(666): {error}")
+                self.query_one("#status").styles.color = "red"
+                self.query_one("#status").update(f"{error}")
         else:
+            self.query_one("#status").styles.color = "red"
             self.query_one("#status").update(f"Empty fields")

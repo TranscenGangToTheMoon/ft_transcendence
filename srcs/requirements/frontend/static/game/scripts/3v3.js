@@ -688,7 +688,25 @@ document.getElementById('confirmModal').addEventListener('hidden.bs.modal', () =
     window.PongGame.resumeGame();
 })
 
+function reconnect(){
+    let event = localStorage.getItem('game-event');
+    if (event){
+        console.log('okay ?');
+        event = JSON.parse(event);
+        let gameMode = window.location.pathname.split('/')[2];
+        console.log(event.data.game_mode, gameMode);
+        if (event.data.game_mode === gameMode){
+            initData(event.data, event.target[0].url, event.target[0].type);
+            if (gameMode !== 'duel' && gameMode != 'ranked')
+                fromLobby = true;
+            return 1;
+        }
+    }
+    return 0;
+}
+
 function checkGameAuthorization(){
+    if (reconnect()) return;
     console.log(window.location.pathname);
     if (typeof fromLobby === 'undefined' || !fromLobby)
         throw `${window.location.pathname}`;
@@ -727,7 +745,7 @@ async function initGame(){
         checkGameAuthorization();
         if (userInformations.lobbyData){
             try {
-                await initData(...(userInformations.lobbyData));
+                // await initData(...(userInformations.lobbyData));
                 document.getElementById('gameArea').classList.replace('d-none', 'd-flex');
                 document.getElementById('opponentWait').style.display = 'none';
             }
@@ -735,16 +753,10 @@ async function initGame(){
                 wrongConfigFileError(error);
             }
         }
-        // await initData(userInformations.lobbyData);
     }
     catch (unauthorized){
-        // if (unauthorized === window.location.pathname){
-            displayMainAlert("Error", `You don't have permission to play in ${unauthorized}`);
-            // await navigateTo('/');
-            history.go(-1);
-        // }
-        // else
-        //     wrongConfigFileError(error);
+        displayMainAlert("Error", `You don't have permission to play in ${unauthorized}`);
+        history.go(-1);
     }
 }
 
