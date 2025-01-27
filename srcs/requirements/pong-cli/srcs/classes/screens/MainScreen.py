@@ -44,7 +44,12 @@ class MainPage(Screen):
                 if (code is not None and code == "token_not_valid"):
                     self.query_one("#userMeStatic").update("Tokens have expired please reconnect")
             else:
-                self.query_one("#userMeStatic").update(f"{error}")
+                if (User.response is not None):
+                    detail = User.response.json().get("detail", None)
+                    if (detail is not None):
+                        self.query_one("#userMeStatic").update(f"{detail}")
+                else:
+                    self.query_one("#userMeStatic").update(f"{error}")
 
     def on_screen_resume(self) -> None:
         self.query_one("#duel").loading = False
@@ -80,7 +85,12 @@ class MainPage(Screen):
                 if (code is not None and code == "token_not_valid"):
                     self.query_one("#statusGame").update("Tokens have expired please reconnect")
             else:
-                self.query_one("#statusGame").update(f"{error}")
+                if (User.response is not None):
+                    detail = User.response.json().get("detail", None)
+                    if (detail is not None):
+                        self.query_one("#statusGame").update(f"{detail}")
+                else:
+                    self.query_one("#statusGame").update(f"{error}")
 
     @on(Button.Pressed, "#cancelDuelGame")
     def cancelDuelAction(self):
@@ -101,4 +111,9 @@ class MainPage(Screen):
                 if (code is not None and code == "token_not_valid"):
                     self.query_one("#statusGame").update("Tokens have expired please reconnect")
             else:
-                self.query_one("#statusGame").update(f"{error}")
+                if (User.response is not None):
+                    detail = User.response.json().get("detail", None)
+                    if (detail is not None):
+                        self.query_one("#statusGame").update(f"{detail}")
+                else:
+                    self.query_one("#statusGame").update(f"{error}")
