@@ -11,7 +11,7 @@ from textual            import on, work
 from textual.app        import ComposeResult
 from textual.geometry   import Offset
 from textual.screen     import Screen
-from textual.widgets    import Button, Digits, Footer, Header, Label
+from textual.widgets    import Digits, Footer, Header, Label
 
 # Local imports
 from classes.game.BallWidget                    import Ball
