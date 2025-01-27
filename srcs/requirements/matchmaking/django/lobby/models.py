@@ -135,7 +135,7 @@ class LobbyParticipants(ParticipantsPlace, models.Model):
     user_id = models.IntegerField(unique=True)
     creator = models.BooleanField(default=False)
     is_ready = models.BooleanField(default=False)
-    join_at = models.DateTimeField(auto_now_add=True, editable=False)
+    join_at = models.DateTimeField(auto_now_add=True)
 
     team = models.CharField(default=None, null=True)
 
