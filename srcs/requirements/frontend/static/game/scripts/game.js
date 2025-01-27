@@ -895,7 +895,6 @@ async function initGame(){
         if (unauthorized === window.location.pathname){
             if (!document.getElementById('alertModal').classList.contains('show'))
                 displayMainAlert("Error", `You don't have permission to play in ${unauthorized}`);
-            // await navigateTo('/');
             history.go(-1);
         }
         else{
