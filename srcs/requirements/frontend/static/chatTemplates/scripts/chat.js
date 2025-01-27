@@ -242,6 +242,7 @@ async function createChatUserCard(chatInfo) {
 	let chatUserCard = document.createElement('div');
 	chatUserCard.id = 'chatListElement' + chatInfo.target;
 	chatUserCard.classList.add('chatUserCard');
+	chatUserCard.style.display = 'flex';
 	chatsList.appendChild(chatUserCard);
 
 	await loadContent('/chatTemplates/chatUserCard.html', chatUserCard.id);
