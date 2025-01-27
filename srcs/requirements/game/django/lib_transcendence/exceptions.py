@@ -130,6 +130,7 @@ class MessagesException:
         MATCH_NOT_FINISHED = 'Match cannot be set as finished.'
         IN_GAME = 'You cannot perform this action when you playing.'
         LOBBY_IN_GAME = 'You cannot perform this action the lobby is playing.'
+        SET_READY_SPECTATOR = 'You cannot set ready as a spectator.'
 
     class Conflict:
         DEFAULT = 'Conflict.'

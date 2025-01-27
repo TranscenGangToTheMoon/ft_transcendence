@@ -2,6 +2,7 @@ import math
 import os
 import random
 import time
+from threading import Lock
 from game_server.match import Match, Player, Spectator, finish_match
 from game_server.pong_ball import Ball
 from game_server.pong_position import Position
@@ -104,6 +105,7 @@ class Game:
         self.safe_zone_height = (self.canvas.y / 2) - (3 * Game.ball_size)
         self.finished = False
         self.spectators: List[Spectator] = []
+        self.spec_lock = Lock()
         self.sending = 0
         self.last_update = 0
         self.ball = self.create_ball(
@@ -133,8 +135,16 @@ class Game:
         pass
 
     def add_spectator(self, user_id: int, sid: str):
-        self.spectators.append(Spectator(user_id, sid))
+        with self.spec_lock:
+            self.spectators.append(Spectator(user_id, sid))
         self.reconnect(user_id, sid)
+        
+    def remove_spectator(self, sid):
+        with self.spec_lock:
+            for spectator in self.spectators:
+                if spectator.socket_id == sid:
+                    self.spectators.remove(spectator)
+                    return
 
     def reconnect(self, user_id: int, sid: str):
         self.send_score(sid=sid)
