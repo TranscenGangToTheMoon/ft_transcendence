@@ -128,6 +128,21 @@ class Server:
         raise Server.NotFound(f'No player with id {user_id} is awaited on this server')
 
     @staticmethod
+    def get_spectator_match_id(sid: str):
+        with Server._games_lock:
+            for match_id in Server._games:
+                for spectator in Server._games[match_id].spectators:
+                    if spectator.socket_id == sid:
+                        return match_id
+        return None
+    
+    @staticmethod
+    async def remove_spectator(sid: str, match_id: int):
+        await Server._sio.leave_room(sid, str(match_id))
+        with Server._games_lock:
+            Server._games[match_id].remove_spectator(sid)
+
+    @staticmethod
     def get_game(game_id):
         with Server._games_lock:
             for match_id in Server._games:

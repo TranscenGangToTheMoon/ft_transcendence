@@ -133,6 +133,7 @@ async function getMoreSentFriendRequests() {
             friendRequestsDiv.appendChild(requestDiv);
             await loadContent(`/friends/sentFriendRequestBlock.html`, `${requestDiv.id}`);
             requestDiv.querySelector(`.receiverUsername`).innerText = result.receiver.username;
+            requestDiv.querySelector('img').src = result.receiver.profile_picture.small;
         }
     }
     catch (error) {
@@ -197,7 +198,7 @@ async function loadFriendList(){
         resultDiv.innerText = "";
         for (let friend of data.results){
             resultDiv.innerHTML += `<div class="friendRequestBlock knownFriend" id="friend${friend.id}">\
-            <img src='/assets/imageNotFound.png'>\
+            <img class="rounded-1" src="${friend.friend.profile_picture.small}" onerror="src='/assets/imageNotFound.png'">\
             <div>${friend.friend.username}</div>\
             <button class='btn btn-danger deleteFriend'>delete</button></div>\n`;
         }
@@ -210,7 +211,7 @@ function addFriend(friendInstance){
     if (!friendDiv.querySelector('div'))
         friendDiv.innerText = '';
     friendDiv.innerHTML += `<div class="friendRequestBlock knownFriend" id="friend${friendInstance.id}">\
-            <img src='/assets/imageNotFound.png'>\
+            <img src="${friendInstance.friend.profile_picture.small}" onerror="src='/assets/imageNotFound.png'">\
             <div>${friendInstance.friend.username}</div>\
             <button class='btn btn-danger deleteFriend'>delete</button></div>\n`;
 }
@@ -232,6 +233,7 @@ async function addFriendRequest(result){
     if (document.getElementById(result.id)) return;
     friendRequestsDiv.appendChild(requestDiv);
     await loadContent('/friends/friendRequestBlock.html', `${requestDiv.id}`);
+    requestDiv.querySelector('img').src = result.sender.profile_picture.small;
     requestDiv.querySelector('.senderUsername').innerText = result.sender.username;
 }
 
@@ -254,7 +256,6 @@ async function loadReceivedFriendRequests(){
         console.log(error);
     }
     nextFriendRequest = data.next;
-    console.log('dIDJEOJD',data);
     const friendRequestsDiv = document.getElementById('friendRequests');
     friendRequestsDiv.style.maxHeight = `119px`;
     const friendRequestTitleDiv = document.getElementById('friendRequestsTitle');
@@ -271,6 +272,7 @@ async function loadReceivedFriendRequests(){
             friendRequestsDiv.appendChild(requestDiv);
             await loadContent('/friends/friendRequestBlock.html', `${requestDiv.id}`);
             requestDiv.querySelector('.senderUsername').innerText = result.sender.username;
+            requestDiv.querySelector('img').src = result.sender.profile_picture.small;
             console.log(requestDiv);
         }
     }
@@ -301,6 +303,7 @@ async function loadSentFriendRequests(){
             requestsDiv.appendChild(requestDiv);
             await loadContent('/friends/sentFriendRequestBlock.html', `${requestDiv.id}`);
             requestDiv.querySelector('.receiverUsername').innerText = result.receiver.username;
+            requestDiv.querySelector('img').src = result.receiver.profile_picture.small;
         }
     }
 }

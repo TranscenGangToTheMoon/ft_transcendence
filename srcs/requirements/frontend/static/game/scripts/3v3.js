@@ -614,12 +614,12 @@ function initSocket(socketPath, socketMode){
 }
 
 function addScore(){
-    document.getElementById('enemyScore').innerText = PongGame.state.enemyScore;
+    document.getElementById('enemyScoreInModal').innerText = PongGame.state.enemyScore;
     const enemyTeamDetail = document.getElementById('enemyScoreLabel').querySelector('.teamDetail');
     enemyTeamDetail.innerText = enemyTeamDetail.innerText.replace('{team-id}', PongGame.info.enemyTeam.name);
     const playerTeamDetail = document.getElementById('playerScoreLabel').querySelector('.teamDetail');
     playerTeamDetail.innerText = playerTeamDetail.innerText.replace('{team-id}', PongGame.info.myTeam.name);
-    document.getElementById('playerScore').innerText = PongGame.state.playerScore;
+    document.getElementById('playerScoreInModal').innerText = PongGame.state.playerScore;
     fillTeamDetail(enemyTeamDetail, playerTeamDetail);
 }
 

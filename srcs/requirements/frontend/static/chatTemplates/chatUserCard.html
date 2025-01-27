@@ -1,17 +1,10 @@
-<style>
-	.chatUserCard {
-		background-color: #f1f1f1;
-		border: 1px solid #ccc;
-		padding: 10px;
-	}
-</style>
-
-<div class="chatUserCardHeader" style="display: flex">
-	<!-- <img src="/assets/imageNotFound.png" class="rounded me-2 notification-img" alt="notification icon"> -->
-	<h3 class="chatUserCardTitleUsername">Username</h3>
-	<button class="chatUserCardButtonDeleteChat btn btn-close"></button>
+<img class="img-fluid chatUserCardAvatar" src='' style="width: 100px;" alt="profile picture" onerror="this.onerror=null; this.src='/assets/imageNotFound.png';">
+<div class=" chatUserCardinfo">
+<div class="chatUserCardHeader d-flex w-100">
+	<h3 class="chatUserCardTitleUsername w-100">Username</h3>
+	<button class="chatUserCardButtonDeleteChat btn btn-close position-absolute top-0 end-0 m-2"></button>
 </div>
 <div class="chatUserCardMessages">
 	<p class="chatUserCardLastMessage">Last Message</p>
 </div>
-
+</div>
