@@ -76,6 +76,7 @@ class MainPage(Screen):
             self.query_one("#duel").loading = True
             self.query_one("#duel").variant = "default"
             self.query_one("#cancelDuelGame").disabled = False
+            self.query_one("#statusGame").styles.color = "white"
             self.query_one("#statusGame").update(f"({User.response.status_code}) Searching for an opponent")
 
         except Exception as error:
