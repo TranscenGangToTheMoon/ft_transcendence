@@ -36,6 +36,7 @@ class EventCode:
     TOURNAMENT_START_AT = 'tournament-start-at'
     TOURNAMENT_START_CANCEL = 'tournament-start-cancel'
     TOURNAMENT_MATCH_FINISH = 'tournament-match-finish'
+    TOURNAMENT_AVAILABLE_SPECTATE_MATCHES = 'tournament-available-spectate-matches'
     TOURNAMENT_FINISH = 'tournament-finish'
     PING = 'ping'
 
