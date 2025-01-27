@@ -1,30 +1,30 @@
-if (!document.getElementById('modals').blockListened){
-    document.getElementById('modals').blockListened = true;
-    document.getElementById('modals').addEventListener('click', async event => {
-        if (event.target.matches('#simulateBlock')){
-            const blockNb = document.getElementById('blockedNb').value;
-            console.log(blockNb)
-            if (!blockNb) return;
-            for (let i = 0; i < blockNb; i++){
-                try {
-                    let data = await apiRequest(undefined, `${baseAPIUrl}/auth/guest/`, "POST");
-                    data = await apiRequest(data.access, `${baseAPIUrl}/auth/register/`, 'POST', undefined, undefined, {
-                        'username' : `test${localStorage.getItem('currentState') + i}`,
-                        'password' : 'test'
-                    })
-                    data = await apiRequest(data.access, `${baseAPIUrl}/users/me/`);
-                    await apiRequest(getAccessToken(), `${baseAPIUrl}/users/me/blocked/`, 'POST', undefined, undefined, {
-                        'user_id' : data.id,
-                    })
-                }
-                catch (error){
-                    console.log('error', error);
-                }
-            }
-            initBlockedUsers();
-        }
-    })
-}
+// if (!document.getElementById('modals').blockListened){
+//     document.getElementById('modals').blockListened = true;
+//     document.getElementById('modals').addEventListener('click', async event => {
+//         if (event.target.matches('#simulateBlock')){
+//             const blockNb = document.getElementById('blockedNb').value;
+//             console.log(blockNb)
+//             if (!blockNb) return;
+//             for (let i = 0; i < blockNb; i++){
+//                 try {
+//                     let data = await apiRequest(undefined, `${baseAPIUrl}/auth/guest/`, "POST");
+//                     data = await apiRequest(data.access, `${baseAPIUrl}/auth/register/`, 'POST', undefined, undefined, {
+//                         'username' : `test${localStorage.getItem('currentState') + i}`,
+//                         'password' : 'test'
+//                     })
+//                     data = await apiRequest(data.access, `${baseAPIUrl}/users/me/`);
+//                     await apiRequest(getAccessToken(), `${baseAPIUrl}/users/me/blocked/`, 'POST', undefined, undefined, {
+//                         'user_id' : data.id,
+//                     })
+//                 }
+//                 catch (error){
+//                     console.log('error', error);
+//                 }
+//             }
+//             initBlockedUsers();
+//         }
+//     })
+// }
 
 if (typeof window.nextBlocked === undefined){
     var nextBlocked;
