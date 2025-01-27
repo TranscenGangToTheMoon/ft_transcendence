@@ -1,5 +1,7 @@
-function displayGameChatMessage(event){
-	event = JSON.parse(event.data);
+function displayGameChatMessage(event, isJson=true) {
+	if (isJson === true){
+		event = JSON.parse(event.data);
+	}
 	let messageDiv = document.createElement('div');
 	messageDiv.className = 'messageGame';
 	messageDiv.innerText = event.message;

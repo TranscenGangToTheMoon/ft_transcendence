@@ -3,6 +3,7 @@ function parsChatInfo(chat) {
 		'chatId': chat.id,
 		'target': chat.chat_with.username,
 		'targetId': chat.chat_with.id,
+		'targetAvatar': chat.chat_with.profile_picture,
 		'lastMessage': null,
 		'lastMessagesNotRead': 0,
 		'chatMessageNext': null,
@@ -246,6 +247,7 @@ async function createChatUserCard(chatInfo) {
 	chatsList.appendChild(chatUserCard);
 
 	await loadContent('/chatTemplates/chatUserCard.html', chatUserCard.id);
+	chatUserCard.querySelector('.chatUserCardAvatar').src = chatInfo.targetAvatar;
 	chatUserCard.querySelector('.chatUserCardTitleUsername').innerText = chatInfo.target + ':';
 	if (chatInfo.lastMessage === null) {
 		chatUserCard.querySelector('.chatUserCardLastMessage').innerText = 'Start the conversation ;)';
