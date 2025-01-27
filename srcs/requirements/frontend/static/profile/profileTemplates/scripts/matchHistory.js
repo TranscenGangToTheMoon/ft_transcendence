@@ -51,6 +51,10 @@ async function loadMatches(noRequest=false){
                 historyDiv.appendChild(matchDiv);
             });
         }
+        else{
+            historyDiv.innerText = 'Play a game to see your history';
+            historyDiv.className = 'w-100 text-center';
+        }
     }
     catch (error){
         console.log(error);
