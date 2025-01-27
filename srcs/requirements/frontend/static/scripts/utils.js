@@ -19,6 +19,8 @@ async function closeGameChatTab()
 	var isTabActive = false;
 	let chatActiveTab = document.querySelector('#chatTabs .nav-link.active');
 	let buttonCollapseChat = document.getElementById('chatTabsCollapse');
+    if (typeof actualGameChat !== 'undefined')
+        actualGameChat = undefined;
 	if (!chatActiveTab) return;
 	if (chatActiveTab.id === 'chatGameTabLink') isTabActive = true;
 	let chatGameTab = document.getElementById('chatGameTab');
