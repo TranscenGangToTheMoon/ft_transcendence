@@ -11,7 +11,8 @@ class Config:
         "authentication_failed": "Authentication failed",
         "sse_connection_required": "SSE connexion required",
         "password_confirmation_required": "Password confirmation required",
-        "token_not_valid": "Invalid token"
+        "token_not_valid": "Invalid token",
+        None: "Unknown error code"
     }
 
     @classmethod

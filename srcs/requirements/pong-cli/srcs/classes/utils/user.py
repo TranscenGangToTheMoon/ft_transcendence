@@ -136,9 +136,7 @@ class User():
         )
         print(User.response)
 
-        if (User.response.status_code != 200):
-            if (User.response.status_code != 401):
-                raise (Exception(f"({User.response.status_code}) {User.response.json()}"))
+        if (User.response.status_code == 401):
             code = User.response.json().get("code")
             if (code is not None and code == "token_not_valid"):
                 User.response = None
@@ -151,15 +149,17 @@ class User():
                 )
                 print(User.response)
 
-                if (User.response.status_code != 200):
-                    try:
-                        _ = User.response.json()
-                    except Exception as _:
-                        raise (Exception(f"({User.response.status_code})"))
-                    else:
-                        raise (Exception(f"({User.response.status_code}) {User.response.json()}"))
+        if (User.response.status_code == 401):
+            code = User.response.json().get("code")
+            raise (Exception(f"({User.response.status_code}) {Config.errorCodes[code]}"))
+        elif (User.response.status_code != 200):
+            try:
+                _ = User.response.json()
+            except Exception as _:
+                raise (Exception(f"({User.response.status_code})"))
             else:
-                raise (Exception(f"({User.response.status_code}) {Config.errorCodes[code]}"))
+                detail = User.response.json().get("detail")
+                raise (Exception(f"({User.response.status_code}) {detail}"))
 
         User.id = User.response.json()["id"]
         User.username = User.response.json()["username"]
@@ -175,9 +175,7 @@ class User():
         )
         print(User.response)
 
-        if (User.response.status_code != 201):
-            if (User.response.status_code != 401):
-                raise (Exception(f"({User.response.status_code}) {User.response.json()}"))
+        if (User.response.status_code == 401):
             code = User.response.json().get("code")
             if (code is not None and code == "token_not_valid"):
                 User.response = None
@@ -190,15 +188,17 @@ class User():
                 )
                 print(User.response)
 
-                if (User.response.status_code != 201):
-                    try:
-                        _ = User.response.json()
-                    except Exception as _:
-                        raise (Exception(f"({User.response.status_code})"))
-                    else:
-                        raise (Exception(f"({User.response.status_code}) {User.response.json()}"))
+        if (User.response.status_code == 401):
+            code = User.response.json().get("code")
+            raise (Exception(f"({User.response.status_code}) {Config.errorCodes[code]}"))
+        elif (User.response.status_code != 201):
+            try:
+                _ = User.response.json()
+            except Exception as _:
+                raise (Exception(f"({User.response.status_code})"))
             else:
-                raise (Exception(f"({User.response.status_code}) {Config.errorCodes[code]}"))
+                detail = User.response.json().get("detail")
+                raise (Exception(f"({User.response.status_code}) {detail}"))
 
     @staticmethod
     def cancelDuel():
@@ -209,10 +209,9 @@ class User():
             headers=User.headers,
             verify=Config.SSL.CRT
         )
+        print(User.response)
 
-        if (User.response.status_code != 204):
-            if (User.response.status_code != 401):
-                raise (Exception(f"({User.response.status_code}) {User.response.json()}"))
+        if (User.response.status_code == 401):
             code = User.response.json().get("code")
             if (code is not None and code == "token_not_valid"):
                 User.response = None
@@ -223,16 +222,19 @@ class User():
                     headers=User.headers,
                     verify=Config.SSL.CRT
                 )
+                print(User.response)
 
-                if (User.response.status_code != 204):
-                    try:
-                        _ = User.response.json()
-                    except Exception as _:
-                        raise (Exception(f"({User.response.status_code})"))
-                    else:
-                        raise (Exception(f"({User.response.status_code}) {User.response.json()}"))
+        if (User.response.status_code == 401):
+            code = User.response.json().get("code")
+            raise (Exception(f"({User.response.status_code}) {Config.errorCodes[code]}"))
+        elif (User.response.status_code != 204):
+            try:
+                _ = User.response.json()
+            except Exception as _:
+                raise (Exception(f"({User.response.status_code})"))
             else:
-                raise (Exception(f"({User.response.status_code}) {Config.errorCodes[code]}"))
+                detail = User.response.json().get("detail")
+                raise (Exception(f"({User.response.status_code}) {detail}"))
 
     @staticmethod
     def refresh():
