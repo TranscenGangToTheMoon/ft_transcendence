@@ -508,9 +508,10 @@ async function initTournament(){
     }
 	SSEListeners.set('game-start', gameStart);
 	sse.addEventListener('game-start', gameStart);
-	const oldTournamentCode = localStorage.getItem('tournament-code');
+	const oldTournamentCode = localStorage.getItem('tournament-code-reconnect');
 	if (oldTournamentCode){
 		localStorage.removeItem('tournament-code');
+		localStorage.removeItem('tournament-code-reconnect');
 		if (joinTournament(oldTournamentCode))
 			return;
 	}

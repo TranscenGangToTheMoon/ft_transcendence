@@ -830,10 +830,12 @@ function reconnect(){
             (event.data.game_mode === 'custom_game' && gameMode === '1v1') ||
             (event.data.game_mode === 'custom_game' && gameMode === '3v3')){
             initData(event.data, event.target[0].url, event.target[0].type);
-            if (gameMode === 'tournament')
+            if (gameMode === 'tournament'){
+                if (!fromTournament)
+                    localStorage.setItem('tournament-code-reconnect', localStorage.getItem('tournament-code'));
                 fromTournament = true;
+            }
             else if (event.data.game_mode === 'custom_game'){
-                
                 fromLobby = true;
             }
             return 1;
