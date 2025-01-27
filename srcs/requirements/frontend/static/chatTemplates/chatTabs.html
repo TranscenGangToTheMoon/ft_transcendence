@@ -1,17 +1,15 @@
-<style>
+<!-- <style>
 	#chatBody {
 		width: 45vh;
 		word-wrap: break-word;
 	}
-</style>
+</style> -->
 
 <div id="chatView" class="position-absolute bottom-0 start-0">
 	<div id="chatHeader" style="display: flex;">
 		<ul id="chatTabs" class="nav nav-tabs" role="tablist">
 		</ul>
-		<button id="chatTabsCollapse" class="btn btn-light" type="button" data-bs-toggle="collapse" data-bs-target="#chatBody" aria-expanded="true" aria-controls="chatBody">
-			v
-		</button>
+		<button id="chatTabsCollapse" class="btn btn-dark" type="button" data-bs-toggle="collapse" data-bs-target="#chatBody" aria-expanded="true" aria-controls="chatBody">▼</button>
 	</div>
-	<div id="chatBody" class="tab-content mt-0 show"></div>
+	<div id="chatBody" class="tab-content mt-0 show w-100 text-wrap"></div>
 </div>
