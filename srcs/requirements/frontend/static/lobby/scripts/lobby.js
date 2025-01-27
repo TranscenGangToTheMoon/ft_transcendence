@@ -371,7 +371,10 @@ async function updateOwnTeam(player, teamDisplayDiv, teamSelectorDiv, benchDiv, 
     playerDiv.querySelector('img').src = player.profile_picture.small;
     playerDiv.querySelector('img').src = player.profile_picture.small;
     playerDiv.querySelector('.playerId').innerText = player.id;
-    playerDiv.querySelector('.playerIsReady').innerText = player.is_ready ? 'Ready' : 'Not ready';
+    const playerIsReadyButton =  playerDiv.querySelector('.playerIsReady');
+    playerIsReadyButton.innerText = player.is_ready ? 'Ready' : 'Not ready';
+    if (player.id !== userInformations.id)
+        playerIsReadyButton.classList.add('disabled');
 }
 
 async function fillPlayerList(noTeam=false){
