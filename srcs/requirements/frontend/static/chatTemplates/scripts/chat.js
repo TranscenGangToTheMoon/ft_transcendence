@@ -47,12 +47,22 @@ function displayChatError(error, idDiv) {
 		var divError = document.createElement('div');
 		divError.className = 'alert alert-danger';
 		divError.id = 'chatAlert';
-		divError.innerHTML = error.code + ": " + error.detail;
+		divError.innerText = "Error: " + error.detail;
 		divToDisplayError.appendChild(divError);
 	}
 	else {
 		console.log('Error chat: div for chat error not found');
 	}
+}
+
+async function closeChatView() {
+	chatView = document.getElementById('chatView');
+	if (!chatView) return;
+	chatView.remove();
+	await disconnect();
+	openChat = {};
+	userChat = {};
+	chatView = document.getElementById('chatView');
 }
 
 async function disconnect() {
@@ -73,7 +83,6 @@ async function connect(token, chatInfo) {
 		auth: {
 			"token": 'Bearer ' + token,
 			"chatId": chatInfo.chatId,
-			"chatType": "private_message"
 		}
 	});
 	window.socket = socket;
@@ -109,25 +118,26 @@ function setupSocketListeners(chatInfo)
 	});
 	
 	socket.on("message", (data) => {
+		let messageDiv = document.createElement('div');
+		let messageContent = document.createElement('p');
+		let messageAuthor = document.createElement('strong');
+		messageDiv.appendChild(messageAuthor);
+		messageDiv.appendChild(messageContent);
+		messageDiv.style.display = 'flex';
 		console.log("Message received: ", data);
 		messagesNotRead = chatBox.querySelectorAll('.chatMessageNotRead');
 		for (let message of messagesNotRead) {
 			message.classList.remove('chatMessageNotRead');
 		}
 		if (chatBox === null) return;
-		if (data.author === ''){
-			var serverMessage = document.getElementById('serverMessage');
-			if (serverMessage) serverMessage.remove();
-			chatBox.insertAdjacentHTML('beforeend', `<div id='serverMessage'><p><strong>:</strong> ${data.content}</p></div>`);
+		if (data.author === chatInfo.targetId) {
+			messageAuthor.innerText = chatInfo.target + ': ';
 		}
-		else{
-			if (data.author === chatInfo.targetId) {
-				chatBox.insertAdjacentHTML('beforeend', `<div><p><strong>${chatInfo.target}:</strong> ${data.content}</p></div>`);
-			}
-			else {
-				chatBox.insertAdjacentHTML('beforeend', `<div><p><strong>You:</strong> ${data.content}</p></div>`);
-			}
+		else {
+			messageAuthor.innerText = 'You: ';
 		}
+		messageContent.innerText = data.content;
+		chatBox.insertAdjacentElement('beforeend', messageDiv);
 		chatBox.scrollTop = chatBox.scrollHeight;
 	});
 
@@ -147,25 +157,31 @@ function setupSocketListeners(chatInfo)
 		}
 	});
 
-	socket.on("debug", (data) => {
-		console.log("Debug received: ", data);
+	socket.on("chat-server", (data) => {
+		console.log("Chat: Server message received: ", data);
 	});
 }
 
 function displayMessages(chatInfo, chatMessages, isMore = false, method='afterbegin'){
 	const chatBox = document.getElementById('messages'+chatInfo.target);
 	chatMessages.forEach(element => {
+		let messageDiv = document.createElement('div');
+		let messageContent = document.createElement('p');
+		let messageAuthor = document.createElement('strong');
 		console.log('Chat: Displaying message:', element);
 		if (element.author !== chatInfo.targetId) {
-			chatBox.insertAdjacentHTML(method, `<div><p><strong>You:</strong> ${element.content}</p></div>`);
+			messageAuthor.innerText = 'You: ';
 		} else {
+			messageAuthor.innerText = chatInfo.target + ': ';
 			if (element.is_read === false) {
-				chatBox.insertAdjacentHTML(method, `<div><p class="chatMessageNotRead"><strong>${chatInfo.target}:</strong> ${element.content}</p></div>`);
-			}
-			else {
-				chatBox.insertAdjacentHTML(method, `<div><p><strong>${chatInfo.target}:</strong> ${element.content}</p></div>`);
+				messageContent.classList.add('chatMessageNotRead');
 			}
 		}
+		messageContent.innerText = element.content;
+		messageDiv.style.display = 'flex';
+		messageDiv.appendChild(messageAuthor);
+		messageDiv.appendChild(messageContent);
+		chatBox.insertAdjacentElement(method, messageDiv);
 	});
 	if (!isMore)
 		chatBox.scrollTop = chatBox.scrollHeight;
@@ -295,7 +311,7 @@ async function getMoreChats() {
 
 async function displayChatsList(filter='') {
 	chatsList = document.getElementById('chatsList');
-	chatsList.innerHTML = '';
+	chatsList.innerHTML= '';
 	try {
 		clearChatError();
 		const apiAnswer = await apiRequest(getAccessToken(), `${baseAPIUrl}/chat/?q=${filter}`);
@@ -419,7 +435,7 @@ async function closeChatTab(chatInfo)
 	}
 	else if (isTabActive) {
 		lastClick = undefined;
-		if (buttonCollapseChat.getAttribute('aria-expanded') === 'true') {
+		if (buttonCollapseChat && buttonCollapseChat.getAttribute('aria-expanded') === 'true') {
 			lastTab.querySelector('a').click();
 		}
 		else {
@@ -451,7 +467,7 @@ async function createChatTab(chatInfo) {
 
     let chatTabLink = document.createElement('a');
     chatTabLink.id = idChatTab + "Link";
-    chatTabLink.innerHTML = chatInfo.target;
+    chatTabLink.innerText = chatInfo.target;
     chatTabLink.setAttribute('data-bs-toggle', 'tab');
     chatTabLink.setAttribute('role', 'tab');
     chatTabLink.setAttribute('href', "#" + idChatBox);
@@ -506,9 +522,9 @@ async function chatTabListener(chatInfo)
 		}
 		if (e.target.id === 'chatTab' + chatInfo.target + 'Link') {
 			let buttonCollapseChat = document.getElementById('chatTabsCollapse');
-			if (buttonCollapseChat.getAttribute('aria-expanded') === 'false') {
-				lastClick = undefined;
+			if (buttonCollapseChat && buttonCollapseChat.getAttribute('aria-expanded') === 'false') {
 				buttonCollapseChat.click();
+				lastClick = undefined;
 			}
 			if (lastClick === e.target.id) return;
 			lastClick = e.target.id;
@@ -549,11 +565,12 @@ function sendMessageListener(chatInfo) {
 
 async function setChatView()
 {
+	if (document.getElementById('chatView')) return;
 	await loadContent('/chatTemplates/chatTabs.html', 'container', true);
 	let buttonCollapseChat = document.getElementById('chatTabsCollapse');
 	buttonCollapseChat.addEventListener('click', async e => {
 		e.preventDefault();
-		if (buttonCollapseChat.getAttribute('aria-expanded') === 'true') {
+		if (buttonCollapseChat && buttonCollapseChat.getAttribute('aria-expanded') === 'true') {
 			if (!lastClick) return;
 			let lastTab = document.getElementById(lastClick);
 			if (lastTab) {
@@ -565,13 +582,12 @@ async function setChatView()
 			await disconnect();
 		}
 	});
-	document.getElementById('logOut').addEventListener('click', async () => {
-		await disconnect();
-		openChat = {};
-		userChat = {};
-		chatView = document.getElementById('chatView');
-		if (chatView) chatView.remove();
-	});
+	logOutButton = document.getElementById('logOut');
+	if (logOutButton) {
+		logOutButton.addEventListener('click', async () => {
+		closeChatView();
+		});
+	}
 }
 
 async function openChatTab(chatId)
@@ -591,6 +607,8 @@ async function openChatTab(chatId)
 	else {
 		if (openChat[chatInfo.chatId] && openChat[chatInfo.chatId].target !== chatInfo.target) {
 			await closeChatTab(openChat[chatInfo.chatId]);
+			await setChatView();
+			
 		}
 		if (!openChat[chatId] && chatTabs.childElementCount >= 4){
 			removeFirstInactiveChatTab();
@@ -602,20 +620,22 @@ async function openChatTab(chatId)
 		console.log('Chat: Creating chat tab');
 		openChat[chatInfo.chatId] = chatInfo;
 		userChat[chatInfo.targetId] = chatInfo.chatId;
-		createChatTab(chatInfo);
-		try {
-			res = await loadOldMessages(chatInfo);
-			if (res.code !== 200)
-				throw (res);
-		}
-		catch (error) {
-			console.log('Error chat:', error);
-			await closeChatTab(chatInfo);
-			if (error.code === 404 && error.detail === undefined) error.detail = 'No chat found';
-			if (error.detail === undefined) error.detail = 'Error while loading old messages';
-			displayChatError(error, 'container');
-			return;
-		}
+		await createChatTab(chatInfo);
+	}
+	try {
+		messageBox = document.getElementById('messages'+chatInfo.target);
+		messageBox.innerHTML = '';
+		res = await loadOldMessages(chatInfo);
+		if (res.code !== 200)
+			throw (res);
+	}
+	catch (error) {
+		console.log('Error chat:', error);
+		await closeChatTab(chatInfo);
+		if (error.code === 404 && error.detail === undefined) error.detail = 'No chat found';
+		if (error.detail === undefined) error.detail = 'Error while loading old messages';
+		displayChatError(error, 'container');
+		return;
 	}
 	const chatModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('chatListModal'));
 	if (chatModal && chatModal._isShown) {

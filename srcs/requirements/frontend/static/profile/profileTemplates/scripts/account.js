@@ -28,6 +28,7 @@ async function deleteAccount(password) {
                 deleteModal.hide();
                 sse.close();
                 removeTokens();
+                closeChatView();
                 await generateToken();
                 initSSE();
                 await fetchUserInfos(true);
@@ -104,6 +105,49 @@ document.getElementById('pChangeNickname').addEventListener('submit', async even
     }
 })
 
+document.getElementById('changeProfilePic').addEventListener('click', async ()=> {
+    try {
+        let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/users/profile-pictures/`)
+        const profilePicContainer = document.getElementById('profilePicContainer');
+        profilePicContainer.innerHTML = '';
+        for (i in data){
+            let profilePic = data[i];
+            const profilePicDiv = document.createElement('div');
+            profilePicDiv.classList.add('profile-pic-div');
+            profilePicDiv.setAttribute('data-bs-toggle', 'popover');
+            profilePicDiv.setAttribute('data-bs-trigger', 'hover');
+            profilePicDiv.setAttribute('data-bs-placement', 'top');
+            profilePicDiv.setAttribute('data-bs-content', `${profilePic.name} (${profilePic.unlock_reason.slice(0, -1)})`);
+            profilePicDiv.innerHTML = `
+            <img src=${profilePic.small} style='cursor: ${profilePic.unlock ? "pointer" : "not-allowed;filter: grayscale(90%);"}'
+            class="${profilePic.is_equiped ? 'border border-warning border-2 m-1' : 'm-1'}">
+            `
+            if (profilePic.unlock && !profilePic.is_equiped){
+                profilePicDiv.addEventListener('click', async ()=> {
+                    try {
+                        await apiRequest(getAccessToken(), `${baseAPIUrl}/users/profile-picture/${profilePic.id}/`, 'PUT');
+                        changeProfilePicModal.hide();
+                        handleRoute();
+                    }
+                    catch(error){
+                        console.log(error);
+                    }
+                })
+            }
+            profilePicContainer.appendChild(profilePicDiv);
+        }
+        const popovers = document.querySelectorAll('[data-bs-toggle="popover"]');
+        popovers.forEach((popover) => {
+            new bootstrap.Popover(popover);
+        });
+    }
+    catch(error){
+        console.log(error)
+    }
+    const changeProfilePicModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('pChangeProfilePictureModal'));
+    changeProfilePicModal.show();
+})
+
 document.getElementById('pDownloadData').addEventListener('click', async () => {
     try {
         const response = await fetch('/api/users/me/download-data/', {
@@ -118,16 +162,12 @@ document.getElementById('pDownloadData').addEventListener('click', async () => {
         if (!response.ok) {
             throw new Error(`Error while downloading: ${response.statusText}`);
         }
-
-        // Get the file directly as blob instead of parsing as JSON
         const blob = await response.blob();
         
-        // Create download link
         const fileURL = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = fileURL;
-        
-        // Get filename from Content-Disposition header if available
+
         const contentDisposition = response.headers.get('Content-Disposition');
         const filename = contentDisposition
             ? contentDisposition.split('filename=')[1].replace(/["']/g, '')
@@ -137,7 +177,7 @@ document.getElementById('pDownloadData').addEventListener('click', async () => {
         link.click();
         URL.revokeObjectURL(fileURL);
     } catch (error) {
-        console.error('Erreur:', error);
+        console.error('error:', error);
     }
 });
 

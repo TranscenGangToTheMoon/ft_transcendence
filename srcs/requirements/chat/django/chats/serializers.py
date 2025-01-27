@@ -7,7 +7,7 @@ from rest_framework.exceptions import PermissionDenied
 from lib_transcendence.serializer import Serializer
 
 from chat_messages.serializers import MessagesSerializer
-from chats.models import Chats, ChatParticipants
+from chats.models import Chats
 from chats.utils import get_chat_together
 from user_management.models import Users
 

@@ -123,8 +123,18 @@ function addChatSSEListeners(){
     sse.addEventListener('receive-message', async event => {
         event = JSON.parse(event.data);
         chatId = event.data.chat_id;
+        console.log(event);
         await displayNotification(undefined, 'message received', event.message, async event => {
-            await openChatTab(chatId);
+            let buttonCollapseChat = document.getElementById('chatTabsCollapse');
+			if (buttonCollapseChat && buttonCollapseChat.getAttribute('aria-expanded') === 'false') {
+				lastClick = undefined;
+				buttonCollapseChat.click();
+			}
+            chatTab = document.getElementById(`chatTab${openChat[chatId].target}Link`);
+            if (chatTab)
+                chatTab.click();
+            else
+                await openChatTab(chatId);
         });
         userInformations.notifications['chats'] += 1;
         getBadgesDivs(document);
@@ -133,7 +143,11 @@ function addChatSSEListeners(){
 }
 
 function addSSEListeners(){
-
+    sse.addEventListener('profile-picture-unlocked', event => {
+        event = JSON.parse(event.data);
+        console.log('profile pic unlocked: ', event);
+        displayNotification(event.data.small, 'achievement', event.message, undefined, [event.target[0]]);
+    })
     addFriendSSEListeners();
     addInviteSSEListeners();
     addChatSSEListeners();

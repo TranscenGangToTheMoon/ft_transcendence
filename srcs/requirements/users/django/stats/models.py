@@ -1,5 +1,6 @@
 from django.db import models
 from lib_transcendence.game import GameMode
+from profile_pictures.unlock import unlock_ranked_pp
 
 from stats.utils import get_trophies
 from users.models import Users
@@ -54,4 +55,5 @@ class RankedStats(models.Model):
         total_trophies = get_trophies(user) + trophies
         if total_trophies < 0:
             total_trophies = 0
+        unlock_ranked_pp(user, total_trophies)
         user.ranked_stats.create(trophies=trophies, total_trophies=total_trophies)

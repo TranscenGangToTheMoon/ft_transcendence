@@ -40,8 +40,11 @@ async def connect(sid, _, auth):
                 await sio.disconnect(usersConnected.get_user_sid(user['id']))
             chat = request_chat(endpoints.Chat.fchat.format(chat_id=chat_id), 'GET', token=token)
             print(f"Connection successeeded {sid}")
-            await sio.emit('debug', chat, to=sid)
-            await sio.emit('debug', user, to=sid)
+            await sio.emit('chat-server', {
+                'content': 'You\'re now connected',
+                'userData': user,
+                'chatData': chat,
+                }, to=sid)
             await sio.enter_room(sid, str(chat_id))
         except AuthenticationFailed:
             print(f"Authentification failed : {sid}")
@@ -49,14 +52,16 @@ async def connect(sid, _, auth):
         except PermissionDenied:
             print(f"Permission denied : {sid}")
             raise ConnectionRefusedError({"error": 403, "message": "Permission denied"})
+        except NotFound:
+            print(f"User not found : {sid}")
+            raise ConnectionRefusedError({"error": 404, "message": "User not found"})
         except APIException:
-            raise ConnectionRefusedError({"error": 500, "message": "error"})
+            raise ConnectionRefusedError({"error": 400, "message": "error"})
         if user and chat:
             usersConnected.add_user(user['id'], sid, user['username'], chat_id, chat['chat_with']['id'])
     else:
         print(f"Connection failed : {sid}")
         raise ConnectionRefusedError({"error": 400, "message": "Missing args"})
-    await sio.emit('debug', {'content': 'You\'re now connected'}, to=sid)
 
 
 @sio.event
@@ -68,6 +73,8 @@ async def disconnect(sid):
 
 @sio.event
 async def leave(sid, _):
+    await sio.leave_room(sid, str(usersConnected.get_chat_id(sid)))
+    usersConnected.remove_user(sid)
     await sio.disconnect(sid)
 
 
@@ -88,30 +95,27 @@ async def message(sid, data):
     try:
         answer_api = await sync_to_async(post_messages, thread_sensitive=False)(chat_id, content, token)
         await sio.emit(
-            'debug',
+            'chat-server',
             answer_api,
             to=sid
         )
         if not is_chat_with_connected:
             await sio.emit(
-                'debug',
+                'chat-server',
                 {'message': 'The other user is not connected'},
                 to=sid
             )
-            try:
-                print(f"User not connected, sending sse {usersConnected.get_chat_with_id(sid)}")
-                await sync_to_async(create_sse_event, thread_sensitive=False)(usersConnected.get_chat_with_id(sid), EventCode.RECEIVE_MESSAGE, answer_api, {'username': usersConnected.get_user_id(sid), 'message': content}, True)
-            except (PermissionDenied, AuthenticationFailed, NotFound, APIException) as e:
-                print(f"Error SSE: {e}")
+            print(f"User not connected, sending sse {usersConnected.get_chat_with_id(sid)}")
+            await sync_to_async(create_sse_event, thread_sensitive=False)(usersConnected.get_chat_with_id(sid), EventCode.RECEIVE_MESSAGE, answer_api, {'username': usersConnected.get_user_id(sid), 'message': content}, False)
         else:
             await sio.emit(
-                'debug',
+                'chat-server',
                 {'message': 'The other user is connected'},
                 to=sid
             )
         await sio.emit(
             'message',
-            {'author': answer_api['author'], 'content': content, 'is_read': is_chat_with_connected},
+            {'author': answer_api['author'], 'content': answer_api['content'], 'is_read': is_chat_with_connected},
             room=str(chat_id)
         )
         print(f"Message saved and sent from {sid}: {data}")
@@ -147,31 +151,11 @@ async def message(sid, data):
         print(f"API error : {sid}")
         await sio.emit(
             'error',
-            {'error': 500, 'message': 'error'},
+            {'error': 400, 'message': 'error'},
             to=sid
         )
         usersConnected.remove_user(sid)
         await sio.disconnect(sid)
-
-
-async def message_lobby(sid, data):
-    chat_id = usersConnected.get_chat_id(sid)
-    user = usersConnected.get_user_id(sid)
-    content = data.get('content')
-    print(f"New message from {sid}: {data}")
-    if content is None:
-        await sio.emit(
-            'error',
-            {'error': 400, 'message': 'Invalid message format'},
-            to=sid
-        )
-        return
-    await sio.emit(
-        'message',
-        {'author': user, 'content': content},
-        room=str(chat_id)
-    )
-    print(f"Message saved and sent from {sid}: {data}")
 
 
 if __name__ == '__main__':
