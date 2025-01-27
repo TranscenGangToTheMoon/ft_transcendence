@@ -18,9 +18,6 @@ class Users(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    profile_picture = models.ForeignKey(ProfilePictures, on_delete=models.SET_NULL, null=True, blank=True)
-    own_profile_pictures = models.ManyToManyField(ProfilePictures, default=None, symmetrical=False, related_name='own_profile_pictures', blank=True)
-
     accept_friend_request = models.BooleanField(default=True)
     accept_chat_from = models.CharField(max_length=30, default=AcceptChat.FRIENDS_ONLY)
 
@@ -36,6 +33,10 @@ class Users(models.Model):
     def set_game_playing(self, code=None):
         self.game_playing = code
         self.save()
+
+    def set_profile_picture(self, profile_pictures):
+        self.profile_pictures.get(is_equiped=True).use(False)
+        profile_pictures.use(True)
 
     def connect(self):
         launch_ping_loop = not self.is_online

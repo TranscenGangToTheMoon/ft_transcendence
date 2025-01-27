@@ -69,5 +69,4 @@ class FriendsSerializer(Serializer):
         validated_data['id'] = fr_id
         validated_data['user_1'] = friend_request.sender
         validated_data['user_2'] = user_accept
-        result = super().create(validated_data)
-        return result
+        return super().create(validated_data)

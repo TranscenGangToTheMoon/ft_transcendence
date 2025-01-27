@@ -2,19 +2,22 @@ from lib_transcendence import endpoints
 from lib_transcendence.chat import AcceptChat
 from lib_transcendence.exceptions import MessagesException
 from lib_transcendence.services import request_chat
-from lib_transcendence.game import GameMode
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied, APIException
 from lib_transcendence.serializer import Serializer
 
 from friends.serializers import FriendsSerializer
 from friends.utils import get_friendship
+from profile_pictures.create import create_user_profile_pictures
+from profile_pictures.serializers import SmallProfilePicturesSerializer
+from stats.create import create_user_stats
 from stats.utils import get_trophies
 from users.auth import auth_update
 from users.models import Users
+from users.serializers_utils import BaseUsersSerializer
 
 
-class UsersMeSerializer(Serializer):
+class UsersMeSerializer(BaseUsersSerializer):
     accept_friend_request = serializers.BooleanField()
     notifications = serializers.SerializerMethodField(read_only=True)
     password = serializers.CharField(max_length=50, write_only=True)
@@ -55,10 +58,6 @@ class UsersMeSerializer(Serializer):
         return AcceptChat.validate(value)
 
     @staticmethod
-    def get_trophies(obj):
-        return get_trophies(obj)
-
-    @staticmethod
     def get_notifications(obj):
         try:
             chat_notifications = request_chat(endpoints.Chat.fnotifications.format(user_id=obj.id), 'GET')['notifications']
@@ -78,7 +77,7 @@ class UsersMeSerializer(Serializer):
         return super().update(instance, validated_data)
 
 
-class UsersSerializer(Serializer):
+class UsersSerializer(BaseUsersSerializer):
     status = serializers.SerializerMethodField(read_only=True)
     friends = FriendsSerializer(source='get_friends', read_only=True)
     trophies = serializers.SerializerMethodField(read_only=True)
@@ -104,18 +103,6 @@ class UsersSerializer(Serializer):
             'friends',
         ]
 
-    @staticmethod
-    def get_status(obj):
-        return {
-            'is_online': obj.is_online,
-            'game_playing': obj.game_playing,
-            'last_online': obj.last_online,
-        }
-
-    @staticmethod
-    def get_trophies(obj):
-        return get_trophies(obj)
-
     def get_friends(self, obj):
         request = self.context.get('request')
         if request is None or obj.id == request.user.id:
@@ -135,14 +122,6 @@ class ManageUserSerializer(Serializer):
 
     def create(self, validated_data):
         result = super().create(validated_data)
-        for game_mode in [GameMode.GLOBAL] + GameMode.attr():
-            if game_mode == GameMode.CUSTOM_GAME:
-                continue
-            kwargs = {'game_mode': game_mode}
-            if GameMode.tournament_field(game_mode):
-                kwargs['tournament_wins'] = 0
-            if GameMode.own_goal_field(game_mode):
-                kwargs['own_goals'] = 0
-            result.stats.create(**kwargs)
-        result.ranked_stats.create(trophies=0, total_trophies=0)
+        create_user_stats(result)
+        create_user_profile_pictures(result)
         return result

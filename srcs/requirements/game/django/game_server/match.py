@@ -1,4 +1,3 @@
-from aiohttp.web_routedef import AbstractRouteDef
 from typing import List
 from lib_transcendence.request import AuthenticationFailed
 from lib_transcendence.services import request_game
@@ -9,7 +8,7 @@ from game_server.pong_racket import Racket
 
 
 class Spectator():
-    def __init__(self, id, sid):
+    def __init__(self, id, sid) -> None:
         self.user_id: int = id
         self.socket_id: str = sid
 
@@ -18,12 +17,13 @@ class Spectator():
 
 
 class Player():
-    def __init__(self, id, match_id, team):
+    def __init__(self, id, match_id, team) -> None:
+        from game_server.game import Game
         self.match_id = match_id
         self.racket: Racket
         self.user_id = id
         self.socket_id = ''
-        self.game = None
+        self.game: Game
         self.team = team
         self.score = 0
         self.csc = 0
@@ -34,7 +34,7 @@ class Player():
         except NotFound as e:
             print(e.detail, flush=True)
             return None
-        except APIException as e:
+        except APIException:
             return None
         if csc:
             self.csc += 1
@@ -47,7 +47,7 @@ class Player():
 
 
 class Team():
-    def __init__(self, players, match_id, name):
+    def __init__(self, players, match_id, name) -> None:
         self.match_id = match_id
         self.players: List[Player] = []
         self.name = name
@@ -60,7 +60,7 @@ class Team():
 
 
 class Match():
-    def __init__(self, game_data):
+    def __init__(self, game_data) -> None:
         self.id = game_data['id']
         self.teams: List[Team] = []
         self.game_mode = game_data['game_mode']
@@ -84,7 +84,7 @@ def finish_match(match_id, finish_reason: str, user_id: int):
                     'user_id': user_id
                 }
             )
-        except AuthenticationFailed as e:
+        except AuthenticationFailed:
             print("The finish_match attribute is not available in the Game class.", flush=True)
         except Exception as e:
             print(f"An error occurred while requesting the game finish: {e}", flush=True)
