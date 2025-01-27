@@ -267,7 +267,7 @@ function removeIds(playerListDiv){
 if (typeof clickedUserDiv === 'undefined')
     var clickedUserDiv;
 
-function addContextMenus(){ 
+function addContextMenus(){
     const playerDivs = document.querySelectorAll('.player');
     const banButton = document.getElementById('cBan');
     if (!creator)
@@ -381,7 +381,7 @@ async function fillPlayerList(noTeam=false){
     tempDiv.style.display = 'none';
     tempDiv.innerHTML = lobbyOptionsDiv.innerHTML;
     removeIds(lobbyOptionsDiv);
-    
+
     let dropzones = tempDiv.querySelectorAll('.dropzone');
     for (let dropzone of dropzones)
         dropzone.innerHTML = '';
@@ -397,7 +397,7 @@ async function fillPlayerList(noTeam=false){
     if (!noTeam)
         await completeTeams(tempDiv);
     lobbyOptionsDiv.innerHTML = tempDiv.innerHTML;
-    
+
     document.getElementById('settingsButton').addEventListener('click', async function() {
         if (!creator || gameMode != 'Custom Game') return;
         try {
@@ -534,6 +534,11 @@ async function lobbyGameStart(event){
     // localStorage.setItem('game-event', JSON.stringify(event));
     // localStorage.setItem('game-target-path', event.target[0].url);
     // localStorage.setItem('game-target-type', event.target[0].type);
+
+    // if player is in bench, then player will spectate the game
+    if (player.team == 'Spectator') {
+        await navigateTo(`/spectate/${event.code}`);
+    }
     if (matchType === '3v3'){
         await navigateTo('/game/3v3', true, true);
         fromLobby = true;

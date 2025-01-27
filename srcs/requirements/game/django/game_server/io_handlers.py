@@ -26,11 +26,13 @@ async def connect(sid, environ, auth):
     try:
         match = request_game(endpoints.Game.fuser.format(user_id=id), 'GET')
     except NotFound as e:
+        print('client is not awaited on a match, searching for a match to spectate', flush=True)
         match_code = auth.get('match_code')
         if match_code is None:
+            print('match code is none', flush=True)
             raise ConnectionRefusedError(e.detail)
         try:
-            game = Server.get_game(match_code)
+            game = Server.get_game_from_code(match_code)
         except Server.NotFound:
             return False
         if game.match.game_type == 'normal':
