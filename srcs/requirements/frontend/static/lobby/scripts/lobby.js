@@ -546,12 +546,12 @@ async function lobbyGameStart(event){
     }
 }
 
-async function lobbyGameStart(event){
+async function spectateLobbyGame(event){
     event = JSON.parse(event.data);
     console.log(event);
 
     if (matchType === '1v1') { // Spectate mode is not available for 3v3
-        await navigateTo('/spectate/' + event.code, true, true);
+        await navigateTo('/spectate/' + event.data.code, true, true);
         fromLobby = true;
     }
 }
