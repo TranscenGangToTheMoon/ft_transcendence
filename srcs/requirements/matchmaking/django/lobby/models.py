@@ -103,7 +103,7 @@ class Lobby(models.Model):
                 return
 
         try:
-            game_code = create_match(GameMode.CUSTOM_GAME, team_a, team_b)['code']
+            game_code = create_match(self.game_mode, team_a, team_b)['code']
         except APIException:
             return
         for lobby in self.playing_lobby:

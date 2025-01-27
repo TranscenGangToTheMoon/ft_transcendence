@@ -5,7 +5,7 @@ from lib_transcendence.game import GameMode
 from lib_transcendence.services import request_game
 
 
-def create_match(game_mode: Literal['duel', 'clash', 'ranked', 'custom_game'] | dict, team_a: int | list[int], team_b: int | list[int]):
+def create_match(game_mode: Literal['duel', 'clash', 'ranked', 'custom_game'] | str | dict, team_a: int | list[int], team_b: int | list[int]):
     if type(team_a) is int:
         team_a = [team_a]
     if type(team_b) is int:
