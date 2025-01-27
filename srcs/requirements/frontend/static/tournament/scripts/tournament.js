@@ -483,7 +483,7 @@ async function gameStart(event) {
 		userInformations.cancelReturn = true;
 	fromTournament = true;
 	tournamentData = [event.data, event.target[0].url, event.target[0].type];
-	// localStorage.setItem('game-event', JSON.stringify(event));
+	localStorage.setItem('game-event', JSON.stringify(event));
 	await navigateTo('/game/tournament', true, true);
 }
 

@@ -724,7 +724,7 @@ document.getElementById('confirmModal').addEventListener('hidden.bs.modal', () =
 
 function checkGameAuthorization(){
     console.log(window.location.pathname);
-    // if (reconnect()) return;
+    if (reconnect()) return;
     if (userInformations.is_guest && window.location.pathname === '/game/ranked')
         throw `${window.location.pathname}`;
     if (window.location.pathname === '/game/tournament' && typeof tournamentData === 'undefined')
@@ -851,7 +851,7 @@ async function initGame(){
                 SSEListeners.set('tournament-finish', tournamentFinished);
                 sse.addEventListener('tournament-finish', tournamentFinished);
             }
-            await initData(...tournamentData);
+            // await initData(...tournamentData);
         }
         else if (window.location.pathname === '/game/1v1')
             await initData(...(userInformations.lobbyData));
