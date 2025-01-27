@@ -124,7 +124,7 @@ function setupSocketListeners(chatInfo)
 		let messageAuthor = document.createElement('strong');
 		messageDiv.appendChild(messageAuthor);
 		messageDiv.appendChild(messageContent);
-		messageDiv.style.display = 'flex';
+		messageDiv.className = 'd-flex gap-1';
 		console.log("Message received: ", data);
 		messagesNotRead = chatBox.querySelectorAll('.chatMessageNotRead');
 		for (let message of messagesNotRead) {
@@ -179,7 +179,7 @@ function displayMessages(chatInfo, chatMessages, isMore = false, method='afterbe
 			}
 		}
 		messageContent.innerText = element.content;
-		messageDiv.style.display = 'flex';
+		messageDiv.className = 'd-flex gap-1';
 		messageDiv.appendChild(messageAuthor);
 		messageDiv.appendChild(messageContent);
 		chatBox.insertAdjacentElement(method, messageDiv);
