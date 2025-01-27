@@ -159,12 +159,9 @@ async def disconnect(sid):
                 '''
     try:
         client = Server._clients[sid]
-        if client.game.match.game_mode != 'duel' and client.game.match.game_mode != 'ranked':
-            await sync_to_async(Server.finish_game)(client.game.match.id, FinishReason.PLAYER_DISCONNECT, client.user_id)
-        else:
-            client.racket.stop_moving(client.racket.position.y)
-            Server._clients.pop(sid)
-            Server.emit('stop_moving', {'player': client.user_id, 'position': client.racket.position.y}, str(client.match_id))
+        client.racket.stop_moving(client.racket.position.y)
+        Server._clients.pop(sid)
+        Server.emit('stop_moving', {'player': client.user_id, 'position': client.racket.position.y}, str(client.match_id))
     except KeyError:
         match_id = Server.get_spectator_match_id(sid)
         if match_id is not None:
