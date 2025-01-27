@@ -54,7 +54,7 @@ class Lobby(models.Model):
     def is_ready(self):
         qs = self.participants
         if self.game_mode == GameMode.CUSTOM_GAME:
-            qs.exclude(team=Teams.SPECTATOR)
+            qs = qs.exclude(team=Teams.SPECTATOR)
             if not self.is_team_full(Teams.A) or not self.is_team_full(Teams.B):
                 return False
         return qs.filter(is_ready=False).count() == 0
