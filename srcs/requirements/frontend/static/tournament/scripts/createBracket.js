@@ -66,6 +66,7 @@ function createBracket(data, history=false) {
             matches.forEach(match => {
                 const matchDiv = document.createElement('div');
                 matchDiv.className = 't-match';
+                matchDiv.id = `match_${match.id}`;
                 const card = document.createElement('div');
                 card.className = 'card';
                 
@@ -91,7 +92,7 @@ function createBracket(data, history=false) {
                 const player2Div = document.createElement('div');
                 player2Div.className = `card-body border-bottom ${match.winner !== undefined
                                         && match.winner === match.user_2?.id ? 'winner' : ''}`;
-                profilePicPath = match.user_2?.profile_picture?.small
+                profilePicPath = match.user_2?.profile_picture?.small;
                 player2Div.innerHTML = `
                     <div class="d-flex justify-content-between">
                     ${match.user_2? '<img class="tournament-participant-pp" src="' + profilePicPath
