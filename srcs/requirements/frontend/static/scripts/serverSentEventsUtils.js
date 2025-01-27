@@ -123,7 +123,13 @@ function addChatSSEListeners(){
     sse.addEventListener('receive-message', async event => {
         event = JSON.parse(event.data);
         chatId = event.data.chat_id;
+        console.log(event);
         await displayNotification(undefined, 'message received', event.message, async event => {
+            let buttonCollapseChat = document.getElementById('chatTabsCollapse');
+			if (buttonCollapseChat && buttonCollapseChat.getAttribute('aria-expanded') === 'false') {
+				lastClick = undefined;
+				buttonCollapseChat.click();
+			}
             await openChatTab(chatId);
         });
         userInformations.notifications['chats'] += 1;

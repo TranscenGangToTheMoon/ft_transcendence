@@ -442,6 +442,7 @@ async function fillPlayerList(noTeam=false){
 }
 
 async function lobbyJoined(event){
+    displayGameChatMessage(event);
     event = JSON.parse(event.data);
     console.log(event);
     if (!checkEventDuplication(event)) return;
@@ -450,6 +451,7 @@ async function lobbyJoined(event){
 }
 
 async function lobbyLeaved(event){
+    displayGameChatMessage(event);
     event = JSON.parse(event.data);
     console.log(event);
     if (!checkEventDuplication(event)) return;
@@ -511,6 +513,7 @@ async function lobbyUpdated(event){
 }
 
 async function lobbyBanned(event){
+    displayGameChatMessage(event);
     event = JSON.parse(event.data);
     console.log(event);
     if (!checkEventDuplication(event)) return;

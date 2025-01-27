@@ -189,16 +189,19 @@ function displayCountdown(){
 }
 
 function tournamentJoined(event){
+	displayGameChatMessage(event);
 	event = JSON.parse(event.data);
 	addParticipant(event.data);
 }
 
 function tournamentLeaved(event){
+	displayGameChatMessage(event);
 	event = JSON.parse(event.data);
 	removeParticipant(event.data.id)
 }
 
 async function tournamentBanned(event){
+	displayGameChatMessage(event);
 	event = JSON.parse(event.data);
 	console.log(event);
 	await navigateTo('/');
@@ -274,6 +277,7 @@ async function tournamentMatchFinished(event){
 
 async function tournamentFinished(event){
 	event = JSON.parse(event.data);
+	closeGameChatTab();
 	console.log('received tournament-finish');
 	console.log(event);
 	await navigateTo('/', true, true); //todo replace by tournament history

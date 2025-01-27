@@ -5,9 +5,8 @@ from aiohttp import web
 from game_server import io_handlers
 from game_server.match import Player
 from game_server.game import Game
-from game_server.pong_position import Position
 from threading import Lock, Thread
-from typing import Dict
+from typing import Dict, List
 
 
 class Server:
@@ -20,7 +19,8 @@ class Server:
     _sio_lock: Lock
     _loop: asyncio.AbstractEventLoop
     _dsids_lock: Lock
-    _disconnected_sids = []
+    _disconnected_sids: List[str] = []
+    _config: dict
 
     @staticmethod
     def serve():
@@ -42,8 +42,9 @@ class Server:
         Server._loop_lock = Lock()
         Server._sio_lock = Lock()
         Server._dsids_lock = Lock()
-        with open('gameConfig.json', 'r') as config_file:
+        with open('gameConfig.json', 'r', encoding='utf-8') as config_file:
             config = json.load(config_file)
+            Server._config = config
             Game.default_ball_speed = config['ball']['speed']
             Game.ball_size = config['ball']['size']
         port = 5500
@@ -85,7 +86,7 @@ class Server:
 
     @staticmethod
     def create_game(match):
-        game = Game(match)
+        game = Game(match, Server._config)
         Server.push_game(match.id, game)
         Thread(target=Server._games[match.id].launch).start()
 

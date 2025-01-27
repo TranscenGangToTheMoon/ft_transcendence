@@ -9,6 +9,7 @@ from rest_framework.exceptions import NotFound
 from friend_requests.models import FriendRequests
 from friend_requests.serializers import FriendRequestsSerializer
 from friends.serializers import FriendsSerializer
+from profile_pictures.unlock import unlock_friends_pp
 from sse.events import publish_event
 
 
@@ -55,6 +56,7 @@ class FriendRequestView(SerializerKwargsContext, generics.CreateAPIView, generic
     def perform_create(self, serializer):
         super().perform_create(serializer)
         publish_event(serializer.instance.user_1, EventCode.ACCEPT_FRIEND_REQUEST, data=serializer.data, kwargs={'username': serializer.instance.user_2.username})
+        unlock_friends_pp(serializer.instance)
 
     def perform_destroy(self, instance):
         user_id = self.request.user.id

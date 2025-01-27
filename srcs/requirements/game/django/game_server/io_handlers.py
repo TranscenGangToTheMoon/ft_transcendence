@@ -70,8 +70,6 @@ async def connect(sid, environ, auth):
             await Server._sio.disconnect(player_sid)
         except (KeyError):
             pass
-        print('je reconnect', flush=True)
-
         Server.get_game(game_id).reconnect(player.user_id, sid)
     player.socket_id = sid
     player.game = Server.get_game(game_id)
@@ -147,7 +145,7 @@ async def disconnect(sid):
                 no need to finish the game
                 '''
     try:
-        
+
         client = Server._clients[sid]
         print(f"clientferiof{client.game.match.game_mode}", flush=True)
         if client.game.match.game_mode != 'duel' and client.game.match.game_mode != 'ranked':
