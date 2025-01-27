@@ -161,6 +161,7 @@ async def disconnect(sid):
         client = Server._clients[sid]
         client.racket.stop_moving(client.racket.position.y)
         Server._clients.pop(sid)
+        Server.emit('stop_moving', {'player': client.user_id, 'position': client.racket.position.y}, str(client.match_id))
     except KeyError:
         match_id = Server.get_spectator_match_id(sid)
         if match_id is not None:

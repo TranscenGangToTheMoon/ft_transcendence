@@ -447,7 +447,7 @@ async function updateTrophies(){
 if (typeof cancelTimeout === 'undefined')
     var cancelTimeout;
 
-function initSocket(match_code, spectateModal=0){
+function initSocket(match_code){
 	const host = window.location.origin;
 	const token = getAccessToken();
 	let gameSocket = io(host, {
@@ -464,8 +464,6 @@ function initSocket(match_code, spectateModal=0){
 	gameSocket.on('connect', () => {
         cancelTimeout = true;
         console.log('Connected to socketIO server!');
-        if (spectateModal !== 0)
-			spectateModal.hide();
 		document.getElementById('gameArea').classList.replace('d-none', 'd-flex');
 		document.getElementById('playerUsername').innerText = 'Team A';
 		document.getElementById('enemyUsername').innerText = 'Team B';
