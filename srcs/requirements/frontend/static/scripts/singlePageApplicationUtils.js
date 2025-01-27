@@ -62,6 +62,14 @@ function containsCode(path){
 }
 
 async function handleRoute() {
+    const openModals = document.querySelectorAll('.modal.show');
+
+    openModals.forEach(modal => {
+        const modalInstance = bootstrap.Modal.getOrCreateInstance(modal);
+        if (modalInstance) {
+            modalInstance.hide();
+        }
+    });
     var path = window.location.pathname;
     if (window.location.pathname !== 'game')
         window.PongGame?.stopGame();
