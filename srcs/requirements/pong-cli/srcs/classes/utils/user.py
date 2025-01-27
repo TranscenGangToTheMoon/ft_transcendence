@@ -34,7 +34,7 @@ class User():
             headers=User.headers,
             verify=Config.SSL.CRT
         )
-        print(User.response.json())
+        print(User.response)
 
         if (User.response.status_code != 200):
             reason = "Unknown error"
@@ -63,7 +63,7 @@ class User():
             headers=User.headers,
             verify=Config.SSL.CRT
         )
-        print(User.response.json())
+        print(User.response)
 
         if (User.response.status_code != 201):
             reason = "Unknown error"
@@ -91,7 +91,7 @@ class User():
             headers=User.headers,
             verify=Config.SSL.CRT
         )
-        print(User.response.json())
+        print(User.response)
 
         if (User.response.status_code != 201):
             reason = "Unknown error"
