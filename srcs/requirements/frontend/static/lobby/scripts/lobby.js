@@ -142,6 +142,7 @@ async function fillBench(player, benchDiv){
     benchDiv.querySelector('#benchPlayerList').appendChild(playerDiv);
     await loadContent('/lobby/player.html', undefined, false, playerDiv);
     playerDiv.querySelector('.playerUsername').innerText = player.username;
+    playerDiv.querySelector('img').src = player.profile_picture.small;
     playerDiv.querySelector('.playerIsReady').style.display = 'none';
     playerDiv.querySelector('.playerId').innerText = player.id;
 }
@@ -155,14 +156,10 @@ async function fillTeamDisplay(player, teamSelectorDiv){
         playerDiv.draggable = true;
     }
     playerDiv.id = `teamPlayer${player.id}`;
-    // teamDisplayDiv.appendChild(playerDiv);
-    // let placeholders = teamDisplayDiv.querySelectorAll('.no-player');
-    // teamDisplayDiv.insertBefore(playerDiv, placeholders[0]);
-    // if (placeholders.length)
-    //     placeholders[0].remove();
     teamDisplayDiv.appendChild(playerDiv);
     await loadContent('/lobby/player.html', undefined, false, playerDiv);
     playerDiv.querySelector('.playerUsername').innerText = player.username;
+    playerDiv.querySelector('img').src = player.profile_picture.small;
     playerDiv.querySelector('.playerIsReady').style.display = 'none';
     playerDiv.querySelector('.playerId').innerText = player.id;
 
@@ -277,7 +274,8 @@ function addContextMenus(){
             banButton.classList.remove('disabled');
     }
     for (let playerDiv of playerDivs){
-        if (playerDiv.querySelector('.playerUsername').innerText === userInformations.username)
+        if (playerDiv.querySelector('.playerUsername').innerText === userInformations.username || 
+            playerDiv.querySelector('.playerUsername').innerText === 'Add')
             continue;
         playerDiv.addEventListener('contextmenu', function(e) {
             e.preventDefault();
@@ -370,8 +368,9 @@ async function updateOwnTeam(player, teamDisplayDiv, teamSelectorDiv, benchDiv, 
     teamDisplayDiv.appendChild(playerDiv);
     await loadContent('/lobby/player.html', undefined, false, playerDiv);
     playerDiv.querySelector('.playerUsername').innerText = player.username;
+    playerDiv.querySelector('img').src = player.profile_picture.small;
+    playerDiv.querySelector('img').src = player.profile_picture.small;
     playerDiv.querySelector('.playerId').innerText = player.id;
-    playerDiv.querySelector('.playerTrophies').innerText = player.trophies;
     playerDiv.querySelector('.playerIsReady').innerText = player.is_ready ? 'Ready' : 'Not ready';
 }
 
