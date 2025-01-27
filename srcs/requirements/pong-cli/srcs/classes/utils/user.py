@@ -152,7 +152,14 @@ class User():
                 print(User.response)
 
                 if (User.response.status_code != 200):
-                    raise (Exception(f"({User.response.status_code}) {User.response.json()}"))
+                    try:
+                        _ = User.response.json()
+                    except Exception as _:
+                        raise (Exception(f"({User.response.status_code})"))
+                    else:
+                        raise (Exception(f"({User.response.status_code}) {User.response.json()}"))
+            else:
+                raise (Exception(f"({User.response.status_code}) {Config.errorCodes[code]}"))
 
         User.id = User.response.json()["id"]
         User.username = User.response.json()["username"]
@@ -184,7 +191,14 @@ class User():
                 print(User.response)
 
                 if (User.response.status_code != 201):
-                    raise (Exception(f"({User.response.status_code}) {User.response.json()}"))
+                    try:
+                        _ = User.response.json()
+                    except Exception as _:
+                        raise (Exception(f"({User.response.status_code})"))
+                    else:
+                        raise (Exception(f"({User.response.status_code}) {User.response.json()}"))
+            else:
+                raise (Exception(f"({User.response.status_code}) {Config.errorCodes[code]}"))
 
     @staticmethod
     def cancelDuel():
@@ -211,7 +225,14 @@ class User():
                 )
 
                 if (User.response.status_code != 204):
-                    raise (Exception(f"({User.response.status_code}) {User.response.json()}"))
+                    try:
+                        _ = User.response.json()
+                    except Exception as _:
+                        raise (Exception(f"({User.response.status_code})"))
+                    else:
+                        raise (Exception(f"({User.response.status_code}) {User.response.json()}"))
+            else:
+                raise (Exception(f"({User.response.status_code}) {Config.errorCodes[code]}"))
 
     @staticmethod
     def refresh():
