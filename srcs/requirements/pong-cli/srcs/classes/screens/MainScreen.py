@@ -68,8 +68,8 @@ class MainPage(Screen):
     @on(Button.Pressed, "#duel")
     def duelAction(self):
         try:
-            if (not self.app.SSEConnected):
-                raise (Exception("SSE not connected ! Reconnect and try again."))
+            # if (not self.app.SSEConnected):
+            #     raise (Exception("SSE not connected ! Reconnect and try again."))
             User.duel()
 
             self.searchDuel = True
@@ -80,27 +80,35 @@ class MainPage(Screen):
 
         except Exception as error:
             self.query_one("#statusGame").styles.color = "red"
-            if (User.response is not None and User.response.status_code == 401):
-                code = User.response.json().get("code")
-                if (code is not None and code == "token_not_valid"):
-                    self.query_one("#statusGame").update("Tokens have expired please reconnect")
-            else:
-                if (User.response is not None):
-                    detail = User.response.json().get("detail", None)
-                    if (detail is not None):
-                        self.query_one("#statusGame").update(f"{detail}")
+            if (User.response is not None):
+                if (User.response.status_code == 401):
+                    code = User.response.json().get("code")
+                    if (code is not None and code == "token_not_valid"):
+                        self.query_one("#statusGame").update("Tokens have expired please reconnect")
+                elif (User.response.status_code == 409 and User.wasInAGame == True):
+                    self.app.pushGamePage()
                 else:
-                    self.query_one("#statusGame").update(f"{error}")
+                    try:
+                        _ = User.response.json()
+                    except Exception as _:
+                        self.query_one("#statusGame").update(f"({User.response.status_code}) {'Service unavailable' if User.response.status_code >= 500 else error}")
+                    else:
+                        detail = User.response.json().get("detail", None)
+                        if (detail is not None):
+                            self.query_one("#statusGame").update(f"{detail}")
+            else:
+                self.query_one("#statusGame").update(f"{error}")
 
     @on(Button.Pressed, "#cancelDuelGame")
     def cancelDuelAction(self):
         try:
-            if (not self.app.SSEConnected):
-                raise (Exception("SSE not connected ! Reconnect and try again."))
+            # if (not self.app.SSEConnected):
+            #     raise (Exception("SSE not connected ! Reconnect and try again."))
             User.cancelDuel()
             self.searchDuel = False
             self.query_one("#duel").loading = False
             self.query_one("#duel").variant = "primary"
+            self.query_one("#statusGame").styles.color = "white"
             self.query_one("#statusGame").update("")
             self.query_one("#cancelDuelGame").disabled = True
 

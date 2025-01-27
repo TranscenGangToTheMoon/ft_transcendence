@@ -19,6 +19,7 @@ class User():
     server: str | None = None
     team: str | None = None
     username: str | None = None
+    wasInAGame: bool = False
 
     @staticmethod
     def loginUser():

@@ -27,7 +27,7 @@ class GamePage(Screen):
     CSS_PATH = "styles/GamePage.tcss"
     BINDINGS = [
         ("^q", "exit", "Exit"),
-        ("f", "forfeit", "Forfeit")
+        ("f", "forfeit", "Quit game")
     ]
 
     def __init__(self):
@@ -92,7 +92,7 @@ class GamePage(Screen):
             self.playground.offset.y + Config.Playground.height + 1
         )
 
-    async def action_quit(self):
+    async def action_forfeit(self):
         while (self.countdownIsActive == True):
             await asyncio.sleep(1 / 10)
         self.dismiss()
@@ -210,6 +210,7 @@ class GamePage(Screen):
 
         @self.sio.on('start_game')
         async def startGameAction():
+            User.wasInAGame = True
             self.lastFrame = 0
             self.gameStarted = True
 
@@ -266,6 +267,7 @@ class GamePage(Screen):
             if (await self.app.push_screen_wait(GameEnd(data["reason"], data["winner"] == User.team)) == "main"):
                 self.dismiss()
             await self.sio.disconnect()
+            User.wasInAGame = False
 
     async def on_unmount(self) -> None:
         if (self.connected):
