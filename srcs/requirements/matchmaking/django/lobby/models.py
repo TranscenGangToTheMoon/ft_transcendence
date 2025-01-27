@@ -19,14 +19,13 @@ class NoLobbyFound(Exception):
 
 
 class Lobby(models.Model):
-    code = models.CharField(max_length=4, unique=True, editable=False)
-    max_participants = models.IntegerField(editable=False)
-    created_at = models.DateTimeField(auto_now_add=True, editable=False)
+    code = models.CharField(max_length=4, unique=True)
+    max_participants = models.IntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
     game_mode = models.CharField(max_length=11)
     ready_to_play = models.BooleanField(default=False)
-    is_playing = models.BooleanField(default=False)
+    playing_game = models.CharField(max_length=4, null=True, default=None)
     count = models.IntegerField(default=1)
-
     match_type = models.CharField(max_length=3)
 
     @property
@@ -54,7 +53,7 @@ class Lobby(models.Model):
     def is_ready(self):
         qs = self.participants
         if self.game_mode == GameMode.CUSTOM_GAME:
-            qs.exclude(team=Teams.SPECTATOR)
+            qs = qs.exclude(team=Teams.SPECTATOR)
             if not self.is_team_full(Teams.A) or not self.is_team_full(Teams.B):
                 return False
         return qs.filter(is_ready=False).count() == 0
@@ -76,7 +75,7 @@ class Lobby(models.Model):
         remain_player = self.max_participants - len(team)
         while remain_player != 0:
             blocked_user = Blocked.objects.filter(user_id__in=team).values_list('blocked_user_id', flat=True)
-            result = Lobby.objects.exclude(Q(id__in=self.exclude_lobby) | Q(participants__user_id__in=blocked_user)).filter(ready_to_play=True, count__lte=remain_player)
+            result = Lobby.objects.exclude(Q(id__in=self.exclude_lobby) | Q(participants__user_id__in=blocked_user)).filter(game_mode=GameMode.CLASH, ready_to_play=True, count__lte=remain_player)
 
             exclude_lobby = [r.id for r in result if block_relation(r)]
             result = result.exclude(id__in=exclude_lobby).order_by('count').last()
@@ -104,15 +103,17 @@ class Lobby(models.Model):
                 return
 
         try:
-            create_match(GameMode.CUSTOM_GAME, team_a, team_b)
+            game_code = create_match(GameMode.CUSTOM_GAME, team_a, team_b)['code']
         except APIException:
             return
         for lobby in self.playing_lobby:
-            lobby.playing()
+            lobby.playing(game_code)
+        if self.game_mode == GameMode.CUSTOM_GAME:
+            create_sse_event(self.get_user_id(Teams.SPECTATOR), EventCode.LOBBY_SPECTATE_GAME, data={'code': game_code})
 
-    def playing(self):
+    def playing(self, game_code):
         self.participants.all().update(is_ready=False)
-        self.is_playing = True
+        self.playing_game = game_code
         self.set_ready_to_play(False)
 
     def join(self):
@@ -134,7 +135,7 @@ class LobbyParticipants(ParticipantsPlace, models.Model):
     user_id = models.IntegerField(unique=True)
     creator = models.BooleanField(default=False)
     is_ready = models.BooleanField(default=False)
-    join_at = models.DateTimeField(auto_now_add=True, editable=False)
+    join_at = models.DateTimeField(auto_now_add=True)
 
     team = models.CharField(default=None, null=True)
 

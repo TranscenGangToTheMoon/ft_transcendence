@@ -26,6 +26,7 @@ class EventCode:
     LOBBY_MESSAGE = 'lobby-message'
     LOBBY_UPDATE = 'lobby-update'
     LOBBY_UPDATE_PARTICIPANT = 'lobby-update-participant'
+    LOBBY_SPECTATE_GAME = 'lobby-spectate-game'
     LOBBY_DESTROY = 'lobby-destroy'
     TOURNAMENT_JOIN = 'tournament-join'
     TOURNAMENT_LEAVE = 'tournament-leave'

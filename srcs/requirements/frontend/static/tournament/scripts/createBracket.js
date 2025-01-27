@@ -18,7 +18,6 @@ function historyBracket(matches, roundInsideDiv){
 
         const player2Div = document.createElement('div');
         profilePicPath = match.looser?.profile_picture?.small;
-        console.log('DJEWOIDJWEOIJDOIWEJDJ c CEIOJK WEOI', profilePicPath);
 
         player2Div.className = `card-body`;
         player2Div.innerHTML = `
@@ -76,7 +75,7 @@ function createBracket(data, history=false) {
                 const player1Div = document.createElement('div');
                 player1Div.className = `card-body border-bottom ${match.winner !== undefined
                                         && match.winner === match.user_1?.id ? 'winner' : ''}`;
-                let profilePicPath = match.user_1.profile_picture?.small;
+                let profilePicPath = match.user_1?.profile_picture?.small;
                 player1Div.innerHTML = `
                     <div class="d-flex justify-content-between">
                         ${match.user_1? '<img class="tournament-participant-pp" src="'+ profilePicPath
@@ -92,7 +91,7 @@ function createBracket(data, history=false) {
                 const player2Div = document.createElement('div');
                 player2Div.className = `card-body border-bottom ${match.winner !== undefined
                                         && match.winner === match.user_2?.id ? 'winner' : ''}`;
-                profilePicPath = match.user_2.profile_picture?.small
+                profilePicPath = match.user_2?.profile_picture?.small
                 player2Div.innerHTML = `
                     <div class="d-flex justify-content-between">
                     ${match.user_2? '<img class="tournament-participant-pp" src="' + profilePicPath

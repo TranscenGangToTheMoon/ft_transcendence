@@ -29,7 +29,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body" id="gameOverContent">
-                <label for="playerScore" id="playerScoreLabel">
+                <label for="playerScoreInModal" id="playerScoreLabel">
                     <a class="teamDetail"
                         data-bs-toggle="popover" 
                         data-bs-trigger="hover"
@@ -37,8 +37,8 @@
                         title="Team ">
                     Team {team-id}</a> Score:
                 </label>
-                <div id="playerScore">-</div>
-                <label for="enemyScore" id="enemyScoreLabel">
+                <div id="playerScoreInModal">-</div>
+                <label for="enemyScoreInModal" id="enemyScoreLabel">
                 <a class="teamDetail"
                     data-bs-toggle="popover" 
                     data-bs-trigger="hover"
@@ -46,14 +46,14 @@
                     title="Team ">
                     Team {team-id}</a> Score:
                 </label>
-                <div id="enemyScore">-</div>
+                <div id="enemyScoreInModal">-</div>
             </div>
         </div>
     </div>
 </div>
 
-<div class="gap-2 w-100 h-100 d-flex justify-content-center align-items-center">
-    <h2 id="opponentWait">Waiting for an opponent</h2><img src="/assets/loading.svg">
+<div id="opponentWait" class="gap-2 w-100 h-100 d-flex justify-content-center align-items-center">
+    <h2>Waiting for an opponent</h2><img src="/assets/loading.svg">
 </div>
 
 <div script="/game/scripts/3v3.js"></div>

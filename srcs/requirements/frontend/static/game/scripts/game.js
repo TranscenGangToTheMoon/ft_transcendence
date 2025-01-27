@@ -592,8 +592,12 @@ function initSocket(match_code, socketPath, socketMode){
             PongGame.state.playerScore = event.team_b;
             PongGame.state.enemyScore = event.team_a;
         }
-        document.getElementById('playerScore').innerText = '' + PongGame.state.playerScore;
-        document.getElementById('enemyScore').innerText = '' + PongGame.state.enemyScore;
+        const playerScoreDiv = document.getElementById('playerScore');
+        if (playerScoreDiv)
+            playerScoreDiv.innerText = '' + PongGame.state.playerScore;
+        const enemyScoreDiv = document.getElementById('enemyScore');
+        if (enemyScoreDiv)
+            enemyScoreDiv.innerText = '' + PongGame.state.enemyScore;
         PongGame.drawGame();
     })
     gameSocket.on('game_over', async event => {
