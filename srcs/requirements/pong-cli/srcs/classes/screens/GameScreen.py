@@ -92,11 +92,11 @@ class GamePage(Screen):
             self.playground.offset.y + Config.Playground.height + 1
         )
 
-    def action_forfeit(self):
+    async def action_quit(self):
         while (self.countdownIsActive == True):
-            asyncio.sleep(1 / 10)
+            await asyncio.sleep(1 / 10)
         self.dismiss()
-        self.sio.disconnect()
+        await self.sio.disconnect()
 
     def compose(self) -> ComposeResult:
         yield Header(show_clock=True)
