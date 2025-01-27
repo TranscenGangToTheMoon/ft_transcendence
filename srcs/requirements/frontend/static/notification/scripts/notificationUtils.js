@@ -79,6 +79,32 @@ function handleFriendRequestNotification(target, img, notification, toastContain
         event.stopImmediatePropagation();
         event.stopPropagation();
         try {
+            let data = await apiRequest(getAccessToken(), '/' + target.url, target.method);
+            if (target.url.includes('friend_request')){
+                userInformations.notifications['friend_requests'] -= 1;
+                if (userInformations.notifications['friend_requests'])
+                    displayBadges();
+                else
+                    removeBadges('friend_requests');
+                removeFriendRequest(target.url.match(/\/(\d+)\/?$/)[1]);
+                if (target.method === 'POST')
+                    addFriend(data);
+            }
+        }
+        catch(error){
+            console.log(error);
+        }
+        notification.clicked = true;
+        dismissNotification(notification, toastInstance, toastContainer);
+    })
+}
+
+function handleProfilePicNotification(target, img, notification, toastContainer, toastInstance){
+    img.addEventListener('click', async event => {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        event.stopPropagation();
+        try {
             let data = await apiRequest(getAccessToken(), target.url, target.method);
             if (target.url.includes('friend_request')){
                 userInformations.notifications['friend_requests'] -= 1;
@@ -120,16 +146,14 @@ async function addTargets(notification, targets, toastInstance, toastContainer){
             notificationBody.appendChild(button);
         }
         if (target.type === 'api') {
-            handleFriendRequestNotification(target, img, notification, toastContainer, toastInstance);
-            // img.addEventListener('click', event => {
-            //     notification.clicked = true;
-            //     dismissNotification(notification, toastInstance, toastContainer);
-            // });
+            if (target.display_name === 'use')
+                handleProfilePicNotification(target, button, notification, toastContainer, toastInstance);
+            else
+                handleFriendRequestNotification(target, img, notification, toastContainer, toastInstance);
         }
         else if (target.type === 'url'){
             button.addEventListener('click', async () => {
-                console.log(target.url.slice(0, -1));
-                await navigateTo(target.url.slice(0, -1));
+                await navigateTo(target.url);
                 notification.clicked = true;
                 dismissNotification(notification, toastInstance, toastContainer);
             })

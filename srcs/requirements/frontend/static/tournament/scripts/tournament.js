@@ -20,11 +20,6 @@ async function joinTournament(code){
 	console.log('join tournament:', code);
 	try {
 		let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/play/tournament/${code}/`, 'POST');
-		// const tournamentDiv = document.getElementById(`tournamentDiv${tournament.id}`);
-		// console.log(tournament);
-		// if (tournamentDiv)
-		// 	tournamentDiv.innerText = `${tournament.name} (${tournament.n_participants + 1}/${tournament.size})`;
-		// tournament = data;
 		if (data.detail){
 			document.getElementById('searchTournamentContextError').innerText = data.detail;
 			return 0;
@@ -136,8 +131,9 @@ function addParticipant(participant){
 	console.log('participant',participant)
 	participantDiv.id = `tParticipant${participant.id}`;
 	participantDiv.className = 'tournament-participant';
+	console.log('AHHHHHHHHHHHHHHHH', participant);
 	participantDiv.innerHTML = `
-		<img class="profile-pic-medium" src="${participant['profile_picture']}" 
+		<img class="profile-pic-medium" src="${participant['profile_picture'].small}" 
 		onerror="this.onerror=null; this.src='/assets/imageNotFound.png'" 
 		alt="profile pic">
 		<div class='trunc-username'>
