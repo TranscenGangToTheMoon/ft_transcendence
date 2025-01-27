@@ -198,6 +198,8 @@ class LobbyParticipantsSerializer(Serializer):
                 raise ResourceExists(MessagesException.ResourceExists.TEAM)
             elif self.instance.lobby.is_team_full(validated_data['team']):
                 raise PermissionDenied(MessagesException.PermissionDenied.TEAM_IS_FULL)
+        if validated_data and 'is_ready' in validated_data and (instance.team == Teams.SPECTATOR or ('team' in validated_data and validated_data['team'] == Teams.SPECTATOR)):
+            raise PermissionDenied(MessagesException.PermissionDenied.SET_READY_SPECTATOR)
         result = super().update(instance, validated_data)
         send_sse_event(EventCode.LOBBY_UPDATE_PARTICIPANT, result, validated_data)
         if instance.lobby.is_ready:
