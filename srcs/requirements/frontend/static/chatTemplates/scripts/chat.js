@@ -258,7 +258,9 @@ async function createChatUserCard(chatInfo) {
 	var chatUserCardLastMessage = chatUserCard.querySelector('.chatUserCardLastMessage');
 	if (chatInfo.lastMessagesNotRead)
 		chatUserCardLastMessage.classList.add('chatMessageNotRead');
-	chatUserCard.querySelector('.chatUserCardButtonDeleteChat').addEventListener('click',async e => {
+	let chatUserCardDeleteButton = chatUserCard.querySelector('.chatUserCardButtonDeleteChat');
+	chatUserCardDeleteButton.style.display = 'none';
+	chatUserCardDeleteButton.addEventListener('click',async e => {
 		e.preventDefault();
 		try {
 			clearChatError();
@@ -279,6 +281,12 @@ async function createChatUserCard(chatInfo) {
 			if (error.detail === undefined) error.detail = 'Error when attempting to delete chat';
 			displayChatError(error, 'chatsListError');
 		}
+	});
+	chatUserCard.addEventListener('mouseover', e => {
+		chatUserCardDeleteButton.style.display = 'block';
+	});
+	chatUserCard.addEventListener('mouseout', e => {
+		chatUserCardDeleteButton.style.display = 'none';
 	});
 	chatUserCard.addEventListener('click', async e => {
 		if (e.target === chatUserCard.querySelector('.chatUserCardButtonDeleteChat')) return;
@@ -615,7 +623,7 @@ async function openChatTab(chatId)
 			await setChatView();
 			
 		}
-		if (!openChat[chatId] && chatTabs.childElementCount >= 4){
+		if (!openChat[chatId] && chatTabs.childElementCount >= 3){
 			removeFirstInactiveChatTab();
 		}
 	}
