@@ -479,6 +479,7 @@ async function gameStart(event) {
 	event = JSON.parse(event.data);
 	if (!checkEventDuplication(event)) return;
 	console.log('game-start received (tournament)',event);
+	localStorage.setItem('tournament-code', tournament.code);
 	if (fromTournament)
 		userInformations.cancelReturn = true;
 	fromTournament = true;
@@ -507,7 +508,12 @@ async function initTournament(){
     }
 	SSEListeners.set('game-start', gameStart);
 	sse.addEventListener('game-start', gameStart);
-
+	const oldTournamentCode = localStorage.getItem('tournament-code');
+	if (oldTournamentCode){
+		localStorage.removeItem('tournament-code');
+		if (joinTournament(oldTournamentCode))
+			return;
+	}
 	let tournamentCode = window.location.pathname.split('/')[2];
 	try {
 		let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/play/tournament/`);
