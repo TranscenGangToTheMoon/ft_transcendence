@@ -369,29 +369,30 @@ function loadTournament(tournament){
 		addParticipant(participant);
 	}
 	if (tournament.matches != null){
+		document.getElementById('leaveTournament').style.display = 'none';
 		if ((!tournament.matches['quarter-final']|| !tournament.matches['quarter-final'].length)
 			&& tournament.matches['round of 16']
-	){
-		tournament.matches['quarter-final'] = [];
-		for (i = 0; i < tournament.matches['round of 16'].length / 2; ++i)
-			tournament.matches['quarter-final'].push(getMatch(i+1, 'round of 16', tournament));
-	} 
-	if ((!tournament.matches['semi-final']|| !tournament.matches['semi-final'].length)
-		&& tournament.matches['quarter-final']
-	){
-		tournament.matches['semi-final'] = [];
-		for (i = 0; i < tournament.matches['quarter-final'].length / 2; ++i)
-			tournament.matches['semi-final'].push(getMatch(i+1, 'quarter-final', tournament));
-	}
-	if ((!tournament.matches['final'] || !tournament.matches['final'].length)
-			&& tournament.matches['semi-final']
 		){
-			tournament.matches['final'] = [];
-			for (i = 0; i < tournament.matches['semi-final'].length / 2; ++i)
-				tournament.matches['final'].push(getMatch(i+1, 'semi-final', tournament));
+			tournament.matches['quarter-final'] = [];
+			for (i = 0; i < tournament.matches['round of 16'].length / 2; ++i)
+				tournament.matches['quarter-final'].push(getMatch(i+1, 'round of 16', tournament));
+		} 
+		if ((!tournament.matches['semi-final']|| !tournament.matches['semi-final'].length)
+			&& tournament.matches['quarter-final']
+		){
+			tournament.matches['semi-final'] = [];
+			for (i = 0; i < tournament.matches['quarter-final'].length / 2; ++i)
+				tournament.matches['semi-final'].push(getMatch(i+1, 'quarter-final', tournament));
 		}
-		document.getElementById('tournamentView').innerHTML = '';
-		createBracket(tournament);
+		if ((!tournament.matches['final'] || !tournament.matches['final'].length)
+				&& tournament.matches['semi-final']
+			){
+				tournament.matches['final'] = [];
+				for (i = 0; i < tournament.matches['semi-final'].length / 2; ++i)
+					tournament.matches['final'].push(getMatch(i+1, 'semi-final', tournament));
+			}
+			document.getElementById('tournamentView').innerHTML = '';
+			createBracket(tournament);
 	}
 	openGameChatTab({'type': 'tournament', 'code': tournament.code});
 }
