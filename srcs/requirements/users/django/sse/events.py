@@ -144,6 +144,7 @@ class Events:
     lobby_message = Event(Service.LOBBY, EventCode.LOBBY_MESSAGE, '{username}: {message}')
     lobby_update = Event(Service.LOBBY, EventCode.LOBBY_UPDATE)
     lobby_update_participant = Event(Service.LOBBY, EventCode.LOBBY_UPDATE_PARTICIPANT)
+    lobby_spectate_game = Event(Service.LOBBY, EventCode.LOBBY_SPECTATE_GAME)
     lobby_destroy = Event(Service.LOBBY, EventCode.LOBBY_DESTROY, 'The lobby has been destroyed.')
 
     tournament_join = Event(Service.TOURNAMENT, EventCode.TOURNAMENT_JOIN, '{username} have joined the tournament.')
