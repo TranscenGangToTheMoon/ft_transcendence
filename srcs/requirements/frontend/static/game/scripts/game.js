@@ -1,3 +1,8 @@
+if (typeof fromLobby === 'undefined')
+    var fromLobby;
+if (typeof fromTournament === 'undefined')
+    var fromTournament;
+
 (function PongGame() {
 
     const config = {
@@ -820,10 +825,17 @@ function reconnect(){
     if (event){
         event = JSON.parse(event);
         let gameMode = window.location.pathname.split('/')[2]
-        if (event.data.game_mode === gameMode){
+        console.log(event.data.game_mode, gameMode);
+        if (event.data.game_mode === gameMode || 
+            (event.data.game_mode === 'custom_game' && gameMode === '1v1') ||
+            (event.data.game_mode === 'custom_game' && gameMode === '3v3')){
             initData(event.data, event.target[0].url, event.target[0].type);
             if (gameMode === 'tournament')
                 fromTournament = true;
+            else if (event.data.game_mode === 'custom_game'){
+                
+                fromLobby = true;
+            }
             return 1;
         }
     }
@@ -854,7 +866,8 @@ async function initGame(){
             // await initData(...tournamentData);
         }
         else if (window.location.pathname === '/game/1v1')
-            await initData(...(userInformations.lobbyData));
+            return;
+            // await initData(...(userInformations.lobbyData));
         else {
             if (SSEListeners.has('game-start')){
                 sse.removeEventListener('game-start', SSEListeners.get('game-start'));

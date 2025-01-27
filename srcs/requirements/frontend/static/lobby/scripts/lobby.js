@@ -533,10 +533,7 @@ async function lobbyGameStart(event){
     event = JSON.parse(event.data);
     console.log(event);
 
-    // localStorage.setItem('game-event', JSON.stringify(event));
-    // localStorage.setItem('game-target-path', event.target[0].url);
-    // localStorage.setItem('game-target-type', event.target[0].type);
-
+    localStorage.setItem('game-event', JSON.stringify(event));
     if (matchType === '3v3'){
         await navigateTo('/game/3v3', true, true);
         fromLobby = true;
