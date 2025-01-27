@@ -68,25 +68,29 @@ class FinishMatchSerializer(serializers.Serializer):
     def create(self, validated_data):
         for team_name, team_users in validated_data['teams'].items():
             for user_json in team_users['players']:
+
                 try:
                     user = get_user(id=user_json['id'])
-                except APIException:
+                    user.set_game_playing()
+                    assert validated_data['game_mode'] != GameMode.CUSTOM_GAME
+                except (APIException, AssertionError):
                     continue
-                user.set_game_playing()
-                if validated_data['game_mode'] != GameMode.CUSTOM_GAME:
-                    if validated_data['game_mode'] == GameMode.CLASH and 'own_goals' in user_json:
-                        own_goals = validated_data['own_goals']
-                    else:
-                        own_goals = None
-                    stat = user.stats.get(game_mode=validated_data['game_mode'])
-                    stat.log(user_json['score'], team_name == validated_data['winner'], own_goals)
-                    unlock_winning_streak_pp(user, stat)
-                    if validated_data['game_mode'] in (GameMode.DUEL, GameMode.CLASH):
-                        unlock_duel_clash_pp(user, stat, validated_data['game_mode'])
-                    if validated_data['game_mode'] == GameMode.RANKED and 'trophies' in user_json:
-                        RankedStats.log(user, user_json['trophies'])
-                    unlock_game_played_pp(user)
-                    unlock_scorer_pp(user)
+
+                if validated_data['game_mode'] == GameMode.CLASH and 'own_goals' in user_json:
+                    own_goals = validated_data['own_goals']
+                else:
+                    own_goals = None
+
+                stat = user.stats.get(game_mode=validated_data['game_mode'])
+                stat.log(user_json['score'], team_name == validated_data['winner'], own_goals)
+                if validated_data['game_mode'] == GameMode.RANKED and 'trophies' in user_json:
+                    RankedStats.log(user, user_json['trophies'])
+
+                if validated_data['game_mode'] in (GameMode.DUEL, GameMode.CLASH):
+                    unlock_duel_clash_pp(user, stat, validated_data['game_mode'])
+                unlock_winning_streak_pp(user, stat)
+                unlock_game_played_pp(user)
+                unlock_scorer_pp(user)
 
         return validated_data
 
