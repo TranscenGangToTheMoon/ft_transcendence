@@ -4,6 +4,16 @@ from rich.console   import Console
 class Config:
     configJson = {}
     frameRate: int = 60
+    errorCodes = {
+        "not_authenticated": "Missing token",
+        "incorrect_password": "Password incorrect",
+        "user_not_found": "Unknown token",
+        "authentication_failed": "Authentication failed",
+        "sse_connection_required": "SSE connexion required",
+        "password_confirmation_required": "Password confirmation required",
+        "token_not_valid": "Invalid token",
+        None: "Unknown error code"
+    }
 
     @classmethod
     def load(cls, configJson = None):
