@@ -3,7 +3,7 @@ from lib_transcendence.game import GameMode
 from rest_framework.exceptions import APIException
 from lib_transcendence.serializer import Serializer
 from profile_pictures.unlock import unlock_tournament_pp, unlock_duel_clash_pp, unlock_game_played_pp, \
-    unlock_score_pp, unlock_winning_streak_pp
+    unlock_scorer_pp, unlock_winning_streak_pp
 
 from stats.models import GameModeStats, RankedStats
 from users.auth import get_user
@@ -86,7 +86,7 @@ class FinishMatchSerializer(serializers.Serializer):
                     if validated_data['game_mode'] == GameMode.RANKED and 'trophies' in user_json:
                         RankedStats.log(user, user_json['trophies'])
                     unlock_game_played_pp(user)
-                    unlock_score_pp(user)
+                    unlock_scorer_pp(user)
 
         return validated_data
 
