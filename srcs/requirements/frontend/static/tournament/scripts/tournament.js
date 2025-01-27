@@ -357,7 +357,6 @@ function getMatch(i, lastRound, tournament){
 }
 
 function loadTournament(tournament){
-	addTournamentSSEListeners();
 	localStorage.setItem('lobbyCode', '/tournament/' + tournament.code);
 	if (window.location.pathname === '/game/tournament') return;
 	document.getElementById('tournamentView').innerHTML = '';
@@ -365,23 +364,22 @@ function loadTournament(tournament){
 		let participant = tournament.participants[i];
 		addParticipant(participant);
 	}
-	openGameChatTab({'type': 'tournament', 'code': tournament.code});
 	if (tournament.matches != null){
 		if ((!tournament.matches['quarter-final']|| !tournament.matches['quarter-final'].length)
 			&& tournament.matches['round of 16']
-		){
-			tournament.matches['quarter-final'] = [];
-			for (i = 0; i < tournament.matches['round of 16'].length / 2; ++i)
-				tournament.matches['quarter-final'].push(getMatch(i+1, 'round of 16', tournament));
-		} 
-		if ((!tournament.matches['semi-final']|| !tournament.matches['semi-final'].length)
-			&& tournament.matches['quarter-final']
-		){
-			tournament.matches['semi-final'] = [];
-			for (i = 0; i < tournament.matches['quarter-final'].length / 2; ++i)
-				tournament.matches['semi-final'].push(getMatch(i+1, 'quarter-final', tournament));
-		}
-		if ((!tournament.matches['final'] || !tournament.matches['final'].length)
+	){
+		tournament.matches['quarter-final'] = [];
+		for (i = 0; i < tournament.matches['round of 16'].length / 2; ++i)
+			tournament.matches['quarter-final'].push(getMatch(i+1, 'round of 16', tournament));
+	} 
+	if ((!tournament.matches['semi-final']|| !tournament.matches['semi-final'].length)
+		&& tournament.matches['quarter-final']
+	){
+		tournament.matches['semi-final'] = [];
+		for (i = 0; i < tournament.matches['quarter-final'].length / 2; ++i)
+			tournament.matches['semi-final'].push(getMatch(i+1, 'quarter-final', tournament));
+	}
+	if ((!tournament.matches['final'] || !tournament.matches['final'].length)
 			&& tournament.matches['semi-final']
 		){
 			tournament.matches['final'] = [];
@@ -391,6 +389,7 @@ function loadTournament(tournament){
 		document.getElementById('tournamentView').innerHTML = '';
 		createBracket(tournament);
 	}
+	openGameChatTab({'type': 'tournament', 'code': tournament.code});
 }
 
 document.getElementById('searchTournamentForm').addEventListener('submit', async (e) => {
@@ -484,6 +483,7 @@ async function gameStart(event) {
 }
 
 async function initTournament(){
+	addTournamentSSEListeners();
 	await loadScript('/tournament/scripts/createBracket.js');
 	document.getElementById('chatsListView').style.display = 'block';
 	document.getElementById('leaveTournament').style.display = 'none';
