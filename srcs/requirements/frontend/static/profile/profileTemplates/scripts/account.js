@@ -21,12 +21,15 @@ async function deleteAccount(password) {
         'password' : password
     })
         .then(async data => {
-            if (data?.password){
+            if (data?.password)
                 document.getElementById('pContextError').innerText = data.password;
-            }
+            else if (data?.detail)
+                document.getElementById('pContextError').innerText = data.detail;
             else if (!data){
-                deleteModal.hide();
+                console.log('je close');
                 sse.close();
+                deleteModal.hide();
+                sse = undefined;
                 removeTokens();
                 closeChatView();
                 await generateToken();
@@ -35,7 +38,7 @@ async function deleteAccount(password) {
                 await navigateTo('/');
                 setTimeout(()=> {
                     displayMainAlert('Account deleted', 'Your account has been successfully deleted. You have been redirected to homepage.');
-                }, 500);
+                }, 300);
             }
         })
         .catch(error => {
