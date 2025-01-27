@@ -5,24 +5,26 @@ function historyBracket(matches, roundInsideDiv){
         const card = document.createElement('div');
         card.className = 'card';
         
-        // let score = match.winner === match.user_1?.id ? match.score_winner : match.score_looser;
-        // if (score === null)
-        //     score = '';
+        let profilePicPath = match.winner?.profile_picture?.small;
         const player1Div = document.createElement('div');
         player1Div.className = `card-body border-bottom winner`;
         player1Div.innerHTML = `
             <div class="d-flex justify-content-between">
-                ${match.winner? '<img class="tournament-participant-pp" src="/assets/imageNotFound.png"></img>' : ''}
+                ${match.winner? '<img class="tournament-participant-pp" src="'+ profilePicPath
+                    +'" onerror="src=`/assets/imageNotFound.png`"></img>' : ''}
                 <span>${match.winner?.username ?? 'to be defined'}</span>
             </div>
         `;
 
         const player2Div = document.createElement('div');
+        profilePicPath = match.looser?.profile_picture?.small;
+        console.log('DJEWOIDJWEOIJDOIWEJDJ c CEIOJK WEOI', profilePicPath);
+
         player2Div.className = `card-body`;
         player2Div.innerHTML = `
             <div class="d-flex justify-content-between">
-            ${match.user_2? '<img class="tournament-participant-pp" src="/assets/imageNotFound.png"></img>' : ''}
-                ${match.looser? '<img class="tournament-participant-pp" src="/assets/imageNotFound.png"></img>' : ''}
+                ${match.looser? '<img class="tournament-participant-pp" src="'+ profilePicPath
+                    +'" onerror="src=`/assets/imageNotFound.png`"></img>' : ''}
                 <span>${match.looser?.username ?? 'to be defined'}</span>
             </div>
         `;
@@ -74,9 +76,11 @@ function createBracket(data, history=false) {
                 const player1Div = document.createElement('div');
                 player1Div.className = `card-body border-bottom ${match.winner !== undefined
                                         && match.winner === match.user_1?.id ? 'winner' : ''}`;
+                let profilePicPath = match.user_1.profile_picture?.small;
                 player1Div.innerHTML = `
                     <div class="d-flex justify-content-between">
-                        ${match.user_1? '<img class="tournament-participant-pp" src="/assets/imageNotFound.png"></img>' : ''}
+                        ${match.user_1? '<img class="tournament-participant-pp" src="'+ profilePicPath
+                            +'" onerror="src=`/assets/imageNotFound.png`"></img>' : ''}
                         <span>${match.user_1?.username ?? 'to be defined'}</span>
                         <span class="fw-bold">${score}</span>
                     </div>
@@ -88,9 +92,11 @@ function createBracket(data, history=false) {
                 const player2Div = document.createElement('div');
                 player2Div.className = `card-body border-bottom ${match.winner !== undefined
                                         && match.winner === match.user_2?.id ? 'winner' : ''}`;
+                profilePicPath = match.user_2.profile_picture?.small
                 player2Div.innerHTML = `
                     <div class="d-flex justify-content-between">
-                    ${match.user_2? '<img class="tournament-participant-pp" src="/assets/imageNotFound.png"></img>' : ''}
+                    ${match.user_2? '<img class="tournament-participant-pp" src="' + profilePicPath
+                        +'" onerror="src=`/assets/imageNotFound.png`"></img>' : ''}
                         <span>${match.user_2?.username ?? 'to be defined'}</span>
                         <span class="fw-bold">${score}</span>
                     </div>
