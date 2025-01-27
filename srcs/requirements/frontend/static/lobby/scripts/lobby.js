@@ -644,6 +644,7 @@ async function lobbyInit() {
                 document.getElementById('gameType').innerText = gameMode;
                 document.getElementById('gameId').innerText = lobby.code;
                 await fillPlayerList();
+                openGameChatTab({type: 'lobby', 'code': lobby.code});
                 localStorage.setItem('lobbyCode', '/lobby/' + code);
                 window.lobbyCode = '/lobby/' + lobby.code;
             }
