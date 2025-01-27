@@ -1,3 +1,8 @@
+if (typeof fromLobby === 'undefined')
+    var fromLobby;
+if (typeof fromTournament === 'undefined')
+    var fromTournament;
+
 (function PongGame() {
 
     const config = {
@@ -592,8 +597,12 @@ function initSocket(match_code, socketPath, socketMode){
             PongGame.state.playerScore = event.team_b;
             PongGame.state.enemyScore = event.team_a;
         }
-        document.getElementById('playerScore').innerText = '' + PongGame.state.playerScore;
-        document.getElementById('enemyScore').innerText = '' + PongGame.state.enemyScore;
+        const playerScoreDiv = document.getElementById('playerScore');
+        if (playerScoreDiv)
+            playerScoreDiv.innerText = '' + PongGame.state.playerScore;
+        const enemyScoreDiv = document.getElementById('enemyScore');
+        if (enemyScoreDiv)
+            enemyScoreDiv.innerText = '' + PongGame.state.enemyScore;
         PongGame.drawGame();
     })
     gameSocket.on('game_over', async event => {
@@ -720,7 +729,7 @@ document.getElementById('confirmModal').addEventListener('hidden.bs.modal', () =
 
 function checkGameAuthorization(){
     console.log(window.location.pathname);
-    // if (reconnect()) return;
+    if (reconnect()) return;
     if (userInformations.is_guest && window.location.pathname === '/game/ranked')
         throw `${window.location.pathname}`;
     if (window.location.pathname === '/game/tournament' && typeof tournamentData === 'undefined')
@@ -816,10 +825,19 @@ function reconnect(){
     if (event){
         event = JSON.parse(event);
         let gameMode = window.location.pathname.split('/')[2]
-        if (event.data.game_mode === gameMode){
+        console.log(event.data.game_mode, gameMode);
+        if (event.data.game_mode === gameMode || 
+            (event.data.game_mode === 'custom_game' && gameMode === '1v1') ||
+            (event.data.game_mode === 'custom_game' && gameMode === '3v3')){
             initData(event.data, event.target[0].url, event.target[0].type);
-            if (gameMode === 'tournament')
+            if (gameMode === 'tournament'){
+                if (!fromTournament)
+                    localStorage.setItem('tournament-code-reconnect', localStorage.getItem('tournament-code'));
                 fromTournament = true;
+            }
+            else if (event.data.game_mode === 'custom_game'){
+                fromLobby = true;
+            }
             return 1;
         }
     }
@@ -847,10 +865,11 @@ async function initGame(){
                 SSEListeners.set('tournament-finish', tournamentFinished);
                 sse.addEventListener('tournament-finish', tournamentFinished);
             }
-            await initData(...tournamentData);
+            // await initData(...tournamentData);
         }
         else if (window.location.pathname === '/game/1v1')
-            await initData(...(userInformations.lobbyData));
+            return;
+            // await initData(...(userInformations.lobbyData));
         else {
             if (SSEListeners.has('game-start')){
                 sse.removeEventListener('game-start', SSEListeners.get('game-start'));

@@ -1,5 +1,4 @@
-document.getElementById('logOut').addEventListener('click', async event => {
-    event.preventDefault();
+async function logOut(){
     sse.close();
     emptyNotificationQueue();
     removeTokens();
@@ -10,6 +9,11 @@ document.getElementById('logOut').addEventListener('click', async event => {
     clearFriendRequests();
     await closeGameConnection(window.location.pathname);
     handleRoute();
+}
+
+document.getElementById('logOut').addEventListener('click', async event => {
+    event.preventDefault();
+    await logOut();
 })
 
 function clearFriendRequests(){

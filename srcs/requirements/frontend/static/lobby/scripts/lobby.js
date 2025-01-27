@@ -142,6 +142,7 @@ async function fillBench(player, benchDiv){
     benchDiv.querySelector('#benchPlayerList').appendChild(playerDiv);
     await loadContent('/lobby/player.html', undefined, false, playerDiv);
     playerDiv.querySelector('.playerUsername').innerText = player.username;
+    playerDiv.querySelector('img').src = player.profile_picture.small;
     playerDiv.querySelector('.playerIsReady').style.display = 'none';
     playerDiv.querySelector('.playerId').innerText = player.id;
 }
@@ -155,14 +156,10 @@ async function fillTeamDisplay(player, teamSelectorDiv){
         playerDiv.draggable = true;
     }
     playerDiv.id = `teamPlayer${player.id}`;
-    // teamDisplayDiv.appendChild(playerDiv);
-    // let placeholders = teamDisplayDiv.querySelectorAll('.no-player');
-    // teamDisplayDiv.insertBefore(playerDiv, placeholders[0]);
-    // if (placeholders.length)
-    //     placeholders[0].remove();
     teamDisplayDiv.appendChild(playerDiv);
     await loadContent('/lobby/player.html', undefined, false, playerDiv);
     playerDiv.querySelector('.playerUsername').innerText = player.username;
+    playerDiv.querySelector('img').src = player.profile_picture.small;
     playerDiv.querySelector('.playerIsReady').style.display = 'none';
     playerDiv.querySelector('.playerId').innerText = player.id;
 
@@ -267,7 +264,7 @@ function removeIds(playerListDiv){
 if (typeof clickedUserDiv === 'undefined')
     var clickedUserDiv;
 
-function addContextMenus(){ 
+function addContextMenus(){
     const playerDivs = document.querySelectorAll('.player');
     const banButton = document.getElementById('cBan');
     if (!creator)
@@ -277,7 +274,8 @@ function addContextMenus(){
             banButton.classList.remove('disabled');
     }
     for (let playerDiv of playerDivs){
-        if (playerDiv.querySelector('.playerUsername').innerText === userInformations.username)
+        if (playerDiv.querySelector('.playerUsername').innerText === userInformations.username || 
+            playerDiv.querySelector('.playerUsername').innerText === 'Add')
             continue;
         playerDiv.addEventListener('contextmenu', function(e) {
             e.preventDefault();
@@ -370,9 +368,13 @@ async function updateOwnTeam(player, teamDisplayDiv, teamSelectorDiv, benchDiv, 
     teamDisplayDiv.appendChild(playerDiv);
     await loadContent('/lobby/player.html', undefined, false, playerDiv);
     playerDiv.querySelector('.playerUsername').innerText = player.username;
+    playerDiv.querySelector('img').src = player.profile_picture.small;
+    playerDiv.querySelector('img').src = player.profile_picture.small;
     playerDiv.querySelector('.playerId').innerText = player.id;
-    playerDiv.querySelector('.playerTrophies').innerText = player.trophies;
-    playerDiv.querySelector('.playerIsReady').innerText = player.is_ready ? 'Ready' : 'Not ready';
+    const playerIsReadyButton =  playerDiv.querySelector('.playerIsReady');
+    playerIsReadyButton.innerText = player.is_ready ? 'Ready' : 'Not ready';
+    if (player.id !== userInformations.id)
+        playerIsReadyButton.classList.add('disabled');
 }
 
 async function fillPlayerList(noTeam=false){
@@ -381,7 +383,7 @@ async function fillPlayerList(noTeam=false){
     tempDiv.style.display = 'none';
     tempDiv.innerHTML = lobbyOptionsDiv.innerHTML;
     removeIds(lobbyOptionsDiv);
-    
+
     let dropzones = tempDiv.querySelectorAll('.dropzone');
     for (let dropzone of dropzones)
         dropzone.innerHTML = '';
@@ -397,7 +399,7 @@ async function fillPlayerList(noTeam=false){
     if (!noTeam)
         await completeTeams(tempDiv);
     lobbyOptionsDiv.innerHTML = tempDiv.innerHTML;
-    
+
     document.getElementById('settingsButton').addEventListener('click', async function() {
         if (!creator || gameMode != 'Custom Game') return;
         try {
@@ -531,9 +533,7 @@ async function lobbyGameStart(event){
     event = JSON.parse(event.data);
     console.log(event);
 
-    // localStorage.setItem('game-event', JSON.stringify(event));
-    // localStorage.setItem('game-target-path', event.target[0].url);
-    // localStorage.setItem('game-target-type', event.target[0].type);
+    localStorage.setItem('game-event', JSON.stringify(event));
     if (matchType === '3v3'){
         await navigateTo('/game/3v3', true, true);
         fromLobby = true;
@@ -543,6 +543,16 @@ async function lobbyGameStart(event){
         await navigateTo('/game/1v1', true, true);
         fromLobby = true;
         userInformations.lobbyData = [event.data, event.target[0].url, event.target[0].type];
+    }
+}
+
+async function spectateLobbyGame(event){
+    event = JSON.parse(event.data);
+    console.log(event);
+
+    if (matchType === '1v1') { // Spectate mode is not available for 3v3
+        await navigateTo('/spectate/' + event.data.code, true, true);
+        fromLobby = true;
     }
 }
 
@@ -580,6 +590,11 @@ function initLobbySSEListeners(){
     if(!SSEListeners.has('lobby-message')){
         SSEListeners.set('lobby-message', displayGameChatMessage);
         sse.addEventListener('lobby-message', displayGameChatMessage);
+    }
+    
+    if(!SSEListeners.has('lobby-spectate-game')){
+        SSEListeners.set('lobby-spectate-game', spectateLobbyGame);
+        sse.addEventListener('lobby-spectate-game', spectateLobbyGame);
     }
 
     if (SSEListeners.has('game-start')){
@@ -644,6 +659,7 @@ async function lobbyInit() {
                 document.getElementById('gameType').innerText = gameMode;
                 document.getElementById('gameId').innerText = lobby.code;
                 await fillPlayerList();
+                openGameChatTab({type: 'lobby', 'code': lobby.code});
                 localStorage.setItem('lobbyCode', '/lobby/' + code);
                 window.lobbyCode = '/lobby/' + lobby.code;
             }

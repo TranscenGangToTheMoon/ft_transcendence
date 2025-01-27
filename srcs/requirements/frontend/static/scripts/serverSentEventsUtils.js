@@ -130,9 +130,11 @@ function addChatSSEListeners(){
 				lastClick = undefined;
 				buttonCollapseChat.click();
 			}
-            chatTab = document.getElementById(`chatTab${openChat[chatId].target}Link`);
-            if (chatTab)
+
+            if (openChat[chatId]){
+                chatTab = document.getElementById(`chatTab${openChat[chatId].target}Link`);
                 chatTab.click();
+            }
             else
                 await openChatTab(chatId);
         });
@@ -147,6 +149,14 @@ function addSSEListeners(){
         event = JSON.parse(event.data);
         console.log('profile pic unlocked: ', event);
         displayNotification(event.data.small, 'achievement', event.message, undefined, [event.target[0]]);
+    })
+
+    sse.addEventListener('delete-user', async event => {
+        event = JSON.parse(event.data);
+        await logOut();
+        setTimeout(async ()=>{
+            displayMainAlert('Error', 'Your account has been deleted on another client. Switching to guest account.')
+        }, 500);
     })
     addFriendSSEListeners();
     addInviteSSEListeners();

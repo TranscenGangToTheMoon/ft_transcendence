@@ -17,6 +17,7 @@ if (typeof emptyMatch === 'undefined'){
 }
 
 async function joinTournament(code){
+	console.log('join tournament:', code);
 	try {
 		let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/play/tournament/${code}/`, 'POST');
 		if (data.detail){
@@ -185,20 +186,20 @@ function displayCountdown(){
 }
 
 function tournamentJoined(event){
-	displayGameChatMessage(event);
 	event = JSON.parse(event.data);
+	displayGameChatMessage(event, false);
 	addParticipant(event.data);
 }
 
 function tournamentLeaved(event){
-	displayGameChatMessage(event);
 	event = JSON.parse(event.data);
+	displayGameChatMessage(event, false);
 	removeParticipant(event.data.id)
 }
 
 async function tournamentBanned(event){
-	displayGameChatMessage(event);
 	event = JSON.parse(event.data);
+	displayGameChatMessage(event, false);
 	console.log(event);
 	await navigateTo('/');
 	displayMainAlert('Banned', event.message);
@@ -238,6 +239,7 @@ function tournamentStartCancel(){
 }
 
 function tournamentStart(event){
+	displayGameChatMessage({'message':":Tournament begins"}, false);
 	displayCountdown();
 	event = JSON.parse(event.data);
 	console.log('tournament start:', event);
@@ -266,7 +268,9 @@ async function tournamentMatchFinished(event){
 	console.log('received match finished event');
 	console.log(event);
 	tournament = event.data;
-	await displayNotification(undefined, 'Match finished', event.message);
+	console.log('tournanananananament:', event);
+	displayGameChatMessage(event, false);
+	//await displayNotification(undefined, 'Match finished', event.message);
 	setBanOption();
 	loadTournament(tournament);
 }
@@ -357,7 +361,6 @@ function getMatch(i, lastRound, tournament){
 }
 
 function loadTournament(tournament){
-	addTournamentSSEListeners();
 	localStorage.setItem('lobbyCode', '/tournament/' + tournament.code);
 	if (window.location.pathname === '/game/tournament') return;
 	document.getElementById('tournamentView').innerHTML = '';
@@ -365,8 +368,8 @@ function loadTournament(tournament){
 		let participant = tournament.participants[i];
 		addParticipant(participant);
 	}
-	openGameChatTab({'type': 'tournament', 'code': tournament.code});
 	if (tournament.matches != null){
+		document.getElementById('leaveTournament').style.display = 'none';
 		if ((!tournament.matches['quarter-final']|| !tournament.matches['quarter-final'].length)
 			&& tournament.matches['round of 16']
 		){
@@ -382,15 +385,16 @@ function loadTournament(tournament){
 				tournament.matches['semi-final'].push(getMatch(i+1, 'quarter-final', tournament));
 		}
 		if ((!tournament.matches['final'] || !tournament.matches['final'].length)
-			&& tournament.matches['semi-final']
-		){
-			tournament.matches['final'] = [];
-			for (i = 0; i < tournament.matches['semi-final'].length / 2; ++i)
-				tournament.matches['final'].push(getMatch(i+1, 'semi-final', tournament));
-		}
-		document.getElementById('tournamentView').innerHTML = '';
-		createBracket(tournament);
+				&& tournament.matches['semi-final']
+			){
+				tournament.matches['final'] = [];
+				for (i = 0; i < tournament.matches['semi-final'].length / 2; ++i)
+					tournament.matches['final'].push(getMatch(i+1, 'semi-final', tournament));
+			}
+			document.getElementById('tournamentView').innerHTML = '';
+			createBracket(tournament);
 	}
+	openGameChatTab({'type': 'tournament', 'code': tournament.code});
 }
 
 document.getElementById('searchTournamentForm').addEventListener('submit', async (e) => {
@@ -475,15 +479,17 @@ async function gameStart(event) {
 	event = JSON.parse(event.data);
 	if (!checkEventDuplication(event)) return;
 	console.log('game-start received (tournament)',event);
+	localStorage.setItem('tournament-code', tournament.code);
 	if (fromTournament)
 		userInformations.cancelReturn = true;
 	fromTournament = true;
 	tournamentData = [event.data, event.target[0].url, event.target[0].type];
-	// localStorage.setItem('game-event', JSON.stringify(event));
+	localStorage.setItem('game-event', JSON.stringify(event));
 	await navigateTo('/game/tournament', true, true);
 }
 
 async function initTournament(){
+	addTournamentSSEListeners();
 	await loadScript('/tournament/scripts/createBracket.js');
 	document.getElementById('chatsListView').style.display = 'block';
 	document.getElementById('leaveTournament').style.display = 'none';
@@ -502,7 +508,13 @@ async function initTournament(){
     }
 	SSEListeners.set('game-start', gameStart);
 	sse.addEventListener('game-start', gameStart);
-
+	const oldTournamentCode = localStorage.getItem('tournament-code-reconnect');
+	if (oldTournamentCode){
+		localStorage.removeItem('tournament-code');
+		localStorage.removeItem('tournament-code-reconnect');
+		if (joinTournament(oldTournamentCode))
+			return;
+	}
 	let tournamentCode = window.location.pathname.split('/')[2];
 	try {
 		let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/play/tournament/`);
