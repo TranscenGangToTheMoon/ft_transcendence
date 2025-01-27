@@ -66,14 +66,14 @@ class FinishMatchSerializer(serializers.Serializer):
         return GameMode.validate(value)
 
     def create(self, validated_data):
-        if validated_data['game_mode'] != GameMode.CUSTOM_GAME:
-            for team_name, team_users in validated_data['teams'].items():
-                for user_json in team_users['players']:
-                    try:
-                        user = get_user(id=user_json['id'])
-                    except APIException:
-                        continue
-                    user.set_game_playing()
+        for team_name, team_users in validated_data['teams'].items():
+            for user_json in team_users['players']:
+                try:
+                    user = get_user(id=user_json['id'])
+                except APIException:
+                    continue
+                user.set_game_playing()
+                if validated_data['game_mode'] != GameMode.CUSTOM_GAME:
                     if validated_data['game_mode'] == GameMode.CLASH and 'own_goals' in user_json:
                         own_goals = validated_data['own_goals']
                     else:
