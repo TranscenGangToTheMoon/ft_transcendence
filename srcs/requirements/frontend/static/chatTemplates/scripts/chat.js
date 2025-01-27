@@ -242,7 +242,7 @@ async function createChatUserCard(chatInfo) {
 	if (!chatInfo) return;
 	let chatUserCard = document.createElement('div');
 	chatUserCard.id = 'chatListElement' + chatInfo.target;
-	chatUserCard.classList.add('chatUserCard');
+	chatUserCard.className = "chatUserCard bg-light bg-gradient d-flex position-relative p-1 border rounded mb-1 gap-2";
 	chatUserCard.style.display = 'flex';
 	chatsList.appendChild(chatUserCard);
 
@@ -580,8 +580,10 @@ async function setChatView()
 				lastClick = undefined;
 				lastTab.click();
 			}
+			buttonCollapseChat.innerText = '▼'
 		}
 		else {
+			buttonCollapseChat.innerText = '▲'
 			await disconnect();
 		}
 	});
@@ -659,7 +661,7 @@ async function displayGameInviteInChat(inviteInfo) {
 	chatInviteGameBox = document.createElement('div');
 	messagesDiv.appendChild(chatInviteGameBox);
 	chatInviteGameBox.id = 'chatInviteGameBox' + inviteInfo.user;
-	chatInviteGameBox.classList.add('chatInviteGameBox');
+	chatInviteGameBox.className = 'chatInviteGameBox bg-info bg-gradient border border-dark rounded mb-1 p-1';
 	await loadContent('/chatTemplates/chatInviteGameBox.html', 'chatInviteGameBox' + inviteInfo.user);
 	chatInviteGameBox.querySelector('.chatInviteGameUsername').innerText = chatInfo.target;
 	chatInviteGameBox.querySelector('.chatInviteGameType').innerText = inviteInfo.game_mode;

@@ -130,9 +130,11 @@ function addChatSSEListeners(){
 				lastClick = undefined;
 				buttonCollapseChat.click();
 			}
-            chatTab = document.getElementById(`chatTab${openChat[chatId].target}Link`);
-            if (chatTab)
+
+            if (openChat[chatId]){
+                chatTab = document.getElementById(`chatTab${openChat[chatId].target}Link`);
                 chatTab.click();
+            }
             else
                 await openChatTab(chatId);
         });
