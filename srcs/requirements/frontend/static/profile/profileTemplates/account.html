@@ -14,6 +14,9 @@
             <div class="option" data-value="everyone">Everyone</div>
         </div>
     </div>
+    <div id="changeProfilePic">
+        <button class="btn btn-secondary">change profile picture</button>
+    </div>
     <div id="pNickname">
         Nickname
         <form id="pChangeNickname" class="d-flex">
@@ -81,4 +84,20 @@
         </div>
     </div>
 </div>
+<div class="modal fade" id="pChangeProfilePictureModal" tabindex="-1" aria-labelledby="pChangeProfilePictureModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="pChangeProfilePictureModalLabel">Change profile picture</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="d-flex w-100 flex-wrap" id="profilePicContainer">
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div script="/profile/profileTemplates/scripts/account.js"></div>
