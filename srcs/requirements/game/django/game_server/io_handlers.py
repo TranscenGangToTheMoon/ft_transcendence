@@ -1,3 +1,4 @@
+import socketio
 from asgiref.sync import sync_to_async
 from lib_transcendence.auth import auth_verify
 from lib_transcendence.game import FinishReason
@@ -13,14 +14,14 @@ async def connect(sid, environ, auth):
     from game_server.server import Server
     token = auth.get('token')
     if token is None:
-        raise ConnectionRefusedError(MessagesException.Authentication.NOT_AUTHENTICATED)
+        raise socketio.exceptions.ConnectionRefusedError(MessagesException.Authentication.NOT_AUTHENTICATED)
     token = 'Bearer ' + token
     try:
         user_data = auth_verify(token)
     except APIException as e:
-        raise ConnectionRefusedError(e.detail)
+        raise socketio.exceptions.ConnectionRefusedError(e.detail)
     if user_data is None:
-        raise ConnectionRefusedError(MessagesException.Authentication.NOT_AUTHENTICATED)
+        raise socketio.exceptions.ConnectionRefusedError(MessagesException.Authentication.NOT_AUTHENTICATED)
     id = user_data['id']
     print(f'User {id} connecting...{sid}', flush=True)
     try:
@@ -30,7 +31,7 @@ async def connect(sid, environ, auth):
         match_code = auth.get('match_code')
         if match_code is None:
             print('match code is none', flush=True)
-            raise ConnectionRefusedError(e.detail)
+            raise socketio.exceptions.ConnectionRefusedError(e.detail)
         try:
             game = Server.get_game_from_code(match_code)
         except Server.NotFound:
@@ -43,17 +44,17 @@ async def connect(sid, environ, auth):
         else:
             return False
     except APIException:
-        raise ConnectionRefusedError(MessagesException.ServiceUnavailable.game)
+        raise socketio.exceptions.ConnectionRefusedError(MessagesException.ServiceUnavailable.game)
     if match is None:
-        raise ConnectionRefusedError(MessagesException.ServiceUnavailable.game)
+        raise socketio.exceptions.ConnectionRefusedError(MessagesException.ServiceUnavailable.game)
     try:
         game_data = request_game(endpoints.Game.fmatch_user.format(user_id=id, match_id=match['id']), 'GET')
     except NotFound as e:
-        raise ConnectionRefusedError(e.detail)
+        raise socketio.exceptions.ConnectionRefusedError(e.detail)
     except APIException:
-        raise ConnectionRefusedError(MessagesException.ServiceUnavailable.game)
+        raise socketio.exceptions.ConnectionRefusedError(MessagesException.ServiceUnavailable.game)
     if game_data is None:
-        raise ConnectionRefusedError(MessagesException.ServiceUnavailable.game)
+        raise socketio.exceptions.ConnectionRefusedError(MessagesException.ServiceUnavailable.game)
     game_id = game_data['id']
     if not Server.does_game_exist(game_id):
         match = Match(game_data)

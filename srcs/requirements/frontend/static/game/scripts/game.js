@@ -541,7 +541,11 @@ function initSocket(match_code, socketPath, socketMode){
         window.PongGame.resizeCanvas();
     });
     gameSocket.on('connect_error', (error)=> {
-        // console.log('error', error);
+        console.log('connect_error', error);
+        navigateTo('/');
+        setTimeout(() => {
+            displayMainAlert('Error', error.message);
+        }, 500);
     })
     gameSocket.on('disconnect', async () => {
         gameSocket.close();
