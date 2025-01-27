@@ -156,13 +156,13 @@ async def disconnect(sid):
                 no need to finish the game
                 '''
     try:
-
         client = Server._clients[sid]
-        print(f"clientferiof{client.game.match.game_mode}", flush=True)
         if client.game.match.game_mode != 'duel' and client.game.match.game_mode != 'ranked':
             await sync_to_async(Server.finish_game)(client.game.match.id, FinishReason.PLAYER_DISCONNECT, client.user_id)
         else:
             client.racket.stop_moving(client.racket.position.y)
             Server._clients.pop(sid)
     except KeyError:
-        pass # the client was a spectator or has already been disconnected, nothing alarming
+        match_id = Server.get_spectator_match_id(sid)
+        if match_id is not None:
+            await Server.remove_spectator(sid, match_id)
