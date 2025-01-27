@@ -361,7 +361,6 @@ function getMatch(i, lastRound, tournament){
 }
 
 function loadTournament(tournament){
-	console.log('load tournament:', tournament);
 	addTournamentSSEListeners();
 	localStorage.setItem('lobbyCode', '/tournament/' + tournament.code);
 	if (window.location.pathname === '/game/tournament') return;

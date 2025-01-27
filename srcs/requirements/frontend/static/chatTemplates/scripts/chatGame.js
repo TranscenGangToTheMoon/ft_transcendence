@@ -75,16 +75,15 @@ async function chatGameTabListener()
 {
 	document.getElementById('chatGameTab').addEventListener('click', async e => {
 		e.preventDefault();
-		if (e.target.id === 'chatGameTab') {
-			let buttonCollapseChat = document.getElementById('chatTabsCollapse');
-			if (buttonCollapseChat.getAttribute('aria-expanded') === 'false') {
-				lastClick = undefined;
-				buttonCollapseChat.click();
-			}
-			if (lastClick === e.target.id) return;
-			lastClick = e.target.id;
-			return;
+		let buttonCollapseChat = document.getElementById('chatTabsCollapse');
+		disconnect();
+		if (buttonCollapseChat.getAttribute('aria-expanded') === 'false') {
+			lastClick = undefined;
+			buttonCollapseChat.click();
 		}
+		if (lastClick === e.target.id) return;
+		lastClick = e.target.id;
+		return;
 	});
 }
 
@@ -124,6 +123,10 @@ function sendGameMessageListener(gameInfo) {
 	});
 }
 
+if (typeof actualGameChat === 'undefined') {
+	var actualGameChat = undefined;
+}
+
 async function openGameChatTab(gameInfo) {
 	chatTabs = document.getElementById('chatTabs');
 	if (!chatTabs) {
@@ -131,8 +134,11 @@ async function openGameChatTab(gameInfo) {
 	}
 	if (document.getElementById('chatGameTab')) 
 	{
-		document.getElementById('messagesGame').innerHTML = '';
+		if (actualGameChat !== gameInfo.code) {
+			document.getElementById('messagesGame').innerHTML = '';
+		}
 		return;
 	}
 	await createGameChatTab(gameInfo);
+	actualGameChat = gameInfo.code;
 }

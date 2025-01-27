@@ -247,7 +247,7 @@ async function createChatUserCard(chatInfo) {
 	chatsList.appendChild(chatUserCard);
 
 	await loadContent('/chatTemplates/chatUserCard.html', chatUserCard.id);
-	chatUserCard.querySelector('.chatUserCardAvatar').src = chatInfo.targetAvatar;
+	chatUserCard.querySelector('.chatUserCardAvatar').src = chatInfo.targetAvatar.small;
 	chatUserCard.querySelector('.chatUserCardTitleUsername').innerText = chatInfo.target + ':';
 	if (chatInfo.lastMessage === null) {
 		chatUserCard.querySelector('.chatUserCardLastMessage').innerText = 'Start the conversation ;)';
