@@ -79,7 +79,7 @@ function handleFriendRequestNotification(target, img, notification, toastContain
         event.stopImmediatePropagation();
         event.stopPropagation();
         try {
-            let data = await apiRequest(getAccessToken(), target.url, target.method);
+            let data = await apiRequest(getAccessToken(), '/' + target.url, target.method);
             if (target.url.includes('friend_request')){
                 userInformations.notifications['friend_requests'] -= 1;
                 if (userInformations.notifications['friend_requests'])
@@ -153,8 +153,7 @@ async function addTargets(notification, targets, toastInstance, toastContainer){
         }
         else if (target.type === 'url'){
             button.addEventListener('click', async () => {
-                console.log(target.url.slice(0, -1));
-                await navigateTo(target.url.slice(0, -1));
+                await navigateTo(target.url);
                 notification.clicked = true;
                 dismissNotification(notification, toastInstance, toastContainer);
             })
