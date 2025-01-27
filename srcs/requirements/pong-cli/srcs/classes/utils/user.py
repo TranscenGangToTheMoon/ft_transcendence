@@ -26,6 +26,7 @@ class User():
         if (User.server is None):
             raise (Exception("Hostname not define"))
 
+        User.response = None
         data = json.dumps( {"username": User.username, "password": User.password})
         User.response = requests.post(
             url=f"https://{User.server}/api/auth/login/",
@@ -54,6 +55,7 @@ class User():
         if (User.server is None):
             raise (Exception("Hostname not define"))
 
+        User.response = None
         data = json.dumps({"username": User.username, "password": User.password})
         User.response = requests.post(
             url=f"https://{User.server}/api/auth/register/",
@@ -82,6 +84,7 @@ class User():
         if (User.server is None):
             raise (Exception("Hostname not define"))
 
+        User.response = None
         User.response = requests.post(
             url=f"https://{User.server}/api/auth/guest/",
             data={},
@@ -106,6 +109,7 @@ class User():
 
     @staticmethod
     def me():
+        User.response = None
         User.response = requests.get(
             url=f"https://{User.server}/api/users/me/",
             data={},
@@ -119,6 +123,7 @@ class User():
                 raise (Exception(f"({User.response.status_code}) {User.response.json()}"))
             code = User.response.json().get("code")
             if (code is not None and code == "token_not_valid"):
+                User.response = None
                 User.refresh()
                 User.response = requests.get(
                     url=f"https://{User.server}/api/users/me/",
@@ -136,6 +141,7 @@ class User():
 
     @staticmethod
     def duel():
+        User.response = None
         User.response = requests.post(
             url=f"https://{User.server}/api/play/duel/",
             data="",
@@ -149,6 +155,7 @@ class User():
                 raise (Exception(f"({User.response.status_code}) {User.response.json()}"))
             code = User.response.json().get("code")
             if (code is not None and code == "token_not_valid"):
+                User.response = None
                 User.refresh()
                 User.response = requests.post(
                     url=f"https://{User.server}/api/play/duel/",
@@ -163,6 +170,7 @@ class User():
 
     @staticmethod
     def cancelDuel():
+        User.response = None
         User.response = requests.delete(
             url=f"https://{User.server}/api/play/duel/",
             data="",
@@ -175,6 +183,7 @@ class User():
                 raise (Exception(f"({User.response.status_code}) {User.response.json()}"))
             code = User.response.json().get("code")
             if (code is not None and code == "token_not_valid"):
+                User.response = None
                 User.refresh()
                 User.response = requests.delete(
                     url=f"https://{User.server}/api/play/duel/",
@@ -188,6 +197,7 @@ class User():
 
     @staticmethod
     def refresh():
+        User.response = None
         data = json.dumps({"refresh": User.refreshToken})
         User.response = requests.post(
             url=f"https://{User.server}/api/auth/refresh/",
