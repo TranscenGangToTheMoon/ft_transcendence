@@ -76,7 +76,7 @@ class Lobby(models.Model):
         remain_player = self.max_participants - len(team)
         while remain_player != 0:
             blocked_user = Blocked.objects.filter(user_id__in=team).values_list('blocked_user_id', flat=True)
-            result = Lobby.objects.exclude(Q(id__in=self.exclude_lobby) | Q(participants__user_id__in=blocked_user)).filter(ready_to_play=True, count__lte=remain_player)
+            result = Lobby.objects.exclude(Q(id__in=self.exclude_lobby) | Q(participants__user_id__in=blocked_user)).filter(game_mode=GameMode.CLASH, ready_to_play=True, count__lte=remain_player)
 
             exclude_lobby = [r.id for r in result if block_relation(r)]
             result = result.exclude(id__in=exclude_lobby).order_by('count').last()
