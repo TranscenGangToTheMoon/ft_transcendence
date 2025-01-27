@@ -19,12 +19,14 @@ class User():
     server: str | None = None
     team: str | None = None
     username: str | None = None
+    wasInAGame: bool = False
 
     @staticmethod
     def loginUser():
         if (User.server is None):
             raise (Exception("Hostname not define"))
 
+        User.response = None
         data = json.dumps( {"username": User.username, "password": User.password})
         User.response = requests.post(
             url=f"https://{User.server}/api/auth/login/",
@@ -32,27 +34,34 @@ class User():
             headers=User.headers,
             verify=Config.SSL.CRT
         )
-        print(User.response.json())
+        print(User.response)
 
-        if (User.response.status_code != 200):
+        if (User.response.status_code == 200):
+            User.accessToken = User.response.json()["access"]
+            User.refreshToken = User.response.json()["refresh"]
+            User.headers["Authorization"] = f"Bearer {User.accessToken}"
+            return
+        else:
             reason = "Unknown error"
-            if (User.response.json().get("detail") is not None):
-                reason = f"{User.response.json()['detail']}"
-            elif (User.response.json().get("username") is not None):
-                reason = f"{User.response.json()['username'][0]}"
-            elif (User.response.json().get("password") is not None):
-                reason = f"{User.response.json()['password'][0]}"
+            try:
+                _ = User.response.json()
+            except Exception as _:
+                raise (Exception())
+            else:
+                if (User.response.json().get("detail") is not None):
+                    reason = f"{User.response.json()['detail']}"
+                elif (User.response.json().get("username") is not None):
+                    reason = f"{User.response.json()['username'][0]}"
+                elif (User.response.json().get("password") is not None):
+                    reason = f"{User.response.json()['password'][0]}"
             raise (Exception(f"({User.response.status_code}) {reason}"))
-
-        User.accessToken = User.response.json()["access"]
-        User.refreshToken = User.response.json()["refresh"]
-        User.headers["Authorization"] = f"Bearer {User.accessToken}"
 
     @staticmethod
     def registerUser():
         if (User.server is None):
             raise (Exception("Hostname not define"))
 
+        User.response = None
         data = json.dumps({"username": User.username, "password": User.password})
         User.response = requests.post(
             url=f"https://{User.server}/api/auth/register/",
@@ -60,51 +69,65 @@ class User():
             headers=User.headers,
             verify=Config.SSL.CRT
         )
-        print(User.response.json())
+        print(User.response)
 
-        if (User.response.status_code != 201):
+        if (User.response.status_code == 201):
+            User.accessToken = User.response.json()["access"]
+            User.refreshToken = User.response.json()["refresh"]
+            User.headers["Authorization"] = f"Bearer {User.accessToken}"
+            return
+        else:
             reason = "Unknown error"
-            if (User.response.json().get("detail") is not None):
-                reason = f"{User.response.json()['detail']}"
-            elif (User.response.json().get("username") is not None):
-                reason = f"{User.response.json()['username'][0]}"
-            elif (User.response.json().get("password") is not None):
-                reason = f"{User.response.json()['password'][0]}"
+            try:
+                _ = User.response.json()
+            except Exception as _:
+                raise (Exception())
+            else:
+                if (User.response.json().get("detail") is not None):
+                    reason = f"{User.response.json()['detail']}"
+                elif (User.response.json().get("username") is not None):
+                    reason = f"{User.response.json()['username'][0]}"
+                elif (User.response.json().get("password") is not None):
+                    reason = f"{User.response.json()['password'][0]}"
             raise (Exception(f"({User.response.status_code}) {reason}"))
-
-        User.accessToken = User.response.json()["access"]
-        User.refreshToken = User.response.json()["refresh"]
-        User.headers["Authorization"] = f"Bearer {User.accessToken}"
 
     @staticmethod
     def guestUser():
         if (User.server is None):
             raise (Exception("Hostname not define"))
 
+        User.response = None
         User.response = requests.post(
             url=f"https://{User.server}/api/auth/guest/",
             data={},
             headers=User.headers,
             verify=Config.SSL.CRT
         )
-        print(User.response.json())
+        print(User.response)
 
-        if (User.response.status_code != 201):
+        if (User.response.status_code == 201):
+            User.accessToken = User.response.json()["access"]
+            User.refreshToken = User.response.json()["refresh"]
+            User.headers["Authorization"] = f"Bearer {User.accessToken}"
+            return
+        else:
             reason = "Unknown error"
-            if (User.response.json().get("detail") is not None):
-                reason = f"{User.response.json()['detail']}"
-            elif (User.response.json().get("username") is not None):
-                reason = f"{User.response.json()['username'][0]}"
-            elif (User.response.json().get("password") is not None):
-                reason = f"{User.response.json()['password'][0]}"
+            try:
+                _ = User.response.json()
+            except Exception as _:
+                raise (Exception())
+            else:
+                if (User.response.json().get("detail") is not None):
+                    reason = f"{User.response.json()['detail']}"
+                elif (User.response.json().get("username") is not None):
+                    reason = f"{User.response.json()['username'][0]}"
+                elif (User.response.json().get("password") is not None):
+                    reason = f"{User.response.json()['password'][0]}"
             raise (Exception(f"({User.response.status_code}) {reason}"))
-
-        User.accessToken = User.response.json()["access"]
-        User.refreshToken = User.response.json()["refresh"]
-        User.headers["Authorization"] = f"Bearer {User.accessToken}"
 
     @staticmethod
     def me():
+        User.response = None
         User.response = requests.get(
             url=f"https://{User.server}/api/users/me/",
             data={},
@@ -113,11 +136,10 @@ class User():
         )
         print(User.response)
 
-        if (User.response.status_code != 200):
-            if (User.response.status_code != 401):
-                raise (Exception(f"({User.response.status_code}) {User.response.json()}"))
+        if (User.response.status_code == 401):
             code = User.response.json().get("code")
             if (code is not None and code == "token_not_valid"):
+                User.response = None
                 User.refresh()
                 User.response = requests.get(
                     url=f"https://{User.server}/api/users/me/",
@@ -127,14 +149,24 @@ class User():
                 )
                 print(User.response)
 
-                if (User.response.status_code != 200):
-                    raise (Exception(f"({User.response.status_code}) {User.response.json()}"))
+        if (User.response.status_code == 401):
+            code = User.response.json().get("code")
+            raise (Exception(f"({User.response.status_code}) {Config.errorCodes[code]}"))
+        elif (User.response.status_code != 200):
+            try:
+                _ = User.response.json()
+            except Exception as _:
+                raise (Exception(f"({User.response.status_code})"))
+            else:
+                detail = User.response.json().get("detail")
+                raise (Exception(f"({User.response.status_code}) {detail}"))
 
         User.id = User.response.json()["id"]
         User.username = User.response.json()["username"]
 
     @staticmethod
     def duel():
+        User.response = None
         User.response = requests.post(
             url=f"https://{User.server}/api/play/duel/",
             data="",
@@ -143,11 +175,10 @@ class User():
         )
         print(User.response)
 
-        if (User.response.status_code != 201):
-            if (User.response.status_code != 401):
-                raise (Exception(f"({User.response.status_code}) {User.response.json()}"))
+        if (User.response.status_code == 401):
             code = User.response.json().get("code")
             if (code is not None and code == "token_not_valid"):
+                User.response = None
                 User.refresh()
                 User.response = requests.post(
                     url=f"https://{User.server}/api/play/duel/",
@@ -157,23 +188,33 @@ class User():
                 )
                 print(User.response)
 
-                if (User.response.status_code != 201):
-                    raise (Exception(f"({User.response.status_code}) {User.response.json()}"))
+        if (User.response.status_code == 401):
+            code = User.response.json().get("code")
+            raise (Exception(f"({User.response.status_code}) {Config.errorCodes[code]}"))
+        elif (User.response.status_code != 201):
+            try:
+                _ = User.response.json()
+            except Exception as _:
+                raise (Exception(f"({User.response.status_code})"))
+            else:
+                detail = User.response.json().get("detail")
+                raise (Exception(f"({User.response.status_code}) {detail}"))
 
     @staticmethod
     def cancelDuel():
+        User.response = None
         User.response = requests.delete(
             url=f"https://{User.server}/api/play/duel/",
             data="",
             headers=User.headers,
             verify=Config.SSL.CRT
         )
+        print(User.response)
 
-        if (User.response.status_code != 204):
-            if (User.response.status_code != 401):
-                raise (Exception(f"({User.response.status_code}) {User.response.json()}"))
+        if (User.response.status_code == 401):
             code = User.response.json().get("code")
             if (code is not None and code == "token_not_valid"):
+                User.response = None
                 User.refresh()
                 User.response = requests.delete(
                     url=f"https://{User.server}/api/play/duel/",
@@ -181,12 +222,23 @@ class User():
                     headers=User.headers,
                     verify=Config.SSL.CRT
                 )
+                print(User.response)
 
-                if (User.response.status_code != 204):
-                    raise (Exception(f"({User.response.status_code}) {User.response.json()}"))
+        if (User.response.status_code == 401):
+            code = User.response.json().get("code")
+            raise (Exception(f"({User.response.status_code}) {Config.errorCodes[code]}"))
+        elif (User.response.status_code != 204):
+            try:
+                _ = User.response.json()
+            except Exception as _:
+                raise (Exception(f"({User.response.status_code})"))
+            else:
+                detail = User.response.json().get("detail")
+                raise (Exception(f"({User.response.status_code}) {detail}"))
 
     @staticmethod
     def refresh():
+        User.response = None
         data = json.dumps({"refresh": User.refreshToken})
         User.response = requests.post(
             url=f"https://{User.server}/api/auth/refresh/",

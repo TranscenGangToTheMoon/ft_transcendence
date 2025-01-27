@@ -39,12 +39,7 @@ class MainPage(Screen):
             self.query_one("#userMeStatic").update(f"Welcome {User.username} (id: {User.id})")
         except Exception as error:
             self.query_one("#userMeStatic").styles.color = "red"
-            if (User.response is not None and User.response.status_code == 401):
-                code = User.response.json().get("code")
-                if (code is not None and code == "token_not_valid"):
-                    self.query_one("#userMeStatic").update("Tokens have expired please reconnect")
-            else:
-                self.query_one("#userMeStatic").update(f"{error}")
+            self.query_one("#userMeStatic").update(f"{error}")
 
     def on_screen_resume(self) -> None:
         self.query_one("#duel").loading = False
@@ -63,42 +58,33 @@ class MainPage(Screen):
     @on(Button.Pressed, "#duel")
     def duelAction(self):
         try:
-            if (not self.app.SSEConnected):
-                raise (Exception("SSE not connected ! Reconnect and try again."))
             User.duel()
 
             self.searchDuel = True
             self.query_one("#duel").loading = True
             self.query_one("#duel").variant = "default"
             self.query_one("#cancelDuelGame").disabled = False
+            self.query_one("#statusGame").styles.color = "white"
             self.query_one("#statusGame").update(f"({User.response.status_code}) Searching for an opponent")
 
         except Exception as error:
             self.query_one("#statusGame").styles.color = "red"
-            if (User.response is not None and User.response.status_code == 401):
-                code = User.response.json().get("code")
-                if (code is not None and code == "token_not_valid"):
-                    self.query_one("#statusGame").update("Tokens have expired please reconnect")
-            else:
-                self.query_one("#statusGame").update(f"{error}")
+            if (User.response is not None):
+                if (User.response.status_code == 409 and User.wasInAGame == True):
+                    self.app.pushGamePage()
+            self.query_one("#statusGame").update(f"{error}")
 
     @on(Button.Pressed, "#cancelDuelGame")
     def cancelDuelAction(self):
         try:
-            if (not self.app.SSEConnected):
-                raise (Exception("SSE not connected ! Reconnect and try again."))
             User.cancelDuel()
             self.searchDuel = False
             self.query_one("#duel").loading = False
             self.query_one("#duel").variant = "primary"
+            self.query_one("#statusGame").styles.color = "white"
             self.query_one("#statusGame").update("")
             self.query_one("#cancelDuelGame").disabled = True
 
         except Exception as error:
             self.query_one("#statusGame").styles.color = "red"
-            if (User.response is not None and User.response.status_code == 401):
-                code = User.response.json().get("code")
-                if (code is not None and code == "token_not_valid"):
-                    self.query_one("#statusGame").update("Tokens have expired please reconnect")
-            else:
-                self.query_one("#statusGame").update(f"{error}")
+            self.query_one("#statusGame").update(f"{error}")
