@@ -594,7 +594,7 @@ function initSocket(match_code, socketPath, socketMode){
         }
         const playerScoreDiv = document.getElementById('playerScore');
         if (playerScoreDiv)
-            playerScoreDiv.innerText = '' + PongGame.state.enemyScore;
+            playerScoreDiv.innerText = '' + PongGame.state.playerScore;
         const enemyScoreDiv = document.getElementById('enemyScore');
         if (enemyScoreDiv)
             enemyScoreDiv.innerText = '' + PongGame.state.enemyScore;
