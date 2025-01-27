@@ -17,6 +17,7 @@ if (typeof emptyMatch === 'undefined'){
 }
 
 async function joinTournament(code){
+	console.log('join tournament:', code);
 	try {
 		let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/play/tournament/${code}/`, 'POST');
 		if (data.detail){
@@ -185,20 +186,20 @@ function displayCountdown(){
 }
 
 function tournamentJoined(event){
-	displayGameChatMessage(event);
 	event = JSON.parse(event.data);
+	displayGameChatMessage(event, false);
 	addParticipant(event.data);
 }
 
 function tournamentLeaved(event){
-	displayGameChatMessage(event);
 	event = JSON.parse(event.data);
+	displayGameChatMessage(event, false);
 	removeParticipant(event.data.id)
 }
 
 async function tournamentBanned(event){
-	displayGameChatMessage(event);
 	event = JSON.parse(event.data);
+	displayGameChatMessage(event, false);
 	console.log(event);
 	await navigateTo('/');
 	displayMainAlert('Banned', event.message);
@@ -238,6 +239,7 @@ function tournamentStartCancel(){
 }
 
 function tournamentStart(event){
+	displayGameChatMessage({'message':":Tournament begins"}, false);
 	displayCountdown();
 	event = JSON.parse(event.data);
 	console.log('tournament start:', event);
@@ -266,7 +268,9 @@ async function tournamentMatchFinished(event){
 	console.log('received match finished event');
 	console.log(event);
 	tournament = event.data;
-	await displayNotification(undefined, 'Match finished', event.message);
+	console.log('tournanananananament:', event);
+	displayGameChatMessage(event, false);
+	//await displayNotification(undefined, 'Match finished', event.message);
 	setBanOption();
 	loadTournament(tournament);
 }
