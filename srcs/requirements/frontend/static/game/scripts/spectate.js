@@ -1,7 +1,7 @@
 (function PongGame() {
 
     const config = {
-        canvasWidth: 800,
+        canvasWidth: 1000,
         canvasHeight: 600,
         paddleWidth: 30,
         paddleHeight: 200,
@@ -459,6 +459,7 @@ function initSocket(match_code, spectateModal=0){
           "match_code": match_code
         },
 	});
+    console.log('made request to spectate to server');
     window.gameSocket = gameSocket;
 	gameSocket.on('connect', () => {
         cancelTimeout = true;
@@ -581,10 +582,6 @@ function initSocket(match_code, spectateModal=0){
         }
     })
 }
-
-document.getElementById('gameOverModalPlayAgain').addEventListener('click', async () => {
-    await navigateTo('/spectate');
-})
 
 document.getElementById('gameOverModalQuit').addEventListener('click', async () => {
     await navigateTo('/');
@@ -754,12 +751,12 @@ async function initGame(){
     if (window.matchMedia("(hover: none) and (pointer: coarse)").matches)
         forPhoneChanges();
     if (window.location.pathname === '/')
-    	return;
+        return;
     await initGameConstants();
     if (containsCode(window.location.pathname)) {
-    	var match_code = window.location.pathname.split('/').pop()
-		console.log('match_code', match_code);
-		initSocket(match_code);
+        var match_code = window.location.pathname.split('/').pop()
+        console.log('match_code', match_code);
+        initSocket(match_code);
     }
     else {
         navigateTo('/');

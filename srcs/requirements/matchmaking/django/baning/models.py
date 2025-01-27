@@ -2,7 +2,7 @@ from django.db import models
 
 
 class Banned(models.Model):
-    code = models.CharField(max_length=4, editable=False)
+    code = models.CharField(max_length=4)
     banned_user_id = models.IntegerField()
 
 

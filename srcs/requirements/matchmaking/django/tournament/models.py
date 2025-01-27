@@ -48,7 +48,7 @@ class Tournament(models.Model):
         16: {1: 1, 2: 5, 3: 7, 4: 3, 5: 4, 6: 8, 7: 6, 8: 2},
     }
 
-    code = models.CharField(max_length=4, unique=True, editable=False)
+    code = models.CharField(max_length=4, unique=True)
     name = models.CharField(max_length=50, unique=True)
     size = models.IntegerField(default=16)
     private = models.BooleanField(default=False)
@@ -56,7 +56,7 @@ class Tournament(models.Model):
     is_started = models.BooleanField(default=False)
     current_stage = models.ForeignKey('TournamentStage', on_delete=models.SET_NULL, default=None, null=True, related_name='current_stage')
     start_at = models.DateTimeField(default=None, null=True)
-    created_at = models.DateTimeField(auto_now_add=True, editable=False)
+    created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.IntegerField()
     created_by_username = models.CharField(max_length=30)
     update_stage = models.BooleanField(default=False)

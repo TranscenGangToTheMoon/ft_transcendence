@@ -264,7 +264,7 @@ function removeIds(playerListDiv){
 if (typeof clickedUserDiv === 'undefined')
     var clickedUserDiv;
 
-function addContextMenus(){ 
+function addContextMenus(){
     const playerDivs = document.querySelectorAll('.player');
     const banButton = document.getElementById('cBan');
     if (!creator)
@@ -380,7 +380,7 @@ async function fillPlayerList(noTeam=false){
     tempDiv.style.display = 'none';
     tempDiv.innerHTML = lobbyOptionsDiv.innerHTML;
     removeIds(lobbyOptionsDiv);
-    
+
     let dropzones = tempDiv.querySelectorAll('.dropzone');
     for (let dropzone of dropzones)
         dropzone.innerHTML = '';
@@ -396,7 +396,7 @@ async function fillPlayerList(noTeam=false){
     if (!noTeam)
         await completeTeams(tempDiv);
     lobbyOptionsDiv.innerHTML = tempDiv.innerHTML;
-    
+
     document.getElementById('settingsButton').addEventListener('click', async function() {
         if (!creator || gameMode != 'Custom Game') return;
         try {
@@ -533,6 +533,7 @@ async function lobbyGameStart(event){
     // localStorage.setItem('game-event', JSON.stringify(event));
     // localStorage.setItem('game-target-path', event.target[0].url);
     // localStorage.setItem('game-target-type', event.target[0].type);
+
     if (matchType === '3v3'){
         await navigateTo('/game/3v3', true, true);
         fromLobby = true;
@@ -542,6 +543,16 @@ async function lobbyGameStart(event){
         await navigateTo('/game/1v1', true, true);
         fromLobby = true;
         userInformations.lobbyData = [event.data, event.target[0].url, event.target[0].type];
+    }
+}
+
+async function spectateLobbyGame(event){
+    event = JSON.parse(event.data);
+    console.log(event);
+
+    if (matchType === '1v1') { // Spectate mode is not available for 3v3
+        await navigateTo('/spectate/' + event.data.code, true, true);
+        fromLobby = true;
     }
 }
 
@@ -579,6 +590,11 @@ function initLobbySSEListeners(){
     if(!SSEListeners.has('lobby-message')){
         SSEListeners.set('lobby-message', displayGameChatMessage);
         sse.addEventListener('lobby-message', displayGameChatMessage);
+    }
+    
+    if(!SSEListeners.has('lobby-spectate-game')){
+        SSEListeners.set('lobby-spectate-game', spectateLobbyGame);
+        sse.addEventListener('lobby-spectate-game', spectateLobbyGame);
     }
 
     if (SSEListeners.has('game-start')){
