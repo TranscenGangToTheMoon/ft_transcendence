@@ -1,5 +1,4 @@
 from game_server.pong_position import Position
-import os
 
 
 class Racket:
