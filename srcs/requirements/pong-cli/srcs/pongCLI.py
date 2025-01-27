@@ -42,7 +42,9 @@ if __name__ == '__main__':
     parser()
     Config.Console.width = 160
     Config.Console.height = 60
+
     os.system('clear')
     os.system(f'printf "\\e[8;{Config.Console.height};{Config.Console.width}t"')
+
     app = PongCLI()
     app.run()
