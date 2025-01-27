@@ -582,10 +582,6 @@ function initSocket(match_code, spectateModal=0){
     })
 }
 
-document.getElementById('gameOverModalPlayAgain').addEventListener('click', async () => {
-    await navigateTo('/spectate');
-})
-
 document.getElementById('gameOverModalQuit').addEventListener('click', async () => {
     await navigateTo('/');
 })
