@@ -1,15 +1,11 @@
-import asyncio
-from typing import Any, Dict
 from asgiref.sync import sync_to_async
 from lib_transcendence.auth import auth_verify
 from lib_transcendence.game import FinishReason
-from logging import info, debug, error
-from lib_transcendence.exceptions import MessagesException, ServiceUnavailable
+from lib_transcendence.exceptions import MessagesException
 from rest_framework.exceptions import NotFound
 from lib_transcendence.services import request_game
 from lib_transcendence import endpoints
 from rest_framework.exceptions import APIException
-from threading import Thread
 from game_server.match import Match
 
 
@@ -40,10 +36,11 @@ async def connect(sid, environ, auth):
         if game.match.game_type == 'normal':
             game.add_spectator(id, sid)
             await Server._sio.enter_room(sid, str(game.match.id))
+            print('accepting spectator', flush=True)
             return True
         else:
             return False
-    except APIException as e:
+    except APIException:
         raise ConnectionRefusedError(MessagesException.ServiceUnavailable.game)
     if match is None:
         raise ConnectionRefusedError(MessagesException.ServiceUnavailable.game)
@@ -51,7 +48,7 @@ async def connect(sid, environ, auth):
         game_data = request_game(endpoints.Game.fmatch_user.format(user_id=id, match_id=match['id']), 'GET')
     except NotFound as e:
         raise ConnectionRefusedError(e.detail)
-    except APIException as e:
+    except APIException:
         raise ConnectionRefusedError(MessagesException.ServiceUnavailable.game)
     if game_data is None:
         raise ConnectionRefusedError(MessagesException.ServiceUnavailable.game)
@@ -63,14 +60,28 @@ async def connect(sid, environ, auth):
     player_sid = player.socket_id
     print(f'player sid: {player_sid}', flush=True)
     if player_sid != '' and player_sid != sid:
-        await Server._sio.leave_room(player_sid, str(player.match_id))
-        with Server._dsids_lock:
-            Server._disconnected_sids.append(player_sid)
-        try:
+        match_code = auth.get('match_code')
+        if match_code is None:
+            await Server._sio.leave_room(player_sid, str(player.match_id))
+            with Server._dsids_lock:
+                Server._disconnected_sids.append(player_sid)
             await Server._sio.disconnect(player_sid)
-        except (KeyError):
-            pass
-        Server.get_game(game_id).reconnect(player.user_id, sid)
+            Server.get_game(game_id).reconnect(player.user_id, sid)
+        else:
+            print('spectator connecting', flush=True)
+            try:
+                game = Server.get_game_from_code(match_code)
+            except Server.NotFound:
+                print('game not found', flush=True)
+                return False
+            if game.match.game_type == 'normal':
+                game.add_spectator(id, sid)
+                await Server._sio.enter_room(sid, str(game.match.id))
+                print('accepting spectator', flush=True)
+                return True
+            else:
+                print('game type is 3v3')
+                return False
     player.socket_id = sid
     player.game = Server.get_game(game_id)
     Server._clients[sid] = player
@@ -114,7 +125,7 @@ async def stop_moving(sid, data):
         try:
             position = data['position']
         except KeyError:
-            error('Need position data for event stop_moving')
+            print('Need position data for event stop_moving', flush=True)
             await Server._sio.emit('error', data={'message': 'Need position data for event stop_moving'}, to=sid)
             return
         position = player.racket.stop_moving(position)

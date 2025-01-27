@@ -130,7 +130,11 @@ function addChatSSEListeners(){
 				lastClick = undefined;
 				buttonCollapseChat.click();
 			}
-            await openChatTab(chatId);
+            chatTab = document.getElementById(`chatTab${openChat[chatId].target}Link`);
+            if (chatTab)
+                chatTab.click();
+            else
+                await openChatTab(chatId);
         });
         userInformations.notifications['chats'] += 1;
         getBadgesDivs(document);
