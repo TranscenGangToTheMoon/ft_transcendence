@@ -139,7 +139,11 @@ function addChatSSEListeners(){
 }
 
 function addSSEListeners(){
-
+    sse.addEventListener('profile-picture-unlocked', event => {
+        event = JSON.parse(event.data);
+        console.log('profile pic unlocked: ', event);
+        displayNotification(event.data.small, 'achievement', event.message, undefined, [event.target[0]]);
+    })
     addFriendSSEListeners();
     addInviteSSEListeners();
     addChatSSEListeners();
