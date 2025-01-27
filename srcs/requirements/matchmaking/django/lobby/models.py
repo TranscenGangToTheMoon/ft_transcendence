@@ -19,9 +19,9 @@ class NoLobbyFound(Exception):
 
 
 class Lobby(models.Model):
-    code = models.CharField(max_length=4, unique=True, editable=False)
-    max_participants = models.IntegerField(editable=False)
-    created_at = models.DateTimeField(auto_now_add=True, editable=False)
+    code = models.CharField(max_length=4, unique=True)
+    max_participants = models.IntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
     game_mode = models.CharField(max_length=11)
     ready_to_play = models.BooleanField(default=False)
     is_playing = models.BooleanField(default=False)
