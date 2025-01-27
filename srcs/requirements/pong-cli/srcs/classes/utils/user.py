@@ -36,19 +36,25 @@ class User():
         )
         print(User.response)
 
-        if (User.response.status_code != 200):
+        if (User.response.status_code == 200):
+            User.accessToken = User.response.json()["access"]
+            User.refreshToken = User.response.json()["refresh"]
+            User.headers["Authorization"] = f"Bearer {User.accessToken}"
+            return
+        else:
             reason = "Unknown error"
-            if (User.response.json().get("detail") is not None):
-                reason = f"{User.response.json()['detail']}"
-            elif (User.response.json().get("username") is not None):
-                reason = f"{User.response.json()['username'][0]}"
-            elif (User.response.json().get("password") is not None):
-                reason = f"{User.response.json()['password'][0]}"
+            try:
+                _ = User.response.json()
+            except Exception as _:
+                raise (Exception())
+            else:
+                if (User.response.json().get("detail") is not None):
+                    reason = f"{User.response.json()['detail']}"
+                elif (User.response.json().get("username") is not None):
+                    reason = f"{User.response.json()['username'][0]}"
+                elif (User.response.json().get("password") is not None):
+                    reason = f"{User.response.json()['password'][0]}"
             raise (Exception(f"({User.response.status_code}) {reason}"))
-
-        User.accessToken = User.response.json()["access"]
-        User.refreshToken = User.response.json()["refresh"]
-        User.headers["Authorization"] = f"Bearer {User.accessToken}"
 
     @staticmethod
     def registerUser():
@@ -65,19 +71,25 @@ class User():
         )
         print(User.response)
 
-        if (User.response.status_code != 201):
+        if (User.response.status_code == 201):
+            User.accessToken = User.response.json()["access"]
+            User.refreshToken = User.response.json()["refresh"]
+            User.headers["Authorization"] = f"Bearer {User.accessToken}"
+            return
+        else:
             reason = "Unknown error"
-            if (User.response.json().get("detail") is not None):
-                reason = f"{User.response.json()['detail']}"
-            elif (User.response.json().get("username") is not None):
-                reason = f"{User.response.json()['username'][0]}"
-            elif (User.response.json().get("password") is not None):
-                reason = f"{User.response.json()['password'][0]}"
+            try:
+                _ = User.response.json()
+            except Exception as _:
+                raise (Exception())
+            else:
+                if (User.response.json().get("detail") is not None):
+                    reason = f"{User.response.json()['detail']}"
+                elif (User.response.json().get("username") is not None):
+                    reason = f"{User.response.json()['username'][0]}"
+                elif (User.response.json().get("password") is not None):
+                    reason = f"{User.response.json()['password'][0]}"
             raise (Exception(f"({User.response.status_code}) {reason}"))
-
-        User.accessToken = User.response.json()["access"]
-        User.refreshToken = User.response.json()["refresh"]
-        User.headers["Authorization"] = f"Bearer {User.accessToken}"
 
     @staticmethod
     def guestUser():
@@ -93,19 +105,25 @@ class User():
         )
         print(User.response)
 
-        if (User.response.status_code != 201):
+        if (User.response.status_code == 201):
+            User.accessToken = User.response.json()["access"]
+            User.refreshToken = User.response.json()["refresh"]
+            User.headers["Authorization"] = f"Bearer {User.accessToken}"
+            return
+        else:
             reason = "Unknown error"
-            if (User.response.json().get("detail") is not None):
-                reason = f"{User.response.json()['detail']}"
-            elif (User.response.json().get("username") is not None):
-                reason = f"{User.response.json()['username'][0]}"
-            elif (User.response.json().get("password") is not None):
-                reason = f"{User.response.json()['password'][0]}"
+            try:
+                _ = User.response.json()
+            except Exception as _:
+                raise (Exception())
+            else:
+                if (User.response.json().get("detail") is not None):
+                    reason = f"{User.response.json()['detail']}"
+                elif (User.response.json().get("username") is not None):
+                    reason = f"{User.response.json()['username'][0]}"
+                elif (User.response.json().get("password") is not None):
+                    reason = f"{User.response.json()['password'][0]}"
             raise (Exception(f"({User.response.status_code}) {reason}"))
-
-        User.accessToken = User.response.json()["access"]
-        User.refreshToken = User.response.json()["refresh"]
-        User.headers["Authorization"] = f"Bearer {User.accessToken}"
 
     @staticmethod
     def me():
