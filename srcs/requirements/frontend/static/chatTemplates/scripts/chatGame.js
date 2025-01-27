@@ -8,30 +8,9 @@ function displayGameChatMessage(event, isJson=true) {
 	let chatBox = document.getElementById('messagesGame');
 	if (chatBox) {
 		chatBox.appendChild(messageDiv);
+		chatBox.scrollTop = chatBox.scrollHeight;
 	}
 }
-
-// async function chatTabListener(chatInfo)
-// {
-// 	document.getElementById('chatTab' + chatInfo.target).addEventListener('click', async e => {
-// 		e.preventDefault();
-// 		if (e.target.id === 'chatTab' + chatInfo.target + 'Button') {
-// 			await closeChatTab(chatInfo);
-// 			return;
-// 		}
-// 		if (e.target.id === 'chatTab' + chatInfo.target + 'Link') {
-// 			let buttonCollapseChat = document.getElementById('chatTabsCollapse');
-// 			if (buttonCollapseChat && buttonCollapseChat.getAttribute('aria-expanded') === 'false') {
-// 				buttonCollapseChat.click();
-// 				lastClick = undefined;
-// 			}
-// 			if (lastClick === e.target.id) return;
-// 			lastClick = e.target.id;
-// 			openChatTab(chatInfo.chatId);
-// 			return;
-// 		}
-// 	});
-// }
 
 async function createGameChatTab(gameInfo) {
 	let idChatTab = "chatGameTab";

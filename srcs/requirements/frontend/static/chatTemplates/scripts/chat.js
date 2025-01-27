@@ -358,7 +358,6 @@ async function closeChatTab(chatInfo)
 {
 	var isTabActive = false;
 	let chatActiveTab = document.querySelector('#chatTabs .nav-link.active');
-	let buttonCollapseChat = document.getElementById('chatTabsCollapse');
 	if (!chatActiveTab) return;
 	if (chatActiveTab.id === 'chatTab' + chatInfo.target + 'Link') isTabActive = true;
 	document.getElementById('chatTab' + chatInfo.target).remove();
