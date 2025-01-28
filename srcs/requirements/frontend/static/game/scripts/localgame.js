@@ -467,7 +467,6 @@ async function initGameConstants(){
     await fetch('/gameConfig.json')
         .then(response => response.json())
         .then(data => {
-            console.log(data);
             PongGame.config.canvasHeight = data.canvas.local.height;
             PongGame.config.canvasWidth = data.canvas.local.width;
             let canvas = document.getElementById('gameCanvas');

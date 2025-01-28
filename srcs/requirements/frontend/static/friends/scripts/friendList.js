@@ -27,7 +27,6 @@ if (document.getElementById('modals').friendListened !== true){
             try {
                 const friendshipId = `${event.target.parentElement.id}`.substring(6);
                 let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/users/me/friends/${friendshipId}/`, 'DELETE');
-                console.log('deleted friendship : ', friendshipId);
                 document.getElementById(event.target.parentElement.id).remove();
                 const displayedFriends = getDisplayedFriends();
                 if (displayedFriends < 15){
@@ -48,7 +47,6 @@ if (document.getElementById('modals').friendListened !== true){
 function decrementOffset(url) {
     if (!url) return;
     url = `https://test.fr${url}`;
-    console.log(url);
     const urlObj = new URL(url);
     const params = urlObj.searchParams;
 
@@ -90,7 +88,6 @@ async function getMoreFriendRequests() {
             requestDiv.id = `fr${result.id}`;
             friendRequestsDiv.appendChild(requestDiv);
             await loadContent('/friends/friendRequestBlock.html', `${requestDiv.id}`);
-            console.log(requestDiv);
             requestDiv.querySelector(`.senderUsername`).innerText = result.sender.username;
         }
     }
@@ -107,13 +104,6 @@ async function getMoreFriends() {
         nextFriend = data.next;
         for (result of data.results){
             addFriend(result);
-            // console.log(result);
-            // const friend1 = result.friends[0];
-            // const friend2 = result.friends[1];
-            // resultDiv.innerHTML += `<div class="friendRequestBlock knownFriend" id="friend${result.id}">\
-            // <img scr='/assets/imageNotFound.png'>
-            // <div>${friend1 === userInformations.username ? friend2 : friend1}</div>\
-            // <button class='deleteFriend'>delete</button></div>\n`;
         }
     }
     catch (error) {
@@ -217,7 +207,6 @@ function addFriend(friendInstance){
 }
 
 function removeFriend(friendInstance){
-    console.log(friendInstance);
     document.getElementById(`friend${friendInstance.id}`).remove();
     const friendListDiv = document.getElementById('knownFriends');
     if (!friendListDiv.querySelector('div'))
@@ -238,11 +227,7 @@ async function addFriendRequest(result){
 }
 
 async function removeFriendRequest(id){
-    // const friendRequestsDiv = document.getElementById('friendRequests');
-    // console.log(friendRequestsDiv);
-    // console.log(`#fr${id}`, friendRequestsDiv.querySelector(`#fr${id}`));
     const friendRequestDiv = document.getElementById(`fr${id}`);
-    console.log(friendRequestDiv);
     if (friendRequestDiv)
         friendRequestDiv.remove();
 }
@@ -273,7 +258,6 @@ async function loadReceivedFriendRequests(){
             await loadContent('/friends/friendRequestBlock.html', `${requestDiv.id}`);
             requestDiv.querySelector('.senderUsername').innerText = result.sender.username;
             requestDiv.querySelector('img').src = result.sender.profile_picture.small;
-            console.log(requestDiv);
         }
     }
 }
@@ -312,7 +296,6 @@ async function  initFriendModal(){
     await loadFriendList();
     const friendRequestsTab = document.getElementById('innerFriendRequests-tab');
     if (friendRequestsTab.classList.contains('active')){
-        console.log('normalement ici');
         await loadReceivedFriendRequests();
         await loadSentFriendRequests();
         friendRequestsTab.clicked = true;

@@ -6,10 +6,10 @@ async function forceReloadGuestToken() {
             return data.access;
         }
         else
-            console.log('error a gerer', data);
+            console.log('error', data);
     }
     catch (error) {
-        console.log('error a gerer', error);
+        console.log('error', error);
     }
 }
 
@@ -21,10 +21,10 @@ async function generateToken() {
             localStorage.setItem('refresh', data.refresh);
         }
         else
-            console.log('error a gerer', data);
+            console.log('error', data);
     }
     catch(error){
-        console.log('error a gerer', error)
+        console.log('error', error)
     }
 }
 
