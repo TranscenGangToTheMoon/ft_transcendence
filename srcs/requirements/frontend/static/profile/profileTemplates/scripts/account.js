@@ -121,7 +121,7 @@ document.getElementById('changeProfilePic').addEventListener('click', async ()=>
             profilePicDiv.setAttribute('data-bs-placement', 'top');
             profilePicDiv.setAttribute('data-bs-content', `${profilePic.name} (${profilePic.unlock_reason.slice(0, -1)})`);
             profilePicDiv.innerHTML = `
-            <img src=${profilePic.small} style='cursor: ${profilePic.unlock ? "pointer" : "not-allowed;filter: grayscale(90%);"}'
+            <img src=${profilePic.medium} style='cursor: ${profilePic.unlock ? "pointer" : "not-allowed;filter: grayscale(90%);"}'
             class="${profilePic.is_equiped ? 'border border-warning border-2 m-1' : 'm-1'}">
             `
             if (profilePic.unlock && !profilePic.is_equiped){
@@ -216,7 +216,8 @@ function fillBanner(){
     usernameDiv.innerText = userInformations.username;
     const profilePicDiv = document.getElementById('pProfilePicture');
     profilePicDiv.innerHTML = `
-    <img class="rounded-1" src="${userInformations.profile_picture?.small}" onerror="src='/assets/imageNotFound.png'">
+    <img class="rounded-1" src="${userInformations.profile_picture?.small}" onerror="src='/assets/imageNotFound.png'"
+    style="max-width:100px;max-height:100px">
     `
 }
 
