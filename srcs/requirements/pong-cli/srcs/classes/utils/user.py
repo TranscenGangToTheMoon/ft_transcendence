@@ -46,7 +46,7 @@ class User():
             try:
                 _ = User.response.json()
             except Exception as _:
-                raise (Exception())
+                raise (Exception(f"({User.response.status_code})"))
             else:
                 if (User.response.json().get("detail") is not None):
                     reason = f"{User.response.json()['detail']}"
@@ -81,7 +81,7 @@ class User():
             try:
                 _ = User.response.json()
             except Exception as _:
-                raise (Exception())
+                raise (Exception(f"({User.response.status_code})"))
             else:
                 if (User.response.json().get("detail") is not None):
                     reason = f"{User.response.json()['detail']}"
@@ -115,7 +115,7 @@ class User():
             try:
                 _ = User.response.json()
             except Exception as _:
-                raise (Exception())
+                raise (Exception(f"({User.response.status_code})"))
             else:
                 if (User.response.json().get("detail") is not None):
                     reason = f"{User.response.json()['detail']}"
@@ -250,7 +250,13 @@ class User():
 
         if (User.response.status_code != 200):
             if (User.response.status_code == 401):
-                raise (Exception(f"({User.response.status_code}) {User.response.json()}"))
+                try:
+                    _ = User.response.json()
+                except Exception as _:
+                    raise (Exception(f"({User.response.status_code})"))
+                else:
+                    detail = User.response.json().get("detail")
+                    raise (Exception(f"({User.response.status_code}) {detail}"))
 
         User.accessToken = User.response.json()["access"]
         User.headers["Authorization"] = f"Bearer {User.accessToken}"
