@@ -10,6 +10,7 @@ async function apiRequest(token, endpoint, method="GET", authType="Bearer",
         options.headers["Authorization"] = `${authType} ${token}`;
     if (body)
         options.body = JSON.stringify(body);
+    removeAlert();
     return fetch(endpoint, options)
         .then(async response => {
             if (!response.ok && (response.status > 499 || response.status === 404)){
@@ -37,9 +38,7 @@ async function apiRequest(token, endpoint, method="GET", authType="Bearer",
                 closeExistingModals();
                 console.log('service unavailable');
                 const contentDiv = document.getElementById('content');
-                const existingAlert = document.querySelector('.unavailable');
-                if (existingAlert)
-                    existingAlert.remove();
+                removeAlert();
                 const alertHtml = `
                 <div class="alert alert-danger unavailable" role="alert">
                     Service unavailable
@@ -59,4 +58,10 @@ async function getDataFromApi(token, endpoint, method="GET", authType="Bearer",
     catch (error) {
         throw error;
     }
+}
+
+function removeAlert(){
+    const existingAlert = document.querySelector('.unavailable');
+    if (existingAlert)
+        existingAlert.remove();
 }
