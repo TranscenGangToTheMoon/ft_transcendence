@@ -301,8 +301,6 @@ async function updateSpectatableMatches(event){
             })
         }
     }
-    
-    [id: code, id: code, id: code, id: code, id: code]
 }
 
 async function tournamentFinished(event){
