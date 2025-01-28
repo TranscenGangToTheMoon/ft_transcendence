@@ -117,7 +117,6 @@ class Event:
         return json.dumps(result, default=datetime_serializer)
 
 
-# todo test all events
 class Events:
     ping = Event(Service.AUTH, EventCode.PING)
     delete_user = Event(Service.USER, EventCode.DELETE_USER)
