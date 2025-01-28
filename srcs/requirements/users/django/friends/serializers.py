@@ -1,10 +1,10 @@
-from lib_transcendence.exceptions import MessagesException
 from rest_framework import serializers
 from rest_framework.exceptions import NotFound, PermissionDenied
-from lib_transcendence.serializer import Serializer
 
 from friend_requests.models import FriendRequests
 from friends.models import Friends
+from lib_transcendence.exceptions import MessagesException
+from lib_transcendence.serializer import Serializer
 from users.auth import get_user
 from users.serializers_utils import LargeUsersSerializer
 
@@ -22,7 +22,7 @@ class FriendsSerializer(Serializer):
             'friend_win',
             'me_win',
             'friends_since',
-            'matches_play_against', # todo make some test
+            'matches_play_against',
             'matches_played_together',
             'matches_won_together',
         ]

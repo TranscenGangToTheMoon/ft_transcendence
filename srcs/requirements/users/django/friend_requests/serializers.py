@@ -1,10 +1,10 @@
-from lib_transcendence.exceptions import MessagesException, ResourceExists
-from lib_transcendence.serializer import Serializer
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
 
 from friend_requests.models import FriendRequests
 from friends.utils import is_friendship
+from lib_transcendence.exceptions import MessagesException, ResourceExists
+from lib_transcendence.serializer import Serializer
 from users.auth import get_user, get_valid_user
 from users.serializers_utils import SmallUsersSerializer
 

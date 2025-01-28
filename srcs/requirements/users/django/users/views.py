@@ -1,14 +1,14 @@
 from django.db.models import Q
 from rest_framework import generics
 from rest_framework.exceptions import NotAuthenticated, NotFound, APIException
-from lib_transcendence.exceptions import MessagesException
-from lib_transcendence import endpoints
-from lib_transcendence.permissions import GuestCannotDestroy
-from lib_transcendence.services import request_matchmaking, request_chat
-from lib_transcendence.sse_events import EventCode
 
 from friends.models import Friends
 from friends.utils import get_friend
+from lib_transcendence import endpoints
+from lib_transcendence.exceptions import MessagesException
+from lib_transcendence.permissions import GuestCannotDestroy
+from lib_transcendence.services import request_matchmaking, request_chat
+from lib_transcendence.sse_events import EventCode
 from sse.events import publish_event
 from users.auth import auth_delete, get_valid_user, get_user
 from users.models import Users

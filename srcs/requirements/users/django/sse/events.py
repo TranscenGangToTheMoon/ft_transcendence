@@ -2,13 +2,12 @@ import json
 
 import redis
 from django.db.models import QuerySet
+from rest_framework.exceptions import ParseError
 
 from lib_transcendence import endpoints
 from lib_transcendence.exceptions import MessagesException, ServiceUnavailable
 from lib_transcendence.sse_events import EventCode
 from lib_transcendence.utils import datetime_serializer
-from rest_framework.exceptions import ParseError
-
 from users.models import Users
 
 

@@ -1,12 +1,12 @@
-from lib_transcendence import endpoints
-from lib_transcendence.services import request_chat, request_game
 from rest_framework import serializers
 from rest_framework.exceptions import APIException
-from lib_transcendence.serializer import Serializer
 
 from blocking.serializers import BlockedSerializer
 from friend_requests.serializers import FriendRequestsSerializer
 from friends.serializers import FriendsSerializer
+from lib_transcendence import endpoints
+from lib_transcendence.serializer import Serializer
+from lib_transcendence.services import request_chat, request_game
 from stats.serializers import StatsSerializer, RankedStatsSerializer
 from users.models import Users
 from users.serializers import UsersMeSerializer

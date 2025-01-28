@@ -1,12 +1,11 @@
 from django.urls import path
-from lib_transcendence.endpoints import Users, UsersManagement
 
 from blocking.views import blocked_view, delete_blocked_view
-from export_data.views import export_data_view
-from friend_requests.views import friend_requests_list_create_view, friend_request_view, \
-    friend_requests_receive_list_view
-from friends.views import friends_view, friend_view
 from events.views import events_view
+from export_data.views import export_data_view
+from friend_requests.views import friend_requests_list_create_view, friend_request_view, friend_requests_receive_list_view
+from friends.views import friends_view, friend_view
+from lib_transcendence.endpoints import Users, UsersManagement
 from profile_pictures.views import profile_pictures_view, set_profile_picture_view
 from sse.views import sse_view
 from stats.views import finish_match_view, stats_view, stats_ranked_view, finish_tournament_view
@@ -46,7 +45,3 @@ urlpatterns = [
 
     path(UsersManagement.manage_user, manage_user_view),
 ]
-
-# todo test tournament with ui (abandon quit tournament via sse, reocnnect)
-# todo check problem
-# todo sort import

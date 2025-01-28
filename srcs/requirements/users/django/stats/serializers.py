@@ -1,10 +1,9 @@
 from rest_framework import serializers
-from lib_transcendence.game import GameMode
 from rest_framework.exceptions import APIException
-from lib_transcendence.serializer import Serializer
-from profile_pictures.unlock import unlock_tournament_pp, unlock_duel_clash_pp, unlock_game_played_pp, \
-    unlock_scorer_pp, unlock_winning_streak_pp
 
+from lib_transcendence.game import GameMode
+from lib_transcendence.serializer import Serializer
+from profile_pictures.unlock import unlock_tournament_pp, unlock_duel_clash_pp, unlock_game_played_pp, unlock_scorer_pp, unlock_winning_streak_pp
 from stats.models import GameModeStats, RankedStats
 from users.auth import get_user
 
