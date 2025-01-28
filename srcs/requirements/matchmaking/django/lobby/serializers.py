@@ -103,9 +103,7 @@ class LobbySerializer(Serializer):
     def update(self, instance, validated_data):
         if instance.playing_game is not None:
             raise PermissionDenied(MessagesException.PermissionDenied.LOBBY_IN_GAME)
-
-        if 'game_mode' in validated_data:
-            raise PermissionDenied(MessagesException.PermissionDenied.CANNOT_UPDATE_GAME_MODE)
+        validated_data.pop('game_mode', None)
 
         participants = instance.participants.all()
         if validated_data.get('match_type') == MatchType.M1V1 and instance.match_type == MatchType.M3V3:
