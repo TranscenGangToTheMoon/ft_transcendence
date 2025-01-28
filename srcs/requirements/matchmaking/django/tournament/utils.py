@@ -1,6 +1,7 @@
 import time
 from datetime import datetime, timezone
 
+from django.db import IntegrityError
 from rest_framework.exceptions import APIException
 
 from lib_transcendence import endpoints
@@ -33,13 +34,16 @@ def create_match_new_stage(tournament_id):
         tournament = Tournament.objects.get(id=tournament_id)
     except Tournament.DoesNotExist:
         return
-    matches = tournament.current_stage.matches.all()
-    if tournament.update_stage or matches.filter(finished=False).exists():
-        return
+    try:
+        matches = tournament.current_stage.matches.all()
+        if tournament.update_stage or matches.filter(finished=False).exists():
+            return
 
-    tournament.set_update_stage(True)
-    time.sleep(3)
-    stage = tournament.stages.get(stage=tournament.current_stage.stage - 1)
+        tournament.set_update_stage(True)
+        time.sleep(3)
+        stage = tournament.stages.get(stage=tournament.current_stage.stage - 1)
+    except IntegrityError:
+        return
 
     spectate = {}
     try:
@@ -55,6 +59,9 @@ def create_match_new_stage(tournament_id):
     except APIException:
         tournament.delete()
 
-    tournament.current_stage = stage
-    create_sse_event(tournament.users_id({'still_in': False}), EventCode.TOURNAMENT_AVAILABLE_SPECTATE_MATCHES, spectate)
-    tournament.set_update_stage(False)
+    try:
+        tournament.current_stage = stage
+        create_sse_event(tournament.users_id({'still_in': False}), EventCode.TOURNAMENT_AVAILABLE_SPECTATE_MATCHES, spectate)
+        tournament.set_update_stage(False)
+    except IntegrityError:
+        pass
