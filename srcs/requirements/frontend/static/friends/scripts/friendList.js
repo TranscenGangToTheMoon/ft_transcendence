@@ -232,7 +232,6 @@ function addFriend(friendInstance){
     friendInstanceDiv.setAttribute('data-bs-trigger', 'hover');
     friendInstanceDiv.setAttribute('data-bs-placement', 'top');
     friendInstanceDiv.setAttribute('data-bs-content', ``);
-    console.log(friendInstance());
 }
 
 function removeFriend(friendInstance){
