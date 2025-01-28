@@ -16,7 +16,6 @@ class Ball:
         self.canvas = canvas
         self.safe_zone_width = (self.canvas.x / 2) - (ledge_offset + (3 * racket_width))
         self.safe_zone_height = (self.canvas.y / 2) - (3 * self.size)
-        # TODO -> update and check last_racket_touched to count CSC goals
 
     def increment_speed(self, max_speed, speed_increment):
         self.speed += speed_increment

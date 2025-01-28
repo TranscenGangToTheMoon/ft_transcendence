@@ -1,3 +1,4 @@
+import os
 import asyncio
 import socketio
 import json
@@ -47,8 +48,7 @@ class Server:
             Server._config = config
             Game.default_ball_speed = config['ball']['speed']
             Game.ball_size = config['ball']['size']
-        port = 5500
-        print(f"SocketIO server running on port {port}", flush=True)
+        port = int(os.environ.get('GAME_SERVER_PORT', 5500))
         web.run_app(Server._app, host='0.0.0.0', port=port, loop=Server._loop)
 
     class ServerException(Exception):
