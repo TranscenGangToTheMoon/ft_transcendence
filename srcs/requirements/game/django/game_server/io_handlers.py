@@ -15,9 +15,7 @@ async def disconnect_old_session(player_sid, player, game_id, sid):
     with Server._dsids_lock:
         Server._disconnected_sids.append(player_sid)
     game = Server.get_game(game_id)
-    print(game.match.game_type, flush=True)
     if game.match.game_type == 'normal':
-        print('sending spectate event', flush=True)
         Server.emit('call_spectate', data={'code': game.match.code}, to=player_sid)
         await asyncio.sleep(0.5)
     await Server._sio.disconnect(player_sid)
@@ -33,7 +31,6 @@ async def handle_spectator(user_id, sid, auth, match_code):
     if game.match.game_type == 'normal':
         game.add_spectator(user_id, sid)
         await Server._sio.enter_room(sid, str(game.match.id))
-        print(f'Accepted user {id} to spectate', flush=True)
         return True
     else:
         return False
@@ -45,7 +42,6 @@ async def accept_connection(player, sid, game_id):
     player.game = Server.get_game(game_id)
     Server._clients[sid] = player
     await Server._sio.enter_room(sid, str(game_id))
-    print(f'User {player.user_id} connected to game server', flush=True)
 
 
 def fetch_data(endpoint) -> dict:
@@ -73,13 +69,11 @@ async def connect(sid, environ, auth):
     if user_data is None:
         raise socketioConnectError(MessagesException.Authentication.NOT_AUTHENTICATED)
     id = user_data['id']
-    print(f'User {id} authenticated, checking player data...', flush=True)
     match_code = auth.get('match_code')
     if match_code is not None:
         return await handle_spectator(id, sid, auth, match_code)
     match = fetch_data(endpoints.Game.fuser.format(user_id=id))
     game_data = fetch_data(endpoints.Game.fmatch_user.format(user_id=id, match_id=match['id']))
-    print(f'Player {id} informations checked, accepting new socketio connection...', flush=True)
     game_id = game_data['id']
     if not Server.does_game_exist(game_id):
         match = Match(game_data)
@@ -127,7 +121,6 @@ async def stop_moving(sid, data):
         try:
             position = data['position']
         except KeyError:
-            print('Need position data for event stop_moving', flush=True)
             await Server._sio.emit('error', data={'message': 'Need position data for event stop_moving'}, to=sid)
             return
         position = player.racket.stop_moving(position)

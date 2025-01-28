@@ -31,8 +31,7 @@ class Player():
     def score_goal(self, csc=False):
         try:
             instance = request_game(endpoints.Game.fscore.format(user_id=self.user_id), 'PUT', data={'own_goal': csc})
-        except NotFound as e:
-            print(e.detail, flush=True)
+        except NotFound:
             return None
         except APIException:
             return None
@@ -64,7 +63,6 @@ class Match():
         self.id = game_data['id']
         self.teams: List[Team] = []
         self.game_mode = game_data['game_mode']
-        print(f"game mode {self.game_mode}", flush=True)
         self.code = game_data['code']
         teams = game_data['teams']
         for team_name, team in teams.items():
@@ -75,7 +73,6 @@ class Match():
 def finish_match(match_id, finish_reason: str, user_id: int):
     if finish_reason != FinishReason.NORMAL_END:
         try:
-            print('sending finish request')
             request_game(
                 endpoints.Game.ffinish_match.format(match_id=match_id),
                 'PUT',

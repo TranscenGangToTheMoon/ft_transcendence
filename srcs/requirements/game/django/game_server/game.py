@@ -321,9 +321,7 @@ class Game:
         timeout = int(os.environ['GAME_PLAYER_CONNECT_TIMEOUT'])
         try:
             self.wait_for_players(timeout)
-            print(time.time(), "all players are connected", flush=True)
         except self.PlayerTimeout as e:
-            print(e, flush=True)
             self.finish(FinishReason.PLAYER_NOT_CONNECTED, disconnected_user_id=e.args[0])
             return
         if self.match.game_type == 'clash':
@@ -384,8 +382,7 @@ class Game:
                 if team.name == 'a':
                     return self.get_player(self.ball.last_touch_team_a), False
                 return self.get_player(self.ball.last_touch_team_b), False
-            except self.NoSuchPlayer as e:
-                print(e, flush=True)
+            except self.NoSuchPlayer:
                 self.finish(FinishReason.PLAYER_DISCONNECT, team.name)
                 return
 
@@ -537,7 +534,6 @@ class Game:
     def get_rackets(self, side: int = 1):
         rackets = {}
         for racket in self.rackets:
-            print(f"racket = {racket.position.x}", flush=True)
             if side == 1:
                 rackets[racket.player_id] = racket.position.x
             else:
