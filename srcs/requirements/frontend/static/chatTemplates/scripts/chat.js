@@ -60,6 +60,7 @@ function displayChatError(error, idDiv) {
 // =========Server==========
 
 async function disconnect() {
+	console.log('Chat: Disconnecting from the chat server');
 	if (typeof window.socket === 'undefined')	return;
 	if (socket === null)	return;
 	socket.off();
@@ -208,6 +209,7 @@ async function searchChatButton(username) {
 
 	chatRequest = undefined;
 	chatInfo = undefined;
+	removeChatCollapse();
 	if (apiAnswer.count === 0)
 	{
 		try {
@@ -229,10 +231,7 @@ async function searchChatButton(username) {
 	else {
 		let chatTabLink = 'chatTab' + apiAnswer.results[0].chat_with.username + 'Link';
 		if (lastClick === chatTabLink) {
-			console.log('Chat: Chat already open');
-			removeChatCollapse();
-			const chatModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('chatListModal'));
-			chatModal.hide();
+			closeChatListModal();
 			return;
 		}
 		let chatTab = document.getElementById(chatTabLink);
@@ -244,7 +243,6 @@ async function searchChatButton(username) {
 	}
 	document.getElementById('searchChatForm').reset();
 	await displayChatsList();
-	removeChatCollapse();
 	await openChatTab(chatInfo.chatId);
 }
 
@@ -348,16 +346,15 @@ async function loadOldMessages(chatInfo){
 // =========ChatView==========
 
 function removeFirstInactiveChatTab() {
-    let chatTabs = document.getElementById('chatTabs');
-    let tabLinks = chatTabs.querySelectorAll('.nav-link');
-
-    for (let tabLink of tabLinks) {
-        if (!tabLink.classList.contains('active') && tabLinks.id !== 'chatGameTabLink') {
-			chatTabs.querySelector('#' + tabLink.id.slice(0, -4) + "Button").click();
-			return ;
-        }
-    }
-    return null;
+	for (let key in openChat) {
+		openedChat = openChat[key];
+		tabLink = document.getElementById('chatTab' + openedChat.target + 'Link');
+		if (tabLink && !tabLink.classList.contains('active')) {
+			closeChatTab(openedChat)
+			return;
+		}
+	}
+	return null;
 }
 
 async function closeChatTab(chatInfo)
@@ -377,8 +374,21 @@ async function closeChatTab(chatInfo)
 		document.getElementById('chatView').remove();
 	}
 	else if (isTabActive) {
-		lastClick = undefined;
-		lastTab.querySelector('a').click();
+		let chatCollapseButton = document.getElementById('chatTabsCollapse');
+		if (chatCollapseButton.getAttribute('aria-expanded') === 'false') {
+			lastClick = lastTab.querySelector('a').id;
+			lastTab.querySelector('a').classList.add('active');
+			if (lastTab.id === 'chatGameTab') {
+				document.getElementById('chatGameBox').classList.add('active');
+			}
+			else {
+				document.getElementById(lastTab.querySelector('a').getAttribute('aria-controls')).classList.add('active');
+			}
+		}
+		else {
+			lastClick = undefined;
+			lastTab.querySelector('a').click();
+		}
 	}
 }
 
@@ -405,7 +415,7 @@ async function setChatView()
 
 	let buttonCollapseChat = document.getElementById('chatTabsCollapse');
 	buttonCollapseChat.addEventListener('click', async e => {
-		e.preventDefault();
+		console.log('Chat: Collapse chat', buttonCollapseChat.getAttribute('aria-expanded'));
 		if (!buttonCollapseChat) return;
 		if (buttonCollapseChat.getAttribute('aria-expanded') === 'false') {
 			await disconnect();
@@ -444,7 +454,7 @@ async function openChatTab(chatId)
 			removeFirstInactiveChatTab();
 		}
 	}
-	
+
 	if (!document.getElementById('chatTab'+chatInfo.target))
 	{
 		openChat[chatInfo.chatId] = chatInfo;
@@ -465,6 +475,7 @@ async function openChatTab(chatId)
 			res = await loadOldMessages(chatInfo);
 			if (res.code !== 200)
 				throw (res);
+			await connect(getAccessToken(), chatInfo);
 		}
 		catch (error) {
 			console.log('Error chat:', error);
@@ -474,7 +485,6 @@ async function openChatTab(chatId)
 			displayChatError(error, 'container');
 			return;
 		}
-		await connect(getAccessToken(), chatInfo);
 	}
 }
 
