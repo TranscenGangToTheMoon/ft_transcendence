@@ -8,10 +8,12 @@ This project is about creating a website for the mighty Pong contest!
 ## About the project
 ft_transcendence is a web-based implementation of the classic Pong game with modern features. The project focuses on creating a full-stack application that includes user authentication, real-time multiplayer gameplay, live chat, and comprehensive game statistics. Users can participate in tournaments, challenge other players, and track their progress through detailed dashboards.
 
-### Module
+## Module
 To attain 100% project completion, a minimum of 7 major modules is required.
 
-#### Major (1.0)
+Two Minor Modules are equivalent to one Major Module.
+
+### Major
 - Framework as backend (Django)
 - Designing the Backend as Microservices
 - Standard user management, authentication, users across tournament
@@ -20,15 +22,20 @@ To attain 100% project completion, a minimum of 7 major modules is required.
 - Live chat
 - Replacing Basic Pong with Server-Side Pong and Implementing an API
 - Enabling Pong Gameplay via CLI against Web Users with API Integration
-
-#### Minor (0.5)
+### Minor
 - Front-end framework or toolkit (Bootstrap)
 - Database for the backend (PostgreSQL)
 - User and Game Stats Dashboards
 - GDPR Compliance Options with User Anonymization, Local Data Management, and Account Deletion.
 - Expanding Browser Compatibility
 
-### Skill learned
+### Bonus Part
+For this project, the bonus section is designed to be straightforward. You are required to
+include more modules.
+- 5 points will be awarded for each minor module.
+- 10 points will be awarded for each major module.
+
+## Skill learned
 - New languages learned such as Python and Js
 - Full-stack web development
 - Real-time application programming
@@ -40,7 +47,7 @@ To attain 100% project completion, a minimum of 7 major modules is required.
 - Frontend framework utilization
 - GDPR compliance implementation
 
-### Tools
+## Tools
 - Django - Python web framework for backend development 
 - PostgreSQL - Relational database management system
 - Caddy - Web server and reverse proxy
