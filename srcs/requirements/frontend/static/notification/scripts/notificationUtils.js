@@ -103,7 +103,7 @@ function handleProfilePicNotification(target, img, notification, toastContainer,
         event.stopImmediatePropagation();
         event.stopPropagation();
         try {
-            let data = await apiRequest(getAccessToken(), target.url, target.method);
+            let data = await apiRequest(getAccessToken(), '/' + target.url, target.method);
             if (target.url.includes('friend_request')){
                 userInformations.notifications['friend_requests'] -= 1;
                 if (userInformations.notifications['friend_requests'])
