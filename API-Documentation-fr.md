@@ -48,7 +48,7 @@ Tous les endpoints marqués avec 🔒 nécessitent une authentification. Ces end
 - `404 Not Found` : Ressource introuvable.
 - `405 Method Not Allowed` : Méthode de requête non autorisée.
 - `409 Conflict` : Conflit lors de la requête (souvent lorsque le client tente de créer une ressource qui existe déjà).
-- `415 Unsupported Media Type` : Le format du *cotent-type* demandé n'est pas pris en charge par le serveur.
+- `415 Unsupported Media Type` : Le format du *content-type* demandé n'est pas pris en charge par le serveur.
 - `429 Throttled` : Toutes les requêtes **POST**, **PUT** et **PATCH** peuvent renvoyer cette erreur. Cela arrive quand beaucoup de requêtes sont envoyées strictement au même moment. Le détail de l'erreur est toujours le même : *"Request was throttled."*
 - `500 Internal Server Error` : Erreur côté serveur.
 - `502 Bad Gateway` : Cette réponse d'erreur signifie que le serveur a reçu une réponse non valide.
@@ -141,7 +141,7 @@ POST https://localhost:4443/api/auth/guest/
 ```
 🔒 POST https://localhost:4443/api/auth/refresh/
 ```
-- **Description** : Permet d'obtenir un nouveau token `access` à l'aide d'un' token `refresh` valide.
+- **Description** : Permet d'obtenir un nouveau token `access` à l'aide d'un token `refresh` valide.
 - **Body (JSON)** :
   ```json
   {

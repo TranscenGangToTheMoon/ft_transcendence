@@ -48,7 +48,7 @@ All endpoints marked with 🔒 require authentication. These endpoints correspon
 - `404 Not Found` : Resource not found.
 - `405 Method Not Allowed` : Request method not authorized.
 - `409 Conflict` : Conflict during request (often when the client tries to create a resource that already exists).
-- `415 Unsupported Media Type` : The requested *cotent-type* format is not supported by the server.
+- `415 Unsupported Media Type` : The requested *content-type* format is not supported by the server.
 - `429 Throttled`: All **POST**, **PUT** and **PATCH** requests may return this error. This happens when many requests are sent at exactly the same time. The error details are always the same: *"Request was throttled. ”*.
 - `500 Internal Server Error`: Server-side error.
 - `502 Bad Gateway`: This error response means that the server has received an invalid response.
