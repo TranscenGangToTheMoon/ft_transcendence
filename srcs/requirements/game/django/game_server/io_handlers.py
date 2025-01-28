@@ -1,3 +1,4 @@
+import asyncio
 from socketio.exceptions import ConnectionRefusedError as socketioConnectError
 from lib_transcendence.auth import auth_verify
 from lib_transcendence.exceptions import MessagesException
@@ -13,8 +14,14 @@ async def disconnect_old_session(player_sid, player, game_id, sid):
     await Server._sio.leave_room(player_sid, str(player.match_id))
     with Server._dsids_lock:
         Server._disconnected_sids.append(player_sid)
+    game = Server.get_game(game_id)
+    print(game.match.game_type, flush=True)
+    if game.match.game_type == 'normal':
+        print('sending spectate event', flush=True)
+        Server.emit('call_spectate', data={'code': game.match.code}, to=player_sid)
+        await asyncio.sleep(0.5)
     await Server._sio.disconnect(player_sid)
-    Server.get_game(game_id).reconnect(player.user_id, sid)
+    game.reconnect(player.user_id, sid)
 
 
 async def handle_spectator(user_id, sid, auth, match_code):
