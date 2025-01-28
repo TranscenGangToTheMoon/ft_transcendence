@@ -487,7 +487,8 @@ function initSocket(socketPath, socketMode){
         window.PongGame.resizeCanvas();
     });
     gameSocket.on('connect_error', event => {
-        console.log(event);
+        localStorage.removeItem('game-event');
+        handleRoute();
     })
     gameSocket.on('disconnect', () => {
         console.log('disconnected from gameSocket');
@@ -638,12 +639,14 @@ async function initData(data, socketPath, socketMode){
 		return;
 	}
 	initSocket(socketPath, socketMode);
-	document.getElementById('playerUsername1').innerText = PongGame.info.myTeam.players.players[0].username;
-	document.getElementById('playerUsername2').innerText = PongGame.info.myTeam.players.players[1].username;
-	document.getElementById('playerUsername3').innerText = PongGame.info.myTeam.players.players[2].username;
-	document.getElementById('enemyUsername1').innerText = PongGame.info.enemyTeam.players.players[0].username;
-	document.getElementById('enemyUsername2').innerText = PongGame.info.enemyTeam.players.players[1].username;
-    document.getElementById('enemyUsername3').innerText = PongGame.info.enemyTeam.players.players[2].username;
+    if (PongGame.info.myTeam.player?.players){
+        document.getElementById('playerUsername1').innerText = PongGame.info.myTeam.players.players[0].username;
+        document.getElementById('playerUsername2').innerText = PongGame.info.myTeam.players.players[1].username;
+        document.getElementById('playerUsername3').innerText = PongGame.info.myTeam.players.players[2].username;
+        document.getElementById('enemyUsername1').innerText = PongGame.info.enemyTeam.players.players[0].username;
+        document.getElementById('enemyUsername2').innerText = PongGame.info.enemyTeam.players.players[1].username;
+        document.getElementById('enemyUsername3').innerText = PongGame.info.enemyTeam.players.players[2].username;
+    }
 }
 
 document.getElementById('confirmModal').addEventListener('hidden.bs.modal', () => {
