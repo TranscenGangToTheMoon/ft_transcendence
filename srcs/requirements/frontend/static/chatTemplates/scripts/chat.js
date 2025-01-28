@@ -378,8 +378,12 @@ async function closeChatTab(chatInfo)
 		if (chatCollapseButton.getAttribute('aria-expanded') === 'false') {
 			lastClick = lastTab.querySelector('a').id;
 			lastTab.querySelector('a').classList.add('active');
-			document.getElementById(lastTab.querySelector('a').getAttribute('aria-controls')).classList.add('active');
-			console.log('Chat: Last tab activeeee', lastClick);
+			if (lastTab.id === 'chatGameTab') {
+				document.getElementById('chatGameBox').classList.add('active');
+			}
+			else {
+				document.getElementById(lastTab.querySelector('a').getAttribute('aria-controls')).classList.add('active');
+			}
 		}
 		else {
 			lastClick = undefined;
