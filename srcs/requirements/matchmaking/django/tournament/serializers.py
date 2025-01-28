@@ -1,12 +1,12 @@
-from lib_transcendence.auth import get_auth_user
-from lib_transcendence.exceptions import MessagesException
-from lib_transcendence.generate import generate_code
-from lib_transcendence.game import FinishReason
-from lib_transcendence.users import retrieve_users
 from rest_framework import serializers
-from lib_transcendence.serializer import Serializer
 
 from blocking.utils import create_player_instance
+from lib_transcendence.auth import get_auth_user
+from lib_transcendence.exceptions import MessagesException
+from lib_transcendence.game import FinishReason
+from lib_transcendence.generate import generate_code
+from lib_transcendence.serializer import Serializer
+from lib_transcendence.users import retrieve_users
 from matchmaking.utils.participant import get_participants
 from matchmaking.utils.place import get_tournament, verify_place
 from matchmaking.utils.user import verify_user

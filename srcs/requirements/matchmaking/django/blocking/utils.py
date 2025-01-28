@@ -1,10 +1,10 @@
 from django.db.models import Q
+
+from blocking.models import Blocked
 from lib_transcendence import endpoints
 from lib_transcendence.auth import get_auth_token
 from lib_transcendence.pagination import get_all_pagination_items
 from lib_transcendence.services import request_users
-
-from blocking.models import Blocked
 
 
 def model_exists(model, user_id):

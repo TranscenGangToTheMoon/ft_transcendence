@@ -1,11 +1,11 @@
 import time
 from datetime import datetime, timezone
 
+from rest_framework.exceptions import APIException
+
 from lib_transcendence import endpoints
 from lib_transcendence.services import request_game, request_users
 from lib_transcendence.sse_events import create_sse_event, EventCode
-from rest_framework.exceptions import APIException
-
 from tournament.serializers import TournamentSerializer, TournamentStageSerializer
 
 

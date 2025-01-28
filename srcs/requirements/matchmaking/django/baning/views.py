@@ -1,9 +1,9 @@
 from django.core.exceptions import PermissionDenied
 from rest_framework import generics
-from lib_transcendence.exceptions import MessagesException
-from lib_transcendence.permissions import NotGuest
 
 from baning.utils import ban_yourself, get_participants_for_baning, banned
+from lib_transcendence.exceptions import MessagesException
+from lib_transcendence.permissions import NotGuest
 from lobby.serializers import LobbyParticipantsSerializer
 from matchmaking.utils.participant import get_lobby_participant, get_tournament_participant
 from matchmaking.utils.place import get_lobby, get_tournament

@@ -1,8 +1,8 @@
+from rest_framework.exceptions import PermissionDenied, APIException, NotFound
+
 from lib_transcendence import endpoints
 from lib_transcendence.exceptions import MessagesException, ResourceExists, ServiceUnavailable
 from lib_transcendence.services import request_users
-from rest_framework.exceptions import PermissionDenied, APIException, NotFound
-
 from lobby.models import LobbyParticipants
 from tournament.models import TournamentParticipants
 

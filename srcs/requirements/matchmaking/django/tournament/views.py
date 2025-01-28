@@ -2,17 +2,17 @@ from threading import Thread
 from typing import Literal
 
 from django.db.models import Q
-from lib_transcendence.exceptions import MessagesException
-from lib_transcendence.permissions import GuestCannotCreate
-from lib_transcendence.serializer import SerializerAuthContext
-from lib_transcendence.sse_events import EventCode
 from rest_framework import generics, status
-from rest_framework.exceptions import PermissionDenied, NotFound
+from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 
 from baning.models import Banned
 from blocking.models import Blocked
 from blocking.utils import create_player_instance, delete_player_instance
+from lib_transcendence.exceptions import MessagesException
+from lib_transcendence.permissions import GuestCannotCreate
+from lib_transcendence.serializer import SerializerAuthContext
+from lib_transcendence.sse_events import EventCode
 from matchmaking.utils.participant import get_tournament_participant
 from matchmaking.utils.place import get_tournament
 from matchmaking.utils.sse import send_sse_event

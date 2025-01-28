@@ -1,11 +1,9 @@
-from typing import Type
-
-from lib_transcendence.exceptions import MessagesException
 from rest_framework.exceptions import NotFound
-from lib_transcendence.serializer import Serializer
 
 from baning.utils import banned
 from blocking.models import Blocked
+from lib_transcendence.exceptions import MessagesException
+from lib_transcendence.serializer import Serializer
 from lobby.models import LobbyParticipants
 from matchmaking.utils.model import ParticipantsPlace
 from play.models import Players
@@ -51,7 +49,7 @@ class BlockedSerializer(Serializer):
         return super().create(validated_data)
 
 
-def get_user_from_model(user_id, model: Type[ParticipantsPlace]):
+def get_user_from_model(user_id, model: ParticipantsPlace):
     try:
         return model.objects.get(user_id=user_id)
     except model.DoesNotExist:

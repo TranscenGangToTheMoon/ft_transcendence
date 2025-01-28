@@ -1,8 +1,9 @@
+from rest_framework.exceptions import AuthenticationFailed
+
 from lib_transcendence import endpoints
 from lib_transcendence.auth import AbstractAuthentication
 from lib_transcendence.exceptions import MessagesException
 from lib_transcendence.services import request_users
-from rest_framework.exceptions import AuthenticationFailed
 
 
 class UserMeAuthentication(AbstractAuthentication):

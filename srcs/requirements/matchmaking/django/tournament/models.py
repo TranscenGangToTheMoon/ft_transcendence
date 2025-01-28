@@ -1,17 +1,17 @@
+import time
 from datetime import datetime, timezone, timedelta
 from math import log2
-import time
 from threading import Thread
 
 from django.db import models
 from django.db.models.functions import Random
-from lib_transcendence.game import FinishReason
-from lib_transcendence.sse_events import create_sse_event, EventCode
-from lib_transcendence.validate_type import validate_type, surchage_list
 from rest_framework.exceptions import APIException
 
 from baning.models import delete_banned
 from blocking.utils import delete_player_instance, model_exists
+from lib_transcendence.game import FinishReason
+from lib_transcendence.sse_events import create_sse_event, EventCode
+from lib_transcendence.validate_type import validate_type, surchage_list
 from lobby.models import LobbyParticipants
 from matchmaking.create_match import create_tournament_match, create_tournament_match_not_played
 from matchmaking.utils.model import ParticipantsPlace

@@ -2,13 +2,12 @@ from django.db import models
 from django.db.models import Q
 from rest_framework.exceptions import APIException
 
+from baning.models import delete_banned
 from blocking.models import Blocked
+from blocking.utils import delete_player_instance
 from lib_transcendence.game import GameMode
 from lib_transcendence.lobby import MatchType, Teams
 from lib_transcendence.sse_events import EventCode, create_sse_event
-
-from baning.models import delete_banned
-from blocking.utils import delete_player_instance
 from matchmaking.create_match import create_match
 from matchmaking.utils.model import ParticipantsPlace
 from matchmaking.utils.sse import send_sse_event

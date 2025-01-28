@@ -1,7 +1,7 @@
 from django.db import models
-from lib_transcendence.game import GameMode
 
 from blocking.utils import delete_player_instance
+from lib_transcendence.game import GameMode
 from matchmaking.create_match import create_match
 from matchmaking.utils.model import ParticipantsPlace
 

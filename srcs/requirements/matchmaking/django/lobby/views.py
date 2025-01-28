@@ -1,12 +1,12 @@
-from lib_transcendence.game import GameMode
-from lib_transcendence.exceptions import MessagesException
-from lib_transcendence.permissions import GuestCannotCreate
-from lib_transcendence.serializer import SerializerAuthContext
-from lib_transcendence.sse_events import EventCode
 from rest_framework import generics, status
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 
+from lib_transcendence.exceptions import MessagesException
+from lib_transcendence.game import GameMode
+from lib_transcendence.permissions import GuestCannotCreate
+from lib_transcendence.serializer import SerializerAuthContext
+from lib_transcendence.sse_events import EventCode
 from lobby.serializers import LobbySerializer, LobbyParticipantsSerializer, LobbyFinishMatchSerializer
 from matchmaking.utils.participant import get_lobby_participant
 from matchmaking.utils.place import get_lobby

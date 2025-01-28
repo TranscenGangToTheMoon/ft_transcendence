@@ -1,8 +1,8 @@
-from lib_transcendence.serializer import SerializerAuthContext
-from lib_transcendence.sse_events import EventCode
 from rest_framework import generics
 
 from chat.serializers import MessageSerializer
+from lib_transcendence.serializer import SerializerAuthContext
+from lib_transcendence.sse_events import EventCode
 from matchmaking.utils.participant import get_lobby_participant, get_tournament_participant
 from matchmaking.utils.place import get_lobby, get_tournament
 
