@@ -94,13 +94,8 @@ document.getElementById('playGame').addEventListener('click', async e => {
 })
 
 function forPhoneChanges(){
-    try {
-        document.getElementById('customGame').style.display = 'none';
-        document.getElementById('clash').style.display = 'none';
-    }
-    catch(error){
-        document.getElementById('container').innerText = error;
-    }
+    document.getElementById('customGame').style.display = 'none';
+    document.getElementById('clash').style.display = 'none';
 }
 
 async function homePageInit() {
