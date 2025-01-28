@@ -1,21 +1,21 @@
 <div class="container">
     <div id="lobbyHeader" class="d-flex flex-column row">
         <button id="leaveLobby" class="btn btn-danger col-2">Leave Lobby</button>
-        <div id="gameInfos" class="col-2 align-items-center">
+        <div id="gameInfos" class="align-items-center">
             <div id="gameType">[insert game type]</div>
             <div id="gameId">Lobby code :</div>
         </div>
     </div>
     <div id="lobbyInterface" class="row">
-        <form id="joinGameField" class="col-2">
+        <form id="joinGameField" class="col-md-4 d-flex flex-column gap-1">
             <label for="joinCode">Join Lobby</label>
-            <div class="d-flex">
+            <div class="d-flex gap-1">
                 <input class="form-control" type="text" id="joinCode" placeholder="code">
                 <button class="btn btn-secondary" id="joinLobby">Join</button>
             </div>
             <div class="inputError" id="joinLobbyError"></div>
-            <div class="dropdown">
-                <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" id="inviteFriends">
+            <div class="dropdown w-100">
+                <button class="btn btn-primary dropdown-toggle w-100" type="button" data-bs-toggle="dropdown" id="inviteFriends">
                   Invite Friends
                 </button>
                 <div id="feedback" style="display: none;">Link copied to clipboard</div>
@@ -32,7 +32,7 @@
               </div>
         </form>
         <div id="lobbyOptions" class="col">
-            <div id="teamSelector">
+            <div id="teamSelector" class="d-flex">
                 <div class="team" id="teamA">
                     <label for="teamADisplay" id="teamALabel">Team A</label>
                     <div id="teamADisplay" class="teamDisplay dropzone"></div>

@@ -67,6 +67,10 @@ class PongCLI(App):
                 finally:
                     self.SSEConnected = False
 
+    @work
+    async def pushGamePage(self):
+        await self.push_screen(GamePage())
+
     def stopSSE(self):
         if (self.SSEConnected == False):
             return

@@ -1,38 +1,18 @@
 #lobbyHeader {
-    /* background-color: red; */
     padding: 10px;
     display: flex;
 }
 
 #lobbyOptions{
-    /* background-color: bisque; */
     width: 100%;
     text-align: center;
 }
 
-/* #leaveGame {
-    background-color: green;
-}
-#gameType {
-    background-color: purple;
-}
-
-#gameId {
-    background-color: goldenrod;
-} */
-
 #lobbyInterface {
-    /* background-color: grey; */
     display: flex;
 }
 
-#joinGameField {
-    /* background-color: cornflowerblue; */
-    /* height: 100%; */
-}
-
 #teamSelector {
-    /* background-color: brown; */
     display: flex;
     justify-content: center;
 }
@@ -49,14 +29,6 @@
 #benchPlayerListLabel {
     width: 100%;
     text-align: center;
-}
-
-#bench {
-    background-color: aquamarine;
-    position: absolute; /* ou `absolute` si nécessaire */
-    right: 0;
-    margin-right: 0;
-    padding-right: 0;
 }
 
 #playButton {

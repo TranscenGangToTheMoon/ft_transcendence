@@ -8,6 +8,7 @@ function displayGameChatMessage(event, isJson=true) {
 	let chatBox = document.getElementById('messagesGame');
 	if (chatBox) {
 		chatBox.appendChild(messageDiv);
+		chatBox.scrollTop = chatBox.scrollHeight;
 	}
 }
 

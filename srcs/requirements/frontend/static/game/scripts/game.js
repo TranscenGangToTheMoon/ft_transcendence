@@ -1,3 +1,8 @@
+if (typeof fromLobby === 'undefined')
+    var fromLobby;
+if (typeof fromTournament === 'undefined')
+    var fromTournament;
+
 (function PongGame() {
 
     const config = {
@@ -536,7 +541,13 @@ function initSocket(match_code, socketPath, socketMode){
         window.PongGame.resizeCanvas();
     });
     gameSocket.on('connect_error', (error)=> {
-        // console.log('error', error);
+        localStorage.removeItem('game-event');
+        handleRoute();
+        // console.log('connect_error', error);
+        // navigateTo('/');
+        // setTimeout(() => {
+        //     displayMainAlert('Error', error.message);
+        // }, 500);
     })
     gameSocket.on('disconnect', async () => {
         gameSocket.close();
@@ -705,13 +716,11 @@ async function initData(data, socketPath, socketMode){
 	}
     document.getElementById('gameArea').classList.replace('d-none', 'd-flex');
     document.getElementById('opponentWait').classList.replace('d-flex', 'd-none');
-	console.log(userInformations.username);
     document.getElementById('playerUsername').innerText = userInformations.username;
     document.getElementById('enemyUsername').innerText = PongGame.info.enemyTeam.players.players[0].username;
 	initSocket(data.code, socketPath, socketMode);
     setTimeout(async () => {
         if (!cancelTimeout && gameSocket && !isModalOpen()){
-            console.log('donc',gameSocket);
             displayMainAlert('Error', 'Unable to establish connection with socket server');
             history.go(-1);
         }
@@ -724,7 +733,7 @@ document.getElementById('confirmModal').addEventListener('hidden.bs.modal', () =
 
 function checkGameAuthorization(){
     console.log(window.location.pathname);
-    // if (reconnect()) return;
+    if (reconnect()) return;
     if (userInformations.is_guest && window.location.pathname === '/game/ranked')
         throw `${window.location.pathname}`;
     if (window.location.pathname === '/game/tournament' && typeof tournamentData === 'undefined')
@@ -820,10 +829,19 @@ function reconnect(){
     if (event){
         event = JSON.parse(event);
         let gameMode = window.location.pathname.split('/')[2]
-        if (event.data.game_mode === gameMode){
+        console.log(event.data.game_mode, gameMode);
+        if (event.data.game_mode === gameMode || 
+            (event.data.game_mode === 'custom_game' && gameMode === '1v1') ||
+            (event.data.game_mode === 'custom_game' && gameMode === '3v3')){
             initData(event.data, event.target[0].url, event.target[0].type);
-            if (gameMode === 'tournament')
+            if (gameMode === 'tournament'){
+                if (!fromTournament)
+                    localStorage.setItem('tournament-code-reconnect', localStorage.getItem('tournament-code'));
                 fromTournament = true;
+            }
+            else if (event.data.game_mode === 'custom_game'){
+                fromLobby = true;
+            }
             return 1;
         }
     }
@@ -851,10 +869,11 @@ async function initGame(){
                 SSEListeners.set('tournament-finish', tournamentFinished);
                 sse.addEventListener('tournament-finish', tournamentFinished);
             }
-            await initData(...tournamentData);
+            // await initData(...tournamentData);
         }
         else if (window.location.pathname === '/game/1v1')
-            await initData(...(userInformations.lobbyData));
+            return;
+            // await initData(...(userInformations.lobbyData));
         else {
             if (SSEListeners.has('game-start')){
                 sse.removeEventListener('game-start', SSEListeners.get('game-start'));
@@ -880,7 +899,6 @@ async function initGame(){
         if (unauthorized === window.location.pathname){
             if (!document.getElementById('alertModal').classList.contains('show'))
                 displayMainAlert("Error", `You don't have permission to play in ${unauthorized}`);
-            // await navigateTo('/');
             history.go(-1);
         }
         else{

@@ -275,6 +275,36 @@ async function tournamentMatchFinished(event){
 	loadTournament(tournament);
 }
 
+if( typeof clickedUserDiv !== 'undefined')
+    var clickedUserDiv;
+
+document.getelementById('cSpectate').addEventListener('click', async () => {
+    navigateTo('/spectate/' + clickedUserDiv.code);
+})
+
+async function updateSpectatableMatches(event){
+    event = JSON.parse(event.data);
+    console.log('received spectatable matches');
+    console.log(event);
+    const contextMenuSpectate = document.getElementById('contextMenuSpectate');
+    const matches = document.querySelectorAll('.t-match')
+    for (let match of matches){
+        let id = match.id.split('_')[1];
+        if (event.data[id]) {
+            match.code = event.data[id];
+            match.addEventListener('contextmenu', function (e){
+                e.preventDefault();
+                clickedUserDiv = this;
+                contextMenuSpectate.style.left = `${e.pageX}px`;
+                contextMenuSpectate.style.top = `${e.pageY}px`;
+                contextMenuSpectate.style.display = 'block';
+            })
+        }
+    }
+    
+    [id: code, id: code, id: code, id: code, id: code]
+}
+
 async function tournamentFinished(event){
 	event = JSON.parse(event.data);
 	closeGameChatTab();
@@ -333,6 +363,11 @@ function addTournamentSSEListeners(){
 	if (!SSEListeners.has('tournament-finish')){
 		SSEListeners.set('tournament-finish', tournamentFinished);
         sse.addEventListener('tournament-finish', tournamentFinished);
+	}
+	
+	if (!SSEListeners.has('tournament-spectatable-matches')){
+		SSEListeners.set('tournament-spectatable-matches', updateSpectatableMatches);
+		sse.addEventListener('tournament-spectatable-matches', updateSpectatableMatches);
 	}
 }
 
@@ -479,11 +514,12 @@ async function gameStart(event) {
 	event = JSON.parse(event.data);
 	if (!checkEventDuplication(event)) return;
 	console.log('game-start received (tournament)',event);
+	localStorage.setItem('tournament-code', tournament.code);
 	if (fromTournament)
 		userInformations.cancelReturn = true;
 	fromTournament = true;
 	tournamentData = [event.data, event.target[0].url, event.target[0].type];
-	// localStorage.setItem('game-event', JSON.stringify(event));
+	localStorage.setItem('game-event', JSON.stringify(event));
 	await navigateTo('/game/tournament', true, true);
 }
 
@@ -507,7 +543,13 @@ async function initTournament(){
     }
 	SSEListeners.set('game-start', gameStart);
 	sse.addEventListener('game-start', gameStart);
-
+	const oldTournamentCode = localStorage.getItem('tournament-code-reconnect');
+	if (oldTournamentCode){
+		localStorage.removeItem('tournament-code');
+		localStorage.removeItem('tournament-code-reconnect');
+		if (joinTournament(oldTournamentCode))
+			return;
+	}
 	let tournamentCode = window.location.pathname.split('/')[2];
 	try {
 		let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/play/tournament/`);

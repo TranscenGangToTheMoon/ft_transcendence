@@ -496,6 +496,7 @@ function fillTeamDetail(enemyTeamDetail, playerTeamDetail){
 
 function initSocket(socketPath, socketMode){
 	const host = window.location.origin;
+    console.log('trying to init socket');
 	const token = getAccessToken();
 	let gameSocket = io(host, {
       transports: [socketMode],
@@ -506,11 +507,13 @@ function initSocket(socketPath, socketMode){
       },
 	});
     window.gameSocket = gameSocket;
-    // console.log(socket)
 	gameSocket.on('connect', () => {
         console.log('Connected to socketIO server!');
         window.PongGame.resizeCanvas();
     });
+    gameSocket.on('connect_error', event => {
+        console.log(event);
+    })
     gameSocket.on('disconnect', () => {
         console.log('disconnected from gameSocket');
     })
@@ -534,7 +537,6 @@ function initSocket(socketPath, socketMode){
             await navigateTo('/lobby', true, true);
             return gameSocket.close();
         }
-        // console.log('received start_game');
         if (!window.PongGame.state.isGameActive)
             window.PongGame.startGame();
     })
@@ -589,6 +591,7 @@ function initSocket(socketPath, socketMode){
     gameSocket.on('game_over', async event => {
         gameSocket.close();
         gameSocket = undefined;
+        localStorage.removeItem('game-event');
         console.log('game_over received', event);
 		window.PongGame.handleGameOver(event.reason);
         if (event.reason === 'normal-end'){
@@ -669,27 +672,39 @@ async function initData(data, socketPath, socketMode){
 		console.log('Invalid game data from SSE, cannot launch game');
 		return;
 	}
+	initSocket(socketPath, socketMode);
 	document.getElementById('playerUsername1').innerText = PongGame.info.myTeam.players.players[0].username;
 	document.getElementById('playerUsername2').innerText = PongGame.info.myTeam.players.players[1].username;
 	document.getElementById('playerUsername3').innerText = PongGame.info.myTeam.players.players[2].username;
 	document.getElementById('enemyUsername1').innerText = PongGame.info.enemyTeam.players.players[0].username;
 	document.getElementById('enemyUsername2').innerText = PongGame.info.enemyTeam.players.players[1].username;
     document.getElementById('enemyUsername3').innerText = PongGame.info.enemyTeam.players.players[2].username;
-	initSocket(socketPath, socketMode);
 }
-
-// sse.addEventListener('game-start', event => {
-//     data = JSON.parse(event.data);
-// 	data = data.data;
-// 	initData(data);
-// })
 
 document.getElementById('confirmModal').addEventListener('hidden.bs.modal', () => {
     window.PongGame.resumeGame();
 })
 
+function reconnect(){
+    let event = localStorage.getItem('game-event');
+    if (event){
+        event = JSON.parse(event);
+        let gameMode = window.location.pathname.split('/')[2];
+        console.log(event.data.game_mode, gameMode);
+        if (event.data.game_mode === 'custom_game' && gameMode === '3v3'){
+            document.getElementById('opponentWait').classList.replace('d-flex', 'd-none');
+            document.getElementById('gameArea').classList.replace('d-none', 'd-flex');
+            initData(event.data, event.target[0].url, event.target[0].type);
+            if (gameMode !== 'duel' && gameMode != 'ranked')
+                fromLobby = true;
+            return 1;
+        }
+    }
+    return 0;
+}
+
 function checkGameAuthorization(){
-    console.log(window.location.pathname);
+    if (reconnect()) return;
     if (typeof fromLobby === 'undefined' || !fromLobby)
         throw `${window.location.pathname}`;
 }
@@ -701,9 +716,10 @@ function wrongConfigFileError(error){
 
 async function gameStart(event){
     document.getElementById('gameArea').classList.replace('d-none', 'd-flex');
-    document.getElementById('opponentWait').style.display = 'none';
+    document.getElementById('opponentWait').classList.replace('d-flex', 'd-none');
     data = JSON.parse(event.data);
     console.log('game-start received (game)');
+    localStorage.setItem('game-event', JSON.stringify(data));
     try {
         await initData(data.data, data.target[0].url, data.target[0].type);
     }
@@ -714,7 +730,7 @@ async function gameStart(event){
 
 async function initGame(){
     document.getElementById('gameArea').classList.replace('d-flex', 'd-none');
-    document.getElementById('opponentWait').style.display = 'block';
+    document.getElementById('opponentWait').classList.replace('d-none', 'd-flex');
     if (SSEListeners.has('game-start')){
         sse.removeEventListener('game-start', SSEListeners.get('game-start'));
         SSEListeners.delete('game-start');
@@ -727,24 +743,18 @@ async function initGame(){
         checkGameAuthorization();
         if (userInformations.lobbyData){
             try {
-                await initData(...(userInformations.lobbyData));
+                // await initData(...(userInformations.lobbyData));
                 document.getElementById('gameArea').classList.replace('d-none', 'd-flex');
-                document.getElementById('opponentWait').style.display = 'none';
+                document.getElementById('opponentWait').classList.replace('d-flex', 'd-none');
             }
             catch (error){
                 wrongConfigFileError(error);
             }
         }
-        // await initData(userInformations.lobbyData);
     }
     catch (unauthorized){
-        // if (unauthorized === window.location.pathname){
-            displayMainAlert("Error", `You don't have permission to play in ${unauthorized}`);
-            // await navigateTo('/');
-            history.go(-1);
-        // }
-        // else
-        //     wrongConfigFileError(error);
+        displayMainAlert("Error", `You don't have permission to play in ${unauthorized}`);
+        history.go(-1);
     }
 }
 

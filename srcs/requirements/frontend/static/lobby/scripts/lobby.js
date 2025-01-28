@@ -371,7 +371,10 @@ async function updateOwnTeam(player, teamDisplayDiv, teamSelectorDiv, benchDiv, 
     playerDiv.querySelector('img').src = player.profile_picture.small;
     playerDiv.querySelector('img').src = player.profile_picture.small;
     playerDiv.querySelector('.playerId').innerText = player.id;
-    playerDiv.querySelector('.playerIsReady').innerText = player.is_ready ? 'Ready' : 'Not ready';
+    const playerIsReadyButton =  playerDiv.querySelector('.playerIsReady');
+    playerIsReadyButton.innerText = player.is_ready ? 'Ready' : 'Not ready';
+    if (player.id !== userInformations.id)
+        playerIsReadyButton.classList.add('disabled');
 }
 
 async function fillPlayerList(noTeam=false){
@@ -530,10 +533,7 @@ async function lobbyGameStart(event){
     event = JSON.parse(event.data);
     console.log(event);
 
-    // localStorage.setItem('game-event', JSON.stringify(event));
-    // localStorage.setItem('game-target-path', event.target[0].url);
-    // localStorage.setItem('game-target-type', event.target[0].type);
-
+    localStorage.setItem('game-event', JSON.stringify(event));
     if (matchType === '3v3'){
         await navigateTo('/game/3v3', true, true);
         fromLobby = true;
