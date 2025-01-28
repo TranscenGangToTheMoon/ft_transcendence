@@ -53,7 +53,7 @@ function addChatUserCardListeners(chatUserCard, chatUserCardDeleteButton, chatUs
 
 async function setChatUserCard(chatInfo, chatUserCard) {
 	chatUserCard.id = 'chatListElement' + chatInfo.target;
-	chatUserCard.className = "chatUserCard bg-light bg-gradient d-flex position-relative p-1 border rounded mb-1 gap-2";
+	chatUserCard.className = "chatUserCard bg-light bg-gradient d-flex position-relative p-1 border rounded gap-2";
 
 	await loadContent('/chatTemplates/chatUserCard.html', chatUserCard.id);
 	chatUserCard.querySelector('.chatUserCardAvatar').src = chatInfo.targetAvatar.small;
