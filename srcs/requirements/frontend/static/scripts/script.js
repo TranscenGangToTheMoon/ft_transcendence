@@ -128,6 +128,7 @@ async function  indexInit(auto=true) {
         await loadScript('/scripts/serverSentEventsUtils.js');
         await loadScript('/notification/scripts/notificationUtils.js');
         await loadScript('/scripts/utils.js');
+        loadCSS('/css/styles.css', false);
         await fetchUserInfos();
         if (userInformations.code === 'user_not_found'){
             console.log('user was deleted from database, switching to guest mode');
@@ -144,7 +145,6 @@ async function  indexInit(auto=true) {
         console.log(`added ${window.location.pathname} to history with state ${currentState}`)
         history.replaceState({state: currentState}, '', window.location.pathname);
         incrementCurrentState();
-        loadCSS('/css/styles.css', false);
         quitLobbies('', window.location.pathname);
         handleRoute();
     }
