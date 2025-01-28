@@ -477,10 +477,10 @@ function initSocket(match_code){
 		window.PongGame.drawGame();
 	})
     gameSocket.on('connect_error', (error)=> {
-        document.getElementById('spectateError').innerText = 'Impossible to spectate that game';
-        setTimeout(() => {
-            document.getElementById('spectateError').innerText = '';
-        }, 3000)
+        navigateTo('/');
+    })
+    gameSocket.on('error', (error)=> {
+        navigateTo('/');
     })
     gameSocket.on('disconnect', async () => {
         gameSocket.close();

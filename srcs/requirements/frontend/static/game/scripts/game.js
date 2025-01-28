@@ -537,6 +537,24 @@ function initSocket(match_code, socketPath, socketMode){
         if (!PongGame.state.isGameActive)
             PongGame.startGame();
     })
+    gameSocket.on('call_spectate', event => {
+        console.log('received call_spectate');
+        navigateTo('/spectate/' + event.code, true, true);
+        setTimeout(() => {
+            if (typeof fromTournament !== 'undefined' && fromTournament) {
+                localStorage.setItem('tournament-code-reconnect', localStorage.getItem('tournament-code'));
+                fromTournament = true;
+            }
+            else if (typeof fromLobby !== 'undefined' && fromLobby) {
+                fromLobby = true;
+            }
+            if (gameSocket !== undefined) {
+                gameSocket.close();
+                gameSocket = undefined;
+            }
+            localStorage.removeItem('game-event');
+        }, 500);
+    })
     gameSocket.on('start_countdown', event => {
         PongGame.startCountdown();
     })
