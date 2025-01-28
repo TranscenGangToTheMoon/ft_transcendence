@@ -119,6 +119,13 @@ class TournamentParticipantsSerializer(Serializer):
         user = self.context['auth_user']
         tournament = get_tournament(create=True, code=self.context.get('code'))
 
+        try:
+            user = tournament.participants.get(user_id=user['id'], connected=False)
+            user.reconnect()
+            return user
+        except TournamentParticipants.DoesNotExist:
+            pass
+
         verify_place(user, tournament)
 
         if tournament.created_by == user['id']:

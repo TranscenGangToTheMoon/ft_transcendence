@@ -171,11 +171,11 @@ class TournamentParticipants(ParticipantsPlace, models.Model):
 
     def delete(self, using=None, keep_parents=False):
         tournament = self.tournament
-        last_member = tournament.participants.count() == 1
 
         if tournament.is_started:
             self.disconnect()
         else:
+            last_member = tournament.participants.count() == 1
             delete_player_instance(self.user_id)
             if not last_member and not self.tournament.is_started:
                 send_sse_event(EventCode.TOURNAMENT_LEAVE, self)
@@ -195,6 +195,10 @@ class TournamentParticipants(ParticipantsPlace, models.Model):
         self.save()
         return False
 
+    def reconnect(self):
+        self.connected = True
+        self.save()
+
     def disconnect(self):
         self.connected = False
         self.eliminate()
@@ -206,9 +210,9 @@ class TournamentMatches(models.Model):
     match_id = models.IntegerField(null=True, default=None)
     match_code = models.CharField(max_length=4, null=True, default=None)
     n = models.IntegerField()
-    winner = models.ForeignKey(TournamentParticipants, on_delete=models.CASCADE, related_name='wins', null=True, default=None)
-    user_1 = models.ForeignKey(TournamentParticipants, on_delete=models.CASCADE, related_name='matches_1', null=True)
-    user_2 = models.ForeignKey(TournamentParticipants, on_delete=models.CASCADE, related_name='matches_2', null=True)
+    winner = models.ForeignKey(TournamentParticipants, on_delete=models.SET_NULL, related_name='wins', null=True, default=None)
+    user_1 = models.ForeignKey(TournamentParticipants, on_delete=models.SET_NULL, related_name='matches_1', null=True)
+    user_2 = models.ForeignKey(TournamentParticipants, on_delete=models.SET_NULL, related_name='matches_2', null=True)
     score_winner = models.IntegerField(null=True, default=None)
     score_looser = models.IntegerField(null=True, default=None)
     finish_reason = models.CharField(max_length=20, null=True, default=None)
