@@ -130,6 +130,8 @@ async function  indexInit(auto=true) {
         await loadScript('/scripts/utils.js');
         loadCSS('/css/styles.css', false);
         await fetchUserInfos();
+        if (!userInformations)
+            return;
         if (userInformations.code === 'user_not_found'){
             console.log('user was deleted from database, switching to guest mode');
             await generateToken();
