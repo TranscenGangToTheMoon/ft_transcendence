@@ -284,6 +284,7 @@ function displayMessages(chatInfo, chatMessages, isMore = false){
 
 async function displayGameInviteInChat(inviteInfo) {
 	chatInfo = openChat[userChat[inviteInfo.user]];
+	if (!chatInfo) return;
 	var messagesDiv = document.getElementById('messages'+chatInfo.target);
 	if (!messagesDiv) return;
 	createChatGameInviteMessage(inviteInfo, messagesDiv);

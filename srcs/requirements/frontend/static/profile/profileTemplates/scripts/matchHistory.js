@@ -139,7 +139,7 @@ function addMatchDetail(){
                     playerRow.className = 'row m-auto';
                     playerRow.style.backgroundColor = `${i === 'a' ? 'rgba(255, 0, 0, 0.54)' : 'rgba(0, 77, 255, 0.54)'}`;
                     playerRow.innerHTML = `
-                    <img class='col-2 p-1' src='${player['profile-picture']}' onerror="this.onerror=null; this.src='/assets/imageNotFound.png'" 
+                    <img class='col-2 p-1' src='${player['profile_picture'].small}' onerror="this.onerror=null; this.src='/assets/imageNotFound.png'" 
                     alt="profile pic"></img>
                     <div class='col m-auto'>${player.username}</div>
                     `
