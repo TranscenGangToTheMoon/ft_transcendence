@@ -390,7 +390,7 @@ https://localhost:4443/api/game/
     "created_at": "datetime",
     "created_by": "int",
     "matches": {
-        "round_of_16": ["MatchInstance", "MatchInstance", "..."],
+        "round-of-16": ["MatchInstance", "MatchInstance", "..."],
         "quarter-final": ["..."],
         "semi-final": ["..."],
         "final": ["..."]
@@ -661,7 +661,7 @@ https://localhost:4443/api/game/
     "created_at": "datetime",
     "created_by": "int",
     "matches": {
-        "round_of_16": ["MatchInstance", "MatchInstance", "..."],
+        "round-of-16": ["MatchInstance", "MatchInstance", "..."],
         "quarter-final": ["..."],
         "semi-final": ["..."],
         "final": ["..."]

@@ -38,7 +38,7 @@ function historyBracket(matches, roundInsideDiv){
 function createBracket(data, history=false) {
 	const bracketDiv = document.getElementById('bracket');
 	bracketDiv.innerHTML = '';
-	const rounds = ['round of 16', 'quarter-final', 'semi-final', 'final'];
+	const rounds = ['round-of-16', 'quarter-final', 'semi-final', 'final'];
 	let firstPassed = false;
 
 	rounds.forEach(roundName => {

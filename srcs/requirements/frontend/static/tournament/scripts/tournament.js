@@ -404,11 +404,11 @@ function loadTournament(tournament){
 	if (tournament.matches != null){
 		document.getElementById('leaveTournament').style.display = 'none';
 		if ((!tournament.matches['quarter-final']|| !tournament.matches['quarter-final'].length)
-			&& tournament.matches['round of 16']
+			&& tournament.matches['round-of-16']
 		){
 			tournament.matches['quarter-final'] = [];
-			for (i = 0; i < tournament.matches['round of 16'].length / 2; ++i)
-				tournament.matches['quarter-final'].push(getMatch(i+1, 'round of 16', tournament));
+			for (i = 0; i < tournament.matches['round-of-16'].length / 2; ++i)
+				tournament.matches['quarter-final'].push(getMatch(i+1, 'round-of-16', tournament));
 		} 
 		if ((!tournament.matches['semi-final']|| !tournament.matches['semi-final'].length)
 			&& tournament.matches['quarter-final']

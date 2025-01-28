@@ -38,7 +38,7 @@ class TournamentSize:
 
 
 class Tournament(models.Model):
-    stage_labels = {0: 'final', 1: 'semi-final', 2: 'quarter-final', 3: 'round of 16'}
+    stage_labels = {0: 'final', 1: 'semi-final', 2: 'quarter-final', 3: 'round-of-16'}
     start_countdown = {
         4: 4,
         8: 7,
