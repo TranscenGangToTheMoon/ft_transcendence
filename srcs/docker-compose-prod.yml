@@ -135,6 +135,7 @@ services:
 
 ##### ========== Event-queue ============================================= #####
   event-queue:
+    restart: on-failure
     image: redis:alpine
     networks:
         - redis-network
