@@ -33,9 +33,7 @@ async function apiRequest(token, endpoint, method="GET", authType="Bearer",
         .catch(async error =>{
             if (error.message === 'relog')
                 return apiRequest(getAccessToken(), endpoint, method, authType, contentType, body);
-            if (error.code === 500 || error.message === 'Failed to fetch')
-                document.getElementById('container').innerText = `alala pas bien ${error.code? `: ${error.code}` : ''} (jcrois c'est pas bon)`;
-            if (error.code === 502 || error.code === 503){
+            if (error.code === 502 || error.code === 503 || error.code === 500 || error.message === 'Failed to fetch'){
                 closeExistingModals();
                 console.log('service unavailable');
                 const contentDiv = document.getElementById('content');
