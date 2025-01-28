@@ -1,5 +1,7 @@
 async function logOut(){
     sse.close();
+    await closeGameConnection(window.location.pathname);
+    localStorage.removeItem('game-event');
     emptyNotificationQueue();
     removeTokens();
     await generateToken();
@@ -7,7 +9,6 @@ async function logOut(){
     initSSE();
     clearCSS();
     clearFriendRequests();
-    await closeGameConnection(window.location.pathname);
     handleRoute();
 }
 
@@ -24,10 +25,6 @@ function clearFriendRequests(){
 
 document.getElementById('pMenuChats').addEventListener('click', async event => {
     event.preventDefault();
-    if (pathName === '/game'){
-        console.log("Error: Can't display chat while in game")
-        return cancelNavigation(undefined, '/chat');
-    }
     await displayChatsList();
 })
 

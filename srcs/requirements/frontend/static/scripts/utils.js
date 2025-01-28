@@ -1,7 +1,6 @@
 async function closeGameConnection(oldUrl){
     if (!oldUrl.includes('game') || oldUrl.includes('local')) return;
     if (typeof gameSocket !== 'undefined'){
-        console.log("je close la grosse game socket la");
         gameSocket.close();
         gameSocket = undefined;
     }
@@ -61,7 +60,6 @@ async function fetchUserInfos(forced=false) {
         try {
             let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/users/me/`);
             userInformations = data;
-            console.log(userInformations);
         }
         catch (error) {
             if (error.message === 'relog')
@@ -83,10 +81,7 @@ function isModalOpen() {
 async function quitLobbies(oldUrl, newUrl){
     await closeGameChatTab();
     if (oldUrl === '/service-unavailable') return;
-    console.log('je passe pourtant');
     let regex = /\/[A-Za-z]+\/[0-9]+/i;;
-    console.log('hey' ,regex.test(newUrl));
-    console.log('hey1' ,localStorage.getItem('lobbyCode'));
     if (localStorage.getItem('lobbyCode') && !regex.test(newUrl)){
         try {
             await apiRequest(getAccessToken(), `${baseAPIUrl}/play${localStorage.getItem('lobbyCode')}/`, 'DELETE');
@@ -99,7 +94,6 @@ async function quitLobbies(oldUrl, newUrl){
     if (oldUrl.includes('/tournament') && typeof tournament !== 'undefined' && tournament && (!fromTournament && (
         containsCode(oldUrl) && !containsCode(newUrl)
     ))){
-        console.log(fromTournament);
         try {
             await apiRequest(getAccessToken(), `${baseAPIUrl}/play/tournament/${tournament.code}/`, 'DELETE');
         }

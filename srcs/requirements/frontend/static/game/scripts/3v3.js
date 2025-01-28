@@ -85,7 +85,6 @@
   
         const baseWidth = config.canvasWidth;
         const baseHeight = config.canvasHeight + document.getElementById('gameInfo').offsetHeight;
-        console.log('BASE HEIGHT', baseHeight);
   
         let scale = Math.min(windowWidth / baseWidth, windowHeight / baseHeight);
         
@@ -130,11 +129,8 @@
     function startGame() {
         state.isGameActive = true;
         state.cancelAnimation = false;
-        // console.log('game started');
 		state.isCountDownActive = false;
 		state.lastFrame = 0;
-		// state.ball.speedX = config.defaultBallSpeed;
-		// state.ball.speedY = config.defaultBallSpeed;
 		state.ball.speed = config.defaultBallSpeed;
 
         function gameLoop(timestamp) {
@@ -165,7 +161,6 @@
     }
 
     function stopGame(animate=false, reason=undefined) {
-        console.log('je passe ici normalement');
         state.isGameActive = false;
         ctx.fillText('Game over', config.canvasWidth / 2, config.canvasHeight / 2);
         if (reason)
@@ -238,13 +233,9 @@
 
             const easeOutProgress = 1 - Math.pow(1 - progress, 3);
 
-            // console.log(startPositions);
             for (let i in startPositions){
-                // console.log('paddle_id', i);
                 state.paddles[i].y = startPositions[i] + (target - startPositions[i]) * easeOutProgress;
             }
-            // state.paddles.left.y = startLeft + (target - startLeft) * easeOutProgress;
-            // state.paddles[userInformations.id].y = startRight + (target - startRight) * easeOutProgress;
 
             drawPaddleReturn();
 
@@ -288,7 +279,6 @@
         if (state.keys['ArrowUp'] && state.keys['ArrowDown']){
             if (state.paddles[userInformations.id].speed != 0){
                 if (typeof gameSocket !== 'undefined'){
-                    console.log('emitting stop_moving');
                     gameSocket.emit('stop_moving', {'position': state.paddles[userInformations.id].y});
                 }
                 state.paddles[userInformations.id].speed = 0;
@@ -298,11 +288,8 @@
             if (typeof gameSocket !== 'undefined'){
                 if (state.paddles[userInformations.id].speed === 1){
                 		gameSocket.emit('stop_moving', {'position': state.paddles[userInformations.id].y});
-                  	console.log('emitting stop_moving');
                 }
                 gameSocket.emit('move_up');
-				console.log('connection_status: ',gameSocket.connected);
-                console.log('emitting move_up')
             }
             state.paddles[userInformations.id].speed = -1;
         }
@@ -310,11 +297,8 @@
             if (typeof gameSocket !== 'undefined'){
                 if (state.paddles[userInformations.id].speed === -1){
                     gameSocket.emit('stop_moving', {'position': state.paddles[userInformations.id].y});
-                    console.log('emitting move_stop');
                 }
                 gameSocket.emit('move_down');
-                console.log('connection_status: ',gameSocket.connected);
-                console.log('emitting move_down')
             }
             state.paddles[userInformations.id].speed = 1;
         }
@@ -322,7 +306,6 @@
             state.paddles[userInformations.id].speed = 0;
             if (typeof gameSocket !== 'undefined'){
                 gameSocket.emit('stop_moving', {'position': state.paddles[userInformations.id].y});
-                console.log('emitting stop_moving');
             }
         }
 
@@ -348,17 +331,13 @@
 
     function calculateNewBallDirection(paddleY, paddleSpeed=0) {
         const impactPosition = calculateImpactPosition(state.ball.y + config.ballSize/2, paddleY, config.paddleHeight);
-        // console.log(impactPosition);
         const bounceAngle = impactPosition * config.maxBounceAngle;
 
         const speed = state.ball.speed;
-        // console.log(bounceAngle);
         const xNewSpeed = speed * Math.cos(bounceAngle);
         const yNewSpeed = speed * -Math.sin(bounceAngle);
-        // console.log(xNewSpeed, yNewSpeed);
         state.ball.speedX = state.ball.speedX < 0 ? xNewSpeed * -1 : xNewSpeed;
         state.ball.speedY = yNewSpeed;
-        // console.log(state.ball.speedX, state.ball.speedY);
     }
 
     function handlePaddleBounce(paddle){
@@ -437,12 +416,10 @@
 		if (state.ball.y < 0) {
 			state.ball.y = -state.ball.y;
 			state.ball.speedY = -state.ball.speedY;
-			console.log('bouncing up', Date.now());
 		}
 		if (state.ball.y + config.ballSize > config.canvasHeight) {
 			state.ball.y -= (state.ball.y + config.ballSize) - config.canvasHeight;
 			state.ball.speedY = -state.ball.speedY;
-			console.log('bouncing down', Date.now());
 		}
 
         for (let paddle in state.paddles){
@@ -477,7 +454,6 @@
 function fillTeamDetail(enemyTeamDetail, playerTeamDetail){
     enemyTeamDetail.title += PongGame.info.enemyTeam.name;
     playerTeamDetail.title += PongGame.info.myTeam.name;
-    console.log()
     for (let player in PongGame.info.myTeam.players.players){
         player = PongGame.info.myTeam.players.players[player];
         const oldContent = playerTeamDetail.getAttribute('data-bs-content');
@@ -496,7 +472,6 @@ function fillTeamDetail(enemyTeamDetail, playerTeamDetail){
 
 function initSocket(socketPath, socketMode){
 	const host = window.location.origin;
-    console.log('trying to init socket');
 	const token = getAccessToken();
 	let gameSocket = io(host, {
       transports: [socketMode],
@@ -519,9 +494,7 @@ function initSocket(socketPath, socketMode){
     })
 
     gameSocket.on('rackets', event => {
-        console.log('received rackets');
         window.PongGame.racketReceived = true;
-        console.log(event);
         window.PongGame.state.paddles = {};
         for (let [player_id, position] of Object.entries(event)){
             window.PongGame.state.paddles[player_id] = {};
@@ -530,7 +503,6 @@ function initSocket(socketPath, socketMode){
             window.PongGame.state.paddles[player_id].blockGlide = false;
             window.PongGame.state.paddles[player_id].speed = 0;
         }
-        console.log(window)
     })
     gameSocket.on('start_game', async event => {
         if (!window.PongGame.racketReceived){
@@ -541,11 +513,9 @@ function initSocket(socketPath, socketMode){
             window.PongGame.startGame();
     })
     gameSocket.on('start_countdown', event => {
-        // console.log('received start_countdown');
         window.PongGame.startCountdown();
     })
     gameSocket.on('game_state', event => {
-        // console.log('game_state received', Date.now());
 		window.PongGame.state.ball.y = event.position_y;
 		window.PongGame.state.ball.x = event.position_x;
 		window.PongGame.state.ball.speedX = event.speed_x;
@@ -556,17 +526,14 @@ function initSocket(socketPath, socketMode){
         console.log('error', error);
     })
     gameSocket.on('move_up', event => {
-        // console.log('move_up received', event.player);
         if (event.player !== userInformations.id)
             window.PongGame.state.paddles[event.player].speed = -1;
     })
     gameSocket.on('move_down', event => {
-        // console.log('move_down received', event.player);
         if (event.player !== userInformations.id)
             window.PongGame.state.paddles[event.player].speed = 1;
     })
     gameSocket.on('stop_moving', event => {
-		// console.log('received stop_moving', event.player);
         if (event.player == userInformations.id)
 	        window.PongGame.state.paddles[userInformations.id].y = event.position;
 		else {
@@ -592,7 +559,6 @@ function initSocket(socketPath, socketMode){
         gameSocket.close();
         gameSocket = undefined;
         localStorage.removeItem('game-event');
-        console.log('game_over received', event);
 		window.PongGame.handleGameOver(event.reason);
         if (event.reason === 'normal-end'){
             addScore();
@@ -600,7 +566,6 @@ function initSocket(socketPath, socketMode){
         else
             document.getElementById('gameOverContent').innerHTML = `${event.reason}`;
         const gameOverModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('gameOverModal'));
-        console.log(gameOverModal);
         gameOverModal.show();
         
         const popovers = document.querySelectorAll('.teamDetail');
@@ -690,7 +655,6 @@ function reconnect(){
     if (event){
         event = JSON.parse(event);
         let gameMode = window.location.pathname.split('/')[2];
-        console.log(event.data.game_mode, gameMode);
         if (event.data.game_mode === 'custom_game' && gameMode === '3v3'){
             document.getElementById('opponentWait').classList.replace('d-flex', 'd-none');
             document.getElementById('gameArea').classList.replace('d-none', 'd-flex');
@@ -718,7 +682,6 @@ async function gameStart(event){
     document.getElementById('gameArea').classList.replace('d-none', 'd-flex');
     document.getElementById('opponentWait').classList.replace('d-flex', 'd-none');
     data = JSON.parse(event.data);
-    console.log('game-start received (game)');
     localStorage.setItem('game-event', JSON.stringify(data));
     try {
         await initData(data.data, data.target[0].url, data.target[0].type);

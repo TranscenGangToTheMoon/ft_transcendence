@@ -18,7 +18,6 @@ function displayBadges(){
 }
 
 function removeBadges(type){
-    console.log('je remove pourtant')
     let toDelete = 0;
     userInformations.notifications[type] = 0;
     getBadgesDivs(document);
@@ -26,7 +25,6 @@ function removeBadges(type){
         let indicator = badgeDiv.querySelector(`.indicator`);
         if (indicator){
             toDelete = parseInt(indicator.innerText);
-            console.log(toDelete);
             if (isNaN(toDelete))
                 toDelete = 0;
             indicator.remove();
@@ -52,7 +50,6 @@ function removeBadges(type){
 }
 
 function addNotificationIndicator(div, number){
-    // console.log(div.cloneNode(true));
     if (!div.querySelector('.indicator')){
         const indicator = document.createElement('div');
         indicator.classList.add('indicator');
@@ -103,7 +100,7 @@ function handleProfilePicNotification(target, img, notification, toastContainer,
         event.stopImmediatePropagation();
         event.stopPropagation();
         try {
-            let data = await apiRequest(getAccessToken(), target.url, target.method);
+            let data = await apiRequest(getAccessToken(), '/' + target.url, target.method);
             if (target.url.includes('friend_request')){
                 userInformations.notifications['friend_requests'] -= 1;
                 if (userInformations.notifications['friend_requests'])
@@ -124,7 +121,6 @@ function handleProfilePicNotification(target, img, notification, toastContainer,
 }
 
 async function addTargets(notification, targets, toastInstance, toastContainer){
-    console.log(targets);
     const notificationBody = notification.querySelector('.toast-body');
     Object.entries(targets).forEach(([i, target]) => {
         if (target.display_icon){
@@ -138,7 +134,7 @@ async function addTargets(notification, targets, toastInstance, toastContainer){
         if (target.display_name){
             var button = document.createElement('button');
             button.id = `notif${notification.id}-nametarget${i}`;
-            button.className = 'notif-button';
+            button.className = 'notif-button btn btn-secondary mx-1';
             button.innerText = target.display_name;
 
             notificationBody.appendChild(button);
@@ -163,11 +159,9 @@ function dismissNotification(notification, toastInstance, toastContainer){
     toastInstance.hide();
     setTimeout (() => {
         displayedNotifications--;
-        console.log(notification);
         toastContainer.removeChild(document.getElementById(notification.id));
         if (notificationQueue.length){
             let notif= notificationQueue.shift();
-            console.log(notificationQueue);
             displayNotification(notif[0], notif[1], notif[2], notif[3], notif[4]);
         }
     }, 500);
@@ -189,7 +183,7 @@ async function displayNotification(icon=undefined, title=undefined, body=undefin
     if (title)
         notification.querySelector('strong').innerText = title;
     if (body)
-        notification.querySelector('.toast-body').innerText = body;
+        notification.querySelector('.toast-body').innerText = body.length > 200 ? body.slice(0, 200) + "..." : body;
     if (mainListener)
         notification.addEventListener('click', event => {
             if (event.target.classList.contains('btn-close')) return;

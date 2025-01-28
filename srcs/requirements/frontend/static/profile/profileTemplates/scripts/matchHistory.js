@@ -67,12 +67,9 @@ async function getMoreMatches(){
     try {
         let data = await apiRequest(getAccessToken(), loadedHistory.next);
         loadedHistory.next = data.next;
-        // console.log('addition',data);
         for (i in data.results){
             loadedHistory.results.push(data.results[i]);
-            // console.log('adding', data.results[i]);
         }
-        // console.log('total', loadedHistory);
         loadMatches(true);
         addMatchDetail();
     }
@@ -123,10 +120,8 @@ function addMatchDetail(){
     matchDivs.forEach(matchDiv => {
         matchDiv.addEventListener('click', event => {
             const match = loadedHistory.results.find(match => match.id === matchDiv.linkedMatchId);
-            // console.log('lematch', match);
             const detailDiv = document.getElementById('matchTeamDetail');
             detailDiv.innerHTML = '';
-            // console.log(match.teams);
             for (i in match.teams){
                 let team = match.teams[i];
                 const teamRow = document.createElement('div');
