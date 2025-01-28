@@ -108,8 +108,8 @@ document.getElementById('joinLobby').addEventListener('click', async event => {
         }
         document.getElementById('gameId').innerText = lobby.code;
         document.getElementById('gameType').innerText = lobby.game_mode === 'clash' ? '3v3' : 'Custom Game';
-        navigateTo(`/lobby/${lobby.code}`, false);
-        // document.getElementById('settingsButton').style.display = 'none';
+        await navigateTo(`/lobby/${lobby.code}`, false);
+        openGameChatTab({type: 'lobby', 'code': lobby.code});
         await fillPlayerList();
     }
     catch (error){
