@@ -1,14 +1,14 @@
-from lib_transcendence import endpoints
-from lib_transcendence.exceptions import MessagesException, ResourceExists
-from lib_transcendence.services import request_users
-from lib_transcendence.users import retrieve_users
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
-from lib_transcendence.serializer import Serializer
 
 from chat_messages.serializers import MessagesSerializer
 from chats.models import Chats
 from chats.utils import get_chat_together
+from lib_transcendence import endpoints
+from lib_transcendence.exceptions import MessagesException, ResourceExists
+from lib_transcendence.serializer import Serializer
+from lib_transcendence.services import request_users
+from lib_transcendence.users import retrieve_users
 from user_management.models import Users
 
 

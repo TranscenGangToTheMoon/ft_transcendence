@@ -1,11 +1,11 @@
-from lib_transcendence.exceptions import MessagesException
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
-from lib_transcendence.serializer import Serializer
 
 from chat_messages.models import Messages
 from chat_messages.utils import get_chat_participants
 from chats.models import ChatParticipants, Chats
+from lib_transcendence.exceptions import MessagesException
+from lib_transcendence.serializer import Serializer
 
 
 class MessagesSerializer(Serializer):

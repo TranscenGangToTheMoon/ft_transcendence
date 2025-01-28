@@ -1,9 +1,9 @@
 from typing import Literal
 
-from lib_transcendence.exceptions import MessagesException
 from rest_framework.exceptions import NotFound
 
 from chats.models import Chats
+from lib_transcendence.exceptions import MessagesException
 
 
 def get_chat_together(user1, user2, field: Literal['user__id', 'user__username'] = 'user__username', raise_exception=False):
