@@ -133,6 +133,9 @@ class Game:
 
     class NoSuchRacket(Exception):
         pass
+        
+    class ProgrammingError(Exception):
+        pass
 
     def add_spectator(self, user_id: int, sid: str):
         with self.spec_lock:
@@ -531,7 +534,7 @@ class Game:
                 to=spectator.socket_id
             )
 
-    def get_rackets(self, side: int):
+    def get_rackets(self, side: int = 1):
         rackets = {}
         for racket in self.rackets:
             print(f"racket = {racket.position.x}", flush=True)
@@ -541,7 +544,7 @@ class Game:
                 rackets[racket.player_id] = racket.position.invert(self.canvas.x).x - racket.width
         return rackets
 
-    def send_rackets(self, user_id= None, sid=None):
+    def send_rackets(self, user_id=None, sid=None):
         from game_server.server import Server
         side = 1
         if sid is None:
@@ -555,7 +558,7 @@ class Game:
                     )
                 side = -1
             if self.spectators:
-                rackets = self.get_rackets(1)
+                rackets = self.get_rackets()
                 for spectator in self.spectators:
                     Server.emit(
                         'rackets',
@@ -563,9 +566,14 @@ class Game:
                         to=spectator.socket_id
                     )
         else:
-            rackets = self.get_rackets(1)
-            if self.get_racket(user_id).position.x < self.canvas.x / 2:
-                rackets = self.get_rackets(-1)
+            rackets = self.get_rackets()
+            if user_id is None:
+                raise Game.ProgrammingError('user_id cannot be None when sid is not None')
+            try:
+                if self.get_racket(user_id).position.x < self.canvas.x / 2:
+                    rackets = self.get_rackets(-1)
+            except Game.NoSuchRacket:
+                rackets = self.get_rackets()
             Server.emit(
                 'rackets',
                 data=rackets,
