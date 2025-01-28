@@ -278,7 +278,7 @@ async function tournamentMatchFinished(event){
 if( typeof clickedUserDiv !== 'undefined')
     var clickedUserDiv;
 
-document.getelementById('cSpectate').addEventListener('click', async () => {
+document.getElementById('cSpectate').addEventListener('click', async () => {
     navigateTo('/spectate/' + clickedUserDiv.code);
 })
 
