@@ -8,6 +8,51 @@ from rest_framework.exceptions import APIException
 from game_server.match import Match
 
 
+async def disconnect_old_session(player_sid, player, game_id, sid):
+    from game_server.server import Server
+    await Server._sio.leave_room(player_sid, str(player.match_id))
+    with Server._dsids_lock:
+        Server._disconnected_sids.append(player_sid)
+    await Server._sio.disconnect(player_sid)
+    Server.get_game(game_id).reconnect(player.user_id, sid)
+
+
+async def handle_spectator(user_id, sid, auth, match_code):
+    from game_server.server import Server
+    try:
+        game = Server.get_game_from_code(match_code)
+    except Server.NotFound as e:
+        raise socketioConnectError(e)
+    if game.match.game_type == 'normal':
+        game.add_spectator(user_id, sid)
+        await Server._sio.enter_room(sid, str(game.match.id))
+        print(f'Accepted user {id} to spectate', flush=True)
+        return True
+    else:
+        return False
+
+
+async def accept_connection(player, sid, game_id):
+    from game_server.server import Server
+    player.socket_id = sid
+    player.game = Server.get_game(game_id)
+    Server._clients[sid] = player
+    await Server._sio.enter_room(sid, str(game_id))
+    print(f'User {player.user_id} connected to game server', flush=True)
+
+
+def fetch_data(endpoint) -> dict:
+    try:
+        data = request_game(endpoint, 'GET')
+    except NotFound as e:
+        raise socketioConnectError(e.detail)
+    except APIException:
+        raise socketioConnectError(MessagesException.ServiceUnavailable.game)
+    if data is None:
+        raise socketioConnectError(MessagesException.ServiceUnavailable.game)
+    return data
+
+
 async def connect(sid, environ, auth):
     from game_server.server import Server
     token = auth.get('token')
@@ -21,73 +66,22 @@ async def connect(sid, environ, auth):
     if user_data is None:
         raise socketioConnectError(MessagesException.Authentication.NOT_AUTHENTICATED)
     id = user_data['id']
-    print(f'User {id} connecting...{sid}', flush=True)
-    try:
-        match = request_game(endpoints.Game.fuser.format(user_id=id), 'GET')
-    except NotFound as e:
-        print('client is not awaited on a match, searching for a match to spectate', flush=True)
-        match_code = auth.get('match_code')
-        if match_code is None:
-            print('match code is none', flush=True)
-            raise socketioConnectError(e.detail)
-        try:
-            game = Server.get_game_from_code(match_code)
-        except Server.NotFound:
-            return False
-        if game.match.game_type == 'normal':
-            game.add_spectator(id, sid)
-            await Server._sio.enter_room(sid, str(game.match.id))
-            print('accepting spectator', flush=True)
-            return True
-        else:
-            return False
-    except APIException:
-        raise socketioConnectError(MessagesException.ServiceUnavailable.game)
-    if match is None:
-        raise socketioConnectError(MessagesException.ServiceUnavailable.game)
-    try:
-        game_data = request_game(endpoints.Game.fmatch_user.format(user_id=id, match_id=match['id']), 'GET')
-    except NotFound as e:
-        raise socketioConnectError(e.detail)
-    except APIException:
-        raise socketioConnectError(MessagesException.ServiceUnavailable.game)
-    if game_data is None:
-        raise socketioConnectError(MessagesException.ServiceUnavailable.game)
+    print(f'User {id} authenticated, checking player data...', flush=True)
+    match_code = auth.get('match_code')
+    if match_code is not None:
+        return await handle_spectator(id, sid, auth, match_code)
+    match = fetch_data(endpoints.Game.fuser.format(user_id=id))
+    game_data = fetch_data(endpoints.Game.fmatch_user.format(user_id=id, match_id=match['id']))
+    print(f'Player {id} informations checked, accepting new socketio connection...', flush=True)
     game_id = game_data['id']
     if not Server.does_game_exist(game_id):
         match = Match(game_data)
         Server.create_game(match)
     player = Server.get_player(id)
     player_sid = player.socket_id
-    print(f'player sid: {player_sid}', flush=True)
     if player_sid != '' and player_sid != sid:
-        match_code = auth.get('match_code')
-        if match_code is None:
-            await Server._sio.leave_room(player_sid, str(player.match_id))
-            with Server._dsids_lock:
-                Server._disconnected_sids.append(player_sid)
-            await Server._sio.disconnect(player_sid)
-            Server.get_game(game_id).reconnect(player.user_id, sid)
-        else:
-            print('spectator connecting', flush=True)
-            try:
-                game = Server.get_game_from_code(match_code)
-            except Server.NotFound:
-                print('game not found', flush=True)
-                return False
-            if game.match.game_type == 'normal':
-                game.add_spectator(id, sid)
-                await Server._sio.enter_room(sid, str(game.match.id))
-                print('accepting spectator', flush=True)
-                return True
-            else:
-                print('game type is 3v3')
-                return False
-    player.socket_id = sid
-    player.game = Server.get_game(game_id)
-    Server._clients[sid] = player
-    await Server._sio.enter_room(sid, str(game_id))
-    print(f'User {id} connected & authenticated', flush=True)
+        await disconnect_old_session(player_sid, player, game_id, sid)
+    await accept_connection(player, sid, game_id)
 
 
 async def move_up(sid):
