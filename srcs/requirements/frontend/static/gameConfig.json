@@ -1,0 +1,56 @@
+{
+    "server": {
+        "tickRate": {
+            "base": 60,
+            "safe": 15
+        }
+    },
+    "canvas": {
+        "normal": {
+            "width": 1000,
+            "height": 600
+        },
+        "clash": {
+            "width": 1800,
+            "height": 750
+        },
+        "local": {
+            "width": 1500,
+            "height": 750
+        }
+    },
+    "paddle": {
+        "normal": {
+            "width": 30,
+            "height": 200,
+            "speed": 500,
+            "ledgeOffset": 100,
+            "paddleOffset": 200
+        },
+        "clash": {
+            "width": 30,
+            "height": 100,
+            "speed": 500,
+            "ledgeOffset": 100,
+            "paddleOffset": 200
+        },
+        "local": {
+            "width": 30,
+            "height": 200,
+            "speed": 500,
+            "ledgeOffset": 100,
+            "paddleOffset": 200
+        }
+    },
+    "ball": {
+        "size": 20,
+        "speed": 350,
+        "speedIncrement": 60,
+        "maxSpeed": 1500,
+        "maxBounceAngle": 1.2566370614359172,
+        "maxBounceAngle3v3": 1.0471975511965976
+    },
+    "score": {
+        "max":5
+    }
+}
