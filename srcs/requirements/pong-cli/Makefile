@@ -15,9 +15,9 @@ SHELL		:=	/bin/zsh
 
 SOURCE		:=	source $(VENV)/bin/activate
 
-ARGS		?=	# Leave empty
+ARGS		?=	-x SYSTEM -x EVENT -x DEBUG -x INFO# Leave empty
 
-CLI_FLAGS	?=	-s localhost:4443 -u xcharra -p Connessor85# Leave empty
+CLI_FLAGS	?=	-s localhost:4443 -u xcharra -p Azerty43## Leave empty
 ########################################################################################################################
 #                                                        COLORS                                                        #
 ########################################################################################################################
