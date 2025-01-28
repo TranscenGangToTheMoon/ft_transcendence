@@ -17,29 +17,31 @@ async function closeGameChatTab()
 {
 	var isTabActive = false;
 	let chatActiveTab = document.querySelector('#chatTabs .nav-link.active');
-	let buttonCollapseChat = document.getElementById('chatTabsCollapse');
     if (typeof actualGameChat !== 'undefined')
-        actualGameChat = undefined;
-	if (!chatActiveTab) return;
-	if (chatActiveTab.id === 'chatGameTabLink') isTabActive = true;
-	let chatGameTab = document.getElementById('chatGameTab');
-	let chatGameBox = document.getElementById('chatGameBox');
-	if (chatGameTab) chatGameTab.remove();
-	if (chatGameBox) chatGameBox.remove();
-	let lastTab = document.getElementById('chatTabs').lastElementChild;
-	if (!lastTab) {
-		lastClick = undefined;
-		document.getElementById('chatView').remove();
-	}
-	else if (isTabActive) {
-		lastClick = undefined;
-		if (buttonCollapseChat.getAttribute('aria-expanded') === 'true') {
-			lastTab.querySelector('a').click();
+    actualGameChat = undefined;
+    if (!chatActiveTab) return;
+    if (chatActiveTab.id === 'chatGameTabLink') isTabActive = true;
+    let chatGameTab = document.getElementById('chatGameTab');
+    let chatGameBox = document.getElementById('chatGameBox');
+    if (chatGameTab) chatGameTab.remove();
+    if (chatGameBox) chatGameBox.remove();
+    let lastTab = document.getElementById('chatTabs').lastElementChild;
+    if (!lastTab) {
+        lastClick = undefined;
+        document.getElementById('chatView').remove();
+    }
+    else if (isTabActive) {
+        let buttonCollapseChat = document.getElementById('chatTabsCollapse');
+        if (buttonCollapseChat.getAttribute('aria-expanded') === 'false') {
+			lastClick = lastTab.querySelector('a').id;
+			lastTab.querySelector('a').classList.add('active');
+			document.getElementById(lastTab.querySelector('a').getAttribute('aria-controls')).classList.add('active');
 		}
 		else {
-			lastClick = lastTab.querySelector('a').id;
+			lastClick = undefined;
+			lastTab.querySelector('a').click();
 		}
-	}
+    }
 }
 
 function closeExistingModals(){
