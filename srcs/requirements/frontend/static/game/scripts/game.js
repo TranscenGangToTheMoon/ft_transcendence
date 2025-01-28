@@ -573,8 +573,10 @@ function initSocket(match_code, socketPath, socketMode){
             else if (typeof fromLobby !== 'undefined' && fromLobby) {
                 fromLobby = true;
             }
-            gameSocket.close();
-            gameSocket = undefined;
+            if (gameSocket !== undefined) {
+                gameSocket.close();
+                gameSocket = undefined;
+            }
             localStorage.removeItem('game-event');
         }, 500);
     })
