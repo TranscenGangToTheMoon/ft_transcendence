@@ -64,8 +64,10 @@ class Tournament(models.Model):
     update_stage = models.BooleanField(default=False)
     finished = models.BooleanField(default=False)
 
-    def users_id(self):
-        return list(self.participants.filter(connected=True).values_list('user_id', flat=True))
+    def users_id(self, kwargs=None):
+        if kwargs is None:
+            kwargs = {}
+        return list(self.participants.filter(connected=True, **kwargs).values_list('user_id', flat=True))
 
     def start_timer(self):
         self.start_at = datetime.now(timezone.utc) + timedelta(seconds=20)
