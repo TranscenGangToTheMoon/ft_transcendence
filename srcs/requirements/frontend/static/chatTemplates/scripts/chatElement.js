@@ -23,11 +23,6 @@ function addChatUserCardListeners(chatUserCard, chatUserCardDeleteButton, chatUs
 			const APIAnswer = await apiRequest(getAccessToken(), `${baseAPIUrl}/chat/${chatInfo.chatId}/`, 'DELETE');
 			console.log('Chat: Chat deleted:', APIAnswer);
 			if (APIAnswer && APIAnswer.detail) throw {'code': 400, 'detail': APIAnswer.detail};
-			userInformations.notifications['chats'] -= chatInfo.lastMessagesNotRead;
-			if (userInformations.notifications['chats'] <= 0)
-				removeBadges('chats');
-			else
-				displayBadges();
 			chatUserCard.remove();
 			await closeChatTab(chatInfo);
 			displayChatsList();
