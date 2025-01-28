@@ -1,10 +1,10 @@
 from typing import Literal
 
 from django.db import models
-from lib_transcendence import endpoints
-from lib_transcendence.services import request_chat, request_matchmaking
 from rest_framework.exceptions import APIException
 
+from lib_transcendence import endpoints
+from lib_transcendence.services import request_chat, request_matchmaking
 from users.models import Users
 
 

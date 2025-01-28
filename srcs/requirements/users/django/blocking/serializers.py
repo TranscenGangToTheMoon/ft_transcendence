@@ -1,12 +1,12 @@
-from lib_transcendence.exceptions import MessagesException, ResourceExists
-from lib_transcendence.sse_events import EventCode
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
-from lib_transcendence.serializer import Serializer
 
 from blocking.models import BlockedUsers
-from friends.utils import get_friendship
 from friend_requests.models import FriendRequests
+from friends.utils import get_friendship
+from lib_transcendence.exceptions import MessagesException, ResourceExists
+from lib_transcendence.serializer import Serializer
+from lib_transcendence.sse_events import EventCode
 from sse.events import publish_event
 from users.auth import get_user, get_valid_user
 from users.serializers_utils import SmallUsersSerializer

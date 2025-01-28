@@ -1,8 +1,8 @@
 from rest_framework import serializers
-from lib_transcendence.serializer import Serializer
 
 from chat_messages.serializers import MessagesSerializer
 from chats.models import Chats
+from lib_transcendence.serializer import Serializer
 from user_management.models import Users
 
 

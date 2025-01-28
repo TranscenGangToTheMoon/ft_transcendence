@@ -1,6 +1,7 @@
 from rest_framework import generics
 from rest_framework.exceptions import NotAuthenticated, AuthenticationFailed
 from rest_framework.permissions import IsAuthenticated
+
 from lib_transcendence.exceptions import MessagesException
 
 

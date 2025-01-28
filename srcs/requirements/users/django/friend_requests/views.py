@@ -1,14 +1,14 @@
 from django.db.models import Q
-from lib_transcendence.exceptions import MessagesException
-from lib_transcendence.permissions import NotGuest
-from lib_transcendence.serializer import SerializerKwargsContext
-from lib_transcendence.sse_events import EventCode
 from rest_framework import generics
 from rest_framework.exceptions import NotFound
 
 from friend_requests.models import FriendRequests
 from friend_requests.serializers import FriendRequestsSerializer
 from friends.serializers import FriendsSerializer
+from lib_transcendence.exceptions import MessagesException
+from lib_transcendence.permissions import NotGuest
+from lib_transcendence.serializer import SerializerKwargsContext
+from lib_transcendence.sse_events import EventCode
 from profile_pictures.unlock import unlock_friends_pp
 from sse.events import publish_event
 

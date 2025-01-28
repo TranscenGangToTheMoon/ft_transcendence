@@ -2,13 +2,13 @@ import json
 import time
 from threading import Thread
 
+import redis
 from django.http import StreamingHttpResponse
 from lib_transcendence.exceptions import ServiceUnavailable
 from lib_transcendence.sse_events import EventCode
 from rest_framework import renderers
 from rest_framework.exceptions import NotFound
 from rest_framework.views import APIView
-import redis
 
 from sse.events import publish_event
 from users.auth import get_user

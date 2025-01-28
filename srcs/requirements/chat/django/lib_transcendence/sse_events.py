@@ -1,8 +1,8 @@
-from lib_transcendence.exceptions import MessagesException, ServiceUnavailable
-from lib_transcendence.request import request_service
-from lib_transcendence import endpoints
 from rest_framework.exceptions import APIException, NotFound
 
+from lib_transcendence import endpoints
+from lib_transcendence.exceptions import MessagesException, ServiceUnavailable
+from lib_transcendence.request import request_service
 from lib_transcendence.validate_type import surchage_list
 
 
@@ -36,6 +36,7 @@ class EventCode:
     TOURNAMENT_START_AT = 'tournament-start-at'
     TOURNAMENT_START_CANCEL = 'tournament-start-cancel'
     TOURNAMENT_MATCH_FINISH = 'tournament-match-finish'
+    TOURNAMENT_AVAILABLE_SPECTATE_MATCHES = 'tournament-available-spectate-matches'
     TOURNAMENT_FINISH = 'tournament-finish'
     PING = 'ping'
 

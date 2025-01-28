@@ -10,8 +10,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 import json
-from pathlib import Path
 from os import environ
+from pathlib import Path
 
 
 # Own settings

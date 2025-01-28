@@ -8,9 +8,9 @@ it handles a queue for each game modes and forms teams for each match it creates
 
 Once it has created a match it sends it to the game service that will create
 the instance of a match in it's own database and then send a request to the game server
-that is also a aiohttp/socketIO server.
+that is also an aiohttp/socketIO server.
 
-The game server then creates it's own instance of a match in its cache and launches a dedicated thread to this match.
+The game server then creates its own instance of a match in its cache and launches a dedicated thread to this match.
 The thread can now wait for players for `GAME_PLAYER_CONNECT_TIMEOUT` seconds.
 `GAME_PLAYER_CONNECT_TIMEOUT` is usually set to 5 seconds.
 

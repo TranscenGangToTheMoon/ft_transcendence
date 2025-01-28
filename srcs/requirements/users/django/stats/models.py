@@ -1,7 +1,7 @@
 from django.db import models
+
 from lib_transcendence.game import GameMode
 from profile_pictures.unlock import unlock_ranked_pp
-
 from stats.utils import get_trophies
 from users.models import Users
 

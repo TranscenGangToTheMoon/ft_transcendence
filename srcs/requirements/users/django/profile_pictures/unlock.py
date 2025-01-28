@@ -42,7 +42,7 @@ def unlock_game_played_pp(user):
         pass
 
 
-def unlock_score_pp(user):
+def unlock_scorer_pp(user):
     for pp_name, required_score in ((ProfilePicture.SCORER, 100), (ProfilePicture.GOD_SCORER, 1000)):
         try:
             assert user.stats.get(game_mode=GameMode.GLOBAL).scored >= required_score

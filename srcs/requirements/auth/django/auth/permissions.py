@@ -1,8 +1,8 @@
-from rest_framework.permissions import BasePermission
 from rest_framework.exceptions import PermissionDenied
-from lib_transcendence.exceptions import MessagesException
+from rest_framework.permissions import BasePermission
 
 from guest.group import is_guest
+from lib_transcendence.exceptions import MessagesException
 
 
 class IsNotAuthenticated(BasePermission):

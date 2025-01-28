@@ -1,7 +1,7 @@
-from lib_transcendence.permissions import NotGuest
 from rest_framework import generics
 
 from export_data.serializers import DownloadDataSerializer
+from lib_transcendence.permissions import NotGuest
 from users.auth import get_user
 
 

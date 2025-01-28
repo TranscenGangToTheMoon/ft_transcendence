@@ -1,12 +1,12 @@
-from lib_transcendence.auth import get_auth_user
-from lib_transcendence.exceptions import MessagesException
-from lib_transcendence.generate import generate_code
-from lib_transcendence.game import FinishReason
-from lib_transcendence.users import retrieve_users
 from rest_framework import serializers
-from lib_transcendence.serializer import Serializer
 
 from blocking.utils import create_player_instance
+from lib_transcendence.auth import get_auth_user
+from lib_transcendence.exceptions import MessagesException
+from lib_transcendence.game import FinishReason
+from lib_transcendence.generate import generate_code
+from lib_transcendence.serializer import Serializer
+from lib_transcendence.users import retrieve_users
 from matchmaking.utils.participant import get_participants
 from matchmaking.utils.place import get_tournament, verify_place
 from matchmaking.utils.user import verify_user
@@ -119,6 +119,13 @@ class TournamentParticipantsSerializer(Serializer):
         user = self.context['auth_user']
         tournament = get_tournament(create=True, code=self.context.get('code'))
 
+        try:
+            user = tournament.participants.get(user_id=user['id'], connected=False)
+            user.reconnect()
+            return user
+        except TournamentParticipants.DoesNotExist:
+            pass
+
         verify_place(user, tournament)
 
         if tournament.created_by == user['id']:
@@ -126,7 +133,9 @@ class TournamentParticipantsSerializer(Serializer):
         validated_data['user_id'] = user['id']
         validated_data['trophies'] = user['trophies']
         validated_data['tournament'] = tournament
-        return super().create(validated_data)
+        result = super().create(validated_data)
+        create_player_instance(self.context['request'])
+        return result
 
 
 class TournamentSearchSerializer(Serializer):

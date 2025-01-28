@@ -1,14 +1,14 @@
 from datetime import timedelta, datetime, timezone
 
 from django.conf import settings
-from lib_transcendence.exceptions import ServiceUnavailable
-from lib_transcendence.services import request_matchmaking
-from lib_transcendence import endpoints
-from lib_transcendence.game import FinishReason, GameMode
 from django.db import models
 from rest_framework.exceptions import APIException
-from lib_transcendence.users import retrieve_users
 
+from lib_transcendence import endpoints
+from lib_transcendence.exceptions import ServiceUnavailable
+from lib_transcendence.game import FinishReason, GameMode
+from lib_transcendence.services import request_matchmaking
+from lib_transcendence.users import retrieve_users
 from matches.utils import send_match_result, compute_trophies
 
 
@@ -61,7 +61,7 @@ class Matches(models.Model):
             except APIException:
                 raise ServiceUnavailable('matchmaking')
         if self.game_mode == GameMode.RANKED:
-            player = retrieve_users(self.users_id(), return_type=dict, size='large')
+            player = dict(retrieve_users(self.users_id(), return_type=dict, size='large'))
             winner = self.winner.players.first()
             looser = self.looser.players.first()
             winner_trophies, looser_trophies = compute_trophies(player[winner.user_id]['trophies'], player[looser.user_id]['trophies'])

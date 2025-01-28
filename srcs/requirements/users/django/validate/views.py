@@ -1,11 +1,11 @@
-from lib_transcendence.chat import AcceptChat
-from lib_transcendence.exceptions import MessagesException
 from rest_framework import generics
 from rest_framework.exceptions import PermissionDenied, NotFound
 
 from friends.models import Friends
 from friends.serializers import FriendsSerializer
 from friends.utils import is_friendship, get_friendship
+from lib_transcendence.chat import AcceptChat
+from lib_transcendence.exceptions import MessagesException
 from users.auth import get_user, get_valid_user
 from users.models import Users
 from users.serializers import UsersSerializer

@@ -1,8 +1,8 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
-from lib_transcendence.serializer import Serializer
 
 from guest.group import is_guest
+from lib_transcendence.serializer import Serializer
 
 
 class VerifyUserSerializer(Serializer):

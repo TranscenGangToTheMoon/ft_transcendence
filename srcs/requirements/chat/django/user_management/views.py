@@ -1,13 +1,13 @@
-from lib_transcendence.exceptions import MessagesException
-from lib_transcendence.serializer import SerializerKwargsContext
 from rest_framework import generics
 from rest_framework.exceptions import NotFound
 from rest_framework.views import APIView
 
 from chats.models import Chats
+from chats.utils import get_chat_together
+from lib_transcendence.exceptions import MessagesException
+from lib_transcendence.serializer import SerializerKwargsContext
 from user_management.models import Users
 from user_management.serializers import BlockChatSerializer, UserDataSerializer
-from chats.utils import get_chat_together
 from user_management.serializers import UserSerializer
 
 

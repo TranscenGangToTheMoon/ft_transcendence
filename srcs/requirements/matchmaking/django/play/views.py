@@ -1,11 +1,11 @@
 from threading import Thread
 
-from lib_transcendence.game import GameMode
-from lib_transcendence.exceptions import MessagesException
-from lib_transcendence.permissions import NotGuest
 from rest_framework import generics
 from rest_framework.exceptions import NotFound
 
+from lib_transcendence.exceptions import MessagesException
+from lib_transcendence.game import GameMode
+from lib_transcendence.permissions import NotGuest
 from play.models import Players
 from play.serializers import PlayersSerializer
 

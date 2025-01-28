@@ -1,7 +1,7 @@
-from lib_transcendence.users import retrieve_users
 from rest_framework import serializers
-from lib_transcendence.serializer import Serializer
 
+from lib_transcendence.serializer import Serializer
+from lib_transcendence.users import retrieve_users
 from matches.models import Matches
 from matches.serializers import TournamentMatchSerializer
 from tournaments.models import Tournaments

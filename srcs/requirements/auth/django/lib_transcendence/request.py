@@ -1,10 +1,11 @@
 import json
 from typing import Literal
 
+import requests
+from rest_framework.exceptions import AuthenticationFailed, PermissionDenied, MethodNotAllowed, NotFound, ParseError
+
 from lib_transcendence.utils import datetime_serializer
 from lib_transcendence.exceptions import Conflict, ServiceUnavailable, Throttled
-from rest_framework.exceptions import AuthenticationFailed, PermissionDenied, MethodNotAllowed, NotFound, ParseError
-import requests
 
 
 def request_service(service: Literal['auth', 'chat', 'game', 'matchmaking', 'users'], endpoint: str, method: Literal['GET', 'POST', 'PUT', 'PATCH', 'DELETE'] | str, data=None, token=None):

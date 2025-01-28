@@ -1,8 +1,9 @@
 from typing import Literal
 
+from rest_framework.exceptions import NotAuthenticated
+
 from lib_transcendence.request import request_service
 from lib_transcendence.exceptions import MessagesException
-from rest_framework.exceptions import NotAuthenticated
 
 
 def request_users(endpoint: Literal['users/me/', 'validate/chat/', 'blocked/<>/'], method: Literal['GET', 'POST', 'PUT', 'PATCH', 'DELETE'], data=None, token=None):
@@ -32,7 +33,3 @@ def request_auth(token, endpoint: Literal['update/', 'verify/', 'delete/'], meth
         raise NotAuthenticated(MessagesException.Authentication.NOT_AUTHENTICATED)
 
     return request_service('auth', endpoint, method, data, token)
-
-
-
-
