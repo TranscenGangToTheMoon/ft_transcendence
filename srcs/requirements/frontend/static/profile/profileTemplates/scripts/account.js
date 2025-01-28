@@ -128,7 +128,6 @@ document.getElementById('changeProfilePic').addEventListener('click', async ()=>
                 profilePicDiv.addEventListener('click', async ()=> {
                     try {
                         await apiRequest(getAccessToken(), `${baseAPIUrl}/users/profile-picture/${profilePic.id}/`, 'PUT');
-                        changeProfilePicModal.hide();
                         handleRoute();
                     }
                     catch(error){
@@ -225,6 +224,7 @@ async function accountInit(){
     if (userInformations.is_guest){
         document.getElementById('pDeleteAccount').classList.add('disabled');
     }
+    await fetchUserInfos(true);
     fillBanner();
     fillNicknamePlaceholder();
     setChatAcceptationOptions();
