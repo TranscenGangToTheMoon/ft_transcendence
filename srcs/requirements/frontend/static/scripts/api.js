@@ -40,7 +40,15 @@ async function apiRequest(token, endpoint, method="GET", authType="Bearer",
             if (error.code === 502 || error.code === 503){
                 closeExistingModals();
                 console.log('service unavailable');
-                // todo add triggerAlert
+                const contentDiv = document.getElementById('content');
+                console.log(document.querySelector('.unavailable'));
+                if (!document.querySelector('.unavailable')){
+                    const alertHtml = `
+                    <div class="alert alert-danger unavailable" role="alert">
+                        Service unavailable
+                    </div>`;
+                    contentDiv.insertAdjacentHTML('beforebegin', alertHtml);
+                }
             }
             throw error;
         })
