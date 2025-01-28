@@ -24,7 +24,7 @@ class Lobby(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     game_mode = models.CharField(max_length=11)
     ready_to_play = models.BooleanField(default=False)
-    playing_game = models.CharField(max_length=4, null=True, default=None)
+    game_playing = models.CharField(max_length=4, null=True, default=None)
     count = models.IntegerField(default=1)
     match_type = models.CharField(max_length=3)
 
@@ -114,7 +114,7 @@ class Lobby(models.Model):
 
     def playing(self, game_code):
         self.participants.all().update(is_ready=False)
-        self.playing_game = game_code
+        self.game_playing = game_code
         self.set_ready_to_play(False)
 
     def join(self):

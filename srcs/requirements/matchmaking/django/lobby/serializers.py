@@ -47,7 +47,7 @@ class LobbySerializer(Serializer):
             'id',
             'code',
             'is_ready',
-            'playing_game',
+            'game_playing',
             'participants',
             'max_participants',
             'created_at',
@@ -58,7 +58,7 @@ class LobbySerializer(Serializer):
             'id',
             'code',
             'is_ready',
-            'playing_game',
+            'game_playing',
             'participants',
             'max_participants',
             'created_at',
@@ -101,7 +101,7 @@ class LobbySerializer(Serializer):
         return result
 
     def update(self, instance, validated_data):
-        if instance.playing_game is not None:
+        if instance.game_playing is not None:
             raise PermissionDenied(MessagesException.PermissionDenied.LOBBY_IN_GAME)
         validated_data.pop('game_mode', None)
 
@@ -134,7 +134,7 @@ class LobbyFinishMatchSerializer(serializers.Serializer):
         ]
 
     def create(self, validated_data):
-        Lobby.objects.filter(participants__user_id__in=validated_data['players']).distinct().update(playing_game=None)
+        Lobby.objects.filter(participants__user_id__in=validated_data['players']).distinct().update(game_playing=None)
         return validated_data
 
 
@@ -186,7 +186,7 @@ class LobbyParticipantsSerializer(Serializer):
         return super().create(validated_data)
 
     def update(self, instance, validated_data):
-        if instance.lobby.playing_game is not None:
+        if instance.lobby.game_playing is not None:
             raise PermissionDenied(MessagesException.PermissionDenied.LOBBY_IN_GAME)
 
         if 'team' in validated_data:
