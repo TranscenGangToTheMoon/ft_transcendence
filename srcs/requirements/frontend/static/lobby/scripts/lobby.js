@@ -104,10 +104,10 @@ document.getElementById('joinLobby').addEventListener('click', async event => {
         document.getElementById('settingsButton').innerText = matchType;
         gameMode = lobby.game_mode === 'clash' ? '3v3': 'Custom Game';
         if (gameMode === '3v3'){
-            document.getElementById('teamSelector').style.display = 'none';
+            document.getElementById('teamSelector').classList.replace('d-flex', 'd-none');
         }
         else{
-            document.getElementById('teamSelector').style.removeProperty('display');
+            document.getElementById('teamSelector').classList.replace('d-none', 'd-flex');
             getTeam(lobby);
         }
         document.getElementById('gameId').innerText = lobby.code;
@@ -624,8 +624,8 @@ async function lobbyInit() {
             document.getElementById('settingsButton').innerText = matchType;
             gameMode = lobby.game_mode === 'clash' ? '3v3': 'Custom Game';
             if (gameMode === '3v3'){
-                // document.getElementById('settingsButton').style.display = 'none';
-                document.getElementById('teamSelector').style.display = 'none';
+                document.getElementById('settingsButton').style.display = 'none';
+                document.getElementById('teamSelector').classList.replace('d-flex', 'd-none');
             }
             else
                 getTeam(lobby);
@@ -651,7 +651,7 @@ async function lobbyInit() {
                 gameMode = lobby.game_mode === 'clash' ? '3v3': 'Custom Game';
                 if (gameMode === '3v3'){
                     // document.getElementById('settingsButton').style.display = 'none';
-                    document.getElementById('teamSelector').style.display = 'none';
+                    document.getElementById('teamSelector').classList.replace('d-flex', 'd-none');
                 }
                 else{
                     getTeam(lobby);
