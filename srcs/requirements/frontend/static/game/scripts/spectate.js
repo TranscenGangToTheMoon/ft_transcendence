@@ -477,10 +477,10 @@ function initSocket(match_code){
 		window.PongGame.drawGame();
 	})
     gameSocket.on('connect_error', (error)=> {
-        document.getElementById('spectateError').innerText = 'Impossible to spectate that game';
-        setTimeout(() => {
-            document.getElementById('spectateError').innerText = '';
-        }, 3000)
+        navigateTo('/');
+    })
+    gameSocket.on('error', (error)=> {
+        navigateTo('/');
     })
     gameSocket.on('disconnect', async () => {
         gameSocket.close();
@@ -659,11 +659,6 @@ async function gameStart(event){
 
 function forPhoneChanges(){
     try {
-        document.getElementById('gameCanvas').style.height = '300px';
-        document.getElementById('gameCanvas').style.width = '400px';
-        document.getElementById('gameCanvas').style.backgroundColor = 'blue';
-
-
         function simulateKey(type, keyCode) {
             const event = new KeyboardEvent(type, {
                 key: keyCode === 38 ? 'ArrowUp' : 'ArrowDown',

@@ -1,9 +1,9 @@
 <div class="container">
-    <div id="lobbyHeader" class="d-flex flex-column row">
-        <button id="leaveLobby" class="btn btn-danger col-2">Leave Lobby</button>
-        <div id="gameInfos" class="align-items-center">
+    <div id="lobbyHeader" class="d-flex flex-column align-items-start">
+        <button id="leaveLobby" class="btn btn-danger">Leave Lobby</button>
+        <div id="gameInfos" class="align-items-center text-muted">
             <div id="gameType">[insert game type]</div>
-            <div id="gameId">Lobby code :</div>
+            <div id="gameId" class="text-center">Lobby code :</div>
         </div>
     </div>
     <div id="lobbyInterface" class="row">
@@ -32,7 +32,7 @@
               </div>
         </form>
         <div id="lobbyOptions" class="col">
-            <div id="teamSelector" class="d-flex">
+            <div id="teamSelector" class="d-flex flex-wrap">
                 <div class="team" id="teamA">
                     <label for="teamADisplay" id="teamALabel">Team A</label>
                     <div id="teamADisplay" class="teamDisplay dropzone"></div>
@@ -43,12 +43,12 @@
                 </div>
                 <div id="bench">
                     <label for="benchPlayerList" id="benchPlayerListLabel">Bench</label>
-                    <div id="benchPlayerList" class="dropzone">
+                    <div id="benchPlayerList" class="dropzone d-flex">
                     </div>
                 </div>
             </div>
             <div id="teamDisplay"></div>
-            <button id="settingsButton">1v1</button>
+            <button id="settingsButton" class="btn btn-secondary">1v1</button>
         </div>
     </div>
     
