@@ -282,9 +282,9 @@ document.getElementById('cSpectate').addEventListener('click', async () => {
     navigateTo('/spectate/' + clickedUserDiv.code);
 })
 
-async function updateSpectatableMatches(event){
+async function updateAvailableSpectateMatches(event){
     event = JSON.parse(event.data);
-    console.log('received spectatable matches');
+    console.log('received available spectate matches');
     console.log(event);
     const contextMenuSpectate = document.getElementById('contextMenuSpectate');
     const matches = document.querySelectorAll('.t-match')
@@ -363,9 +363,9 @@ function addTournamentSSEListeners(){
         sse.addEventListener('tournament-finish', tournamentFinished);
 	}
 	
-	if (!SSEListeners.has('tournament-spectatable-matches')){
-		SSEListeners.set('tournament-spectatable-matches', updateSpectatableMatches);
-		sse.addEventListener('tournament-spectatable-matches', updateSpectatableMatches);
+	if (!SSEListeners.has('tournament-available-spectate-matches')){
+		SSEListeners.set('tournament-available-spectate-matches', updateAvailableSpectateMatches);
+		sse.addEventListener('tournament-available-spectate-matches', updateAvailableSpectateMatches);
 	}
 }
 
