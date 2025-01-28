@@ -639,7 +639,7 @@ async function initData(data, socketPath, socketMode){
 		return;
 	}
 	initSocket(socketPath, socketMode);
-    if (PongGame.info.myTeam.player?.players){
+    if (PongGame.info.myTeam.players?.players){
         document.getElementById('playerUsername1').innerText = PongGame.info.myTeam.players.players[0].username;
         document.getElementById('playerUsername2').innerText = PongGame.info.myTeam.players.players[1].username;
         document.getElementById('playerUsername3').innerText = PongGame.info.myTeam.players.players[2].username;
@@ -694,7 +694,69 @@ async function gameStart(event){
     }
 }
 
+function forPhoneChanges(){
+    try {
+        function simulateKey(type, keyCode) {
+            const event = new KeyboardEvent(type, {
+                key: keyCode === 38 ? 'ArrowUp' : 'ArrowDown',
+                keyCode: keyCode,
+                code: keyCode === 38 ? 'ArrowUp' : 'ArrowDown',
+                which: keyCode,
+                bubbles: true,
+                cancelable: true
+            });
+
+            document.dispatchEvent(event);
+        }
+        
+    let lastTouchY = undefined;
+    function handleTouchStart(event) {
+        const touch = event.touches[0];
+        const screenHeight = window.innerHeight;
+        const touchY = touch.clientY;
+        
+        if (touchY < screenHeight / 2) {
+            if (lastTouchY && lastTouchY >= screenHeight / 2)
+                simulateKey('keyup', 40)
+            simulateKey('keydown', 38);
+        } else {
+            if (lastTouchY && lastTouchY < screenHeight / 2)
+                simulateKey('keyup', 38)
+            simulateKey('keydown', 40);
+        }
+        lastTouchY = touchY;
+    }
+    
+    function handleTouchEnd(event) {
+        if (event.changedTouches.length > 0) {
+            const touch = event.changedTouches[0];
+            const screenHeight = window.innerHeight;
+            const touchY = touch.clientY;
+            const threshold = 0.20;
+
+            if (touchY < screenHeight / 2) {
+                // Release arrow up
+                simulateKey('keyup', 38);
+            } else {
+                // Release arrow down
+                simulateKey('keyup', 40);
+            }
+        }
+    }
+
+        document.addEventListener('touchstart', handleTouchStart);
+        document.addEventListener('touchmove', handleTouchStart);
+        document.addEventListener('touchend', handleTouchEnd);
+        document.addEventListener('touchmove', event => {event.preventDefault()}, { passive: false });
+    }
+    catch (error){
+        document.getElementById('salut').innerText = error;
+    }
+}
+
 async function initGame(){
+    if (window.matchMedia("(hover: none) and (pointer: coarse)").matches)
+        forPhoneChanges();
     document.getElementById('gameArea').classList.replace('d-flex', 'd-none');
     document.getElementById('opponentWait').classList.replace('d-none', 'd-flex');
     if (SSEListeners.has('game-start')){
