@@ -491,6 +491,7 @@ loadScript('/chatTemplates/scripts/chatGame.js');
 document.getElementById('searchChatForm').addEventListener('keyup', (e) => {
 	e.preventDefault();
 	if (e.key === 'Enter') return;
+	if (e.key === 'Escape') return;
 	displayChatsList(e.target.value);
 });
 
