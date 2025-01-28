@@ -22,7 +22,7 @@ class FriendsSerializer(Serializer):
             'friend_win',
             'me_win',
             'friends_since',
-            'matches_play_against',
+            'matches_play_against', # todo make some test
             'matches_played_together',
             'matches_won_together',
         ]
