@@ -1,8 +1,8 @@
-from lib_transcendence.exceptions import MessagesException, ServiceUnavailable
-from lib_transcendence.request import request_service
-from lib_transcendence import endpoints
 from rest_framework.exceptions import APIException, NotFound
 
+from lib_transcendence import endpoints
+from lib_transcendence.exceptions import MessagesException, ServiceUnavailable
+from lib_transcendence.request import request_service
 from lib_transcendence.validate_type import surchage_list
 
 

@@ -1,11 +1,12 @@
 from abc import ABC, abstractmethod
 
-from lib_transcendence.endpoints import Auth
-from lib_transcendence.exceptions import MessagesException
-from lib_transcendence.services import request_auth
 from rest_framework import serializers
 from rest_framework.authentication import BaseAuthentication
 from rest_framework.exceptions import AuthenticationFailed, NotAuthenticated, ParseError
+
+from lib_transcendence.endpoints import Auth
+from lib_transcendence.exceptions import MessagesException
+from lib_transcendence.services import request_auth
 
 
 def get_user_from_auth(user_data):

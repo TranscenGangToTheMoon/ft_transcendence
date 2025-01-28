@@ -2,8 +2,9 @@ import random
 import string
 from typing import Literal
 
-from lib_transcendence.exceptions import MessagesException
 from rest_framework.exceptions import APIException
+
+from lib_transcendence.exceptions import MessagesException
 
 
 def generate_code(model=None, k=4, filter_field: Literal['code', 'username'] = 'code'):

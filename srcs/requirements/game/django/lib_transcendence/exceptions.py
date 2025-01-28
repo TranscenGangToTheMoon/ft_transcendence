@@ -1,8 +1,9 @@
 from typing import Literal
 
-from lib_transcendence.game import GameMode
 from rest_framework import status
 from rest_framework.exceptions import APIException
+
+from lib_transcendence.game import GameMode
 
 
 class MessagesException:

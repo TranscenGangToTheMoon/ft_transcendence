@@ -1,8 +1,9 @@
 from django.utils.deprecation import MiddlewareMixin
-from lib_transcendence import endpoints
-from lib_transcendence.services import request_users
-from lib_transcendence.exceptions import MessagesException
 from rest_framework.exceptions import NotFound
+
+from lib_transcendence import endpoints
+from lib_transcendence.exceptions import MessagesException
+from lib_transcendence.services import request_users
 
 
 def retrieve_users(user_id: list[int] | int, return_type=list, size='small') -> dict | list:

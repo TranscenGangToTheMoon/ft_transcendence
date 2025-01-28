@@ -1,7 +1,8 @@
+from django.db import IntegrityError
 from rest_framework import generics
 from rest_framework import serializers
+
 from lib_transcendence.exceptions import Throttled
-from django.db import IntegrityError
 
 
 class SerializerKwargsContext(generics.GenericAPIView):
