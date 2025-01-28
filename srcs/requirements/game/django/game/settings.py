@@ -52,7 +52,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'matches',
-    'tournaments'
+    'tournaments',
 ]
 
 MIDDLEWARE = [
@@ -84,7 +84,6 @@ TEMPLATES = [
     },
 ]
 
-# WSGI_APPLICATION = 'game.wsgi.application'
 ASGI_APPLICATION = 'game.asgi.application'
 
 

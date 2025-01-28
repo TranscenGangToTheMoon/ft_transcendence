@@ -28,7 +28,7 @@ FROM base AS production
 
 COPY django /code
 
-RUN pip install daphne
+RUN pip install uvicorn
 
 ENTRYPOINT ["/init.d/entrypoint.sh"]
-CMD ["daphne", "-b", "0.0.0.0", "-p", "8000", "game.asgi:application"]
+CMD ["uvicorn", "game.asgi:application",  "--host", "0.0.0.0", "--port", "8000"]

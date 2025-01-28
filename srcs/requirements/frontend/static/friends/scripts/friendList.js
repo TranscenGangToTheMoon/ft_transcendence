@@ -191,8 +191,31 @@ async function loadFriendList(){
             <img class="rounded-1" src="${friend.friend.profile_picture.small}" onerror="src='/assets/imageNotFound.png'">\
             <div>${friend.friend.username}</div>\
             <button class='btn btn-danger deleteFriend'>delete</button></div>\n`;
+            const friendDiv = resultDiv.querySelector(`#friend${friend.id}`);
+            console.log(friend);
+            friendDiv.setAttribute('data-bs-toggle', 'popover');
+            friendDiv.setAttribute('data-bs-trigger', 'hover');
+            friendDiv.setAttribute('data-bs-placement', 'top');
+            friendDiv.setAttribute('data-bs-html', 'true');
+            const popoverContent = `
+            <div class="d-flex flex-column">
+                <strong>Friend Stats</strong>
+                <div class="d-flex flex-column">
+                        <div class="justify-content-between d-flex column-gap-2"><div>matches played against :</div>${friend.matches_play_against}</div>
+                        <div class="justify-content-between d-flex column-gap-2"><div>matches played together :</div>${friend.matches_played_together}</div>
+                        <div class="justify-content-between d-flex column-gap-2"><div>matches won together :</div>${friend.matches_won_together}</div>
+                        <div class="justify-content-between d-flex column-gap-2"><div>lost games :</div>${friend.friend_win}</div>
+                        <div class="justify-content-between d-flex column-gap-2"><div>won games :</div>${friend.me_win}</div>
+                </div>
+            </div>
+            `
+            friendDiv.setAttribute('data-bs-content', popoverContent);
         }
     }
+    const popovers = document.querySelectorAll('[data-bs-toggle="popover"]');
+    popovers.forEach((popover) => {
+        new bootstrap.Popover(popover);
+    });
     loadCSS('/friends/css/friendRequestBlock.css');
 }
 
@@ -204,6 +227,12 @@ function addFriend(friendInstance){
             <img src="${friendInstance.friend.profile_picture.small}" onerror="src='/assets/imageNotFound.png'">\
             <div>${friendInstance.friend.username}</div>\
             <button class='btn btn-danger deleteFriend'>delete</button></div>\n`;
+    const friendInstanceDiv = friendDiv.querySelector(`#friend${friendInstance.id}`);
+    friendInstanceDiv.setAttribute('data-bs-toggle', 'popover');
+    friendInstanceDiv.setAttribute('data-bs-trigger', 'hover');
+    friendInstanceDiv.setAttribute('data-bs-placement', 'top');
+    friendInstanceDiv.setAttribute('data-bs-content', ``);
+    console.log(friendInstance());
 }
 
 function removeFriend(friendInstance){
