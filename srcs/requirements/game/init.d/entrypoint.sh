@@ -7,8 +7,6 @@ echo -e $BOLD$RED"- Fetching gameConfig.json ..."$RESET
 FILE="gameConfig.json"
 URL="https://frontend:443/$FILE"
 curl -ks "$URL" -o "$FILE" || exit 1
-#GAME_MAX_SCORE=$(jq '.score.max' "$FILE") todo use !
-#export GAME_MAX_SCORE
 
 echo -e $BOLD$RED"- Game migrations processing"$RESET
 
