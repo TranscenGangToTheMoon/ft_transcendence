@@ -1,8 +1,7 @@
 from django.urls import path
-from lib_transcendence.endpoints import Game, UsersManagement
 
-from matches.views import create_match_view, create_match_not_played_view, list_matches_view, \
-    retrieve_user_match_view, retrieve_match_view, finish_match_view, score_view
+from lib_transcendence.endpoints import Game, UsersManagement
+from matches.views import create_match_view, create_match_not_played_view, list_matches_view, retrieve_user_match_view, retrieve_match_view, finish_match_view, score_view
 from tournaments.views import save_tournament_view, retrieve_tournament_view
 from user_management.views import export_data_view
 
