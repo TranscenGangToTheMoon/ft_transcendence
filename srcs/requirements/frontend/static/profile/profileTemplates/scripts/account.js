@@ -26,7 +26,6 @@ async function deleteAccount(password) {
             else if (data?.detail)
                 document.getElementById('pContextError').innerText = data.detail;
             else if (!data){
-                console.log('je close');
                 sse.close();
                 deleteModal.hide();
                 sse = undefined;

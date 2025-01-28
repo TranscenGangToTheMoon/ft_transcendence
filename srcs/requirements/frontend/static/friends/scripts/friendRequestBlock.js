@@ -1,17 +1,9 @@
 
 async function decrementFriendRequests(sent){
     if (getDisplayedFriendRequests(sent) < 10){
-        // console.log(nextFriendRequest);
         if (sent) return await getMoreSentFriendRequests();
         else await getMoreFriendRequests();
-        // console.log(nextFriendRequest);
     }
-    // let old = document.getElementById('innerFriendRequests-tab').innerText.match(/\((.*?)\)/);
-    // old = parseInt(old[1]);
-    // if (old < 2)
-    //     document.getElementById('innerFriendRequests-tab').innerText = `Friend Requests`;
-    // else 
-    //     document.getElementById('innerFriendRequests-tab').innerText = `Friend Requests (${old - 1})`;
 }
 
 async function acceptFriendRequest(id){
@@ -55,7 +47,6 @@ async function declineFriendRequest(id, sent=false){
                 if (this.classList.contains('sent')) sent = true;
                 let id = declineButton.parentElement.parentElement.parentElement.id;
                 await declineFriendRequest(id.substring(2), sent);
-                console.log('declined friend request: ', id.substring(2));
             })
         }
         declineButton.listened = true;
@@ -68,7 +59,6 @@ async function declineFriendRequest(id, sent=false){
             acceptButton.addEventListener('click', async event => {
                 let id = acceptButton.parentElement.parentElement.parentElement.id
                 await acceptFriendRequest(id.substring(2));
-                console.log('accepted friend request: ', id.substring(2));
             })
         }
         acceptButton.listened = true;

@@ -47,7 +47,6 @@ async function loadContent(url, containerId='content', append=false, container=u
         else if (userInformations.is_guest)
             style = 'guestStyle'
         css = contentDiv.querySelector(`[${style}]`);
-        // console.log(style, css)
         if (css)
             loadCSS(css.getAttribute(style), css.getAttribute('clearable'));//, !css.getAttribute(style).includes('Guest'));
     } catch (error) {
@@ -177,10 +176,8 @@ function cancelNavigation(event, url, callback=undefined){
 }
 
 window.addEventListener('popstate', async event => {
-    console.log(event.state, 'last state:', lastState);
     if (!isUserGoBack)
         return isUserGoBack = true;
-    console.log(pathName, window.location.pathname);
     if (pathName === '/game')
         return cancelNavigation(event, undefined);
     _cancelTimeout();

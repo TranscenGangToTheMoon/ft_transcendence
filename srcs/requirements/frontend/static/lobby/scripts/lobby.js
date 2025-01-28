@@ -40,7 +40,6 @@ document.getElementById('inviteFriends').addEventListener('click', async event =
     const fullFriendsDiv = document.getElementById('iFriends');
     try {
         let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/users/me/friends/?online=true`);
-        console.log(data);
         if (!data.count)
             fullFriendsDiv.style.display = 'none';
         else{
@@ -60,13 +59,10 @@ document.getElementById('inviteFriends').addEventListener('click', async event =
             onlineFriendsDiv.innerHTML = tempDiv.innerHTML;
             const friendButtons = document.querySelectorAll('.inviteOnlineFriend');
             for (let button of friendButtons){
-                console.log(button);
                 button.addEventListener('click', async event => {
                     event.preventDefault();
-                    console.log(button);
                     try {
                         let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/play/lobby/${code}/invite/${button.id.substring(7)}/`, 'POST');
-                        console.log(data);
                     }
                     catch (error) {
                         if (error.code === 404){
@@ -112,15 +108,15 @@ document.getElementById('joinLobby').addEventListener('click', async event => {
         }
         document.getElementById('gameId').innerText = lobby.code;
         document.getElementById('gameType').innerText = lobby.game_mode === 'clash' ? '3v3' : 'Custom Game';
-        navigateTo(`/lobby/${lobby.code}`, false);
-        // document.getElementById('settingsButton').style.display = 'none';
+        await navigateTo(`/lobby/${lobby.code}`, false);
+        openGameChatTab({type: 'lobby', 'code': lobby.code});
         await fillPlayerList();
     }
     catch (error){
         if (error.code === 404){
             return joinErrorDiv.innerText = 'this lobby does not exists';
         }
-        return console.log(error);
+        console.log(error);
     }
 })
 
@@ -436,7 +432,7 @@ async function fillPlayerList(noTeam=false){
             }
         }
         catch (error) {
-            console.log('error');
+            console.log(error);
         }
     })
     if (!noTeam)
@@ -446,7 +442,6 @@ async function fillPlayerList(noTeam=false){
 async function lobbyJoined(event){
     displayGameChatMessage(event);
     event = JSON.parse(event.data);
-    console.log(event);
     if (!checkEventDuplication(event)) return;
     lobby.participants[lobby.participants.length] = event.data;
     await fillPlayerList();
@@ -455,7 +450,6 @@ async function lobbyJoined(event){
 async function lobbyLeaved(event){
     displayGameChatMessage(event);
     event = JSON.parse(event.data);
-    console.log(event);
     if (!checkEventDuplication(event)) return;
     for (let participant in lobby.participants){
         if (lobby.participants[participant].id === event.data.id)
@@ -475,7 +469,6 @@ function everybodyIsReady(){
 
 async function participantUpdated(event){
     event = JSON.parse(event.data);
-    console.log(event);
     if (!checkEventDuplication(event)) return;
     const data = event.data;
     for (let participant in lobby.participants){
@@ -505,11 +498,9 @@ async function participantUpdated(event){
 async function lobbyUpdated(event){
     event = JSON.parse(event.data);
     if (!checkEventDuplication(event)) return;
-    console.log(event.data);
     if (event.data.match_type){
         matchType = event.data.match_type;
         document.getElementById('settingsButton').innerText = event.data.match_type;
-        console.log(lobby);
         await fillPlayerList();
     }
 }
@@ -517,7 +508,6 @@ async function lobbyUpdated(event){
 async function lobbyBanned(event){
     displayGameChatMessage(event);
     event = JSON.parse(event.data);
-    console.log(event);
     if (!checkEventDuplication(event)) return;
     await navigateTo('/');
     displayMainAlert('Banned from Lobby', event.message);
@@ -525,13 +515,11 @@ async function lobbyBanned(event){
 
 async function lobbyDestroyed(event){
     await navigateTo('/');
-    console.log(JSON.parse(event.data));
     displayMainAlert('Lobby destroyed', "The lobby has been destroyed.")
 }
 
 async function lobbyGameStart(event){
     event = JSON.parse(event.data);
-    console.log(event);
 
     localStorage.setItem('game-event', JSON.stringify(event));
     if (matchType === '3v3'){
@@ -548,7 +536,6 @@ async function lobbyGameStart(event){
 
 async function spectateLobbyGame(event){
     event = JSON.parse(event.data);
-    console.log(event);
 
     if (matchType === '1v1') { // Spectate mode is not available for 3v3
         await navigateTo('/spectate/' + event.data.code, true, true);

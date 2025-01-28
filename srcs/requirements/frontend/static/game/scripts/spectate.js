@@ -100,7 +100,6 @@
 
         const baseWidth = config.canvasWidth;
         const baseHeight = config.canvasHeight + document.getElementById('gameInfo').offsetHeight;
-        console.log('BASE HEIGHT', baseHeight);
 
         let scale = Math.min(windowWidth / baseWidth, windowHeight / baseHeight);
 
@@ -141,7 +140,6 @@
     document.addEventListener("keyup", (e) => (state.keys[e.key] = undefined));
 
     function startGame() {
-        console.log('game start');
         state.isGameActive = true;
         state.cancelAnimation = false;
 		state.isCountDownActive = false;
@@ -173,7 +171,6 @@
     }
 
     function stopGame(animate=false, reason=undefined) {
-        console.log('game stop');
         state.isGameActive = false;
         if (animate){
             animatePaddlesToMiddle();
@@ -459,7 +456,6 @@ function initSocket(match_code){
           "match_code": match_code
         },
 	});
-    console.log('made request to spectate to server');
     window.gameSocket = gameSocket;
 	gameSocket.on('connect', () => {
         cancelTimeout = true;
@@ -470,15 +466,12 @@ function initSocket(match_code){
         window.PongGame.resizeCanvas();
     });
 	gameSocket.on('rackets', event => {
-		console.log('received rackets');
 		for ([paddle_id, position] of Object.entries(event)) {
 			if (position > window.PongGame.config.canvasWidth / 2){
 				window.PongGame.state.paddles.right.id = paddle_id;
-				console.log(window.PongGame.state.paddles.right.id)
 			}
 			else {
 				window.PongGame.state.paddles.left.id = paddle_id;
-				console.log(window.PongGame.state.paddles.left.id)
 			}
 		}
 		window.PongGame.drawGame();
@@ -506,7 +499,6 @@ function initSocket(match_code){
         window.PongGame.startCountdown();
     })
     gameSocket.on('game_state', event => {
-		console.log('received game State');
 		window.PongGame.state.ball.y = event.position_y;
 		window.PongGame.state.ball.x = event.position_x;
 		window.PongGame.state.ball.speedX = event.speed_x;
@@ -514,22 +506,18 @@ function initSocket(match_code){
 		window.PongGame.state.ball.speed = event.speed;
     })
     gameSocket.on('move_up', event => {
-        console.log('move_up received', event.player);
         if (event.player != window.PongGame.state.paddles.right.id)
             window.PongGame.state.paddles.left.speed = -1;
         else
         	window.PongGame.state.paddles.right.speed = -1;
     })
     gameSocket.on('move_down', event => {
-        console.log('move_down received', event.player);
-		console.log(window.PongGame.state.paddles.right.id);
         if (event.player != window.PongGame.state.paddles.right.id)
             window.PongGame.state.paddles.left.speed = 1;
         else
         	window.PongGame.state.paddles.right.speed = 1;
     })
     gameSocket.on('stop_moving', event => {
-		console.log('received stop_moving', event.player);
         if (event.player == window.PongGame.state.paddles.right.id) {
 	        window.PongGame.state.paddles.right.speed = 0;
 	        window.PongGame.state.paddles.right.y = event.position;
@@ -548,7 +536,6 @@ function initSocket(match_code){
         window.PongGame.drawGame();
     })
     gameSocket.on('game_over', async event => {
-        console.log('game_over received', event);
         gameSocket.close();
         gameSocket = undefined;
         updateTrophies();
@@ -570,7 +557,6 @@ function initSocket(match_code){
                 await handleRoute();
             });
             fillTeamDetail(enemyTeamDetail, playerTeamDetail);
-            console.log(enemyTeamDetail);
             const popovers = document.querySelectorAll('.teamDetail');
             popovers.forEach(element => {
                 new bootstrap.Popover(element, {
@@ -616,7 +602,6 @@ async function initGameConstants(){
 async function initData(data){
     await initGameConstants();
     try {
-        console.log(data);
 		if (data.teams.a.players.some(player => player.id == userInformations.id)) {
 			PongGame.info.myTeam.name = 'A';
 			PongGame.info.myTeam.players = data.teams.a;
@@ -640,7 +625,6 @@ async function initData(data){
 	initSocket();
     setTimeout(async () => {
         if (!cancelTimeout && gameSocket && !isModalOpen()){
-            console.log('donc',gameSocket);
             displayMainAlert('Error', 'Unable to establish connection with socket server');
             history.go(-1);
         }
@@ -652,7 +636,6 @@ document.getElementById('confirmModal').addEventListener('hidden.bs.modal', () =
 })
 
 function checkGameAuthorization(){
-    console.log(window.location.pathname);
     if (userInformations.is_guest && window.location.pathname === '/game/ranked')
         throw `${window.location.pathname}`;
     if (window.location.pathname === '/game/tournament' && typeof tournamentData === 'undefined')
@@ -666,7 +649,6 @@ async function gameStart(event){
 
     data = JSON.parse(event.data);
     data = data.data;
-    console.log('game-start received (game)');
     try {
         await initData(data);
     }
@@ -753,7 +735,6 @@ async function initGame(){
     await initGameConstants();
     if (containsCode(window.location.pathname)) {
         var match_code = window.location.pathname.split('/').pop()
-        console.log('match_code', match_code);
         initSocket(match_code);
     }
     else {
