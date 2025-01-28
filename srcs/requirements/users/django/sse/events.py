@@ -2,13 +2,12 @@ import json
 
 import redis
 from django.db.models import QuerySet
+from rest_framework.exceptions import ParseError
 
 from lib_transcendence import endpoints
 from lib_transcendence.exceptions import MessagesException, ServiceUnavailable
 from lib_transcendence.sse_events import EventCode
 from lib_transcendence.utils import datetime_serializer
-from rest_framework.exceptions import ParseError
-
 from users.models import Users
 
 
@@ -117,13 +116,12 @@ class Event:
         return json.dumps(result, default=datetime_serializer)
 
 
-# todo test all events
 class Events:
     ping = Event(Service.AUTH, EventCode.PING)
     delete_user = Event(Service.USER, EventCode.DELETE_USER)
     profile_picture_unlocked = Event(Service.USER, EventCode.PROFILE_PICTURE_UNLOCKED, 'You have unlocked new profile pictures!', [Target(endpoints.Users.fprofile_picture, 'PUT', display_name='use'), Target('/profile/pictures', 'PUT', display_name='see all')])
 
-    receive_message = Event(Service.CHAT, EventCode.RECEIVE_MESSAGE, '{username}: {message}', Target('/chat/{chat_id}'))
+    receive_message = Event(Service.CHAT, EventCode.RECEIVE_MESSAGE, '{username}: {message}')
 
     accept_friend_request = Event(Service.FRIENDS, EventCode.ACCEPT_FRIEND_REQUEST, '{username} has accepted your friend request.', type=SSEType.NOTIFICATION)
     receive_friend_request = Event(Service.FRIENDS, EventCode.RECEIVE_FRIEND_REQUEST, '{username} wants to be friends with you.', [Target(endpoints.Users.ffriend_request, 'POST', display_icon='/icon/accept.png'), Target(endpoints.Users.ffriend_request, 'DELETE', display_icon='/icon/decline.png')])
@@ -155,6 +153,7 @@ class Events:
     tournament_start_at = Event(Service.TOURNAMENT, EventCode.TOURNAMENT_START_AT, 'Tournament {name} start in 20 seconds.')
     tournament_start_cancel = Event(Service.TOURNAMENT, EventCode.TOURNAMENT_START_CANCEL)
     tournament_match_finish = Event(Service.TOURNAMENT, EventCode.TOURNAMENT_MATCH_FINISH, '{winner} win against {looser} {score_winner}-{score_looser}{finish_reason}.')
+    tournament_available_spectate_matches = Event(Service.TOURNAMENT, EventCode.TOURNAMENT_AVAILABLE_SPECTATE_MATCHES)
     tournament_finish = Event(Service.TOURNAMENT, EventCode.TOURNAMENT_FINISH, 'The tournament {name} is now over. Well done to {username} for his victory!', Target('/history/tournament/{id}', display_name='view'))
 
 

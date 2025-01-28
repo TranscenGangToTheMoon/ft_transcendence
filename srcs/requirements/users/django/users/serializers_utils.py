@@ -1,7 +1,7 @@
 from rest_framework import serializers
+
 from lib_transcendence.serializer import Serializer
 from profile_pictures.serializers import SmallProfilePicturesSerializer
-
 from stats.utils import get_trophies
 from users.models import Users
 

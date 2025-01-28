@@ -1,10 +1,10 @@
-from lib_transcendence.exceptions import MessagesException
-from lib_transcendence.permissions import NotGuest
 from rest_framework import generics
 from rest_framework.exceptions import PermissionDenied
 
 from blocking.models import BlockedUsers
 from blocking.serializers import BlockedSerializer
+from lib_transcendence.exceptions import MessagesException
+from lib_transcendence.permissions import NotGuest
 
 
 class BlockedMixin(generics.GenericAPIView):

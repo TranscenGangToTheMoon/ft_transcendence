@@ -1,11 +1,11 @@
-from lib_transcendence.serializer import SerializerAuthContext
-from lib_transcendence.permissions import NotGuest
 from rest_framework import generics, status
 from rest_framework.response import Response
 
 from chat_messages.utils import get_chat_participants
 from chats.models import Chats, ChatParticipants
 from chats.serializers import ChatsSerializer, ChatNotificationsSerializer
+from lib_transcendence.permissions import NotGuest
+from lib_transcendence.serializer import SerializerAuthContext
 
 
 class ChatsView(SerializerAuthContext, generics.ListCreateAPIView):

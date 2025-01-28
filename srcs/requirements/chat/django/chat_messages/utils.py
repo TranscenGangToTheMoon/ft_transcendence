@@ -1,7 +1,7 @@
 from rest_framework.exceptions import PermissionDenied
-from lib_transcendence.exceptions import MessagesException
 
 from chats.models import ChatParticipants
+from lib_transcendence.exceptions import MessagesException
 
 
 def get_chat_participants(chat_id, user_id, view_chat_required=True):

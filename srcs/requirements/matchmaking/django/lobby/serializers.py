@@ -1,14 +1,14 @@
-from lib_transcendence.exceptions import MessagesException, ResourceExists
-from lib_transcendence.game import GameMode
-from lib_transcendence.lobby import MatchType, Teams
-from lib_transcendence.auth import get_auth_user
-from lib_transcendence.generate import generate_code
-from lib_transcendence.sse_events import EventCode, create_sse_event
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
-from lib_transcendence.serializer import Serializer
 
 from blocking.utils import create_player_instance
+from lib_transcendence.auth import get_auth_user
+from lib_transcendence.exceptions import MessagesException, ResourceExists
+from lib_transcendence.game import GameMode
+from lib_transcendence.generate import generate_code
+from lib_transcendence.lobby import MatchType, Teams
+from lib_transcendence.serializer import Serializer
+from lib_transcendence.sse_events import EventCode, create_sse_event
 from lobby.models import Lobby, LobbyParticipants
 from matchmaking.utils.participant import get_participants
 from matchmaking.utils.place import get_lobby, verify_place
@@ -47,7 +47,7 @@ class LobbySerializer(Serializer):
             'id',
             'code',
             'is_ready',
-            'playing_game',
+            'game_playing',
             'participants',
             'max_participants',
             'created_at',
@@ -58,7 +58,7 @@ class LobbySerializer(Serializer):
             'id',
             'code',
             'is_ready',
-            'playing_game',
+            'game_playing',
             'participants',
             'max_participants',
             'created_at',
@@ -101,11 +101,9 @@ class LobbySerializer(Serializer):
         return result
 
     def update(self, instance, validated_data):
-        if instance.playing_game is not None:
+        if instance.game_playing is not None:
             raise PermissionDenied(MessagesException.PermissionDenied.LOBBY_IN_GAME)
-
-        if 'game_mode' in validated_data:
-            raise PermissionDenied(MessagesException.PermissionDenied.CANNOT_UPDATE_GAME_MODE)
+        validated_data.pop('game_mode', None)
 
         participants = instance.participants.all()
         if validated_data.get('match_type') == MatchType.M1V1 and instance.match_type == MatchType.M3V3:
@@ -136,7 +134,7 @@ class LobbyFinishMatchSerializer(serializers.Serializer):
         ]
 
     def create(self, validated_data):
-        Lobby.objects.filter(participants__user_id__in=validated_data['players']).distinct().update(playing_game=None)
+        Lobby.objects.filter(participants__user_id__in=validated_data['players']).distinct().update(game_playing=None)
         return validated_data
 
 
@@ -188,7 +186,7 @@ class LobbyParticipantsSerializer(Serializer):
         return super().create(validated_data)
 
     def update(self, instance, validated_data):
-        if instance.lobby.playing_game is not None:
+        if instance.lobby.game_playing is not None:
             raise PermissionDenied(MessagesException.PermissionDenied.LOBBY_IN_GAME)
 
         if 'team' in validated_data:

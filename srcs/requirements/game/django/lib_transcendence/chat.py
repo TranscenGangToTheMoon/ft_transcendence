@@ -1,6 +1,6 @@
-from lib_transcendence.validate_type import validate_type, surchage_list
 from lib_transcendence import endpoints
 from lib_transcendence.request import request_service
+from lib_transcendence.validate_type import validate_type, surchage_list
 
 
 class AcceptChat:

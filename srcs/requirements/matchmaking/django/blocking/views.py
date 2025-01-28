@@ -1,10 +1,10 @@
-from lib_transcendence.exceptions import MessagesException
-from lib_transcendence.serializer import SerializerKwargsContext
 from rest_framework import generics
 from rest_framework.exceptions import NotFound
 
 from blocking.models import Blocked
 from blocking.serializers import BlockedSerializer
+from lib_transcendence.exceptions import MessagesException
+from lib_transcendence.serializer import SerializerKwargsContext
 
 
 class BlockedUserView(SerializerKwargsContext, generics.CreateAPIView, generics.DestroyAPIView):

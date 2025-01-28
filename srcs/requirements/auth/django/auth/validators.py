@@ -1,11 +1,11 @@
 from string import ascii_letters, digits
 
+from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from rest_framework import serializers
-from lib_transcendence.exceptions import MessagesException
-from django.contrib.auth.models import User
 
+from lib_transcendence.exceptions import MessagesException
 
 valid_charset = ascii_letters + digits + '_-'
 valid_password_charset = valid_charset + '!@#$%^&*()'

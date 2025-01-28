@@ -1,8 +1,8 @@
-from lib_transcendence.exceptions import MessagesException
-from lib_transcendence.sse_events import EventCode
 from rest_framework import serializers
 from rest_framework.exceptions import NotFound
 
+from lib_transcendence.exceptions import MessagesException
+from lib_transcendence.sse_events import EventCode
 from sse.events import publish_event
 from users.auth import get_user
 

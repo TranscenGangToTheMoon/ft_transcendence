@@ -2,16 +2,15 @@ import os
 import time
 from threading import Thread
 
-from lib_transcendence.auth import Authentication
-from lib_transcendence.game import FinishReason
-from lib_transcendence.sse_events import create_sse_event, EventCode
-from lib_transcendence.exceptions import MessagesException
 from rest_framework import generics
 from rest_framework.exceptions import NotFound
 
+from lib_transcendence.auth import Authentication
+from lib_transcendence.exceptions import MessagesException
+from lib_transcendence.game import FinishReason
+from lib_transcendence.sse_events import create_sse_event, EventCode
 from matches.models import Matches, Players
-from matches.serializers import MatchSerializer, validate_user_id, MatchFinishSerializer, ScoreSerializer, \
-    MatchNotPlayedSerializer
+from matches.serializers import MatchSerializer, validate_user_id, MatchFinishSerializer, ScoreSerializer, MatchNotPlayedSerializer
 
 
 class CreateMatchView(generics.CreateAPIView):

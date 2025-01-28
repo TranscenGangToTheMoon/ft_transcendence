@@ -1,7 +1,8 @@
+from rest_framework.exceptions import APIException
+
 from lib_transcendence import endpoints
 from lib_transcendence.exceptions import ServiceUnavailable
 from lib_transcendence.services import request_users
-from rest_framework.exceptions import APIException
 
 
 def send_match_result(match):

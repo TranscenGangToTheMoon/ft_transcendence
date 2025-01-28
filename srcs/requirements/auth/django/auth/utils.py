@@ -1,12 +1,12 @@
+from rest_framework.exceptions import APIException, AuthenticationFailed
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework_simplejwt.exceptions import AuthenticationFailed as JWTAuthenticationFailed
+from rest_framework_simplejwt.tokens import RefreshToken
+
+from guest.group import is_guest
 from lib_transcendence import endpoints
 from lib_transcendence.exceptions import ServiceUnavailable, MessagesException
 from lib_transcendence.services import request_users
-from rest_framework.exceptions import APIException, AuthenticationFailed
-from rest_framework_simplejwt.authentication import JWTAuthentication
-from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework_simplejwt.exceptions import AuthenticationFailed as JWTAuthenticationFailed
-
-from guest.group import is_guest
 
 
 def create_user_get_token(user, create=True):

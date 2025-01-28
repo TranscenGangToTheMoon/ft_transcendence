@@ -1,8 +1,8 @@
-from lib_transcendence.auth import Authentication
-from lib_transcendence.exceptions import MessagesException
 from rest_framework import generics
 from rest_framework.exceptions import NotFound
 
+from lib_transcendence.auth import Authentication
+from lib_transcendence.exceptions import MessagesException
 from tournaments.models import Tournaments
 from tournaments.serializers import TournamentSerializer
 

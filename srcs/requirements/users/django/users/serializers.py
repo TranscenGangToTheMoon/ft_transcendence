@@ -1,17 +1,15 @@
-from lib_transcendence import endpoints
-from lib_transcendence.chat import AcceptChat
-from lib_transcendence.exceptions import MessagesException
-from lib_transcendence.services import request_chat
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied, APIException
-from lib_transcendence.serializer import Serializer
 
 from friends.serializers import FriendsSerializer
 from friends.utils import get_friendship
+from lib_transcendence import endpoints
+from lib_transcendence.chat import AcceptChat
+from lib_transcendence.exceptions import MessagesException
+from lib_transcendence.serializer import Serializer
+from lib_transcendence.services import request_chat
 from profile_pictures.create import create_user_profile_pictures
-from profile_pictures.serializers import SmallProfilePicturesSerializer
 from stats.create import create_user_stats
-from stats.utils import get_trophies
 from users.auth import auth_update
 from users.models import Users
 from users.serializers_utils import BaseUsersSerializer

@@ -1,10 +1,10 @@
-from lib_transcendence.exceptions import MessagesException
 from rest_framework import serializers
 from rest_framework.exceptions import NotFound, PermissionDenied
-from lib_transcendence.serializer import Serializer
 
 from friend_requests.models import FriendRequests
 from friends.models import Friends
+from lib_transcendence.exceptions import MessagesException
+from lib_transcendence.serializer import Serializer
 from users.auth import get_user
 from users.serializers_utils import LargeUsersSerializer
 

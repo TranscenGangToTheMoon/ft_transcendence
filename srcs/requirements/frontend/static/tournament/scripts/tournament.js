@@ -278,13 +278,13 @@ async function tournamentMatchFinished(event){
 if( typeof clickedUserDiv !== 'undefined')
     var clickedUserDiv;
 
-document.getElementById('cSpectate').addEventListener('click', async () => {
+document.getelementById('cSpectate').addEventListener('click', async () => {
     navigateTo('/spectate/' + clickedUserDiv.code);
 })
 
-async function updateSpectatableMatches(event){
+async function updateAvailableSpectateMatches(event){
     event = JSON.parse(event.data);
-    console.log('received spectatable matches');
+    console.log('received available spectate matches');
     console.log(event);
     const contextMenuSpectate = document.getElementById('contextMenuSpectate');
     const matches = document.querySelectorAll('.t-match')
@@ -300,7 +300,7 @@ async function updateSpectatableMatches(event){
                 contextMenuSpectate.style.display = 'block';
             })
         }
-    }   
+    }
 }
 
 async function tournamentFinished(event){
@@ -363,9 +363,9 @@ function addTournamentSSEListeners(){
         sse.addEventListener('tournament-finish', tournamentFinished);
 	}
 	
-	if (!SSEListeners.has('tournament-spectatable-matches')){
-		SSEListeners.set('tournament-spectatable-matches', updateSpectatableMatches);
-		sse.addEventListener('tournament-spectatable-matches', updateSpectatableMatches);
+	if (!SSEListeners.has('tournament-available-spectate-matches')){
+		SSEListeners.set('tournament-available-spectate-matches', updateAvailableSpectateMatches);
+		sse.addEventListener('tournament-available-spectate-matches', updateAvailableSpectateMatches);
 	}
 }
 
@@ -404,11 +404,11 @@ function loadTournament(tournament){
 	if (tournament.matches != null){
 		document.getElementById('leaveTournament').style.display = 'none';
 		if ((!tournament.matches['quarter-final']|| !tournament.matches['quarter-final'].length)
-			&& tournament.matches['round of 16']
+			&& tournament.matches['round-of-16']
 		){
 			tournament.matches['quarter-final'] = [];
-			for (i = 0; i < tournament.matches['round of 16'].length / 2; ++i)
-				tournament.matches['quarter-final'].push(getMatch(i+1, 'round of 16', tournament));
+			for (i = 0; i < tournament.matches['round-of-16'].length / 2; ++i)
+				tournament.matches['quarter-final'].push(getMatch(i+1, 'round-of-16', tournament));
 		} 
 		if ((!tournament.matches['semi-final']|| !tournament.matches['semi-final'].length)
 			&& tournament.matches['quarter-final']

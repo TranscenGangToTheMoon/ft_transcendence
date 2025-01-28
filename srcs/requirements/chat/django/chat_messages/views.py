@@ -1,10 +1,10 @@
 from rest_framework import generics
-from lib_transcendence.permissions import NotGuest
-from lib_transcendence.serializer import SerializerAuthContext
 
 from chat_messages.models import Messages
 from chat_messages.serializers import MessagesSerializer
 from chat_messages.utils import get_chat_participants
+from lib_transcendence.permissions import NotGuest
+from lib_transcendence.serializer import SerializerAuthContext
 
 
 class RetrieveMessagesView(SerializerAuthContext, generics.ListAPIView):

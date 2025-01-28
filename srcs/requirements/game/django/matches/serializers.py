@@ -1,15 +1,15 @@
 from datetime import datetime, timezone, timedelta
 
 from django.conf import settings
-from lib_transcendence.game import GameMode, FinishReason
-from lib_transcendence.generate import generate_code
-from lib_transcendence.exceptions import MessagesException, Conflict, ResourceExists
-from lib_transcendence.lobby import MatchType
-from lib_transcendence.users import retrieve_users
 from rest_framework import serializers
 from rest_framework.exceptions import NotFound, PermissionDenied
-from lib_transcendence.serializer import Serializer
 
+from lib_transcendence.exceptions import MessagesException, Conflict, ResourceExists
+from lib_transcendence.game import GameMode, FinishReason
+from lib_transcendence.generate import generate_code
+from lib_transcendence.lobby import MatchType
+from lib_transcendence.serializer import Serializer
+from lib_transcendence.users import retrieve_users
 from matches.models import Matches, Players
 
 
