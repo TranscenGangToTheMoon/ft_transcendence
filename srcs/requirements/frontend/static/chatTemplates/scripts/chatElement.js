@@ -134,7 +134,7 @@ async function scrollMessagesListener(chatInfo) {
 		const clientHeight = messagesDiv.clientHeight;
 		const scrollTop = messagesDiv.scrollTop;
 		const scrollPercentage = (scrollTop / (scrollHeight - clientHeight)) * 100;
-		if (scrollPercentage <= 15 && !loading) {
+		if (scrollPercentage <= 20 && !loading) {
 			loading = true;
 			await getMoreOldsMessages(chatInfo);
 			loading = false;
@@ -200,7 +200,7 @@ async function createChatTab(chatInfo) {
     let chatBody = document.getElementById('chatBody');
     let chatBox = document.createElement('div');
     chatBox.id = idChatBox;
-	chatBox.className = 'tab-pane fade show active';
+	chatBox.className = 'message-box overflow-auto tab-pane fade show active';
     chatBox.setAttribute('role', 'tabpanel');
     chatBox.setAttribute('aria-labelledby', idChatTab);
     chatBody.appendChild(chatBox);

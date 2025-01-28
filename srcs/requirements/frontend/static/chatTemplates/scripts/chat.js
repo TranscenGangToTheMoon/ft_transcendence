@@ -304,7 +304,7 @@ async function getMoreOldsMessages(chatInfo){
 		if (apiAnswer.detail){
 			throw {'code': 400, 'detail': apiAnswer.detail};
 		}
-		if (apiAnswer.count !== 0) displayMessages(chatInfo, apiAnswer.results, true);
+		if (apiAnswer.count !== 0) displayMessages(chatInfo, apiAnswer.results, false);
 		chatInfo.chatMessageNext = apiAnswer.next;
 	}
 	catch (error) {
