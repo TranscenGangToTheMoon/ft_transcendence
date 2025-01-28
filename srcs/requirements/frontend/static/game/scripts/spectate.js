@@ -659,11 +659,6 @@ async function gameStart(event){
 
 function forPhoneChanges(){
     try {
-        document.getElementById('gameCanvas').style.height = '300px';
-        document.getElementById('gameCanvas').style.width = '400px';
-        document.getElementById('gameCanvas').style.backgroundColor = 'blue';
-
-
         function simulateKey(type, keyCode) {
             const event = new KeyboardEvent(type, {
                 key: keyCode === 38 ? 'ArrowUp' : 'ArrowDown',

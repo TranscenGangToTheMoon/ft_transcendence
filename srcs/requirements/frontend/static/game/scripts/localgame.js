@@ -522,10 +522,6 @@ function setGameMode(){
 
 function forPhoneChanges(){
     try {
-        document.getElementById('gameCanvas').style.height = '300px';
-        document.getElementById('gameCanvas').style.width = '400px';
-        document.getElementById('gameCanvas').style.backgroundColor = 'blue';
-    
         
         function simulateKey(type, keyCode) {
             const event = new KeyboardEvent(type, {

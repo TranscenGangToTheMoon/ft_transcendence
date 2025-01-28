@@ -116,6 +116,7 @@ function sendGameMessageListener(gameInfo) {
 			let chatBox = document.getElementById('messagesGame');
 			if (chatBox) {
 				chatBox.appendChild(messageDiv);
+				chatBox.scrollTop = chatBox.scrollHeight;
 			}
 			chatForm.reset();
 		} catch (error) {

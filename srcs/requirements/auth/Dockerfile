@@ -26,7 +26,7 @@ FROM base AS production
 
 COPY django /code
 
-RUN pip install daphne
+RUN pip install gunicorn
 
 ENTRYPOINT ["/init.d/entrypoint.sh"]
-CMD ["daphne", "-b", "0.0.0.0", "-p", "8000", "auth.asgi:application"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "auth.wsgi"]
