@@ -1,7 +1,6 @@
 
 function displayBadges(){
     if (userInformations.notifications){
-        console.log(userInformations.notifications)
         let totalNotifications = 0;
         for (let type in userInformations.notifications){
             if (!userInformations.notifications[type] || type === 'all') continue;
@@ -10,7 +9,6 @@ function displayBadges(){
                 addNotificationIndicator(badgeDiv, userInformations.notifications[type]);
             }
         }
-        console.log(totalNotifications);
         userInformations.notifications['all'] = totalNotifications;
         if (!totalNotifications) return;
         for (let allBadgesDiv of badgesDivs['all']){

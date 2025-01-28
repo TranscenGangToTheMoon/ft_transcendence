@@ -275,6 +275,34 @@ async function tournamentMatchFinished(event){
 	loadTournament(tournament);
 }
 
+if( typeof clickedUserDiv !== 'undefined')
+    var clickedUserDiv;
+
+document.getElementById('cSpectate').addEventListener('click', async () => {
+    navigateTo('/spectate/' + clickedUserDiv.code);
+})
+
+async function updateSpectatableMatches(event){
+    event = JSON.parse(event.data);
+    console.log('received spectatable matches');
+    console.log(event);
+    const contextMenuSpectate = document.getElementById('contextMenuSpectate');
+    const matches = document.querySelectorAll('.t-match')
+    for (let match of matches){
+        let id = match.id.split('_')[1];
+        if (event.data[id]) {
+            match.code = event.data[id];
+            match.addEventListener('contextmenu', function (e){
+                e.preventDefault();
+                clickedUserDiv = this;
+                contextMenuSpectate.style.left = `${e.pageX}px`;
+                contextMenuSpectate.style.top = `${e.pageY}px`;
+                contextMenuSpectate.style.display = 'block';
+            })
+        }
+    }   
+}
+
 async function tournamentFinished(event){
 	event = JSON.parse(event.data);
 	closeGameChatTab();
@@ -333,6 +361,11 @@ function addTournamentSSEListeners(){
 	if (!SSEListeners.has('tournament-finish')){
 		SSEListeners.set('tournament-finish', tournamentFinished);
         sse.addEventListener('tournament-finish', tournamentFinished);
+	}
+	
+	if (!SSEListeners.has('tournament-spectatable-matches')){
+		SSEListeners.set('tournament-spectatable-matches', updateSpectatableMatches);
+		sse.addEventListener('tournament-spectatable-matches', updateSpectatableMatches);
 	}
 }
 

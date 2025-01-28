@@ -149,7 +149,7 @@ class Game:
     def reconnect(self, user_id: int, sid: str):
         self.send_score(sid=sid)
         self.send_canvas(sid)
-        self.send_rackets(sid)
+        self.send_rackets(user_id, sid)
         self.send_stop_movings(sid)
         if self.last_update != 0:
             self.send_start_game(sid)
@@ -541,7 +541,7 @@ class Game:
                 rackets[racket.player_id] = racket.position.invert(self.canvas.x).x - racket.width
         return rackets
 
-    def send_rackets(self, sid=None):
+    def send_rackets(self, user_id= None, sid=None):
         from game_server.server import Server
         side = 1
         if sid is None:
@@ -564,6 +564,8 @@ class Game:
                     )
         else:
             rackets = self.get_rackets(1)
+            if self.get_racket(user_id).position.x < self.canvas.x / 2:
+                rackets = self.get_rackets(-1)
             Server.emit(
                 'rackets',
                 data=rackets,

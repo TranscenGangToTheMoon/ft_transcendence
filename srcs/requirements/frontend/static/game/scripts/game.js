@@ -541,7 +541,13 @@ function initSocket(match_code, socketPath, socketMode){
         window.PongGame.resizeCanvas();
     });
     gameSocket.on('connect_error', (error)=> {
-        // console.log('error', error);
+        localStorage.removeItem('game-event');
+        handleRoute();
+        // console.log('connect_error', error);
+        // navigateTo('/');
+        // setTimeout(() => {
+        //     displayMainAlert('Error', error.message);
+        // }, 500);
     })
     gameSocket.on('disconnect', async () => {
         gameSocket.close();
@@ -710,13 +716,11 @@ async function initData(data, socketPath, socketMode){
 	}
     document.getElementById('gameArea').classList.replace('d-none', 'd-flex');
     document.getElementById('opponentWait').classList.replace('d-flex', 'd-none');
-	console.log(userInformations.username);
     document.getElementById('playerUsername').innerText = userInformations.username;
     document.getElementById('enemyUsername').innerText = PongGame.info.enemyTeam.players.players[0].username;
 	initSocket(data.code, socketPath, socketMode);
     setTimeout(async () => {
         if (!cancelTimeout && gameSocket && !isModalOpen()){
-            console.log('donc',gameSocket);
             displayMainAlert('Error', 'Unable to establish connection with socket server');
             history.go(-1);
         }
@@ -895,7 +899,6 @@ async function initGame(){
         if (unauthorized === window.location.pathname){
             if (!document.getElementById('alertModal').classList.contains('show'))
                 displayMainAlert("Error", `You don't have permission to play in ${unauthorized}`);
-            // await navigateTo('/');
             history.go(-1);
         }
         else{
