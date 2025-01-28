@@ -6,7 +6,7 @@ EXPOSE 8000
 RUN apt-get update -y
 RUN apt-get upgrade -y
 RUN apt-get install -y postgresql-client
-RUN apt-get install -y jq
+RUN apt-get install -y curl
 
 COPY init.d /init.d
 
@@ -18,7 +18,7 @@ WORKDIR /code
 ##### Development build
 FROM base AS development
 
-RUN apt-get install -y --no-install-recommends curl net-tools
+RUN apt-get install -y --no-install-recommends net-tools
 
 ENTRYPOINT ["/init.d/entrypoint.sh"]
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
