@@ -11,12 +11,6 @@ ENV_EXEMPLE	:=	.env_exemple
 
 ENV_FILE	:=	$(SRCS_D)/.env
 
-CONFIG		:=	gameConfig.json
-
-CONFIG_T	:=	$(SRCS_D)/requirements/frontend/static/
-
-CONFIG_F	:=	$(addsuffix $(CONFIG), $(CONFIG_T))
-
 COMPOSE_F	:=	$(SRCS_D)/docker-compose-dev.yml
 
 SERVICE		?=	#Leave blank
@@ -29,6 +23,7 @@ FLAGS		=	-f $(COMPOSE_F)
 COMPOSE		=	docker compose
 
 DSHELL		=	/bin/sh
+
 ########################################################################################################################
 #                                                        COLORS                                                        #
 ########################################################################################################################
@@ -48,7 +43,7 @@ RESET		:=	\001\033[0m\002
 .PHONY: all
 all			:	banner $(NAME)
 
-$(NAME)		:	secrets $(CONFIG_F)
+$(NAME)		:	secrets
 			$(COMPOSE) $(FLAGS) up --build $(SERVICE)
 
 CMDS		:=	up build down ps ls images events top
@@ -85,9 +80,6 @@ secrets		:	$(ENV_EXEMPLE)
 			./launch.d/01generatePasswordsAndKeys.sh
 			./launch.d/02genreateSSL.sh
 
-$(CONFIG_F)	:	$(CONFIG)
-			cp $< $@
-
 .PHONY: clean
 clean		:
 			$(COMPOSE) $(FLAGS) down --rmi local --remove-orphans
@@ -104,9 +96,6 @@ fclean		:	dusting
 			docker system prune -af
 			rm -rf $(ENV_FILE)
 			rm -rf $(SECRETS_D)
-			rm -rf $(CONFIG_F)
-			rm -rf $(SRCS_D)/requirements/game/django/gameConfig.json
-			rm -rf $(SRCS_D)/requirements/pong-cli/gameConfig.json
 			rm -rf $(SRCS_D)/requirements/pong-cli/ft_transcendence.crt
 
 .PHONY: dusting

@@ -38,7 +38,6 @@ async function getMatchesAfter(date){
             if (!passed){
                 passed = true;
                 const index = rankedData.results.findIndex(obj => obj.id === match.id);
-                console.log('index',index);
                 if (index){
                     previousRank = rankedData.results[index - 1];
                     let copy = {...previousRank};
@@ -53,7 +52,6 @@ async function getMatchesAfter(date){
 
 function filterDataForPeriod(data, period) {
     test = [...data];
-    console.log('au debut', test);
     let filteredData = [];
     let seenDates = {};
     let simulationDate;
@@ -221,7 +219,6 @@ async function changePeriod(period){
             date = getLastYearDate();
             break;
     }
-    console.log('voici',date);
     let data = await getMatchesAfter(date);
     data = filterDataForPeriod(data, period);
     updateChart(chart, data, period);

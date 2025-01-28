@@ -27,7 +27,6 @@ function loadScript(scriptSrc, type) {
         if (type)
             script.type = type;
         script.onload = () => {
-            // console.log(`Script ${scriptSrc} loaded.`);
             resolve();
         };
         script.onerror = () => {
@@ -120,7 +119,6 @@ function addFriendListListener(){
 
 async function  indexInit(auto=true) {
     if (!auto){
-        console.log('zizi');
         await loadUserProfile();
     }
     else{
@@ -130,7 +128,10 @@ async function  indexInit(auto=true) {
         await loadScript('/scripts/serverSentEventsUtils.js');
         await loadScript('/notification/scripts/notificationUtils.js');
         await loadScript('/scripts/utils.js');
+        loadCSS('/css/styles.css', false);
         await fetchUserInfos();
+        if (!userInformations)
+            return;
         if (userInformations.code === 'user_not_found'){
             console.log('user was deleted from database, switching to guest mode');
             await generateToken();
@@ -146,7 +147,6 @@ async function  indexInit(auto=true) {
         console.log(`added ${window.location.pathname} to history with state ${currentState}`)
         history.replaceState({state: currentState}, '', window.location.pathname);
         incrementCurrentState();
-        loadCSS('/css/styles.css', false);
         quitLobbies('', window.location.pathname);
         handleRoute();
     }

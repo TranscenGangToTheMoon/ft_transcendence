@@ -32,7 +32,6 @@ async function playClash(event) {
         }, undefined, true);
         if (data.code)
             await navigateTo(`/lobby/${data.code}`);
-        console.log(data);
     }
     catch (error){
         console.log(error);

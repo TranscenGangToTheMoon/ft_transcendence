@@ -1,3 +1,17 @@
+<style>
+	#chatView {
+		width: 30vh;
+	}
+	.messages{
+		height:30vh;
+		flex-direction: column-reverse;
+	}
+	.messages p{
+		overflow-wrap: anywhere;
+		white-space: normal;
+	}
+</style>
+
 <div id="chatView" class="position-absolute bottom-0 end-0">
 	<div id="chatHeader" class="d-flex justify-content-between">
 		<ul id="chatTabs" class="nav nav-tabs" role="tablist">
@@ -5,5 +19,5 @@
 		<button id="chatTabsCollapse" style="display:none" class="btn" type="button" data-bs-toggle="collapse" data-bs-target="#chatBody" aria-expanded="true" aria-controls="chatBody"></button>
 		<button id="chatTabsAdd" class="btn btn-dark" type="button">✚</button>
 	</div>
-	<div id="chatBody" class="tab-content mt-0 show text-wrap w-100 w-sm-75 w-md-50"></div>
+	<div id="chatBody" class="tab-content mt-0 show"></div>
 </div>

@@ -12,16 +12,13 @@ function checkEventDuplication(data){
     const now = Date.now();
 
     const lastTimeStamp = eventTimestamps.get(data.event_code);
-    // console.log(lastTimeStamp);f
     if (lastTimeStamp && (now - lastTimeStamp < DEBOUNCE_TIME)){
-        console.log('skip', data);
         if (data.event_code === 'lobby-update-participant' && data.data && data.data.team === 'Spectator')
             return 1;
         return 0;
     }
 
     eventTimestamps.set(data.event_code, now);
-    // console.log('cala',eventTimestamps.get(data));
     return 1;
 }
 
@@ -30,7 +27,6 @@ function removeSSEListeners(type){
         if (key.includes(type)) {
             sse.removeEventListener(key, value);
             SSEListeners.delete(key);
-            // console.log('removed sse listener:', key);
         }
     }
 }
@@ -41,7 +37,6 @@ function addFriendSSEListeners(){
         const isModalShown = friendListModal ? friendListModal._isShown : friendListModal;
         const isTabActive = document.getElementById('innerFriendRequests-tab').classList.contains('active');
         event = JSON.parse(event.data);
-        console.log(event);
         if (!isModalShown || !isTabActive) {
             await displayNotification(undefined, 'friend request', event.message, event => {
                 const friendListModal = new bootstrap.Modal(document.getElementById('friendListModal'));
@@ -57,11 +52,9 @@ function addFriendSSEListeners(){
 
     sse.addEventListener('accept-friend-request', async event => {
         event = JSON.parse(event.data);
-        console.log(event);
         if (!(bootstrap.Modal.getInstance(document.getElementById('friendListModal'))._isShown))
             await displayNotification(undefined, 'friend request', event.message);
         removeFriendRequest(event.data.id);
-        console.log(event.data);
         addFriend(event.data);
     })
 
@@ -81,7 +74,6 @@ function addFriendSSEListeners(){
     sse.addEventListener('reject-friend-request', async event => {
         event = JSON.parse(event.data);
         removeFriendRequest(event.data.id);
-        console.log(event);
     })
 
     sse.addEventListener('delete-friend', event => {
@@ -95,26 +87,23 @@ function addInviteSSEListeners(){
         event = JSON.parse(event.data);
         displayNotification(undefined, event.service, event.message, undefined, event.target);
         displayGameInviteInChat({'user': event.data.id, 'game_mode': 'clash', 'game_url': event.target[0].url, 'game_code': event.data.code});
-        console.log(event);
     })
 
     sse.addEventListener('invite-3v3', event => {
         event = JSON.parse(event.data);
         displayNotification(undefined, event.service, event.message, undefined, event.target);
         displayGameInviteInChat({'user': event.data.id, 'game_mode': 'clash', 'game_url': event.target.url, 'game_code': event.data.code});
-        console.log(event);
     })
 
     sse.addEventListener('invite-1v1', event => {
         event = JSON.parse(event.data);
         displayNotification(undefined, event.service, event.message, undefined, event.target);
         displayGameInviteInChat({'user': event.data.id, 'game_mode': 'clash', 'game_url': event.target[0].url, 'game_code': event.data.code});
-        console.log(event);
     })
 
     sse.addEventListener('invite-tournament', event => {
         event = JSON.parse(event.data);
-        console.log(event);
+        displayNotification(undefined, event.service, event.message, undefined, event.target);
     })
 
 }
@@ -147,7 +136,6 @@ function addChatSSEListeners(){
 function addSSEListeners(){
     sse.addEventListener('profile-picture-unlocked', event => {
         event = JSON.parse(event.data);
-        console.log('profile pic unlocked: ', event);
         displayNotification(event.data.small, 'achievement', event.message, undefined, [event.target[0]]);
     })
 
@@ -177,10 +165,15 @@ function initSSE(){
 
     sse.onerror = async error => {
         console.log(error);
-        const shownModal = document.querySelector('.modal.show[aria-modal="true"]');
-        if (shownModal)
-            return;
-        displayMainAlert('Error', 'Unable to connect to Server Sent Events. Note that several services will be unavailable.');
+        const contentDiv = document.getElementById('content');
+        const existingAlert = document.querySelector('.unavailable');
+        if (existingAlert)
+            existingAlert.remove();
+        const alertHtml = `
+        <div class="alert alert-danger unavailable" role="alert">
+            connection with server lost
+        </div>`;
+        contentDiv.insertAdjacentHTML('beforebegin', alertHtml);
     }
 
     addSSEListeners();
