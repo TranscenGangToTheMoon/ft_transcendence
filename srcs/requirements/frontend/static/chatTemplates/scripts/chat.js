@@ -30,7 +30,6 @@ async function getChatInstance(chatId) {
 		return apiAnswer;
 	}
 	catch (error) {
-		console.log('Error chat:', error);
 		if (error.code === 404 && error.detail === undefined) error.detail = 'No chat found';
 		if (error.detail === undefined) error.detail = 'Error while loading chat';
 		displayChatError(error, 'container');
@@ -494,6 +493,7 @@ loadScript('/chatTemplates/scripts/chatGame.js');
 document.getElementById('searchChatForm').addEventListener('keyup', (e) => {
 	e.preventDefault();
 	if (e.key === 'Enter') return;
+	if (e.key === 'Escape') return;
 	displayChatsList(e.target.value);
 });
 

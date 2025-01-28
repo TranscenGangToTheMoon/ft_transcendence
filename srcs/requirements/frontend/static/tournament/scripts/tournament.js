@@ -17,7 +17,6 @@ if (typeof emptyMatch === 'undefined'){
 }
 
 async function joinTournament(code){
-	console.log('join tournament:', code);
 	try {
 		let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/play/tournament/${code}/`, 'POST');
 		if (data.detail){
@@ -50,7 +49,6 @@ document.getElementById('searchTournamentForm').addEventListener('keyup', async 
 		if (data.count){
 			for (i in data.results){
 				let tournament = data.results[i];
-				// console.log(tournament);
 				let tournamentDiv = document.createElement('div');
 				tournamentDiv.classList.add('tournament-div');
 				tournamentDiv.id = `tournamentDiv${tournament.code}`
@@ -128,10 +126,8 @@ document.getElementById('cBlock').addEventListener('click', async () => {
 function addParticipant(participant){
 	const tournamentViewDiv = document.getElementById('tournamentView');
 	const participantDiv = document.createElement('div');
-	console.log('participant',participant)
 	participantDiv.id = `tParticipant${participant.id}`;
 	participantDiv.className = 'tournament-participant';
-	console.log('AHHHHHHHHHHHHHHHH', participant);
 	participantDiv.innerHTML = `
 		<img class="profile-pic-medium" src="${participant['profile_picture'].small}" 
 		onerror="this.onerror=null; this.src='/assets/imageNotFound.png'" 
@@ -242,7 +238,6 @@ function tournamentStart(event){
 	displayGameChatMessage({'message':":Tournament begins"}, false);
 	displayCountdown();
 	event = JSON.parse(event.data);
-	console.log('tournament start:', event);
 	loadTournament(event.data);
 }
 
@@ -265,12 +260,8 @@ function updateMatchFromWinnerId(id, data){
 
 async function tournamentMatchFinished(event){
 	event = JSON.parse(event.data);
-	console.log('received match finished event');
-	console.log(event);
 	tournament = event.data;
-	console.log('tournanananananament:', event);
 	displayGameChatMessage(event, false);
-	//await displayNotification(undefined, 'Match finished', event.message);
 	setBanOption();
 	loadTournament(tournament);
 }
@@ -284,8 +275,6 @@ document.getElementById('cSpectate').addEventListener('click', async () => {
 
 async function updateAvailableSpectateMatches(event){
     event = JSON.parse(event.data);
-    console.log('received available spectate matches');
-    console.log(event);
     const contextMenuSpectate = document.getElementById('contextMenuSpectate');
     const matches = document.querySelectorAll('.t-match')
     for (let match of matches){
@@ -306,8 +295,6 @@ async function updateAvailableSpectateMatches(event){
 async function tournamentFinished(event){
 	event = JSON.parse(event.data);
 	closeGameChatTab();
-	console.log('received tournament-finish');
-	console.log(event);
 	await navigateTo('/', true, true); //todo replace by tournament history
 	displayNotification(undefined, 'tournament finished', event.message, undefined, undefined); //todo add target 
 }
@@ -511,7 +498,6 @@ if (typeof tournamentData === 'undefined')
 async function gameStart(event) {
 	event = JSON.parse(event.data);
 	if (!checkEventDuplication(event)) return;
-	console.log('game-start received (tournament)',event);
 	localStorage.setItem('tournament-code', tournament.code);
 	if (fromTournament)
 		userInformations.cancelReturn = true;
@@ -535,7 +521,6 @@ async function initTournament(){
 	setTournamentOptions();
 
 	if (SSEListeners.has('game-start')){
-		// console.log('je remove :', SSEListeners.get('game-start'));
         sse.removeEventListener('game-start', SSEListeners.get('game-start'));
         SSEListeners.delete('game-start');
     }
