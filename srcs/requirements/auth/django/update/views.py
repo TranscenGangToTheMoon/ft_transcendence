@@ -1,9 +1,9 @@
 from rest_framework import generics
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated
-from lib_transcendence.exceptions import MessagesException
 
 from guest.group import is_guest
+from lib_transcendence.exceptions import MessagesException
 from update.serializers import UpdateSerializer
 
 

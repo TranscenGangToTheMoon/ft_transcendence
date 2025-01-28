@@ -1,13 +1,13 @@
 from django.contrib.auth.models import User
-from lib_transcendence import endpoints
-from lib_transcendence.exceptions import MessagesException
-from lib_transcendence.services import request_chat
 from rest_framework import serializers
 from rest_framework.exceptions import APIException
-from lib_transcendence.serializer import Serializer
 
 from auth.validators import validate_username, set_password
 from guest.group import is_guest
+from lib_transcendence import endpoints
+from lib_transcendence.exceptions import MessagesException
+from lib_transcendence.serializer import Serializer
+from lib_transcendence.services import request_chat
 
 
 class UpdateSerializer(Serializer):
