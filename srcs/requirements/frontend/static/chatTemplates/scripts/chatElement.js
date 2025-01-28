@@ -41,6 +41,11 @@ function addChatUserCardListeners(chatUserCard, chatUserCardDeleteButton, chatUs
 	chatUserCard.addEventListener('click', async e => {
 		if (e.target === chatUserCard.querySelector('.chatUserCardButtonDeleteChat')) return;
 		chatUserCardLastMessage.classList.remove('chatMessageNotRead');
+		let chatTab = document.getElementById('chatTab' + chatInfo.target + 'Link');
+		if (chatTab) {
+			chatTab.click();
+			return;
+		}
 		await openChatTab(chatInfo.chatId);
 	});
 }

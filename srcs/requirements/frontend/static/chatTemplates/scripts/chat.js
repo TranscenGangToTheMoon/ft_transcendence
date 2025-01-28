@@ -226,11 +226,17 @@ async function searchChatButton(username) {
 		console.log('Chat: New chat created:', chatRequest);
 	}
 	else {
-		if (lastClick === 'chatTab' + apiAnswer.results[0].chat_with.username + 'Link') {
+		let chatTabLink = 'chatTab' + apiAnswer.results[0].chat_with.username + 'Link';
+		if (lastClick === chatTabLink) {
 			console.log('Chat: Chat already open');
 			removeChatCollapse();
 			const chatModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('chatListModal'));
 			chatModal.hide();
+			return;
+		}
+		let chatTab = document.getElementById(chatTabLink);
+		if (chatTab) {
+			chatTab.click();
 			return;
 		}
 		console.log('Chat: Chat already exist => loading chat');
