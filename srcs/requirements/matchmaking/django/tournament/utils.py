@@ -16,6 +16,7 @@ def finish_tournament(tournament_id, winner_user_id):
         tournament = Tournament.objects.get(id=tournament_id)
     except Tournament.DoesNotExist:
         return
+    tournament.finish()
     data = TournamentSerializer(tournament).data
     data['finish_at'] = datetime.now(timezone.utc)
     data['stages'] = TournamentStageSerializer(tournament.stages.all(), many=True).data

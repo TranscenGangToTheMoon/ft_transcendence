@@ -11,10 +11,12 @@ from lib_transcendence.validate_type import validate_type, surchage_list
 from rest_framework.exceptions import APIException
 
 from baning.models import delete_banned
-from blocking.utils import delete_player_instance
+from blocking.utils import delete_player_instance, model_exists
+from lobby.models import LobbyParticipants
 from matchmaking.create_match import create_tournament_match, create_tournament_match_not_played
 from matchmaking.utils.model import ParticipantsPlace
 from matchmaking.utils.sse import send_sse_event, start_tournament_sse
+from play.models import Players
 from tournament.sse import send_sse_event_finish_match
 
 
@@ -60,6 +62,7 @@ class Tournament(models.Model):
     created_by = models.IntegerField()
     created_by_username = models.CharField(max_length=30)
     update_stage = models.BooleanField(default=False)
+    finished = models.BooleanField(default=False)
 
     def users_id(self):
         return list(self.participants.filter(connected=True).values_list('user_id', flat=True))
@@ -126,6 +129,10 @@ class Tournament(models.Model):
         for matche in self.matches.all():
             matche.post()
 
+    def finish(self):
+        self.finished = True
+        self.save()
+
     def get_nb_matches(self):
         self.nb_matches += 1
         self.save()
@@ -172,7 +179,11 @@ class TournamentParticipants(ParticipantsPlace, models.Model):
     def delete(self, using=None, keep_parents=False):
         tournament = self.tournament
 
-        if tournament.is_started:
+        if tournament.finished:
+            if not self.connected and (model_exists(LobbyParticipants, self.user_id) or model_exists(Players, self.user_id)):
+                delete_player_instance(self.user_id)
+            super().delete(using=using, keep_parents=keep_parents)
+        elif tournament.is_started:
             self.disconnect()
         else:
             last_member = tournament.participants.count() == 1

@@ -7,10 +7,15 @@ from lib_transcendence.services import request_users
 from blocking.models import Blocked
 
 
+def model_exists(model, user_id):
+    return model.objects.filter(user_id=user_id).exists()
+
+
 def create_player_instance(request, instance=None, *args, **kwargs):
-    result = get_all_pagination_items(request_users, 'users', endpoints.Users.blocked, token=get_auth_token(request))
-    for blocked_instance in result:
-        Blocked.objects.create(user_id=request.user.id, blocked_user_id=blocked_instance['blocked']['id'])
+    if not model_exists(Blocked, request.user.id):
+        result = get_all_pagination_items(request_users, 'users', endpoints.Users.blocked, token=get_auth_token(request))
+        for blocked_instance in result:
+            Blocked.objects.create(user_id=request.user.id, blocked_user_id=blocked_instance['blocked']['id'])
 
     if instance is not None:
         return instance.objects.create(*args, **kwargs)

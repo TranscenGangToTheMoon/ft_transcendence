@@ -133,7 +133,9 @@ class TournamentParticipantsSerializer(Serializer):
         validated_data['user_id'] = user['id']
         validated_data['trophies'] = user['trophies']
         validated_data['tournament'] = tournament
-        return super().create(validated_data)
+        result = super().create(validated_data)
+        create_player_instance(self.context['request'])
+        return result
 
 
 class TournamentSearchSerializer(Serializer):
