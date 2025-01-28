@@ -79,10 +79,11 @@ async function chatGameTabListener()
 		let buttonCollapseChat = document.getElementById('chatTabsCollapse');
 		disconnect();
 		if (buttonCollapseChat.getAttribute('aria-expanded') === 'false') {
-			lastClick = undefined;
 			buttonCollapseChat.click();
 		}
-		if (lastClick === e.target.id) return;
+		if (lastClick === e.target.id) {
+			buttonCollapseChat.click();
+		}
 		lastClick = e.target.id;
 		return;
 	});
