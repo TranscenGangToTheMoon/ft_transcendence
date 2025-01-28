@@ -2,10 +2,10 @@
 RED="\001\033[031m\002"
 BOLD="\001\033[001m\002"
 RESET="\001\033[000m\002"
-
-echo -e $BOLD$RED"- Fetching gameConfig.json ..."$RESET
 FILE="gameConfig.json"
 URL="https://frontend:443/$FILE"
+
+echo -e $BOLD$RED"- Fetching gameConfig.json ..."$RESET
 curl -ks "$URL" -o "$FILE" || exit 1
 
 echo -e $BOLD$RED"- Game migrations processing"$RESET

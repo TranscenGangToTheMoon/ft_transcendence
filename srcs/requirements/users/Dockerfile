@@ -27,7 +27,7 @@ FROM base AS production
 
 COPY django /code
 
-RUN pip install daphne
+RUN pip install gunicorn gevent
 
 ENTRYPOINT ["/init.d/entrypoint.sh"]
-CMD ["daphne", "-b", "0.0.0.0", "-p", "8000", "users.asgi:application"]
+CMD ["gunicorn", "--worker-class", "gevent", "--workers", "4", "--bind", "0.0.0.0:8000", "--timeout", "3600", "users.wsgi:application"]

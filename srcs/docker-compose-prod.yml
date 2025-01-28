@@ -45,6 +45,8 @@ services:
       chat-db:
         condition: service_healthy
     restart: on-failure
+    ports:
+      - "8002:8000"
     environment:
       <<: *django-env
       POSTGRES_DB: ${POSTGRES_CHAT_DB_NAME}
@@ -79,6 +81,8 @@ services:
       game-db:
         condition: service_healthy
     restart: on-failure
+    ports:
+      - "8003:8000"
     environment:
       <<: *django-env
       POSTGRES_DB: ${POSTGRES_GAME_DB_NAME}
@@ -121,6 +125,8 @@ services:
       event-queue:
         condition: service_healthy
     restart: on-failure
+    ports:
+      - "8005:8000"
     environment:
       <<: *django-env
       POSTGRES_DB: ${POSTGRES_USERS_DB_NAME}
