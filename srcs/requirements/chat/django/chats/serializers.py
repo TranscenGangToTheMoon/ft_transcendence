@@ -92,5 +92,3 @@ class ChatNotificationsSerializer(serializers.Serializer):
 #                 results[message.author] = count
 #
 #         return results
-
-# TODO fguirama: remake notifications chat

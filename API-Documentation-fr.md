@@ -159,7 +159,7 @@ POST https://localhost:4443/api/auth/guest/
 ```
 🔒 PUT https://localhost:4443/api/auth/register/guest/
 ```
-- **Description** : Permet d'enregister un utilisateur invité.
+- **Description** : Permet d'enregistrer un utilisateur invité.
 - **Body (JSON)** :
   ```json
   {
@@ -259,7 +259,7 @@ https://localhost:4443/api/chat/
   }
   ```
 - **Codes de réponse** :
-  - `201 Created` : Ressource créée.
+  - `201 Created`
   - `400 Bad Request`
   - `401 Unauthorized`
   - `403 Permission Denied` : Si l'utilisateur qui a reçu la demande a bloqué les demandes de conversation. Si l'utilisateur renseigné est le même que l'utilisateur qui fait la requête. Si l'utilisateur qui fait la requête a bloqué l'utilisateur renseigné.
@@ -647,7 +647,7 @@ https://localhost:4443/api/game/
 ```
 🔒 GET https://localhost:4443/api/play/tournament/
 ```
-- **Description** : Retourne l'instance du tournament auquel l'utilisateur appartient.
+- **Description** : Retourne l'instance du tournoi auquel l'utilisateur appartient.
   ```json
   {
     "id": "int",
@@ -672,12 +672,12 @@ https://localhost:4443/api/game/
 - **Codes de réponse** :
   - `201 Ressource Created`
   - `401 Unauthorized`
-  - `404 Not Found` : Si l'utilisateur n'appartient à aucun tournament.
+  - `404 Not Found` : Si l'utilisateur n'appartient à aucun tournoi.
 
 ```
 🔒 POST https://localhost:4443/api/play/tournament/<str:tournament_code>/
 ```
-- **Description** : Rejoins l'instance du tournament.
+- **Description** : Rejoins l'instance du tournoi.
 - **Réponse (succès)** :
   ```json
   {
@@ -693,7 +693,7 @@ https://localhost:4443/api/game/
 - **Codes de réponse** :
   - `201 Ressource Created`
   - `401 Unauthorized`
-  - `404 Not Found` : Si le tournoi n'existe pas ou que le créateur du tournament a bloqué l'utilisateur qui fait la requête.
+  - `404 Not Found` : Si le tournoi n'existe pas ou que le créateur du tournoi a bloqué l'utilisateur qui fait la requête.
   - `409 Conflict` : Si l'utilisateur est déjà en train de jouer.
 
 ```
@@ -703,17 +703,17 @@ https://localhost:4443/api/game/
 - **Codes de réponse** :
   - `204 No Content`
   - `401 Unauthorized`
-  - `403 Permission Denied` : Si l'utilisateur n'a pas rejoint le tournament.
+  - `403 Permission Denied` : Si l'utilisateur n'a pas rejoint le tournoi.
 
 ### Ban
 ```
 🔒 DELETE https://localhost:4443/api/play/tournament/<str:tournament_code>/ban/<int:user_id>/
 ```
-- **Description** : Ban l'utilisateur du tournament.
+- **Description** : Ban l'utilisateur du tournoi.
 - **Codes de réponse** :
   - `204 No Content`
   - `401 Unauthorized`
-  - `403 Permission Denied` : Si l'utilisateur n'a pas rejoint le tournoi, que le tournoi n'existe pas, que l'utilisateur tente de se bannir lui-même ou que l'utilisateur n'est pas le créateur du tournament.
+  - `403 Permission Denied` : Si l'utilisateur n'a pas rejoint le tournoi, que le tournoi n'existe pas, que l'utilisateur tente de se bannir lui-même ou que l'utilisateur n'est pas le créateur du tournoi.
   - `404 Not Found` : Si l'utilisateur invité n'est pas dans le tournoi.
 
 ### Invitation
@@ -724,7 +724,7 @@ https://localhost:4443/api/game/
 - **Codes de réponse** :
   - `204 No Content`
   - `401 Unauthorized`
-  - `403 Permission Denied` : Si l'utilisateur n'a pas rejoint le tournoi, que le tournoi n'existe pas, que l'utilisateur tente de se bannir lui-même ou que l'utilisateur n'est pas le créateur du tournament.
+  - `403 Permission Denied` : Si l'utilisateur n'a pas rejoint le tournoi, que le tournoi n'existe pas, que l'utilisateur tente de se bannir lui-même ou que l'utilisateur n'est pas le créateur du tournoi.
   - `404 Not Found` : Si l'utilisateur invité n'est pas dans le tournoi.
 
 ### Messages de tournoi
@@ -1253,18 +1253,18 @@ Events envoyés quand l'utilisateur est dans un lobby :
 - ***lobby-join*** est envoyé à tous les utilisateurs déjà présents dans le lobby afin de les informer qu'un nouvel utilisateur a rejoint le lobby. data: *LobbyParticipantInstance*, kwargs : *username*
 - ***lobby-leave*** est envoyé à tous les utilisateurs présents dans le lobby afin de les informer qu'un utilisateur à quitter le lobby. data: *{"id" : "int"}*, kwargs : *username*
 - ***lobby-banned*** est envoyé à l'utilisateur banni. Les autres participants du lobby reçoivent un event *lobby-leave*.
-- ***lobby-message***est envoyé est envoyé à tous les utilisateurs présents dans le lobby (excepté l'auteur du message). kwargs : *username*
+- ***lobby-message*** est envoyé à tous les utilisateurs présents dans le lobby (excepté l'auteur du message). kwargs : *username*
 - ***lobby-update*** est envoyé à tous les utilisateurs présents dans le lobby (excepté le créateur) afin de les informer que les paramètres du lobby ont été changés. data: *LobbyInstance* (uniquement les champs qui ont été modifiés).
 - ***lobby-update-participant*** est envoyé à tous les utilisateurs présents dans le lobby (excepté celui qui performe la modification) afin de les informer que les paramètres de l'utilisateur ont été changés. data: *LobbyParticipantInstance* (uniquement les champs qui ont été modifiés à savoir où `creator`, `team` ou `is_ready`).
 - ***lobby-spectate-game*** est envoyé à tous les utilisateurs présents dans la team "spectator" lorsqu'une game commence. data : *{"code" : "str"}*
 - ***lobby-destroy*** est envoyé à tous les utilisateurs utilisateur invité présents dans le lobby dans le cas où le creator quitte le lobby, et que plus aucun utilisateur enregistré reste dans le lobby, afin de les informer le lobby a été détruit.
 
 ## Tournament
-Events envoyés quand l'utilisateur est dans un tournament :
-- ***tournament-join*** est envoyé à tous les utilisateurs déjà présents dans le tournament afin de les informer qu'un nouvel utilisateur a rejoint le tournament. data: *TournamentParticipantInstance*, kwargs : *username*
-- ***tournament-leave*** est envoyé à tous les utilisateurs présents dans le tournament afin de les informer qu'un utilisateur à quitter le tournament. data: *{"id" : "int"}*, kwargs : *username*
-- ***tournament-banned*** est envoyé à l'utilisateur banni. Les autres participants du tournament reçoivent un event *tournament-leave*.
-- ***tournament-message***est envoyé est envoyé à tous les utilisateurs présents dans le tournoi (excepté l'auteur du message). kwargs : *username*
+Events envoyés quand l'utilisateur est dans un tournoi :
+- ***tournament-join*** est envoyé à tous les utilisateurs déjà présents dans le tournoi afin de les informer qu'un nouvel utilisateur a rejoint le tournoi. data: *TournamentParticipantInstance*, kwargs : *username*
+- ***tournament-leave*** est envoyé à tous les utilisateurs présents dans le tournoi afin de les informer qu'un utilisateur à quitter le tournoi. data: *{"id" : "int"}*, kwargs : *username*
+- ***tournament-banned*** est envoyé à l'utilisateur banni. Les autres participants du tournoi reçoivent un event *tournament-leave*.
+- ***tournament-message*** est envoyé à tous les utilisateurs présents dans le tournoi (excepté l'auteur du message). kwargs : *username*
 - ***tournament-start-at*** est envoyé à tous les participants du tournoi pour les informer que le tournoi commence à "start_at". C'est lorsque le tournoi est rempli à 80% de la taille. Il y a alors une période de 20 secondes d'attente avant que le tournoi commence. Si une personne quitte pendant ce temps d'attente, l'event *tournament-start-cancel* est envoyé à tous les utilisateurs encore présents et "start_at" est remis à None. data: *{"id" : "int", "start_at" : "datetime"}*
 - ***tournament-start-cancel*** est envoyé à tous les participants du tournoi pour les informer que le lancement du tournoi est annulé. data: *{"id" : "int", "start_at" : "datetime"}*
 - ***tournament-start*** est envoyé à tous les participants du tournoi pour les informer que le tournoi commence (soit parce que le "start_at" est passé ou parce que le tournoi est complet). Il y a alors un timer de trois secondes avant que les game se lance, afin d'avoir le temps de voir le bracket (qui est envoyé dans les data). data: *TournamentInstance*

@@ -212,10 +212,20 @@ function setChatAcceptationOptions(){
 	});
 }
 
+function fillBanner(){
+    const usernameDiv = document.getElementById('bUsername');
+    usernameDiv.innerText = userInformations.username;
+    const profilePicDiv = document.getElementById('pProfilePicture');
+    profilePicDiv.innerHTML = `
+    <img class="rounded-1" src="${userInformations.profile_picture?.small}" onerror="src='/assets/imageNotFound.png'">
+    `
+}
+
 async function accountInit(){
     if (userInformations.is_guest){
         document.getElementById('pDeleteAccount').classList.add('disabled');
     }
+    fillBanner();
     fillNicknamePlaceholder();
     setChatAcceptationOptions();
 } 

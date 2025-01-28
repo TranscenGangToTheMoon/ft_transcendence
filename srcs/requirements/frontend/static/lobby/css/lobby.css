@@ -26,6 +26,11 @@
     display: flex;
 }
 
+#teamDisplay .player {
+    border-radius: 10px;
+    margin :10px;
+}
+
 #benchPlayerListLabel {
     width: 100%;
     text-align: center;
@@ -36,7 +41,6 @@
 }
 
 #settingsButton {
-    background-color: crimson;
     cursor: pointer;
     user-select: none;
 }
@@ -46,7 +50,7 @@
 }
 
 #teamA .player{
-    background-color: red !important;
+    background-color: rgba(255, 0, 0, 0.54) !important;
     outline: auto;
     outline-color: white;
     width: 70px;
@@ -54,7 +58,7 @@
 }
 
 #teamB .player{
-    background-color: rgb(0, 181, 247) !important;
+    background-color: rgba(0, 77, 255, 0.54) !important;
     outline: auto;
     outline-color: white;
     width: 70px;
@@ -62,7 +66,7 @@
 }
 
 #bench .player {
-    background-color: rgb(100, 102, 104);
+    background-color: rgba(255, 255, 255, 0.361);
     outline: auto;
     outline-color: white;
     width: 70px;
