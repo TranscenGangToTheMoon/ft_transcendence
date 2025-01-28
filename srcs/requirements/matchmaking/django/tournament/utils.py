@@ -41,6 +41,7 @@ def create_match_new_stage(tournament_id):
     time.sleep(3)
     stage = tournament.stages.get(stage=tournament.current_stage.stage - 1)
 
+    spectate = {}
     try:
         previous = None
         for match in matches.order_by('n'):
@@ -49,9 +50,11 @@ def create_match_new_stage(tournament_id):
                 continue
             match = tournament.matches.create(n=tournament.get_nb_matches(), stage=stage, user_1=previous.winner, user_2=match.winner)
             match.post()
+            spectate[match.id] = match.match_code
             previous = None
     except APIException:
         tournament.delete()
 
     tournament.current_stage = stage
+    create_sse_event(tournament.users_id({'still_in': False}), EventCode.TOURNAMENT_AVAILABLE_SPECTATE_MATCHES, spectate)
     tournament.set_update_stage(False)
