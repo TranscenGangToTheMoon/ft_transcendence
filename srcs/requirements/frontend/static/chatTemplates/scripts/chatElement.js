@@ -43,8 +43,13 @@ function addChatUserCardListeners(chatUserCard, chatUserCardDeleteButton, chatUs
 		chatUserCardLastMessage.classList.remove('chatMessageNotRead');
 		let chatTab = document.getElementById('chatTab' + chatInfo.target + 'Link');
 		if (chatTab) {
-			removeChatCollapse();
-			chatTab.click();
+			if (chatTab.classList.contains('active')) {
+				closeChatListModal();
+			}
+			else {
+				removeChatCollapse();
+				chatTab.click();
+			}
 			return;
 		}
 		await openChatTab(chatInfo.chatId);
@@ -126,7 +131,6 @@ async function chatTabListener(chatInfo)
 					if (buttonCollapseChat.getAttribute('aria-expanded') === 'false') return;
 				}
 			}
-
 			openChatTab(chatInfo.chatId);
 			lastClick = e.target.id;
 			return;

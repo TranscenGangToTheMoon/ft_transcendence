@@ -142,6 +142,14 @@ function setupSocketListeners(chatInfo)
 
 //==========ChatListView==========
 
+function closeChatListModal() {
+	const chatModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('chatListModal'));
+	if (chatModal && chatModal._isShown) {
+		chatModal.hide();
+		document.getElementById('searchChatForm').reset();
+	}
+}
+
 async function createChatUserCard(chatInfo) {
 	verifChatCard = document.getElementById('chatListElement' + chatInfo.target);
 	if (verifChatCard) return;
@@ -444,11 +452,7 @@ async function openChatTab(chatId)
 		userChat[chatInfo.targetId] = chatInfo.chatId;
 		await createChatTab(chatInfo);
 	}
-	const chatModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('chatListModal'));
-	if (chatModal && chatModal._isShown) {
-		chatModal.hide();
-		document.getElementById('searchChatForm').reset();
-	}
+	closeChatListModal();
 	let buttonCollapseChat = document.getElementById('chatTabsCollapse');
 	if (buttonCollapseChat && buttonCollapseChat.getAttribute('aria-expanded') === 'true') {
 		try {
