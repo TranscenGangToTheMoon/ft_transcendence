@@ -455,6 +455,11 @@ async function openChatTab(chatId)
 	let buttonCollapseChat = document.getElementById('chatTabsCollapse');
 	if (buttonCollapseChat && buttonCollapseChat.getAttribute('aria-expanded') === 'true') {
 		try {
+			userInformations.notifications['chats'] -= chatInfo.lastMessagesNotRead;
+			if (userInformations.notifications['chats'] <= 0)
+				removeBadges('chats');
+			else
+				displayBadges();
 			messageBox = document.getElementById('messages'+chatInfo.target);
 			messageBox.innerHTML = '';
 			res = await loadOldMessages(chatInfo);
