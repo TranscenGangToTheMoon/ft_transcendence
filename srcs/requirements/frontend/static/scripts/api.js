@@ -10,7 +10,6 @@ async function apiRequest(token, endpoint, method="GET", authType="Bearer",
         options.headers["Authorization"] = `${authType} ${token}`;
     if (body)
         options.body = JSON.stringify(body);
-    console.log(endpoint, options);
     return fetch(endpoint, options)
         .then(async response => {
             if (!response.ok && (response.status > 499 || response.status === 404)){
@@ -20,7 +19,6 @@ async function apiRequest(token, endpoint, method="GET", authType="Bearer",
                 return;
             }
             let data = await response.json();
-            console.log(data);
             if (data.code === 'token_not_valid') {
                 if (currentlyRefreshing)
                     return {};
