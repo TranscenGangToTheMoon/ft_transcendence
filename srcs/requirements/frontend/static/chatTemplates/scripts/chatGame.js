@@ -5,7 +5,7 @@ function displayGameChatMessage(event, isJson=true) {
 	let messageDiv = document.createElement('div');
 	messageDiv.className = 'messageGame';
 	messageDiv.innerText = event.message;
-	console.log('displayGameChatMessage:', event);
+	let chatBox = document.getElementById('messagesGame');
 	if (chatBox) {
 		chatBox.appendChild(messageDiv);
 		chatBox.scrollTop = chatBox.scrollHeight;
