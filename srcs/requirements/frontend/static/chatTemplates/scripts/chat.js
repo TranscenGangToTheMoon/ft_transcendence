@@ -63,7 +63,6 @@ function displayChatError(error, idDiv) {
 async function disconnect() {
 	if (typeof window.socket === 'undefined')	return;
 	if (socket === null)	return;
-	console.log("Chat: Closing the connection to the server...");
 	socket.off();
 	await socket.disconnect();
 	socket = null;
@@ -81,7 +80,6 @@ async function connect(token, chatInfo) {
 		}
 	});
 	window.socket = socket;
-	console.log("Chat: Connecting to the server...");
 	setupSocketListeners(chatInfo);
 }
 
@@ -130,7 +128,6 @@ function setupSocketListeners(chatInfo)
 			socket.emit('message', {'content': data.retry_content, 'token' : 'Bearer ' + await refreshToken(), 'retry': true});
 		}
 		else {
-			console.log('Error chat:', data);
 			if (data.message === undefined) data.message = 'Error with chat server';
 			await closeChatTab(chatInfo);
 			displayChatError({'code':data.error, 'detail': data.message}, 'container');
@@ -165,7 +162,6 @@ async function displayChatsList(filter='') {
 		}
 		if (apiAnswer.count > 0) {
 			for(element of apiAnswer.results) {
-				console.log('Chat: Displaying chat:', element);
 				data = parsChatInfo(element);
 				await createChatUserCard(data);
 			}
@@ -207,7 +203,6 @@ async function searchChatButton(username) {
 	chatInfo = undefined;
 	if (apiAnswer.count === 0)
 	{
-		console.log('Chat: Chat doesn\'t exist => creating chat');
 		try {
 			clearChatError();
 			var chatRequest = await apiRequest(getAccessToken(), `${baseAPIUrl}/chat/`, 'POST', undefined, undefined, {'username': username, 'type':"private_message"});
@@ -223,17 +218,21 @@ async function searchChatButton(username) {
 			displayChatError(error, 'chatListError');
 			return;
 		}
-		console.log('Chat: New chat created:', chatRequest);
 	}
 	else {
-		if (lastClick === 'chatTab' + apiAnswer.results[0].chat_with.username + 'Link') {
+		let chatTabLink = 'chatTab' + apiAnswer.results[0].chat_with.username + 'Link';
+		if (lastClick === chatTabLink) {
 			console.log('Chat: Chat already open');
 			removeChatCollapse();
 			const chatModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('chatListModal'));
 			chatModal.hide();
 			return;
 		}
-		console.log('Chat: Chat already exist => loading chat');
+		let chatTab = document.getElementById(chatTabLink);
+		if (chatTab) {
+			chatTab.click();
+			return;
+		}
 		chatInfo = parsChatInfo(apiAnswer.results[0]);
 	}
 	document.getElementById('searchChatForm').reset();
@@ -272,7 +271,6 @@ async function getMoreChats() {
 function displayMessages(chatInfo, chatMessages, isMore = false){
 	const chatBox = document.getElementById('messages'+chatInfo.target);
 	chatMessages.forEach(element => {
-		console.log('Chat: Displaying message:', element);
 		chatBox.insertAdjacentElement('afterbegin', createMessage(element, chatInfo));
 	});
 	if (!isMore)
@@ -288,7 +286,6 @@ async function displayGameInviteInChat(inviteInfo) {
 	messagesDiv.scrollTop = messagesDiv.scrollHeight;
 	chatInviteGameBox.querySelector('.chatInviteGameButton').addEventListener('click', async e => {
 		e.preventDefault();
-		console.log('Chat: Accepting game invite');
 		await navigateTo(inviteInfo.game_url.slice(0, -1));
 	});
 	chatInviteGameBox.querySelector('.chatInviteGameDelete').addEventListener('click', async e => {
@@ -305,7 +302,11 @@ async function getMoreOldsMessages(chatInfo){
 		if (apiAnswer.detail){
 			throw {'code': 400, 'detail': apiAnswer.detail};
 		}
-		if (apiAnswer.count !== 0) displayMessages(chatInfo, apiAnswer.results, false);
+		if (apiAnswer.count !== 0) {
+			displayMessages(chatInfo, apiAnswer.results, true);
+			const chatBox = document.getElementById('messages'+chatInfo.target);
+			chatBox.scrollTop = chatBox.scrollTop * 0.7;
+		}
 		chatInfo.chatMessageNext = apiAnswer.next;
 	}
 	catch (error) {
@@ -319,7 +320,6 @@ async function getMoreOldsMessages(chatInfo){
 async function loadOldMessages(chatInfo){
 	try {
 		clearChatError();
-		console.log('Chat: Loading old messages');
 		var apiAnswer = await apiRequest(getAccessToken(), `${baseAPIUrl}/chat/${chatInfo.chatId}/messages/`, 'GET');
 		if (apiAnswer.detail){
 			return {'code': 400, 'detail': apiAnswer.detail};
@@ -346,7 +346,6 @@ function removeFirstInactiveChatTab() {
 
     for (let tabLink of tabLinks) {
         if (!tabLink.classList.contains('active') && tabLinks.id !== 'chatGameTabLink') {
-			console.log('Chat: Removing first inactive chat tab', tabLink.id.slice(0, -4));
 			chatTabs.querySelector('#' + tabLink.id.slice(0, -4) + "Button").click();
 			return ;
         }
@@ -441,7 +440,6 @@ async function openChatTab(chatId)
 	
 	if (!document.getElementById('chatTab'+chatInfo.target))
 	{
-		console.log('Chat: Creating chat tab');
 		openChat[chatInfo.chatId] = chatInfo;
 		userChat[chatInfo.targetId] = chatInfo.chatId;
 		await createChatTab(chatInfo);

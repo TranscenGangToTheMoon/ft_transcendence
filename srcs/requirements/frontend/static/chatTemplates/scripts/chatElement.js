@@ -41,6 +41,12 @@ function addChatUserCardListeners(chatUserCard, chatUserCardDeleteButton, chatUs
 	chatUserCard.addEventListener('click', async e => {
 		if (e.target === chatUserCard.querySelector('.chatUserCardButtonDeleteChat')) return;
 		chatUserCardLastMessage.classList.remove('chatMessageNotRead');
+		let chatTab = document.getElementById('chatTab' + chatInfo.target + 'Link');
+		if (chatTab) {
+			removeChatCollapse();
+			chatTab.click();
+			return;
+		}
 		await openChatTab(chatInfo.chatId);
 	});
 }
@@ -120,6 +126,7 @@ async function chatTabListener(chatInfo)
 					if (buttonCollapseChat.getAttribute('aria-expanded') === 'false') return;
 				}
 			}
+
 			openChatTab(chatInfo.chatId);
 			lastClick = e.target.id;
 			return;
@@ -134,7 +141,7 @@ async function scrollMessagesListener(chatInfo) {
 		const clientHeight = messagesDiv.clientHeight;
 		const scrollTop = messagesDiv.scrollTop;
 		const scrollPercentage = (scrollTop / (scrollHeight - clientHeight)) * 100;
-		if (scrollPercentage <= 20 && !loading) {
+		if (scrollPercentage <= 25 && !loading) {
 			loading = true;
 			await getMoreOldsMessages(chatInfo);
 			loading = false;
@@ -200,7 +207,7 @@ async function createChatTab(chatInfo) {
     let chatBody = document.getElementById('chatBody');
     let chatBox = document.createElement('div');
     chatBox.id = idChatBox;
-	chatBox.className = 'message-box overflow-auto tab-pane fade show active';
+	chatBox.className = 'message-box tab-pane fade show active';
     chatBox.setAttribute('role', 'tabpanel');
     chatBox.setAttribute('aria-labelledby', idChatTab);
     chatBody.appendChild(chatBox);
