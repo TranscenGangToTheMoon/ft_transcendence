@@ -165,10 +165,15 @@ function initSSE(){
 
     sse.onerror = async error => {
         console.log(error);
-        const shownModal = document.querySelector('.modal.show[aria-modal="true"]');
-        if (shownModal)
-            return;
-        displayMainAlert('Error', 'Unable to connect to Server Sent Events. Note that several services will be unavailable.');
+        const contentDiv = document.getElementById('content');
+        const existingAlert = document.querySelector('.unavailable');
+        if (existingAlert)
+            existingAlert.remove();
+        const alertHtml = `
+        <div class="alert alert-danger unavailable" role="alert">
+            connection with server lost
+        </div>`;
+        contentDiv.insertAdjacentHTML('beforebegin', alertHtml);
     }
 
     addSSEListeners();

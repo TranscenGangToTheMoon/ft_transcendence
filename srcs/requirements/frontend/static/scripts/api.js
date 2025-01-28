@@ -39,13 +39,14 @@ async function apiRequest(token, endpoint, method="GET", authType="Bearer",
                 closeExistingModals();
                 console.log('service unavailable');
                 const contentDiv = document.getElementById('content');
-                if (!document.querySelector('.unavailable')){
-                    const alertHtml = `
-                    <div class="alert alert-danger unavailable" role="alert">
-                        Service unavailable
-                    </div>`;
-                    contentDiv.insertAdjacentHTML('beforebegin', alertHtml);
-                }
+                const existingAlert = document.querySelector('.unavailable');
+                if (existingAlert)
+                    existingAlert.remove();
+                const alertHtml = `
+                <div class="alert alert-danger unavailable" role="alert">
+                    Service unavailable
+                </div>`;
+                contentDiv.insertAdjacentHTML('beforebegin', alertHtml);
             }
             throw error;
         })
