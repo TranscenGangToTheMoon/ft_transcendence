@@ -37,8 +37,8 @@ class GameMode:
 
 class FinishReason:
     NORMAL_END = 'normal-end'
-    PLAYER_DISCONNECT = 'player-disconnect'
-    PLAYER_NOT_CONNECTED = 'player-not-connected'
+    PLAYER_DISCONNECT = 'player-disconnect' # todo delete
+    PLAYER_NOT_CONNECTED = 'player-not-connected' # todo remake endpoint finish game
     PLAYERS_TIMEOUT = 'players-timeout'
     GAME_NOT_PLAYED = 'game-not-played'
     NO_GAME = 'no-game'
