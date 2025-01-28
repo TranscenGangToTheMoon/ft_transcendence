@@ -1,5 +1,7 @@
 async function logOut(){
     sse.close();
+    await closeGameConnection(window.location.pathname);
+    localStorage.removeItem('game-event');
     emptyNotificationQueue();
     removeTokens();
     await generateToken();
@@ -7,7 +9,6 @@ async function logOut(){
     initSSE();
     clearCSS();
     clearFriendRequests();
-    await closeGameConnection(window.location.pathname);
     handleRoute();
 }
 

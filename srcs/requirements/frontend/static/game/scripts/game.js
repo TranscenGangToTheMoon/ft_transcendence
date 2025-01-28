@@ -714,10 +714,6 @@ async function initData(data, socketPath, socketMode){
 		console.log('Invalid game data from SSE, cannot launch game');
 		return;
 	}
-    document.getElementById('gameArea').classList.replace('d-none', 'd-flex');
-    document.getElementById('opponentWait').classList.replace('d-flex', 'd-none');
-    document.getElementById('playerUsername').innerText = userInformations.username;
-    document.getElementById('enemyUsername').innerText = PongGame.info.enemyTeam.players.players[0].username;
 	initSocket(data.code, socketPath, socketMode);
     setTimeout(async () => {
         if (!cancelTimeout && gameSocket && !isModalOpen()){
@@ -725,6 +721,10 @@ async function initData(data, socketPath, socketMode){
             history.go(-1);
         }
     }, GAME_CONNECTION_TIMEOUT);
+    document.getElementById('gameArea').classList.replace('d-none', 'd-flex');
+    document.getElementById('opponentWait').classList.replace('d-flex', 'd-none');
+    document.getElementById('playerUsername').innerText = userInformations.username;
+    document.getElementById('enemyUsername').innerText = PongGame.info.enemyTeam.players.players[0].username;
 }
 
 document.getElementById('confirmModal').addEventListener('hidden.bs.modal', () => {
