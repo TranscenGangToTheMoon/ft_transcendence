@@ -4,7 +4,7 @@ vscode
 *.pyc
 secrets
 .zed
-__pycache__
+**__pycache__
 .venv
 /srcs/.env
 build
@@ -14,5 +14,4 @@ build
 .mypy_cache/
 pyproject.toml
 **/socket_client.py
-srcs/**/gameConfig.json
 *.key
