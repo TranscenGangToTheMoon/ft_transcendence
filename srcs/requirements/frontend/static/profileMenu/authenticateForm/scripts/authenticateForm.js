@@ -57,7 +57,6 @@ document.getElementById("loginButton").addEventListener('click', event => {
                 return;
             }
             if (data.username) {
-                console.log(usernameField.parentElement.querySelector('.invalid-feedback'));
                 const feedbackDiv = usernameField.parentElement.querySelector('.invalid-feedback');
                 feedbackDiv.innerText = data.username[0];
                 usernameField.classList.add('is-invalid');
@@ -76,7 +75,7 @@ document.getElementById("loginButton").addEventListener('click', event => {
                 passwordField.classList.add('is-invalid');
             }
             else
-                console.log('error a gerer', data);
+                console.log('error', data);
         })
-        .catch(error => console.log('error a gerer1', error))
+        .catch(error => console.log('error', error))
 })

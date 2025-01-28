@@ -18,7 +18,6 @@ function displayBadges(){
 }
 
 function removeBadges(type){
-    console.log('je remove pourtant')
     let toDelete = 0;
     userInformations.notifications[type] = 0;
     getBadgesDivs(document);
@@ -26,7 +25,6 @@ function removeBadges(type){
         let indicator = badgeDiv.querySelector(`.indicator`);
         if (indicator){
             toDelete = parseInt(indicator.innerText);
-            console.log(toDelete);
             if (isNaN(toDelete))
                 toDelete = 0;
             indicator.remove();
@@ -52,7 +50,6 @@ function removeBadges(type){
 }
 
 function addNotificationIndicator(div, number){
-    // console.log(div.cloneNode(true));
     if (!div.querySelector('.indicator')){
         const indicator = document.createElement('div');
         indicator.classList.add('indicator');
@@ -124,7 +121,6 @@ function handleProfilePicNotification(target, img, notification, toastContainer,
 }
 
 async function addTargets(notification, targets, toastInstance, toastContainer){
-    console.log(targets);
     const notificationBody = notification.querySelector('.toast-body');
     Object.entries(targets).forEach(([i, target]) => {
         if (target.display_icon){
@@ -163,11 +159,9 @@ function dismissNotification(notification, toastInstance, toastContainer){
     toastInstance.hide();
     setTimeout (() => {
         displayedNotifications--;
-        console.log(notification);
         toastContainer.removeChild(document.getElementById(notification.id));
         if (notificationQueue.length){
             let notif= notificationQueue.shift();
-            console.log(notificationQueue);
             displayNotification(notif[0], notif[1], notif[2], notif[3], notif[4]);
         }
     }, 500);

@@ -1,7 +1,6 @@
 async function loadStatistics(){
     try {
         let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/users/me/stats/`);
-        console.log(data);
         for (gameMode in data){
             let gameStats = data[gameMode];
             let gameStatsDiv = document.createElement('div');
@@ -18,7 +17,6 @@ async function loadStatistics(){
             `
             gameStatsDiv.insertAdjacentHTML("beforeend", html);
             document.getElementById('statisticsContainer').appendChild(gameStatsDiv);
-            console.log(gameStats);
             
             const chartData = {
                 labels: [

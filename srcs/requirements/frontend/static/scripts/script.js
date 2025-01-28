@@ -27,7 +27,6 @@ function loadScript(scriptSrc, type) {
         if (type)
             script.type = type;
         script.onload = () => {
-            // console.log(`Script ${scriptSrc} loaded.`);
             resolve();
         };
         script.onerror = () => {
@@ -120,7 +119,6 @@ function addFriendListListener(){
 
 async function  indexInit(auto=true) {
     if (!auto){
-        console.log('zizi');
         await loadUserProfile();
     }
     else{

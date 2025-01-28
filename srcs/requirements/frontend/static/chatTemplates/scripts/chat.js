@@ -30,7 +30,6 @@ async function getChatInstance(chatId) {
 		return apiAnswer;
 	}
 	catch (error) {
-		console.log('Error chat:', error);
 		if (error.code === 404 && error.detail === undefined) error.detail = 'No chat found';
 		if (error.detail === undefined) error.detail = 'Error while loading chat';
 		displayChatError(error, 'container');

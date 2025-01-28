@@ -25,10 +25,6 @@ function clearFriendRequests(){
 
 document.getElementById('pMenuChats').addEventListener('click', async event => {
     event.preventDefault();
-    if (pathName === '/game'){
-        console.log("Error: Can't display chat while in game")
-        return cancelNavigation(undefined, '/chat');
-    }
     await displayChatsList();
 })
 

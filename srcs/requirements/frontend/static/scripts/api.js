@@ -41,7 +41,6 @@ async function apiRequest(token, endpoint, method="GET", authType="Bearer",
                 closeExistingModals();
                 console.log('service unavailable');
                 const contentDiv = document.getElementById('content');
-                console.log(document.querySelector('.unavailable'));
                 if (!document.querySelector('.unavailable')){
                     const alertHtml = `
                     <div class="alert alert-danger unavailable" role="alert">
