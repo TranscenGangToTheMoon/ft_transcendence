@@ -21,7 +21,6 @@ class ProfilePictures(models.Model):
 
         self.is_unlocked = True
         self.save()
-        print('PUBLISH EVENT unlock', self.id, self.name, flush=True)
         if self.name != ProfilePicture.DEFAULT:
             from sse.events import publish_event
 
