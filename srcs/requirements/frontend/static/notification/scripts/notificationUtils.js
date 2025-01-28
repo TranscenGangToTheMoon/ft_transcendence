@@ -138,7 +138,7 @@ async function addTargets(notification, targets, toastInstance, toastContainer){
         if (target.display_name){
             var button = document.createElement('button');
             button.id = `notif${notification.id}-nametarget${i}`;
-            button.className = 'notif-button';
+            button.className = 'notif-button btn btn-secondary mx-1';
             button.innerText = target.display_name;
 
             notificationBody.appendChild(button);
@@ -189,7 +189,7 @@ async function displayNotification(icon=undefined, title=undefined, body=undefin
     if (title)
         notification.querySelector('strong').innerText = title;
     if (body)
-        notification.querySelector('.toast-body').innerText = body;
+        notification.querySelector('.toast-body').innerText = body.length > 200 ? body.slice(0, 200) + "..." : body;
     if (mainListener)
         notification.addEventListener('click', event => {
             if (event.target.classList.contains('btn-close')) return;
