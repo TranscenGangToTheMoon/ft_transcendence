@@ -61,7 +61,7 @@ async function setChatUserCard(chatInfo, chatUserCard) {
 	if (chatInfo.lastMessage === null) {
 		chatUserCard.querySelector('.chatUserCardLastMessage').innerText = 'Start the conversation ;)';
 	}
-	else {
+	if (chatInfo.lastMessagesNotRead != 0) {
 		chatUserCard.querySelector('.chatUserCardLastMessage').innerText = (chatInfo.lastMessage);
 	}
 	var chatUserCardLastMessage = chatUserCard.querySelector('.chatUserCardLastMessage');
