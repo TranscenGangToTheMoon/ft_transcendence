@@ -11,13 +11,20 @@ from game_server.match import Match
 
 async def disconnect_old_session(player_sid, player, game_id, sid):
     from game_server.server import Server
+    print('disconnecting old session', flush=True)
     await Server._sio.leave_room(player_sid, str(player.match_id))
     with Server._dsids_lock:
         Server._disconnected_sids.append(player_sid)
     game = Server.get_game(game_id)
-    if game.match.game_type == 'normal':
-        Server.emit('call_spectate', data={'code': game.match.code}, to=player_sid)
+    try:
         await asyncio.sleep(0.5)
+        await Server._sio.get_session(player_sid)
+        print('player still connected redirecting to spectate', flush=True)
+        if game.match.game_type == 'normal':
+            Server.emit('call_spectate', data={'code': game.match.code}, to=player_sid)
+            await asyncio.sleep(0.5)
+    except KeyError:
+        print('player disconnected', flush=True)
     await Server._sio.disconnect(player_sid)
     game.reconnect(player.user_id, sid)
 
@@ -135,6 +142,11 @@ async def stop_moving(sid, data):
 
 async def disconnect(sid):
     from game_server.server import Server
+    try:
+        match_id = Server._clients[sid].game.match.id
+        await Server._sio.leave_room(sid, str(match_id))
+    except KeyError:
+        pass
     with Server._dsids_lock:
         for search in Server._disconnected_sids:
             try:
