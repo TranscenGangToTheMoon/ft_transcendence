@@ -3,6 +3,7 @@ from datetime import datetime, timezone, timedelta
 from threading import Thread
 
 from django.db import models
+from rest_framework.exceptions import APIException
 
 from baning.models import delete_banned
 from blocking.utils import delete_player_instance
@@ -81,9 +82,18 @@ class Tournament(models.Model):
         return self.start_countdown[self.size] <= self.participants.count()
 
     def start(self):
-        data = {} # todo make data
-        request_game(endpoints.Game.tournaments, method='POST', data=data)
-        self.delete()
+        data = {
+            'id': self.id,
+            'name': self.name,
+            'size': self.size,
+            'created_by': self.created_by,
+            'participants': self.users_id(),
+        }
+        try:
+            request_game(endpoints.Game.tournaments, method='POST', data=data)
+            self.delete()
+        except APIException:
+            pass
 
     @property
     def is_full(self):
