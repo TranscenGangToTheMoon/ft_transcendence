@@ -16,8 +16,8 @@ from lib_transcendence.sse_events import EventCode
 from matchmaking.utils.participant import get_tournament_participant
 from matchmaking.utils.place import get_tournament
 from matchmaking.utils.sse import send_sse_event
-from tournament.models import Tournament, TournamentParticipants, TournamentMatches
-from tournament.serializers import TournamentSerializer, TournamentParticipantsSerializer, TournamentSearchSerializer, TournamentMatchSerializer
+from tournament.models import Tournament, TournamentParticipants
+from tournament.serializers import TournamentSerializer, TournamentParticipantsSerializer, TournamentSearchSerializer
 
 
 class TournamentView(generics.CreateAPIView, generics.RetrieveAPIView):
@@ -87,18 +87,6 @@ class TournamentParticipantsView(SerializerAuthContext, generics.CreateAPIView, 
             tournament.start_timer()
 
 
-class TournamentResultMatchView(generics.UpdateAPIView):
-    authentication_classes = []
-    serializer_class = TournamentMatchSerializer
-
-    def get_object(self):
-        try:
-            return TournamentMatches.objects.get(match_id=self.kwargs['match_id'])
-        except TournamentMatches.DoesNotExist:
-            raise NotFound(MessagesException.NotFound.MATCH)
-
-
 tournament_view = TournamentView.as_view()
 tournament_search_view = TournamentSearchView.as_view()
 tournament_participants_view = TournamentParticipantsView.as_view()
-tournament_result_match_view = TournamentResultMatchView.as_view()

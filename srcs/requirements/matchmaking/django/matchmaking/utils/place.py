@@ -53,9 +53,6 @@ def verify_place(user, model):
     if is_banned(model.code, user['id']) or are_users_blocked(user['id'], get_place_creator()):
         raise NotFound(MessagesException.NotFound.NOT_FOUND.format(obj=name.title()))
 
-    if isinstance(model, Tournament) and model.is_started:
-        raise PermissionDenied(MessagesException.PermissionDenied.TOURNAMENT_ALREADY_STARTED)
-
     verify_user(user['id'])
 
     if model.is_full:

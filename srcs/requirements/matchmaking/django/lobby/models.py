@@ -130,12 +130,12 @@ class Lobby(models.Model):
 
 
 class LobbyParticipants(ParticipantsPlace, models.Model):
+    user_id = models.IntegerField(unique=True)
     lobby = models.ForeignKey(Lobby, on_delete=models.CASCADE, related_name='participants')
     is_guest = models.BooleanField(default=False)
-    user_id = models.IntegerField(unique=True)
     creator = models.BooleanField(default=False)
-    is_ready = models.BooleanField(default=False)
     join_at = models.DateTimeField(auto_now_add=True)
+    is_ready = models.BooleanField(default=False)
 
     team = models.CharField(default=None, null=True)
 

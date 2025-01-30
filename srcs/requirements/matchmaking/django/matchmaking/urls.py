@@ -7,7 +7,7 @@ from invite.views import lobby_invite_view, tournament_invite_view
 from lib_transcendence.endpoints import Matchmaking, UsersManagement
 from lobby.views import lobby_view, lobby_participants_view, lobby_finish_match_view
 from play.views import duel_view, ranked_view
-from tournament.views import tournament_view, tournament_search_view, tournament_participants_view, tournament_result_match_view
+from tournament.views import tournament_view, tournament_search_view, tournament_participants_view
 from user_management.views import delete_user_view
 
 urlpatterns = [
@@ -27,8 +27,6 @@ urlpatterns = [
     path(Matchmaking.tournament_invite, tournament_invite_view),
     path(Matchmaking.tournament_ban, tournament_ban_view),
     path(Matchmaking.tournament_message, tournament_message_view),
-
-    path(Matchmaking.tournament_result_match, tournament_result_match_view),
 
     path(UsersManagement.blocked_user, blocked_user_view),
     path(UsersManagement.delete_user, delete_user_view),
