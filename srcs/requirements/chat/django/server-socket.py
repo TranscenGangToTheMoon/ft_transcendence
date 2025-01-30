@@ -56,8 +56,8 @@ async def connect(sid, _, auth):
         except NotFound:
             print(f"User not found : {sid}")
             raise SocketIOConnectionRefusedError({"error": 404, "message": "User not found"})
-        except APIException:
-            raise SocketIOConnectionRefusedError({"error": 400, "message": "error"})
+        except APIException as e:
+            raise SocketIOConnectionRefusedError({"error": 400, "message": e.detail.get('content')})
         if user and chat:
             usersConnected.add_user(user['id'], sid, user['username'], chat_id, chat['chat_with']['id'])
     else:
