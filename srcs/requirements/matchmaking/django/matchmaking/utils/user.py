@@ -1,5 +1,5 @@
 from django.core.exceptions import PermissionDenied
-from lib_transcendence.exceptions import Conflict, MessagesException, ServiceUnavailable
+from lib_transcendence.exceptions import Conflict, MessagesException
 from lib_transcendence.services import request_game
 from lib_transcendence import endpoints
 from rest_framework.exceptions import APIException, NotFound
@@ -37,6 +37,6 @@ def verify_user(user_id, created_tournament=False):
         return
 
     except APIException:
-        raise ServiceUnavailable('game')
+        return
 
     raise Conflict(MessagesException.Conflict.ALREADY_IN_GAME)
