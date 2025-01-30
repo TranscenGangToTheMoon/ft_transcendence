@@ -51,7 +51,7 @@ class TournamentSearchView(generics.ListAPIView):
         query = self.request.query_params.get('q')
         if query is None:
             query = ''
-        results = Tournament.objects.filter(Q(private=False) | Q(created_by=user_id), name__icontains=query, is_started=False)
+        results = Tournament.objects.filter(Q(private=False) | Q(created_by=user_id), name__icontains=query)
         exclude_blocked = get_blocked_users('user_id') + get_blocked_users('blocked_user_id')
         queryset = results.exclude(created_by__in=exclude_blocked)
         exclude_tournament = []

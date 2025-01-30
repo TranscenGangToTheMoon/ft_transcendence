@@ -32,8 +32,6 @@ class InviteMixin(generics.CreateAPIView):
         validate_participants_for_inviting(place, user_id, self.kwargs['user_id'])
 
         if self.place is Tournament:
-            if place.is_started:
-                raise PermissionDenied(MessagesException.PermissionDenied.INVITE_AFTER_START)
             event = EventCode.INVITE_TOURNAMENT
         elif place.game_mode == GameMode.CLASH:
             event = EventCode.INVITE_CLASH
