@@ -22,8 +22,8 @@ DELETE FROM matches_players WHERE match_id IN (SELECT id FROM matches_matches WH
 DELETE FROM matches_teams WHERE match_id IN (SELECT id FROM matches_matches WHERE finished = FALSE);
 DELETE FROM matches_matches WHERE finished = FALSE;
 DELETE FROM tournaments_tournaments WHERE finished = FALSE;
-DELETE FROM tournaments_tournamentstage WHERE tournament_id (SELECT id FROM tournaments_tournaments WHERE finished = FALSE);
-DELETE FROM tournaments_tournamentplayers WHERE tournament_id (SELECT id FROM tournaments_tournaments WHERE finished = FALSE);
+DELETE FROM tournaments_tournamentstage WHERE tournament_id IN (SELECT id FROM tournaments_tournaments WHERE finished = FALSE);
+DELETE FROM tournaments_tournamentplayers WHERE tournament_id IN (SELECT id FROM tournaments_tournaments WHERE finished = FALSE);
 "
 
 python socket_server.py &
