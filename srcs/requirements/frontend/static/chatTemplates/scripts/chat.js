@@ -127,8 +127,8 @@ function setupSocketListeners(chatInfo)
 		if (data.error === 401){
 			socket.emit('message', {'content': data.retry_content, 'token' : 'Bearer ' + await refreshToken(), 'retry': true});
 		}
-		else {
-			if (data.message === undefined) data.message = 'Error with chat server';
+		if (data.error === 404 || data.error === 403) {
+			if (data.message === undefined) data.message = 'Chat not found';
 			await closeChatTab(chatInfo);
 			displayChatError({'code':data.error, 'detail': data.message}, 'container');
 		}
