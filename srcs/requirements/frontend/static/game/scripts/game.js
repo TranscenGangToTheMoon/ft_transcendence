@@ -556,7 +556,8 @@ function initSocket(match_code, socketPath, socketMode){
         }, 500);
     })
     gameSocket.on('start_countdown', event => {
-        PongGame.startCountdown();
+        if (!PongGame.state.isCountDownActive)
+            PongGame.startCountdown();
     })
     gameSocket.on('game_state', event => {
 		PongGame.state.ball.y = event.position_y;
