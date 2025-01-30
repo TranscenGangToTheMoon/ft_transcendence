@@ -57,9 +57,6 @@ class MatchSerializer(Serializer):
             'game_mode',
             'created_at',
             'game_duration',
-            'tournament_id',
-            'tournament_stage_id',
-            'tournament_n',
             'match_type',
             'finished',
             'teams',
@@ -76,9 +73,6 @@ class MatchSerializer(Serializer):
         ]
         write_only_fields = [
             'game_mode'
-            'tournament_id'
-            'tournament_stage_id'
-            'tournament_n'
             'teams'
         ]
 
@@ -112,23 +106,9 @@ class MatchSerializer(Serializer):
                 representation['looser'] = instance.looser.name
             else:
                 representation['looser'] = None
-        if representation['tournament_id'] is None:
-            representation.pop('tournament_id')
         return representation
 
     def create(self, validated_data):
-        if validated_data['game_mode'] == GameMode.TOURNAMENT:
-            if not validated_data.get('tournament_id'):
-                raise serializers.ValidationError({'tournament_id': [MessagesException.ValidationError.FIELD_REQUIRED]})
-            if not validated_data.get('tournament_stage_id'):
-                raise serializers.ValidationError({'tournament_stage_id': [MessagesException.ValidationError.FIELD_REQUIRED]})
-            if not validated_data.get('tournament_n'):
-                raise serializers.ValidationError({'tournament_n': [MessagesException.ValidationError.FIELD_REQUIRED]})
-        else:
-            validated_data.pop('tournament_id', None)
-            validated_data.pop('tournament_stage_id', None)
-            validated_data.pop('tournament_n', None)
-
         validated_data['code'] = generate_code(Matches)
         teams = validated_data.pop('teams')
         if len(teams['a']) == 1 and validated_data['game_mode'] == GameMode.CLASH:
