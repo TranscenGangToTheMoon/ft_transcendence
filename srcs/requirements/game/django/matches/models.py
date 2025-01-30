@@ -10,6 +10,7 @@ from lib_transcendence.game import FinishReason, GameMode
 from lib_transcendence.services import request_matchmaking
 from lib_transcendence.users import retrieve_users
 from matches.utils import send_match_result, compute_trophies
+from tournaments.models import Tournaments, TournamentStage
 
 
 class Matches(models.Model):
@@ -18,8 +19,8 @@ class Matches(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     match_type = models.CharField(max_length=3)
     game_duration = models.DurationField(default=timedelta(minutes=3))
-    tournament_id = models.IntegerField(null=True, default=None)
-    tournament_stage_id = models.IntegerField(null=True, default=None)
+    tournament = models.ForeignKey(Tournaments, null=True, default=None, on_delete=models.SET_NULL, related_name='matches')
+    tournament_stage = models.ForeignKey(TournamentStage, null=True, default=None, on_delete=models.SET_NULL, related_name='matches')
     tournament_n = models.IntegerField(null=True, default=None)
     game_start = models.BooleanField(default=False)
     finished = models.BooleanField(default=False)
@@ -49,17 +50,6 @@ class Matches(models.Model):
         self.game_duration = finished_at - self.created_at
         self.winner, self.looser = self.teams.order_by('-score')
         self.save()
-        if self.tournament_id is not None:
-            data = {
-                'winner_id': self.winner.players.first().user_id,
-                'score_winner': self.winner.score,
-                'score_looser': self.looser.score,
-                'finish_reason': self.finish_reason,
-            }
-            try:
-                request_matchmaking(endpoints.Matchmaking.ftournament_result_match.format(match_id=self.id), 'PUT', data)
-            except APIException:
-                raise ServiceUnavailable('matchmaking')
         if self.game_mode == GameMode.RANKED:
             player = dict(retrieve_users(self.users_id(), return_type=dict, size='large'))
             winner = self.winner.players.first()
