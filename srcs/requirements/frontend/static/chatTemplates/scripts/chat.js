@@ -7,7 +7,7 @@ function parsChatInfo(chat) {
 		'targetId': chat.chat_with.id,
 		'targetAvatar': chat.chat_with.profile_picture,
 		'lastMessage': null,
-		'lastMessagesNotRead': 0,
+		'unreadMessage': 0,
 		'chatMessageNext': null,
 	};
 	if (chat.last_message) {
@@ -15,7 +15,7 @@ function parsChatInfo(chat) {
 			chatInfo.lastMessage = chat.last_message.content.slice(0, 37) + '...';
 		}
 		else chatInfo.lastMessage = chat.last_message.content;
-		chatInfo.lastMessagesNotRead = chat.unread_messages;
+		chatInfo.unreadMessage = chat.unread_messages;
 	}
 	return chatInfo;
 }
@@ -466,7 +466,7 @@ async function openChatTab(chatId)
 	let buttonCollapseChat = document.getElementById('chatTabsCollapse');
 	if (buttonCollapseChat && buttonCollapseChat.getAttribute('aria-expanded') === 'true') {
 		try {
-			userInformations.notifications['chats'] -= chatInfo.lastMessagesNotRead;
+			userInformations.notifications['chats'] -= chatInfo.unreadMessage;
 			if (userInformations.notifications['chats'] <= 0)
 				removeBadges('chats');
 			else
