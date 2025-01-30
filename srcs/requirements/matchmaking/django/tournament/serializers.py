@@ -42,12 +42,6 @@ class TournamentSerializer(Serializer):
         self.context['participants'] = {u['id']: u for u in participants}
         return participants
 
-    def to_representation(self, instance):
-        result = super().to_representation(instance)
-        if result['matches'] is not None:
-            result.pop('participants')
-        return result
-
     def create(self, validated_data):
         request = self.context.get('request')
         user = get_auth_user(request)
@@ -83,14 +77,14 @@ class TournamentParticipantsSerializer(Serializer):
 
     def create(self, validated_data):
         user = self.context['auth_user']
-        tournament = get_tournament(create=True, code=self.context.get('code'))
+        tournament = get_tournament(create=True, code=self.context['code'])
 
-        try:
-            user = tournament.participants.get(user_id=user['id'], connected=False)
-            user.reconnect()
-            return user
-        except TournamentParticipants.DoesNotExist:
-            pass
+        # try: todo handle reconnection
+        #     user = tournament.participants.get(user_id=user['id'])
+        #     user.reconnect()
+        #     return user
+        # except TournamentParticipants.DoesNotExist:
+        #     pass
 
         verify_place(user, tournament)
 

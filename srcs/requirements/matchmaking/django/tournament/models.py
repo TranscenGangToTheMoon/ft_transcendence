@@ -50,7 +50,7 @@ class Tournament(models.Model):
     def users_id(self, kwargs=None):
         if kwargs is None:
             kwargs = {}
-        return list(self.participants.filter(connected=True, **kwargs).values_list('user_id', flat=True))
+        return list(self.participants.filter(**kwargs).values_list('user_id', flat=True))
 
     def start_timer(self):
         self.start_at = datetime.now(timezone.utc) + timedelta(seconds=20)

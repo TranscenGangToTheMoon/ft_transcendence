@@ -23,7 +23,6 @@ def get_participant(model, obj, user_id, creator_check: bool | str = False, from
 
     if model is TournamentParticipants:
         name = 'tournament'
-        kwargs['connected'] = True
     else:
         name = 'lobby'
 
