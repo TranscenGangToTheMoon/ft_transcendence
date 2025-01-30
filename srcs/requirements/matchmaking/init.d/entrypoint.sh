@@ -19,9 +19,7 @@ DELETE FROM lobby_lobby;
 DELETE FROM lobby_lobbyparticipants;
 DELETE FROM play_players;
 DELETE FROM tournament_tournament;
-DELETE FROM tournament_tournamentstage;
 DELETE FROM tournament_tournamentparticipants;
-DELETE FROM tournament_tournamentmatches;
 "
 
 exec "$@"
