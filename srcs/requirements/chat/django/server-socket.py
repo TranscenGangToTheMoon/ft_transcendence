@@ -2,6 +2,7 @@ import os
 import sys
 
 import socketio
+from socketio.exceptions import ConnectionRefusedError as SocketIOConnectionRefusedError
 from aiohttp import web
 from asgiref.sync import sync_to_async
 from rest_framework.exceptions import AuthenticationFailed, PermissionDenied, APIException, NotFound
@@ -48,20 +49,20 @@ async def connect(sid, _, auth):
             await sio.enter_room(sid, str(chat_id))
         except AuthenticationFailed:
             print(f"Authentification failed : {sid}")
-            raise ConnectionRefusedError({"error": 401, "message": "Invalid token"})
+            raise SocketIOConnectionRefusedError({"error": 401, "message": "Invalid token"})
         except PermissionDenied:
             print(f"Permission denied : {sid}")
-            raise ConnectionRefusedError({"error": 403, "message": "Permission denied"})
+            raise SocketIOConnectionRefusedError({"error": 403, "message": "Permission denied"})
         except NotFound:
             print(f"User not found : {sid}")
-            raise ConnectionRefusedError({"error": 404, "message": "User not found"})
-        except APIException:
-            raise ConnectionRefusedError({"error": 400, "message": "error"})
+            raise SocketIOConnectionRefusedError({"error": 404, "message": "User not found"})
+        except APIException as e:
+            raise SocketIOConnectionRefusedError({"error": 400, "message": e.detail.get('content')})
         if user and chat:
             usersConnected.add_user(user['id'], sid, user['username'], chat_id, chat['chat_with']['id'])
     else:
         print(f"Connection failed : {sid}")
-        raise ConnectionRefusedError({"error": 400, "message": "Missing args"})
+        raise SocketIOConnectionRefusedError({"error": 400, "message": "Missing args"})
 
 
 @sio.event
@@ -119,15 +120,6 @@ async def message(sid, data):
             room=str(chat_id)
         )
         print(f"Message saved and sent from {sid}: {data}")
-    except PermissionDenied as e:
-        await sio.emit(
-            'error',
-            {'error': 403, 'message': 'Permission Denied'},
-            to=sid
-        )
-        print(f"Error: {e}")
-        usersConnected.remove_user(sid)
-        await sio.disconnect(sid)
     except AuthenticationFailed:
         print(f"Authentification failed : {sid}")
         if data.get('retry'):
@@ -138,6 +130,15 @@ async def message(sid, data):
             {'error': 401, 'message': 'Invalid token', 'retry_content': content},
             to=sid
         )
+    except PermissionDenied as e:
+        await sio.emit(
+            'error',
+            {'error': 403, 'message': 'Permission Denied'},
+            to=sid
+        )
+        print(f"Error: {e}")
+        usersConnected.remove_user(sid)
+        await sio.disconnect(sid)
     except NotFound:
         print(f"User not found : {sid}")
         await sio.emit(
@@ -147,15 +148,13 @@ async def message(sid, data):
         )
         usersConnected.remove_user(sid)
         await sio.disconnect(sid)
-    except APIException:
+    except APIException as e:
         print(f"API error : {sid}")
         await sio.emit(
             'error',
-            {'error': 400, 'message': 'error'},
+            {'error': 400, 'message': e.detail.get('content')},
             to=sid
         )
-        usersConnected.remove_user(sid)
-        await sio.disconnect(sid)
 
 
 if __name__ == '__main__':
