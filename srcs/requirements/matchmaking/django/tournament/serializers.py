@@ -29,6 +29,7 @@ class TournamentSerializer(Serializer):
         read_only_fields = [
             'code',
             'participants',
+            'start_at',
             'created_at',
             'created_by',
         ]
