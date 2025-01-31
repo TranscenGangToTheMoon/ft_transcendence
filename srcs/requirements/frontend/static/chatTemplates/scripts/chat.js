@@ -398,6 +398,12 @@ async function closeChatTab(chatInfo)
 	}
 }
 
+function isChatCollapsed() {
+	let buttonCollapseChat = document.getElementById('chatTabsCollapse');
+	if (buttonCollapseChat && buttonCollapseChat.getAttribute('aria-expanded') === 'false') return true;
+	return false;
+}
+
 function removeChatCollapse() {
 	let buttonCollapseChat = document.getElementById('chatTabsCollapse');
 	if (buttonCollapseChat && buttonCollapseChat.getAttribute('aria-expanded') === 'false') {
