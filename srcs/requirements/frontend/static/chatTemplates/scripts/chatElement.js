@@ -164,9 +164,6 @@ function sendMessageListener(chatInfo) {
 		if (socket && socket.disconnected === true) {
 			await connect(getAccessToken(), chatInfo);
 		}
-		if (socket === null) {
-			await connect(getAccessToken(), chatInfo);
-		}
 		const message = this.querySelector('input').value;
 		if (message === '') return;
 		socket.emit('message', {'content': message, 'token' : 'Bearer ' + getAccessToken()});
