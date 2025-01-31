@@ -1,4 +1,5 @@
 from datetime import timedelta, datetime, timezone
+from threading import Thread
 
 from django.conf import settings
 from django.db import models
@@ -8,6 +9,7 @@ from lib_transcendence import endpoints
 from lib_transcendence.exceptions import ServiceUnavailable
 from lib_transcendence.game import FinishReason, GameMode
 from lib_transcendence.services import request_matchmaking
+from lib_transcendence.sse_events import create_sse_event, EventCode
 from lib_transcendence.users import retrieve_users
 from matches.utils import send_match_result, compute_trophies
 from tournaments.models import Tournaments, TournamentStage
