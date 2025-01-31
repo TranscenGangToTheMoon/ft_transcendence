@@ -12,8 +12,7 @@ from lib_transcendence.serializer import Serializer
 from lib_transcendence.users import retrieve_users
 from matches.models import Matches, Players
 
-# todo fix friend sse
-# todo fix friend stat
+
 def validate_user_id(value, return_match=False, kwargs=None):
     if kwargs is None:
         kwargs = {}
