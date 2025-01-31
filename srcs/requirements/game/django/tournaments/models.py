@@ -18,7 +18,6 @@ class Tournaments(models.Model):
         16: {1: 1, 2: 5, 3: 7, 4: 3, 5: 4, 6: 8, 7: 6, 8: 2},
     }
 
-    code = models.CharField(max_length=4, unique=True)
     name = models.CharField(max_length=50, unique=True)
     size = models.IntegerField(default=16)
     nb_matches = models.IntegerField(default=1)
