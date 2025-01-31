@@ -87,7 +87,7 @@ async function  loadUserProfile(){
         document.getElementById('trophies').innerText = "";
     }
     else {
-        document.getElementById('trophies').innerText = userInformations.trophies;
+        document.getElementById('trophies').innerText = userInformations.trophies + '🏆';
     }
     await loadContent(`/${profileMenu}`, 'profileMenu');
     // if (!userInformations.is_guest)
