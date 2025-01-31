@@ -13,11 +13,16 @@ def model_exists(model, user_id):
     return model.objects.filter(user_id=user_id).exists()
 
 
-def create_player_instance(request, instance=None, *args, **kwargs):
-    if not model_exists(Blocked, request.user.id):
-        result = get_all_pagination_items(request_users, 'users', endpoints.Users.blocked, token=get_auth_token(request))
-        for blocked_instance in result:
-            Blocked.objects.create(user_id=request.user.id, blocked_user_id=blocked_instance['blocked']['id'])
+def create_blocked(user_id, blocked=None):
+    if not model_exists(Blocked, user_id):
+        if blocked is None:
+            blocked = get_all_pagination_items(request_users, 'users', endpoints.Users.blocked, token=get_auth_token(request))
+        for blocked_instance in blocked:
+            Blocked.objects.create(user_id=user_id, blocked_user_id=blocked_instance['blocked']['id'])
+
+
+def create_player_instance(user, instance=None, *args, **kwargs):
+    create_blocked(user['id'], user['blocked'])
 
     if instance is not None:
         try:

@@ -149,7 +149,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'matchmaking.auth.UserMeAuthentication',
+        'matchmaking.auth.UserAuthAuthentication',
     ],
     'DEFAULT_PAGINATION_CLASS': 'lib_transcendence.pagination.LimitOffsetPagination',
     'PAGE_SIZE': 20,

@@ -80,8 +80,7 @@ class LobbySerializer(Serializer):
         return get_participants(obj, fields)
 
     def create(self, validated_data):
-        request = self.context.get('request')
-        user = get_auth_user(request)
+        user = get_auth_user(self.context.get('request'))
 
         verify_user(user['id'])
 
@@ -94,7 +93,7 @@ class LobbySerializer(Serializer):
                 validated_data['match_type'] = MatchType.M1V1
             validated_data['max_participants'] = 6
         result = super().create(validated_data)
-        creator = create_player_instance(request, LobbyParticipants, lobby_id=result.id, user_id=user['id'], creator=True)
+        creator = create_player_instance(user, LobbyParticipants, lobby_id=result.id, user_id=user['id'], creator=True)
         if validated_data['game_mode'] == GameMode.CUSTOM_GAME:
             creator.team = Teams.A
             creator.save()

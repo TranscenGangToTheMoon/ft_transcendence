@@ -8,7 +8,7 @@ from rest_framework.response import Response
 
 from baning.models import Banned
 from blocking.models import Blocked
-from blocking.utils import create_player_instance, delete_player_instance
+from blocking.utils import create_player_instance, delete_player_instance, create_blocked
 from lib_transcendence.exceptions import MessagesException
 from lib_transcendence.permissions import GuestCannotCreate
 from lib_transcendence.serializer import SerializerAuthContext
@@ -39,7 +39,7 @@ class TournamentSearchView(generics.ListAPIView):
 
         def get_blocked_users(kwargs: Literal['user_id', 'blocked_user_id']):
             if kwargs == 'user_id':
-                create_player_instance(self.request)
+                create_blocked(self.request.user.id)
                 values_list = 'blocked_user_id'
             else:
                 values_list = 'user_id'

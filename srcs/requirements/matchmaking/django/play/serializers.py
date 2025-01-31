@@ -25,8 +25,7 @@ class PlayersSerializer(Serializer):
         ]
 
     def create(self, validated_data):
-        request = self.context.get('request')
-        user = get_auth_user(request)
+        user = get_auth_user(self.context.get('request'))
 
         verify_user(user['id'])
 
