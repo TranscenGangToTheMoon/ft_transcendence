@@ -12,7 +12,7 @@ from matchmaking.utils.participant import get_lobby_participant
 from matchmaking.utils.place import get_lobby
 from matchmaking.utils.sse import send_sse_event
 
-
+# todo fix 500 xav discord
 class LobbyView(SerializerAuthContext, generics.CreateAPIView, generics.RetrieveUpdateAPIView):
     serializer_class = LobbySerializer
     permission_classes = [GuestCannotCreate]
