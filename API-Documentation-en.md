@@ -619,7 +619,8 @@ https://localhost:4443/api/game/
   ```json
   {
     "*name": "str",
-    "*size": "4 | 8 | 16"
+    "*size": "4 | 8 | 16",
+    "private": "bool"
   }
   ```
 - **Response (success)** :
