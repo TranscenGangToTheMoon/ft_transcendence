@@ -1,21 +1,23 @@
-<div class="d-flex flex-column align-items-center w-100 h-100">
-    <div class="d-flex w-100 h-25 justify-content-center align-items-end center">
-        <button class="btn btn-warning no-user h-25 m-4" onclick="navigateTo('/profile')">guest profile</button>
-    </div>
-    <div id="interface" class="d-flex flex-column w-75 my-5 gap-2 h-75">
-        <h1>Select Game Mode</h1>
-        <select class="form-select" aria-label="Select Game Mode" id="gameModeSelect">
-            <option value="0" class="" id="local">local</option>
-            <option value="1" class="game" id="duel">duel</option>
-            <option value="2" class="game no-guest" id="ranked">ranked</option>
-            <option value="3" class="game" id="clash">clash</option>
-            <option value="4" class="game" id="customGame">Custom Game</option>
-            <option value="5" class="game" id="tournament">tournament</option>
-        </select>
-        <button id="playGame" class="btn btn-dark">Play</button>
-        <div id="actions">
-            <button id="chat" class="btn btn-outline-dark chat-badges no-guest w-100" type="button">chats</button>
-            <button class="btn btn-outline-dark friend-badges no-guest w-100" id="friends" type="button" data-bs-toggle="modal" data-bs-target="#friendListModal">friends</button>
+<div class="d-flex w-100 justify-content-center">
+    <div class="d-flex flex-column align-items-center h-100 col-lg-6 col-8">
+        <div class="d-flex w-100 h-25 justify-content-center align-items-end center">
+            <button class="btn btn-warning no-user h-25 m-4" onclick="navigateTo('/profile')">guest profile</button>
+        </div>
+        <div id="interface" class="d-flex flex-column w-75 my-5 gap-2 h-75">
+            <h1>Select Game Mode</h1>
+            <select class="form-select" aria-label="Select Game Mode" id="gameModeSelect">
+                <option value="0" class="" id="local">Local</option>
+                <option value="1" class="game" id="duel">Duel</option>
+                <option value="2" class="game no-guest" id="ranked">Ranked</option>
+                <option value="3" class="game" id="clash">Clash</option>
+                <option value="4" class="game" id="customGame">Custom Game</option>
+                <option value="5" class="game" id="tournament">Tournament</option>
+            </select>
+            <button id="playGame" class="btn btn-dark">Play</button>
+            <div id="actions" class="d-flex gap-1">
+                <button id="chat" class="justify-content-center btn btn-outline-dark chat-badges no-guest w-100 text-center" type="button">Chats</button>
+                <button class="justify-content-center btn btn-outline-dark friend-badges no-guest w-100 text-center" id="friends" type="button" data-bs-toggle="modal" data-bs-target="#friendListModal">Friends</button>
+            </div>
         </div>
     </div>
 </div>
