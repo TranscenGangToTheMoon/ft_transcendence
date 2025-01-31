@@ -160,6 +160,7 @@ async function createChatUserCard(chatInfo) {
 }
 
 async function displayChatsList(filter='') {
+	if (isModalOpen()) return;
 	chatsList = document.getElementById('chatsList');
 	chatsList.innerHTML= '';
 	try {
