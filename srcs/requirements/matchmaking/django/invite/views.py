@@ -1,4 +1,3 @@
-from django.core.exceptions import PermissionDenied
 from django.db.models.base import ModelBase
 from rest_framework import generics, status
 from rest_framework.response import Response

@@ -1,4 +1,3 @@
-from django.core.exceptions import PermissionDenied
 from rest_framework import generics
 
 from baning.utils import ban_yourself, get_participants_for_baning, banned
