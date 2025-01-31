@@ -94,6 +94,7 @@ class Users:
     chat = 'api/private/users/chat/<int:user1_id>/<str:username2>/'
     fare_friends = 'api/private/users/friends/{user1_id}/{user2_id}/'
     are_friends = 'api/private/users/friends/<int:user1_id>/<int:user2_id>/'
+    auth_matchmaking = 'api/private/users/me/auth-matchmaking/'
 
 
 class UsersManagement:

@@ -12,7 +12,7 @@ from lib_transcendence.services import request_auth
 def get_user_from_auth(user_data):
     from django.contrib.auth.models import User
 
-    user, created = User.objects.get_or_create(id=user_data['id'], username=user_data['username'])
+    user, created = User.objects.get_or_create(id=user_data['id'])
     return user
 
 
