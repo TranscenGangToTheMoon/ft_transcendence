@@ -5,12 +5,12 @@ from lib_transcendence.game import GameMode
 from lib_transcendence.services import request_matchmaking
 
 
-def send_finish_match_matchmaking(match=None, tournament=None):
+def send_finish_match_matchmaking(data):
     try:
-        if match:
-            kwargs = {'game_mode': match.game_mode, 'players': match.users_id()}
+        if isinstance(data, int):
+            kwargs = {'game_mode': GameMode.TOURNAMENT, 'tournament_id': data}
         else:
-            kwargs = {'game_mode': GameMode.TOURNAMENT, 'tournament_id': tournament.id}
+            kwargs = {'game_mode': data.game_mode, 'players': data.users_id()}
         request_matchmaking(endpoints.Matchmaking.finish_match, 'POST', kwargs)
     except APIException:
         pass
