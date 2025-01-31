@@ -143,6 +143,7 @@ class AuthMatchmakingSerializer(Serializer):
         model = Users
         fields = [
             'id',
+            'username',
             'is_guest',
             'is_online',
             'blocked',
@@ -150,6 +151,7 @@ class AuthMatchmakingSerializer(Serializer):
         ]
         read_only_fields = [
             'id',
+            'username',
             'is_guest',
             'is_online',
             'blocked',
