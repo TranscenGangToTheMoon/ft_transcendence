@@ -12,7 +12,7 @@ from matches.serializers import TournamentMatchSerializer
 from tournaments.models import Tournaments
 
 
-class TournamentPlayerSerializer(Serializer):
+class TournamentPlayerSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     trophies = serializers.IntegerField()
 
@@ -88,6 +88,6 @@ class TournamentSerializer(Serializer):
             result.nb_matches = index
         result.save()
         create_sse_event(result.users_id(), EventCode.TOURNAMENT_START, TournamentSerializer(result).data, {'name': result.name})
-        Thread(target=result.post_matches).start()
+        Thread(target=result.post_matches, args=(first_stage, True)).start()
         Thread(target=result.main_thread).start()
         return result
