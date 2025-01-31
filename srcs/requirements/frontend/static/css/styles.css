@@ -108,3 +108,7 @@ body {
 .max-vh-75 {
     max-height: 75vh !important;
 }
+
+#home, #test34 {
+    cursor: pointer !important;
+}
