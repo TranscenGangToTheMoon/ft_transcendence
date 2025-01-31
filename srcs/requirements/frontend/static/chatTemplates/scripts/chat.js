@@ -241,8 +241,12 @@ async function searchChatButton(username) {
 		}
 		chatInfo = parsChatInfo(apiAnswer.results[0]);
 	}
-	document.getElementById('searchChatForm').reset();
-	await displayChatsList();
+	let searchChat = document.getElementById('searchChatForm');
+	if (searchChat)
+		searchChat.reset();
+	let chatListModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('chatListModal'));
+	if (chatListModal && chatListModal._isShown)
+		await displayChatsList();
 	await openChatTab(chatInfo.chatId);
 }
 
