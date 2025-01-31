@@ -980,7 +980,7 @@ https://localhost:4443/api/users/
     "friend_wins": "int",
     "me_wins": "int",
     "friends_since": "datetime",
-    "matches_play_against": "int",
+    "matches_played_against": "int",
     "matches_played_together": "int",
     "matches_won_together": "int"
   }
@@ -1005,7 +1005,7 @@ https://localhost:4443/api/users/
     "friend_wins": "int",
     "me_wins": "int",
     "friends_since": "datetime",
-    "matches_play_against": "int",
+    "matches_played_against": "int",
     "matches_played_together": "int",
     "matches_won_together": "int"
   }

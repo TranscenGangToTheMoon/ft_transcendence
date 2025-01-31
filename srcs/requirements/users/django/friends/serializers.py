@@ -22,7 +22,7 @@ class FriendsSerializer(Serializer):
             'friend_wins',
             'me_wins',
             'friends_since',
-            'matches_play_against',
+            'matches_played_against',
             'matches_played_together',
             'matches_won_together',
         ]
@@ -32,7 +32,7 @@ class FriendsSerializer(Serializer):
             'friend_wins',
             'me_wins',
             'friends_since',
-            'matches_play_against',
+            'matches_played_against',
             'matches_played_together',
             'matches_won_together',
         ]
