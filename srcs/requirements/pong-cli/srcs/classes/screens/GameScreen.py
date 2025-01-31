@@ -55,6 +55,7 @@ class GamePage(Screen):
         self.HTTPSession = aiohttp.ClientSession(connector=connector)
         self.sio = socketio.AsyncClient(
             http_session=self.HTTPSession,
+            reconnection=False,
             # logger=True,
             # engineio_logger=True,
         )
@@ -263,15 +264,21 @@ class GamePage(Screen):
         @self.sio.on('call_spectate')
         async def callSpectateAction(data):
             print("Spectate called!", flush=True)
+            while (self.countdownIsActive == True):
+                await asyncio.sleep(1/10)
+            await self.app.push_screen_wait(GameEnd(Config.FinishReason.SPECTATE, False))
+            await self.sio.disconnect()
+            User.inAGame = False
+            self.dismiss()
 
         @self.sio.on('game_over')
         async def gameOverAction(data):
             while (self.countdownIsActive == True):
                 await asyncio.sleep(1/10)
-            if (await self.app.push_screen_wait(GameEnd(data["reason"], data["winner"] == User.team)) == "main"):
-                self.dismiss()
+            await self.app.push_screen_wait(GameEnd(data["reason"], data["winner"] == User.team))
             await self.sio.disconnect()
             User.inAGame = False
+            self.dismiss()
 
     async def on_unmount(self) -> None:
         if (self.connected):
