@@ -616,9 +616,11 @@ function initSocket(match_code, socketPath, socketMode){
         }
         else{
             document.getElementById('gameOverModal').querySelector('.modal-footer').classList.remove('d-none');
-            document.getElementById('gameOverModal').addEventListener('hidden.bs.modal', async () => {
-                await handleRoute();
+            const gamePath = window.location.pathname;
+            document.getElementById('gameOverModalPlayAgain').addEventListener('click', async () => {
+                await navigateTo(gamePath);
             });
+            navigateTo('/', true , true);
         }
         if (event.reason === 'normal-end'){
             addScore();
