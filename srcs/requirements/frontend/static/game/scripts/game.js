@@ -556,7 +556,8 @@ function initSocket(match_code, socketPath, socketMode){
         }, 500);
     })
     gameSocket.on('start_countdown', event => {
-        PongGame.startCountdown();
+        if (!PongGame.state.isCountDownActive)
+            PongGame.startCountdown();
     })
     gameSocket.on('game_state', event => {
 		PongGame.state.ball.y = event.position_y;
@@ -624,8 +625,9 @@ function initSocket(match_code, socketPath, socketMode){
         }
         else
             document.getElementById('gameOverContent').innerHTML = `${event.reason}`;
-        const gameOverModal = new bootstrap.Modal(document.getElementById('gameOverModal'));
-        gameOverModal.show();
+        const gameOverModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('gameOverModal'));
+        if (!isModalOpen())
+            gameOverModal.show();
         
         const popovers = document.querySelectorAll('.teamDetail');
         popovers.forEach(element => {

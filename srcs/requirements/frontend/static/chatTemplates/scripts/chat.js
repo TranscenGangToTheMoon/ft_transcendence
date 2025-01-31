@@ -7,7 +7,7 @@ function parsChatInfo(chat) {
 		'targetId': chat.chat_with.id,
 		'targetAvatar': chat.chat_with.profile_picture,
 		'lastMessage': null,
-		'lastMessagesNotRead': 0,
+		'unreadMessage': 0,
 		'chatMessageNext': null,
 	};
 	if (chat.last_message) {
@@ -15,7 +15,7 @@ function parsChatInfo(chat) {
 			chatInfo.lastMessage = chat.last_message.content.slice(0, 37) + '...';
 		}
 		else chatInfo.lastMessage = chat.last_message.content;
-		chatInfo.lastMessagesNotRead = chat.unread_messages;
+		chatInfo.unreadMessage = chat.unread_messages;
 	}
 	return chatInfo;
 }
@@ -127,8 +127,8 @@ function setupSocketListeners(chatInfo)
 		if (data.error === 401){
 			socket.emit('message', {'content': data.retry_content, 'token' : 'Bearer ' + await refreshToken(), 'retry': true});
 		}
-		else {
-			if (data.message === undefined) data.message = 'Error with chat server';
+		if (data.error === 404 || data.error === 403) {
+			if (data.message === undefined) data.message = 'Chat not found';
 			await closeChatTab(chatInfo);
 			displayChatError({'code':data.error, 'detail': data.message}, 'container');
 		}
@@ -160,6 +160,7 @@ async function createChatUserCard(chatInfo) {
 }
 
 async function displayChatsList(filter='') {
+	if (isModalOpen()) return;
 	chatsList = document.getElementById('chatsList');
 	chatsList.innerHTML= '';
 	try {
@@ -241,8 +242,12 @@ async function searchChatButton(username) {
 		}
 		chatInfo = parsChatInfo(apiAnswer.results[0]);
 	}
-	document.getElementById('searchChatForm').reset();
-	await displayChatsList();
+	let searchChat = document.getElementById('searchChatForm');
+	if (searchChat)
+		searchChat.reset();
+	let chatListModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('chatListModal'));
+	if (chatListModal && chatListModal._isShown)
+		await displayChatsList();
 	await openChatTab(chatInfo.chatId);
 }
 
@@ -393,6 +398,12 @@ async function closeChatTab(chatInfo)
 	}
 }
 
+function isChatCollapsed() {
+	let buttonCollapseChat = document.getElementById('chatTabsCollapse');
+	if (buttonCollapseChat && buttonCollapseChat.getAttribute('aria-expanded') === 'false') return true;
+	return false;
+}
+
 function removeChatCollapse() {
 	let buttonCollapseChat = document.getElementById('chatTabsCollapse');
 	if (buttonCollapseChat && buttonCollapseChat.getAttribute('aria-expanded') === 'false') {
@@ -466,7 +477,7 @@ async function openChatTab(chatId)
 	let buttonCollapseChat = document.getElementById('chatTabsCollapse');
 	if (buttonCollapseChat && buttonCollapseChat.getAttribute('aria-expanded') === 'true') {
 		try {
-			userInformations.notifications['chats'] -= chatInfo.lastMessagesNotRead;
+			userInformations.notifications['chats'] -= chatInfo.unreadMessage;
 			if (userInformations.notifications['chats'] <= 0)
 				removeBadges('chats');
 			else

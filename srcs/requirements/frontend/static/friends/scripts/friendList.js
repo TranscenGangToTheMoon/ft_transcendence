@@ -23,11 +23,23 @@ if (document.getElementById('modals').friendListened !== true){
                     document.getElementById('searchResults').innerText = 'user not found';
             }
         }
+        if (event.target.matches('.chatButton')){
+            friendUsername = event.target.parentElement.parentElement.querySelector('div').innerText;
+            searchChatButton(friendUsername);
+            let friendListModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('friendListModal'));
+            if (friendListModal && friendListModal._isShown){
+                friendListModal.hide();
+            }
+            console.log('chat button clicked', friendUsername);
+        }
         if (event.target.matches('.deleteFriend')){
             try {
-                const friendshipId = `${event.target.parentElement.id}`.substring(6);
+                const friendStatsDiv = document.querySelector('.popover.bs-popover-auto.fade.show');
+                if (friendStatsDiv)
+                    friendStatsDiv.remove();
+                const friendshipId = `${event.target.parentElement.parentElement.id}`.substring(6);
                 let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/users/me/friends/${friendshipId}/`, 'DELETE');
-                document.getElementById(event.target.parentElement.id).remove();
+                document.getElementById(event.target.parentElement.parentElement.id).remove();
                 const displayedFriends = getDisplayedFriends();
                 if (displayedFriends < 15){
                     nextFriend = decrementOffset(nextFriend);
@@ -38,6 +50,33 @@ if (document.getElementById('modals').friendListened !== true){
                 }   
             }
             catch (error){
+                console.log(error);
+            }
+        }
+        if (event.target.matches('.friendRequestKebabMenuButton')){
+            console.log('kkpipi')
+            const contextMenu = document.getElementById('friendListContextMenu');
+            const friendRequestDiv = event.target.closest('.friendRequestBlock');
+            const position = friendRequestDiv.getBoundingClientRect();
+            console.log(position);
+            contextMenu.style.left = `${position.left + position.width}px`;
+            contextMenu.style.top = `${position.top}px`;
+            contextMenu.friendId = friendRequestDiv.friendId;
+            console.log(friendRequestDiv);
+            setTimeout(()=> {
+                contextMenu.style.display = 'block';
+            }, 200);
+        }
+        if (event.target.matches('.cBlock')){
+            const contextMenu = event.target.closest('#friendListContextMenu');
+            console.log(contextMenu.friendId);
+            const friendId = contextMenu.friendId;
+            try {
+                await apiRequest(getAccessToken(), `${baseAPIUrl}/users/me/blocked/`, 'POST', undefined, undefined, {
+                    "user_id" : friendId
+                })
+            }
+            catch(error){
                 console.log(error);
             }
         }
@@ -88,7 +127,9 @@ async function getMoreFriendRequests() {
             requestDiv.id = `fr${result.id}`;
             friendRequestsDiv.appendChild(requestDiv);
             await loadContent('/friends/friendRequestBlock.html', `${requestDiv.id}`);
-            requestDiv.querySelector(`.senderUsername`).innerText = result.sender.username;
+            requestDiv.querySelector('img').src = result.sender.profile_picture.small;
+            requestDiv.querySelector('.senderUsername').innerText = result.sender.username;
+            requestDiv.querySelector('.friendRequestBlock').friendId = result.sender.id;
         }
     }
     catch (error) {
@@ -190,8 +231,13 @@ async function loadFriendList(){
             resultDiv.innerHTML += `<div class="friendRequestBlock knownFriend" id="friend${friend.id}">\
             <img class="rounded-1" src="${friend.friend.profile_picture.small}" onerror="src='/assets/imageNotFound.png'">\
             <div>${friend.friend.username}</div>\
-            <button class='btn btn-danger deleteFriend'>delete</button></div>\n`;
+            <div>\
+            <button class='btn btn-dark chatButton'>chat</button>\
+            <button class='btn btn-danger deleteFriend'>delete</button>\
+            <img src="/assets/kebabMenu.png" class="friendRequestKebabMenuButton mx-2"></div>
+            </div>\n`;
             const friendDiv = resultDiv.querySelector(`#friend${friend.id}`);
+            friendDiv.friendId = friend.friend.id;
             console.log(friend);
             friendDiv.setAttribute('data-bs-toggle', 'popover');
             friendDiv.setAttribute('data-bs-trigger', 'hover');
@@ -224,14 +270,34 @@ function addFriend(friendInstance){
     if (!friendDiv.querySelector('div'))
         friendDiv.innerText = '';
     friendDiv.innerHTML += `<div class="friendRequestBlock knownFriend" id="friend${friendInstance.id}">\
-            <img src="${friendInstance.friend.profile_picture.small}" onerror="src='/assets/imageNotFound.png'">\
-            <div>${friendInstance.friend.username}</div>\
-            <button class='btn btn-danger deleteFriend'>delete</button></div>\n`;
+    <img src="${friendInstance.friend.profile_picture.small}" onerror="src='/assets/imageNotFound.png'" class="rounded-1">\
+    <div>${friendInstance.friend.username}</div>\
+    <div><button class='btn btn-dark chatButton'>chat</button>\
+    <button class='btn btn-danger deleteFriend'>delete</button>
+    <img src="/assets/kebabMenu.png" class="friendRequestKebabMenuButton mx-2"></div></div>\n`;
     const friendInstanceDiv = friendDiv.querySelector(`#friend${friendInstance.id}`);
+    friendInstanceDiv.friendId = friendInstance.friend.id;
     friendInstanceDiv.setAttribute('data-bs-toggle', 'popover');
     friendInstanceDiv.setAttribute('data-bs-trigger', 'hover');
     friendInstanceDiv.setAttribute('data-bs-placement', 'top');
-    friendInstanceDiv.setAttribute('data-bs-content', ``);
+    friendInstanceDiv.setAttribute('data-bs-html', 'true');
+    const popoverContent = `
+    <div class="d-flex flex-column">
+        <strong>Friend Stats</strong>
+        <div class="d-flex flex-column">
+                <div class="justify-content-between d-flex column-gap-2"><div>matches played against :</div>${friendInstance.matches_play_against}</div>
+                <div class="justify-content-between d-flex column-gap-2"><div>matches played together :</div>${friendInstance.matches_played_together}</div>
+                <div class="justify-content-between d-flex column-gap-2"><div>matches won together :</div>${friendInstance.matches_won_together}</div>
+                <div class="justify-content-between d-flex column-gap-2"><div>lost games :</div>${friendInstance.friend_win}</div>
+                <div class="justify-content-between d-flex column-gap-2"><div>won games :</div>${friendInstance.me_win}</div>
+        </div>
+    </div>
+    `
+    friendInstanceDiv.setAttribute('data-bs-content', popoverContent);
+    const popovers = document.querySelectorAll('[data-bs-toggle="popover"]');
+    popovers.forEach((popover) => {
+        new bootstrap.Popover(popover);
+    });
 }
 
 function removeFriend(friendInstance){
@@ -252,6 +318,7 @@ async function addFriendRequest(result){
     await loadContent('/friends/friendRequestBlock.html', `${requestDiv.id}`);
     requestDiv.querySelector('img').src = result.sender.profile_picture.small;
     requestDiv.querySelector('.senderUsername').innerText = result.sender.username;
+    requestDiv.querySelector('.friendRequestBlock').friendId = result.sender.id;
 }
 
 async function removeFriendRequest(id){
@@ -286,6 +353,7 @@ async function loadReceivedFriendRequests(){
             await loadContent('/friends/friendRequestBlock.html', `${requestDiv.id}`);
             requestDiv.querySelector('.senderUsername').innerText = result.sender.username;
             requestDiv.querySelector('img').src = result.sender.profile_picture.small;
+            requestDiv.querySelector('.friendRequestBlock').friendId = result.sender.id;
         }
     }
 }
