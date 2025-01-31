@@ -127,6 +127,8 @@ class Config:
         PLAYER_NOT_CONNECTED = 'player-not-connected'
         PLAYERS_TIMEOUT = 'players-timeout'
         GAME_NOT_PLAYED = 'game-not-played'
+        SPECTATE = 'spectate'
+        CONNECTION_ERROR = 'connection-error'
 
     class SSL:
         CRT = "ft_transcendence.crt"
