@@ -34,9 +34,9 @@ if (document.getElementById('modals').friendListened !== true){
         }
         if (event.target.matches('.deleteFriend')){
             try {
-                const friendshipId = `${event.target.parentElement.id}`.substring(6);
+                const friendshipId = `${event.target.parentElement.parentElement.id}`.substring(6);
                 let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/users/me/friends/${friendshipId}/`, 'DELETE');
-                document.getElementById(event.target.parentElement.id).remove();
+                document.getElementById(event.target.parentElement.parentElement.id).remove();
                 const displayedFriends = getDisplayedFriends();
                 if (displayedFriends < 15){
                     nextFriend = decrementOffset(nextFriend);
@@ -238,7 +238,10 @@ function addFriend(friendInstance){
     friendDiv.innerHTML += `<div class="friendRequestBlock knownFriend" id="friend${friendInstance.id}">\
             <img src="${friendInstance.friend.profile_picture.small}" onerror="src='/assets/imageNotFound.png'">\
             <div>${friendInstance.friend.username}</div>\
-            <button class='btn btn-danger deleteFriend'>delete</button></div>\n`;
+            <div>
+            <button class='btn btn-dark chatButton'>chat</button>\
+            <button class='btn btn-danger deleteFriend'>delete</button></div>\
+            </div>\n`;
     const friendInstanceDiv = friendDiv.querySelector(`#friend${friendInstance.id}`);
     friendInstanceDiv.setAttribute('data-bs-toggle', 'popover');
     friendInstanceDiv.setAttribute('data-bs-trigger', 'hover');
