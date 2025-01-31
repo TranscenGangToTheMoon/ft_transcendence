@@ -15,7 +15,6 @@ from classes.utils.config           import Config
 from classes.utils.user             import User
 
 class PongCLI(App):
-    SCREENS = {}
     BINDINGS = [("^q", "exit", "Exit"), ]
 
     def __init__(self) -> None:
@@ -54,7 +53,8 @@ class PongCLI(App):
                                             else:
                                                 User.team = "b"
                                                 User.opponent = dataJson["data"]["teams"]["a"]["players"][0]["username"]
-                                            await self.push_screen(GamePage())
+                                            if (User.inAGame == False):
+                                                await self.push_screen(GamePage())
                                         elif (event != "game-start" and event != "ping"):
                                             print(f"{event}: {data}")
                                 except (IndexError, ValueError) as _:

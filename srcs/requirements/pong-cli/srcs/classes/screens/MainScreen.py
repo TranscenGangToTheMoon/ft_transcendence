@@ -70,7 +70,7 @@ class MainPage(Screen):
         except Exception as error:
             self.query_one("#statusGame").styles.color = "red"
             if (User.response is not None):
-                if (User.response.status_code == 409 and User.wasInAGame == True):
+                if (User.response.status_code == 409 and User.inAGame == True):
                     self.app.pushGamePage()
             self.query_one("#statusGame").update(f"{error}")
 

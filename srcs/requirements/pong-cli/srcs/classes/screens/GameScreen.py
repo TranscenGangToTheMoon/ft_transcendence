@@ -18,7 +18,7 @@ from classes.game.BallWidget                    import Ball
 from classes.game.PaddleWidget                  import Paddle
 from classes.game.PlaygroundWidget              import Playground
 from classes.modalScreens.CountdownModalScreen  import Countdown
-from classes.modalScreens.GameOverModalScreen   import GameEnd
+from classes.modalScreens.GameEndModalScreen    import GameEnd
 from classes.utils.config                       import Config
 from classes.utils.user                         import User
 
@@ -210,7 +210,7 @@ class GamePage(Screen):
 
         @self.sio.on('start_game')
         async def startGameAction():
-            User.wasInAGame = True
+            User.inAGame = True
             self.lastFrame = 0
             self.gameStarted = True
 
@@ -271,7 +271,7 @@ class GamePage(Screen):
             if (await self.app.push_screen_wait(GameEnd(data["reason"], data["winner"] == User.team)) == "main"):
                 self.dismiss()
             await self.sio.disconnect()
-            User.wasInAGame = False
+            User.inAGame = False
 
     async def on_unmount(self) -> None:
         if (self.connected):
