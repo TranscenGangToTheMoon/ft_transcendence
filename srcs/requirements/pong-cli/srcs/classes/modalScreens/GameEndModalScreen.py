@@ -8,12 +8,18 @@ from textual.widgets    import Button, Label, Static
 # Local imports
 from classes.utils.config   import Config
 
-class GameEnd(ModalScreen[str]):
+class GameEnd(ModalScreen):
     CSS_PATH = "styles/GameEnd.tcss"
 
     def __init__(self, reason: str, victory: bool):
         super().__init__()
-        if (reason == Config.FinishReason.NORMAL_END):
+        if (reason == Config.FinishReason.SPECTATE):
+            self.result = "Spectate event"
+            self.styles.background = "green 15%"
+        elif (reason == Config.FinishReason.CONNECTION_ERROR):
+            self.result = "Connection error"
+            self.styles.background = "red 50%"
+        elif (reason == Config.FinishReason.NORMAL_END):
             self.result = "You win" if victory else "You lose"
             self.styles.background = "blue 15%" if victory else "red 15%"
         else:
@@ -26,7 +32,7 @@ class GameEnd(ModalScreen[str]):
 
     @on(Button.Pressed, "#mainMenu")
     def mainPage(self):
-        self.dismiss("main")
+        self.dismiss()
 
     def compose(self) -> ComposeResult:
         yield Grid(
