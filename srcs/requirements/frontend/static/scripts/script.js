@@ -60,6 +60,11 @@ document.addEventListener('click', (e) => {
     contextMenu = document.getElementById('contextMenu');
     if (contextMenu)
         document.getElementById('contextMenu').style.display = 'none';
+    else{
+        contextMenu = document.getElementById('friendListContextMenu');
+        if (contextMenu)
+            contextMenu.style.display = 'none'
+    }
 });
 
 document.addEventListener('keyup', e => {
@@ -67,6 +72,11 @@ document.addEventListener('keyup', e => {
         let contextMenu = document.getElementById('contextMenu');
         if (contextMenu)
             contextMenu.style.display = 'none';
+        else{
+            contextMenu = document.getElementById('friendListContextMenu');
+            if (contextMenu)
+                contextMenu.style.display = 'none'
+        }
     }
 })
 
