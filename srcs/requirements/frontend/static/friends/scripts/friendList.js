@@ -34,9 +34,10 @@ if (document.getElementById('modals').friendListened !== true){
         }
         if (event.target.matches('.deleteFriend')){
             try {
-                const friendshipId = `${event.target.parentElement.id}`.substring(6);
+                const friendshipId = `${event.target.parentElement.parentElement.id}`.substring(6);
+                console.log(friendshipId, "yooooooooooo");
                 let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/users/me/friends/${friendshipId}/`, 'DELETE');
-                document.getElementById(event.target.parentElement.id).remove();
+                document.getElementById(event.target.parentElement.parentElement.id).remove();
                 const displayedFriends = getDisplayedFriends();
                 if (displayedFriends < 15){
                     nextFriend = decrementOffset(nextFriend);
