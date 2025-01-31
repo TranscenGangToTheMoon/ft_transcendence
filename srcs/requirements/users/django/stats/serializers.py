@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from rest_framework.exceptions import APIException
 
+from friends.utils import get_friendship
 from lib_transcendence.game import GameMode
 from lib_transcendence.serializer import Serializer
 from profile_pictures.unlock import unlock_tournament_pp, unlock_duel_clash_pp, unlock_game_played_pp, unlock_scorer_pp, unlock_winning_streak_pp
@@ -65,11 +66,14 @@ class FinishMatchSerializer(serializers.Serializer):
         return GameMode.validate(value)
 
     def create(self, validated_data):
+        users = {}
         for team_name, team_users in validated_data['teams'].items():
+            users[team_name] = []
             for user_json in team_users['players']:
 
                 try:
                     user = get_user(id=user_json['id'])
+                    users[team_name].append(user)
                     user.set_game_playing()
                     assert validated_data['game_mode'] != GameMode.CUSTOM_GAME
                 except (APIException, AssertionError):
@@ -90,6 +94,23 @@ class FinishMatchSerializer(serializers.Serializer):
                 unlock_winning_streak_pp(user, stat)
                 unlock_game_played_pp(user)
                 unlock_scorer_pp(user)
+
+        for team_name, team_users in users.items():
+            if len(team_users) == 3:
+                for index1, index2 in ((0, 1), (0, 2), (0, 2)):
+                    friendship = get_friendship(team_users[index1], team_users[index2])
+                    if friendship is not None:
+                        friendship.play_together(team_name == validated_data['winner'])
+
+        for user in users['a']:
+            for user2 in users['b']:
+                friendship = get_friendship(user, user2)
+                if friendship is not None:
+                    if users['a'] == validated_data['winner']:
+                        winnner = user
+                    else:
+                        winnner = user2
+                    friendship.play_against(winnner)
 
         return validated_data
 
