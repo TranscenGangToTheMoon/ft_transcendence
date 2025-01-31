@@ -78,11 +78,12 @@ class TournamentParticipantsView(SerializerAuthContext, generics.CreateAPIView, 
     def perform_create(self, serializer):
         super().perform_create(serializer)
         tournament = serializer.instance.tournament
-        send_sse_event(EventCode.TOURNAMENT_JOIN, serializer.instance, serializer.data, self.request)
-        if tournament.size == tournament.participants.count():
-            Thread(target=tournament.start).start()
-        elif tournament.start_at is None and tournament.is_enough_players():
-            tournament.start_timer()
+        if not tournament.started:
+            send_sse_event(EventCode.TOURNAMENT_JOIN, serializer.instance, serializer.data, self.request)
+            if tournament.size == tournament.participants.count():
+                Thread(target=tournament.start).start()
+            elif tournament.start_at is None and tournament.is_enough_players():
+                tournament.start_timer()
 
 
 tournament_view = TournamentView.as_view()

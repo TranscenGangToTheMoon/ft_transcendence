@@ -119,7 +119,7 @@ class TournamentParticipants(ParticipantsPlace, models.Model):
         tournament = self.tournament
         last_member = tournament.participants.count() == 1
         delete_player_instance(self.user_id)
-        if not last_member:
+        if not last_member and not self.tournament.started:
             send_sse_event(EventCode.TOURNAMENT_LEAVE, self)
         super().delete(using=using, keep_parents=keep_parents)
         if last_member:
