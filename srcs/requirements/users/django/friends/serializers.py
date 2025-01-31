@@ -39,10 +39,7 @@ class FriendsSerializer(Serializer):
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
-        request = self.context.get('request')
-        if request is None:
-            raise serializers.ValidationError(MessagesException.ValidationError.REQUEST_REQUIRED)
-        if (instance.user_1.id == request.user.id and request.method != 'POST') or (instance.user_1.id != request.user.id and request.method == 'POST'):
+        if instance.user_1.id == self.context['user']:
             data['friend_win'] = instance.user2_wins
             data['me_win'] = instance.user1_wins
             friend = instance.user_2

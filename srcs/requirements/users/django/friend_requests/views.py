@@ -5,6 +5,7 @@ from rest_framework.exceptions import NotFound
 from friend_requests.models import FriendRequests
 from friend_requests.serializers import FriendRequestsSerializer
 from friends.serializers import FriendsSerializer
+from friends.utils import SerializerFriendContext
 from lib_transcendence.exceptions import MessagesException
 from lib_transcendence.permissions import NotGuest
 from lib_transcendence.serializer import SerializerKwargsContext
@@ -40,7 +41,7 @@ class FriendRequestsReceiveListView(generics.ListAPIView, FriendRequestsMixin):
         return response
 
 
-class FriendRequestView(SerializerKwargsContext, generics.CreateAPIView, generics.RetrieveDestroyAPIView, FriendRequestsMixin):
+class FriendRequestView(SerializerKwargsContext, SerializerFriendContext, generics.CreateAPIView, generics.RetrieveDestroyAPIView, FriendRequestsMixin):
 
     def get_object(self):
         try:
@@ -55,7 +56,7 @@ class FriendRequestView(SerializerKwargsContext, generics.CreateAPIView, generic
 
     def perform_create(self, serializer):
         super().perform_create(serializer)
-        publish_event(serializer.instance.user_1, EventCode.ACCEPT_FRIEND_REQUEST, data=serializer.data, kwargs={'username': serializer.instance.user_2.username})
+        publish_event(serializer.instance.user_1, EventCode.ACCEPT_FRIEND_REQUEST, data=FriendsSerializer(serializer.instance, context={'user': serializer.instance.user_1.id}).data, kwargs={'username': serializer.instance.user_2.username})
         unlock_friends_pp(serializer.instance)
 
     def perform_destroy(self, instance):

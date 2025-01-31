@@ -4,14 +4,14 @@ from rest_framework.exceptions import NotFound
 
 from friends.models import Friends
 from friends.serializers import FriendsSerializer
-from friends.utils import get_friend
+from friends.utils import get_friend, SerializerFriendContext
 from lib_transcendence.exceptions import MessagesException
 from lib_transcendence.permissions import NotGuest
 from lib_transcendence.sse_events import EventCode
 from sse.events import publish_event
 
 
-class FriendsMixin(generics.GenericAPIView):
+class FriendsMixin(SerializerFriendContext, generics.GenericAPIView):
     queryset = Friends.objects.all()
     serializer_class = FriendsSerializer
     permission_classes = [NotGuest]
