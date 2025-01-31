@@ -8,7 +8,7 @@ from lobby.models import Lobby, LobbyParticipants
 from matchmaking.utils.user import verify_user
 from tournament.models import Tournament, TournamentParticipants
 
-# todo make endpoint for login via  mathcmaking only trophie, usr, blocked
+
 def get_place(model, create=False, **kwargs):
     name = model.__name__
     allowed_keys = ('id', 'code')

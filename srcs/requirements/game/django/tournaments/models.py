@@ -10,8 +10,6 @@ from lib_transcendence.services import request_users
 from lib_transcendence.sse_events import EventCode, create_sse_event
 
 
-# todo handle tournament message
-
 class Tournaments(models.Model):
     stage_labels = {0: 'final', 1: 'semi-final', 2: 'quarter-final', 3: 'round-of-16'}
     match_order = {

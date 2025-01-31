@@ -45,3 +45,22 @@ urlpatterns = [
 
     path(UsersManagement.manage_user, manage_user_view),
 ]
+
+# todo fix 500 xav discord
+# todo make endpoint for login via  mathcmaking only trophie, usr, blocked
+# todo dont request trophies twice in ranked use au dessus
+# todo handle tournament message
+
+
+# try: todo handle reconnection tournament
+#     user = tournament.participants.get(user_id=user['id'])
+#     user.reconnect()
+#     return user
+# except TournamentParticipants.DoesNotExist:
+#     pass
+
+# todo finir tournament (test with ui)
+# todo faire list nino
+# todo finish all # todo
+# todo finish all git hub issue
+# todo aller voir nino
