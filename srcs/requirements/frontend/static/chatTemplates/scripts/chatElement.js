@@ -61,12 +61,14 @@ async function setChatUserCard(chatInfo, chatUserCard) {
 	if (chatInfo.lastMessage === null) {
 		chatUserCard.querySelector('.chatUserCardLastMessage').innerText = 'Start the conversation ;)';
 	}
-	if (chatInfo.lastMessagesNotRead != 0) {
+	else {
 		chatUserCard.querySelector('.chatUserCardLastMessage').innerText = (chatInfo.lastMessage);
 	}
 	var chatUserCardLastMessage = chatUserCard.querySelector('.chatUserCardLastMessage');
-	if (chatInfo.lastMessagesNotRead)
+	if (chatInfo.unreadMessage) {
+		console.log('setChatUserCard:', chatInfo.unreadMessage);
 		chatUserCardLastMessage.classList.add('chatMessageNotRead');
+	}
 	let chatUserCardDeleteButton = chatUserCard.querySelector('.chatUserCardButtonDeleteChat');
 	chatUserCardDeleteButton.style.display = 'none';
 	addChatUserCardListeners(chatUserCard, chatUserCardDeleteButton, chatUserCardLastMessage, chatInfo);
@@ -81,7 +83,7 @@ function createMessage(message, chatInfo) {
 	messageDiv.appendChild(messageAuthor);
 	messageDiv.appendChild(messageContent);
 
-	messageDiv.className = 'd-flex gap-1';
+	messageDiv.className = 'gap-1';
 	if (message.author === chatInfo.targetId) {
 		messageAuthor.innerText = chatInfo.target + ': ';
 		if (message.is_read === false) {
