@@ -89,6 +89,6 @@ class TournamentSerializer(Serializer):
             result.nb_matches = index
         result.save()
         create_sse_event(result.users_id(), EventCode.TOURNAMENT_START, TournamentSerializer(result).data, {'name': result.name})
-        Thread(target=result.post_matches, args=(first_stage, True)).start()
+        Thread(target=result.start_matches, args=(first_stage, True)).start()
         Thread(target=result.main_thread).start()
         return result

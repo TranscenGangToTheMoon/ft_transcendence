@@ -4,6 +4,8 @@ from datetime import datetime, timezone
 from django.db import models
 
 from lib_transcendence import endpoints
+from lib_transcendence.game import FinishReason, GameMode
+from lib_transcendence.lobby import MatchType
 from lib_transcendence.services import request_users
 from lib_transcendence.sse_events import EventCode, create_sse_event
 
@@ -64,7 +66,7 @@ class Tournaments(models.Model):
 
             self.current_stage = stage
             self.save()
-            self.post_matches(stage)
+            self.start_matches(stage)
             create_sse_event(self.users_id(), EventCode.TOURNAMENT_AVAILABLE_SPECTATE_MATCHES, spectate)
 
     def finish_match(self, match, winner, looser):
@@ -94,10 +96,27 @@ class Tournaments(models.Model):
     def users_id(self):
         return list(self.players.values_list('user_id', flat=True))
 
-    def post_matches(self):
-        time.sleep(3)
-        for matche in self.matches.filter(tournament_stage=self.current_stage):
-            matche.post()
+    def create_match(self, n, stage, user_1, user_2):
+        match = self.matches.create(game_mode=GameMode.TOURNAMENT, match_type=MatchType.M1V1, tournament_n=n, tournament_stage=stage)
+
+        if user_2 is None:
+            match.finish(FinishReason.GAME_NOT_PLAYED)
+            winner_team = match.teams.create(name='a')
+            match.teams.create(name='b')
+            match.players.create(user_id=user_1.user_id, team=winner_team)
+            match.winner = winner_team
+            match.save()
+            user_1.win()
+        else:
+            for name_team, player in (('a', user_1), ('b', user_2)):
+                new_team = match.teams.create(name=name_team)
+                match.players.create(user_id=player.user_id, team=new_team)
+
+    def start_matches(self, stage, sleep=False):
+        if sleep:
+            time.sleep(3)
+        for matche in self.matches.filter(tournament_stage=stage):
+            matche.start()
 
 
 class TournamentStage(models.Model):
