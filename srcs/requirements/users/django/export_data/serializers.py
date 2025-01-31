@@ -7,6 +7,7 @@ from friends.serializers import FriendsSerializer
 from lib_transcendence import endpoints
 from lib_transcendence.serializer import Serializer
 from lib_transcendence.services import request_chat, request_game
+from profile_pictures.serializers import ProfilePicturesSerializer
 from stats.serializers import StatsSerializer, RankedStatsSerializer
 from users.models import Users
 from users.serializers import UsersMeSerializer
@@ -30,6 +31,7 @@ class FriendDataSerializer(Serializer):
 
 class DownloadDataSerializer(Serializer):
     user_data = UsersMeSerializer(source='*')
+    profile_pictures_data = ProfilePicturesSerializer(source='profile_pictures', many=True)
     friend_data = FriendDataSerializer(source='*')
     stats_data = StatsSerializer(source='stats', many=True)
     ranked_data = RankedStatsSerializer(source='ranked_stats', many=True)
@@ -40,6 +42,7 @@ class DownloadDataSerializer(Serializer):
         model = Users
         fields = [
             'user_data',
+            'profile_pictures_data',
             'friend_data',
             'stats_data',
             'ranked_data',

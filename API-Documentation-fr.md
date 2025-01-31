@@ -1085,6 +1085,7 @@ https://localhost:4443/api/users/
   ```json
   {
     "user_data": "UserMeInstance",
+    "profile_pictures_data": "list[ProfilePictureInstance]",
     "friends_data": {"friends": "list[FriendInstance]", "friend_requests_sent": "list[FriendRequestsInstance]", "friend_requests_received": "list[FriendRequestsInstance]", "blocked_users": "list[BlockedInstance]"},
     "stats_data": "list[StatsInstance]",
     "chat_data": "list[ChatInstance]",

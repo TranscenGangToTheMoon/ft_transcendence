@@ -16,8 +16,7 @@ class TournamentPlayerSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     trophies = serializers.IntegerField()
 
-# todo guest pp
-# todo fix pp order
+
 class TournamentSerializer(Serializer):
     id = serializers.IntegerField()
     matches = serializers.SerializerMethodField(read_only=True)
