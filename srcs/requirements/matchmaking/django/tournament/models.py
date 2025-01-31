@@ -44,6 +44,7 @@ class Tournament(models.Model):
     size = models.IntegerField(default=16)
     private = models.BooleanField(default=False)
     start_at = models.DateTimeField(default=None, null=True)
+    started = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.IntegerField()
     created_by_username = models.CharField(max_length=30)
@@ -91,7 +92,8 @@ class Tournament(models.Model):
         }
         try:
             request_game(endpoints.Game.tournaments, method='POST', data=data)
-            self.delete()
+            self.started = True
+            self.save()
         except APIException:
             pass
 
