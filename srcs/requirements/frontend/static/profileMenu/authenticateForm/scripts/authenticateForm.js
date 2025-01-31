@@ -6,8 +6,23 @@ document.getElementById('switchButton').addEventListener('click', event => {
     if (loginButton.innerText === "Register"){
         loginButton.innerText = "Login";
         event.target.innerText = "New? Create an account"
+        privacyPolicyRegister = document.getElementById('privacyPolicyRegister');
+        if (privacyPolicyRegister)
+            privacyPolicyRegister.remove();
     }
     else{
+        privacyPolicyRegister = document.createElement('a');
+        privacyPolicyRegister.id = "privacyPolicyRegister";
+        privacyPolicyRegister.innerText = "Privacy Policy";
+        privacyPolicyRegister.className = "text-decoration";
+        loginButton.parentElement.insertBefore(privacyPolicyRegister, loginButton);
+        privacyPolicyRegister.addEventListener('click', async event => {
+            privacyPolicyModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('privacyPolicyModal'));
+            if (isModalOpen()) return;
+            if (privacyPolicyModal && !privacyPolicyModal._isShown){
+                privacyPolicyModal.show();
+            }
+        })
         loginButton.innerText = "Register";
         event.target.innerText = "Already have an account? log in"
     }

@@ -80,6 +80,14 @@ document.addEventListener('keyup', e => {
     }
 })
 
+document.getElementById('privacyPolicyLink').addEventListener('click', function(){
+    privacyPolicyModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('privacyPolicyModal'));
+    if (isModalOpen()) return;
+    if (privacyPolicyModal && !privacyPolicyModal._isShown){
+        privacyPolicyModal.show();
+    }
+})
+
 async function loadFriendListModal() {
     const friendModal = document.getElementById('friendListModal');
     if (friendModal)
@@ -99,6 +107,13 @@ async function loadChatListModal(){
     if (chatListModal)
         chatListModal.remove();
     await loadContent('/chatTemplates/chatListModal.html', 'modals', true);
+}
+
+async function loadPrivacyPolicy(){
+    const privacyPolicyModal = document.getElementById('privacyPolicyModal')
+    if (privacyPolicyModal)
+        privacyPolicyModal.remove();
+    await loadContent('/privacyPolicyModal.html', 'modals', true);
 }
 
 async function  loadUserProfile(){
@@ -164,6 +179,7 @@ async function  indexInit(auto=true) {
         initSSE();
         await loadFriendListModal();
         await loadChatListModal();
+        await loadPrivacyPolicy();
         document.getElementById('innerFriendRequests-tab').clicked = true;
         addFriendListListener();
         let currentState = getCurrentState();
