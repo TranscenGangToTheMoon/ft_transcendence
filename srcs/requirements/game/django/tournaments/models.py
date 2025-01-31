@@ -39,6 +39,7 @@ class Tournaments(models.Model):
         request_users(endpoints.Users.result_tournament, method='POST', data={'winner': winner_user_id})
 
     def main_thread(self):
+        time.sleep(5)
         while True:
             time.sleep(3)
             if self.current_stage.stage == 0:
@@ -53,17 +54,17 @@ class Tournaments(models.Model):
 
             spectate = {}
             previous = None
-            for match in matches.order_by('n'):
+            for match in matches.order_by('tournament_n'):
                 if previous is None:
                     previous = match
                     continue
-                match = self.matches.create(tournament_n=self.get_nb_matches(), tournament_stage=stage, user_1=previous.winner, user_2=match.winner)
-                match.post()
-                spectate[match.id] = match.match_code
+                self.create_match(self.get_nb_matches(), stage, previous.winner.players.first(), match.winner.players.first())
+                spectate[match.id] = match.code
                 previous = None
 
             self.current_stage = stage
             self.save()
+            self.post_matches(stage)
             create_sse_event(self.users_id(), EventCode.TOURNAMENT_AVAILABLE_SPECTATE_MATCHES, spectate)
 
     def get_nb_matches(self):
