@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied, APIException
 
+from blocking.serializers import BlockedSerializer
 from friends.serializers import FriendsSerializer
 from friends.utils import get_friendship
 from lib_transcendence import endpoints
@@ -11,6 +12,7 @@ from lib_transcendence.services import request_chat
 from profile_pictures.create import create_user_profile_pictures
 from profile_pictures.unlock import unlock_user_pp
 from stats.create import create_user_stats
+from stats.utils import get_trophies
 from users.auth import auth_update
 from users.models import Users
 from users.serializers_utils import BaseUsersSerializer
@@ -131,3 +133,29 @@ class ManageUserSerializer(Serializer):
         create_user_stats(result)
         create_user_profile_pictures(result)
         return result
+
+
+class AuthMatchmakingSerializer(Serializer):
+    blocked = BlockedSerializer('blocked', many=True, read_only=True)
+    trophies = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = Users
+        fields = [
+            'id',
+            'is_guest',
+            'is_online',
+            'blocked',
+            'trophies',
+        ]
+        read_only_fields = [
+            'id',
+            'is_guest',
+            'is_online',
+            'blocked',
+            'trophies',
+        ]
+
+    @staticmethod
+    def get_trophies(obj):
+        return get_trophies(obj)

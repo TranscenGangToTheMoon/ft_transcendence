@@ -9,7 +9,7 @@ from lib_transcendence.endpoints import Users, UsersManagement
 from profile_pictures.views import profile_pictures_view, set_profile_picture_view
 from sse.views import sse_view
 from stats.views import finish_match_view, stats_view, stats_ranked_view, finish_tournament_view
-from users.views import users_me_view, retrieve_user_view, retrieve_users_view, manage_user_view
+from users.views import users_me_view, retrieve_user_view, retrieve_users_view, manage_user_view, auth_matchmaking_view
 from validate.views import validate_chat_view, are_friends_view
 
 urlpatterns = [
@@ -42,13 +42,12 @@ urlpatterns = [
 
     path(Users.chat, validate_chat_view),
     path(Users.are_friends, are_friends_view),
+    path(Users.auth_matchmaking, auth_matchmaking_view),
 
     path(UsersManagement.manage_user, manage_user_view),
 ]
 
-# todo fix 500 xav discord
-# todo make endpoint for login via  mathcmaking only trophie, usr, blocked
-# todo dont request trophies twice in ranked use au dessus
+# todo don t request trophies twice in ranked use au dessus
 # todo handle tournament message
 
 
