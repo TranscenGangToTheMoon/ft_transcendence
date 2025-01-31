@@ -141,7 +141,7 @@ function addMatchDetail(){
                     playerRow.innerHTML = `
                     <img class='col-2 p-1' src='${player['profile_picture'].small}' onerror="this.onerror=null; this.src='/assets/imageNotFound.png'" 
                     alt="profile pic"></img>
-                    <div class='col m-auto'>${player.username}</div>
+                    <div class='col m-auto text-truncate'>${player.username}</div>
                     `
                     teamPlayersCol.appendChild(playerRow);
                 })
