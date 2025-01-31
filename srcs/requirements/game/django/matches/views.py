@@ -44,13 +44,6 @@ class ListMatchesView(generics.ListAPIView):
         return queryset.filter(players__user_id=self.kwargs['user_id'], finished=True).order_by('-finished_at')
 
 
-class UserMatchRetrieveView(generics.RetrieveAPIView):
-    serializer_class = MatchSerializer
-
-    def get_object(self):
-        return validate_user_id(self.kwargs['user_id'], True)
-
-
 class MatchRetrieveView(generics.RetrieveAPIView):
     serializer_class = MatchSerializer
 
@@ -64,5 +57,4 @@ create_match_view = CreateMatchView.as_view()
 finish_match_view = FinishMatchView.as_view()
 score_view = ScoreView.as_view()
 list_matches_view = ListMatchesView.as_view()
-retrieve_user_match_view = UserMatchRetrieveView.as_view()
 retrieve_match_view = MatchRetrieveView.as_view()
