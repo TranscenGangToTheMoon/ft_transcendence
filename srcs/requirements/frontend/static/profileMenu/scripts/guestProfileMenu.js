@@ -9,6 +9,10 @@ document.getElementById('loginMenu').addEventListener('mousedown', event => {
     isClickStartingInside = true;
 })
 
+document.getElementById('loginMenu').addEventListener('mouseup', event => {
+    isClickStartingInside = false;
+})
+
 document.addEventListener("hide.bs.dropdown", function (event) {
     if (isClickStartingInside)
         event.preventDefault();
