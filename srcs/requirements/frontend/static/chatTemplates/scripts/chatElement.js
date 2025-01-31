@@ -37,16 +37,19 @@ function addChatUserCardListeners(chatUserCard, chatUserCardDeleteButton, chatUs
 		if (e.target === chatUserCard.querySelector('.chatUserCardButtonDeleteChat')) return;
 		chatUserCardLastMessage.classList.remove('chatMessageNotRead');
 		let chatTab = document.getElementById('chatTab' + chatInfo.target + 'Link');
-		removeChatCollapse();
 		if (chatTab) {
 			if (chatTab.classList.contains('active')) {
 				closeChatListModal();
+				if (isChatCollapsed()) {
+					chatTab.click();
+				}
 			}
 			else {
 				chatTab.click();
 			}
 			return;
 		}
+		removeChatCollapse();
 		await openChatTab(chatInfo.chatId);
 	});
 }
@@ -83,7 +86,7 @@ function createMessage(message, chatInfo) {
 	messageDiv.appendChild(messageAuthor);
 	messageDiv.appendChild(messageContent);
 
-	messageDiv.className = 'd-flex gap-1';
+	messageDiv.className = 'gap-1';
 	if (message.author === chatInfo.targetId) {
 		messageAuthor.innerText = chatInfo.target + ': ';
 		if (message.is_read === false) {

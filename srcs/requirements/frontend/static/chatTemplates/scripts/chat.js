@@ -160,6 +160,7 @@ async function createChatUserCard(chatInfo) {
 }
 
 async function displayChatsList(filter='') {
+	if (isModalOpen()) return;
 	chatsList = document.getElementById('chatsList');
 	chatsList.innerHTML= '';
 	try {
@@ -241,8 +242,12 @@ async function searchChatButton(username) {
 		}
 		chatInfo = parsChatInfo(apiAnswer.results[0]);
 	}
-	document.getElementById('searchChatForm').reset();
-	await displayChatsList();
+	let searchChat = document.getElementById('searchChatForm');
+	if (searchChat)
+		searchChat.reset();
+	let chatListModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('chatListModal'));
+	if (chatListModal && chatListModal._isShown)
+		await displayChatsList();
 	await openChatTab(chatInfo.chatId);
 }
 
@@ -391,6 +396,12 @@ async function closeChatTab(chatInfo)
 			lastTab.querySelector('a').click();
 		}
 	}
+}
+
+function isChatCollapsed() {
+	let buttonCollapseChat = document.getElementById('chatTabsCollapse');
+	if (buttonCollapseChat && buttonCollapseChat.getAttribute('aria-expanded') === 'false') return true;
+	return false;
 }
 
 function removeChatCollapse() {

@@ -42,11 +42,29 @@ function loadScript(scriptSrc, type) {
 }
 
 // ========================== MAIN  ==========================
+let isInside = false;
+document.getElementById('home').addEventListener('mouseover', function(){
+    if (!isInside){
+        document.getElementById('home').querySelector('img').style.transition = 'all 0.3s'
+        document.getElementById('home').querySelector('img').style.filter = 'invert(1)'
+    }
+    isInside = true;
+})
+
+document.getElementById('home').addEventListener('mouseleave', event => {
+    isInside = false;
+    document.getElementById('home').querySelector('img').style.removeProperty('filter');
+})
 
 document.addEventListener('click', (e) => {
     contextMenu = document.getElementById('contextMenu');
     if (contextMenu)
         document.getElementById('contextMenu').style.display = 'none';
+    else{
+        contextMenu = document.getElementById('friendListContextMenu');
+        if (contextMenu)
+            contextMenu.style.display = 'none'
+    }
 });
 
 document.addEventListener('keyup', e => {
@@ -54,6 +72,11 @@ document.addEventListener('keyup', e => {
         let contextMenu = document.getElementById('contextMenu');
         if (contextMenu)
             contextMenu.style.display = 'none';
+        else{
+            contextMenu = document.getElementById('friendListContextMenu');
+            if (contextMenu)
+                contextMenu.style.display = 'none'
+        }
     }
 })
 
@@ -87,7 +110,7 @@ async function  loadUserProfile(){
         document.getElementById('trophies').innerText = "";
     }
     else {
-        document.getElementById('trophies').innerText = userInformations.trophies;
+        document.getElementById('trophies').innerText = userInformations.trophies + '🏆';
     }
     await loadContent(`/${profileMenu}`, 'profileMenu');
     // if (!userInformations.is_guest)

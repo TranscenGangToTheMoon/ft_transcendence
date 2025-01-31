@@ -17,6 +17,10 @@ function initSwitch(){
         FRswitch.checked = userInformations.accept_friend_request;
 }
 
+document.getElementById('seeBlockedUsers').addEventListener('click', async () => {
+    await initBlockedUsers();
+});
+
 async function initFriendsTemplate() {
     if (!userInformations.is_guest)
         await loadBlockedModal();

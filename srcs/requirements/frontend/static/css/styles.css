@@ -51,7 +51,7 @@ body {
 .indicator {
     background: red;
     color: white;
-    border-radius: 50%;  /* Makes it perfectly round */
+    border-radius: 50%;
     width: 12px;
     height: 12px;
     display: flex;
@@ -59,7 +59,7 @@ body {
     justify-content: center;
     font-size: 10px;
     font-weight: bold;
-    /* position: absolute; */
+    margin-left: 5px;
     -ms-transform: translateY(50%);
     transform: translateY(50%);
 }
@@ -107,4 +107,8 @@ body {
 
 .max-vh-75 {
     max-height: 75vh !important;
+}
+
+#home, #test34 {
+    cursor: pointer !important;
 }

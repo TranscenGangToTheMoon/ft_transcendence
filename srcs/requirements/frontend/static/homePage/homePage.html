@@ -1,14 +1,9 @@
-<!-- <h1>======================= DEBUG   ==========================</h1>
-<button id="logoutButton">Log out</button>
-<button id="testRefresh">test refresh</button>
-<div id="container"></div>
-<button id="delete">delete</button>
-
-<h1>========================================================</h1> -->
-
-<div class="container">
-    <h1>play</h1>
-    <div id="interface" class="d-flex">
+<div class="d-flex flex-column align-items-center w-100 h-100">
+    <div class="d-flex w-100 h-25 justify-content-center align-items-end center">
+        <button class="btn btn-warning no-user h-25 m-4" onclick="navigateTo('/profile')">guest profile</button>
+    </div>
+    <div id="interface" class="d-flex flex-column w-75 my-5 gap-2 h-75">
+        <h1>Select Game Mode</h1>
         <select class="form-select" aria-label="Select Game Mode" id="gameModeSelect">
             <option value="0" class="" id="local">local</option>
             <option value="1" class="game" id="duel">duel</option>
@@ -18,28 +13,9 @@
             <option value="5" class="game" id="tournament">tournament</option>
         </select>
         <button id="playGame" class="btn btn-dark">Play</button>
-        <button class="btn btn-warning no-user" onclick="navigateTo('/profile')">guest profile</button>
         <div id="actions">
             <button id="chat" class="btn btn-outline-dark chat-badges no-guest w-100" type="button">chats</button>
             <button class="btn btn-outline-dark friend-badges no-guest w-100" id="friends" type="button" data-bs-toggle="modal" data-bs-target="#friendListModal">friends</button>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="leaderBoardModal" tabindex="-1" aria-labelledby="leaderBoardModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="leaderBoardModalLabel">Leaderboard</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div id="onlineFriends"></div>
-                <div id="friends"></div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            </div>
         </div>
     </div>
 </div>

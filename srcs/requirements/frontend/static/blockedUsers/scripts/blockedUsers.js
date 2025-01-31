@@ -61,6 +61,7 @@ function decrementNextBlock(url){
 }
 
 async function initBlockedUsers() {
+    loadCSS('/friends/css/friendRequestBlock.css');
     const blockedUsersDiv = document.getElementById('blockedUsersList');
     try {
         let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/users/me/blocked/?limit=15&offset=0`, 'GET');

@@ -11,6 +11,7 @@ async function apiRequest(token, endpoint, method="GET", authType="Bearer",
     if (body)
         options.body = JSON.stringify(body);
     removeAlert();
+    console.log(endpoint, options);
     return fetch(endpoint, options)
         .then(async response => {
             if (!response.ok && (response.status > 499 || response.status === 404)){
