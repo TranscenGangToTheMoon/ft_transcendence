@@ -8,7 +8,17 @@
     align-items: center;
 }
 
-.friendRequestBlock img {
+.friendRequestBlock .rounded-1 {
     height: 30px;
     width: 30px;
+}
+
+.friendRequestKebabMenuButton{
+    height: 30px;
+    cursor: pointer;
+    transition: ease-in-out 0.3s;
+}
+
+.friendRequestKebabMenuButton:hover{
+    transform: scale(1.2);
 }

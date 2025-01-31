@@ -93,7 +93,7 @@ document.getElementById('pChangeNickname').addEventListener('submit', async even
         let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/users/me/`, "PATCH",
         undefined, undefined, {'username' : newUsername});
         if (!data.id)
-            document.getElementById('pChangeNicknameError').innerText = data.username;
+            document.getElementById('pChangeNicknameError').innerText = data.username ?? data.detail;
         else {
             document.getElementById('pChangeNicknameError').innerText = "";
             await fetchUserInfos(true);
