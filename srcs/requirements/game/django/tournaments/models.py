@@ -67,6 +67,21 @@ class Tournaments(models.Model):
             self.post_matches(stage)
             create_sse_event(self.users_id(), EventCode.TOURNAMENT_AVAILABLE_SPECTATE_MATCHES, spectate)
 
+    def finish_match(self, match, winner, looser):
+        from tournaments.serializers import TournamentSerializer
+
+        if match.finish_reason == FinishReason.PLAYER_DISCONNECT:
+            finish_reason = ' (obviously the other player gave up the game)'
+        elif match.finish_reason == FinishReason.GAME_NOT_PLAYED:
+            finish_reason = ' (yeah, there just was no game)'
+        else:
+            finish_reason = ''
+
+        create_sse_event(self.users_id(), EventCode.TOURNAMENT_MATCH_FINISH, TournamentSerializer(self).data, {'winner': winner.user_id, 'looser': looser, 'score_winner': match.winner.score, 'score_looser': match.looser.score, 'finish_reason': finish_reason})
+        self.players.get(user_id=winner.user_id).win()
+        if looser is not None:
+            self.players.get(user_id=looser).eliminate()
+
     def get_nb_matches(self):
         self.nb_matches += 1
         self.save()

@@ -63,6 +63,10 @@ class Matches(models.Model):
             except APIException:
                 raise ServiceUnavailable('matchmaking')
         send_match_result(self)
+        if self.tournament is not None:
+            if looser is not None:
+                looser = looser.user_id
+            self.tournament.finish_match(self, winner, looser)
 
 
 class Teams(models.Model):
