@@ -141,7 +141,7 @@ class MatchSerializer(Serializer):
                 match.players.create(user_id=user['id'], team=new_team, **kwargs)
         return match
 
-# todo fix trophies compute
+
 class TournamentMatchSerializer(Serializer):
     n = serializers.IntegerField(source='tournament_n')
     winner = serializers.SerializerMethodField()

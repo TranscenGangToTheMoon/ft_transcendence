@@ -16,7 +16,7 @@ def send_match_result(match):
 
 def compute_trophies(winner_trophies, looser_trophies):
     gap = abs(winner_trophies - looser_trophies)
-    win_trophies = 30 - (winner_trophies / 2000) * 10
+    win_trophies = 36 - (winner_trophies / 2000) * 10
     loose_trophies = 20 + (looser_trophies / 2000) * 15
     adjust_gap = gap / 10
     if winner_trophies > looser_trophies:
