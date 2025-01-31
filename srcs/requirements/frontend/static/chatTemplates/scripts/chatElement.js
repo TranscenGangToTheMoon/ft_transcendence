@@ -83,7 +83,7 @@ function createMessage(message, chatInfo) {
 	messageDiv.appendChild(messageAuthor);
 	messageDiv.appendChild(messageContent);
 
-	messageDiv.className = 'd-flex gap-1';
+	messageDiv.className = 'gap-1';
 	if (message.author === chatInfo.targetId) {
 		messageAuthor.innerText = chatInfo.target + ': ';
 		if (message.is_read === false) {

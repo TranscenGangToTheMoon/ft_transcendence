@@ -23,6 +23,15 @@ if (document.getElementById('modals').friendListened !== true){
                     document.getElementById('searchResults').innerText = 'user not found';
             }
         }
+        if (event.target.matches('.chatButton')){
+            friendUsername = event.target.parentElement.parentElement.querySelector('div').innerText;
+            searchChatButton(friendUsername);
+            let friendListModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('friendListModal'));
+            if (friendListModal && friendListModal._isShown){
+                friendListModal.hide();
+            }
+            console.log('chat button clicked', friendUsername);
+        }
         if (event.target.matches('.deleteFriend')){
             try {
                 const friendshipId = `${event.target.parentElement.id}`.substring(6);
@@ -190,7 +199,10 @@ async function loadFriendList(){
             resultDiv.innerHTML += `<div class="friendRequestBlock knownFriend" id="friend${friend.id}">\
             <img class="rounded-1" src="${friend.friend.profile_picture.small}" onerror="src='/assets/imageNotFound.png'">\
             <div>${friend.friend.username}</div>\
-            <button class='btn btn-danger deleteFriend'>delete</button></div>\n`;
+            <div>\
+            <button class='btn btn-dark chatButton'>chat</button>\
+            <button class='btn btn-danger deleteFriend'>delete</button></div>\
+            </div>\n`;
             const friendDiv = resultDiv.querySelector(`#friend${friend.id}`);
             console.log(friend);
             friendDiv.setAttribute('data-bs-toggle', 'popover');
