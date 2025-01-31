@@ -51,7 +51,7 @@ class Matches(models.Model):
     def finish(self, finish_reason=FinishReason.NORMAL_END):
         if self.finish_reason is None:
             self.finish_reason = finish_reason
-        if self.finish_reason == FinishReason.PLAYERS_TIMEOUT:
+        if self.finish_reason == FinishReason.PLAYERS_TIMEOUT and self.game_mode != GameMode.TOURNAMENT:
             self.delete()
             return
         finished_at = datetime.now(timezone.utc)
@@ -59,12 +59,15 @@ class Matches(models.Model):
         self.finished_at = finished_at
         self.code = None
         self.game_duration = finished_at - self.created_at
-        self.winner, self.looser = self.teams.order_by('-score')
+        if self.teams is not None:
+            self.winner, self.looser = self.teams.order_by('-score')
         self.save()
+        if self.finish_reason == FinishReason.GAME_NOT_PLAYED:
+            return
+        winner = self.winner.players.first()
+        looser = self.looser.players.first()
         if self.game_mode == GameMode.RANKED:
             player = dict(retrieve_users(self.users_id(), return_type=dict, size='large'))
-            winner = self.winner.players.first()
-            looser = self.looser.players.first()
             winner_trophies, looser_trophies = compute_trophies(player[winner.user_id]['trophies'], player[looser.user_id]['trophies'])
             winner.set_trophies(winner_trophies)
             looser.set_trophies(-looser_trophies)
