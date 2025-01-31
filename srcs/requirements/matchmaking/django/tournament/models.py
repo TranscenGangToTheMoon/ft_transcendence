@@ -87,7 +87,7 @@ class Tournament(models.Model):
             'name': self.name,
             'size': self.size,
             'created_by': self.created_by,
-            'participants': [{'id': user.id, 'trophies': user.trophies} for user in self.participants.all()],
+            'participants': [{'id': user.user_id, 'trophies': user.trophies} for user in self.participants.all()],
         }
         try:
             request_game(endpoints.Game.tournaments, method='POST', data=data)
