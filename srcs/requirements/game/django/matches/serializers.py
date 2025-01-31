@@ -106,6 +106,9 @@ class MatchSerializer(Serializer):
                 representation['looser'] = instance.looser.name
             else:
                 representation['looser'] = None
+        else:
+            representation.pop('winner')
+            representation.pop('looser')
         return representation
 
     def create(self, validated_data):
@@ -201,6 +204,8 @@ class TournamentMatchSerializer(Serializer):
         ]
 
     def get_winner(self, obj):
+        if obj.winner is None:
+            return None
         user = obj.winner.players.first()
         if 'users' in self.context and user.user_id in self.context['users']:
             base = self.context['users'][user.user_id]
