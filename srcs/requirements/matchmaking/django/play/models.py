@@ -11,7 +11,7 @@ RANGE = 50
 class Players(ParticipantsPlace, models.Model):
     user_id = models.IntegerField(unique=True)
     trophies = models.IntegerField()
-    game_mode = models.CharField(max_length=10)
+    game_mode = models.CharField(max_length=20)
     join_at = models.DateTimeField(auto_now_add=True)
 
     def tag(self):

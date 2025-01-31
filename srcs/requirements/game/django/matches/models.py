@@ -17,7 +17,7 @@ from tournaments.models import Tournaments, TournamentStage
 
 class Matches(models.Model):
     code = models.CharField(max_length=4, null=True)
-    game_mode = models.CharField(max_length=11)
+    game_mode = models.CharField(max_length=20)
     created_at = models.DateTimeField(auto_now_add=True)
     match_type = models.CharField(max_length=3)
     game_duration = models.DurationField(default=timedelta(minutes=3))

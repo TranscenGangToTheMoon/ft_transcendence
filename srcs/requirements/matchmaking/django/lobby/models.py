@@ -21,7 +21,7 @@ class Lobby(models.Model):
     code = models.CharField(max_length=4, unique=True)
     max_participants = models.IntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
-    game_mode = models.CharField(max_length=11)
+    game_mode = models.CharField(max_length=20)
     ready_to_play = models.BooleanField(default=False)
     game_playing = models.CharField(max_length=4, null=True, default=None)
     count = models.IntegerField(default=1)
