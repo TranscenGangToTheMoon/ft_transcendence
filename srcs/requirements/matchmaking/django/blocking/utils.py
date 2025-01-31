@@ -1,8 +1,10 @@
+from django.db import IntegrityError
 from django.db.models import Q
 
 from blocking.models import Blocked
 from lib_transcendence import endpoints
 from lib_transcendence.auth import get_auth_token
+from lib_transcendence.exceptions import Throttled
 from lib_transcendence.pagination import get_all_pagination_items
 from lib_transcendence.services import request_users
 
@@ -18,7 +20,10 @@ def create_player_instance(request, instance=None, *args, **kwargs):
             Blocked.objects.create(user_id=request.user.id, blocked_user_id=blocked_instance['blocked']['id'])
 
     if instance is not None:
-        return instance.objects.create(*args, **kwargs)
+        try:
+            return instance.objects.create(*args, **kwargs)
+        except IntegrityError:
+            raise Throttled()
 
 
 def delete_player_instance(user_id=None):
