@@ -59,8 +59,8 @@ class MatchRetrieveView(generics.RetrieveAPIView):
     serializer_class = MatchSerializer
 
     def get_object(self):
-        obj = validate_user_id(self.kwargs['user_id'], True, {'match__id': self.kwargs['match_id']})
-        obj.start()
+        obj = validate_user_id(self.kwargs['user_id'], True, {'match__id': self.kwargs['match_id'], 'match__send_game_start': True})
+        obj.player_connect()
         return obj
 
 

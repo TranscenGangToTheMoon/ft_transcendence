@@ -31,6 +31,10 @@ class Matches(models.Model):
     winner = models.ForeignKey('Teams', null=True, default=None, on_delete=models.SET_NULL, related_name='winner')
     looser = models.ForeignKey('Teams', null=True, default=None, on_delete=models.SET_NULL, related_name='looser')
 
+    def player_connect(self):
+        self.game_start = True
+        self.save()
+
     def start(self):
         from matches.serializers import MatchSerializer
         from matches.timeout import check_timeout
