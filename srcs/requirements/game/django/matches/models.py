@@ -19,6 +19,7 @@ class Matches(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     match_type = models.CharField(max_length=3)
     game_duration = models.DurationField(default=timedelta(minutes=3))
+    send_game_start = models.BooleanField(default=False)
     tournament = models.ForeignKey(Tournaments, null=True, default=None, on_delete=models.CASCADE, related_name='matches')
     tournament_stage = models.ForeignKey(TournamentStage, null=True, default=None, on_delete=models.CASCADE, related_name='matches')
     tournament_n = models.IntegerField(null=True, default=None)
@@ -31,8 +32,14 @@ class Matches(models.Model):
     looser = models.ForeignKey('Teams', null=True, default=None, on_delete=models.SET_NULL, related_name='looser')
 
     def start(self):
-        self.game_start = True
+        from matches.serializers import MatchSerializer
+        from matches.timeout import check_timeout
+
+        create_sse_event(self.users_id(), EventCode.GAME_START, MatchSerializer(self).data)
+        self.created_at = datetime.now(timezone.utc)
+        self.send_game_start = True
         self.save()
+        Thread(target=check_timeout, args=(self.id, )).start()
 
     def users_id(self):
         return list(self.players.all().values_list('user_id', flat=True))

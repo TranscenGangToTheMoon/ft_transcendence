@@ -1,14 +1,8 @@
-import os
-import time
-from threading import Thread
-
 from rest_framework import generics
 from rest_framework.exceptions import NotFound
 
 from lib_transcendence.auth import Authentication
 from lib_transcendence.exceptions import MessagesException
-from lib_transcendence.game import FinishReason
-from lib_transcendence.sse_events import create_sse_event, EventCode
 from matches.models import Matches, Players
 from matches.serializers import MatchSerializer, validate_user_id, MatchFinishSerializer, ScoreSerializer, MatchNotPlayedSerializer
 
@@ -17,20 +11,8 @@ class CreateMatchView(generics.CreateAPIView):
     serializer_class = MatchSerializer
 
     def perform_create(self, serializer):
-        users = serializer.validated_data['teams']['a'] + serializer.validated_data['teams']['b']
         super().perform_create(serializer)
-        create_sse_event(users, EventCode.GAME_START, serializer.data)
-        Thread(target=check_timeout, args=(serializer.instance.id, )).start()
-
-
-def check_timeout(match_id):
-    time.sleep(int(os.environ['GAME_PLAYER_CONNECT_TIMEOUT']))
-    try:
-        match = Matches.objects.get(id=match_id)
-        if not match.game_start:
-            match.finish(FinishReason.PLAYERS_TIMEOUT)
-    except Matches.DoesNotExist:
-        pass
+        serializer.instance.start()
 
 
 class CreateMatchNotPlayedView(generics.CreateAPIView):
