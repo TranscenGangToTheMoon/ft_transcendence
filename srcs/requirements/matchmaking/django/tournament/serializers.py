@@ -4,9 +4,9 @@ from blocking.utils import create_player_instance
 from lib_transcendence.auth import get_auth_user
 from lib_transcendence.generate import generate_code
 from lib_transcendence.serializer import Serializer
-from matchmaking.utils.participant import get_participants
-from matchmaking.utils.place import get_tournament, verify_place
-from matchmaking.utils.user import verify_user
+from matchmaking.participant import get_participants
+from matchmaking.place import get_tournament, verify_place
+from matchmaking.user import verify_user
 from tournament.models import Tournament, TournamentSize, TournamentParticipants
 
 

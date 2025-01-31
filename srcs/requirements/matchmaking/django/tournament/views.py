@@ -13,9 +13,9 @@ from lib_transcendence.exceptions import MessagesException
 from lib_transcendence.permissions import GuestCannotCreate
 from lib_transcendence.serializer import SerializerAuthContext
 from lib_transcendence.sse_events import EventCode
-from matchmaking.utils.participant import get_tournament_participant
-from matchmaking.utils.place import get_tournament
-from matchmaking.utils.sse import send_sse_event
+from matchmaking.participant import get_tournament_participant
+from matchmaking.place import get_tournament
+from matchmaking.sse import send_sse_event
 from tournament.models import Tournament, TournamentParticipants
 from tournament.serializers import TournamentSerializer, TournamentParticipantsSerializer, TournamentSearchSerializer
 

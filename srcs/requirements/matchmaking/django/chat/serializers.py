@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from matchmaking.utils.sse import send_sse_event
+from matchmaking.sse import send_sse_event
 
 
 class MessageSerializer(serializers.Serializer):

@@ -10,10 +10,10 @@ from lib_transcendence.lobby import MatchType, Teams
 from lib_transcendence.serializer import Serializer
 from lib_transcendence.sse_events import EventCode, create_sse_event
 from lobby.models import Lobby, LobbyParticipants
-from matchmaking.utils.participant import get_participants
-from matchmaking.utils.place import get_lobby, verify_place
-from matchmaking.utils.sse import send_sse_event
-from matchmaking.utils.user import verify_user
+from matchmaking.participant import get_participants
+from matchmaking.place import get_lobby, verify_place
+from matchmaking.sse import send_sse_event
+from matchmaking.user import verify_user
 
 
 class LobbyGetParticipantsSerializer(Serializer):

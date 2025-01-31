@@ -10,8 +10,8 @@ from lib_transcendence.lobby import MatchType
 from lib_transcendence.permissions import NotGuest
 from lib_transcendence.sse_events import create_sse_event, EventCode
 from lobby.models import Lobby, LobbyParticipants
-from matchmaking.utils.participant import get_participant
-from matchmaking.utils.place import get_place
+from matchmaking.participant import get_participant
+from matchmaking.place import get_place
 from tournament.models import Tournament, TournamentParticipants
 
 

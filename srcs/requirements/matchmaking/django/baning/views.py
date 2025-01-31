@@ -6,8 +6,8 @@ from lib_transcendence.exceptions import MessagesException
 from lib_transcendence.permissions import NotGuest
 from lobby.models import Lobby, LobbyParticipants
 from lobby.serializers import LobbyParticipantsSerializer
-from matchmaking.utils.participant import get_lobby_participant, get_tournament_participant, get_participant
-from matchmaking.utils.place import get_lobby, get_tournament, get_place
+from matchmaking.participant import get_participant
+from matchmaking.place import get_place
 from tournament.models import Tournament, TournamentParticipants
 from tournament.serializers import TournamentParticipantsSerializer
 

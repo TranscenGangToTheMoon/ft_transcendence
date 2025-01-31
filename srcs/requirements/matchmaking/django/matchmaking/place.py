@@ -5,7 +5,7 @@ from lib_transcendence.exceptions import MessagesException, ResourceExists
 from baning.utils import is_banned
 from blocking.utils import are_users_blocked
 from lobby.models import Lobby, LobbyParticipants
-from matchmaking.utils.user import verify_user
+from matchmaking.user import verify_user
 from tournament.models import Tournament, TournamentParticipants
 
 

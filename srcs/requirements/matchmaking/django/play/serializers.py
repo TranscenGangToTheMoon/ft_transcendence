@@ -3,7 +3,7 @@ from rest_framework import serializers
 from blocking.utils import create_player_instance
 from lib_transcendence.auth import get_auth_user
 from lib_transcendence.serializer import Serializer
-from matchmaking.utils.user import verify_user
+from matchmaking.user import verify_user
 from play.models import Players
 
 

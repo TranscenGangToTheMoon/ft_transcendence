@@ -8,9 +8,9 @@ from lib_transcendence.permissions import GuestCannotCreate
 from lib_transcendence.serializer import SerializerAuthContext
 from lib_transcendence.sse_events import EventCode
 from lobby.serializers import LobbySerializer, LobbyParticipantsSerializer, LobbyFinishMatchSerializer
-from matchmaking.utils.participant import get_lobby_participant
-from matchmaking.utils.place import get_lobby
-from matchmaking.utils.sse import send_sse_event
+from matchmaking.participant import get_lobby_participant
+from matchmaking.place import get_lobby
+from matchmaking.sse import send_sse_event
 
 
 class LobbyView(SerializerAuthContext, generics.CreateAPIView, generics.RetrieveUpdateAPIView):

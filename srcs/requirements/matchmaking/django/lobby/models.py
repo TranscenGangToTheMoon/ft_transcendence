@@ -9,8 +9,8 @@ from lib_transcendence.game import GameMode
 from lib_transcendence.lobby import MatchType, Teams
 from lib_transcendence.sse_events import EventCode, create_sse_event
 from matchmaking.create_match import create_match
-from matchmaking.utils.model import ParticipantsPlace
-from matchmaking.utils.sse import send_sse_event
+from matchmaking.model import ParticipantsPlace
+from matchmaking.sse import send_sse_event
 
 
 class NoLobbyFound(Exception):
