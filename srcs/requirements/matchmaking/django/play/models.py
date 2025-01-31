@@ -25,7 +25,7 @@ class Players(ParticipantsPlace, models.Model):
             ranked_players = Players.objects.exclude(user_id=self.user_id).filter(game_mode=GameMode.RANKED, trophies__gte=self.trophies - RANGE, trophies__lte=self.trophies + RANGE)
             ranked_players = sorted(list(ranked_players), key=lambda x: abs(x.trophies - self.trophies))
             if len(ranked_players) > 0:
-                create_match(GameMode.RANKED, self.user_id, ranked_players[0].user_id)
+                create_match(GameMode.RANKED, {'id': self.user_id, 'trophies': self.trophies}, {'id': ranked_players[0].user_id, 'trophies': ranked_players[0].trophies})
                 self.delete()
                 ranked_players[0].delete()
 

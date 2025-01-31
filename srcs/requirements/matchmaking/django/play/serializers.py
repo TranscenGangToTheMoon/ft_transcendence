@@ -31,4 +31,4 @@ class PlayersSerializer(Serializer):
 
         validated_data['user_id'] = user['id']
         validated_data['trophies'] = user['trophies']
-        return create_player_instance(request, Players, **validated_data)
+        return create_player_instance(user, Players, **validated_data)
