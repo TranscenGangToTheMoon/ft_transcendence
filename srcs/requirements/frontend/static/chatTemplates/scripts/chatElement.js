@@ -37,16 +37,19 @@ function addChatUserCardListeners(chatUserCard, chatUserCardDeleteButton, chatUs
 		if (e.target === chatUserCard.querySelector('.chatUserCardButtonDeleteChat')) return;
 		chatUserCardLastMessage.classList.remove('chatMessageNotRead');
 		let chatTab = document.getElementById('chatTab' + chatInfo.target + 'Link');
-		removeChatCollapse();
 		if (chatTab) {
 			if (chatTab.classList.contains('active')) {
 				closeChatListModal();
+				if (isChatCollapsed()) {
+					chatTab.click();
+				}
 			}
 			else {
 				chatTab.click();
 			}
 			return;
 		}
+		removeChatCollapse();
 		await openChatTab(chatInfo.chatId);
 	});
 }
