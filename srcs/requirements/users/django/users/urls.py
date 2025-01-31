@@ -47,19 +47,17 @@ urlpatterns = [
     path(UsersManagement.manage_user, manage_user_view),
 ]
 
-# todo don t request trophies twice in ranked use au dessus
 # todo handle tournament message
-
-
 # try: todo handle reconnection tournament
 #     user = tournament.participants.get(user_id=user['id'])
 #     user.reconnect()
 #     return user
 # except TournamentParticipants.DoesNotExist:
 #     pass
-
 # todo finir tournament (test with ui)
 # todo faire list nino
+# todo make unit work
+# todo make correction db
 # todo finish all # todo
 # todo finish all git hub issue
 # todo aller voir nino
