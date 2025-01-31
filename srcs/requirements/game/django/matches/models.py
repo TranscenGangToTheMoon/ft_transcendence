@@ -69,8 +69,7 @@ class Matches(models.Model):
         winner = self.winner.players.first()
         looser = self.looser.players.first()
         if self.game_mode == GameMode.RANKED:
-            player = dict(retrieve_users(self.users_id(), return_type=dict, size='large'))
-            winner_trophies, looser_trophies = compute_trophies(player[winner.user_id]['trophies'], player[looser.user_id]['trophies'])
+            winner_trophies, looser_trophies = compute_trophies(winner.trophies, looser.trophies)
             winner.set_trophies(winner_trophies)
             looser.set_trophies(-looser_trophies)
         if self.game_mode in [GameMode.CLASH, GameMode.CUSTOM_GAME]:

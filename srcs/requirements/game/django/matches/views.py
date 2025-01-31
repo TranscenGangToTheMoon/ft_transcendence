@@ -4,7 +4,7 @@ from rest_framework.exceptions import NotFound
 from lib_transcendence.auth import Authentication
 from lib_transcendence.exceptions import MessagesException
 from matches.models import Matches, Players
-from matches.serializers import MatchSerializer, validate_user_id, MatchFinishSerializer, ScoreSerializer, MatchNotPlayedSerializer
+from matches.serializers import MatchSerializer, validate_user_id, MatchFinishSerializer, ScoreSerializer
 
 
 class CreateMatchView(generics.CreateAPIView):
@@ -13,10 +13,6 @@ class CreateMatchView(generics.CreateAPIView):
     def perform_create(self, serializer):
         super().perform_create(serializer)
         serializer.instance.start()
-
-
-class CreateMatchNotPlayedView(generics.CreateAPIView):
-    serializer_class = MatchNotPlayedSerializer
 
 
 class FinishMatchView(generics.UpdateAPIView):
@@ -65,7 +61,6 @@ class MatchRetrieveView(generics.RetrieveAPIView):
 
 
 create_match_view = CreateMatchView.as_view()
-create_match_not_played_view = CreateMatchNotPlayedView.as_view()
 finish_match_view = FinishMatchView.as_view()
 score_view = ScoreView.as_view()
 list_matches_view = ListMatchesView.as_view()

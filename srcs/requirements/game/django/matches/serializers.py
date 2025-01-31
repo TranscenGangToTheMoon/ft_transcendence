@@ -1,5 +1,3 @@
-from datetime import datetime, timezone, timedelta
-
 from django.conf import settings
 from rest_framework import serializers
 from rest_framework.exceptions import NotFound, PermissionDenied
@@ -28,19 +26,27 @@ def validate_user_id(value, return_match=False, kwargs=None):
             raise NotFound(MessagesException.NotFound.NOT_BELONG_GAME)
 
 
+class UserSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    trophies = serializers.IntegerField(required=False)
+
+
 class TeamsSerializer(serializers.Serializer):
-    a = serializers.ListSerializer(child=serializers.IntegerField())
-    b = serializers.ListSerializer(child=serializers.IntegerField())
+    a = UserSerializer(many=True)
+    b = UserSerializer(many=True)
 
     def validate(self, attrs):
+        def get_ids(team):
+            return [u['id'] for u in attr[team]]
+
         attr = super().validate(attrs)
         if len(attr['a']) != len(attr['b']):
             raise serializers.ValidationError(MessagesException.ValidationError.TEAMS_NOT_EQUAL)
         if len(attr['a']) not in (1, 3):
             raise serializers.ValidationError(MessagesException.ValidationError.ONLY_1V1_3V3_ALLOWED)
-        if len(attr['a'] + attr['b']) != len(set(attr['a'] + attr['b'])):
+        if len(get_ids('a') + get_ids('b')) != len(set(get_ids('a') + get_ids('b'))):
             raise serializers.ValidationError(MessagesException.ValidationError.IN_BOTH_TEAMS)
-        for user in attr['a'] + attr['b']:
+        for user in get_ids('a') + get_ids('b'):
             validate_user_id(user)
         return attr
 
@@ -125,59 +131,17 @@ class MatchSerializer(Serializer):
 
         match = super().create(validated_data)
         kwargs = {}
-        if match.game_mode == GameMode.RANKED:
-            kwargs['trophies'] = 0
         if match.game_mode == GameMode.CLASH:
             kwargs['own_goal'] = 0
         for name_team, players in teams.items():
             new_team = match.teams.create(name=name_team)
             for user in players:
-                match.players.create(user_id=user, team=new_team, **kwargs)
+                if match.game_mode == GameMode.RANKED:
+                    kwargs['trophies'] = user['trophies']
+                match.players.create(user_id=user['id'], team=new_team, **kwargs)
         return match
 
-
-class MatchNotPlayedSerializer(Serializer):
-    user_id = serializers.IntegerField(write_only=True)
-    tournament_id = serializers.IntegerField()
-    tournament_stage_id = serializers.IntegerField()
-    tournament_n = serializers.IntegerField()
-
-    class Meta:
-        model = Matches
-        fields = [
-            'user_id',
-            'id',
-            'game_mode',
-            'created_at',
-            'tournament_id',
-            'tournament_stage_id',
-            'tournament_n',
-            'winner',
-        ]
-        read_only_fields = [
-            'id',
-            'game_mode',
-            'created_at',
-            'winner',
-        ]
-
-    def create(self, validated_data):
-        user_id = validated_data.pop('user_id')
-        validated_data['game_mode'] = GameMode.TOURNAMENT
-        validated_data['match_type'] = MatchType.M1V1
-        validated_data['game_duration'] = timedelta()
-        validated_data['finished'] = True
-        validated_data['finished_at'] = datetime.now(timezone.utc)
-        validated_data['finish_reason'] = FinishReason.GAME_NOT_PLAYED
-        match = super().create(validated_data)
-        winner_team = match.teams.create(name='a')
-        match.teams.create(name='b')
-        match.players.create(user_id=user_id, team=winner_team)
-        match.winner = winner_team
-        match.save()
-        return match
-
-
+# todo fix trophies compute
 class TournamentMatchSerializer(Serializer):
     n = serializers.IntegerField(source='tournament_n')
     winner = serializers.SerializerMethodField()
