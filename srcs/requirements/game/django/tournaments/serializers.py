@@ -59,32 +59,32 @@ class TournamentSerializer(Serializer):
         participants = validated_data.pop('participants')
         result = super().create(validated_data)
         for user in participants:
-            result.participants.create(user_id=user['id'], trophies=user['trophies'])
+            result.players.create(user_id=user['id'], trophies=user['trophies'])
         for n_stage in range(int(log2(result.size))):
             result.stages.create(label=Tournaments.stage_labels[n_stage], stage=n_stage)
         result.current_stage = result.stages.last()
         result.save()
         first_stage = result.current_stage
-        participants = result.participants.all().order_by('-trophies', Random())
+        players = result.players.all().order_by('-trophies', Random())
 
-        for n, p in enumerate(participants):
+        for n, p in enumerate(players):
             p.seed = n + 1
             p.stage = first_stage
             p.save()
 
         for i in range(int(result.size / 2)):
-            user_1 = participants[i]
+            user_1 = players[i]
             index = result.match_order[result.size][user_1.seed]
             user_1.index = index
             user_1.save()
             k = result.size - i - 1
-            if participants.count() > k:
-                user_2 = participants[k]
+            if players.count() > k:
+                user_2 = players[k]
                 user_2.index = index
                 user_2.save()
             else:
                 user_2 = None
-            result.matches.create(n=index, stage=first_stage, user_1=user_1, user_2=user_2)
+            result.create_match(index, first_stage, user_1, user_2)
             result.nb_matches = index
         result.save()
         create_sse_event(result.users_id(), EventCode.TOURNAMENT_START, TournamentSerializer(result).data, {'name': result.name})
