@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 
 from django.db import models
 
+from game.matchmaking import send_finish_match_matchmaking
 from lib_transcendence import endpoints
 from lib_transcendence.game import FinishReason, GameMode
 from lib_transcendence.lobby import MatchType
@@ -37,6 +38,7 @@ class Tournaments(models.Model):
         self.players.all().update(still_in=False)
         create_sse_event(self.users_id(), EventCode.TOURNAMENT_FINISH, {'id': self.id}, {'name': self.name, 'username': winner_user_id})
         request_users(endpoints.Users.result_tournament, method='POST', data={'winner': winner_user_id})
+        send_finish_match_matchmaking(self.id)
 
     def main_thread(self):
         time.sleep(5)

@@ -3,14 +3,10 @@ from threading import Thread
 
 from django.conf import settings
 from django.db import models
-from rest_framework.exceptions import APIException
 
-from lib_transcendence import endpoints
-from lib_transcendence.exceptions import ServiceUnavailable
+from game.matchmaking import send_finish_match_matchmaking
 from lib_transcendence.game import FinishReason, GameMode
-from lib_transcendence.services import request_matchmaking
 from lib_transcendence.sse_events import create_sse_event, EventCode
-from lib_transcendence.users import retrieve_users
 from matches.utils import send_match_result, compute_trophies
 from tournaments.models import Tournaments, TournamentStage
 
@@ -73,10 +69,7 @@ class Matches(models.Model):
             winner.set_trophies(winner_trophies)
             looser.set_trophies(-looser_trophies)
         if self.game_mode in [GameMode.CLASH, GameMode.CUSTOM_GAME]:
-            try:
-                request_matchmaking(endpoints.Matchmaking.lobby_finish_match, 'POST', {'players': self.users_id()})
-            except APIException:
-                raise ServiceUnavailable('matchmaking')
+            send_finish_match_matchmaking(self)
         send_match_result(self)
         if self.tournament is not None:
             if looser is not None:
