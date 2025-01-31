@@ -32,7 +32,7 @@ class TournamentSerializer(Serializer):
             'finish_at',
             'created_by',
             'matches',
-            'stages',
+            'participants',
         ]
         read_only_fields = [
             'start_at',
