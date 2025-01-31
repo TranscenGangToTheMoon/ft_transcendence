@@ -977,8 +977,8 @@ https://localhost:4443/api/users/
   {
     "id": "int",
     "friend": "SmallUserInstance",
-    "friend_win": "int",
-    "me_win": "int",
+    "friend_wins": "int",
+    "me_wins": "int",
     "friends_since": "datetime",
     "matches_play_against": "int",
     "matches_played_together": "int",
@@ -1002,8 +1002,8 @@ https://localhost:4443/api/users/
   {
     "id": "int",
     "friend": "SmallUserInstance",
-    "friend_win": "int",
-    "me_win": "int",
+    "friend_wins": "int",
+    "me_wins": "int",
     "friends_since": "datetime",
     "matches_play_against": "int",
     "matches_played_together": "int",

@@ -11,16 +11,16 @@ from users.serializers_utils import LargeUsersSerializer
 
 class FriendsSerializer(Serializer):
     friend = serializers.ModelSerializer(read_only=True)
-    friend_win = serializers.ModelSerializer(read_only=True)
-    me_win = serializers.ModelSerializer(read_only=True)
+    friend_wins = serializers.ModelSerializer(read_only=True)
+    me_wins = serializers.ModelSerializer(read_only=True)
 
     class Meta:
         model = Friends
         fields = [
             'id',
             'friend',
-            'friend_win',
-            'me_win',
+            'friend_wins',
+            'me_wins',
             'friends_since',
             'matches_play_against',
             'matches_played_together',
@@ -29,8 +29,8 @@ class FriendsSerializer(Serializer):
         read_only_fields = [
             'id',
             'friend',
-            'friend_win',
-            'me_win',
+            'friend_wins',
+            'me_wins',
             'friends_since',
             'matches_play_against',
             'matches_played_together',
@@ -40,12 +40,12 @@ class FriendsSerializer(Serializer):
     def to_representation(self, instance):
         data = super().to_representation(instance)
         if instance.user_1.id == self.context['user']:
-            data['friend_win'] = instance.user2_wins
-            data['me_win'] = instance.user1_wins
+            data['friend_wins'] = instance.user2_wins
+            data['me_wins'] = instance.user1_wins
             friend = instance.user_2
         else:
-            data['friend_win'] = instance.user1_wins
-            data['me_win'] = instance.user2_wins
+            data['friend_wins'] = instance.user1_wins
+            data['me_wins'] = instance.user2_wins
             friend = instance.user_1
         data['friend'] = LargeUsersSerializer(friend).data
         return data
