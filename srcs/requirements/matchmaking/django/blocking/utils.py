@@ -13,7 +13,7 @@ def model_exists(model, user_id):
     return model.objects.filter(user_id=user_id).exists()
 
 
-def create_blocked(user_id, blocked=None):
+def create_blocked(user_id, blocked=None, request=None):
     if not model_exists(Blocked, user_id):
         if blocked is None:
             blocked = get_all_pagination_items(request_users, 'users', endpoints.Users.blocked, token=get_auth_token(request))
