@@ -11,8 +11,8 @@ from lib_transcendence import endpoints
 from lib_transcendence.services import request_game
 from lib_transcendence.sse_events import create_sse_event, EventCode
 from lib_transcendence.validate_type import validate_type, surchage_list
-from matchmaking.utils.model import ParticipantsPlace
-from matchmaking.utils.sse import send_sse_event
+from matchmaking.model import ParticipantsPlace
+from matchmaking.sse import send_sse_event
 
 
 class TournamentSize:
