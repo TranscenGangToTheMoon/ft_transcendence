@@ -3,6 +3,11 @@ from profile_pictures.data import ProfilePicture
 from profile_pictures.models import ProfilePictures
 
 
+def unlock_user_pp(user):
+    pp = user.profile_pictures.get(name=ProfilePicture.REGISTER, is_unlocked=False)
+    pp.unlock()
+
+
 def unlock_tournament_pp(user):
     for pp_name, required_wins in ((ProfilePicture.TOURNAMENT_WINNER, 1), (ProfilePicture.TOURNAMENT_MASTER, 10), (ProfilePicture.TOURNAMENT_GOD, 100)):
         try:

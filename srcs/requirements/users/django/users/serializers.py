@@ -9,6 +9,7 @@ from lib_transcendence.exceptions import MessagesException
 from lib_transcendence.serializer import Serializer
 from lib_transcendence.services import request_chat
 from profile_pictures.create import create_user_profile_pictures
+from profile_pictures.unlock import unlock_user_pp
 from stats.create import create_user_stats
 from users.auth import auth_update
 from users.models import Users
@@ -118,7 +119,14 @@ class ManageUserSerializer(Serializer):
             'is_guest',
         ]
 
+    def update(self, instance, validated_data):
+        result = super().update(instance, validated_data)
+        if not validated_data['is_guest']:
+            unlock_user_pp(result)
+        return result
+
     def create(self, validated_data):
+        print(validated_data, flush=True)
         result = super().create(validated_data)
         create_user_stats(result)
         create_user_profile_pictures(result)
