@@ -67,6 +67,7 @@ class MatchSerializer(Serializer):
             'teams',
             'winner',
             'looser',
+            'tournament_id',
         ]
         read_only_fields = [
             'id',
@@ -75,6 +76,7 @@ class MatchSerializer(Serializer):
             'created_at',
             'winner',
             'looser',
+            'tournament_id',
         ]
         write_only_fields = [
             'game_mode'
@@ -114,6 +116,8 @@ class MatchSerializer(Serializer):
         else:
             representation.pop('winner')
             representation.pop('looser')
+        if representation['tournament_id'] is None:
+            representation.pop('tournament_id')
         return representation
 
     def create(self, validated_data):
