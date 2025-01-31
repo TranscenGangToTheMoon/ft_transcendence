@@ -260,6 +260,10 @@ class GamePage(Screen):
             self.paddleLeft.reset()
             self.paddleRight.reset()
 
+        @self.sio.on('call_spectate')
+        async def callSpectateAction(data):
+            print("Spectate called!", flush=True)
+
         @self.sio.on('game_over')
         async def gameOverAction(data):
             while (self.countdownIsActive == True):
