@@ -39,15 +39,16 @@ class FriendsSerializer(Serializer):
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
-        if instance.user_1.id == self.context['user']:
-            data['friend_wins'] = instance.user2_wins
-            data['me_wins'] = instance.user1_wins
-            friend = instance.user_2
-        else:
-            data['friend_wins'] = instance.user1_wins
-            data['me_wins'] = instance.user2_wins
-            friend = instance.user_1
-        data['friend'] = LargeUsersSerializer(friend).data
+        if 'user' in self.context:
+            if instance.user_1.id == self.context['user']:
+                data['friend_wins'] = instance.user2_wins
+                data['me_wins'] = instance.user1_wins
+                friend = instance.user_2
+            else:
+                data['friend_wins'] = instance.user1_wins
+                data['me_wins'] = instance.user2_wins
+                friend = instance.user_1
+            data['friend'] = LargeUsersSerializer(friend).data
         return data
 
     def create(self, validated_data):
