@@ -44,7 +44,7 @@ async function createGameChatTab(gameInfo) {
     chatTabLink.className = 'nav-link active';
 
     chatTab.appendChild(chatTabLink);
-    chatTabs.appendChild(chatTab);
+    chatTabs.insertAdjacentElement('afterbegin', chatTab);
 
     let chatBody = document.getElementById('chatBody');
     let chatBox = document.createElement('div');

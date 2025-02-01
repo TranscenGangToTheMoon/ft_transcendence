@@ -206,11 +206,7 @@ async function createChatTab(chatInfo) {
     chatTabLink.appendChild(chatTabButton);
     chatTab.appendChild(chatTabLink);
 	gameChatTab = chatTabs.querySelector('#chatGameTab');
-	if (gameChatTab) {
-		chatTabs.insertBefore(chatTab, gameChatTab);
-	} else {
-		chatTabs.appendChild(chatTab);
-	}
+	chatTabs.appendChild(chatTab);
 
     let chatBody = document.getElementById('chatBody');
     let chatBox = document.createElement('div');
