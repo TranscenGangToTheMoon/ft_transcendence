@@ -171,7 +171,7 @@ function initSSE(){
             existingAlert.remove();
         const alertHtml = `
         <div class="alert alert-danger unavailable" role="alert">
-            connection with server lost
+            Error: connection with server lost
         </div>`;
         contentDiv.insertAdjacentHTML('beforebegin', alertHtml);
     }

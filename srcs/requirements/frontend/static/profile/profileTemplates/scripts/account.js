@@ -156,7 +156,6 @@ document.getElementById('pDownloadData').addEventListener('click', async () => {
             headers: {
                 Authorization: 'Bearer ' + getAccessToken(),
                 'Content-Type': 'application/json',
-                // Remove Content-Type since we're expecting a file, not JSON
             }
         });
 

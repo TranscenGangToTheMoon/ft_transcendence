@@ -29,13 +29,9 @@ async function generateToken() {
 }
 
 async function relog(){
-    // if (window.location.pathname !== '/')
-    //     await navigateTo('/');
     await generateToken();
-    displayMainAlert("Unable to retrieve your account/guest profile","We're sorry your account has been permanently deleted and cannot be recovered.");
+    displayMainAlert("Account Not Found", "We are unable to retrieve your account or guest profile.");
     throw new Error('relog');
-    // await fetchUserInfos();
-    // await loadUserProfile();
 }
 
 async function refreshToken(token) {

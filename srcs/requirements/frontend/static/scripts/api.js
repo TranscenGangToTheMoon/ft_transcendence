@@ -10,7 +10,10 @@ async function apiRequest(token, endpoint, method="GET", authType="Bearer",
         options.headers["Authorization"] = `${authType} ${token}`;
     if (body)
         options.body = JSON.stringify(body);
-    removeAlert();
+    if (!keepAlert)
+        removeAlert();
+    else
+        keepAlert = false;
     console.log(endpoint, options);
     return fetch(endpoint, options)
         .then(async response => {
@@ -62,6 +65,7 @@ async function getDataFromApi(token, endpoint, method="GET", authType="Bearer",
 }
 
 function removeAlert(){
+    console.log('ici');
     const existingAlert = document.querySelector('.unavailable');
     if (existingAlert)
         existingAlert.remove();
