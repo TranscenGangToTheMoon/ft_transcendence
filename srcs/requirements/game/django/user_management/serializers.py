@@ -1,9 +1,35 @@
 from rest_framework import serializers
 
 from matches.models import Matches
-from matches.serializers import MatchSerializer
-from tournaments.models import Tournaments
+from matches.serializers import MatchSerializer, validate_user_id
+from tournaments.models import Tournaments, TournamentPlayers
 from tournaments.serializers import TournamentSerializer
+
+
+class RetrieveUserPlaceSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    code = serializers.CharField(read_only=True, max_length=4)
+    type = serializers.CharField(read_only=True, max_length=11)
+
+    @staticmethod
+    def validate_type(value):
+        if value not in ['game', 'tournament']:
+            raise serializers.ValidationError('Invalid type')
+        return value
+
+    def to_representation(self, instance):
+        result = {}
+        try:
+            tournament = TournamentPlayers.objects.get(user_id=instance, tournament__finished=False)
+            result['id'] = tournament.tournament_id
+            result['type'] = 'tournament'
+            result['code'] = None
+        except TournamentPlayers.DoesNotExist:
+            match = validate_user_id(instance, True)
+            result['id'] = match.id
+            result['type'] = 'match'
+            result['code'] = match.code
+        return result
 
 
 class DownloadDataSerializer(serializers.Serializer):
