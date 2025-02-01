@@ -658,7 +658,7 @@ function reconnect(){
     if (event){
         event = JSON.parse(event);
         let gameMode = window.location.pathname.split('/')[2];
-        if (event.data.game_mode === 'custom_game' && gameMode === '3v3'){
+        if ((event.data.game_mode === 'custom_game' || event.data.game_mode === 'clash') && gameMode === '3v3'){
             document.getElementById('opponentWait').classList.replace('d-flex', 'd-none');
             document.getElementById('gameArea').classList.replace('d-none', 'd-flex');
             initData(event.data, event.target[0].url, event.target[0].type);
@@ -686,6 +686,9 @@ async function gameStart(event){
     document.getElementById('opponentWait').classList.replace('d-flex', 'd-none');
     data = JSON.parse(event.data);
     localStorage.setItem('game-event', JSON.stringify(data));
+
+    console.log('game-start from game');
+
     try {
         await initData(data.data, data.target[0].url, data.target[0].type);
     }
