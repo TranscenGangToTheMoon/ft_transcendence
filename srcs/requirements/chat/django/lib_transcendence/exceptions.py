@@ -39,7 +39,6 @@ class MessagesException:
 
         USERNAME_NOT_ALLOWED = 'This username is not allowed.'
         USERNAME_LONGER_THAN_3_CHAR = 'Username must be at least 3 characters long.'
-        USERNAME_SHORTER_THAN_30_CHAR = 'Username must be less than 30 characters long.'
         INVALIDE_CHAR = 'Use of an invlid character.'
         USERNAME_ALREAY_EXISTS = 'This username already exists.'
         PASSWORD_SHORTER_THAN_50_CHAR = 'Password must be less than 50 characters long.'

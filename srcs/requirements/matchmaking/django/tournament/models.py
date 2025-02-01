@@ -47,7 +47,7 @@ class Tournament(models.Model):
     started = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.IntegerField()
-    created_by_username = models.CharField(max_length=30)
+    created_by_username = models.CharField(max_length=15)
 
     def users_id(self, kwargs=None):
         if kwargs is None:

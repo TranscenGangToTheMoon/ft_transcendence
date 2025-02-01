@@ -25,7 +25,7 @@ class Tournaments(models.Model):
     current_stage = models.ForeignKey('TournamentStage', on_delete=models.SET_NULL, default=None, null=True, related_name='current_stage')
     start_at = models.DateTimeField(auto_now_add=True)
     created_by = models.IntegerField()
-    created_by_username = models.CharField(max_length=30)
+    created_by_username = models.CharField(max_length=15)
     update_stage = models.BooleanField(default=False)
     finished = models.BooleanField(default=False)
     finish_at = models.DateTimeField(default=None, null=True)
