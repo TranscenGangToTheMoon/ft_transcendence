@@ -2,10 +2,24 @@ function displayGameChatMessage(event, isJson=true) {
 	if (isJson === true){
 		event = JSON.parse(event.data);
 	}
-	const message = event.message;
-	const author = event.author;
+	const indexOfColon = event.message.indexOf(':');
+	const author = event.message.slice(0, indexOfColon).trim();
+	const message = event.message.slice(indexOfColon + 1).trim();
 	let messageDiv = createMessage({"author": null, "content":message}, {'target': author});
-	messageDiv.className = 'messageGame';
+	messageDiv.classList.add('messageGame');
+	let chatBox = document.getElementById('messagesGame');
+	if (chatBox) {
+		chatBox.appendChild(messageDiv);
+		chatBox.scrollTop = chatBox.scrollHeight;
+	}
+}
+
+function displayGameChatNotif(event, isJson=true) {
+	if (isJson === true){
+		event = JSON.parse(event.data);
+	}
+	let messageDiv = document.createElement('div');
+	messageDiv.classList.add('notificationGame');
 	messageDiv.innerText = event.message;
 	let chatBox = document.getElementById('messagesGame');
 	if (chatBox) {
@@ -112,9 +126,9 @@ function sendGameMessageListener(gameInfo) {
 			if (apiAnswer.detail) {
 				throw {'code': 400, 'detail': apiAnswer.detail};
 			}
-			let messageDiv = document.createElement('div');
-			messageDiv.className = 'messageGame';
-			messageDiv.innerText = "You: " + message;
+			console.log('Game chat:', apiAnswer);
+			let messageDiv = createMessage({'author':apiAnswer.id, 'content':apiAnswer.content}, {'tagertId':null});
+			messageDiv.classList.add('messageGame');
 			let chatBox = document.getElementById('messagesGame');
 			if (chatBox) {
 				chatBox.appendChild(messageDiv);
