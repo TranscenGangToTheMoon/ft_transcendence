@@ -142,6 +142,9 @@ async function openGameChatTab(gameInfo) {
 		}
 		return;
 	}
+	else if (chatTabs && chatTabs.childElementCount >= 3) {
+		removeFirstInactiveChatTab();
+	}
 	await createGameChatTab(gameInfo);
 	actualGameChat = gameInfo.code;
 }
