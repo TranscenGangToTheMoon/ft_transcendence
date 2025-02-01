@@ -72,23 +72,6 @@ class ChatNotificationsSerializer(serializers.Serializer):
         count = 0
 
         for chat in Chats.objects.filter(participants__user__id=obj):
-            if chat.messages.exclude(author__id=obj).filter(is_read=False).exists():
-                count += 1
+            count += chat.messages.exclude(author__id=obj).filter(is_read=False).count()
 
         return count
-
-
-# class ChatNotificationsSerializer(serializers.Serializer):
-#     notifications = serializers.SerializerMethodField(read_only=True)
-#
-#     @staticmethod
-#     def get_notifications(obj):
-#         results = {}
-#
-#         for chat in Chats.objects.filter(participants__user__id=obj):
-#             message = chat.messages.exclude(author__id=obj).filter(is_read=False)
-#             count = message.count()
-#             if count > 0:
-#                 results[message.author] = count
-#
-#         return results
