@@ -49,17 +49,8 @@ async def connect(sid, _, auth):
                 'chatData': chat,
                 }, to=sid)
             await sio.enter_room(sid, str(chat_id))
-        except AuthenticationFailed:
-            print(f"Authentification failed : {sid}")
-            raise SocketIOConnectionRefusedError({"error": 401, "message": "Invalid token"})
-        except PermissionDenied:
-            print(f"Permission denied : {sid}")
-            raise SocketIOConnectionRefusedError({"error": 403, "message": "Permission denied"})
-        except NotFound:
-            print(f"User not found : {sid}")
-            raise SocketIOConnectionRefusedError({"error": 404, "message": "User not found"})
         except APIException as e:
-            raise SocketIOConnectionRefusedError({"error": 400, "message": e.detail.get('content')})
+            raise SocketIOConnectionRefusedError({"error": e.status_code, "message": e.detail.get('content')})
         if user and chat:
             usersConnected.add_user(user['id'], sid, user['username'], chat_id, chat['chat_with']['id'])
     else:

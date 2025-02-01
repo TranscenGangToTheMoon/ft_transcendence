@@ -183,19 +183,19 @@ function displayCountdown(){
 
 function tournamentJoined(event){
 	event = JSON.parse(event.data);
-	displayGameChatMessage(event, false);
+	displayGameChatNotification(event, false);
 	addParticipant(event.data);
 }
 
 function tournamentLeaved(event){
 	event = JSON.parse(event.data);
-	displayGameChatMessage(event, false);
+	displayGameChatNotification(event, false);
 	removeParticipant(event.data.id)
 }
 
 async function tournamentBanned(event){
 	event = JSON.parse(event.data);
-	displayGameChatMessage(event, false);
+	displayGameChatNotification(event, false);
 	console.log(event);
 	await navigateTo('/');
 	displayMainAlert('Banned', event.message);
@@ -217,11 +217,13 @@ function tournamentStartAt(event) {
 		
 		if (difference <= 0) {
 			countdownDiv.innerHTML = "Starting Soon!";
+			displayGameChatNotification({'message':"Starting Soon!"}, false);
 			clearInterval(timer);
 			return;
 		}
 		
 		countdownDiv.innerHTML = `Starting in: ${difference}s`;
+		displayGameChatNotification({'message':`Starting in: ${difference}s`}, false);
 	}
 
 	updateCountdown();
@@ -235,7 +237,7 @@ function tournamentStartCancel(){
 }
 
 function tournamentStart(event){
-	displayGameChatMessage({'message':":Tournament begins"}, false);
+	displayGameChatNotif({'message':":Tournament begins"}, false);
 	displayCountdown();
 	event = JSON.parse(event.data);
 	loadTournament(event.data);
@@ -261,7 +263,7 @@ function updateMatchFromWinnerId(id, data){
 async function tournamentMatchFinished(event){
 	event = JSON.parse(event.data);
 	tournament = event.data;
-	displayGameChatMessage(event, false);
+	displayGameChatNotification(event, false);
 	setBanOption();
 	loadTournament(tournament);
 }

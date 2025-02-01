@@ -440,16 +440,16 @@ async function fillPlayerList(noTeam=false){
 }
 
 async function lobbyJoined(event){
-    displayGameChatMessage(event);
     event = JSON.parse(event.data);
+    displayGameChatNotif(event, false);
     if (!checkEventDuplication(event)) return;
     lobby.participants[lobby.participants.length] = event.data;
     await fillPlayerList();
 }
 
 async function lobbyLeaved(event){
-    displayGameChatMessage(event);
     event = JSON.parse(event.data);
+    displayGameChatNotif(event, false);
     if (!checkEventDuplication(event)) return;
     for (let participant in lobby.participants){
         if (lobby.participants[participant].id === event.data.id)
@@ -506,8 +506,8 @@ async function lobbyUpdated(event){
 }
 
 async function lobbyBanned(event){
-    displayGameChatMessage(event);
     event = JSON.parse(event.data);
+    displayGameChatNotif(event);
     if (!checkEventDuplication(event)) return;
     await navigateTo('/');
     displayMainAlert('Banned from Lobby', event.message);
