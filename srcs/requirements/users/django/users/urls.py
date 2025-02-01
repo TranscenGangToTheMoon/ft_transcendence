@@ -47,17 +47,19 @@ urlpatterns = [
     path(UsersManagement.manage_user, manage_user_view),
 ]
 
-# todo handle tournament message
 # try: todo handle reconnection tournament
 #     user = tournament.participants.get(user_id=user['id'])
 #     user.reconnect()
 #     return user
 # except TournamentParticipants.DoesNotExist:
 #     pass
-# todo finir tournament (test with ui)
-# todo faire list nino
 # todo make unit work
 # todo make correction db
-# todo finish all # todo
 # todo finish all git hub issue
-# todo aller voir nino
+# todo test all sse events
+# todo test tournament with ui (abandon quit tournament via sse, reocnnect)
+# todo finish reason : delete conencteion, remake finish match
+# todo make database
+# todo reduire username a 15 max
+# todo rename message error when username
+# todo Limite à 8 custom game
