@@ -15,4 +15,4 @@ build
 pyproject.toml
 **/socket_client.py
 *.key
-django/gameConfig.json
+srcs/requirements/game/django/gameConfig.json
