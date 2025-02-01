@@ -2,11 +2,11 @@ from django.urls import path
 
 from baning.views import lobby_ban_view, tournament_ban_view
 from blocking.views import blocked_user_view
-from chat.views import lobby_message_view, tournament_message_view
 from invite.views import lobby_invite_view, tournament_invite_view
 from lib_transcendence.endpoints import Matchmaking, UsersManagement
 from lobby.views import lobby_view, lobby_participants_view
 from matchmaking.views import finish_match_view
+from message.views import lobby_message_view, tournament_message_view
 from play.views import duel_view, ranked_view
 from tournament.views import tournament_view, tournament_search_view, tournament_participants_view
 from user_management.views import delete_user_view
