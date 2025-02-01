@@ -64,6 +64,8 @@ class MessagesException:
         MISSING_KWARGS = 'Missing required kwargs.'
         MISSING_DATA = 'Missing required data.'
 
+        BLANK_FIELD = 'This field may not be blank.'
+
     class Authentication:
         NOT_CONNECTED_SSE = {'detail': 'You need to be connected to SSE to access this resource.', 'code': 'sse_connection_required'}
         AUTHENTICATION_FAILED = {'detail': 'Incorrect authentication credentials.', 'code': 'authentication_failed'}
