@@ -91,7 +91,7 @@ class LobbySerializer(Serializer):
         else:
             if 'match_type' not in validated_data:
                 validated_data['match_type'] = MatchType.M1V1
-            validated_data['max_participants'] = 6
+            validated_data['max_participants'] = 8
         result = super().create(validated_data)
         creator = create_player_instance(user, LobbyParticipants, lobby_id=result.id, user_id=user['id'], creator=True)
         if validated_data['game_mode'] == GameMode.CUSTOM_GAME:
