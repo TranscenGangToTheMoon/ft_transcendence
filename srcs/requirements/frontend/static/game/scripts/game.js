@@ -843,8 +843,8 @@ async function initGame(){
         if (window.location.pathname === '/game/tournament'){
             async function tournamentFinished(event){
                 event = JSON.parse(event.data);
-                await navigateTo('/', true, true); //todo replace by tournament history
-                displayNotification(undefined, 'tournament finished', event.message, undefined, undefined); //todo add target 
+                await navigateTo('/', true, true);
+                displayNotification(undefined, 'tournament finished', event.message, undefined, undefined);
             }
             if (!SSEListeners.has('tournament-finish')){
                 SSEListeners.set('tournament-finish', tournamentFinished);
