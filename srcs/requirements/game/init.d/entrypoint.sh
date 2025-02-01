@@ -21,9 +21,9 @@ PGPASSWORD=$POSTGRES_PASSWORD psql -h $POSTGRES_HOST -p 5432 -U $POSTGRES_USER -
 DELETE FROM matches_players WHERE match_id IN (SELECT id FROM matches_matches WHERE finished = FALSE);
 DELETE FROM matches_teams WHERE match_id IN (SELECT id FROM matches_matches WHERE finished = FALSE);
 DELETE FROM matches_matches WHERE finished = FALSE;
-DELETE FROM tournaments_tournaments WHERE finished = FALSE;
 DELETE FROM tournaments_tournamentstage WHERE tournament_id IN (SELECT id FROM tournaments_tournaments WHERE finished = FALSE);
 DELETE FROM tournaments_tournamentplayers WHERE tournament_id IN (SELECT id FROM tournaments_tournaments WHERE finished = FALSE);
+DELETE FROM tournaments_tournaments WHERE finished = FALSE;
 "
 
 python socket_server.py &
