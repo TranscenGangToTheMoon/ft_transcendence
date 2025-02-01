@@ -1,5 +1,3 @@
-from lib_transcendence import endpoints
-from lib_transcendence.request import request_service
 from lib_transcendence.validate_type import validate_type, surchage_list
 
 
@@ -22,7 +20,3 @@ class AcceptChat:
 
     def __str__(self):
         return 'Chat status'
-
-
-def post_messages(chat_id: int, content: str, token: str, is_read: bool = False):
-    return request_service('chat', endpoints.Chat.fmessage.format(chat_id=chat_id), 'POST', {'content': content, 'is_read': is_read}, token)
