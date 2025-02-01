@@ -604,6 +604,13 @@ https://localhost:4443/api/game/
     "*content": "str"
   }
   ```
+- **Réponse (succès)** :
+  ```json
+  {
+    "id": "int",
+    "content": "str"
+  }
+  ```
 - **Codes de réponse** :
   - `201 Content Created`
   - `400 Bad Request`
@@ -737,6 +744,13 @@ https://localhost:4443/api/game/
   ```json
   {
     "*content": "str"
+  }
+  ```
+- **Réponse (succès)** :
+  ```json
+  {
+    "id": "int",
+    "content": "str"
   }
   ```
 - **Codes de réponse** :
