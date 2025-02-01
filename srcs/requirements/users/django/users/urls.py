@@ -56,10 +56,6 @@ urlpatterns = [
 # todo make unit work
 # todo make correction db
 # todo finish all git hub issue
-# todo test all sse events
-# todo test tournament with ui (abandon quit tournament via sse, reocnnect)
+# todo fix tournament with ui (abandon quit tournament via sse, reocnnect)
 # todo finish reason : delete conencteion, remake finish match
 # todo make database
-# todo reduire username a 15 max
-# todo rename message error when username
-# todo Limite à 8 custom game
