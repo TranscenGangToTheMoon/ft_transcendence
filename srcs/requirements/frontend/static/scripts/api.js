@@ -41,7 +41,7 @@ async function apiRequest(token, endpoint, method="GET", authType="Bearer",
             if (error.code === 502 || error.code === 503 || error.code === 500 || error.message === 'Failed to fetch'){
                 closeExistingModals();
                 console.log('service unavailable');
-                const contentDiv = document.getElementById('content');
+                const contentDiv = document.getElementById('alertContainer');
                 removeAlert();
                 const alertHtml = `
                 <div class="alert alert-danger unavailable" role="alert">

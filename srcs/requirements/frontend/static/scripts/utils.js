@@ -106,14 +106,6 @@ async function quitLobbies(oldUrl, newUrl){
 }
 
 function displayMainAlert(alertTitle, alertContent) {
-        // if (isModalOpen()) return;
-        // const alertContentDiv = document.getElementById('alertContent');
-        // const alertTitleDiv = document.getElementById('alertModalLabel');
-        // const alertModal = new bootstrap.Modal(document.getElementById('alertModal'));
-
-        // alertContentDiv.innerText = alertContent;
-        // alertTitleDiv.innerText = alertTitle;
-        // alertModal.show();
     console.log('je ssuis')
     const contentDiv = document.getElementById('alertContainer');
     removeAlert();

@@ -165,7 +165,7 @@ function initSSE(){
 
     sse.onerror = async error => {
         console.log(error);
-        const contentDiv = document.getElementById('content');
+        const contentDiv = document.getElementById('alertContainer');
         const existingAlert = document.querySelector('.unavailable');
         if (existingAlert)
             existingAlert.remove();
