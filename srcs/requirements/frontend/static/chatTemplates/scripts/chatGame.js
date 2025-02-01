@@ -2,7 +2,9 @@ function displayGameChatMessage(event, isJson=true) {
 	if (isJson === true){
 		event = JSON.parse(event.data);
 	}
-	let messageDiv = document.createElement('div');
+	const message = event.message;
+	const author = event.author;
+	let messageDiv = createMessage({"author": null, "content":message}, {'target': author});
 	messageDiv.className = 'messageGame';
 	messageDiv.innerText = event.message;
 	let chatBox = document.getElementById('messagesGame');

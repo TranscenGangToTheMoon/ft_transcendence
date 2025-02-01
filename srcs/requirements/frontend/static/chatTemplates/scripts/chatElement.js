@@ -70,6 +70,7 @@ async function setChatUserCard(chatInfo, chatUserCard) {
 	var chatUserCardLastMessage = chatUserCard.querySelector('.chatUserCardLastMessage');
 	if (chatInfo.unreadMessage) {
 		console.log('setChatUserCard:', chatInfo.unreadMessage);
+		console.log('setChatUserCard:', chatInfo.unreadMessage);
 		chatUserCardLastMessage.classList.add('chatMessageNotRead');
 	}
 	let chatUserCardDeleteButton = chatUserCard.querySelector('.chatUserCardButtonDeleteChat');
@@ -87,14 +88,14 @@ function createMessage(message, chatInfo) {
 	messageDiv.appendChild(messageContent);
 
 	messageDiv.className = 'gap-1';
-	if (message.author === chatInfo.targetId) {
-		messageAuthor.innerText = chatInfo.target + ': ';
+	if (message.author && message.author !== chatInfo.targetId) {
+		messageAuthor.innerText = 'You: ';
 		if (message.is_read === false) {
 			messageContent.classList.add('chatMessageNotRead');
 		}
 	}
 	else {
-		messageAuthor.innerText = 'You: ';
+		messageAuthor.innerText = chatInfo.target + ': ';
 	}
 	messageContent.innerText = message.content;
 	return messageDiv;
