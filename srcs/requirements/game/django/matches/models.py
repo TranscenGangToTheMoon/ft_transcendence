@@ -37,10 +37,10 @@ class Matches(models.Model):
         from matches.serializers import MatchSerializer
         from matches.timeout import check_timeout
 
-        create_sse_event(self.users_id(), EventCode.GAME_START, MatchSerializer(self).data)
         self.created_at = datetime.now(timezone.utc)
         self.send_game_start = True
         self.save()
+        create_sse_event(self.users_id(), EventCode.GAME_START, MatchSerializer(self).data)
         Thread(target=check_timeout, args=(self.id, )).start()
 
     def users_id(self):
