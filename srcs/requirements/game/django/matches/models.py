@@ -40,8 +40,9 @@ class Matches(models.Model):
         self.created_at = datetime.now(timezone.utc)
         self.send_game_start = True
         self.save()
-        create_sse_event(self.users_id(), EventCode.GAME_START, MatchSerializer(self).data)
-        Thread(target=check_timeout, args=(self.id, )).start()
+        if self.finish_reason is None:
+            create_sse_event(self.users_id(), EventCode.GAME_START, MatchSerializer(self).data)
+            Thread(target=check_timeout, args=(self.id, )).start()
 
     def users_id(self):
         return list(self.players.all().values_list('user_id', flat=True))
