@@ -24,7 +24,7 @@ def get_user_from_auth(user_data):
         return user
     except User.DoesNotExist:
         pass
-    user, created = User.objects.create(id=user_data['id'], username=user_data['username'])
+    user = User.objects.create(id=user_data['id'], username=user_data['username'])
     return user
 
 
