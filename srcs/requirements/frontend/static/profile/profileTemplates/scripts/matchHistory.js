@@ -131,7 +131,7 @@ function addMatchDetail(){
                 teamPlayersCol.className = 'col-8';
                 teamRow.appendChild(teamPlayersCol);
                 const scoreCol = document.createElement('div');
-                scoreCol.className = 'col m-auto';
+                scoreCol.className = 'col mx-3 my-auto';
                 scoreCol.innerText = team.score;
                 teamRow.appendChild(scoreCol);
                 team.players.forEach(player => {

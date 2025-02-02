@@ -32,7 +32,7 @@ async function getChatInstance(chatId) {
 	catch (error) {
 		if (error.code === 404 && error.detail === undefined) error.detail = 'No chat found';
 		if (error.detail === undefined) error.detail = 'Error while loading chat';
-		displayChatError(error, 'container');
+		displayMainAlert("Error Chat", error.detail, 'danger', 5000)
 		return undefined;
 	}
 }
@@ -99,23 +99,25 @@ function setupSocketListeners(chatInfo)
 	});
 
 	socket.on("connect_error", async (data) => {
-		if (data.error === 401){
+		data = data.toString();
+		if (data=== "Error: 401"){
 			console.log('Chat: Reattempting connection to the server...');
 			await connect(await refreshToken(), chatInfo.chatId);
 		}
 		else {
-			console.log('Error chat:', data);
+			console.log(data);
+			displayMainAlert("Error", data, 'danger', 5000)
 			await closeChatTab(chatInfo);
-			if (data.message === undefined) data.message = 'Error while connecting to the chat server';
-			displayChatError({'code':data.error, 'detail': data.message}, 'container');
 		}
 	});
 	
 	socket.on("disconnect", () => {
+		clearChatError();
 		console.log("Chat: Disconnected from the server");
 	});
 	
 	socket.on("message", (data) => {
+		clearChatError();
 		console.log("Message received: ", data);
 		if (chatBox === null) return;
 		messagesNotRead = chatBox.querySelectorAll('.chatMessageNotRead');
@@ -127,14 +129,15 @@ function setupSocketListeners(chatInfo)
 	});
 
 	socket.on("error", async (data) => {
+		clearChatError();
 		console.log("Error received from chat server: ", data);
 		if (data.error === 401){
 			socket.emit('message', {'content': data.retry_content, 'token' : 'Bearer ' + await refreshToken(), 'retry': true});
 		}
-		if (data.error === 404 || data.error === 403) {
+		else if (data.error === 404 || data.error === 403) {
 			if (data.message === undefined) data.message = 'Chat not found';
+			displayMainAlert("Error Chat", data.message, 'danger', 5000)
 			await closeChatTab(chatInfo);
-			displayChatError({'code':data.error, 'detail': data.message}, 'container');
 		}
 	});
 
@@ -498,7 +501,7 @@ async function openChatTab(chatId)
 			await closeChatTab(chatInfo);
 			if (error.code === 404 && error.detail === undefined) error.detail = 'No chat found';
 			if (error.detail === undefined) error.detail = 'Error while loading old messages';
-			displayChatError(error, 'container');
+			displayMainAlert("Error Chat", error.detail, 'danger', 5000)
 			return;
 		}
 	}
@@ -520,6 +523,7 @@ if (typeof nextChatsRequest === 'undefined')
 
 loadScript('/chatTemplates/scripts/chatElement.js');
 loadScript('/chatTemplates/scripts/chatGame.js');
+loadCSS('/chatTemplates/css/chat.css', false);
 
 document.getElementById('searchChatForm').addEventListener('keyup', (e) => {
 	e.preventDefault();
