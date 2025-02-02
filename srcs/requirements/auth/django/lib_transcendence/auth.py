@@ -16,8 +16,7 @@ def get_user_from_auth(user_data):
     try:
         return User.objects.get(id=user_data['id'])
     except User.DoesNotExist:
-        pass
-    return User.objects.create(id=user_data['id'], username=uuid.uuid1())
+        return User.objects.create(id=user_data['id'], username=str(uuid.uuid1()))
 
 
 class AbstractAuthentication(ABC, BaseAuthentication):
