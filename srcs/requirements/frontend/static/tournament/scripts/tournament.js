@@ -48,7 +48,7 @@ async function searchForTournament(filter){
 			for (i in data.results){
 				let tournament = data.results[i];
 				let tournamentDiv = document.createElement('div');
-				tournamentDiv.classList.add('tournament-div');
+				tournamentDiv.className = 'btn btn-dark m-1 d-flex justify-content-center tournament-div';
 				tournamentDiv.id = `tournamentDiv${tournament.code}`
 				tournamentDiv.innerText = `${tournament.name} (${tournament.n_participants}/${tournament.size})`;
 				tempDiv.appendChild(tournamentDiv);
