@@ -9,23 +9,27 @@ from rest_framework.exceptions import APIException
 from game_server.match import Match
 
 
-async def disconnect_old_session(player_sid, player, game_id, sid):
+async def disconnect_old_session(old_sid, player, game_id, new_sid):
     from game_server.server import Server
     print('disconnecting old session', flush=True)
-    await Server._sio.leave_room(player_sid, str(player.match_id))
-    with Server._dsids_lock:
-        Server._disconnected_sids.append(player_sid)
+    print('old sid:', old_sid, flush=True)
+    print('new sid:', new_sid, flush=True)
+    await Server._sio.leave_room(old_sid, str(player.match_id))
     game = Server.get_game(game_id)
     if game.match.game_type == 'normal':
         await asyncio.sleep(1)
         try:
-            await Server._sio.get_session(player_sid)
-            Server.emit('call_spectate', data={'code': game.match.code}, to=player_sid)
-            await asyncio.sleep(0.5)
+            await Server._sio.get_session(old_sid)
+            print('old session is still connected', flush=True)
+            await Server._sio.disconnect(old_sid)
+            print('disconnecting old session', flush=True)
+            Server._clients[old_sid].socket_id = ''
+            with Server._dsids_lock:
+                Server._disconnected_sids.append(old_sid)
         except KeyError:
-            pass
-    await Server._sio.disconnect(player_sid)
-    game.reconnect(player.user_id, sid)
+            print('old session has disconnected', flush=True)
+    print('connecting new sid', flush=True)
+    game.reconnect(player.user_id, new_sid)
 
 
 async def handle_spectator(user_id, sid, auth, match_code):
@@ -44,6 +48,7 @@ async def handle_spectator(user_id, sid, auth, match_code):
 
 async def accept_connection(player, sid, game_id):
     from game_server.server import Server
+    print('accepting new connection')
     player.socket_id = sid
     player.game = Server.get_game(game_id)
     Server._clients[sid] = player
@@ -64,6 +69,7 @@ def fetch_data(endpoint) -> dict:
 
 async def connect(sid, environ, auth):
     from game_server.server import Server
+    print('connecting...', flush=True)
     token = auth.get('token')
     if token is None:
         raise socketioConnectError(MessagesException.Authentication.NOT_AUTHENTICATED)
@@ -164,6 +170,7 @@ async def disconnect(sid):
     try:
         client = Server._clients[sid]
         client.racket.stop_moving(client.racket.position.y)
+        Server._clients[sid].socket_id = ''
         Server._clients.pop(sid)
         Server.emit(
             'stop_moving',
