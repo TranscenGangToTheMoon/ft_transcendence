@@ -32,12 +32,12 @@ class Racket:
 
     def update(self, ball_size, canvas_height, time_delta):
         self.position.y += self.velocity * self.max_speed * time_delta
+        if self.position.y < 0:
+            self.position.y = 0
+        elif self.position.y + self.height > canvas_height:
+            self.position.y = canvas_height - self.height
         if self.block_glide:
             if self.position.y + self.height + ball_size > canvas_height:
                 self.position.y = canvas_height - self.height - ball_size
             elif self.position.y - ball_size < 0:
                 self.position.y = ball_size
-        if self.position.y < 0:
-            self.position.y = 0
-        elif self.position.y + self.height > canvas_height:
-            self.position.y = canvas_height - self.height

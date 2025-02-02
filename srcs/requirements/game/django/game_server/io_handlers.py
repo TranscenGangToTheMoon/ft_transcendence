@@ -16,8 +16,13 @@ async def disconnect_old_session(player_sid, player, game_id, sid):
         Server._disconnected_sids.append(player_sid)
     game = Server.get_game(game_id)
     if game.match.game_type == 'normal':
-        Server.emit('call_spectate', data={'code': game.match.code}, to=player_sid)
-        await asyncio.sleep(0.5)
+        await asyncio.sleep(1)
+        try:
+            await Server._sio.get_session(player_sid)
+            Server.emit('call_spectate', data={'code': game.match.code}, to=player_sid)
+            await asyncio.sleep(0.5)
+        except KeyError:
+            pass
     await Server._sio.disconnect(player_sid)
     game.reconnect(player.user_id, sid)
 
