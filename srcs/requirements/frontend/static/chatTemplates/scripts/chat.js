@@ -99,14 +99,14 @@ function setupSocketListeners(chatInfo)
 	});
 
 	socket.on("connect_error", async (data) => {
-		if (data.error === 401){
+		data = data.toString();
+		if (data=== "Error: 401"){
 			console.log('Chat: Reattempting connection to the server...');
 			await connect(await refreshToken(), chatInfo.chatId);
 		}
 		else {
-			console.log('Error chaaaaaaaaat:', data.error);
-			if (data.message === undefined) data.message = 'Error while connecting to the chat server';
-			displayMainAlert("Error Chat", data.message, 'danger', 5000)
+			console.log(data);
+			displayMainAlert("Error", data, 'danger', 5000)
 			await closeChatTab(chatInfo);
 		}
 	});
@@ -139,10 +139,6 @@ function setupSocketListeners(chatInfo)
 			displayMainAlert("Error Chat", data.message, 'danger', 5000)
 			await closeChatTab(chatInfo);
 		}
-		else {
-			displayMainAlert("Error Chat", data.message, 'danger', 5000)
-		}
-
 	});
 
 	socket.on("chat-server", (data) => {
