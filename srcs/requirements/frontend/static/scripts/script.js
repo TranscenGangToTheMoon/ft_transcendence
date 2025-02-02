@@ -117,20 +117,107 @@ async function loadPrivacyPolicy(){
     await loadContent('/privacyPolicyModal.html', 'modals', true);
 }
 
+let cancelHide = false;
+
+function addHoverListeners(userInfosDiv, dropdownMenu){
+    console.log(dropdownMenu);
+    let mouseAlreadyIn = false;
+    userInfosDiv.addEventListener('mouseover', () => {
+        if (mouseAlreadyIn) return;
+        dropdownMenuInstance = bootstrap.Dropdown.getOrCreateInstance(dropdownMenu);
+        cancelHide = true;
+        console.log(dropdownMenuInstance);
+        if (dropdownMenuInstance && !dropdownMenuInstance._element.classList.contains('show'))
+            dropdownMenuInstance.toggle();
+        mouseAlreadyIn = true;
+    })
+    userInfosDiv.addEventListener('mouseleave', () => {
+        dropdownMenuInstance = bootstrap.Dropdown.getOrCreateInstance(dropdownMenu);
+        cancelHide = false;
+        mouseAlreadyIn = false;
+        if (dropdownMenuInstance)
+            setTimeout(()=> {
+                if (!cancelHide && dropdownMenuInstance._element.classList.contains('show'))
+                    dropdownMenuInstance.toggle();
+            }, 300);
+    });
+    dropdownMenu.addEventListener('mouseover', () => {
+        cancelHide = true;
+    })
+    dropdownMenu.addEventListener('mouseleave', function () {
+        dropdownMenuInstance = bootstrap.Dropdown.getOrCreateInstance(this);
+        cancelHide = false;
+        if (dropdownMenuInstance)
+            setTimeout(()=> {
+                if (!cancelHide && dropdownMenuInstance._element.classList.contains('show'))
+                    dropdownMenuInstance.toggle();
+            }, 300);
+    })
+}
+
+// function addGuestHoverListeners(userInfosDiv, dropdownMenu){
+//     let mouseAlreadyIn = false;
+//     userInfosDiv.addEventListener('mouseover', () => {
+//         if (mouseAlreadyIn) return;
+//         dropdownMenuInstance = bootstrap.Dropdown.getOrCreateInstance(dropdownMenu);
+//         cancelHide = true;
+//         console.log(dropdownMenuInstance);
+//         if (dropdownMenuInstance && !dropdownMenuInstance._element.classList.contains('show'))
+//             dropdownMenuInstance.toggle();
+//         mouseAlreadyIn = true;
+//     })
+//     userInfosDiv.addEventListener('mouseleave', () => {
+//         dropdownMenuInstance = bootstrap.Dropdown.getOrCreateInstance(dropdownMenu);
+//         cancelHide = false;
+//         mouseAlreadyIn = false;
+//         if (dropdownMenuInstance)
+//             setTimeout(()=> {
+//                 if (!cancelHide && dropdownMenuInstance._element.classList.contains('show'))
+//                     dropdownMenuInstance.toggle();
+//             }, 300);
+//     });
+//     dropdownMenu.addEventListener('mouseover', () => {
+//         cancelHide = true;
+//     })
+//     dropdownMenu.addEventListener('mouseleave', function () {
+//         dropdownMenuInstance = bootstrap.Dropdown.getOrCreateInstance(this);
+//         cancelHide = false;
+//         if (dropdownMenuInstance)
+//             setTimeout(()=> {
+//                 if (!cancelHide && dropdownMenuInstance._element.classList.contains('show'))
+//                     dropdownMenuInstance.toggle();
+//             }, 300);
+//     })
+// }
+
 async function  loadUserProfile(){
     let profileMenu = 'profileMenu/profileMenu.html';
 
-    document.getElementById('username').innerText = userInformations.username;
+    const usernameDiv = document.getElementById('username')
+    usernameDiv.innerText = userInformations.username;
+    usernameDiv.style.width = '100px';
+    usernameDiv.className = 'text-truncate text-center px-1 fs-4'
     if (userInformations.is_guest){
         profileMenu = 'profileMenu/guestProfileMenu.html'
         document.getElementById('trophies').innerText = "";
     }
     else {
-        document.getElementById('trophies').innerText = userInformations.trophies + '🏆';
+        document.getElementById('trophies').innerHTML = `
+        <div>${userInformations.trophies}</div><img src="/assets/trophy.png" style="width:20px;height:20px">`;
     }
+    const userInfos = document.getElementById('userInfos');
+    userInfos.style.backgroundImage = `url(${userInformations['profile_picture']?.small ?? '/assets/imageNotFound.png'})`;
+    userInfos.style.maxHeight = `100px`;
+    userInfos.style.maxWidth = `100px`;
+    userInfos.style.aspectRatio = '1 / 1';
+    userInfos.style.backgroundRepeat = 'repeat-y';
+    userInfos.style.backgroundSize = 'cover';
+    userInfos.className = 'd-flex flex-column-reverse overflow-hidden'
+    const profileDiv = document.getElementById('profile');
+    profileDiv.style.cursor = 'pointer';
     await loadContent(`/${profileMenu}`, 'profileMenu');
-    // if (!userInformations.is_guest)
-
+    const dropdownMenu = document.getElementById('dropdownMenuProfile');
+    addHoverListeners(profileDiv, dropdownMenu);
 }
 
 document.getElementById('home').addEventListener('click', async event => {

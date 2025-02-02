@@ -126,6 +126,9 @@ function sendGameMessageListener(gameInfo) {
 			if (apiAnswer.detail) {
 				throw {'code': 400, 'detail': apiAnswer.detail};
 			}
+			if (typeof(apiAnswer.id) === 'undefined') {
+				throw {'code': 400, 'detail': apiAnswer.content};
+			}
 			console.log('Game chat:', apiAnswer);
 			let messageDiv = createMessage({'author':apiAnswer.id, 'content':apiAnswer.content}, {'tagertId':null});
 			messageDiv.classList.add('messageGame');
@@ -137,7 +140,6 @@ function sendGameMessageListener(gameInfo) {
 			chatForm.reset();
 		} catch (error) {
 			console.log('Error game chat:', error);
-			displayChatError(error, 'messagesGame');
 		}
 	});
 }
