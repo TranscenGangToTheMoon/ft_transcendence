@@ -9,6 +9,7 @@ async function loadTabs() {
 
     for (const key in tabFiles){
         await loadContent(tabFiles[key], key);
+        await new Promise(r => setTimeout(r, 300));
     }
 }
 

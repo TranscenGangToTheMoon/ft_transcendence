@@ -143,7 +143,7 @@ function addSSEListeners(){
         event = JSON.parse(event.data);
         await logOut();
         setTimeout(async ()=>{
-            displayMainAlert('Error', 'Your account has been deleted on another client. Switching to guest account.')
+            displayMainAlert('Error', 'Your account has been deleted on another client. Switching to guest account.', 'error', 5000)
         }, 500);
     })
     addFriendSSEListeners();
@@ -165,15 +165,7 @@ function initSSE(){
 
     sse.onerror = async error => {
         console.log(error);
-        const contentDiv = document.getElementById('alertContainer');
-        const existingAlert = document.querySelector('.unavailable');
-        if (existingAlert)
-            existingAlert.remove();
-        const alertHtml = `
-        <div class="alert alert-danger unavailable" role="alert">
-            Error: connection with server lost
-        </div>`;
-        contentDiv.insertAdjacentHTML('beforebegin', alertHtml);
+        displayMainAlert('Error', 'connection with server lost');
     }
 
     addSSEListeners();

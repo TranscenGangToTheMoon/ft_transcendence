@@ -16,17 +16,6 @@ document.getElementById('pChangePassword').addEventListener('click', event => {
     window.changePasswordModal = changePasswordModal;
 })
 
-document.getElementById('pProfilePicture').addEventListener('mouseover', () => {
-    console.log('You\'re stepping on me');
-    const pProfilePictureEdit = document.getElementById('pProfilePictureEdit');
-    pProfilePictureEdit.style.display = 'block';
-});
-document.getElementById('pProfilePicture').addEventListener('mouseout', () => {
-    console.log('Why do you stop ?');
-    const pProfilePictureEdit = document.getElementById('pProfilePictureEdit');
-    pProfilePictureEdit.style.display = 'none';
-});
-
 async function deleteAccount(password) {
     getDataFromApi(getAccessToken(), `${baseAPIUrl}/users/me/`, 'DELETE', undefined, undefined, {
         'password' : password
@@ -47,7 +36,7 @@ async function deleteAccount(password) {
                 await fetchUserInfos(true);
                 await navigateTo('/');
                 setTimeout(()=> {
-                    displayMainAlert('Account deleted', 'Your account has been successfully deleted. You have been redirected to homepage.');
+                    displayMainAlert('Account deleted', 'Your account has been successfully deleted. You have been redirected to homepage.', 'info', 5000);
                 }, 300);
             }
         })
@@ -57,27 +46,40 @@ async function deleteAccount(password) {
 }
 
 async function changePassword(new_password, old_password){
+    const newPasswordField = document.getElementById('pPasswordInput');
+    const oldPasswordField = document.getElementById('pConfirmPassword');
+    const newPasswordFeedback = document.getElementById('pChangePasswordError');
+    const oldPasswordFeedback = document.getElementById('pChangeContextError');
+
+    newPasswordField.classList.remove('is-invalid');
+    oldPasswordField.classList.remove('is-invalid');
+    newPasswordFeedback.innerText = '';
+    oldPasswordFeedback.innerText = '';
     try {
         let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/users/me/`, "PATCH",
         undefined, undefined, {'password' : new_password, 'old_password' : old_password});
         if (!data.id){
-            let error = data.detail ?? data.password;
-            if (error){
-                document.getElementById('pChangePasswordError').innerText = error;
-                changePasswordModal.hide();
+            console.log(data);
+            if (data.password){
+                newPasswordField.classList.add('is-invalid');
+                newPasswordFeedback.innerText = data.password[0];
             }
-            error = data.old_password;
-            if (error)
-                document.getElementById('pChangeContextError').innerText = error;
+            if (data.old_password){
+                oldPasswordField.classList.add('is-invalid');
+                oldPasswordFeedback.innerText = data.old_password[0];
+            }
+            // if (data.detail){
+            //     oldPasswordField.classList.add('is-invalid');    
+            //     newPasswordField.classList.add('is-invalid');
+            //     oldPasswordFeedback.innerText = data.detail;
+            // }
         }
         else{
             changePasswordModal.hide();
             document.getElementById('pChangePasswordError').innerText = "";
             document.getElementById('pChangeContextError').innerText = "";
             document.getElementById('pPasswordInput').value = "";
-            setTimeout(() => {
-                displayMainAlert("password updated", "successfully updated your password.");
-            }, 500);
+            displayMainAlert("password updated", "successfully updated your password.", 'info', 3000);
         }
     }
     catch (error){
@@ -109,7 +111,7 @@ document.getElementById('pChangeNickname').addEventListener('submit', async even
             document.getElementById('pChangeNicknameError').innerText = "";
             await fetchUserInfos(true);
             await indexInit(false);
-            displayMainAlert("Nickname updated", `Successfully updated your nickname to '${newUsername}'`)
+            displayMainAlert("Nickname updated", `Successfully updated your nickname to '${newUsername}'`, 'info', 5000)
             handleRoute();
         }
     }
@@ -179,6 +181,15 @@ function setChatAcceptationOptions(){
 	});
 }
 function addBannerEventListener() {
+    document.getElementById('pProfilePicture').addEventListener('mouseover', () => {
+        const pProfilePictureEdit = document.getElementById('pProfilePictureEdit');
+        pProfilePictureEdit.style.display = 'block';
+    });
+    document.getElementById('pProfilePicture').addEventListener('mouseout', () => {
+        const pProfilePictureEdit = document.getElementById('pProfilePictureEdit');
+        pProfilePictureEdit.style.display = 'none';
+    });
+    console.log('I\'m here', document.getElementById('pProfilePictureEdit'));
     document.getElementById('pProfilePictureEdit').addEventListener('click', async ()=> {
         try {
             let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/users/profile-pictures/`)
@@ -226,9 +237,8 @@ function fillBanner(){
     usernameDiv.innerText = userInformations.username;
     const profilePicDiv = document.getElementById('pProfilePicture');
     profilePicDiv.innerHTML = `
-    <img class="rounded-1" src="${userInformations.profile_picture?.small}" onerror="src='/assets/imageNotFound.png'"
-    style="max-width:100px;max-height:100px">
-    <img id="pProfilePictureEdit" class="rounded-1 border border-primary position-absolute top-0 end-0 edit-button" src="/assets/icon/pencil.svg" style="display:none;" onerror="src='/assets/imageNotFound.png'></img>
+    <img class="rounded-1" src="${userInformations.profile_picture?.small}" onerror="src='/assets/imageNotFound.png'" style="max-width:100px;max-height:100px">
+    <img id="pProfilePictureEdit" class="rounded-1 border border-primary position-absolute top-0 end-0" src='/assets/icon/pencil.svg' style="display:none;" onerror="src='/assets/imageNotFound.png'">
     `
     addBannerEventListener();
 }

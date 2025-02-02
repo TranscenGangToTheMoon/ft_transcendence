@@ -105,16 +105,20 @@ async function quitLobbies(oldUrl, newUrl){
     }
 }
 
-function displayMainAlert(alertTitle, alertContent) {
-    console.log('je ssuis')
+ function displayMainAlert(alertTitle, alertContent, type='danger', timeout=undefined) {
     const contentDiv = document.getElementById('alertContainer');
     removeAlert();
     keepAlert = true;
     const alertHtml = `
-    <div class="alert alert-danger unavailable" role="alert">
+    <div class="alert alert-${type} unavailable alert-transition" role="alert">
         ${alertTitle}: ${alertContent}
     </div>`;
-    contentDiv.insertAdjacentHTML('beforebegin', alertHtml);
+    contentDiv.innerHTML = alertHtml;
+    console.log(document.body.cloneNode(true));
+    document.querySelector('.unavailable.alert-transition.alert').classList.add('alert-transition-show');
+    if (timeout){
+        setTimeout(removeAlert, timeout);
+    }
 }
 
 function displayConfirmModal(confirmTitle, confirmContent) {

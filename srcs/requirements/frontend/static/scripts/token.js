@@ -30,7 +30,8 @@ async function generateToken() {
 
 async function relog(){
     await generateToken();
-    displayMainAlert("Account Not Found", "We are unable to retrieve your account or guest profile.");
+    console.log('celuila');
+    displayMainAlert("Account Not Found", "We are unable to retrieve your account or guest profile.", 'warning', '4000');
     throw new Error('relog');
 }
 
