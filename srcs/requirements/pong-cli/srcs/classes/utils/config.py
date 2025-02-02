@@ -52,7 +52,7 @@ class Config:
         )
 
     @classmethod
-    def get(cls, *keys, default: int | None =None):
+    def get(cls, *keys, default: int | None = None):
         value = cls.configJson
         for key in keys:
             value = value.get(key, {})
@@ -82,7 +82,7 @@ class Config:
         @classmethod
         def load(cls):
             if (Config.configJson != {}):
-                cls.cWidth = Config.get("canvas", "normal", "width", default=800)
+                cls.cWidth = Config.get("canvas", "normal", "width", default=1000)
                 cls.cHeight = Config.get("canvas", "normal", "height", default=600)
                 cls.width = int(cls.cWidth / Config.Cell.width)
                 cls.height = int(cls.cHeight / Config.Cell.height)
