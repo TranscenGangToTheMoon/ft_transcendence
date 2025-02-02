@@ -56,7 +56,7 @@ def verify_place(user, model, join_tournament_id=None):
     if isinstance(model, Tournament) and model.started:
         raise PermissionDenied(MessagesException.PermissionDenied.TOURNAMENT_ALREADY_STARTED)
 
-    verify_user(user['id'], join_tournament_id)
+    verify_user(user['id'], join_tournament_id=join_tournament_id)
 
     if model.is_full:
         raise PermissionDenied(MessagesException.PermissionDenied.IS_FULL.format(obj=name.title()))
