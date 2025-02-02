@@ -187,3 +187,7 @@ body {
 #home, #test34 {
     cursor: pointer !important;
 }
+
+.toast-body {
+    color: rgba(0, 0, 0, 0.603) !important;
+}

@@ -39,18 +39,16 @@ async function joinTournament(code){
 	return 1;
 }
 
-document.getElementById('searchTournamentForm').addEventListener('keyup', async (e) => {
-	e.preventDefault();
-	if (e.key === 'Enter') return;
+async function searchForTournament(filter){
 	try {
-		let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/play/tournament/search/?q=${e.target.value}`);
+		let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/play/tournament/search/?q=${filter}`);
 		const tempDiv = document.createElement('div');
 		tournaments = data;
 		if (data.count){
 			for (i in data.results){
 				let tournament = data.results[i];
 				let tournamentDiv = document.createElement('div');
-				tournamentDiv.classList.add('tournament-div');
+				tournamentDiv.className = 'btn btn-dark m-1 d-flex justify-content-center tournament-div';
 				tournamentDiv.id = `tournamentDiv${tournament.code}`
 				tournamentDiv.innerText = `${tournament.name} (${tournament.n_participants}/${tournament.size})`;
 				tempDiv.appendChild(tournamentDiv);
@@ -68,6 +66,12 @@ document.getElementById('searchTournamentForm').addEventListener('keyup', async 
 	catch (error){
 		console.log(error);
 	}
+}
+
+document.getElementById('searchTournamentForm').addEventListener('keyup', async (e) => {
+	e.preventDefault();
+	if (e.key === 'Enter') return;
+	await searchForTournament(e.target.value);
 });
 
 if (typeof clickedUserDiv === 'undefined')
@@ -479,7 +483,7 @@ async function leaveTournament(){
 
 function setTournamentOptions(){
 	const options = document.querySelectorAll('.option');
-	selectedValue = 16;
+	selectedValue = 8;
 
 	options.forEach(option => {
   		if (option.dataset.value == selectedValue) {
@@ -521,7 +525,7 @@ async function initTournament(){
 		return;
 	loadCSS('/tournament/css/tournament.css', false);
 	setTournamentOptions();
-
+	await searchForTournament('');
 	if (SSEListeners.has('game-start')){
         sse.removeEventListener('game-start', SSEListeners.get('game-start'));
         SSEListeners.delete('game-start');
