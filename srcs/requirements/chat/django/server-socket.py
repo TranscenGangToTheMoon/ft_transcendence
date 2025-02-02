@@ -50,6 +50,8 @@ async def connect(sid, _, auth):
                 }, to=sid)
             await sio.enter_room(sid, str(chat_id))
         except APIException as e:
+            print(f"error {e.status_code}: {e.detail.get('content')}")
+            await sio.emit('error', {'error': e.status_code, 'message': e.detail.get('content')}, to=sid)
             raise SocketIOConnectionRefusedError({"error": e.status_code, "message": e.detail.get('content')})
         if user and chat:
             usersConnected.add_user(user['id'], sid, user['username'], chat_id, chat['chat_with']['id'])
