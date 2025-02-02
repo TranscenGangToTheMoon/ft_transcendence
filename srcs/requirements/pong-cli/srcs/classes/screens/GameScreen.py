@@ -78,7 +78,7 @@ class GamePage(Screen):
         self.listener.start()
 
         # Game handling
-        await self.launchSocketIO()
+        await self.startSIOServer()
         self.gameLoop()
 
     def on_resize(self) -> None:
@@ -180,7 +180,7 @@ class GamePage(Screen):
             self.lastFrame = time.perf_counter()
             await asyncio.sleep(1 / (Config.frameRate - elapsedTime))
 
-    async def launchSocketIO(self):
+    async def startSIOServer(self):
         try:
             self.setHandler()
             await self.sio.connect(
