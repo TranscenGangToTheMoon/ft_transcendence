@@ -54,8 +54,8 @@ async def connect(sid, _, auth):
             await sio.emit('error', {'error': 401, 'message': 'Invalid token'}, to=sid)
             raise SocketIOConnectionRefusedError("401")
         except APIException as e:
-            print(f"error {e.status_code}: {e.detail.get('content')}")
-            raise SocketIOConnectionRefusedError(e.detail.get('content'))
+            print(f"Error: {e.detail['detail']}")
+            raise SocketIOConnectionRefusedError(e.detail['detail'])
         if user and chat:
             usersConnected.add_user(user['id'], sid, user['username'], chat_id, chat['chat_with']['id'])
     else:
