@@ -39,11 +39,9 @@ async function joinTournament(code){
 	return 1;
 }
 
-document.getElementById('searchTournamentForm').addEventListener('keyup', async (e) => {
-	e.preventDefault();
-	if (e.key === 'Enter') return;
+async function searchForTournament(filter){
 	try {
-		let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/play/tournament/search/?q=${e.target.value}`);
+		let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/play/tournament/search/?q=${filter}`);
 		const tempDiv = document.createElement('div');
 		tournaments = data;
 		if (data.count){
@@ -68,6 +66,12 @@ document.getElementById('searchTournamentForm').addEventListener('keyup', async 
 	catch (error){
 		console.log(error);
 	}
+}
+
+document.getElementById('searchTournamentForm').addEventListener('keyup', async (e) => {
+	e.preventDefault();
+	if (e.key === 'Enter') return;
+	await searchForTournament(e.target.value);
 });
 
 if (typeof clickedUserDiv === 'undefined')
@@ -521,7 +525,7 @@ async function initTournament(){
 		return;
 	loadCSS('/tournament/css/tournament.css', false);
 	setTournamentOptions();
-
+	await searchForTournament('');
 	if (SSEListeners.has('game-start')){
         sse.removeEventListener('game-start', SSEListeners.get('game-start'));
         SSEListeners.delete('game-start');
