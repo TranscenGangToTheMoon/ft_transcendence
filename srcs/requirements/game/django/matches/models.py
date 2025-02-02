@@ -57,7 +57,7 @@ class Matches(models.Model):
         self.finished_at = finished_at
         self.code = None
         self.game_duration = finished_at - self.created_at
-        if self.teams is not None:
+        if self.teams is not None and self.teams.count() == 2:
             self.winner, self.looser = self.teams.order_by('-score')
         self.save()
         if self.finish_reason == FinishReason.GAME_NOT_PLAYED:
