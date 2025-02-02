@@ -51,7 +51,6 @@ class TournamentSerializer(Serializer):
 
         validated_data['code'] = generate_code(Tournament)
         validated_data['created_by'] = user['id']
-        validated_data['created_by_username'] = user['username']
         result = super().create(validated_data)
         create_player_instance(user, TournamentParticipants, user_id=user['id'], tournament=result, creator=True, trophies=user['trophies'])
         return result
@@ -94,7 +93,6 @@ class TournamentParticipantsSerializer(Serializer):
 
 class TournamentSearchSerializer(Serializer):
     n_participants = serializers.SerializerMethodField(read_only=True)
-    created_by = serializers.CharField(source='created_by_username', read_only=True)
 
     class Meta:
         model = Tournament

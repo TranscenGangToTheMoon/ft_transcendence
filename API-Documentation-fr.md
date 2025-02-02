@@ -779,7 +779,7 @@ https://localhost:4443/api/game/
     "name": "str",
     "n_participants": "int",
     "size": "int",
-    "created_by": "str"
+    "created_by": "int"
   }
   ```
 - **Codes de réponse** :
