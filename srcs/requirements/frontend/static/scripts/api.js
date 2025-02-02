@@ -41,13 +41,7 @@ async function apiRequest(token, endpoint, method="GET", authType="Bearer",
             if (error.code === 502 || error.code === 503 || error.code === 500 || error.message === 'Failed to fetch'){
                 closeExistingModals();
                 console.log('service unavailable');
-                const contentDiv = document.getElementById('alertContainer');
-                removeAlert();
-                const alertHtml = `
-                <div class="alert alert-danger unavailable" role="alert">
-                    Service unavailable
-                </div>`;
-                contentDiv.insertAdjacentHTML('beforebegin', alertHtml);
+                displayMainAlert('Error', 'Service unavailable');
             }
             throw error;
         })
@@ -67,5 +61,10 @@ async function getDataFromApi(token, endpoint, method="GET", authType="Bearer",
 function removeAlert(){
     const existingAlert = document.querySelector('.unavailable');
     if (existingAlert)
-        existingAlert.remove();
+    {
+        existingAlert.classList.remove('alert-transition-show');
+        setTimeout(()=>{
+            existingAlert.remove();
+        }, 500);
+    }
 }
