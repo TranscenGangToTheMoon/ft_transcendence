@@ -1,6 +1,5 @@
 # Python imports
 import asyncio
-
 import httpx
 import json
 import re

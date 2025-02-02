@@ -46,7 +46,6 @@ class GamePage(Screen):
         self.countdownIsActive = False
         self.pressedKeys = set()
         self.listener = None
-        self.connected = False
         self.gameStarted = False
         SSLContext = ssl.create_default_context()
         SSLContext.load_verify_locations(Config.SSL.CRT)
@@ -127,10 +126,10 @@ class GamePage(Screen):
 
     @work
     async def gameLoop(self):
-        while (not self.connected or not self.gameStarted):
+        while (not self.sio.connected or not self.gameStarted):
             await asyncio.sleep(0.1)
 
-        while (self.connected and self.gameStarted):
+        while (self.sio.connected and self.gameStarted):
             if (self.lastFrame == 0):
                 self.lastFrame = time.perf_counter()
                 await asyncio.sleep(1 / Config.frameRate)
@@ -201,8 +200,7 @@ class GamePage(Screen):
     def setHandler(self):
         @self.sio.on('connect')
         async def connect():
-            self.connected = True
-            print("Connected to server event!", flush=True)
+            print("Connected to server!", flush=True)
 
         @self.sio.on('disconnect')
         async def disconnect():
@@ -276,13 +274,8 @@ class GamePage(Screen):
             while (self.countdownIsActive == True):
                 await asyncio.sleep(1/10)
             await self.app.push_screen_wait(GameEnd(data["reason"], data["winner"] == User.team))
-            await self.sio.disconnect()
-            User.inAGame = False
             self.dismiss()
 
     async def on_unmount(self) -> None:
-        if (self.connected):
-            await self.sio.disconnect()
-        self.connected = False
         self.listener.stop()
         await self.HTTPSession.close()
