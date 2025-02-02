@@ -35,7 +35,7 @@ def get_tournament(create=False, **kwargs):
     return get_place(Tournament, create, **kwargs)
 
 
-def verify_place(user, model):
+def verify_place(user, model, join_tournament_id=None):
     name = type(model).__name__
 
     def get_place_creator():
@@ -53,7 +53,10 @@ def verify_place(user, model):
     if is_banned(model.code, user['id']) or are_users_blocked(user['id'], get_place_creator()):
         raise NotFound(MessagesException.NotFound.NOT_FOUND.format(obj=name.title()))
 
-    verify_user(user['id'])
+    if isinstance(model, Tournament) and model.started:
+        raise PermissionDenied(MessagesException.PermissionDenied.TOURNAMENT_ALREADY_STARTED)
+
+    verify_user(user['id'], join_tournament_id)
 
     if model.is_full:
         raise PermissionDenied(MessagesException.PermissionDenied.IS_FULL.format(obj=name.title()))
