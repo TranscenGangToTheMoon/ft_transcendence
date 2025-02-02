@@ -479,7 +479,7 @@ async function leaveTournament(){
 
 function setTournamentOptions(){
 	const options = document.querySelectorAll('.option');
-	selectedValue = 16;
+	selectedValue = 8;
 
 	options.forEach(option => {
   		if (option.dataset.value == selectedValue) {
