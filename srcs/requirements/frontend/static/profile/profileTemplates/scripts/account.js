@@ -47,7 +47,7 @@ async function deleteAccount(password) {
                 await fetchUserInfos(true);
                 await navigateTo('/');
                 setTimeout(()=> {
-                    displayMainAlert('Account deleted', 'Your account has been successfully deleted. You have been redirected to homepage.');
+                    displayMainAlert('Account deleted', 'Your account has been successfully deleted. You have been redirected to homepage.', 'info', 5000);
                 }, 300);
             }
         })
@@ -122,7 +122,7 @@ document.getElementById('pChangeNickname').addEventListener('submit', async even
             document.getElementById('pChangeNicknameError').innerText = "";
             await fetchUserInfos(true);
             await indexInit(false);
-            displayMainAlert("Nickname updated", `Successfully updated your nickname to '${newUsername}'`)
+            displayMainAlert("Nickname updated", `Successfully updated your nickname to '${newUsername}'`, 'info', 5000)
             handleRoute();
         }
     }

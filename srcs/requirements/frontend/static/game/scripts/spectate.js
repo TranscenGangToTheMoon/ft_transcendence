@@ -625,7 +625,7 @@ async function initData(data){
 	initSocket();
     setTimeout(async () => {
         if (!cancelTimeout && gameSocket && !isModalOpen()){
-            displayMainAlert('Error', 'Unable to establish connection with socket server');
+            displayMainAlert('Error', 'Unable to establish connection with socket server', 'error', 5000);
             history.go(-1);
         }
     }, GAME_CONNECTION_TIMEOUT);
@@ -717,7 +717,7 @@ function forPhoneChanges(){
 }
 
 function wrongConfigFileError(error){
-    displayMainAlert('Error', 'Erroneous game config file.\n');
+    displayMainAlert('Error', 'Erroneous game config file.\n', 'error', 5000);
     console.log(error);
 }
 

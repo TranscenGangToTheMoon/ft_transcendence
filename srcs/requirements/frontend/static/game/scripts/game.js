@@ -707,7 +707,7 @@ async function initData(data, socketPath, socketMode){
     console.log('socket init');
     setTimeout(async () => {
         if (!cancelTimeout && gameSocket){
-            displayMainAlert('Error', 'Unable to establish connection with socket server');
+            displayMainAlert('Error', 'Unable to establish connection with socket server', 'error', 5000);
         }
     }, GAME_CONNECTION_TIMEOUT);
     document.getElementById('gameArea').classList.replace('d-none', 'd-flex');
@@ -804,7 +804,7 @@ function forPhoneChanges(){
 }
 
 function wrongConfigFileError(error){
-    displayMainAlert('Error', 'Erroneous game config file.\n');
+    displayMainAlert('Error', 'Erroneous game config file.\n', 'error', 5000);
     console.log(error);
 }
 
@@ -877,7 +877,7 @@ async function initGame(){
     catch (unauthorized){
         if (unauthorized === window.location.pathname){
             if (!document.getElementById('alertModal').classList.contains('show'))
-                displayMainAlert("Error", `You don't have permission to play in ${unauthorized}`);
+                displayMainAlert("Error", `You don't have permission to play in ${unauthorized}`, 'warning', 5000);
             history.go(-1);
         }
         else{

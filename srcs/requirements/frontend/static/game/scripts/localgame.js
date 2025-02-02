@@ -594,7 +594,7 @@ async function initGame(){
         initGameConstants();
     }
     catch (error){
-        return displayMainAlert('Error', 'Erroneous game config file.\n');
+        return displayMainAlert('Error', 'Erroneous game config file.\n', 'error', 5000);
     }
     if (window.matchMedia("(hover: none) and (pointer: coarse)").matches)
         forPhoneChanges();

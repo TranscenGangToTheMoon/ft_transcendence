@@ -677,7 +677,7 @@ function checkGameAuthorization(){
 }
 
 function wrongConfigFileError(error){
-    displayMainAlert('Error', 'Erroneous game config file.\n');
+    displayMainAlert('Error', 'Erroneous game config file.\n', 'error', 5000);
     console.log(error);
 }
 
@@ -784,7 +784,7 @@ async function initGame(){
         }
     }
     catch (unauthorized){
-        displayMainAlert("Error", `You don't have permission to play in ${unauthorized}`);
+        displayMainAlert("Error", `You don't have permission to play in ${unauthorized}`, 'warning', 5000);
         history.go(-1);
     }
 }
