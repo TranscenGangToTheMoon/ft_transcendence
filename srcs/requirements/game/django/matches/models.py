@@ -80,7 +80,7 @@ class Matches(models.Model):
 
 class Teams(models.Model):
     match = models.ForeignKey(Matches, on_delete=models.CASCADE, related_name='teams')
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=1)
     score = models.IntegerField(default=0)
 
     @property
