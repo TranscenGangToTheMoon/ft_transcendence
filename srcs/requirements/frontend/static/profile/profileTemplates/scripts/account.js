@@ -47,7 +47,7 @@ async function deleteAccount(password) {
                 await fetchUserInfos(true);
                 await navigateTo('/');
                 setTimeout(()=> {
-                    displayMainAlert('Account deleted', 'Your account has been successfully deleted. You have been redirected to homepage.');
+                    displayMainAlert('Account deleted', 'Your account has been successfully deleted. You have been redirected to homepage.', 'info', 5000);
                 }, 300);
             }
         })
@@ -57,27 +57,40 @@ async function deleteAccount(password) {
 }
 
 async function changePassword(new_password, old_password){
+    const newPasswordField = document.getElementById('pPasswordInput');
+    const oldPasswordField = document.getElementById('pConfirmPassword');
+    const newPasswordFeedback = document.getElementById('pChangePasswordError');
+    const oldPasswordFeedback = document.getElementById('pChangeContextError');
+
+    newPasswordField.classList.remove('is-invalid');
+    oldPasswordField.classList.remove('is-invalid');
+    newPasswordFeedback.innerText = '';
+    oldPasswordFeedback.innerText = '';
     try {
         let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/users/me/`, "PATCH",
         undefined, undefined, {'password' : new_password, 'old_password' : old_password});
         if (!data.id){
-            let error = data.detail ?? data.password;
-            if (error){
-                document.getElementById('pChangePasswordError').innerText = error;
-                changePasswordModal.hide();
+            console.log(data);
+            if (data.password){
+                newPasswordField.classList.add('is-invalid');
+                newPasswordFeedback.innerText = data.password[0];
             }
-            error = data.old_password;
-            if (error)
-                document.getElementById('pChangeContextError').innerText = error;
+            if (data.old_password){
+                oldPasswordField.classList.add('is-invalid');
+                oldPasswordFeedback.innerText = data.old_password[0];
+            }
+            // if (data.detail){
+            //     oldPasswordField.classList.add('is-invalid');    
+            //     newPasswordField.classList.add('is-invalid');
+            //     oldPasswordFeedback.innerText = data.detail;
+            // }
         }
         else{
             changePasswordModal.hide();
             document.getElementById('pChangePasswordError').innerText = "";
             document.getElementById('pChangeContextError').innerText = "";
             document.getElementById('pPasswordInput').value = "";
-            setTimeout(() => {
-                displayMainAlert("password updated", "successfully updated your password.");
-            }, 500);
+            displayMainAlert("password updated", "successfully updated your password.", 'info', 3000);
         }
     }
     catch (error){
@@ -109,7 +122,7 @@ document.getElementById('pChangeNickname').addEventListener('submit', async even
             document.getElementById('pChangeNicknameError').innerText = "";
             await fetchUserInfos(true);
             await indexInit(false);
-            displayMainAlert("Nickname updated", `Successfully updated your nickname to '${newUsername}'`)
+            displayMainAlert("Nickname updated", `Successfully updated your nickname to '${newUsername}'`, 'info', 5000)
             handleRoute();
         }
     }

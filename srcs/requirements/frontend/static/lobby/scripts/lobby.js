@@ -510,12 +510,12 @@ async function lobbyBanned(event){
     displayGameChatNotif(event);
     if (!checkEventDuplication(event)) return;
     await navigateTo('/');
-    displayMainAlert('Banned from Lobby', event.message);
+    displayMainAlert('Banned from Lobby', event.message, 'warning', 5000);
 }
 
 async function lobbyDestroyed(event){
     await navigateTo('/');
-    displayMainAlert('Lobby destroyed', "The lobby has been destroyed.")
+    displayMainAlert('Lobby destroyed', "The lobby has been destroyed.", 'warning', 5000)
 }
 
 async function lobbyGameStart(event){
@@ -655,7 +655,7 @@ async function lobbyInit() {
         }
         catch (subError){
             if (subError.code === 404){
-                displayMainAlert('Unable to join the lobby', 'It may not exist, has been deleted, or is already full.');
+                displayMainAlert('Unable to join the lobby', 'It may not exist, has been deleted, or is already full.', 'error', 5000);
                 await navigateTo('/');
             }
             console.log(subError);
