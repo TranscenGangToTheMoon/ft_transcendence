@@ -1,5 +1,4 @@
 # Python imports
-import asyncio
 import httpx
 import json
 import re
@@ -55,7 +54,6 @@ class PongCLI(App):
                                                 User.team = "b"
                                                 User.opponent = dataJson["data"]["teams"]["a"]["players"][0]["username"]
                                             if (User.inAGame == False):
-                                                # await asyncio.sleep(1)
                                                 await self.push_screen(GamePage())
                                         elif (event != "game-start" and event != "ping"):
                                             print(f"{event}: {data}")

@@ -268,7 +268,7 @@ class User():
         User.headers = {"Content-Type": "application/json"}
         User.host = None
         User.id = None
-        User.inAGame: bool = False
+        User.inAGame = False
         User.opponent = None
         User.password = None
         User.port = None
