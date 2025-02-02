@@ -1,3 +1,4 @@
+import uuid
 from abc import ABC, abstractmethod
 
 from rest_framework import serializers
@@ -13,19 +14,10 @@ def get_user_from_auth(user_data):
     from django.contrib.auth.models import User
 
     try:
-        user = User.objects.get(id=user_data['id'], username=user_data['username'])
-        return user
+        return User.objects.get(id=user_data['id'])
     except User.DoesNotExist:
         pass
-    try:
-        user = User.objects.get(id=user_data['id'])
-        user.username = user_data['username']
-        user.save()
-        return user
-    except User.DoesNotExist:
-        pass
-    user = User.objects.create(id=user_data['id'], username=user_data['username'])
-    return user
+    return User.objects.create(id=user_data['id'], username=uuid.uuid1())
 
 
 class AbstractAuthentication(ABC, BaseAuthentication):
