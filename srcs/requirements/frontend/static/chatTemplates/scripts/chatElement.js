@@ -85,9 +85,8 @@ function createMessage(message, chatInfo) {
 	let messageDiv = document.createElement('div');
 	let messageContent = document.createElement('p');
 	let messageAuthor = document.createElement('strong');
-	messageDiv.appendChild(messageAuthor);
 	messageDiv.appendChild(messageContent);
-
+	
 	messageDiv.className = 'gap-1';
 	if (message.author && message.author !== chatInfo.targetId) {
 		messageAuthor.innerText = 'You: ';
@@ -99,6 +98,7 @@ function createMessage(message, chatInfo) {
 		}
 	}
 	messageContent.innerText = message.content;
+	messageContent.insertAdjacentElement('afterbegin', messageAuthor);
 	return messageDiv;
 }
 
