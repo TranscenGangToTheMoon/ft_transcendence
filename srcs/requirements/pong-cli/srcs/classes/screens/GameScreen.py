@@ -192,10 +192,10 @@ class GamePage(Screen):
 
         @self.sio.on('disconnect')
         async def disconnect():
-            print("Disconnected from server event!", flush=True)
-            if (User.inAGame):
-                while (self.countdownIsActive == True):
-                    await asyncio.sleep(1/10)
+            print("Disconnected from server!", flush=True)
+            while (self.countdownIsActive == True):
+                await asyncio.sleep(1/10)
+            if (User.inAGame == True):
                 await self.app.push_screen_wait(GameEnd(Config.FinishReason.SERVER_DISCONNECT, False))
             User.inAGame = False
 
@@ -251,22 +251,14 @@ class GamePage(Screen):
             self.paddleLeft.reset()
             self.paddleRight.reset()
 
-        @self.sio.on('call_spectate')
-        async def callSpectateAction(data):
-            User.inAGame = False
-            while (self.countdownIsActive == True):
-                await asyncio.sleep(1/10)
-            await self.app.push_screen_wait(GameEnd(Config.FinishReason.SPECTATE, False))
-            await self.sio.disconnect() # maybe delete
-            User.inAGame = False # maybe delete
-            self.dismiss()
-
         @self.sio.on('game_over')
         async def gameOverAction(data):
-            User.inAGame = False
             while (self.countdownIsActive == True):
                 await asyncio.sleep(1/10)
+            self.countdownIsActive = True
             await self.app.push_screen_wait(GameEnd(data["reason"], data["winner"] == User.team))
+            User.inAGame = False
+            self.countdownIsActive = False
             self.dismiss()
 
     async def on_unmount(self) -> None:
