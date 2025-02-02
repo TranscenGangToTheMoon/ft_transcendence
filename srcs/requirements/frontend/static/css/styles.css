@@ -1,9 +1,62 @@
+.video-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+    z-index: -1;
+}
+
+.video-container video {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
+    transform: translate(-50%, -50%);
+    object-fit: cover;
+}
+
+
+/* UNCOMMENT TO ENABLE CRT EFFECT */
+/* body::before, body::after {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 2000;
+}
+
+body::before {
+    background: url('/assets/layer1.png') repeat;
+    opacity: 0.05;
+}
+
+body::after {
+    background: url('/assets/layer2.png') repeat;
+    mix-blend-mode: soft-light;
+    opacity: 0.6;
+} */
+
+@font-face {
+    font-family: 'balatro';
+    src: url('/fonts/balatro.woff') format('woff'), /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
+         url('/fonts/balatro.ttf') format('truetype'); /* Chrome 4+, Firefox 3.5, Opera 10+, Safari 3—5 */
+}  
+
 .modal {
-    font-family: 'Marker Felt, fantasy';
+    font-family: 'balatro';
+    color: black;
 }
 
 body {
-    background-image: url("/assets/background.png");
+    font-family: 'balatro';
     background-repeat: no-repeat;
     background-size: cover;
     background-attachment: fixed;
@@ -11,6 +64,7 @@ body {
     height: 100vh;
     max-height: 100vh;
     overflow: hidden;
+    color: white;
 }
 
 .dropdown-item:active {
@@ -101,8 +155,29 @@ body {
 }
 
 .tab-content{
-    background-color: rgba(255, 255, 255, 0.361);
+    background-color: rgba(60, 60, 71);
+    border-radius: 0 10px 10px 10px
     /* border-radius: 10px; */
+}
+
+.nav-link{
+    background-color: rgb(40, 40, 46);
+    color: rgba(255, 255, 255, 0.438);
+}
+
+.nav-link:hover{
+    color: rgba(255, 255, 255, 0.638);
+}
+
+.nav-link.active {
+    color: white !important;
+    background-color: rgba(60, 60, 71) !important;
+}
+
+.nav-tabs {
+    /* background-color: rgba(60, 60, 71); */
+    --bs-nav-tabs-border-width: 0px; /* Désactive la bordure */
+    border-bottom: none !important; /* Supprime toute bordure éventuelle */
 }
 
 .max-vh-75 {

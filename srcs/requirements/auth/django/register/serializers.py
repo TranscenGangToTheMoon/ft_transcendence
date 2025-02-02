@@ -9,7 +9,7 @@ from lib_transcendence.serializer import Serializer
 
 
 class RegisterSerializer(Serializer):
-    username = serializers.CharField(max_length=30, write_only=True)
+    username = serializers.CharField(max_length=15, write_only=True)
     password = serializers.CharField(max_length=50, write_only=True)
     access = serializers.CharField(read_only=True)
     refresh = serializers.CharField(read_only=True)

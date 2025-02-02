@@ -10,7 +10,7 @@ from users.serializers_utils import SmallUsersSerializer
 
 
 class FriendRequestsSerializer(Serializer):
-    username = serializers.CharField(max_length=30, write_only=True)
+    username = serializers.CharField(max_length=15, write_only=True)
     sender = SmallUsersSerializer(read_only=True)
     receiver = SmallUsersSerializer(read_only=True)
 

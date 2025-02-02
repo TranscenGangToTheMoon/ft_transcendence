@@ -1,4 +1,3 @@
-from django.core.exceptions import PermissionDenied
 from django.db.models.base import ModelBase
 from rest_framework import generics, status
 from rest_framework.response import Response
@@ -10,8 +9,8 @@ from lib_transcendence.lobby import MatchType
 from lib_transcendence.permissions import NotGuest
 from lib_transcendence.sse_events import create_sse_event, EventCode
 from lobby.models import Lobby, LobbyParticipants
-from matchmaking.utils.participant import get_participant
-from matchmaking.utils.place import get_place
+from matchmaking.participant import get_participant
+from matchmaking.place import get_place
 from tournament.models import Tournament, TournamentParticipants
 
 
@@ -32,8 +31,6 @@ class InviteMixin(generics.CreateAPIView):
         validate_participants_for_inviting(place, user_id, self.kwargs['user_id'])
 
         if self.place is Tournament:
-            if place.is_started:
-                raise PermissionDenied(MessagesException.PermissionDenied.INVITE_AFTER_START)
             event = EventCode.INVITE_TOURNAMENT
         elif place.game_mode == GameMode.CLASH:
             event = EventCode.INVITE_CLASH

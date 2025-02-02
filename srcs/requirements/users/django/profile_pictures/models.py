@@ -21,7 +21,7 @@ class ProfilePictures(models.Model):
 
         self.is_unlocked = True
         self.save()
-        if self.name != ProfilePicture.DEFAULT:
+        if self.name != ProfilePicture.GUEST:
             from sse.events import publish_event
 
             publish_event(self.user, EventCode.PROFILE_PICTURE_UNLOCKED, ProfilePicturesSerializer(self).data)

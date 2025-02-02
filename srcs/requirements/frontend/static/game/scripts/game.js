@@ -14,7 +14,7 @@ if (typeof fromTournament === 'undefined')
         maxBallSpeed: 1500,
         maxPaddleSpeed: 500,
         animationDuration: 800,
-        font: "48px Arial",
+        font: "48px balatro",
         fontColor: "white",
         defaultBallSpeed : 240,
         ballSpeedIncrement: 30,
@@ -190,7 +190,7 @@ if (typeof fromTournament === 'undefined')
     }
 
     function drawCountdown() {
-        ctx.font = '96px Arial';
+        ctx.font = '96px balatro';
         ctx.fillText(
             state.countDown.currentStep + 1,
             config.canvasWidth / 2,
@@ -704,10 +704,10 @@ async function initData(data, socketPath, socketMode){
 		return;
 	}
 	initSocket(data.code, socketPath, socketMode);
+    console.log('socket init');
     setTimeout(async () => {
-        if (!cancelTimeout && gameSocket && !isModalOpen()){
+        if (!cancelTimeout && gameSocket){
             displayMainAlert('Error', 'Unable to establish connection with socket server');
-            history.go(-1);
         }
     }, GAME_CONNECTION_TIMEOUT);
     document.getElementById('gameArea').classList.replace('d-none', 'd-flex');
@@ -843,8 +843,8 @@ async function initGame(){
         if (window.location.pathname === '/game/tournament'){
             async function tournamentFinished(event){
                 event = JSON.parse(event.data);
-                await navigateTo('/', true, true); //todo replace by tournament history
-                displayNotification(undefined, 'tournament finished', event.message, undefined, undefined); //todo add target 
+                await navigateTo('/', true, true);
+                displayNotification(undefined, 'tournament finished', event.message, undefined, undefined);
             }
             if (!SSEListeners.has('tournament-finish')){
                 SSEListeners.set('tournament-finish', tournamentFinished);

@@ -11,46 +11,44 @@ from users.serializers_utils import LargeUsersSerializer
 
 class FriendsSerializer(Serializer):
     friend = serializers.ModelSerializer(read_only=True)
-    friend_win = serializers.ModelSerializer(read_only=True)
-    me_win = serializers.ModelSerializer(read_only=True)
+    friend_wins = serializers.ModelSerializer(read_only=True)
+    me_wins = serializers.ModelSerializer(read_only=True)
 
     class Meta:
         model = Friends
         fields = [
             'id',
             'friend',
-            'friend_win',
-            'me_win',
+            'friend_wins',
+            'me_wins',
             'friends_since',
-            'matches_play_against',
+            'matches_played_against',
             'matches_played_together',
             'matches_won_together',
         ]
         read_only_fields = [
             'id',
             'friend',
-            'friend_win',
-            'me_win',
+            'friend_wins',
+            'me_wins',
             'friends_since',
-            'matches_play_against',
+            'matches_played_against',
             'matches_played_together',
             'matches_won_together',
         ]
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
-        request = self.context.get('request')
-        if request is None:
-            raise serializers.ValidationError(MessagesException.ValidationError.REQUEST_REQUIRED)
-        if (instance.user_1.id == request.user.id and request.method != 'POST') or (instance.user_1.id != request.user.id and request.method == 'POST'):
-            data['friend_win'] = instance.user2_wins
-            data['me_win'] = instance.user1_wins
-            friend = instance.user_2
-        else:
-            data['friend_win'] = instance.user1_wins
-            data['me_win'] = instance.user2_wins
-            friend = instance.user_1
-        data['friend'] = LargeUsersSerializer(friend).data
+        if 'user' in self.context:
+            if instance.user_1.id == self.context['user']:
+                data['friend_wins'] = instance.user2_wins
+                data['me_wins'] = instance.user1_wins
+                friend = instance.user_2
+            else:
+                data['friend_wins'] = instance.user1_wins
+                data['me_wins'] = instance.user2_wins
+                friend = instance.user_1
+            data['friend'] = LargeUsersSerializer(friend).data
         return data
 
     def create(self, validated_data):

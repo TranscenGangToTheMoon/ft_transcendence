@@ -165,13 +165,13 @@ function initSSE(){
 
     sse.onerror = async error => {
         console.log(error);
-        const contentDiv = document.getElementById('content');
+        const contentDiv = document.getElementById('alertContainer');
         const existingAlert = document.querySelector('.unavailable');
         if (existingAlert)
             existingAlert.remove();
         const alertHtml = `
         <div class="alert alert-danger unavailable" role="alert">
-            connection with server lost
+            Error: connection with server lost
         </div>`;
         contentDiv.insertAdjacentHTML('beforebegin', alertHtml);
     }

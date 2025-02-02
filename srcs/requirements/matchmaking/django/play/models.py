@@ -3,7 +3,7 @@ from django.db import models
 from blocking.utils import delete_player_instance
 from lib_transcendence.game import GameMode
 from matchmaking.create_match import create_match
-from matchmaking.utils.model import ParticipantsPlace
+from matchmaking.model import ParticipantsPlace
 
 RANGE = 50
 
@@ -11,7 +11,7 @@ RANGE = 50
 class Players(ParticipantsPlace, models.Model):
     user_id = models.IntegerField(unique=True)
     trophies = models.IntegerField()
-    game_mode = models.CharField(max_length=10)
+    game_mode = models.CharField(max_length=20)
     join_at = models.DateTimeField(auto_now_add=True)
 
     def tag(self):
@@ -25,7 +25,7 @@ class Players(ParticipantsPlace, models.Model):
             ranked_players = Players.objects.exclude(user_id=self.user_id).filter(game_mode=GameMode.RANKED, trophies__gte=self.trophies - RANGE, trophies__lte=self.trophies + RANGE)
             ranked_players = sorted(list(ranked_players), key=lambda x: abs(x.trophies - self.trophies))
             if len(ranked_players) > 0:
-                create_match(GameMode.RANKED, self.user_id, ranked_players[0].user_id)
+                create_match(GameMode.RANKED, {'id': self.user_id, 'trophies': self.trophies}, {'id': ranked_players[0].user_id, 'trophies': ranked_players[0].trophies})
                 self.delete()
                 ranked_players[0].delete()
 

@@ -1,6 +1,6 @@
 async function closeGameConnection(oldUrl){
     if (!oldUrl.includes('game') || oldUrl.includes('local')) return;
-    if (typeof gameSocket !== 'undefined'){
+    if (typeof gameSocket !== 'undefined' && gameSocket){
         gameSocket.close();
         gameSocket = undefined;
     }
@@ -106,14 +106,15 @@ async function quitLobbies(oldUrl, newUrl){
 }
 
 function displayMainAlert(alertTitle, alertContent) {
-    if (isModalOpen()) return;
-    const alertContentDiv = document.getElementById('alertContent');
-    const alertTitleDiv = document.getElementById('alertModalLabel');
-    const alertModal = new bootstrap.Modal(document.getElementById('alertModal'));
-
-    alertContentDiv.innerText = alertContent;
-    alertTitleDiv.innerText = alertTitle;
-    alertModal.show();
+    console.log('je ssuis')
+    const contentDiv = document.getElementById('alertContainer');
+    removeAlert();
+    keepAlert = true;
+    const alertHtml = `
+    <div class="alert alert-danger unavailable" role="alert">
+        ${alertTitle}: ${alertContent}
+    </div>`;
+    contentDiv.insertAdjacentHTML('beforebegin', alertHtml);
 }
 
 function displayConfirmModal(confirmTitle, confirmContent) {

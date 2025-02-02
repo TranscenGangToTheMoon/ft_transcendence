@@ -11,7 +11,7 @@ from lib_transcendence.services import request_matchmaking
 
 class Users(models.Model):
     id = models.IntegerField(unique=True, primary_key=True)
-    username = models.CharField(unique=True, max_length=30)
+    username = models.CharField(unique=True, max_length=15)
     is_guest = models.BooleanField(default=False)
 
     created_at = models.DateTimeField(auto_now_add=True)

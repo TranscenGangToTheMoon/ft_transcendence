@@ -11,7 +11,7 @@ from lib_transcendence.services import request_chat
 
 
 class UpdateSerializer(Serializer):
-    username = serializers.CharField(max_length=30, write_only=True, validators=[validate_username])
+    username = serializers.CharField(max_length=15, write_only=True, validators=[validate_username])
     password = serializers.CharField(max_length=50, write_only=True)
     old_password = serializers.CharField(max_length=50, write_only=True, required=False)
 

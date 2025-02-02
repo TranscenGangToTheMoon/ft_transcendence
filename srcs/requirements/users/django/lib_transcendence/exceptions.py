@@ -39,7 +39,6 @@ class MessagesException:
 
         USERNAME_NOT_ALLOWED = 'This username is not allowed.'
         USERNAME_LONGER_THAN_3_CHAR = 'Username must be at least 3 characters long.'
-        USERNAME_SHORTER_THAN_30_CHAR = 'Username must be less than 30 characters long.'
         INVALIDE_CHAR = 'Use of an invlid character.'
         USERNAME_ALREAY_EXISTS = 'This username already exists.'
         PASSWORD_SHORTER_THAN_50_CHAR = 'Password must be less than 50 characters long.'
@@ -134,9 +133,7 @@ class MessagesException:
 
     class Conflict:
         DEFAULT = 'Conflict.'
-        _ALREADY = 'You are already in a {obj}.'
-        ALREADY_IN_GAME = _ALREADY.format(obj='game')
-        ALREADY_IN_TOURNAMENT = _ALREADY.format(obj='tournament')
+        ALREADY_IN_GAME_OR_TOURNAMENT = 'You are already in a game or a tournament.'
         USER_ALREADY_IN_GAME = 'Users are already in a game.'
 
     class ResourceExists:

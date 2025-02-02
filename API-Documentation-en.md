@@ -604,6 +604,13 @@ https://localhost:4443/api/game/
     "*content": "str"
   }
   ```
+- **Response (success)** :
+  ```json
+  {
+    "id": "int",
+    "content": "str"
+  }
+  ```
 - **Response codes** :
   - `201 Content Created`
   - `400 Bad Request`
@@ -737,6 +744,13 @@ https://localhost:4443/api/game/
   ```json
   {
     "*content": "str"
+  }
+  ```
+- **Response (success)** :
+  ```json
+  {
+    "id": "int",
+    "content": "str"
   }
   ```
 - **Response codes** :
@@ -978,10 +992,10 @@ https://localhost:4443/api/users/
   {
     "id": "int",
     "friend": "SmallUserInstance",
-    "friend_win": "int",
-    "me_win": "int",
+    "friend_wins": "int",
+    "me_wins": "int",
     "friends_since": "datetime",
-    "matches_play_against": "int",
+    "matches_played_against": "int",
     "matches_played_together": "int",
     "matches_won_together": "int"
   }
@@ -1003,10 +1017,10 @@ https://localhost:4443/api/users/
   {
     "id": "int",
     "friend": "SmallUserInstance",
-    "friend_win": "int",
-    "me_win": "int",
+    "friend_wins": "int",
+    "me_wins": "int",
     "friends_since": "datetime",
-    "matches_play_against": "int",
+    "matches_played_against": "int",
     "matches_played_together": "int",
     "matches_won_together": "int"
   }
@@ -1086,6 +1100,7 @@ https://localhost:4443/api/users/
   ```json
   {
     "user_data": "UserMeInstance",
+    "profile_pictures_data": "list[ProfilePictureInstance]",
     "friends_data": {"friends": "list[FriendInstance]", "friend_requests_sent": "list[FriendRequestsInstance]", "friend_requests_received": "list[FriendRequestsInstance]", "blocked_users": "list[BlockedInstance]"},
     "stats_data": "list[StatsInstance]",
     "chat_data": "list[ChatInstance]",

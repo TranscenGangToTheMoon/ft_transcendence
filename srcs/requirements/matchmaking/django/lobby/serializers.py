@@ -10,10 +10,10 @@ from lib_transcendence.lobby import MatchType, Teams
 from lib_transcendence.serializer import Serializer
 from lib_transcendence.sse_events import EventCode, create_sse_event
 from lobby.models import Lobby, LobbyParticipants
-from matchmaking.utils.participant import get_participants
-from matchmaking.utils.place import get_lobby, verify_place
-from matchmaking.utils.sse import send_sse_event
-from matchmaking.utils.user import verify_user
+from matchmaking.participant import get_participants
+from matchmaking.place import get_lobby, verify_place
+from matchmaking.sse import send_sse_event
+from matchmaking.user import verify_user
 
 
 class LobbyGetParticipantsSerializer(Serializer):
@@ -80,8 +80,7 @@ class LobbySerializer(Serializer):
         return get_participants(obj, fields)
 
     def create(self, validated_data):
-        request = self.context.get('request')
-        user = get_auth_user(request)
+        user = get_auth_user(self.context.get('request'))
 
         verify_user(user['id'])
 
@@ -92,9 +91,9 @@ class LobbySerializer(Serializer):
         else:
             if 'match_type' not in validated_data:
                 validated_data['match_type'] = MatchType.M1V1
-            validated_data['max_participants'] = 6
+            validated_data['max_participants'] = 8
         result = super().create(validated_data)
-        creator = create_player_instance(request, LobbyParticipants, lobby_id=result.id, user_id=user['id'], creator=True)
+        creator = create_player_instance(user, LobbyParticipants, lobby_id=result.id, user_id=user['id'], creator=True)
         if validated_data['game_mode'] == GameMode.CUSTOM_GAME:
             creator.team = Teams.A
             creator.save()
@@ -122,19 +121,6 @@ class LobbySerializer(Serializer):
         if other_members:
             create_sse_event(other_members, EventCode.LOBBY_UPDATE, validated_data)
         return result
-
-
-class LobbyFinishMatchSerializer(serializers.Serializer):
-    players = serializers.ListSerializer(child=serializers.IntegerField())
-
-    class Meta:
-        fields = [
-            'players',
-        ]
-
-    def create(self, validated_data):
-        Lobby.objects.filter(participants__user_id__in=validated_data['players']).distinct().update(game_playing=None)
-        return validated_data
 
 
 class LobbyParticipantsSerializer(Serializer):

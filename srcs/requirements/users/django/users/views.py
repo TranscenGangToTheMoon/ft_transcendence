@@ -13,7 +13,7 @@ from sse.events import publish_event
 from users.auth import auth_delete, get_valid_user, get_user
 from users.models import Users
 from users.permissions import NotInGame
-from users.serializers import UsersSerializer, UsersMeSerializer, ManageUserSerializer
+from users.serializers import UsersSerializer, UsersMeSerializer, ManageUserSerializer, AuthMatchmakingSerializer
 from users.serializers_utils import SmallUsersSerializer, LargeUsersSerializer
 
 
@@ -91,7 +91,15 @@ class ManageUserView(generics.CreateAPIView, generics.UpdateAPIView):
         return get_user(id=self.request.data.get('id'))
 
 
+class AuthMatchmakingView(generics.RetrieveAPIView):
+    serializer_class = AuthMatchmakingSerializer
+
+    def get_object(self):
+        return get_user(self.request)
+
+
 users_me_view = UsersMeView.as_view()
 retrieve_user_view = RetrieveUserView.as_view()
 retrieve_users_view = RetrieveUsersView.as_view()
 manage_user_view = ManageUserView.as_view()
+auth_matchmaking_view = AuthMatchmakingView.as_view()

@@ -10,8 +10,8 @@ from rest_framework.exceptions import AuthenticationFailed, PermissionDenied, AP
 from connectedUsers import ConnectedUsers
 from lib_transcendence import endpoints
 from lib_transcendence.auth import auth_verify
-from lib_transcendence.chat import post_messages
 from lib_transcendence.services import request_chat
+from lib_transcendence.request import request_service
 from lib_transcendence.sse_events import create_sse_event, EventCode
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -25,6 +25,8 @@ sio.attach(app, socketio_path='/ws/chat/')
 
 usersConnected = ConnectedUsers()
 
+def post_messages(chat_id: int, content: str, token: str, is_read: bool = False):
+    return request_service('chat', endpoints.Chat.fmessage.format(chat_id=chat_id), 'POST', {'content': content, 'is_read': is_read}, token)
 
 @sio.event
 async def connect(sid, _, auth):
@@ -47,17 +49,8 @@ async def connect(sid, _, auth):
                 'chatData': chat,
                 }, to=sid)
             await sio.enter_room(sid, str(chat_id))
-        except AuthenticationFailed:
-            print(f"Authentification failed : {sid}")
-            raise SocketIOConnectionRefusedError({"error": 401, "message": "Invalid token"})
-        except PermissionDenied:
-            print(f"Permission denied : {sid}")
-            raise SocketIOConnectionRefusedError({"error": 403, "message": "Permission denied"})
-        except NotFound:
-            print(f"User not found : {sid}")
-            raise SocketIOConnectionRefusedError({"error": 404, "message": "User not found"})
         except APIException as e:
-            raise SocketIOConnectionRefusedError({"error": 400, "message": e.detail.get('content')})
+            raise SocketIOConnectionRefusedError({"error": e.status_code, "message": e.detail.get('content')})
         if user and chat:
             usersConnected.add_user(user['id'], sid, user['username'], chat_id, chat['chat_with']['id'])
     else:
@@ -94,7 +87,7 @@ async def message(sid, data):
         )
         return
     try:
-        answer_api = await sync_to_async(post_messages, thread_sensitive=False)(chat_id, content, token)
+        answer_api = await sync_to_async(post_messages, thread_sensitive=False)(chat_id, content, token, is_chat_with_connected)
         await sio.emit(
             'chat-server',
             answer_api,
@@ -107,7 +100,7 @@ async def message(sid, data):
                 to=sid
             )
             print(f"User not connected, sending sse {usersConnected.get_chat_with_id(sid)}")
-            await sync_to_async(create_sse_event, thread_sensitive=False)(usersConnected.get_chat_with_id(sid), EventCode.RECEIVE_MESSAGE, answer_api, {'username': usersConnected.get_user_id(sid), 'message': content}, False)
+            await sync_to_async(create_sse_event, thread_sensitive=False)(usersConnected.get_chat_with_id(sid), EventCode.RECEIVE_MESSAGE, answer_api, {'username': usersConnected.get_user_id(sid), 'message': answer_api['content']}, False)
         else:
             await sio.emit(
                 'chat-server',
