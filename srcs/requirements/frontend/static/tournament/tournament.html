@@ -32,18 +32,16 @@
 			<div class="modal-body" id="createTournamentContent">
 				<form class="row g-3 align-items-center">
 					<div class="col-auto">
+						<label for="numberInput" class="form-label">tournament name</label>
+						<input type="text" class="form-control" id="tournamentName">
+					</div>
+					<div class="col-auto">
 					  <label for="rangeInput" class="form-label" id="tournamentSize">Select size</label>
-					  <!-- <input type="range" class="form-range" id="rangeInput" min="4" max="16" step="4" value="16"> -->
 					  <div class="options-container">
 						<div class="option" data-value="4">4</div>
 						<div class="option" data-value="8">8</div>
 						<div class="option" data-value="16">16</div>
 					  </div>
-					</div>
-
-					<div class="col-auto">
-					  <label for="numberInput" class="form-label">tournament name</label>
-					  <input type="text" class="form-control" id="tournamentName">
 					</div>
 				</form>
 				<div id="createTournamentError"></div>
