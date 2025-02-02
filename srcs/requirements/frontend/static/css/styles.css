@@ -163,6 +163,9 @@ body {
 .nav-link{
     background-color: rgb(40, 40, 46);
     color: rgba(255, 255, 255, 0.438);
+    border: 1px solid rgb(30, 30, 32) !important;
+    border-bottom: 0 !important;
+    transition: none !important;
 }
 
 .nav-link:hover{
@@ -172,12 +175,13 @@ body {
 .nav-link.active {
     color: white !important;
     background-color: rgba(60, 60, 71) !important;
+    border: 0 !important;
+    border-bottom: 1px solid rgba(60, 60, 71) !important;
 }
 
 .nav-tabs {
-    /* background-color: rgba(60, 60, 71); */
-    --bs-nav-tabs-border-width: 0px; /* Désactive la bordure */
-    border-bottom: none !important; /* Supprime toute bordure éventuelle */
+    --bs-nav-tabs-border-width: 0px;
+    border-bottom: none !important;
 }
 
 .max-vh-75 {
