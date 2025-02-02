@@ -202,7 +202,8 @@ async function  loadUserProfile(){
         document.getElementById('trophies').innerText = "";
     }
     else {
-        document.getElementById('trophies').innerText = userInformations.trophies + '🏆';
+        document.getElementById('trophies').innerHTML = `
+        <div>${userInformations.trophies}</div><img src="/assets/trophy.png" style="width:20px;height:20px">`;
     }
     const userInfos = document.getElementById('userInfos');
     userInfos.style.backgroundImage = `url(${userInformations['profile_picture']?.small ?? '/assets/imageNotFound.png'})`;
