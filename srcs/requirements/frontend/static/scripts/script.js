@@ -17,6 +17,7 @@ var badgesDivs = {};
 var notificationQueue = [];
 const SSEListeners = new Map();
 var fromTournament = false;
+let keepAlert = false;
 
 // ========================== SCRIPT ROUTING ==========================
 
@@ -174,7 +175,7 @@ async function  indexInit(auto=true) {
             console.log('user was deleted from database, switching to guest mode');
             await generateToken();
             await fetchUserInfos(true);
-            displayMainAlert("Unable to retrieve your account/guest profile","We're sorry your account has been permanently deleted and cannot be recovered.");
+            displayMainAlert("Account Not Found", "We are unable to retrieve your account or guest profile.");
         }
         initSSE();
         await loadFriendListModal();

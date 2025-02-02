@@ -8,16 +8,16 @@ from rest_framework.response import Response
 
 from baning.models import Banned
 from blocking.models import Blocked
-from blocking.utils import create_player_instance, delete_player_instance
+from blocking.utils import delete_player_instance, create_blocked
 from lib_transcendence.exceptions import MessagesException
 from lib_transcendence.permissions import GuestCannotCreate
 from lib_transcendence.serializer import SerializerAuthContext
 from lib_transcendence.sse_events import EventCode
-from matchmaking.utils.participant import get_tournament_participant
-from matchmaking.utils.place import get_tournament
-from matchmaking.utils.sse import send_sse_event
-from tournament.models import Tournament, TournamentParticipants, TournamentMatches
-from tournament.serializers import TournamentSerializer, TournamentParticipantsSerializer, TournamentSearchSerializer, TournamentMatchSerializer
+from matchmaking.participant import get_tournament_participant
+from matchmaking.place import get_tournament
+from matchmaking.sse import send_sse_event
+from tournament.models import Tournament, TournamentParticipants
+from tournament.serializers import TournamentSerializer, TournamentParticipantsSerializer, TournamentSearchSerializer
 
 
 class TournamentView(generics.CreateAPIView, generics.RetrieveAPIView):
@@ -39,7 +39,7 @@ class TournamentSearchView(generics.ListAPIView):
 
         def get_blocked_users(kwargs: Literal['user_id', 'blocked_user_id']):
             if kwargs == 'user_id':
-                create_player_instance(self.request)
+                create_blocked(self.request.user.id, request=self.request)
                 values_list = 'blocked_user_id'
             else:
                 values_list = 'user_id'
@@ -51,7 +51,7 @@ class TournamentSearchView(generics.ListAPIView):
         query = self.request.query_params.get('q')
         if query is None:
             query = ''
-        results = Tournament.objects.filter(Q(private=False) | Q(created_by=user_id), name__icontains=query, is_started=False)
+        results = Tournament.objects.filter(Q(private=False) | Q(created_by=user_id), name__icontains=query)
         exclude_blocked = get_blocked_users('user_id') + get_blocked_users('blocked_user_id')
         queryset = results.exclude(created_by__in=exclude_blocked)
         exclude_tournament = []
@@ -78,27 +78,14 @@ class TournamentParticipantsView(SerializerAuthContext, generics.CreateAPIView, 
     def perform_create(self, serializer):
         super().perform_create(serializer)
         tournament = serializer.instance.tournament
-        if tournament.is_started:
-            return
-        send_sse_event(EventCode.TOURNAMENT_JOIN, serializer.instance, serializer.data, self.request)
-        if tournament.size == tournament.participants.count():
-            Thread(target=tournament.start).start()
-        elif tournament.start_at is None and tournament.is_enough_players():
-            tournament.start_timer()
-
-
-class TournamentResultMatchView(generics.UpdateAPIView):
-    authentication_classes = []
-    serializer_class = TournamentMatchSerializer
-
-    def get_object(self):
-        try:
-            return TournamentMatches.objects.get(match_id=self.kwargs['match_id'])
-        except TournamentMatches.DoesNotExist:
-            raise NotFound(MessagesException.NotFound.MATCH)
+        if not tournament.started:
+            send_sse_event(EventCode.TOURNAMENT_JOIN, serializer.instance, serializer.data, self.request)
+            if tournament.size == tournament.participants.count():
+                Thread(target=tournament.start).start()
+            elif tournament.start_at is None and tournament.is_enough_players():
+                tournament.start_timer()
 
 
 tournament_view = TournamentView.as_view()
 tournament_search_view = TournamentSearchView.as_view()
 tournament_participants_view = TournamentParticipantsView.as_view()
-tournament_result_match_view = TournamentResultMatchView.as_view()

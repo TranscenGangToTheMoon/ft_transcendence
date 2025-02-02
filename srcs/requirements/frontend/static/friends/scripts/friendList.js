@@ -247,11 +247,11 @@ async function loadFriendList(){
             <div class="d-flex flex-column">
                 <strong>Friend Stats</strong>
                 <div class="d-flex flex-column">
-                        <div class="justify-content-between d-flex column-gap-2"><div>matches played against :</div>${friend.matches_play_against}</div>
+                        <div class="justify-content-between d-flex column-gap-2"><div>matches played against :</div>${friend.matches_played_against}</div>
                         <div class="justify-content-between d-flex column-gap-2"><div>matches played together :</div>${friend.matches_played_together}</div>
                         <div class="justify-content-between d-flex column-gap-2"><div>matches won together :</div>${friend.matches_won_together}</div>
-                        <div class="justify-content-between d-flex column-gap-2"><div>lost games :</div>${friend.friend_win}</div>
-                        <div class="justify-content-between d-flex column-gap-2"><div>won games :</div>${friend.me_win}</div>
+                        <div class="justify-content-between d-flex column-gap-2"><div>lost games :</div>${friend.friend_wins}</div>
+                        <div class="justify-content-between d-flex column-gap-2"><div>won games :</div>${friend.me_wins}</div>
                 </div>
             </div>
             `

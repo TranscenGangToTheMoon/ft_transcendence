@@ -5,7 +5,7 @@ from blocking.models import Blocked
 from lib_transcendence.exceptions import MessagesException
 from lib_transcendence.serializer import Serializer
 from lobby.models import LobbyParticipants
-from matchmaking.utils.model import ParticipantsPlace
+from matchmaking.model import ParticipantsPlace
 from play.models import Players
 from tournament.models import TournamentParticipants
 

@@ -6,11 +6,6 @@
     margin: 10px;
 }
 
-.tournament-div {
-    background-color: rebeccapurple;
-    cursor: pointer;
-}
-
 .custom-context-menu {
     position: absolute;
     z-index: 1000;

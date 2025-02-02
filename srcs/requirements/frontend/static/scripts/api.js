@@ -10,7 +10,10 @@ async function apiRequest(token, endpoint, method="GET", authType="Bearer",
         options.headers["Authorization"] = `${authType} ${token}`;
     if (body)
         options.body = JSON.stringify(body);
-    removeAlert();
+    if (!keepAlert)
+        removeAlert();
+    else
+        keepAlert = false;
     console.log(endpoint, options);
     return fetch(endpoint, options)
         .then(async response => {
@@ -38,7 +41,7 @@ async function apiRequest(token, endpoint, method="GET", authType="Bearer",
             if (error.code === 502 || error.code === 503 || error.code === 500 || error.message === 'Failed to fetch'){
                 closeExistingModals();
                 console.log('service unavailable');
-                const contentDiv = document.getElementById('content');
+                const contentDiv = document.getElementById('alertContainer');
                 removeAlert();
                 const alertHtml = `
                 <div class="alert alert-danger unavailable" role="alert">
@@ -62,6 +65,7 @@ async function getDataFromApi(token, endpoint, method="GET", authType="Bearer",
 }
 
 function removeAlert(){
+    console.log('ici');
     const existingAlert = document.querySelector('.unavailable');
     if (existingAlert)
         existingAlert.remove();

@@ -9,7 +9,7 @@ from lib_transcendence.endpoints import Users, UsersManagement
 from profile_pictures.views import profile_pictures_view, set_profile_picture_view
 from sse.views import sse_view
 from stats.views import finish_match_view, stats_view, stats_ranked_view, finish_tournament_view
-from users.views import users_me_view, retrieve_user_view, retrieve_users_view, manage_user_view
+from users.views import users_me_view, retrieve_user_view, retrieve_users_view, manage_user_view, auth_matchmaking_view
 from validate.views import validate_chat_view, are_friends_view
 
 urlpatterns = [
@@ -42,6 +42,20 @@ urlpatterns = [
 
     path(Users.chat, validate_chat_view),
     path(Users.are_friends, are_friends_view),
+    path(Users.auth_matchmaking, auth_matchmaking_view),
 
     path(UsersManagement.manage_user, manage_user_view),
 ]
+
+# try: todo handle reconnection tournament
+#     user = tournament.participants.get(user_id=user['id'])
+#     user.reconnect()
+#     return user
+# except TournamentParticipants.DoesNotExist:
+#     pass
+# todo make unit work
+# todo make correction db
+# todo finish all git hub issue
+# todo fix tournament with ui (abandon quit tournament via sse, reocnnect)
+# todo finish reason : delete conencteion, remake finish match
+# todo make database

@@ -4,7 +4,8 @@ EXT = '.png'
 class ProfilePicture:
     global_n = 0
 
-    DEFAULT = 'Default'
+    REGISTER = 'Register'
+    GUEST = 'Guest'
     TOURNAMENT_WINNER = 'Tournament Winner'
     TOURNAMENT_MASTER = 'Tournament Master'
     TOURNAMENT_GOD = 'Tournament God'
@@ -51,7 +52,8 @@ class ProfilePicture:
 
 
 profile_pictures = [
-    ProfilePicture(ProfilePicture.DEFAULT, 'Default profile picture.'),
+    ProfilePicture(ProfilePicture.GUEST, 'Be a guest.'),
+    ProfilePicture(ProfilePicture.REGISTER, 'Register user.'),
     ProfilePicture(ProfilePicture.TOURNAMENT_WINNER, 'Win 1 tournament.'),
     ProfilePicture(ProfilePicture.TOURNAMENT_MASTER, 'Win 10 tournaments.'),
     ProfilePicture(ProfilePicture.TOURNAMENT_GOD, 'Win 100 tournaments.'),

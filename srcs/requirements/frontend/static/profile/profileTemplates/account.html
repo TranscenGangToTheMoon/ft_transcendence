@@ -1,7 +1,6 @@
 <div class="m-3">
     <div id="banner" class="d-flex justify-content-center">
-        <div id="pProfilePicture">
-            
+        <div id="pProfilePicture" class="position-relative ">
         </div>
         <h1 id="bUsername" class="m-2 text-center align-items-center align-self-center text-truncate"></h1>
     </div>
@@ -13,9 +12,6 @@
                 <div class="option" data-value="friends_only">Friends</div>
                 <div class="option" data-value="everyone">Everyone</div>
             </div>
-        </div>
-        <div id="changeProfilePic" class="mt-2">
-            <button class="btn btn-secondary">change profile picture</button>
         </div>
         <div id="pNickname">
             Nickname
@@ -84,7 +80,7 @@
             </div>
         </div>
     </div>
-    <div class="modal fade" id="pChangeProfilePictureModal" tabindex="-1" aria-labelledby="pChangeProfilePictureModalLabel" aria-hidden="true">
+    <div class="modal modal-lg fade" id="pChangeProfilePictureModal" tabindex="-1" aria-labelledby="pChangeProfilePictureModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -92,7 +88,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="d-flex w-100 flex-wrap" id="profilePicContainer">
+                    <div class="d-flex w-100 flex-wrap justify-content-center" id="profilePicContainer">
     
                     </div>
                 </div>

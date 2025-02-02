@@ -39,18 +39,16 @@ async function joinTournament(code){
 	return 1;
 }
 
-document.getElementById('searchTournamentForm').addEventListener('keyup', async (e) => {
-	e.preventDefault();
-	if (e.key === 'Enter') return;
+async function searchForTournament(filter){
 	try {
-		let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/play/tournament/search/?q=${e.target.value}`);
+		let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/play/tournament/search/?q=${filter}`);
 		const tempDiv = document.createElement('div');
 		tournaments = data;
 		if (data.count){
 			for (i in data.results){
 				let tournament = data.results[i];
 				let tournamentDiv = document.createElement('div');
-				tournamentDiv.classList.add('tournament-div');
+				tournamentDiv.className = 'btn btn-dark m-1 d-flex justify-content-center tournament-div';
 				tournamentDiv.id = `tournamentDiv${tournament.code}`
 				tournamentDiv.innerText = `${tournament.name} (${tournament.n_participants}/${tournament.size})`;
 				tempDiv.appendChild(tournamentDiv);
@@ -68,6 +66,12 @@ document.getElementById('searchTournamentForm').addEventListener('keyup', async 
 	catch (error){
 		console.log(error);
 	}
+}
+
+document.getElementById('searchTournamentForm').addEventListener('keyup', async (e) => {
+	e.preventDefault();
+	if (e.key === 'Enter') return;
+	await searchForTournament(e.target.value);
 });
 
 if (typeof clickedUserDiv === 'undefined')
@@ -183,19 +187,19 @@ function displayCountdown(){
 
 function tournamentJoined(event){
 	event = JSON.parse(event.data);
-	displayGameChatMessage(event, false);
+	displayGameChatNotif(event, false);
 	addParticipant(event.data);
 }
 
 function tournamentLeaved(event){
 	event = JSON.parse(event.data);
-	displayGameChatMessage(event, false);
+	displayGameChatNotif(event, false);
 	removeParticipant(event.data.id)
 }
 
 async function tournamentBanned(event){
 	event = JSON.parse(event.data);
-	displayGameChatMessage(event, false);
+	displayGameChatNotif(event, false);
 	console.log(event);
 	await navigateTo('/');
 	displayMainAlert('Banned', event.message);
@@ -217,11 +221,13 @@ function tournamentStartAt(event) {
 		
 		if (difference <= 0) {
 			countdownDiv.innerHTML = "Starting Soon!";
+			displayGameChatNotif({'message':"Starting Soon!"}, false);
 			clearInterval(timer);
 			return;
 		}
 		
 		countdownDiv.innerHTML = `Starting in: ${difference}s`;
+		displayGameChatNotif({'message':`Starting in: ${difference}s`}, false);
 	}
 
 	updateCountdown();
@@ -235,7 +241,7 @@ function tournamentStartCancel(){
 }
 
 function tournamentStart(event){
-	displayGameChatMessage({'message':":Tournament begins"}, false);
+	displayGameChatNotif({'message':":Tournament begins"}, false);
 	displayCountdown();
 	event = JSON.parse(event.data);
 	loadTournament(event.data);
@@ -261,7 +267,7 @@ function updateMatchFromWinnerId(id, data){
 async function tournamentMatchFinished(event){
 	event = JSON.parse(event.data);
 	tournament = event.data;
-	displayGameChatMessage(event, false);
+	displayGameChatNotif(event, false);
 	setBanOption();
 	loadTournament(tournament);
 }
@@ -295,8 +301,8 @@ async function updateAvailableSpectateMatches(event){
 async function tournamentFinished(event){
 	event = JSON.parse(event.data);
 	closeGameChatTab();
-	await navigateTo('/', true, true); //todo replace by tournament history
-	displayNotification(undefined, 'tournament finished', event.message, undefined, undefined); //todo add target 
+	await navigateTo('/', true, true);
+	displayNotification(undefined, 'tournament finished', event.message, undefined, undefined);
 }
 
 function addTournamentSSEListeners(){
@@ -477,7 +483,7 @@ async function leaveTournament(){
 
 function setTournamentOptions(){
 	const options = document.querySelectorAll('.option');
-	selectedValue = 16;
+	selectedValue = 8;
 
 	options.forEach(option => {
   		if (option.dataset.value == selectedValue) {
@@ -519,7 +525,7 @@ async function initTournament(){
 		return;
 	loadCSS('/tournament/css/tournament.css', false);
 	setTournamentOptions();
-
+	await searchForTournament('');
 	if (SSEListeners.has('game-start')){
         sse.removeEventListener('game-start', SSEListeners.get('game-start'));
         SSEListeners.delete('game-start');

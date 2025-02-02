@@ -16,6 +16,17 @@ document.getElementById('pChangePassword').addEventListener('click', event => {
     window.changePasswordModal = changePasswordModal;
 })
 
+document.getElementById('pProfilePicture').addEventListener('mouseover', () => {
+    console.log('You\'re stepping on me');
+    const pProfilePictureEdit = document.getElementById('pProfilePictureEdit');
+    pProfilePictureEdit.style.display = 'block';
+});
+document.getElementById('pProfilePicture').addEventListener('mouseout', () => {
+    console.log('Why do you stop ?');
+    const pProfilePictureEdit = document.getElementById('pProfilePictureEdit');
+    pProfilePictureEdit.style.display = 'none';
+});
+
 async function deleteAccount(password) {
     getDataFromApi(getAccessToken(), `${baseAPIUrl}/users/me/`, 'DELETE', undefined, undefined, {
         'password' : password
@@ -107,48 +118,6 @@ document.getElementById('pChangeNickname').addEventListener('submit', async even
     }
 })
 
-document.getElementById('changeProfilePic').addEventListener('click', async ()=> {
-    try {
-        let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/users/profile-pictures/`)
-        const profilePicContainer = document.getElementById('profilePicContainer');
-        profilePicContainer.innerHTML = '';
-        for (i in data){
-            let profilePic = data[i];
-            const profilePicDiv = document.createElement('div');
-            profilePicDiv.classList.add('profile-pic-div');
-            profilePicDiv.setAttribute('data-bs-toggle', 'popover');
-            profilePicDiv.setAttribute('data-bs-trigger', 'hover');
-            profilePicDiv.setAttribute('data-bs-placement', 'top');
-            profilePicDiv.setAttribute('data-bs-content', `${profilePic.name} (${profilePic.unlock_reason.slice(0, -1)})`);
-            profilePicDiv.innerHTML = `
-            <img src=${profilePic.medium} style='cursor: ${profilePic.unlock ? "pointer" : "not-allowed;filter: grayscale(90%);"}'
-            class="${profilePic.is_equiped ? 'border border-warning border-2 m-1' : 'm-1'}">
-            `
-            if (profilePic.unlock && !profilePic.is_equiped){
-                profilePicDiv.addEventListener('click', async ()=> {
-                    try {
-                        await apiRequest(getAccessToken(), `${baseAPIUrl}/users/profile-picture/${profilePic.id}/`, 'PUT');
-                        handleRoute();
-                    }
-                    catch(error){
-                        console.log(error);
-                    }
-                })
-            }
-            profilePicContainer.appendChild(profilePicDiv);
-        }
-        const popovers = document.querySelectorAll('[data-bs-toggle="popover"]');
-        popovers.forEach((popover) => {
-            new bootstrap.Popover(popover);
-        });
-    }
-    catch(error){
-        console.log(error)
-    }
-    const changeProfilePicModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('pChangeProfilePictureModal'));
-    changeProfilePicModal.show();
-})
-
 document.getElementById('pDownloadData').addEventListener('click', async () => {
     try {
         const response = await fetch('/api/users/me/download-data/', {
@@ -156,7 +125,6 @@ document.getElementById('pDownloadData').addEventListener('click', async () => {
             headers: {
                 Authorization: 'Bearer ' + getAccessToken(),
                 'Content-Type': 'application/json',
-                // Remove Content-Type since we're expecting a file, not JSON
             }
         });
 
@@ -210,7 +178,49 @@ function setChatAcceptationOptions(){
  		});
 	});
 }
-
+function addBannerEventListener() {
+    document.getElementById('pProfilePictureEdit').addEventListener('click', async ()=> {
+        try {
+            let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/users/profile-pictures/`)
+            const profilePicContainer = document.getElementById('profilePicContainer');
+            profilePicContainer.innerHTML = '';
+            for (i in data){
+                let profilePic = data[i];
+                const profilePicDiv = document.createElement('div');
+                profilePicDiv.classList.add('profile-pic-div');
+                profilePicDiv.setAttribute('data-bs-toggle', 'popover');
+                profilePicDiv.setAttribute('data-bs-trigger', 'hover');
+                profilePicDiv.setAttribute('data-bs-placement', 'top');
+                profilePicDiv.setAttribute('data-bs-content', `${profilePic.name} (${profilePic.unlock_reason.slice(0, -1)})`);
+                profilePicDiv.innerHTML = `
+                <img src=${profilePic.medium} style='cursor: ${profilePic.unlock ? "pointer" : "not-allowed;filter: grayscale(90%);"}'
+                class="${profilePic.is_equiped ? 'border border-warning border-2 m-1' : 'm-1'}">
+                `
+                if (profilePic.unlock && !profilePic.is_equiped){
+                    profilePicDiv.addEventListener('click', async ()=> {
+                        try {
+                            await apiRequest(getAccessToken(), `${baseAPIUrl}/users/profile-picture/${profilePic.id}/`, 'PUT');
+                            handleRoute();
+                        }
+                        catch(error){
+                            console.log(error);
+                        }
+                    })
+                }
+                profilePicContainer.appendChild(profilePicDiv);
+            }
+            const popovers = document.querySelectorAll('[data-bs-toggle="popover"]');
+            popovers.forEach((popover) => {
+                new bootstrap.Popover(popover);
+            });
+        }
+        catch(error){
+            console.log(error)
+        }
+        const changeProfilePicModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('pChangeProfilePictureModal'));
+        changeProfilePicModal.show();
+    });
+}
 function fillBanner(){
     const usernameDiv = document.getElementById('bUsername');
     usernameDiv.innerText = userInformations.username;
@@ -218,7 +228,9 @@ function fillBanner(){
     profilePicDiv.innerHTML = `
     <img class="rounded-1" src="${userInformations.profile_picture?.small}" onerror="src='/assets/imageNotFound.png'"
     style="max-width:100px;max-height:100px">
+    <button class="btn btn-dark position-absolute top-0 end-0 edit-button" id="pProfilePictureEdit" style="display:none;"></button>
     `
+    addBannerEventListener();
 }
 
 async function accountInit(){

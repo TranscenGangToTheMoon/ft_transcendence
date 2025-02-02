@@ -3,7 +3,7 @@ from rest_framework import serializers
 from blocking.utils import create_player_instance
 from lib_transcendence.auth import get_auth_user
 from lib_transcendence.serializer import Serializer
-from matchmaking.utils.user import verify_user
+from matchmaking.user import verify_user
 from play.models import Players
 
 
@@ -25,11 +25,10 @@ class PlayersSerializer(Serializer):
         ]
 
     def create(self, validated_data):
-        request = self.context.get('request')
-        user = get_auth_user(request)
+        user = get_auth_user(self.context.get('request'))
 
         verify_user(user['id'])
 
         validated_data['user_id'] = user['id']
         validated_data['trophies'] = user['trophies']
-        return create_player_instance(request, Players, **validated_data)
+        return create_player_instance(user, Players, **validated_data)

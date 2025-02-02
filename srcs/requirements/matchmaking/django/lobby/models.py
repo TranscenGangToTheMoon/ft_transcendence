@@ -9,8 +9,8 @@ from lib_transcendence.game import GameMode
 from lib_transcendence.lobby import MatchType, Teams
 from lib_transcendence.sse_events import EventCode, create_sse_event
 from matchmaking.create_match import create_match
-from matchmaking.utils.model import ParticipantsPlace
-from matchmaking.utils.sse import send_sse_event
+from matchmaking.model import ParticipantsPlace
+from matchmaking.sse import send_sse_event
 
 
 class NoLobbyFound(Exception):
@@ -21,7 +21,7 @@ class Lobby(models.Model):
     code = models.CharField(max_length=4, unique=True)
     max_participants = models.IntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
-    game_mode = models.CharField(max_length=11)
+    game_mode = models.CharField(max_length=20)
     ready_to_play = models.BooleanField(default=False)
     game_playing = models.CharField(max_length=4, null=True, default=None)
     count = models.IntegerField(default=1)
@@ -130,12 +130,12 @@ class Lobby(models.Model):
 
 
 class LobbyParticipants(ParticipantsPlace, models.Model):
+    user_id = models.IntegerField(unique=True)
     lobby = models.ForeignKey(Lobby, on_delete=models.CASCADE, related_name='participants')
     is_guest = models.BooleanField(default=False)
-    user_id = models.IntegerField(unique=True)
     creator = models.BooleanField(default=False)
-    is_ready = models.BooleanField(default=False)
     join_at = models.DateTimeField(auto_now_add=True)
+    is_ready = models.BooleanField(default=False)
 
     team = models.CharField(default=None, null=True)
 

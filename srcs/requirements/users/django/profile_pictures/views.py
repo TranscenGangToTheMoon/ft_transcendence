@@ -12,7 +12,7 @@ class ProfilePicturesView(generics.ListAPIView):
     pagination_class = None
 
     def get_queryset(self):
-        return get_user(self.request).profile_pictures.all().order_by('is_equiped', 'is_unlocked', 'n')
+        return get_user(self.request).profile_pictures.all().order_by('-is_equiped', '-is_unlocked', 'n')
 
 
 class SetProfilePictureView(generics.UpdateAPIView):

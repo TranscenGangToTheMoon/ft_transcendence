@@ -1,5 +1,7 @@
+import uuid
 from abc import ABC, abstractmethod
 
+from django.contrib.auth.models import User
 from rest_framework import serializers
 from rest_framework.authentication import BaseAuthentication
 from rest_framework.exceptions import AuthenticationFailed, NotAuthenticated, ParseError
@@ -10,10 +12,10 @@ from lib_transcendence.services import request_auth
 
 
 def get_user_from_auth(user_data):
-    from django.contrib.auth.models import User
-
-    user, created = User.objects.get_or_create(id=user_data['id'], username=user_data['username'])
-    return user
+    try:
+        return User.objects.get(id=user_data['id'])
+    except User.DoesNotExist:
+        return User.objects.create(id=user_data['id'], username=str(uuid.uuid1()))
 
 
 class AbstractAuthentication(ABC, BaseAuthentication):

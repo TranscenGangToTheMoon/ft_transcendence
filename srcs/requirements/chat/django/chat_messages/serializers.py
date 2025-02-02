@@ -18,13 +18,14 @@ class MessagesSerializer(Serializer):
             'chat_id',
             'author',
             'content',
-            'sent_at',
             'is_read',
+            'sent_at',
         ]
         read_only_fields = [
             'id',
-            'author',
             'chat_id',
+            'author',
+            'sent_at',
         ]
 
     @staticmethod

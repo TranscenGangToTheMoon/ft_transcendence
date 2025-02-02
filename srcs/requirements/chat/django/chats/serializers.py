@@ -13,7 +13,7 @@ from user_management.models import Users
 
 
 class ChatsSerializer(Serializer):
-    username = serializers.CharField(max_length=30, write_only=True)
+    username = serializers.CharField(max_length=15, write_only=True)
     chat_with = serializers.SerializerMethodField(read_only=True)
     unread_messages = serializers.SerializerMethodField(read_only=True)
     last_message = MessagesSerializer(source='messages.last', read_only=True)
@@ -72,23 +72,6 @@ class ChatNotificationsSerializer(serializers.Serializer):
         count = 0
 
         for chat in Chats.objects.filter(participants__user__id=obj):
-            if chat.messages.exclude(author__id=obj).filter(is_read=False).exists():
-                count += 1
+            count += chat.messages.exclude(author__id=obj).filter(is_read=False).count()
 
         return count
-
-
-# class ChatNotificationsSerializer(serializers.Serializer):
-#     notifications = serializers.SerializerMethodField(read_only=True)
-#
-#     @staticmethod
-#     def get_notifications(obj):
-#         results = {}
-#
-#         for chat in Chats.objects.filter(participants__user__id=obj):
-#             message = chat.messages.exclude(author__id=obj).filter(is_read=False)
-#             count = message.count()
-#             if count > 0:
-#                 results[message.author] = count
-#
-#         return results

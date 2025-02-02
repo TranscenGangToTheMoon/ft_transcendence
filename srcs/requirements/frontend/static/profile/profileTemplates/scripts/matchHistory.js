@@ -153,6 +153,26 @@ function addMatchDetail(){
     })
 }
 
+document.addEventListener('keyup', e => {
+    console.log(e);
+    if (e.key === 'Escape'){
+        const detailDivContainer = document.getElementById('matchTeamDetail')?.parentElement;
+        if (detailDivContainer){
+            detailDivContainer.classList.add('d-none');
+        }
+    }
+})
+
+document.addEventListener('click', event => {
+    console.log(event.target);
+    if (!event.target.closest('.match')){
+        const detailDivContainer = document.getElementById('matchTeamDetail')?.parentElement;
+        if (detailDivContainer){
+            detailDivContainer.classList.add('d-none');
+        }
+    }
+})
+
 async function initHistory(){
     await loadScript('/tournament/scripts/createBracket.js');
     loadCSS('/tournament/css/tournament.css');

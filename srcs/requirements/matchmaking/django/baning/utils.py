@@ -5,7 +5,7 @@ from baning.models import Banned
 from lib_transcendence.exceptions import MessagesException
 from lib_transcendence.sse_events import EventCode, create_sse_event
 from lobby.models import LobbyParticipants
-from matchmaking.utils.model import ParticipantsPlace
+from matchmaking.model import ParticipantsPlace
 from tournament.models import TournamentParticipants
 
 
