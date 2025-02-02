@@ -192,7 +192,6 @@ class GamePage(Screen):
                     "token": User.accessToken
                 }
             )
-            print("Connected to server!")
         except Exception as error:
             print(f"From socketio launching: {error}")
             self.dismiss()
@@ -204,8 +203,12 @@ class GamePage(Screen):
 
         @self.sio.on('disconnect')
         async def disconnect():
-            self.connected = False
             print("Disconnected from server event!", flush=True)
+            if (User.inAGame):
+                while (self.countdownIsActive == True):
+                    await asyncio.sleep(1/10)
+                await self.app.push_screen_wait(GameEnd(Config.FinishReason.SERVER_DISCONNECT, False))
+            User.inAGame = False
 
         @self.sio.on('start_game')
         async def startGameAction():
@@ -261,16 +264,17 @@ class GamePage(Screen):
 
         @self.sio.on('call_spectate')
         async def callSpectateAction(data):
-            print("Spectate called!", flush=True)
+            User.inAGame = False
             while (self.countdownIsActive == True):
                 await asyncio.sleep(1/10)
             await self.app.push_screen_wait(GameEnd(Config.FinishReason.SPECTATE, False))
-            await self.sio.disconnect()
-            User.inAGame = False
+            await self.sio.disconnect() # maybe delete
+            User.inAGame = False # maybe delete
             self.dismiss()
 
         @self.sio.on('game_over')
         async def gameOverAction(data):
+            User.inAGame = False
             while (self.countdownIsActive == True):
                 await asyncio.sleep(1/10)
             await self.app.push_screen_wait(GameEnd(data["reason"], data["winner"] == User.team))
