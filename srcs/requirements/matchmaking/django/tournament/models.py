@@ -67,12 +67,14 @@ class Tournament(models.Model):
                 tournament = Tournament.objects.get(id=tournament_id)
             except Tournament.DoesNotExist:
                 return
+            if tournament.started:
+                return
             if not tournament.is_enough_players():
                 tournament.cancel_start()
                 return
             time.sleep(1)
         tournament.start()
-
+# todo delete tournament if noone left
     def cancel_start(self):
         self.start_at = None
         self.save()
