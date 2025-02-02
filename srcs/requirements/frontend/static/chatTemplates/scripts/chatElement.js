@@ -81,6 +81,7 @@ async function setChatUserCard(chatInfo, chatUserCard) {
 // ==========Chat Message==========
 
 function createMessage(message, chatInfo) {
+	console.log('createMessage:', message);
 	let messageDiv = document.createElement('div');
 	let messageContent = document.createElement('p');
 	let messageAuthor = document.createElement('strong');
@@ -90,12 +91,12 @@ function createMessage(message, chatInfo) {
 	messageDiv.className = 'gap-1';
 	if (message.author && message.author !== chatInfo.targetId) {
 		messageAuthor.innerText = 'You: ';
-		if (message.is_read === false) {
-			messageContent.classList.add('chatMessageNotRead');
-		}
 	}
 	else {
 		messageAuthor.innerText = chatInfo.target + ': ';
+		if (message.is_read === false) {
+			messageContent.classList.add('chatMessageNotRead');
+		}
 	}
 	messageContent.innerText = message.content;
 	return messageDiv;

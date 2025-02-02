@@ -191,3 +191,8 @@ body {
 .toast-body {
     color: rgba(0, 0, 0, 0.603) !important;
 }
+
+.edit-button {
+    background:url('/assets/icon/pencil.svg') no-repeat center center;
+    background-size: contain;
+}

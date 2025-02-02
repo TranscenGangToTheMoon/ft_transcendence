@@ -123,31 +123,16 @@ async def message(sid, data):
             {'error': 401, 'message': 'Invalid token', 'retry_content': content},
             to=sid
         )
-    except PermissionDenied as e:
-        await sio.emit(
-            'error',
-            {'error': 403, 'message': 'Permission Denied'},
-            to=sid
-        )
-        print(f"Error: {e}")
-        usersConnected.remove_user(sid)
-        await sio.disconnect(sid)
-    except NotFound:
-        print(f"User not found : {sid}")
-        await sio.emit(
-            'error',
-            {'error': 404, 'message': 'User not found'},
-            to=sid
-        )
-        usersConnected.remove_user(sid)
-        await sio.disconnect(sid)
     except APIException as e:
         print(f"API error : {sid}")
         await sio.emit(
             'error',
-            {'error': 400, 'message': e.detail.get('content')},
+            {'error': e.status_code, 'message': e.detail.get('content')},
             to=sid
         )
+        if e.status_code != 400:
+            usersConnected.remove_user(sid)
+            await sio.disconnect(sid)
 
 
 if __name__ == '__main__':
