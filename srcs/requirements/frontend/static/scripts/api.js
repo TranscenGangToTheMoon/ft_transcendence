@@ -65,7 +65,6 @@ async function getDataFromApi(token, endpoint, method="GET", authType="Bearer",
 }
 
 function removeAlert(){
-    console.log('ici');
     const existingAlert = document.querySelector('.unavailable');
     if (existingAlert)
         existingAlert.remove();
