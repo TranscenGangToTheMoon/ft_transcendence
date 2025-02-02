@@ -196,3 +196,7 @@ body {
     background:url('/assets/icon/pencil.svg') no-repeat center center;
     background-size: contain;
 }
+
+#tabContentProfile{
+    height: 75%;
+}
