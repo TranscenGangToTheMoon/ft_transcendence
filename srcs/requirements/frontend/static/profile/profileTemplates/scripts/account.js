@@ -228,7 +228,7 @@ function fillBanner(){
     profilePicDiv.innerHTML = `
     <img class="rounded-1" src="${userInformations.profile_picture?.small}" onerror="src='/assets/imageNotFound.png'"
     style="max-width:100px;max-height:100px">
-    <button class="btn btn-dark position-absolute top-0 end-0 edit-button" id="pProfilePictureEdit" style="display:none;"></button>
+    <img id="pProfilePictureEdit" class="rounded-1 border border-primary position-absolute top-0 end-0 edit-button" src="/assets/icon/pencil.svg" style="display:none;" onerror="src='/assets/imageNotFound.png'></img>
     `
     addBannerEventListener();
 }

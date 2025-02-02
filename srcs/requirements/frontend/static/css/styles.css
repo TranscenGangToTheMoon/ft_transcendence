@@ -193,6 +193,5 @@ body {
 }
 
 .edit-button {
-    background:url('/assets/icon/pencil.svg') no-repeat center center;
-    background-size: contain;
+    cursor: pointer;
 }
