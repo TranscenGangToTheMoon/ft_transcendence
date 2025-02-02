@@ -11,6 +11,7 @@ from game_server.match import Match
 
 async def disconnect_old_session(player_sid, player, game_id, sid):
     from game_server.server import Server
+    print('disconnecting old session', flush=True)
     await Server._sio.leave_room(player_sid, str(player.match_id))
     with Server._dsids_lock:
         Server._disconnected_sids.append(player_sid)
@@ -140,6 +141,11 @@ async def stop_moving(sid, data):
 
 async def disconnect(sid):
     from game_server.server import Server
+    try:
+        match_id = Server._clients[sid].game.match.id
+        await Server._sio.leave_room(sid, str(match_id))
+    except KeyError:
+        pass
     with Server._dsids_lock:
         for search in Server._disconnected_sids:
             try:
