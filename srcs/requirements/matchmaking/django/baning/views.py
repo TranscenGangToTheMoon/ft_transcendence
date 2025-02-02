@@ -19,6 +19,8 @@ class BanMixin(generics.DestroyAPIView):
     def get_object(self):
         ban_yourself(self.kwargs['user_id'], self.request.user.id)
         place = get_place(self.Place, code=self.kwargs['code'])
+        if isinstance(place, Tournament) and place.started:
+            raise MessagesException.PermissionDenied.BAN_AFTER_START
         get_participant(self.PlaceParticipant, place, self.request.user.id, MessagesException.PermissionDenied.BAN_NOT_CREATOR)
         return get_participants_for_baning(place, self.kwargs['user_id'])
 

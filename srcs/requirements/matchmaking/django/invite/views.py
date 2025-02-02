@@ -1,5 +1,6 @@
 from django.db.models.base import ModelBase
 from rest_framework import generics, status
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 
 from invite.utils import invite_yourself, validate_participants_for_inviting
@@ -24,6 +25,8 @@ class InviteMixin(generics.CreateAPIView):
         user_id = request.user.id
         invite_yourself(self.kwargs['user_id'], user_id)
         place = get_place(self.place, code=self.kwargs['code'])
+        if isinstance(place, Tournament) and place.started:
+            raise PermissionDenied(MessagesException.PermissionDenied.INVITE_AFTER_START)
         creator_check = False
         if self.place is Lobby or place.private:
             creator_check = MessagesException.PermissionDenied.INVITE_NOT_CREATOR.format(obj=type(place).__name__.lower())
