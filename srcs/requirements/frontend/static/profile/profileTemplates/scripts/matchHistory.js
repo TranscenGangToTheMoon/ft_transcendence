@@ -154,7 +154,6 @@ function addMatchDetail(){
 }
 
 document.addEventListener('keyup', e => {
-    console.log(e);
     if (e.key === 'Escape'){
         const detailDivContainer = document.getElementById('matchTeamDetail')?.parentElement;
         if (detailDivContainer){
@@ -164,7 +163,6 @@ document.addEventListener('keyup', e => {
 })
 
 document.addEventListener('click', event => {
-    console.log(event.target);
     if (!event.target.closest('.match')){
         const detailDivContainer = document.getElementById('matchTeamDetail')?.parentElement;
         if (detailDivContainer){
