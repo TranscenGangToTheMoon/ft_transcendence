@@ -24,10 +24,8 @@
         <div id="pPassword">
             Password
             <form class="d-flex">
-                <input class="form-control" type="password" id="pPasswordInput" placeholder="new password">
                 <button class="btn btn-dark ml-2" id="pChangePassword" type="submit">change password</button>
             </form>
-            <div id="pChangePasswordError" class="inputError"></div>
         </div>
         <div id="pDownload" class="d-flex flex-column">
             Download Account data
@@ -69,13 +67,17 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    Are you sure you want to change your password? This action is permanent and cannot be undone.
-                    To confirm your request, please re-enter your old password below:
+                    <!-- Are you sure you want to change your password? This action is permanent and cannot be undone.
+                    To confirm your request, please re-enter your old password below: -->
                     <form id="changePasswordConfirm">
-                        <input type="password" id="pConfirmPassword">
-                        <button type="submit" class="btn btn-danger">Confirm</button>
+                        <label for="pPasswordInput">New password</label>
+                        <input class="form-control" type="password" id="pPasswordInput" placeholder="">
+                        <div id="pChangePasswordError" class="inputError invalid-feedback"></div>
+                        <label for="pConfirmPassword">Old password</label>
+                        <input class="form-control" type="password" id="pConfirmPassword">
+                        <div id="pChangeContextError" class="inputError invalid-feedback"></div>
+                        <button type="submit" class="btn btn-danger mt-2">Confirm</button>
                     </form>
-                    <div id="pChangeContextError" class="inputError"></div>
                 </div>
             </div>
         </div>

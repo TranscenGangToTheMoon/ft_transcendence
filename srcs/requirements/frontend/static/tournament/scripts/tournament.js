@@ -32,7 +32,7 @@ async function joinTournament(code){
 		loadTournament(data);
 	}
 	catch (error){
-		displayMainAlert('Error', 'This tournament does not exists.');
+		displayMainAlert('Error', 'This tournament does not exists.', 'error', 5000);
 		console.log(error);
 		return 0;
 	}
@@ -202,7 +202,7 @@ async function tournamentBanned(event){
 	displayGameChatNotif(event, false);
 	console.log(event);
 	await navigateTo('/');
-	displayMainAlert('Banned', event.message);
+	displayMainAlert('Banned', event.message, 'warning', 5000);
 }
 
 function tournamentStartAt(event) {

@@ -120,7 +120,7 @@
     const leftPaddleImage = new Image();
     leftPaddleImage.src = "/assets/paddle_left.png";
     const ballImage = new Image();
-    ballImage.src = "/assets/ball2.png";
+    ballImage.src = "/assets/ball.png";
 
     function setFont(){
         ctx.font = config.font;
@@ -625,7 +625,7 @@ async function initData(data){
 	initSocket();
     setTimeout(async () => {
         if (!cancelTimeout && gameSocket && !isModalOpen()){
-            displayMainAlert('Error', 'Unable to establish connection with socket server');
+            displayMainAlert('Error', 'Unable to establish connection with socket server', 'error', 5000);
             history.go(-1);
         }
     }, GAME_CONNECTION_TIMEOUT);
@@ -717,7 +717,7 @@ function forPhoneChanges(){
 }
 
 function wrongConfigFileError(error){
-    displayMainAlert('Error', 'Erroneous game config file.\n');
+    displayMainAlert('Error', 'Erroneous game config file.\n', 'error', 5000);
     console.log(error);
 }
 

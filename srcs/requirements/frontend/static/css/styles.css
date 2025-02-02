@@ -196,3 +196,42 @@ body {
     background:url('/assets/icon/pencil.svg') no-repeat center center;
     background-size: contain;
 }
+
+#tabContentProfile{
+    height: 75%;
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+}
+
+.alert-transition {
+    position: fixed;
+    top: 10px;
+    z-index: 1050;
+    display: block;
+    animation: slideUp 0.6s ease-out;
+}
+
+.alert-transition-show {
+    display: block;
+    animation: slideDown 0.5s ease-out;
+}
