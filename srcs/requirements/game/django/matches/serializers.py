@@ -174,6 +174,8 @@ class TournamentMatchSerializer(Serializer):
         if obj.winner is None:
             return None
         user = obj.winner.players.first()
+        if user is None:
+            return None
         if 'users' in self.context and user.user_id in self.context['users']:
             base = self.context['users'][user.user_id]
         else:
@@ -184,6 +186,8 @@ class TournamentMatchSerializer(Serializer):
         if obj.looser is None:
             return None
         user = obj.looser.players.first()
+        if user is None:
+            return None
         if 'users' in self.context and user.user_id in self.context['users']:
             base = self.context['users'][user.user_id]
         else:
