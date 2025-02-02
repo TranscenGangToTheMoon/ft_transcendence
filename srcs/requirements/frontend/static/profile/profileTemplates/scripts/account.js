@@ -97,27 +97,65 @@ document.getElementById('changePasswordConfirm').addEventListener('submit', even
     changePassword(document.getElementById('pPasswordInput').value, document.getElementById('pConfirmPassword').value);
 })
 
-document.getElementById('pChangeNickname').addEventListener('submit', async event => {
-    event.preventDefault();
-    const newUsername = document.getElementById('pNicknameInput').value;
+async function changeUsername(newUsername)
+{
     if (!newUsername)
         return; 
     try {
         let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/users/me/`, "PATCH",
         undefined, undefined, {'username' : newUsername});
-        if (!data.id)
+        if (!data.id) {
             document.getElementById('pChangeNicknameError').innerText = data.username ?? data.detail;
+            return false;
+        }
         else {
             document.getElementById('pChangeNicknameError').innerText = "";
+
             await fetchUserInfos(true);
             await indexInit(false);
             displayMainAlert("Nickname updated", `Successfully updated your nickname to '${newUsername}'`, 'info', 5000)
             handleRoute();
+            return true;
         }
     }
     catch (error){
         console.log('error on username change', error);
+        return false;
     }
+}
+
+document.getElementById('bUsername').addEventListener('click', () => {
+    const usernameElement = document.getElementById('bUsername');
+    const currentUsername = usernameElement.innerText;
+    const inputField = document.createElement('input');
+    inputField.id = 'pNicknameInput';
+    inputField.type = 'text';
+    inputField.value = currentUsername; // optional, for styling
+    inputField.style.fontSize = '1.5rem'; // optional, to match the previous size
+    usernameElement.innerHTML = ''; // Clear existing content
+    usernameElement.appendChild(inputField);
+    inputField.focus();
+
+    inputField.addEventListener('blur', async function() {
+        if (inputField.value !== userInformations.username) {
+            if (await changeUsername(inputField.value) === true) return;
+        }
+        else {
+            usernameElement.innerText = userInformations.username;
+            document.getElementById('pChangeNicknameError').innerText = "";
+        }
+    });
+    
+    inputField.addEventListener('keydown', async function(event) {
+        if (event.key === 'Enter') {
+            if (inputField.value !== userInformations.username)
+                await changeUsername(inputField.value);
+            else {
+                usernameElement.innerText = userInformations.username;
+                document.getElementById('pChangeNicknameError').innerText = "";
+            }
+        }
+    });
 })
 
 document.getElementById('pDownloadData').addEventListener('click', async () => {
@@ -151,10 +189,6 @@ document.getElementById('pDownloadData').addEventListener('click', async () => {
         console.error('error:', error);
     }
 });
-
-function fillNicknamePlaceholder() {
-    document.getElementById('pNicknameInput').placeholder = userInformations.username;
-}
 
 function setChatAcceptationOptions(){
 	const options = document.getElementById('options').querySelectorAll('.option');
@@ -249,8 +283,8 @@ async function accountInit(){
     }
     await fetchUserInfos(true);
     fillBanner();
-    fillNicknamePlaceholder();
     setChatAcceptationOptions();
+    loadCSS('/profileTemplates/css/profile.css', false);
 } 
 
 accountInit();
