@@ -106,7 +106,7 @@ function setupSocketListeners(chatInfo)
 		}
 		else {
 			console.log(data);
-			displayMainAlert("Error", data, 'danger', 5000)
+			displayMainAlert("Error", data.substring(data.indexOf("Error: ") + 7), 'danger', 5000)
 			await closeChatTab(chatInfo);
 		}
 	});
