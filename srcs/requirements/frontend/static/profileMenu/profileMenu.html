@@ -1,12 +1,6 @@
-<div class="dropdown d-flex justify-content-center">
-    <button type="button" class="all-badges btn btn-secondary" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-        Menu
-    </button>
-    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton" style="z-index: 1000;">
-        <li><a class="dropdown-item" id="settings">Profile</a></li>
-        <li><a id="pMenuFriends" class="dropdown-item friend-badges" data-bs-toggle="modal" data-bs-target="#friendListModal">Friends</a></li>
-        <li><a id="pMenuChats" class="dropdown-item chat-badges">Chats</a></li>
-        <li><a class="dropdown-item text-danger" id="logOut">Log out</a></li>
+<div class="dropdown d-flex justify-content-center position-relative">
+    <ul class="dropdown-menu mt-1" id="dropdownMenuProfile" aria-labelledby="dropdownMenuButton" style="z-index: 1000; width: 100px !important;">
+        <li><a class="dropdown-item text-danger text-center" id="logOut">Log out</a></li>
     </ul>
 </div>
 <div script="/profileMenu/scripts/profileMenu.js"></div>

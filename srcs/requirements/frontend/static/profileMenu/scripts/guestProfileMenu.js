@@ -1,25 +1,33 @@
-if (typeof isClickStartingInside === 'undefined')
-    var isClickStartingInside = false;
+// if (typeof isClickStartingInside === 'undefined')
+//     var isClickStartingInside = false;
 
-document.getElementById('loginMenu').addEventListener('click', event => {
-    event.stopPropagation();
+// document.getElementById('loginMenu').addEventListener('click', event => {
+//     event.stopPropagation();
+// })
+
+// document.getElementById('loginMenu').addEventListener('mousedown', event => {
+//     isClickStartingInside = true;
+// })
+
+// document.getElementById('loginMenu').addEventListener('mouseup', event => {
+//     isClickStartingInside = false;
+// })
+
+// document.addEventListener("hide.bs.dropdown", function (event) {
+//     if (isClickStartingInside)
+//         event.preventDefault();
+//     isClickStartingInside = false;
+// });
+
+document.getElementById('userInfos').addEventListener('click', async event => {
+    event.preventDefault();
+    if (pathName === '/game')
+        return cancelNavigation(undefined, '/profile');
+    await navigateTo('/profile');
 })
-
-document.getElementById('loginMenu').addEventListener('mousedown', event => {
-    isClickStartingInside = true;
-})
-
-document.getElementById('loginMenu').addEventListener('mouseup', event => {
-    isClickStartingInside = false;
-})
-
-document.addEventListener("hide.bs.dropdown", function (event) {
-    if (isClickStartingInside)
-        event.preventDefault();
-    isClickStartingInside = false;
-});
 
 async function guestProfileInit() {
+    console.log('doiejdwedioiodiodiodjewio')
     await loadContent('/profileMenu/authenticateForm/authenticationForm.html', 'authenticate');
 }
 

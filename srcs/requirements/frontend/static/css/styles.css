@@ -20,6 +20,11 @@
     object-fit: cover;
 }
 
+/* body{
+    background-image: url('/assets/background.png');
+    background-repeat: no-repeat;
+    background-size: cover;
+} */
 
 /* UNCOMMENT TO ENABLE CRT EFFECT */
 /* body::before, body::after {
@@ -237,4 +242,24 @@ body {
 .alert-transition-show {
     display: block;
     animation: slideDown 0.5s ease-out;
+}
+
+#username {
+    background-color: rgba(60, 60, 71, 0.733) !important;
+    pointer-events: none !important;
+}
+
+#userStats{
+    background-color: rgba(60, 60, 71) !important;
+}
+
+#dropdownMenuProfile {
+    transform: translateY(0) !important;
+    width: auto !important;
+    min-width: auto !important;
+}
+
+#logOut {
+    width: auto !important;
+    min-width: auto !important;
 }

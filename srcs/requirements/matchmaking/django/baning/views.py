@@ -1,4 +1,5 @@
 from rest_framework import generics
+from rest_framework.exceptions import PermissionDenied
 
 from baning.utils import ban_yourself, get_participants_for_baning, banned
 from lib_transcendence.exceptions import MessagesException
@@ -20,7 +21,7 @@ class BanMixin(generics.DestroyAPIView):
         ban_yourself(self.kwargs['user_id'], self.request.user.id)
         place = get_place(self.Place, code=self.kwargs['code'])
         if isinstance(place, Tournament) and place.started:
-            raise MessagesException.PermissionDenied.BAN_AFTER_START
+            raise PermissionDenied(MessagesException.PermissionDenied.BAN_AFTER_START)
         get_participant(self.PlaceParticipant, place, self.request.user.id, MessagesException.PermissionDenied.BAN_NOT_CREATOR)
         return get_participants_for_baning(place, self.kwargs['user_id'])
 
