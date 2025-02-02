@@ -83,7 +83,7 @@
     const leftPaddleImage = new Image();
     leftPaddleImage.src = "/assets/paddle_left.png";
     const ballImage = new Image();
-    ballImage.src = "/assets/ball2.png";
+    ballImage.src = "/assets/ball.png";
 
     function setFont(){
         ctx.font = config.font;
