@@ -2,7 +2,10 @@
     <div id="banner" class="d-flex justify-content-center">
         <div id="pProfilePicture" class="position-relative ">
         </div>
-        <h1 id="bUsername" class="m-2 text-center align-items-center align-self-center text-truncate"></h1>
+        <div>
+            <h1 id="bUsername" class="m-2 text-center align-items-center align-self-center text-truncate"></h1>
+            <p id="pChangeNicknameError" class="text-danger"></p>
+        </div>
     </div>
     <div id="options">
         <div id="pAcceptChat">
@@ -12,14 +15,6 @@
                 <div class="option" data-value="friends_only">Friends</div>
                 <div class="option" data-value="everyone">Everyone</div>
             </div>
-        </div>
-        <div id="pNickname">
-            Nickname
-            <form id="pChangeNickname" class="d-flex">
-                <input class="form-control" type="text" id="pNicknameInput">
-                <button class="btn btn-dark ml-2" type="submit">change username</button>
-            </form>
-            <div id="pChangeNicknameError" class="inputError"></div>
         </div>
         <div id="pPassword">
             Password
@@ -101,3 +96,4 @@
 
 
 <div script="/profile/profileTemplates/scripts/account.js"></div>
+<div s

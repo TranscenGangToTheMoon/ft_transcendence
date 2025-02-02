@@ -82,6 +82,8 @@ class Tournament(models.Model):
         return self.start_countdown[self.size] <= self.participants.count()
 
     def start(self):
+        self.started = True
+        self.save()
         data = {
             'id': self.id,
             'name': self.name,
@@ -91,10 +93,9 @@ class Tournament(models.Model):
         }
         try:
             request_game(endpoints.Game.tournaments, method='POST', data=data)
-            self.started = True
-            self.save()
         except APIException:
-            pass
+            self.started = False
+            self.save()
 
     @property
     def is_full(self):

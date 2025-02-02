@@ -520,6 +520,7 @@ if (typeof nextChatsRequest === 'undefined')
 
 loadScript('/chatTemplates/scripts/chatElement.js');
 loadScript('/chatTemplates/scripts/chatGame.js');
+loadCSS('/chatTemplates/css/chat.css', false);
 
 document.getElementById('searchChatForm').addEventListener('keyup', (e) => {
 	e.preventDefault();

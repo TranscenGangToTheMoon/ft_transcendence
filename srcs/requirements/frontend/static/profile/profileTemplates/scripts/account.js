@@ -16,17 +16,6 @@ document.getElementById('pChangePassword').addEventListener('click', event => {
     window.changePasswordModal = changePasswordModal;
 })
 
-document.getElementById('pProfilePicture').addEventListener('mouseover', () => {
-    console.log('You\'re stepping on me');
-    const pProfilePictureEdit = document.getElementById('pProfilePictureEdit');
-    pProfilePictureEdit.style.display = 'block';
-});
-document.getElementById('pProfilePicture').addEventListener('mouseout', () => {
-    console.log('Why do you stop ?');
-    const pProfilePictureEdit = document.getElementById('pProfilePictureEdit');
-    pProfilePictureEdit.style.display = 'none';
-});
-
 async function deleteAccount(password) {
     getDataFromApi(getAccessToken(), `${baseAPIUrl}/users/me/`, 'DELETE', undefined, undefined, {
         'password' : password
@@ -108,27 +97,65 @@ document.getElementById('changePasswordConfirm').addEventListener('submit', even
     changePassword(document.getElementById('pPasswordInput').value, document.getElementById('pConfirmPassword').value);
 })
 
-document.getElementById('pChangeNickname').addEventListener('submit', async event => {
-    event.preventDefault();
-    const newUsername = document.getElementById('pNicknameInput').value;
+async function changeUsername(newUsername)
+{
     if (!newUsername)
         return; 
     try {
         let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/users/me/`, "PATCH",
         undefined, undefined, {'username' : newUsername});
-        if (!data.id)
+        if (!data.id) {
             document.getElementById('pChangeNicknameError').innerText = data.username ?? data.detail;
+            return false;
+        }
         else {
             document.getElementById('pChangeNicknameError').innerText = "";
+
             await fetchUserInfos(true);
             await indexInit(false);
             displayMainAlert("Nickname updated", `Successfully updated your nickname to '${newUsername}'`, 'info', 5000)
             handleRoute();
+            return true;
         }
     }
     catch (error){
         console.log('error on username change', error);
+        return false;
     }
+}
+
+document.getElementById('bUsername').addEventListener('click', () => {
+    const usernameElement = document.getElementById('bUsername');
+    const currentUsername = usernameElement.innerText;
+    const inputField = document.createElement('input');
+    inputField.id = 'pNicknameInput';
+    inputField.type = 'text';
+    inputField.value = currentUsername; // optional, for styling
+    inputField.style.fontSize = '1.5rem'; // optional, to match the previous size
+    usernameElement.innerHTML = ''; // Clear existing content
+    usernameElement.appendChild(inputField);
+    inputField.focus();
+
+    inputField.addEventListener('blur', async function() {
+        if (inputField.value !== userInformations.username) {
+            if (await changeUsername(inputField.value) === true) return;
+        }
+        else {
+            usernameElement.innerText = userInformations.username;
+            document.getElementById('pChangeNicknameError').innerText = "";
+        }
+    });
+    
+    inputField.addEventListener('keydown', async function(event) {
+        if (event.key === 'Enter') {
+            if (inputField.value !== userInformations.username)
+                await changeUsername(inputField.value);
+            else {
+                usernameElement.innerText = userInformations.username;
+                document.getElementById('pChangeNicknameError').innerText = "";
+            }
+        }
+    });
 })
 
 document.getElementById('pDownloadData').addEventListener('click', async () => {
@@ -163,10 +190,6 @@ document.getElementById('pDownloadData').addEventListener('click', async () => {
     }
 });
 
-function fillNicknamePlaceholder() {
-    document.getElementById('pNicknameInput').placeholder = userInformations.username;
-}
-
 function setChatAcceptationOptions(){
 	const options = document.getElementById('options').querySelectorAll('.option');
 	selectedValue = userInformations.accept_chat_from;
@@ -192,6 +215,15 @@ function setChatAcceptationOptions(){
 	});
 }
 function addBannerEventListener() {
+    document.getElementById('pProfilePicture').addEventListener('mouseover', () => {
+        const pProfilePictureEdit = document.getElementById('pProfilePictureEdit');
+        pProfilePictureEdit.style.display = 'block';
+    });
+    document.getElementById('pProfilePicture').addEventListener('mouseout', () => {
+        const pProfilePictureEdit = document.getElementById('pProfilePictureEdit');
+        pProfilePictureEdit.style.display = 'none';
+    });
+    console.log('I\'m here', document.getElementById('pProfilePictureEdit'));
     document.getElementById('pProfilePictureEdit').addEventListener('click', async ()=> {
         try {
             let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/users/profile-pictures/`)
@@ -239,9 +271,8 @@ function fillBanner(){
     usernameDiv.innerText = userInformations.username;
     const profilePicDiv = document.getElementById('pProfilePicture');
     profilePicDiv.innerHTML = `
-    <img class="rounded-1" src="${userInformations.profile_picture?.small}" onerror="src='/assets/imageNotFound.png'"
-    style="max-width:100px;max-height:100px">
-    <button class="btn btn-dark position-absolute top-0 end-0 edit-button" id="pProfilePictureEdit" style="display:none;"></button>
+    <img class="rounded-1" src="${userInformations.profile_picture?.small}" onerror="src='/assets/imageNotFound.png'" style="max-width:100px;max-height:100px">
+    <img id="pProfilePictureEdit" class="rounded-1 border border-primary position-absolute top-0 end-0" src='/assets/icon/pencil.svg' style="display:none;" onerror="src='/assets/imageNotFound.png'">
     `
     addBannerEventListener();
 }
@@ -252,8 +283,8 @@ async function accountInit(){
     }
     await fetchUserInfos(true);
     fillBanner();
-    fillNicknamePlaceholder();
     setChatAcceptationOptions();
+    loadCSS('/profileTemplates/css/profile.css', false);
 } 
 
 accountInit();

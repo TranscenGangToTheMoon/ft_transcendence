@@ -79,8 +79,7 @@ class TournamentParticipantsSerializer(Serializer):
         user = self.context['auth_user']
         tournament = get_tournament(create=True, code=self.context['code'])
 
-        verify_place(user, tournament)
-
+        verify_place(user, tournament, tournament.id)
         if tournament.created_by == user['id']:
             validated_data['creator'] = True
         validated_data['user_id'] = user['id']

@@ -1,0 +1,33 @@
+#chatsList{
+	max-height: 25vh;
+	overflow-y: auto;
+	flex-direction: column-reverse;
+}
+
+.chatMessageNotRead{
+	color: rgb(0, 187, 40);
+}
+
+.chatUserCardAvatar{
+	width: 50px;
+	height: 50px;
+}
+
+#chatView {
+	width: 30vh;
+}
+
+.messages{
+	height:30vh;
+	flex-direction: column-reverse;
+}
+
+.messages p{
+	overflow-wrap: anywhere;
+	white-space: normal;
+}
+
+.messageGame{
+	overflow-wrap: anywhere;
+	white-space: normal;
+}

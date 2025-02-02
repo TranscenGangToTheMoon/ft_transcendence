@@ -22,7 +22,7 @@ def validate_user_id(value, return_match=False, kwargs=None):
     except Players.DoesNotExist:
         if return_match:
             if kwargs:
-                return PermissionDenied(MessagesException.PermissionDenied.NOT_BELONG_GAME)
+                raise PermissionDenied(MessagesException.PermissionDenied.NOT_BELONG_GAME)
             raise NotFound(MessagesException.NotFound.NOT_BELONG_GAME)
 
 
