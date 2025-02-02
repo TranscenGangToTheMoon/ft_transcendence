@@ -22,6 +22,7 @@ class TournamentSerializer(Serializer):
             'participants',
             'size',
             'private',
+            'started',
             'start_at',
             'created_at',
             'created_by',
@@ -29,6 +30,7 @@ class TournamentSerializer(Serializer):
         read_only_fields = [
             'code',
             'participants',
+            'started',
             'start_at',
             'created_at',
             'created_by',
