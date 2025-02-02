@@ -25,10 +25,7 @@ from classes.utils.user                         import User
 class GamePage(Screen):
     SUB_TITLE = "Game Page"
     CSS_PATH = "styles/GamePage.tcss"
-    BINDINGS = [
-        ("^q", "exit", "Exit"),
-        ("f", "forfeit", "Quit game")
-    ]
+    BINDINGS = [("^q", "exit", "Exit")]
 
     def __init__(self):
         super().__init__()
@@ -55,8 +52,6 @@ class GamePage(Screen):
         self.sio = socketio.AsyncClient(
             http_session=self.HTTPSession,
             reconnection=False,
-            # logger=True,
-            # engineio_logger=True,
         )
 
     async def on_mount(self) -> None:
@@ -91,12 +86,6 @@ class GamePage(Screen):
             self.playground.offset.x,
             self.playground.offset.y + Config.Playground.height + 1
         )
-
-    async def action_forfeit(self):
-        while (self.countdownIsActive == True):
-            await asyncio.sleep(1 / 10)
-        self.dismiss()
-        await self.sio.disconnect()
 
     def compose(self) -> ComposeResult:
         yield Header(show_clock=True)
