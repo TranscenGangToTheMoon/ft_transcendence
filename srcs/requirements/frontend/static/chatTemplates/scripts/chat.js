@@ -168,6 +168,10 @@ async function createChatUserCard(chatInfo) {
 
 async function displayChatsList(filter='') {
 	if (isModalOpen()) return;
+	const chatListHeader = document.getElementById('chatListModalHeader');
+	const chatListBody = document.getElementById('chatListModalBody');
+	chatListHeader.classList.add('border-bottom-0');
+	chatListBody.style.display = 'none';
 	chatsList = document.getElementById('chatsList');
 	chatsList.innerHTML= '';
 	try {
@@ -177,6 +181,9 @@ async function displayChatsList(filter='') {
 			throw {'code': 400, 'detail': apiAnswer.detail};
 		}
 		if (apiAnswer.count > 0) {
+			console.log('Chat: Chats found', apiAnswer.results);
+			chatListHeader.classList.remove('border-bottom-0');
+			chatListBody.style.display = 'block';
 			for(element of apiAnswer.results) {
 				data = parsChatInfo(element);
 				await createChatUserCard(data);
