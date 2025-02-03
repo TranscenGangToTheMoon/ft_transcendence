@@ -120,13 +120,21 @@ async function loadPrivacyPolicy(){
 async function  loadUserProfile(){
     let profileMenu = 'profileMenu/profileMenu.html';
 
+    const profilePicDiv = document.getElementById('profilePic');
+    profilePicDiv.style.backgroundImage = `url("${userInformations['profile_picture'].medium}")`
+    profilePicDiv.style.width = "100px";
+    profilePicDiv.style.height = "100px";
     document.getElementById('username').innerText = userInformations.username;
     if (userInformations.is_guest){
         profileMenu = 'profileMenu/guestProfileMenu.html'
-        document.getElementById('trophies').innerText = "";
+        document.getElementById('trophies').innerHTML = `
+        <img src="/assets/trophy.png" class="mx-1" style="max-height: 15px; filter:grayscale(1);">
+        `;
     }
     else {
-        document.getElementById('trophies').innerText = userInformations.trophies + '🏆';
+        document.getElementById('trophies').innerHTML = `
+        ${userInformations.trophies}<img src="/assets/trophy.png" class="mx-1" style="max-height: 15px;">
+        `;
     }
     await loadContent(`/${profileMenu}`, 'profileMenu');
     // if (!userInformations.is_guest)
