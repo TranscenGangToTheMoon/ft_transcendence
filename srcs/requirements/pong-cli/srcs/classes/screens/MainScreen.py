@@ -56,8 +56,11 @@ class MainPage(Screen):
         self.app.pop_screen()
 
     @on(Button.Pressed, "#duel")
-    def duelAction(self):
+    async def duelAction(self):
         try:
+            if (self.app.SSEConnected == False):
+                raise (Exception(f"SSE not properly started"))
+
             User.duel()
 
             self.searchDuel = True
@@ -69,9 +72,6 @@ class MainPage(Screen):
 
         except Exception as error:
             self.query_one("#statusGame").styles.color = "red"
-            if (User.response is not None):
-                if (User.response.status_code == 409 and User.wasInAGame == True):
-                    self.app.pushGamePage()
             self.query_one("#statusGame").update(f"{error}")
 
     @on(Button.Pressed, "#cancelDuelGame")
@@ -79,12 +79,13 @@ class MainPage(Screen):
         try:
             User.cancelDuel()
             self.searchDuel = False
-            self.query_one("#duel").loading = False
-            self.query_one("#duel").variant = "primary"
-            self.query_one("#statusGame").styles.color = "white"
-            self.query_one("#statusGame").update("")
-            self.query_one("#cancelDuelGame").disabled = True
 
         except Exception as error:
             self.query_one("#statusGame").styles.color = "red"
             self.query_one("#statusGame").update(f"{error}")
+        self.query_one("#duel").loading = False
+        self.query_one("#duel").variant = "primary"
+        self.query_one("#statusGame").styles.color = "white"
+        self.query_one("#statusGame").update("")
+        self.query_one("#cancelDuelGame").disabled = True
+
