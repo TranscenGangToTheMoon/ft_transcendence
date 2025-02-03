@@ -129,21 +129,17 @@ document.getElementById('bUsername').addEventListener('click', () => {
     const currentUsername = usernameElement.innerText;
     const inputField = document.createElement('input');
     inputField.id = 'pNicknameInput';
+    inputField.className = 'm-2';
     inputField.type = 'text';
     inputField.value = currentUsername; // optional, for styling
-    inputField.style.fontSize = '1.5rem'; // optional, to match the previous size
+    inputField.style.fontSize = 'calc(1.375rem + 1.5vw)'; // optional, to match the previous size
     usernameElement.innerHTML = ''; // Clear existing content
     usernameElement.appendChild(inputField);
     inputField.focus();
 
     inputField.addEventListener('blur', async function() {
-        if (inputField.value !== userInformations.username) {
-            if (await changeUsername(inputField.value) === true) return;
-        }
-        else {
-            usernameElement.innerText = userInformations.username;
-            document.getElementById('pChangeNicknameError').innerText = "";
-        }
+        usernameElement.innerText = userInformations.username;
+        document.getElementById('pChangeNicknameError').innerText = "";
     });
     
     inputField.addEventListener('keydown', async function(event) {
@@ -154,6 +150,10 @@ document.getElementById('bUsername').addEventListener('click', () => {
                 usernameElement.innerText = userInformations.username;
                 document.getElementById('pChangeNicknameError').innerText = "";
             }
+        }
+        if (event.key === 'Escape') {
+            usernameElement.innerText = userInformations.username;
+            document.getElementById('pChangeNicknameError').innerText = "";
         }
     });
 })
