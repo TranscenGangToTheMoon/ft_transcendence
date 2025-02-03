@@ -344,3 +344,28 @@ function initSwitch(){
 document.getElementById('seeBlockedUsers').addEventListener('click', async () => {
     await initBlockedUsers();
 });
+
+function clearFriendRequests(){
+    document.getElementById('friendRequests').innerHTML = '';
+    document.getElementById('sentFriendRequests').innerHTML = '';
+    document.getElementById('friendSearched').value = '';
+}
+
+async function logOut(){
+    sse.close();
+    await closeGameConnection(window.location.pathname);
+    localStorage.removeItem('game-event');
+    emptyNotificationQueue();
+    removeTokens();
+    await generateToken();
+    await fetchUserInfos(true);
+    initSSE();
+    clearCSS();
+    clearFriendRequests();
+    handleRoute();
+}
+
+document.getElementById('logOut').addEventListener('click', async event => {
+    event.preventDefault();
+    await logOut();
+})

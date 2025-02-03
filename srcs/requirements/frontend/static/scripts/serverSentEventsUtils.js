@@ -129,6 +129,7 @@ function addChatSSEListeners(){
         });
         userInformations.notifications['chats'] += 1;
         getBadgesDivs(document);
+        console.log(badgesDivs)
         displayBadges();
     })
 }

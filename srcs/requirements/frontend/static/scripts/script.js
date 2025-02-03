@@ -126,17 +126,26 @@ async function  loadUserProfile(){
     profilePicDiv.style.height = "100px";
     document.getElementById('username').innerText = userInformations.username;
     if (userInformations.is_guest){
+        // document.getElementById('dropdownMenuButton').classList.replace('d-none', 'd-flex');
+        document.getElementById('chatFriends').classList.replace('d-flex', 'd-none');
         profileMenu = 'profileMenu/guestProfileMenu.html'
         document.getElementById('trophies').innerHTML = `
         <img src="/assets/trophy.png" class="mx-1" style="max-height: 15px; filter:grayscale(1);">
         `;
+        await loadContent(`/${profileMenu}`, 'profileMenu');
     }
     else {
+        document.getElementById('profileMenu').innerHTML = '';
+        // document.getElementById('dropdownMenuButton').classList.replace('d-flex', 'd-none');
+        document.getElementById('chatFriends').classList.replace('d-none', 'd-flex');
         document.getElementById('trophies').innerHTML = `
         ${userInformations.trophies}<img src="/assets/trophy.png" class="mx-1" style="max-height: 15px;">
         `;
+        document.getElementById('pMenuChats').addEventListener('click', async event => {
+            event.preventDefault();
+            await displayChatsList();
+        })
     }
-    await loadContent(`/${profileMenu}`, 'profileMenu');
     // if (!userInformations.is_guest)
 
 }
