@@ -167,7 +167,6 @@ async function createChatUserCard(chatInfo) {
 }
 
 async function displayChatsList(filter='') {
-	if (isModalOpen()) return;
 	const chatListHeader = document.getElementById('chatListModalHeader');
 	const chatListBody = document.getElementById('chatListModalBody');
 	chatListHeader.classList.add('border-bottom-0');
@@ -201,6 +200,7 @@ async function displayChatsList(filter='') {
 		if (error.detail === undefined) error.detail = 'Error while loading chats list';
 		displayChatError(error, 'chatsListError');
 	}
+	if (isModalOpen()) return;
 	chatListModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('chatListModal'));
 	if (chatListModal && !chatListModal._isShown)
 		chatListModal.show();
