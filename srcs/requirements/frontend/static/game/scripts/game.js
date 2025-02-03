@@ -517,7 +517,7 @@ function initSocket(match_code, socketPath, socketMode){
 	gameSocket.on('connect', () => {
         cancelTimeout = true;
         console.log('Connected to socketIO server!');
-        document.getElementById('matchCode').innerText = ' ' + match_code;
+        document.getElementById('matchCode').innerText = match_code;
         window.PongGame.resizeCanvas();
     });
     gameSocket.on('connect_error', (error)=> {
@@ -689,7 +689,7 @@ async function initData(data, socketPath, socketMode){
     console.log('socket init');
     setTimeout(async () => {
         if (!cancelTimeout && gameSocket){
-            displayMainAlert('Error', 'Unable to establish connection with socket server', 'error', 5000);
+            displayMainAlert('Error', 'Unable to establish connection with socket server', 'danger', 5000);
         }
     }, GAME_CONNECTION_TIMEOUT);
     document.getElementById('gameArea').classList.replace('d-none', 'd-flex');
@@ -786,7 +786,7 @@ function forPhoneChanges(){
 }
 
 function wrongConfigFileError(error){
-    displayMainAlert('Error', 'Erroneous game config file.\n', 'error', 5000);
+    displayMainAlert('Error', 'Erroneous game config file.\n', 'danger', 5000);
     console.log(error);
 }
 

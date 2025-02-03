@@ -17,24 +17,24 @@ document.getElementById('pChangePassword').addEventListener('click', event => {
 })
 
 async function deleteAccount(password) {
+    sse.close();
     getDataFromApi(getAccessToken(), `${baseAPIUrl}/users/me/`, 'DELETE', undefined, undefined, {
         'password' : password
     })
         .then(async data => {
-            if (data?.password)
+            if (data?.password){
                 document.getElementById('pContextError').innerText = data.password;
-            else if (data?.detail)
-                document.getElementById('pContextError').innerText = data.detail;
-            else if (!data){
-                sse.close();
-                deleteModal.hide();
-                sse = undefined;
-                removeTokens();
-                closeChatView();
-                await generateToken();
                 initSSE();
-                await fetchUserInfos(true);
+            }
+            else if (data?.detail){
+                initSSE();
+                document.getElementById('pContextError').innerText = data.detail;
+            }
+            else if (!data){
                 await navigateTo('/');
+                await logOut();
+                deleteModal.hide();
+                closeChatView();
                 setTimeout(()=> {
                     displayMainAlert('Account deleted', 'Your account has been successfully deleted. You have been redirected to homepage.', 'info', 5000);
                 }, 300);
@@ -124,26 +124,39 @@ async function changeUsername(newUsername)
     }
 }
 
-document.getElementById('bUsername').addEventListener('click', () => {
+document.getElementById('bUsername').addEventListener('mouseover', () => {
     const usernameElement = document.getElementById('bUsername');
+    if (usernameElement) {
+        usernameElement.classList.add(`border`);
+        usernameElement.classList.add(`border-primary`);
+        usernameElement.classList.add(`rounded`);
+    }
+});
+document.getElementById('bUsername').addEventListener('mouseout', () => {
+    const usernameElement = document.getElementById('bUsername');
+    if (usernameElement) {
+        usernameElement.classList.remove(`border`);
+        usernameElement.classList.remove(`border-primary`);
+        usernameElement.classList.remove(`rounded`);
+    }
+});
+
+document.getElementById('bUsername').addEventListener('click', () => {
+    let usernameElement = document.getElementById('bUsername');
     const currentUsername = usernameElement.innerText;
     const inputField = document.createElement('input');
     inputField.id = 'pNicknameInput';
+    inputField.className = 'm-0 p-0 align-items-center align-self-center text-truncate';
     inputField.type = 'text';
-    inputField.value = currentUsername; // optional, for styling
-    inputField.style.fontSize = '1.5rem'; // optional, to match the previous size
-    usernameElement.innerHTML = ''; // Clear existing content
+    inputField.value = currentUsername;
+    inputField.style.fontSize = 'calc(1.375rem + 1.5vw)';
+    usernameElement.innerHTML = '';
     usernameElement.appendChild(inputField);
     inputField.focus();
 
     inputField.addEventListener('blur', async function() {
-        if (inputField.value !== userInformations.username) {
-            if (await changeUsername(inputField.value) === true) return;
-        }
-        else {
-            usernameElement.innerText = userInformations.username;
-            document.getElementById('pChangeNicknameError').innerText = "";
-        }
+        usernameElement.innerText = userInformations.username;
+        document.getElementById('pChangeNicknameError').innerText = "";
     });
     
     inputField.addEventListener('keydown', async function(event) {
@@ -154,6 +167,10 @@ document.getElementById('bUsername').addEventListener('click', () => {
                 usernameElement.innerText = userInformations.username;
                 document.getElementById('pChangeNicknameError').innerText = "";
             }
+        }
+        if (event.key === 'Escape') {
+            usernameElement.innerText = userInformations.username;
+            document.getElementById('pChangeNicknameError').innerText = "";
         }
     });
 })
@@ -196,7 +213,7 @@ function setChatAcceptationOptions(){
 
 	options.forEach(option => {
   		if (option.dataset.value == selectedValue) {
-    		option.classList.add('selected');
+    		option.classList.add('customSelected');
   		}
   
   		option.addEventListener('click', async () => {
@@ -204,8 +221,8 @@ function setChatAcceptationOptions(){
                 await apiRequest(getAccessToken(), `${baseAPIUrl}/users/me/`, 'PATCH', undefined, undefined, {
                     'accept_chat_from': option.dataset.value,
                 })
-                options.forEach(opt => opt.classList.remove('selected'));
-                option.classList.add('selected');
+                options.forEach(opt => opt.classList.remove('customSelected'));
+                option.classList.add('customSelected');
                 selectedValue = option.dataset.value;
             }
             catch(error){
@@ -224,7 +241,7 @@ function addBannerEventListener() {
         pProfilePictureEdit.style.display = 'none';
     });
     console.log('I\'m here', document.getElementById('pProfilePictureEdit'));
-    document.getElementById('pProfilePictureEdit').addEventListener('click', async ()=> {
+    document.getElementById('pProfilePicture').addEventListener('click', async ()=> {
         try {
             let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/users/profile-pictures/`)
             const profilePicContainer = document.getElementById('profilePicContainer');
@@ -271,8 +288,8 @@ function fillBanner(){
     usernameDiv.innerText = userInformations.username;
     const profilePicDiv = document.getElementById('pProfilePicture');
     profilePicDiv.innerHTML = `
-    <img class="rounded-1" src="${userInformations.profile_picture?.small}" onerror="src='/assets/imageNotFound.png'" style="max-width:100px;max-height:100px">
-    <img id="pProfilePictureEdit" class="rounded-1 border border-primary position-absolute top-0 end-0" src='/assets/icon/pencil.svg' style="display:none;" onerror="src='/assets/imageNotFound.png'">
+    <img class="rounded-1" src="${userInformations.profile_picture?.large}" onerror="src='/assets/imageNotFound.png'" style="cursor:pointer;max-width:100px;max-height:100px">
+    <img id="pProfilePictureEdit" class="position-absolute top-0 start-0" src='/assets/icon/edit.png' cursor="pointer" style="cursor:pointer;display:none;max-width:40px;max-height:40px" onerror="src='/assets/imageNotFound.png'">
     `
     addBannerEventListener();
 }
@@ -285,6 +302,36 @@ async function accountInit(){
     fillBanner();
     setChatAcceptationOptions();
     loadCSS('/profileTemplates/css/profile.css', false);
+
+    loadContent('/blockedUsers/blockedUsers.html', 'blockedModalContainer');
+    initSwitch();
 } 
 
 accountInit();
+
+document.getElementById('switchAcceptFriendRequests').addEventListener('change', async function (event){
+    event.preventDefault();
+    try {
+        await apiRequest(getAccessToken(), `${baseAPIUrl}/users/me/`, 'PATCH', undefined, undefined, {
+            'accept_friend_request': this.checked,
+        })
+    }
+    catch(error){
+        console.log(error);
+        this.checked=false;
+    }
+})
+
+function initSwitch(){
+    const FRswitch = document.getElementById('switchAcceptFriendRequests');
+    if (FRswitch)
+        FRswitch.checked = userInformations.accept_friend_request;
+    if (userInformations.is_guest)
+        document.getElementById('pFriendship').classList.add('d-none');
+    else
+        document.getElementById('pFriendship').classList.remove('d-none');
+}
+
+document.getElementById('seeBlockedUsers').addEventListener('click', async () => {
+    await initBlockedUsers();
+});

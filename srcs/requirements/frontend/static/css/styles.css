@@ -20,11 +20,6 @@
     object-fit: cover;
 }
 
-/* body{
-    background-image: url('/assets/background.png');
-    background-repeat: no-repeat;
-    background-size: cover;
-} */
 
 /* UNCOMMENT TO ENABLE CRT EFFECT */
 /* body::before, body::after {
@@ -147,8 +142,8 @@ body {
 }
 
 .profile-pic-medium {
-    width: 50px;
-    height: 50px;
+    width: 64px;
+    height: 64px;
 }
 
 .trunc-username{
@@ -206,7 +201,8 @@ body {
 }
 
 #tabContentProfile{
-    height: 75%;
+    height: 81%;
+    padding:20px;
 }
 
 @keyframes slideDown {
@@ -244,22 +240,53 @@ body {
     animation: slideDown 0.5s ease-out;
 }
 
+.profileContainer {
+    padding: 1%;
+}
+
+.profileTitle {
+    font-size: 20px;
+    padding: 6px;
+}
+
+.profileContent {
+ margin-left: 10px;
+}
+
+.form-check-input:checked
+{
+    background-color:  #0dcaf0;
+    border-color:  #0dcaf0;
+}
+
+.customSelected
+{
+    color: black;
+    background-color:  #0dcaf0;
+}
+
+#profilePic{
+    max-width: 100px;
+    max-height: 100px;
+    background-size: cover;
+}
+
 #username {
-    background-color: rgba(60, 60, 71, 0.733) !important;
-    pointer-events: none !important;
+    background-color: rgba(60, 60, 71, 0.822) !important;
+    max-width: 100px;
 }
 
-#userStats{
+#trophies {
+    max-width: 100px;
     background-color: rgba(60, 60, 71) !important;
+    min-height: 24px;
 }
 
-#dropdownMenuProfile {
-    transform: translateY(0) !important;
-    width: auto !important;
-    min-width: auto !important;
+#userInfos{
+    border: 1px solid rgb(196, 196, 196);
 }
 
-#logOut {
-    width: auto !important;
-    min-width: auto !important;
+#dropdownMenuButton {
+    background-color: rgba(60, 60, 71) !important;
+    border: 1px solid rgb(196, 196, 196);
 }

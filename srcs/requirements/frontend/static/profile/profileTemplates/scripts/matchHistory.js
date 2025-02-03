@@ -54,6 +54,7 @@ async function loadMatches(noRequest=false){
         else{
             historyDiv.innerText = 'Play a game to see your history';
             historyDiv.className = 'w-100 text-center';
+            historyDiv.parentElement.className = 'd-flex w-100 h-100 align-items-center'
         }
     }
     catch (error){

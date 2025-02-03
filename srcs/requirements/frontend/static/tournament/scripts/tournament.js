@@ -32,7 +32,7 @@ async function joinTournament(code){
 		loadTournament(data);
 	}
 	catch (error){
-		displayMainAlert('Error', 'This tournament does not exists.', 'error', 5000);
+		displayMainAlert('Error', 'This tournament does not exists.', 'danger', 5000);
 		console.log(error);
 		return 0;
 	}
@@ -133,10 +133,10 @@ function addParticipant(participant){
 	participantDiv.id = `tParticipant${participant.id}`;
 	participantDiv.className = 'tournament-participant';
 	participantDiv.innerHTML = `
-		<img class="profile-pic-medium" src="${participant['profile_picture'].small}" 
+		<img src="${participant['profile_picture'].medium}"
 		onerror="this.onerror=null; this.src='/assets/imageNotFound.png'" 
-		alt="profile pic">
-		<div class='trunc-username'>
+		alt="profile pic" style="width:100px;height:100px">
+		<div class='trunc-username' style="margin-bottom:5px;">
 			${participant.username}
 		</div>
 	`

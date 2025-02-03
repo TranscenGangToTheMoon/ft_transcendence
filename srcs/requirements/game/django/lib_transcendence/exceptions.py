@@ -133,7 +133,9 @@ class MessagesException:
 
     class Conflict:
         DEFAULT = 'Conflict.'
-        ALREADY_IN_GAME_OR_TOURNAMENT = 'You are already in a game or a tournament.'
+        _ALREADY = 'You are already in a {obj}.'
+        ALREADY_IN_GAME = _ALREADY.format(obj='game')
+        ALREADY_IN_TOURNAMENT = _ALREADY.format(obj='tournament')
         USER_ALREADY_IN_GAME = 'Users are already in a game.'
 
     class ResourceExists:

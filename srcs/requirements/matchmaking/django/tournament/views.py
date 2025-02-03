@@ -16,8 +16,9 @@ from lib_transcendence.sse_events import EventCode
 from matchmaking.participant import get_tournament_participant
 from matchmaking.place import get_tournament
 from matchmaking.sse import send_sse_event
-from tournament.models import Tournament, TournamentParticipants
-from tournament.serializers import TournamentSerializer, TournamentParticipantsSerializer, TournamentSearchSerializer
+from tournament.models import Tournament, TournamentParticipants, TournamentMatches
+from tournament.serializers import TournamentSerializer, TournamentParticipantsSerializer, TournamentSearchSerializer, \
+    TournamentMatchSerializer
 
 
 class TournamentView(generics.CreateAPIView, generics.RetrieveAPIView):
@@ -51,7 +52,7 @@ class TournamentSearchView(generics.ListAPIView):
         query = self.request.query_params.get('q')
         if query is None:
             query = ''
-        results = Tournament.objects.filter(Q(private=False) | Q(created_by=user_id), name__icontains=query)
+        results = Tournament.objects.filter(Q(private=False) | Q(created_by=user_id), name__icontains=query, started=False)
         exclude_blocked = get_blocked_users('user_id') + get_blocked_users('blocked_user_id')
         queryset = results.exclude(created_by__in=exclude_blocked)
         exclude_tournament = []
@@ -86,6 +87,18 @@ class TournamentParticipantsView(SerializerAuthContext, generics.CreateAPIView, 
                 tournament.start_timer()
 
 
+class TournamentResultMatchView(generics.UpdateAPIView):
+    authentication_classes = []
+    serializer_class = TournamentMatchSerializer
+
+    def get_object(self):
+        try:
+            return TournamentMatches.objects.get(match_id=self.kwargs['match_id'])
+        except TournamentMatches.DoesNotExist:
+            raise NotFound(MessagesException.NotFound.MATCH)
+
+
 tournament_view = TournamentView.as_view()
 tournament_search_view = TournamentSearchView.as_view()
 tournament_participants_view = TournamentParticipantsView.as_view()
+tournament_result_match_view = TournamentResultMatchView.as_view()

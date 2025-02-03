@@ -11,6 +11,7 @@ class User():
     headers = {"Content-Type": "application/json"}
     host: str | None = None
     id: int | None = None
+    inAGame: bool = False
     opponent: str | None = None
     password: str | None = None
     port: int | None = None
@@ -19,7 +20,6 @@ class User():
     server: str | None = None
     team: str | None = None
     username: str | None = None
-    wasInAGame: bool = False
 
     @staticmethod
     def loginUser():
@@ -268,6 +268,7 @@ class User():
         User.headers = {"Content-Type": "application/json"}
         User.host = None
         User.id = None
+        User.inAGame = False
         User.opponent = None
         User.password = None
         User.port = None

@@ -18,17 +18,14 @@ from classes.game.BallWidget                    import Ball
 from classes.game.PaddleWidget                  import Paddle
 from classes.game.PlaygroundWidget              import Playground
 from classes.modalScreens.CountdownModalScreen  import Countdown
-from classes.modalScreens.GameOverModalScreen   import GameEnd
+from classes.modalScreens.GameEndModalScreen    import GameEnd
 from classes.utils.config                       import Config
 from classes.utils.user                         import User
 
 class GamePage(Screen):
     SUB_TITLE = "Game Page"
     CSS_PATH = "styles/GamePage.tcss"
-    BINDINGS = [
-        ("^q", "exit", "Exit"),
-        ("f", "forfeit", "Quit game")
-    ]
+    BINDINGS = [("^q", "exit", "Exit")]
 
     def __init__(self):
         super().__init__()
@@ -46,7 +43,6 @@ class GamePage(Screen):
         self.countdownIsActive = False
         self.pressedKeys = set()
         self.listener = None
-        self.connected = False
         self.gameStarted = False
         SSLContext = ssl.create_default_context()
         SSLContext.load_verify_locations(Config.SSL.CRT)
@@ -55,8 +51,7 @@ class GamePage(Screen):
         self.HTTPSession = aiohttp.ClientSession(connector=connector)
         self.sio = socketio.AsyncClient(
             http_session=self.HTTPSession,
-            # logger=True,
-            # engineio_logger=True,
+            reconnection=False,
         )
 
     async def on_mount(self) -> None:
@@ -78,7 +73,7 @@ class GamePage(Screen):
         self.listener.start()
 
         # Game handling
-        await self.launchSocketIO()
+        await self.startSIOServer()
         self.gameLoop()
 
     def on_resize(self) -> None:
@@ -91,12 +86,6 @@ class GamePage(Screen):
             self.playground.offset.x,
             self.playground.offset.y + Config.Playground.height + 1
         )
-
-    async def action_forfeit(self):
-        while (self.countdownIsActive == True):
-            await asyncio.sleep(1 / 10)
-        self.dismiss()
-        await self.sio.disconnect()
 
     def compose(self) -> ComposeResult:
         yield Header(show_clock=True)
@@ -126,10 +115,10 @@ class GamePage(Screen):
 
     @work
     async def gameLoop(self):
-        while (not self.connected or not self.gameStarted):
+        while (not self.sio.connected or not self.gameStarted):
             await asyncio.sleep(0.1)
 
-        while (self.connected and self.gameStarted):
+        while (self.sio.connected and self.gameStarted):
             if (self.lastFrame == 0):
                 self.lastFrame = time.perf_counter()
                 await asyncio.sleep(1 / Config.frameRate)
@@ -180,7 +169,7 @@ class GamePage(Screen):
             self.lastFrame = time.perf_counter()
             await asyncio.sleep(1 / (Config.frameRate - elapsedTime))
 
-    async def launchSocketIO(self):
+    async def startSIOServer(self):
         try:
             self.setHandler()
             await self.sio.connect(
@@ -192,7 +181,6 @@ class GamePage(Screen):
                     "token": User.accessToken
                 }
             )
-            print("Connected to server!")
         except Exception as error:
             print(f"From socketio launching: {error}")
             self.dismiss()
@@ -200,17 +188,20 @@ class GamePage(Screen):
     def setHandler(self):
         @self.sio.on('connect')
         async def connect():
-            self.connected = True
-            print("Connected to server event!", flush=True)
+            print("Connected to server!", flush=True)
 
         @self.sio.on('disconnect')
         async def disconnect():
-            self.connected = False
-            print("Disconnected from server event!", flush=True)
+            print("Disconnected from server!", flush=True)
+            while (self.countdownIsActive == True):
+                await asyncio.sleep(1/10)
+            if (User.inAGame == True):
+                await self.app.push_screen_wait(GameEnd(Config.FinishReason.SERVER_DISCONNECT, False))
+            User.inAGame = False
 
         @self.sio.on('start_game')
         async def startGameAction():
-            User.wasInAGame = True
+            User.inAGame = True
             self.lastFrame = 0
             self.gameStarted = True
 
@@ -264,14 +255,12 @@ class GamePage(Screen):
         async def gameOverAction(data):
             while (self.countdownIsActive == True):
                 await asyncio.sleep(1/10)
-            if (await self.app.push_screen_wait(GameEnd(data["reason"], data["winner"] == User.team)) == "main"):
-                self.dismiss()
-            await self.sio.disconnect()
-            User.wasInAGame = False
+            self.countdownIsActive = True
+            await self.app.push_screen_wait(GameEnd(data["reason"], data["winner"] == User.team))
+            User.inAGame = False
+            self.countdownIsActive = False
+            self.dismiss()
 
     async def on_unmount(self) -> None:
-        if (self.connected):
-            await self.sio.disconnect()
-        self.connected = False
         self.listener.stop()
         await self.HTTPSession.close()

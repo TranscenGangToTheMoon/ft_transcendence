@@ -39,7 +39,7 @@ class Service:
     INVITE = 'invite'
     LOBBY = 'lobby'
     TOURNAMENT = 'tournament'
-    USER = 'USER'
+    USER = 'user'
 
 
 class Target:

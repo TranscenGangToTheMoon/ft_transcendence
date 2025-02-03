@@ -7,7 +7,7 @@ from lib_transcendence.game import GameMode
 from lib_transcendence.permissions import GuestCannotCreate
 from lib_transcendence.serializer import SerializerAuthContext
 from lib_transcendence.sse_events import EventCode
-from lobby.serializers import LobbySerializer, LobbyParticipantsSerializer
+from lobby.serializers import LobbySerializer, LobbyParticipantsSerializer, LobbyFinishMatchSerializer
 from matchmaking.participant import get_lobby_participant
 from matchmaking.place import get_lobby
 from matchmaking.sse import send_sse_event
@@ -43,5 +43,11 @@ class LobbyParticipantsView(SerializerAuthContext, generics.CreateAPIView, gener
         send_sse_event(EventCode.LOBBY_JOIN, serializer.instance, serializer.data, self.request)
 
 
+class LobbyFinishMatchView(generics.CreateAPIView):
+    authentication_classes = []
+    serializer_class = LobbyFinishMatchSerializer
+
+
 lobby_view = LobbyView.as_view()
 lobby_participants_view = LobbyParticipantsView.as_view()
+lobby_finish_match_view = LobbyFinishMatchView.as_view()

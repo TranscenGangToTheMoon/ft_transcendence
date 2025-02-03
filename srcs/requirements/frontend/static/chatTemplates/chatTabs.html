@@ -9,10 +9,16 @@
 	.messages p{
 		overflow-wrap: anywhere;
 		white-space: normal;
+		padding-left: 15px;
+    	margin-bottom: 6px;
 	}
 	.messageGame{
 		overflow-wrap: anywhere;
 		white-space: normal;
+	}
+	.notificationGame{
+		padding-left: 10px;
+    	margin-bottom: 6px;
 	}
 </style>
 
@@ -23,7 +29,7 @@
 		<button id="chatTabsCollapse" style="display:none" class="btn" type="button" data-bs-toggle="collapse" data-bs-target="#chatBody" aria-expanded="true" aria-controls="chatBody"></button>
 		<button id="chatTabsAdd" class="btn btn-dark" type="button">✚</button>
 	</div>
-	<div id="chatBody" class="tab-content mt-0 show">
+	<div id="chatBody" class="tab-content mt-0 show" style="padding-top:5px;">
 		<div id="chatTabsError"></div>
 	</div>
 </div>

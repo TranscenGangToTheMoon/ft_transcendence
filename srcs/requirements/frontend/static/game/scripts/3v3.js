@@ -677,7 +677,7 @@ function checkGameAuthorization(){
 }
 
 function wrongConfigFileError(error){
-    displayMainAlert('Error', 'Erroneous game config file.\n', 'error', 5000);
+    displayMainAlert('Error', 'Erroneous game config file.\n', 'danger', 5000);
     console.log(error);
 }
 

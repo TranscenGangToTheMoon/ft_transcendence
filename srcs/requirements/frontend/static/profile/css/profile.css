@@ -4,3 +4,7 @@
 	color: white;
 	outline: none;
 }
+
+.match {
+	cursor: pointer;
+}
