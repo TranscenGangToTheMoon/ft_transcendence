@@ -136,7 +136,6 @@ document.getElementById('bUsername').addEventListener('mouseout', () => {
     if (usernameElement) {
         usernameElement.classList.remove('border-opacity-100');
         usernameElement.classList.add('border-opacity-10');
-        
     }
 });
 
