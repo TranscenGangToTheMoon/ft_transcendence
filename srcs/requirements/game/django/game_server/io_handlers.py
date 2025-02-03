@@ -43,8 +43,11 @@ async def handle_spectator(user_id, sid, auth, match_code):
 
 async def accept_connection(player, sid, game_id):
     from game_server.server import Server
+    try:
+        player.game = Server.get_game(game_id)
+    except Server.NotFound as e:
+        raise socketioConnectError(e)
     player.socket_id = sid
-    player.game = Server.get_game(game_id)
     Server._clients[sid] = player
     await Server._sio.enter_room(sid, str(game_id))
 
