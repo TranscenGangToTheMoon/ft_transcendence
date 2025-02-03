@@ -146,7 +146,6 @@ function updateChart(trophiesChart, data, period) {
 function setGraph(data){
     const labels = data.map(item => new Date(item.at).toLocaleTimeString()); // Heures en format lisible
     const totalTrophies = data.map(item => item.total_trophies);
-
     const config = {
         type: 'line',
         data: {
@@ -184,7 +183,7 @@ function setGraph(data){
             }
         }
     };
-
+    Chart.defaults.color = "white";
     const ctx = document.getElementById('trophiesChart').getContext('2d');
     const trophiesChart = new Chart(ctx, config);
     return trophiesChart;

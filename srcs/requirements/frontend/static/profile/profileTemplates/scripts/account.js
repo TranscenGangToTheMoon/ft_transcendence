@@ -363,7 +363,8 @@ async function logOut(){
     initSSE();
     clearCSS();
     clearFriendRequests();
-    handleRoute();
+    // handleRoute();
+    await navigateTo('/')
 }
 
 document.getElementById('logOut').addEventListener('click', async event => {
