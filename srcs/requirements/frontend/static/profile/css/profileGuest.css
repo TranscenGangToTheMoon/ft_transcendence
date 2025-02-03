@@ -9,3 +9,6 @@
 	outline: none;
 }
 
+.match {
+	cursor: pointer;
+}
