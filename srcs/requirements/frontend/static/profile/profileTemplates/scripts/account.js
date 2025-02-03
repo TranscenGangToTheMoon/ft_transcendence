@@ -287,7 +287,7 @@ async function accountInit(){
     loadCSS('/profileTemplates/css/profile.css', false);
 
     loadContent('/blockedUsers/blockedUsers.html', 'blockedModalContainer');
-    // await loadScript('/blockedUsers/scripts/blockedUsers.js');
+    initSwitch();
 } 
 
 accountInit();
