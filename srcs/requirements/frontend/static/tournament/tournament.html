@@ -2,11 +2,11 @@
 
 <div class="container">
 	<button id="leaveTournament" class="btn btn-danger">Leave Tournament</button>
-	<div id="chatSection" style="display:flex;">
+	<div id="chatSection" style="display:flex;align-items:center;flex-direction:column-reverse;">
 		<div id="chatsListView">
 			<form id="searchTournamentForm" class="d-flex">
-				<input id="searchTournament" class="form-control" placeholder="tournament name" type="text" autocomplete="off">
-				<button type="submit" class="btn btn-dark">Join / Create tournament</button>
+				<input id="searchTournament" class="form-control" placeholder="Tournament name" type="text" autocomplete="off">
+				<button type="submit" class="btn btn-dark" style="margin-left:10px;">Create tournament</button>
 			</form>
 			<div id="searchTournamentContextError"></div>
 			<div id="tournamentsList"></div>
@@ -32,7 +32,7 @@
 			<div class="modal-body" id="createTournamentContent">
 				<form class="row g-3 align-items-center">
 					<div class="col-auto">
-						<label for="numberInput" class="form-label">tournament name</label>
+						<label for="numberInput" class="form-label">Tournament name</label>
 						<input type="text" class="form-control" id="tournamentName">
 					</div>
 					<div class="col-auto">
