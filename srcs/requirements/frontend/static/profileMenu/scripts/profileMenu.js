@@ -23,7 +23,12 @@ function clearFriendRequests(){
     document.getElementById('friendSearched').value = '';
 }
 
-document.getElementById('userInfos').addEventListener('click', async event => {
+document.getElementById('pMenuChats').addEventListener('click', async event => {
+    event.preventDefault();
+    await displayChatsList();
+})
+
+document.getElementById('settings').addEventListener('click', async event => {
     event.preventDefault();
     if (pathName === '/game')
         return cancelNavigation(undefined, '/profile');

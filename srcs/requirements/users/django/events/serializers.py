@@ -9,7 +9,7 @@ from users.auth import get_user
 
 class EventSerializer(serializers.Serializer):
     users_id = serializers.ListField(child=serializers.IntegerField())
-    event_code = serializers.CharField(max_length=30)
+    event_code = serializers.CharField(max_length=50)
     data = serializers.DictField(required=False)
     kwargs = serializers.DictField(required=False)
 
