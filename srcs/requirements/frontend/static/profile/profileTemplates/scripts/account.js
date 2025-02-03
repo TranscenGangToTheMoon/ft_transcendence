@@ -124,6 +124,23 @@ async function changeUsername(newUsername)
     }
 }
 
+document.getElementById('bUsername').addEventListener('mouseover', () => {
+    const usernameElement = document.getElementById('bUsername');
+    if (usernameElement) {
+        usernameElement.classList.add(`border`);
+        usernameElement.classList.add(`border-primary`);
+        usernameElement.classList.add(`rounded`);
+    }
+});
+document.getElementById('bUsername').addEventListener('mouseout', () => {
+    const usernameElement = document.getElementById('bUsername');
+    if (usernameElement) {
+        usernameElement.classList.remove(`border`);
+        usernameElement.classList.remove(`border-primary`);
+        usernameElement.classList.remove(`rounded`);
+    }
+});
+
 document.getElementById('bUsername').addEventListener('click', () => {
     let usernameElement = document.getElementById('bUsername');
     const currentUsername = usernameElement.innerText;
