@@ -1,32 +1,3 @@
-async function logOut(){
-    sse.close();
-    await closeGameConnection(window.location.pathname);
-    localStorage.removeItem('game-event');
-    emptyNotificationQueue();
-    removeTokens();
-    await generateToken();
-    await fetchUserInfos(true);
-    initSSE();
-    clearCSS();
-    clearFriendRequests();
-    handleRoute();
-}
-
-document.getElementById('logOut').addEventListener('click', async event => {
-    event.preventDefault();
-    await logOut();
-})
-
-function clearFriendRequests(){
-    document.getElementById('friendRequests').innerHTML = '';
-    document.getElementById('sentFriendRequests').innerHTML = '';
-    document.getElementById('friendSearched').value = '';
-}
-
-document.getElementById('pMenuChats').addEventListener('click', async event => {
-    event.preventDefault();
-    await displayChatsList();
-})
 
 document.getElementById('settings').addEventListener('click', async event => {
     event.preventDefault();

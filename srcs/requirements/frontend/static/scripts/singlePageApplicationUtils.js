@@ -34,8 +34,7 @@ async function loadContent(url, containerId='content', append=false, container=u
             contentDiv.insertAdjacentHTML('beforeend', `\n${html}`);
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = html;
-        getBadgesDivs(contentDiv);
-        badgesDivs['friend_requests'] = contentDiv.querySelectorAll('.friend-badges');
+        getBadgesDivs(document);
         displayBadges();
 
         const script = tempDiv.querySelector('[script]');
