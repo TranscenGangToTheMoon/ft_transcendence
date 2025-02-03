@@ -76,6 +76,29 @@
     canvas.width = config.canvasWidth;
     canvas.height = config.canvasHeight;
 
+    function resizeCanvas() {
+        const container = document.getElementById('canvas-container');
+        if (!container) return;
+        const windowWidth = window.innerWidth;
+        const windowHeight = window.innerHeight - document.querySelector('header').offsetHeight;
+  
+        const baseWidth = config.canvasWidth;
+        const baseHeight = config.canvasHeight + document.getElementById('gameInfo').offsetHeight + 200;
+  
+        let scale = Math.min(windowWidth / baseWidth, windowHeight / baseHeight);
+        
+        if (scale > 1)
+            scale = 1;
+        container.style.transform = `scale(${scale})`;
+        container.style.width = `${baseWidth}px`;
+        container.style.height = `${baseHeight}px`;
+        container.style.marginLeft = `${(windowWidth - baseWidth * scale) / 2}px`;
+        container.style.marginTop = `${(windowHeight - baseHeight * scale) / 2}px`;
+    }
+    
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
     const paddleImage = new Image();
     paddleImage.src = "/assets/paddle.png";
     const rightPaddleImage = new Image();
@@ -456,7 +479,7 @@
         }
     }
     
-    window.PongGame = {startGame, stopGame, pauseGame, resumeGame, config, resetGame, state, setScoreCoords, setFont};
+    window.PongGame = {startGame, stopGame, pauseGame, resumeGame, config, resetGame, state, setScoreCoords, setFont, resizeCanvas};
 })();
 
 document.getElementById('confirmModal').addEventListener('hidden.bs.modal', () => {
@@ -479,6 +502,7 @@ async function initGameConstants(){
             PongGame.config.maxBounceAngle = data.ball.maxBounceAngle;
             PongGame.config.winningScore = data.score.max;
             PongGame.setScoreCoords();
+            PongGame.resizeCanvas();
         })
 }
 
