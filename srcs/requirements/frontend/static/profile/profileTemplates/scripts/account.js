@@ -152,6 +152,7 @@ document.getElementById('bUsername').parentElement.addEventListener('click', () 
     inputField.className = 'm-0 p-0 align-items-center align-self-center text-truncate';
     inputField.type = 'text';
     inputField.value = usernameTitle.innerText;
+    inputField.maxLength = 15;
     inputField.style.fontSize = 'calc(1.375rem + 1.5vw)';
     usernameElement.appendChild(inputField);
     usernameElement.appendChild(errorField);
