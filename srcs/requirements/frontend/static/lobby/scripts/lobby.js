@@ -655,7 +655,7 @@ async function lobbyInit() {
         }
         catch (subError){
             if (subError.code === 404){
-                displayMainAlert('Unable to join the lobby', 'It may not exist, has been deleted, or is already full.', 'error', 5000);
+                displayMainAlert('Unable to join the lobby', 'It may not exist, has been deleted, or is already full.', 'danger', 5000);
                 await navigateTo('/');
             }
             console.log(subError);
