@@ -25,8 +25,6 @@ class InviteMixin(generics.CreateAPIView):
         user_id = request.user.id
         invite_yourself(self.kwargs['user_id'], user_id)
         place = get_place(self.place, code=self.kwargs['code'])
-        if isinstance(place, Tournament) and place.started:
-            raise PermissionDenied(MessagesException.PermissionDenied.INVITE_AFTER_START)
         creator_check = False
         if self.place is Lobby or place.private:
             creator_check = MessagesException.PermissionDenied.INVITE_NOT_CREATOR.format(obj=type(place).__name__.lower())
@@ -34,6 +32,8 @@ class InviteMixin(generics.CreateAPIView):
         validate_participants_for_inviting(place, user_id, self.kwargs['user_id'])
 
         if self.place is Tournament:
+            if place.started:
+                raise PermissionDenied(MessagesException.PermissionDenied.INVITE_AFTER_START)
             event = EventCode.INVITE_TOURNAMENT
         elif place.game_mode == GameMode.CLASH:
             event = EventCode.INVITE_CLASH

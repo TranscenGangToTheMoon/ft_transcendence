@@ -1,3 +1,5 @@
+from datetime import timedelta, datetime, timezone
+
 from django.conf import settings
 from rest_framework import serializers
 from rest_framework.exceptions import NotFound, PermissionDenied
@@ -62,12 +64,14 @@ class MatchSerializer(Serializer):
             'game_mode',
             'created_at',
             'game_duration',
+            'tournament_id',
+            'tournament_stage_id',
+            'tournament_n',
             'match_type',
             'finished',
             'teams',
             'winner',
             'looser',
-            'tournament_id',
         ]
         read_only_fields = [
             'id',
@@ -76,10 +80,12 @@ class MatchSerializer(Serializer):
             'created_at',
             'winner',
             'looser',
-            'tournament_id',
         ]
         write_only_fields = [
             'game_mode'
+            'tournament_id'
+            'tournament_stage_id'
+            'tournament_n'
             'teams'
         ]
 
@@ -113,14 +119,23 @@ class MatchSerializer(Serializer):
                 representation['looser'] = instance.looser.name
             else:
                 representation['looser'] = None
-        else:
-            representation.pop('winner')
-            representation.pop('looser')
         if representation['tournament_id'] is None:
             representation.pop('tournament_id')
         return representation
 
     def create(self, validated_data):
+        if validated_data['game_mode'] == GameMode.TOURNAMENT:
+            if not validated_data.get('tournament_id'):
+                raise serializers.ValidationError({'tournament_id': [MessagesException.ValidationError.FIELD_REQUIRED]})
+            if not validated_data.get('tournament_stage_id'):
+                raise serializers.ValidationError({'tournament_stage_id': [MessagesException.ValidationError.FIELD_REQUIRED]})
+            if not validated_data.get('tournament_n'):
+                raise serializers.ValidationError({'tournament_n': [MessagesException.ValidationError.FIELD_REQUIRED]})
+        else:
+            validated_data.pop('tournament_id', None)
+            validated_data.pop('tournament_stage_id', None)
+            validated_data.pop('tournament_n', None)
+
         validated_data['code'] = generate_code(Matches)
         teams = validated_data.pop('teams')
         if len(teams['a']) == 1 and validated_data['game_mode'] == GameMode.CLASH:
@@ -143,6 +158,48 @@ class MatchSerializer(Serializer):
                 if match.game_mode == GameMode.RANKED:
                     kwargs['trophies'] = user['trophies']
                 match.players.create(user_id=user['id'], team=new_team, **kwargs)
+        return match
+
+
+class MatchNotPlayedSerializer(Serializer):
+    user_id = serializers.IntegerField(write_only=True)
+    tournament_id = serializers.IntegerField()
+    tournament_stage_id = serializers.IntegerField()
+    tournament_n = serializers.IntegerField()
+
+    class Meta:
+        model = Matches
+        fields = [
+            'user_id',
+            'id',
+            'game_mode',
+            'created_at',
+            'tournament_id',
+            'tournament_stage_id',
+            'tournament_n',
+            'winner',
+        ]
+        read_only_fields = [
+            'id',
+            'game_mode',
+            'created_at',
+            'winner',
+        ]
+
+    def create(self, validated_data):
+        user_id = validated_data.pop('user_id')
+        validated_data['game_mode'] = GameMode.TOURNAMENT
+        validated_data['match_type'] = MatchType.M1V1
+        validated_data['game_duration'] = timedelta()
+        validated_data['finished'] = True
+        validated_data['finished_at'] = datetime.now(timezone.utc)
+        validated_data['finish_reason'] = FinishReason.GAME_NOT_PLAYED
+        match = super().create(validated_data)
+        winner_team = match.teams.create(name='a')
+        match.teams.create(name='b')
+        match.players.create(user_id=user_id, team=winner_team)
+        match.winner = winner_team
+        match.save()
         return match
 
 
@@ -171,11 +228,7 @@ class TournamentMatchSerializer(Serializer):
         ]
 
     def get_winner(self, obj):
-        if obj.winner is None:
-            return None
         user = obj.winner.players.first()
-        if user is None:
-            return None
         if 'users' in self.context and user.user_id in self.context['users']:
             base = self.context['users'][user.user_id]
         else:
@@ -186,8 +239,6 @@ class TournamentMatchSerializer(Serializer):
         if obj.looser is None:
             return None
         user = obj.looser.players.first()
-        if user is None:
-            return None
         if 'users' in self.context and user.user_id in self.context['users']:
             base = self.context['users'][user.user_id]
         else:

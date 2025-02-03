@@ -10,6 +10,7 @@ from lib_transcendence.exceptions import MessagesException
 from lib_transcendence.serializer import Serializer
 from lib_transcendence.services import request_chat
 from profile_pictures.create import create_user_profile_pictures
+from profile_pictures.serializers import ProfilePicturesSerializer
 from profile_pictures.unlock import unlock_user_pp
 from stats.create import create_user_stats
 from stats.utils import get_trophies
@@ -41,7 +42,6 @@ class UsersMeSerializer(BaseUsersSerializer):
             'last_online',
             'password',
             'old_password',
-
         ]
         read_only_fields = [
             'id',
@@ -68,6 +68,10 @@ class UsersMeSerializer(BaseUsersSerializer):
             'friend_requests': obj.friend_requests_received.filter(new=True).count(),
             'chats': chat_notifications,
         }
+
+    @staticmethod
+    def get_profile_picture(obj):
+        return ProfilePicturesSerializer(obj.profile_pictures.get(is_equiped=True)).data
 
     def update(self, instance, validated_data):
         if instance.is_guest and any([k != 'username' for k in validated_data]):
