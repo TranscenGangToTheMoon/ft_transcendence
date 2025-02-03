@@ -148,6 +148,7 @@ document.getElementById('bUsername').parentElement.addEventListener('click', () 
     usernameTitle.style.display = 'none';
     errorField.id = 'pChangeNicknameError';
     errorField.className = 'text-danger';
+    errorField.style.marginLeft = '10px';
     inputField.id = 'pNicknameInput';
     inputField.className = 'p-1 align-items-center align-self-center text-truncate';
     inputField.type = 'text';
