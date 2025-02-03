@@ -127,17 +127,16 @@ async function changeUsername(newUsername)
 document.getElementById('bUsername').addEventListener('mouseover', () => {
     const usernameElement = document.getElementById('bUsername');
     if (usernameElement) {
-        usernameElement.classList.add(`border`);
-        usernameElement.classList.add(`border-primary`);
-        usernameElement.classList.add(`rounded`);
+        usernameElement.classList.remove('border-opacity-10');
+        usernameElement.classList.add('border-opacity-100');
     }
 });
 document.getElementById('bUsername').addEventListener('mouseout', () => {
     const usernameElement = document.getElementById('bUsername');
     if (usernameElement) {
-        usernameElement.classList.remove(`border`);
-        usernameElement.classList.remove(`border-primary`);
-        usernameElement.classList.remove(`rounded`);
+        usernameElement.classList.remove('border-opacity-100');
+        usernameElement.classList.add('border-opacity-10');
+        
     }
 });
 
