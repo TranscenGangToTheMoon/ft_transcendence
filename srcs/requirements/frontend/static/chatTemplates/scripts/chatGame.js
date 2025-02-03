@@ -123,6 +123,7 @@ function sendGameMessageListener(gameInfo) {
 					'content': message,
 				});
 			}
+			chatForm.reset();
 			if (apiAnswer.detail) {
 				throw {'code': 400, 'detail': apiAnswer.detail};
 			}
@@ -137,7 +138,6 @@ function sendGameMessageListener(gameInfo) {
 				chatBox.appendChild(messageDiv);
 				chatBox.scrollTop = chatBox.scrollHeight;
 			}
-			chatForm.reset();
 		} catch (error) {
 			console.log('Error game chat:', error);
 		}
