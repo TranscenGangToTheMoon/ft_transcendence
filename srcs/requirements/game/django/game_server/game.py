@@ -517,11 +517,12 @@ class Game:
         for team in self.match.teams:
             game_state = self.get_game_state(side)
             for player in team.players:
-                Server.emit(
-                    'game_state',
-                    data=game_state,
-                    to=player.socket_id
-                )
+                if player.socket_id != '':
+                    Server.emit(
+                        'game_state',
+                        data=game_state,
+                        to=player.socket_id
+                    )
             side = -1
         game_state = self.get_game_state(1)
         with self.spec_lock:
@@ -572,6 +573,7 @@ class Game:
                     rackets = self.get_rackets(-1)
             except Game.NoSuchRacket:
                 rackets = self.get_rackets()
+            print('sending rackets', flush=True)
             Server.emit(
                 'rackets',
                 data=rackets,
