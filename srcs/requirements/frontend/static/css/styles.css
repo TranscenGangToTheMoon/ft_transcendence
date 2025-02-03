@@ -22,7 +22,7 @@
 
 
 /* UNCOMMENT TO ENABLE CRT EFFECT */
-/* body::before, body::after {
+body::before, body::after {
     content: "";
     position: fixed;
     top: 0;
@@ -41,8 +41,8 @@ body::before {
 body::after {
     background: url('/assets/layer2.png') repeat;
     mix-blend-mode: soft-light;
-    opacity: 0.6;
-} */
+    opacity: 0.3;
+}
 
 @font-face {
     font-family: 'balatro';
@@ -288,9 +288,19 @@ body {
 
 #userInfos{
     border: 1px solid rgb(196, 196, 196);
+    padding:5px;
+    background-color: rgba(60, 60, 71) !important;
 }
 
 #dropdownMenuButton {
     background-color: rgba(60, 60, 71) !important;
     border: 1px solid rgb(196, 196, 196);
+}
+
+.headerButtons img:hover {
+    transition: all 0.1s;
+}
+
+.headerButtons img:hover {
+    transform: scale(1.1);
 }
