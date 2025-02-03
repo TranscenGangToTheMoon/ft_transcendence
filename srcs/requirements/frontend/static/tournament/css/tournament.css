@@ -1,9 +1,16 @@
 .tournament-participant {
-    width: 70px;
-    height: 100px;
-    background-color: darkseagreen;
+    width: 110px;
+    height: 150px;
+    background-color: rgba(60, 60, 71);
     text-align: center;
     margin: 10px;
+    padding-top: 5px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: baseline;
 }
 
 .custom-context-menu {
