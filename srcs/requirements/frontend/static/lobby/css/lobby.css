@@ -50,27 +50,49 @@
 }
 
 #teamA .player{
-    background-color: rgba(255, 0, 0, 0.54) !important;
-    outline: auto;
-    outline-color: white;
-    width: 70px;
-    height: 100px;
+    border-radius: 8px;
+    background-color: rgba(220, 53, 69, 0.9) !important;
+    border: 1px solid #ccc;
+    width: 80px;
+    height: 110px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    margin-left: 3px;
+    padding-top: 3px;
 }
 
 #teamB .player{
-    background-color: rgba(0, 77, 255, 0.54) !important;
-    outline: auto;
-    outline-color: white;
-    width: 70px;
-    height: 100px;
+    border-radius: 8px;
+    background-color: rgba(13, 110, 253, 0.9) !important;
+    border: 1px solid #ccc;
+    width: 80px;
+    height: 110px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    margin-left: 3px;
+    padding-top: 3px;
+}
+
+.dropzone .player .playerUsername {
+    margin-left: 5px;
 }
 
 #bench .player {
-    background-color: rgba(255, 255, 255, 0.361);
-    outline: auto;
-    outline-color: white;
-    width: 70px;
-    height: 100px;
+    border-radius: 8px;
+    background-color: rgba(60, 60, 71, 0.9) !important;
+    border: 1px solid #ccc;
+    width: 80px;
+    height: 110px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    margin-left: 3px;
+    padding-top: 3px;
 }
 
 #teamALabel {

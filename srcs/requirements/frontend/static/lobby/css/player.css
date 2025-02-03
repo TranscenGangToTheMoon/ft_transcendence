@@ -1,14 +1,21 @@
 .player {
-    height: 200px;
-    width: 140px;
-    background-color: darkcyan;
+    height: 205px;
+    width: 135px;
+    background-color: #3C3C47;
     text-align: center;
     justify-content: center;
+    border: 1px solid #ccc;
+}
+
+.mediumPlayerProfilePic {
+    height: 124px;
+    width: 124px;
 }
 
 .playerProfilePic {
-    height: 60px;
-    width: 60px;
+    margin-top: 2px;
+    height: 64px;
+    width: 64px;
 }
 
 .playerId {

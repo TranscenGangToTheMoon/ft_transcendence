@@ -138,7 +138,7 @@ async function fillBench(player, benchDiv){
     benchDiv.querySelector('#benchPlayerList').appendChild(playerDiv);
     await loadContent('/lobby/player.html', undefined, false, playerDiv);
     playerDiv.querySelector('.playerUsername').innerText = player.username;
-    playerDiv.querySelector('img').src = player.profile_picture.small;
+    playerDiv.querySelector('img').src = player.profile_picture.medium;
     playerDiv.querySelector('.playerIsReady').style.display = 'none';
     playerDiv.querySelector('.playerId').innerText = player.id;
 }
@@ -271,8 +271,11 @@ function addContextMenus(){
     }
     for (let playerDiv of playerDivs){
         if (playerDiv.querySelector('.playerUsername').innerText === userInformations.username || 
-            playerDiv.querySelector('.playerUsername').innerText === 'Add')
-            continue;
+            playerDiv.querySelector('.playerUsername').innerText === 'Add'){
+                playerDiv.querySelector('.playerUsername').className = 'playerUsername w-100 text-truncate';
+                playerDiv.querySelector('.playerUsername').style.marginBottom = '5px';
+                continue;
+            }
         playerDiv.addEventListener('contextmenu', function(e) {
             e.preventDefault();
             clickedUserDiv = this;
@@ -364,8 +367,10 @@ async function updateOwnTeam(player, teamDisplayDiv, teamSelectorDiv, benchDiv, 
     teamDisplayDiv.appendChild(playerDiv);
     await loadContent('/lobby/player.html', undefined, false, playerDiv);
     playerDiv.querySelector('.playerUsername').innerText = player.username;
-    playerDiv.querySelector('img').src = player.profile_picture.small;
-    playerDiv.querySelector('img').src = player.profile_picture.small;
+    playerDiv.querySelector('img').src = player.profile_picture.medium;
+    playerDiv.querySelector('img').classList.remove("playerProfilePic");
+    playerDiv.querySelector('img').classList.add("m-1");
+    playerDiv.querySelector('img').classList.add("mediumPlayerProfilePic");
     playerDiv.querySelector('.playerId').innerText = player.id;
     const playerIsReadyButton =  playerDiv.querySelector('.playerIsReady');
     playerIsReadyButton.innerText = player.is_ready ? 'Ready' : 'Not ready';
