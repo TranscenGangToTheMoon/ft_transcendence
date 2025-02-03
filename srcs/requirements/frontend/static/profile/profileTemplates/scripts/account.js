@@ -139,22 +139,29 @@ document.getElementById('bUsername').addEventListener('mouseout', () => {
     }
 });
 
-document.getElementById('bUsername').addEventListener('click', () => {
-    let usernameElement = document.getElementById('bUsername');
-    const currentUsername = usernameElement.innerText;
+document.getElementById('bUsername').parentElement.addEventListener('click', () => {
+    const usernameTitle = document.getElementById('bUsername');
+    let usernameElement = usernameTitle.parentElement;
+    if (document.getElementById('pNicknameInput') || document.getElementById('pChangeNicknameError')) return;
     const inputField = document.createElement('input');
+    const errorField = document.createElement('div');
+    usernameTitle.style.display = 'none';
+    errorField.id = 'pChangeNicknameError';
+    errorField.className = 'text-danger';
     inputField.id = 'pNicknameInput';
     inputField.className = 'm-0 p-0 align-items-center align-self-center text-truncate';
     inputField.type = 'text';
-    inputField.value = currentUsername;
+    inputField.value = usernameTitle.innerText;
     inputField.style.fontSize = 'calc(1.375rem + 1.5vw)';
-    usernameElement.innerHTML = '';
     usernameElement.appendChild(inputField);
+    usernameElement.appendChild(errorField);
     inputField.focus();
 
     inputField.addEventListener('blur', async function() {
-        usernameElement.innerText = userInformations.username;
-        document.getElementById('pChangeNicknameError').innerText = "";
+        usernameTitle.style.display = 'block';
+        usernameTitle.innerText = userInformations.username;
+        inputField.remove();
+        errorField.remove();
     });
     
     inputField.addEventListener('keydown', async function(event) {
@@ -162,13 +169,17 @@ document.getElementById('bUsername').addEventListener('click', () => {
             if (inputField.value !== userInformations.username)
                 await changeUsername(inputField.value);
             else {
-                usernameElement.innerText = userInformations.username;
-                document.getElementById('pChangeNicknameError').innerText = "";
+                usernameTitle.style.display = 'block';
+                usernameTitle.innerText = userInformations.username;
+                inputField.remove();
+                errorField.remove();
             }
         }
         if (event.key === 'Escape') {
-            usernameElement.innerText = userInformations.username;
-            document.getElementById('pChangeNicknameError').innerText = "";
+            usernameTitle.style.display = 'block';
+            usernameTitle.innerText = userInformations.username;
+            inputField.remove();
+            errorField.remove();
         }
     });
 })
