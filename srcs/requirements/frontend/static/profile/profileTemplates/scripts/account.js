@@ -285,6 +285,9 @@ async function accountInit(){
     fillBanner();
     setChatAcceptationOptions();
     loadCSS('/profileTemplates/css/profile.css', false);
+
+    loadContent('/blockedUsers/blockedUsers.html', 'blockedModalContainer');
+    // await loadScript('/blockedUsers/scripts/blockedUsers.js');
 } 
 
 accountInit();
@@ -306,6 +309,10 @@ function initSwitch(){
     const FRswitch = document.getElementById('switchAcceptFriendRequests');
     if (FRswitch)
         FRswitch.checked = userInformations.accept_friend_request;
+    if (userInformations.is_guest)
+        document.getElementById('pFriendship').classList.add('d-none');
+    else
+        document.getElementById('pFriendship').classList.remove('d-none');
 }
 
 document.getElementById('seeBlockedUsers').addEventListener('click', async () => {

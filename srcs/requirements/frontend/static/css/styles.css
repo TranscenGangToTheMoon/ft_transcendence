@@ -263,3 +263,29 @@ body {
     color: black;
     background-color:  #0dcaf0;
 }
+
+#profilePic{
+    max-width: 100px;
+    max-height: 100px;
+    background-size: cover;
+}
+
+#username {
+    background-color: rgba(60, 60, 71, 0.822) !important;
+    max-width: 100px;
+}
+
+#trophies {
+    max-width: 100px;
+    background-color: rgba(60, 60, 71) !important;
+    min-height: 24px;
+}
+
+#userInfos{
+    border: 1px solid rgb(196, 196, 196);
+}
+
+#dropdownMenuButton {
+    background-color: rgba(60, 60, 71) !important;
+    border: 1px solid rgb(196, 196, 196);
+}
