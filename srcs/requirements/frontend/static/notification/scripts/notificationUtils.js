@@ -111,6 +111,14 @@ function handleProfilePicNotification(target, img, notification, toastContainer,
                 if (target.method === 'POST')
                     addFriend(data);
             }
+            if (window.location.pathname === '/profile'){
+                // fetchUserInfos(true);
+                await handleRoute();
+            }
+            // else{
+                await fetchUserInfos(true);
+                await loadUserProfile();
+            // }
         }
         catch(error){
             console.log(error);
