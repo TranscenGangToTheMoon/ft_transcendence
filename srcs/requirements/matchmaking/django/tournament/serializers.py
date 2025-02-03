@@ -126,7 +126,7 @@ class TournamentParticipantsSerializer(Serializer):
         except TournamentParticipants.DoesNotExist:
             pass
 
-        verify_place(user, tournament) # todo test reconenct
+        verify_place(user, tournament)
         if tournament.created_by == user['id']:
             validated_data['creator'] = True
         validated_data['user_id'] = user['id']
