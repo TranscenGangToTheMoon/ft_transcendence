@@ -18,7 +18,3 @@
     cursor: pointer;
     transition: ease-in-out 0.3s;
 }
-
-.friendRequestKebabMenuButton:hover{
-    transform: scale(1.2);
-}
