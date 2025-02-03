@@ -126,13 +126,16 @@ async function  loadUserProfile(){
     profilePicDiv.style.height = "100px";
     document.getElementById('username').innerText = userInformations.username;
     if (userInformations.is_guest){
-        // document.getElementById('dropdownMenuButton').classList.replace('d-none', 'd-flex');
         document.getElementById('chatFriends').classList.replace('d-flex', 'd-none');
         profileMenu = 'profileMenu/guestProfileMenu.html'
         document.getElementById('trophies').innerHTML = `
         <img src="/assets/trophy.png" class="mx-1" style="max-height: 15px; filter:grayscale(1);">
         `;
         await loadContent(`/${profileMenu}`, 'profileMenu');
+        if (window.location.pathname.includes('tournament') || window.location.pathname.includes('game') || window.location.pathname.includes('lobby'))
+            document.getElementById('dropdownMenuButton').classList.add('disabled');
+        else
+            document.getElementById('dropdownMenuButton').classList.remove('disabled');
     }
     else {
         document.getElementById('profileMenu').innerHTML = '';
@@ -146,8 +149,6 @@ async function  loadUserProfile(){
             await displayChatsList();
         })
     }
-    // if (!userInformations.is_guest)
-
 }
 
 document.getElementById('home').addEventListener('click', async event => {
