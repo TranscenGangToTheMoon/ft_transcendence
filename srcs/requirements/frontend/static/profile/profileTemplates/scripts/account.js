@@ -125,15 +125,15 @@ async function changeUsername(newUsername)
 }
 
 document.getElementById('bUsername').addEventListener('click', () => {
-    const usernameElement = document.getElementById('bUsername');
+    let usernameElement = document.getElementById('bUsername');
     const currentUsername = usernameElement.innerText;
     const inputField = document.createElement('input');
     inputField.id = 'pNicknameInput';
-    inputField.className = 'm-2';
+    inputField.className = 'm-0 p-0 align-items-center align-self-center text-truncate';
     inputField.type = 'text';
-    inputField.value = currentUsername; // optional, for styling
-    inputField.style.fontSize = 'calc(1.375rem + 1.5vw)'; // optional, to match the previous size
-    usernameElement.innerHTML = ''; // Clear existing content
+    inputField.value = currentUsername;
+    inputField.style.fontSize = 'calc(1.375rem + 1.5vw)';
+    usernameElement.innerHTML = '';
     usernameElement.appendChild(inputField);
     inputField.focus();
 
