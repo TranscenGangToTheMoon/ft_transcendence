@@ -132,7 +132,7 @@ async def message(sid, data):
         print(f"API error : {sid}")
         await sio.emit(
             'error',
-            {'error': e.status_code, 'message': e.detail.get('content')},
+            {'error': e.status_code, 'message': e.detail['detail']},
             to=sid
         )
         if e.status_code != 400:
