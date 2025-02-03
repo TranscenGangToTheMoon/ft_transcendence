@@ -13,9 +13,9 @@ async def disconnect_old_session(old_sid, player, game_id, new_sid):
     from game_server.server import Server
     await Server._sio.leave_room(old_sid, str(player.match_id))
     game = Server.get_game(game_id)
-    await asyncio.sleep(1)
     if game.match.game_type == 'clash':
         raise socketioConnectError()
+    await asyncio.sleep(1)
     try:
         await Server._sio.get_session(old_sid)
         await Server._sio.disconnect(old_sid)
