@@ -79,12 +79,13 @@ class MainPage(Screen):
         try:
             User.cancelDuel()
             self.searchDuel = False
-            self.query_one("#duel").loading = False
-            self.query_one("#duel").variant = "primary"
-            self.query_one("#statusGame").styles.color = "white"
-            self.query_one("#statusGame").update("")
-            self.query_one("#cancelDuelGame").disabled = True
 
         except Exception as error:
             self.query_one("#statusGame").styles.color = "red"
             self.query_one("#statusGame").update(f"{error}")
+        self.query_one("#duel").loading = False
+        self.query_one("#duel").variant = "primary"
+        self.query_one("#statusGame").styles.color = "white"
+        self.query_one("#statusGame").update("")
+        self.query_one("#cancelDuelGame").disabled = True
+
