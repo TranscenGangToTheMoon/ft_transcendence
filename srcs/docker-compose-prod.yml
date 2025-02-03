@@ -65,6 +65,7 @@ services:
     restart: on-failure
     ports:
       - "4443:443"
+      - "8080:80"
     networks:
       - transcendence-network
     environment:
