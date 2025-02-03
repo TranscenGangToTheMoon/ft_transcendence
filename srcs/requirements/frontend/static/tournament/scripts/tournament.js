@@ -135,7 +135,7 @@ function addParticipant(participant){
 	participantDiv.innerHTML = `
 		<img src="${participant['profile_picture'].medium}"
 		onerror="this.onerror=null; this.src='/assets/imageNotFound.png'" 
-		alt="profile pic" style="width:100px;height:100px">
+		alt="profile pic" style="width:100px;height:100px" class="rounded-2">
 		<div class='trunc-username' style="margin-bottom:5px;">
 			${participant.username}
 		</div>
