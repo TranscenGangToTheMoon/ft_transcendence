@@ -149,7 +149,7 @@ document.getElementById('bUsername').parentElement.addEventListener('click', () 
     errorField.id = 'pChangeNicknameError';
     errorField.className = 'text-danger';
     inputField.id = 'pNicknameInput';
-    inputField.className = 'ml-2 p-1 align-items-center align-self-center text-truncate';
+    inputField.className = 'p-1 align-items-center align-self-center text-truncate';
     inputField.type = 'text';
     inputField.value = usernameTitle.innerText;
     inputField.maxLength = 15;
