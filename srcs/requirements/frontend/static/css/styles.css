@@ -201,7 +201,7 @@ body {
 }
 
 #tabContentProfile{
-    height: 75%;
+    height: 81%;
 }
 
 @keyframes slideDown {
@@ -237,4 +237,29 @@ body {
 .alert-transition-show {
     display: block;
     animation: slideDown 0.5s ease-out;
+}
+
+.profileContainer {
+    padding: 1%;
+}
+
+.profileTitle {
+    font-size: 20px;
+    padding: 6px;
+}
+
+.profileContent {
+ margin-left: 10px;
+}
+
+.form-check-input:checked
+{
+    background-color:  #0dcaf0;
+    border-color:  #0dcaf0;
+}
+
+.customSelected
+{
+    color: black;
+    background-color:  #0dcaf0;
 }
