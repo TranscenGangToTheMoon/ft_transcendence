@@ -356,6 +356,7 @@ async function loadOldMessages(chatInfo){
 		else {
 			document.getElementById('messages'+ chatInfo.target).insertAdjacentHTML('afterbegin', `<div><p><strong>:</strong> Start the conversation ;)</p></div>`);
 		}
+		getMoreOldsMessages(chatInfo);
 	}
 	catch (error) {
 		return error;
