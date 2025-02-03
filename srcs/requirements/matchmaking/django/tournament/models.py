@@ -89,7 +89,7 @@ class Tournament(models.Model):
                 return
             time.sleep(1)
         tournament.start()
-# todo delete tournament if noone left
+
     def cancel_start(self):
         self.start_at = None
         self.save()
