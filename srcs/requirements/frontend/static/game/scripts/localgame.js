@@ -191,7 +191,7 @@
     }
 
     function drawCountdown() {
-        ctx.font = '96px Arial';
+        ctx.font = '96px balatro';
         ctx.fillText(
             state.countDown.currentStep + 1,
             config.canvasWidth / 2,

@@ -494,8 +494,10 @@ async function openChatTab(chatId)
 			userInformations.notifications['chats'] -= chatInfo.unreadMessage;
 			if (userInformations.notifications['chats'] <= 0)
 				removeBadges('chats');
-			else
+			else{
+				getBadgesDiv(document);
 				displayBadges();
+			}
 			messageBox = document.getElementById('messages'+chatInfo.target);
 			messageBox.innerHTML = '';
 			res = await loadOldMessages(chatInfo);

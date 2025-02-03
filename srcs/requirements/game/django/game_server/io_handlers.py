@@ -13,15 +13,17 @@ async def disconnect_old_session(old_sid, player, game_id, new_sid):
     from game_server.server import Server
     await Server._sio.leave_room(old_sid, str(player.match_id))
     game = Server.get_game(game_id)
-    if game.match.game_type == 'normal':
-        await asyncio.sleep(1)
-        try:
-            await Server._sio.get_session(old_sid)
-            await Server._sio.disconnect(old_sid)
-            with Server._dsids_lock:
-                Server._disconnected_sids.append(old_sid)
-        except KeyError:
-            pass
+    if game.match.game_type == 'clash':
+        raise socketioConnectError()
+    await asyncio.sleep(1)
+    try:
+        await Server._sio.get_session(old_sid)
+        await Server._sio.disconnect(old_sid)
+        with Server._dsids_lock:
+            Server._disconnected_sids.append(old_sid)
+        await asyncio.sleep(0.5)
+    except KeyError:
+        pass
     game.reconnect(player.user_id, new_sid)
 
 
@@ -41,8 +43,11 @@ async def handle_spectator(user_id, sid, auth, match_code):
 
 async def accept_connection(player, sid, game_id):
     from game_server.server import Server
+    try:
+        player.game = Server.get_game(game_id)
+    except Server.NotFound as e:
+        raise socketioConnectError(e)
     player.socket_id = sid
-    player.game = Server.get_game(game_id)
     Server._clients[sid] = player
     await Server._sio.enter_room(sid, str(game_id))
 

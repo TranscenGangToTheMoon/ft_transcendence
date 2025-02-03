@@ -127,36 +127,42 @@ async function changeUsername(newUsername)
 document.getElementById('bUsername').addEventListener('mouseover', () => {
     const usernameElement = document.getElementById('bUsername');
     if (usernameElement) {
-        usernameElement.classList.add(`border`);
-        usernameElement.classList.add(`border-primary`);
-        usernameElement.classList.add(`rounded`);
+        usernameElement.classList.remove('border-opacity-10');
+        usernameElement.classList.add('border-opacity-100');
     }
 });
 document.getElementById('bUsername').addEventListener('mouseout', () => {
     const usernameElement = document.getElementById('bUsername');
     if (usernameElement) {
-        usernameElement.classList.remove(`border`);
-        usernameElement.classList.remove(`border-primary`);
-        usernameElement.classList.remove(`rounded`);
+        usernameElement.classList.remove('border-opacity-100');
+        usernameElement.classList.add('border-opacity-10');
     }
 });
 
-document.getElementById('bUsername').addEventListener('click', () => {
-    let usernameElement = document.getElementById('bUsername');
-    const currentUsername = usernameElement.innerText;
+document.getElementById('bUsername').parentElement.addEventListener('click', () => {
+    const usernameTitle = document.getElementById('bUsername');
+    let usernameElement = usernameTitle.parentElement;
+    if (document.getElementById('pNicknameInput') || document.getElementById('pChangeNicknameError')) return;
     const inputField = document.createElement('input');
+    const errorField = document.createElement('div');
+    usernameTitle.style.display = 'none';
+    errorField.id = 'pChangeNicknameError';
+    errorField.className = 'text-danger';
     inputField.id = 'pNicknameInput';
     inputField.className = 'm-0 p-0 align-items-center align-self-center text-truncate';
     inputField.type = 'text';
-    inputField.value = currentUsername;
+    inputField.value = usernameTitle.innerText;
+    inputField.maxLength = 15;
     inputField.style.fontSize = 'calc(1.375rem + 1.5vw)';
-    usernameElement.innerHTML = '';
     usernameElement.appendChild(inputField);
+    usernameElement.appendChild(errorField);
     inputField.focus();
 
     inputField.addEventListener('blur', async function() {
-        usernameElement.innerText = userInformations.username;
-        document.getElementById('pChangeNicknameError').innerText = "";
+        usernameTitle.style.display = 'block';
+        usernameTitle.innerText = userInformations.username;
+        inputField.remove();
+        errorField.remove();
     });
     
     inputField.addEventListener('keydown', async function(event) {
@@ -164,13 +170,17 @@ document.getElementById('bUsername').addEventListener('click', () => {
             if (inputField.value !== userInformations.username)
                 await changeUsername(inputField.value);
             else {
-                usernameElement.innerText = userInformations.username;
-                document.getElementById('pChangeNicknameError').innerText = "";
+                usernameTitle.style.display = 'block';
+                usernameTitle.innerText = userInformations.username;
+                inputField.remove();
+                errorField.remove();
             }
         }
         if (event.key === 'Escape') {
-            usernameElement.innerText = userInformations.username;
-            document.getElementById('pChangeNicknameError').innerText = "";
+            usernameTitle.style.display = 'block';
+            usernameTitle.innerText = userInformations.username;
+            inputField.remove();
+            errorField.remove();
         }
     });
 })
@@ -335,3 +345,28 @@ function initSwitch(){
 document.getElementById('seeBlockedUsers').addEventListener('click', async () => {
     await initBlockedUsers();
 });
+
+function clearFriendRequests(){
+    document.getElementById('friendRequests').innerHTML = '';
+    document.getElementById('sentFriendRequests').innerHTML = '';
+    document.getElementById('friendSearched').value = '';
+}
+
+async function logOut(){
+    sse.close();
+    await closeGameConnection(window.location.pathname);
+    localStorage.removeItem('game-event');
+    emptyNotificationQueue();
+    removeTokens();
+    await generateToken();
+    await fetchUserInfos(true);
+    initSSE();
+    clearCSS();
+    clearFriendRequests();
+    handleRoute();
+}
+
+document.getElementById('logOut').addEventListener('click', async event => {
+    event.preventDefault();
+    await logOut();
+})

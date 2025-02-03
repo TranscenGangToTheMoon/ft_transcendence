@@ -118,6 +118,10 @@ body {
     transform: translateY(50%);
 }
 
+.headerButtons .indicator{
+    transform: translateX(-20px);
+}
+
 .options-container {
     display: flex;
     gap: 1rem;

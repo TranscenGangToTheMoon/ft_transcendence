@@ -300,7 +300,7 @@ async function updateAvailableSpectateMatches(event){
 
 async function tournamentFinished(event){
 	event = JSON.parse(event.data);
-	closeGameChatTab();
+	await closeGameChatTab();
 	await navigateTo('/', true, true);
 	displayNotification(undefined, 'tournament finished', event.message, undefined, undefined);
 }
