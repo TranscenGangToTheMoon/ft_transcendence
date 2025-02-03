@@ -56,8 +56,11 @@ class MainPage(Screen):
         self.app.pop_screen()
 
     @on(Button.Pressed, "#duel")
-    def duelAction(self):
+    async def duelAction(self):
         try:
+            if (self.app.SSEConnected == False):
+                raise (Exception(f"SSE not properly started"))
+
             User.duel()
 
             self.searchDuel = True

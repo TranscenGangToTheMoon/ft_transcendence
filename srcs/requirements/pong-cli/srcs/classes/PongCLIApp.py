@@ -28,7 +28,6 @@ class PongCLI(App):
     @work
     async def SSE(self):
         if (not self.SSEConnected):
-            self.SSEConnected = True
             async with httpx.AsyncClient(verify=Config.SSL.CRT) as client:
                 headers = {
                     'Content-Type': 'text/event-stream',
@@ -41,6 +40,8 @@ class PongCLI(App):
                             self.SSEConnected = False
                             raise (Exception(f"({response.status_code}) SSE stream failed {response.text}"))
                         try:
+                            self.notify("SSE connected")
+                            self.SSEConnected = True
                             async for line in response.aiter_text():
                                 try:
                                     events = self.regex.findall(line)
@@ -61,7 +62,7 @@ class PongCLI(App):
                                     continue
                         except Exception as error:
                             self.SSEConnected = False
-                            raise (Exception(f"Response aiter : {error}"))
+                            raise (Exception(f"aiter ERROR: {error}"))
                 except Exception as _:
                     self.notify("SSE disconnected", severity="error", timeout=10)
                 finally:
