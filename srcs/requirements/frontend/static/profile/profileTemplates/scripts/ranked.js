@@ -230,12 +230,12 @@ function setGraphOptions(){
 
 	options.forEach(option => {
   		if (option.dataset.value == selectedGraph) {
-    		option.classList.add('selected');
+    		option.classList.add('customSelected');
   		}
   
   		option.addEventListener('click', async () => {
-            options.forEach(opt => opt.classList.remove('selected'));
-            option.classList.add('selected');
+            options.forEach(opt => opt.classList.remove('customSelected'));
+            option.classList.add('customSelected');
             selectedGraph = option.dataset.value;
             changePeriod(selectedGraph);
  		});

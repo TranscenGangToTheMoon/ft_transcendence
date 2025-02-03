@@ -11,7 +11,7 @@ class DeleteUserView(generics.DestroyAPIView):
 
     def delete(self, request, *args, **kwargs):
         try:
-            TournamentParticipants.objects.get(user_id=kwargs['user_id']).delete()
+            TournamentParticipants.objects.get(user_id=kwargs['user_id'], connected=True).delete()
         except TournamentParticipants.DoesNotExist:
             pass
         try:

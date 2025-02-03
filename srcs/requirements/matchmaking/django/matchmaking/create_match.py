@@ -32,3 +32,22 @@ def create_match(game_mode: Literal['duel', 'clash', 'ranked', 'custom_game'] | 
         return request_game(endpoints.Game.create_match, method='POST', data=data)
     except APIException:
         pass
+
+
+def create_tournament_match(tournament_id, stage_id, n, player1, player2):
+    data = {
+        'tournament_id': tournament_id,
+        'tournament_stage_id': stage_id,
+        'tournament_n': n,
+    }
+    return create_match(data, player1, player2)
+
+
+def create_tournament_match_not_played(tournament_id, stage_id, n, user):
+    data = {
+        'user_id': user.user_id,
+        'tournament_id': tournament_id,
+        'tournament_stage_id': stage_id,
+        'tournament_n': n,
+    }
+    return request_game(endpoints.Game.create_match_not_played, method='POST', data=data)

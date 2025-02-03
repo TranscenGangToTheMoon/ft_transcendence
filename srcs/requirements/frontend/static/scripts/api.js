@@ -37,7 +37,7 @@ async function apiRequest(token, endpoint, method="GET", authType="Bearer",
             if (error.code === 502 || error.code === 503 || error.code === 500 || error.message === 'Failed to fetch'){
                 closeExistingModals();
                 console.log('service unavailable');
-                displayMainAlert('Error', 'Service unavailable', 'warning', 10000);
+                displayMainAlert('Error', 'Service unavailable', 'error', 10000);
             }
             throw error;
         })
