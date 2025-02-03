@@ -221,13 +221,13 @@ function tournamentStartAt(event) {
 		
 		if (difference <= 0) {
 			countdownDiv.innerHTML = "Starting Soon!";
-			displayGameChatNotif({'message':"Starting Soon!"}, false);
+			// displayGameChatNotif({'message':"Starting Soon!"}, false);
 			clearInterval(timer);
 			return;
 		}
 		
 		countdownDiv.innerHTML = `Starting in: ${difference}s`;
-		displayGameChatNotif({'message':`Starting in: ${difference}s`}, false);
+		// displayGameChatNotif({'message':`Starting in: ${difference}s`}, false);
 	}
 
 	updateCountdown();

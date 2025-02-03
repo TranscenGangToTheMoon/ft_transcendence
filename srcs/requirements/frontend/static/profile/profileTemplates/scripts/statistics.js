@@ -12,7 +12,7 @@ async function loadStatistics(){
             const html = `
                 <div class='d-flex justify-content-between'>
                 <h2 class=''>${gameStats.game_mode}</h2>
-                <div class='text-muted small text-center align-middle'>scored: ${gameStats.scored}</div></div>
+                <div class='small text-center align-middle' style='color: white'>scored: ${gameStats.scored}</div></div>
                 <canvas class='statChart'></canvas>
             `
             gameStatsDiv.insertAdjacentHTML("beforeend", html);
