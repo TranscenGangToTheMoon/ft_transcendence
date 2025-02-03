@@ -2,7 +2,7 @@
 	
 	<div class="modal-dialog">
 		<div class="modal-content">
-			<div class="modal-header" id="chatListModalHeader" style="display: flex;">
+			<div class="modal-header border-bottom-0" id="chatListModalHeader" style="display: flex;">
 				<form id="searchChatForm" class="d-flex gap-1 mb-1">
 					<input id="searchChat" class="form-control flex-grow-1" placeholder="Search user" type="text">
 					<button id="searchChatButton" class="btn btn-dark flex-shrink-0" type="submit">Start Chat</button>
@@ -10,7 +10,7 @@
 				<button type="button" class="btn btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 			</div>
 			<div id="chatListError"></div>
-			<div class="modal-body" id="chatListModalBody">
+			<div class="modal-body" id="chatListModalBody" style="display:none;">
 				<div id="chatsList" class="overflow-auto"></div>
 			</div>
 		</div>
