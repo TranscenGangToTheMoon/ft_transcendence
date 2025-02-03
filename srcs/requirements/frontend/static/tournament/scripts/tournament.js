@@ -32,7 +32,7 @@ async function joinTournament(code){
 		loadTournament(data);
 	}
 	catch (error){
-		displayMainAlert('Error', 'This tournament does not exists.', 'error', 5000);
+		displayMainAlert('Error', 'This tournament does not exists.', 'danger', 5000);
 		console.log(error);
 		return 0;
 	}

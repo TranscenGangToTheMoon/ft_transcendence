@@ -17,24 +17,24 @@ document.getElementById('pChangePassword').addEventListener('click', event => {
 })
 
 async function deleteAccount(password) {
+    sse.close();
     getDataFromApi(getAccessToken(), `${baseAPIUrl}/users/me/`, 'DELETE', undefined, undefined, {
         'password' : password
     })
         .then(async data => {
-            if (data?.password)
+            if (data?.password){
                 document.getElementById('pContextError').innerText = data.password;
-            else if (data?.detail)
-                document.getElementById('pContextError').innerText = data.detail;
-            else if (!data){
-                sse.close();
-                deleteModal.hide();
-                sse = undefined;
-                removeTokens();
-                closeChatView();
-                await generateToken();
                 initSSE();
-                await fetchUserInfos(true);
+            }
+            else if (data?.detail){
+                initSSE();
+                document.getElementById('pContextError').innerText = data.detail;
+            }
+            else if (!data){
                 await navigateTo('/');
+                await logOut();
+                deleteModal.hide();
+                closeChatView();
                 setTimeout(()=> {
                     displayMainAlert('Account deleted', 'Your account has been successfully deleted. You have been redirected to homepage.', 'info', 5000);
                 }, 300);
@@ -125,25 +125,21 @@ async function changeUsername(newUsername)
 }
 
 document.getElementById('bUsername').addEventListener('click', () => {
-    const usernameElement = document.getElementById('bUsername');
+    let usernameElement = document.getElementById('bUsername');
     const currentUsername = usernameElement.innerText;
     const inputField = document.createElement('input');
     inputField.id = 'pNicknameInput';
+    inputField.className = 'm-0 p-0 align-items-center align-self-center text-truncate';
     inputField.type = 'text';
-    inputField.value = currentUsername; // optional, for styling
-    inputField.style.fontSize = '1.5rem'; // optional, to match the previous size
-    usernameElement.innerHTML = ''; // Clear existing content
+    inputField.value = currentUsername;
+    inputField.style.fontSize = 'calc(1.375rem + 1.5vw)';
+    usernameElement.innerHTML = '';
     usernameElement.appendChild(inputField);
     inputField.focus();
 
     inputField.addEventListener('blur', async function() {
-        if (inputField.value !== userInformations.username) {
-            if (await changeUsername(inputField.value) === true) return;
-        }
-        else {
-            usernameElement.innerText = userInformations.username;
-            document.getElementById('pChangeNicknameError').innerText = "";
-        }
+        usernameElement.innerText = userInformations.username;
+        document.getElementById('pChangeNicknameError').innerText = "";
     });
     
     inputField.addEventListener('keydown', async function(event) {
@@ -154,6 +150,10 @@ document.getElementById('bUsername').addEventListener('click', () => {
                 usernameElement.innerText = userInformations.username;
                 document.getElementById('pChangeNicknameError').innerText = "";
             }
+        }
+        if (event.key === 'Escape') {
+            usernameElement.innerText = userInformations.username;
+            document.getElementById('pChangeNicknameError').innerText = "";
         }
     });
 })
@@ -287,7 +287,7 @@ async function accountInit(){
     loadCSS('/profileTemplates/css/profile.css', false);
 
     loadContent('/blockedUsers/blockedUsers.html', 'blockedModalContainer');
-    // await loadScript('/blockedUsers/scripts/blockedUsers.js');
+    initSwitch();
 } 
 
 accountInit();

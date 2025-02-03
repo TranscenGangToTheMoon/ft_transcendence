@@ -143,7 +143,7 @@ function addSSEListeners(){
         event = JSON.parse(event.data);
         await logOut();
         setTimeout(async ()=>{
-            displayMainAlert('Error', 'Your account has been deleted on another client. Switching to guest account.', 'error', 5000)
+            displayMainAlert('Error', 'Your account has been deleted on another client. Switching to guest account.', 'danger', 5000)
         }, 500);
     })
     addFriendSSEListeners();

@@ -3,6 +3,9 @@
 }
 
 #pNicknameInput {
-	background: none;
+	background: transparent;
+	border: none;
+	color: white;
+	outline: none;
 }
 
