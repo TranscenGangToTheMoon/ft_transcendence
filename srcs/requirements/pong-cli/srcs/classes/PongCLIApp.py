@@ -15,7 +15,6 @@ from classes.utils.config           import Config
 from classes.utils.user             import User
 
 class PongCLI(App):
-    SCREENS = {}
     BINDINGS = [("^q", "exit", "Exit"), ]
 
     def __init__(self) -> None:
@@ -29,7 +28,6 @@ class PongCLI(App):
     @work
     async def SSE(self):
         if (not self.SSEConnected):
-            self.SSEConnected = True
             async with httpx.AsyncClient(verify=Config.SSL.CRT) as client:
                 headers = {
                     'Content-Type': 'text/event-stream',
@@ -42,6 +40,8 @@ class PongCLI(App):
                             self.SSEConnected = False
                             raise (Exception(f"({response.status_code}) SSE stream failed {response.text}"))
                         try:
+                            self.notify("SSE connected")
+                            self.SSEConnected = True
                             async for line in response.aiter_text():
                                 try:
                                     events = self.regex.findall(line)
@@ -54,14 +54,15 @@ class PongCLI(App):
                                             else:
                                                 User.team = "b"
                                                 User.opponent = dataJson["data"]["teams"]["a"]["players"][0]["username"]
-                                            await self.push_screen(GamePage())
+                                            if (User.inAGame == False):
+                                                await self.push_screen(GamePage())
                                         elif (event != "game-start" and event != "ping"):
                                             print(f"{event}: {data}")
                                 except (IndexError, ValueError) as _:
                                     continue
                         except Exception as error:
                             self.SSEConnected = False
-                            raise (Exception(f"Response aiter : {error}"))
+                            raise (Exception(f"aiter ERROR: {error}"))
                 except Exception as _:
                     self.notify("SSE disconnected", severity="error", timeout=10)
                 finally:

@@ -17,24 +17,24 @@ document.getElementById('pChangePassword').addEventListener('click', event => {
 })
 
 async function deleteAccount(password) {
+    sse.close();
     getDataFromApi(getAccessToken(), `${baseAPIUrl}/users/me/`, 'DELETE', undefined, undefined, {
         'password' : password
     })
         .then(async data => {
-            if (data?.password)
+            if (data?.password){
                 document.getElementById('pContextError').innerText = data.password;
-            else if (data?.detail)
-                document.getElementById('pContextError').innerText = data.detail;
-            else if (!data){
-                sse.close();
-                deleteModal.hide();
-                sse = undefined;
-                removeTokens();
-                closeChatView();
-                await generateToken();
                 initSSE();
-                await fetchUserInfos(true);
+            }
+            else if (data?.detail){
+                initSSE();
+                document.getElementById('pContextError').innerText = data.detail;
+            }
+            else if (!data){
                 await navigateTo('/');
+                await logOut();
+                deleteModal.hide();
+                closeChatView();
                 setTimeout(()=> {
                     displayMainAlert('Account deleted', 'Your account has been successfully deleted. You have been redirected to homepage.', 'info', 5000);
                 }, 300);
