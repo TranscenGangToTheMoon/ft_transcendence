@@ -25,6 +25,7 @@ class Chat:
 
 class Game:
     create_match = 'api/private/match/create/'
+    create_match_not_played = 'api/private/match/create/not-played/'
     ffinish_match = 'api/private/match/finish/{match_id}/'
     finish_match = 'api/private/match/finish/<int:match_id>/'
     fscore = 'api/private/match/score/{user_id}/'
@@ -57,7 +58,9 @@ class Matchmaking:
     tournament_ban = 'api/play/tournament/<str:code>/ban/<int:user_id>/'
     tournament_message = 'api/play/tournament/<str:code>/message/'
 
-    finish_match = 'api/private/finish-match/'
+    lobby_finish_match = 'api/private/lobby/finish-match/'
+    ftournament_result_match = 'api/private/tournament/result-match/{match_id}/'
+    tournament_result_match = 'api/private/tournament/result-match/<int:match_id>/'
 
 
 class Users:

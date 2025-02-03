@@ -1,52 +1,42 @@
 from django.core.exceptions import PermissionDenied
-from lib_transcendence.exceptions import Conflict, MessagesException
-from lib_transcendence.game import GameMode
-from lib_transcendence.services import request_game
-from lib_transcendence import endpoints
-from rest_framework.exceptions import APIException
+from rest_framework.exceptions import APIException, NotFound
 
+from lib_transcendence import endpoints
+from lib_transcendence.exceptions import Conflict, MessagesException
+from lib_transcendence.services import request_game
 from lobby.models import LobbyParticipants
 from play.models import Players
 from tournament.models import TournamentParticipants, Tournament
 
 
-def verify_user(user_id, created_tournament=False, join_tournament_id=None, from_place=False):
+def verify_user(user_id, created_tournament=False):
     try:
-        place = request_game(endpoints.Game.fuser.format(user_id=user_id), method='GET')
-    except APIException:
+        request_game(endpoints.Game.fuser.format(user_id=user_id), method='GET')
+    except NotFound:
         try:
-            participant = TournamentParticipants.objects.get(user_id=user_id)
+            participant = TournamentParticipants.objects.get(user_id=user_id, connected=True)
+            if participant.tournament.started and participant.still_in:
+                raise Conflict(MessagesException.Conflict.ALREADY_IN_TOURNAMENT)
             if created_tournament and participant.creator:
                 raise PermissionDenied(MessagesException.PermissionDenied.CAN_CREATE_MORE_THAN_ONE_TOURNAMENT)
-            if from_place:
-                return participant
-            else:
-                participant.delete()
+            participant.delete()
         except TournamentParticipants.DoesNotExist:
             if created_tournament and Tournament.objects.filter(created_by=user_id).exists():
                 raise PermissionDenied(MessagesException.PermissionDenied.CAN_CREATE_MORE_THAN_ONE_TOURNAMENT)
 
         try:
-            player = Players.objects.get(user_id=user_id)
-            if from_place:
-                return player
-            else:
-                player.delete()
+            Players.objects.get(user_id=user_id).delete()
         except Players.DoesNotExist:
             pass
 
         try:
-            player = LobbyParticipants.objects.get(user_id=user_id)
-            if from_place:
-                return player
-            else:
-                player.delete()
+            LobbyParticipants.objects.get(user_id=user_id).delete()
         except LobbyParticipants.DoesNotExist:
             pass
 
         return
 
-    if join_tournament_id and place['type'] == GameMode.TOURNAMENT and place['id'] == join_tournament_id:
-        return 'reconnect'
+    except APIException:
+        return
 
-    raise Conflict(MessagesException.Conflict.ALREADY_IN_GAME_OR_TOURNAMENT)
+    raise Conflict(MessagesException.Conflict.ALREADY_IN_GAME)

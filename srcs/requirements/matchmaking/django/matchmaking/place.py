@@ -1,4 +1,3 @@
-from django.db import models
 from rest_framework import serializers
 from rest_framework.exceptions import NotFound, PermissionDenied
 from lib_transcendence.exceptions import MessagesException, ResourceExists
@@ -36,7 +35,7 @@ def get_tournament(create=False, **kwargs):
     return get_place(Tournament, create, **kwargs)
 
 
-def verify_place(user, model, join_tournament_id=None):
+def verify_place(user, model):
     name = type(model).__name__
 
     def get_place_creator():
@@ -54,13 +53,7 @@ def verify_place(user, model, join_tournament_id=None):
     if is_banned(model.code, user['id']) or are_users_blocked(user['id'], get_place_creator()):
         raise NotFound(MessagesException.NotFound.NOT_FOUND.format(obj=name.title()))
 
-    place = verify_user(user['id'], join_tournament_id=join_tournament_id, from_place=True)
-
-    if isinstance(model, Tournament) and model.started and place != 'reconnect':
-        raise PermissionDenied(MessagesException.PermissionDenied.TOURNAMENT_ALREADY_STARTED)
-
     if model.is_full:
         raise PermissionDenied(MessagesException.PermissionDenied.IS_FULL.format(obj=name.title()))
 
-    if isinstance(place, models.Model):
-        place.delete()
+    verify_user(user['id'])

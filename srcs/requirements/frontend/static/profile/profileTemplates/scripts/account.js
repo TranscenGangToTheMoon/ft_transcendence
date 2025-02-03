@@ -196,7 +196,7 @@ function setChatAcceptationOptions(){
 
 	options.forEach(option => {
   		if (option.dataset.value == selectedValue) {
-    		option.classList.add('selected');
+    		option.classList.add('customSelected');
   		}
   
   		option.addEventListener('click', async () => {
@@ -204,8 +204,8 @@ function setChatAcceptationOptions(){
                 await apiRequest(getAccessToken(), `${baseAPIUrl}/users/me/`, 'PATCH', undefined, undefined, {
                     'accept_chat_from': option.dataset.value,
                 })
-                options.forEach(opt => opt.classList.remove('selected'));
-                option.classList.add('selected');
+                options.forEach(opt => opt.classList.remove('customSelected'));
+                option.classList.add('customSelected');
                 selectedValue = option.dataset.value;
             }
             catch(error){
@@ -224,7 +224,7 @@ function addBannerEventListener() {
         pProfilePictureEdit.style.display = 'none';
     });
     console.log('I\'m here', document.getElementById('pProfilePictureEdit'));
-    document.getElementById('pProfilePictureEdit').addEventListener('click', async ()=> {
+    document.getElementById('pProfilePicture').addEventListener('click', async ()=> {
         try {
             let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/users/profile-pictures/`)
             const profilePicContainer = document.getElementById('profilePicContainer');
@@ -271,8 +271,8 @@ function fillBanner(){
     usernameDiv.innerText = userInformations.username;
     const profilePicDiv = document.getElementById('pProfilePicture');
     profilePicDiv.innerHTML = `
-    <img class="rounded-1" src="${userInformations.profile_picture?.small}" onerror="src='/assets/imageNotFound.png'" style="max-width:100px;max-height:100px">
-    <img id="pProfilePictureEdit" class="rounded-1 border border-primary position-absolute top-0 end-0" src='/assets/icon/pencil.svg' style="display:none;" onerror="src='/assets/imageNotFound.png'">
+    <img class="rounded-1" src="${userInformations.profile_picture?.large}" onerror="src='/assets/imageNotFound.png'" style="cursor:pointer;max-width:100px;max-height:100px">
+    <img id="pProfilePictureEdit" class="position-absolute top-0 start-0" src='/assets/icon/edit.png' cursor="pointer" style="cursor:pointer;display:none;max-width:40px;max-height:40px" onerror="src='/assets/imageNotFound.png'">
     `
     addBannerEventListener();
 }
@@ -288,3 +288,26 @@ async function accountInit(){
 } 
 
 accountInit();
+
+document.getElementById('switchAcceptFriendRequests').addEventListener('change', async function (event){
+    event.preventDefault();
+    try {
+        await apiRequest(getAccessToken(), `${baseAPIUrl}/users/me/`, 'PATCH', undefined, undefined, {
+            'accept_friend_request': this.checked,
+        })
+    }
+    catch(error){
+        console.log(error);
+        this.checked=false;
+    }
+})
+
+function initSwitch(){
+    const FRswitch = document.getElementById('switchAcceptFriendRequests');
+    if (FRswitch)
+        FRswitch.checked = userInformations.accept_friend_request;
+}
+
+document.getElementById('seeBlockedUsers').addEventListener('click', async () => {
+    await initBlockedUsers();
+});
