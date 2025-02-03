@@ -524,12 +524,13 @@ class Game:
                 )
             side = -1
         game_state = self.get_game_state(1)
-        for spectator in self.spectators:
-            Server.emit(
-                'game_state',
-                data=game_state,
-                to=spectator.socket_id
-            )
+        with self.spec_lock:
+            for spectator in self.spectators:
+                Server.emit(
+                    'game_state',
+                    data=game_state,
+                    to=spectator.socket_id
+                )
 
     def get_rackets(self, side: int = 1):
         rackets = {}
@@ -555,12 +556,13 @@ class Game:
                 side = -1
             if self.spectators:
                 rackets = self.get_rackets()
-                for spectator in self.spectators:
-                    Server.emit(
-                        'rackets',
-                        data=rackets,
-                        to=spectator.socket_id
-                    )
+                with self.spec_lock:
+                    for spectator in self.spectators:
+                        Server.emit(
+                            'rackets',
+                            data=rackets,
+                            to=spectator.socket_id
+                        )
         else:
             rackets = self.get_rackets()
             if user_id is None:
