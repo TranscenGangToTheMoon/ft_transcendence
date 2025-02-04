@@ -47,7 +47,7 @@ def verify_place(user, model):
             except (LobbyParticipants.DoesNotExist, TournamentParticipants.DoesNotExist):
                 raise NotFound(MessagesException.NotFound.CREATOR)
 
-    if model.participants.filter(user_id=user['id']).exists():
+    if model.participants.filter(user_id=user['id'], connected=False).exists():
         raise ResourceExists(MessagesException.ResourceExists.JOIN.format(obj=name.lower()))
 
     if is_banned(model.code, user['id']) or are_users_blocked(user['id'], get_place_creator()):

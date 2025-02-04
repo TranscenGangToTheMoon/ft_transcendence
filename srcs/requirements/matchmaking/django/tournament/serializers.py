@@ -121,6 +121,7 @@ class TournamentParticipantsSerializer(Serializer):
 
         try:
             user = tournament.participants.get(user_id=user['id'], connected=False)
+            print('Reconnecting user ===================', flush=True)
             user.reconnect()
             return user
         except TournamentParticipants.DoesNotExist:

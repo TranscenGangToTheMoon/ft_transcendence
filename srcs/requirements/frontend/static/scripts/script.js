@@ -132,10 +132,6 @@ async function  loadUserProfile(){
         <img src="/assets/trophy.png" class="mx-1" style="max-height: 15px; filter:grayscale(1);">
         `;
         await loadContent(`/${profileMenu}`, 'profileMenu');
-        if (window.location.pathname.includes('tournament') || window.location.pathname.includes('game') || window.location.pathname.includes('lobby'))
-            document.getElementById('dropdownMenuButton').classList.add('disabled');
-        else
-            document.getElementById('dropdownMenuButton').classList.remove('disabled');
     }
     else {
         document.getElementById('profileMenu').innerHTML = '';
