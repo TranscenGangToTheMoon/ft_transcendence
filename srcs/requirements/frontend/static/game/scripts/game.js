@@ -516,7 +516,6 @@ function initSocket(match_code, socketPath, socketMode){
     window.gameSocket = gameSocket;
 	gameSocket.on('connect', () => {
         cancelTimeout = true;
-        console.log('Connected to socketIO server!');
         document.getElementById('matchCode').innerText = match_code;
         window.PongGame.resizeCanvas();
     });

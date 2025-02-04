@@ -41,7 +41,7 @@ async function deleteAccount(password) {
             }
         })
         .catch(error => {
-            console.log('error', error)
+            console.log(error)
         })
 }
 
@@ -251,7 +251,6 @@ function addBannerEventListener() {
         const pProfilePictureEdit = document.getElementById('pProfilePictureEdit');
         pProfilePictureEdit.style.display = 'none';
     });
-    console.log('I\'m here', document.getElementById('pProfilePictureEdit'));
     document.getElementById('pProfilePicture').addEventListener('click', async ()=> {
         try {
             let data = await apiRequest(getAccessToken(), `${baseAPIUrl}/users/profile-pictures/`)

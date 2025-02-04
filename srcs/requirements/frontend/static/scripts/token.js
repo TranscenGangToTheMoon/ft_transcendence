@@ -6,10 +6,10 @@ async function forceReloadGuestToken() {
             return data.access;
         }
         else
-            console.log('error', data);
+            console.log(data);
     }
     catch (error) {
-        console.log('error', error);
+        console.log(error);
     }
 }
 
@@ -21,16 +21,15 @@ async function generateToken() {
             localStorage.setItem('refresh', data.refresh);
         }
         else
-            console.log('error', data);
+            console.log(data);
     }
     catch(error){
-        console.log('error', error)
+        console.log(error)
     }
 }
 
 async function relog(){
     await generateToken();
-    console.log('celuila');
     displayMainAlert("Account Not Found", "We are unable to retrieve your account or guest profile.", 'warning', '4000');
     throw new Error('relog');
 }
@@ -38,7 +37,6 @@ async function relog(){
 async function refreshToken(token) {
     var refresh = getRefreshToken();
     try {
-        console.log('token expired. refreshing.')
         let data = await apiRequest(token, `${baseAPIUrl}/auth/refresh/`, 'POST', undefined, undefined, {'refresh':refresh}, true)
         if (data.access) {
             token = data.access;
@@ -47,7 +45,6 @@ async function refreshToken(token) {
             return token;
         }
         else {
-            console.log('refresh token expired must relog')
             await relog();
         }
     }
@@ -55,7 +52,7 @@ async function refreshToken(token) {
         if (error.message === 'relog')
             throw error;
         else
-            console.log("ERROR", error);
+            console.log(error);
     }
 }
 

@@ -483,7 +483,6 @@ function initSocket(socketPath, socketMode){
 	});
     window.gameSocket = gameSocket;
 	gameSocket.on('connect', () => {
-        console.log('Connected to socketIO server!');
         window.PongGame.resizeCanvas();
     });
     gameSocket.on('connect_error', event => {

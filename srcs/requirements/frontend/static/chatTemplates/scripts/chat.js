@@ -56,9 +56,6 @@ function displayChatError(error, idDiv) {
 		}
 		divToDisplayError.appendChild(divError);
 	}
-	else {
-		console.log('Error chat: div for chat error not found');
-	}
 }
 
 // =========Server==========
@@ -118,7 +115,6 @@ function setupSocketListeners(chatInfo)
 	
 	socket.on("message", (data) => {
 		clearChatError();
-		console.log("Message received: ", data);
 		if (chatBox === null) return;
 		messagesNotRead = chatBox.querySelectorAll('.chatMessageNotRead');
 		for (let message of messagesNotRead) {
@@ -130,7 +126,6 @@ function setupSocketListeners(chatInfo)
 
 	socket.on("error", async (data) => {
 		clearChatError();
-		console.log("Error received from chat server: ", data);
 		if (data.error === 401){
 			socket.emit('message', {'content': data.retry_content, 'token' : 'Bearer ' + await refreshToken(), 'retry': true});
 		}
@@ -189,12 +184,8 @@ async function displayChatsList(filter='') {
 			}
 			nextChatsRequest = apiAnswer.next;
 		}
-		else {
-			console.log('Chat: No chat found');
-		}
 	}
 	catch(error) {
-		console.log('Error chat:', error);
 		if (error.code === 503 || error.code === 502) return;
 		if (error.code === 404 && error.detail === undefined) error.detail = 'No chat found';
 		if (error.detail === undefined) error.detail = 'Error while loading chats list';
@@ -215,7 +206,6 @@ async function searchChatButton(username) {
 		}
 	}
 	catch(error) {
-		console.log('Error chat:', error);
 		if (error.code === 404 && error.detail === undefined) error.detail = 'No chat found';
 		if (error.detail === undefined) error.detail = 'Error while searching chat';
 		displayChatError(error, 'chatListError');

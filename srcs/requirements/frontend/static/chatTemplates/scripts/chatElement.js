@@ -21,13 +21,11 @@ function addChatUserCardListeners(chatUserCard, chatUserCardDeleteButton, chatUs
 		try {
 			clearChatError();
 			const APIAnswer = await apiRequest(getAccessToken(), `${baseAPIUrl}/chat/${chatInfo.chatId}/`, 'DELETE');
-			console.log('Chat: Chat deleted:', APIAnswer);
 			if (APIAnswer && APIAnswer.detail) throw {'code': 400, 'detail': APIAnswer.detail};
 			chatUserCard.remove();
 			await closeChatTab(chatInfo);
 			displayChatsList();
 		} catch(error) {
-			console.log('Error chat:', error);
 			if (error.code === 404 && error.detail === undefined) error.detail = 'No chat found';
 			if (error.detail === undefined) error.detail = 'Error when attempting to delete chat';
 			displayChatError(error, 'chatsListError');
@@ -69,8 +67,6 @@ async function setChatUserCard(chatInfo, chatUserCard) {
 	}
 	var chatUserCardLastMessage = chatUserCard.querySelector('.chatUserCardLastMessage');
 	if (chatInfo.unreadMessage) {
-		console.log('setChatUserCard:', chatInfo.unreadMessage);
-		console.log('setChatUserCard:', chatInfo.unreadMessage);
 		chatUserCardLastMessage.classList.add('chatMessageNotRead');
 	}
 	let chatUserCardDeleteButton = chatUserCard.querySelector('.chatUserCardButtonDeleteChat');

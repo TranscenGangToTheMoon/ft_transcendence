@@ -130,7 +130,6 @@ function sendGameMessageListener(gameInfo) {
 			if (typeof(apiAnswer.id) === 'undefined') {
 				throw {'code': 400, 'detail': apiAnswer.content};
 			}
-			console.log('Game chat:', apiAnswer);
 			let messageDiv = createMessage({'author':apiAnswer.id, 'content':apiAnswer.content}, {'tagertId':null});
 			messageDiv.classList.add('messageGame');
 			let chatBox = document.getElementById('messagesGame');

@@ -459,7 +459,6 @@ function initSocket(match_code){
     window.gameSocket = gameSocket;
 	gameSocket.on('connect', () => {
         cancelTimeout = true;
-        console.log('Connected to socketIO server!');
 		document.getElementById('gameArea').classList.replace('d-none', 'd-flex');
 		document.getElementById('playerUsername').innerText = 'Team A';
 		document.getElementById('enemyUsername').innerText = 'Team B';

@@ -89,8 +89,6 @@ document.getElementById("loginButton").addEventListener('click', event => {
                 usernameField.classList.add('is-invalid');
                 passwordField.classList.add('is-invalid');
             }
-            else
-                console.log('error', data);
         })
-        .catch(error => console.log('error', error))
+        .catch(error => console.log(error))
 })

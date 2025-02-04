@@ -25,7 +25,6 @@ async function apiRequest(token, endpoint, method="GET", authType="Bearer",
                     return {};
                 token = await refreshToken(token);
                 if (token) {
-                    console.log('done, reposting request');
                     return apiRequest(token, endpoint, method, authType, contentType, body);
                 }
             }
@@ -36,7 +35,6 @@ async function apiRequest(token, endpoint, method="GET", authType="Bearer",
                 return apiRequest(getAccessToken(), endpoint, method, authType, contentType, body);
             if (error.code === 502 || error.code === 503 || error.code === 500 || error.message === 'Failed to fetch'){
                 closeExistingModals();
-                console.log('service unavailable');
                 displayMainAlert('Error', 'Service unavailable', 'danger', 10000);
             }
             throw error;

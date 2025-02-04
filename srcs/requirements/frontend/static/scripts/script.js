@@ -186,7 +186,6 @@ async function  indexInit(auto=true) {
         if (!userInformations)
             return;
         if (userInformations.code === 'user_not_found'){
-            console.log('user was deleted from database, switching to guest mode');
             await generateToken();
             await fetchUserInfos(true);
             displayMainAlert("Account Not Found", "We are unable to retrieve your account or guest profile.", 'warning', '4000');

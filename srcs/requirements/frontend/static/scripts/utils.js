@@ -114,7 +114,6 @@ async function quitLobbies(oldUrl, newUrl){
         ${alertTitle}: ${alertContent}
     </div>`;
     contentDiv.innerHTML = alertHtml;
-    console.log(document.body.cloneNode(true));
     document.querySelector('.unavailable.alert-transition.alert').classList.add('alert-transition-show');
     if (timeout){
         setTimeout(removeAlert, timeout);

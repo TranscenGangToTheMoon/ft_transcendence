@@ -144,7 +144,6 @@ function addParticipant(participant){
 	if (participant.id !== userInformations.id){
 		participantDiv.addEventListener('contextmenu', function(e) {
 			e.preventDefault();
-			console.log('test');
 			clickedUserDiv = this;
 			const contextMenu = document.getElementById('contextMenu');
 			contextMenu.style.left = `${e.pageX}px`;
@@ -200,7 +199,6 @@ function tournamentLeaved(event){
 async function tournamentBanned(event){
 	event = JSON.parse(event.data);
 	displayGameChatNotif(event, false);
-	console.log(event);
 	await navigateTo('/');
 	displayMainAlert('Banned', event.message, 'warning', 5000);
 }

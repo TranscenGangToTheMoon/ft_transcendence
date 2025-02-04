@@ -18,7 +18,6 @@ if (document.getElementById('modals').friendListened !== true){
                     await loadSentFriendRequests();
             }
             catch (error) {
-                console.log(error);
                 if (error.code === 404)
                     document.getElementById('searchResults').innerText = 'user not found';
             }
@@ -30,7 +29,6 @@ if (document.getElementById('modals').friendListened !== true){
             if (friendListModal && friendListModal._isShown){
                 friendListModal.hide();
             }
-            console.log('chat button clicked', friendUsername);
         }
         if (event.target.matches('.deleteFriend')){
             try {
@@ -54,22 +52,18 @@ if (document.getElementById('modals').friendListened !== true){
             }
         }
         if (event.target.matches('.friendRequestKebabMenuButton')){
-            console.log('kkpipi')
             const contextMenu = document.getElementById('friendListContextMenu');
             const friendRequestDiv = event.target.closest('.friendRequestBlock');
             const position = friendRequestDiv.getBoundingClientRect();
-            console.log(position);
             contextMenu.style.left = `${position.left + position.width}px`;
             contextMenu.style.top = `${position.top}px`;
             contextMenu.friendId = friendRequestDiv.friendId;
-            console.log(friendRequestDiv);
             setTimeout(()=> {
                 contextMenu.style.display = 'block';
             }, 200);
         }
         if (event.target.matches('.cBlock')){
             const contextMenu = event.target.closest('#friendListContextMenu');
-            console.log(contextMenu.friendId);
             const friendId = contextMenu.friendId;
             try {
                 await apiRequest(getAccessToken(), `${baseAPIUrl}/users/me/blocked/`, 'POST', undefined, undefined, {
