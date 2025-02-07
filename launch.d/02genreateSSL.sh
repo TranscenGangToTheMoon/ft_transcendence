@@ -10,7 +10,7 @@ C = FR
 ST = Auvergne-Rhone-Alpes
 L = Lyon
 O = 42Lyon
-CN = localhost
+CN = pong.bajeanno.com
 
 [v3_req]
 basicConstraints = CA:FALSE
@@ -18,7 +18,7 @@ keyUsage = digitalSignature, keyEncipherment
 subjectAltName = @alt_names
 
 [alt_names]
-DNS.1 = localhost
+DNS.1 = pong.bajeanno.com
 DNS.2 = $(hostname)
 DNS.3 = $(hostname -s)" > secrets/ssl.conf
 

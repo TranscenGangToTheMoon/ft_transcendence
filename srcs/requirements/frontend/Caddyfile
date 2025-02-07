@@ -5,11 +5,11 @@
 	}
 }
 
-:80 {
+pong.bajeanno.com:80 {
 	redir https://{host}:443{uri} permanent
 }
 
-:443 {
+pong.bajeanno.com:443 {
 	tls /run/secrets/ssl.crt /run/secrets/ssl.key
 
 	root * /var/www/html
