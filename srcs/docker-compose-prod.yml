@@ -64,8 +64,8 @@ services:
       target: production
     restart: on-failure
     ports:
-      - "4443:443"
-      - "8080:80"
+      - "443:443"
+      - "80:80"
     networks:
       - transcendence-network
     environment:
