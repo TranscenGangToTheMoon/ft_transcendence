@@ -11,7 +11,7 @@ ENV_EXEMPLE	:=	.env_exemple
 
 ENV_FILE	:=	$(SRCS_D)/.env
 
-COMPOSE_F	:=	$(SRCS_D)/docker-compose-prod.yml
+COMPOSE_F	:=	$(SRCS_D)/docker-compose-vps.yml
 
 SERVICE		?=	#Leave blank
 

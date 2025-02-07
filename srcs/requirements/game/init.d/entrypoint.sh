@@ -6,7 +6,7 @@ FILE="gameConfig.json"
 URL="https://frontend:443/$FILE"
 
 echo -e $BOLD$RED"- Fetching gameConfig.json ..."$RESET
-curl -ks "$URL" -o "$FILE" || exit 1
+curl -ks "$URL" -o "$FILE"
 
 echo -e $BOLD$RED"- Game migrations processing"$RESET
 

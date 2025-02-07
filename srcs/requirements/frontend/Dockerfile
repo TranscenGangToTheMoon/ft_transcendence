@@ -13,8 +13,10 @@ RUN apk add curl net-tools bash
 FROM base AS production
 
 COPY static /var/www/html
-COPY Caddyfile /etc/caddy/Caddyfile
+COPY Caddyfile-prod/Caddyfile /etc/caddy/Caddyfile
 
-# WORKDIR /srv
+##### VPS build
+FROM base AS vps
 
-# CMD ["caddy", "run", "--config", "/etc/caddy/Caddyfile", "--adapter", "caddyfile"]
+COPY static /var/www/html
+COPY Caddyfile-vps/Caddyfile /etc/caddy/Caddyfile

@@ -1,6 +1,6 @@
 x-django-env: &django-env
   TZ: Europe/Paris
-  DEBUG: "True" # True or False
+  DEBUG: "False" # True or False
   MIGRATION: "true" # true or false
 
 x-pgsql-healtcheck: &healthcheck
@@ -9,27 +9,16 @@ x-pgsql-healtcheck: &healthcheck
   timeout: 5s
   retries: 5
 
-##### ========== Secrets ================================================= #####
-secrets:
-  ssl.crt:
-    file: ../secrets/ssl.crt
-  ssl.key:
-    file: ../secrets/ssl.key
-
 ##### ========== Django Projects ========================================= #####
 services:
   auth:
     build:
       context: "requirements/auth"
-      target: development
+      target: production
     depends_on:
       auth-db:
         condition: service_healthy
     restart: on-failure
-    ports:
-      - "8001:8000"
-    volumes:
-      - auth-volume:/code
     environment:
       <<: *django-env
       POSTGRES_DB: ${POSTGRES_AUTH_DB_NAME}
@@ -44,15 +33,13 @@ services:
   chat:
     build:
       context: "requirements/chat"
-      target: development
+      target: production
     depends_on:
       chat-db:
         condition: service_healthy
     restart: on-failure
     ports:
       - "8002:8000"
-    volumes:
-      - chat-volume:/code
     environment:
       <<: *django-env
       POSTGRES_DB: ${POSTGRES_CHAT_DB_NAME}
@@ -67,34 +54,27 @@ services:
   frontend:
     build:
       context: "requirements/frontend"
-      target: development
+      target: vps
     restart: on-failure
     ports:
-      - "4443:443"
-      - "8080:80"
+      - "443:443"
+      - "80:80"
     networks:
       - transcendence-network
-    volumes:
-      - frontend-volume:/var/www/html
-      - ./requirements/frontend/Caddyfile-dev/Caddyfile:/etc/caddy/Caddyfile
     environment:
       TZ: Europe/Paris
-    secrets:
-      - ssl.crt
-      - ssl.key
+      HOSTNAME: ${HOSTNAME}
 
   game:
     build:
       context: "requirements/game"
-      target: development
+      target: production
     depends_on:
       game-db:
         condition: service_healthy
     restart: on-failure
     ports:
       - "8003:8000"
-    volumes:
-      - game-volume:/code
     environment:
       <<: *django-env
       POSTGRES_DB: ${POSTGRES_GAME_DB_NAME}
@@ -111,15 +91,11 @@ services:
   matchmaking:
     build:
       context: "requirements/matchmaking"
-      target: development
+      target: production
     depends_on:
       matchmaking-db:
         condition: service_healthy
     restart: on-failure
-    ports:
-      - "8004:8000"
-    volumes:
-      - matchmaking-volume:/code
     environment:
       <<: *django-env
       POSTGRES_DB: ${POSTGRES_MATCHMAKING_DB_NAME}
@@ -134,7 +110,7 @@ services:
   users:
     build:
       context: "requirements/users"
-      target: development
+      target: production
     depends_on:
       users-db:
         condition: service_healthy
@@ -143,8 +119,6 @@ services:
     restart: on-failure
     ports:
       - "8005:8000"
-    volumes:
-      - users-volume:/code
     environment:
       <<: *django-env
       POSTGRES_DB: ${POSTGRES_USERS_DB_NAME}
@@ -273,55 +247,6 @@ networks:
     driver: bridge
 
 volumes:
-##### ========== Django Volumes ========================================== #####
-  auth-volume:
-    name: auth-volume
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: "requirements/auth/django"
-
-  chat-volume:
-    name: chat-volume
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: "requirements/chat/django"
-
-  frontend-volume:
-    name: frontend-volume
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: "requirements/frontend/static"
-
-  game-volume:
-    name: game-volume
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: "requirements/game/django"
-
-  matchmaking-volume:
-    name: matchmaking-volume
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: "requirements/matchmaking/django"
-
-  users-volume:
-    name: users-volume
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: "requirements/users/django"
-
 #####Database Volumes
   auth-db-volume:
     name: "auth-db-volume"

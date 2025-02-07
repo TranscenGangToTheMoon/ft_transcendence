@@ -1,0 +1,69 @@
+{$HOSTNAME} {
+	root * /var/www/html
+
+	handle {
+		@trailing path_regexp trailing ^(/.+)/$
+		redir @trailing {re.trailing.1} permanent
+		try_files {path} /index.html
+		file_server
+	}
+
+	@notJSON {
+		not header Content-Type application/json
+	}
+
+	handle /ws/* {
+		handle /ws/chat/* {
+			reverse_proxy http://chat:8010
+		}
+		handle /ws/game/* {
+			reverse_proxy http://game:5500
+		}
+	}
+
+	handle /sse/* {
+		header {
+			Cache-Control "no-cache"
+			Connection "keep-alive"
+			Content-Type "text/event-stream"
+		}
+
+		handle /sse/users/* {
+			reverse_proxy http://users:8000 {
+				header_up Accept "text/event-stream"
+				header_up Connection "keep-alive"
+				header_up Cache-Control "no-cache"
+				header_down Connection "keep-alive"
+			}
+		}
+	}
+
+	handle /api/* {
+		handle @notJSON {
+			respond "Unsupported Media Type" 415
+		}
+
+		# API route to micro-services
+		handle /api/auth/* {
+			reverse_proxy http://auth:8000
+		}
+
+		handle /api/chat/* {
+			reverse_proxy http://chat:8000
+		}
+
+		handle /api/game/* {
+			reverse_proxy http://game:8000
+		}
+
+		handle /api/play/* {
+			reverse_proxy http://matchmaking:8000
+		}
+
+		handle /api/users/* {
+			reverse_proxy http://users:8000
+		}
+
+		respond "ft_transcendence : api not found" 404
+	}
+}
