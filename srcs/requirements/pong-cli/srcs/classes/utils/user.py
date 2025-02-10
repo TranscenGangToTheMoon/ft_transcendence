@@ -32,7 +32,8 @@ class User():
             url=f"https://{User.server}/api/auth/login/",
             data=data,
             headers=User.headers,
-            verify=Config.SSL.CRT
+            verify=Config.SSL.verify,
+            timeout=5
         )
         print(User.response)
 
@@ -67,7 +68,8 @@ class User():
             url=f"https://{User.server}/api/auth/register/",
             data=data,
             headers=User.headers,
-            verify=Config.SSL.CRT
+            verify=Config.SSL.verify,
+            timeout=5
         )
         print(User.response)
 
@@ -101,7 +103,8 @@ class User():
             url=f"https://{User.server}/api/auth/guest/",
             data={},
             headers=User.headers,
-            verify=Config.SSL.CRT
+            verify=Config.SSL.verify,
+            timeout=5
         )
         print(User.response)
 
@@ -132,7 +135,8 @@ class User():
             url=f"https://{User.server}/api/users/me/",
             data={},
             headers=User.headers,
-            verify=Config.SSL.CRT
+            verify=Config.SSL.verify,
+            timeout=5
         )
         print(User.response)
 
@@ -145,7 +149,8 @@ class User():
                     url=f"https://{User.server}/api/users/me/",
                     data={},
                     headers=User.headers,
-                    verify=Config.SSL.CRT
+                    verify=Config.SSL.verify,
+                    timeout=5
                 )
                 print(User.response)
 
@@ -171,7 +176,8 @@ class User():
             url=f"https://{User.server}/api/play/duel/",
             data="",
             headers=User.headers,
-            verify=Config.SSL.CRT
+            verify=Config.SSL.verify,
+            timeout=5
         )
         print(User.response)
 
@@ -184,7 +190,8 @@ class User():
                     url=f"https://{User.server}/api/play/duel/",
                     data="",
                     headers=User.headers,
-                    verify=Config.SSL.CRT
+                    verify=Config.SSL.verify,
+                    timeout=5
                 )
                 print(User.response)
 
@@ -207,7 +214,8 @@ class User():
             url=f"https://{User.server}/api/play/duel/",
             data="",
             headers=User.headers,
-            verify=Config.SSL.CRT
+            verify=Config.SSL.verify,
+            timeout=5
         )
         print(User.response)
 
@@ -220,7 +228,8 @@ class User():
                     url=f"https://{User.server}/api/play/duel/",
                     data="",
                     headers=User.headers,
-                    verify=Config.SSL.CRT
+                    verify=Config.SSL.verify,
+                    timeout=5
                 )
                 print(User.response)
 
@@ -244,7 +253,8 @@ class User():
             url=f"https://{User.server}/api/auth/refresh/",
             data=data,
             headers=User.headers,
-            verify=Config.SSL.CRT
+            verify=Config.SSL.verify,
+            timeout=5
         )
         print(User.response)
 

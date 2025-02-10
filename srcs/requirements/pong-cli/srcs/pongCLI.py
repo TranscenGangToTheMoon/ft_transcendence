@@ -13,7 +13,7 @@ def parser():
     parser.add_argument(
         "-s", "--server",
         type=str,
-        help="Server host (exemple: 127.0.0.1:4443)",
+        help="Server host (exemple: 127.0.0.1:4443 or ft-transendence.xcharra.fr, default port: 443)",
     )
     parser.add_argument(
         "-u", "--user",
@@ -37,6 +37,8 @@ def parser():
     User.URI = f"https://{User.server}"
     User.host = urlparse(User.URI).hostname
     User.port = urlparse(User.URI).port
+    if (User.port is None):
+        User.port = 443
 
 if __name__ == '__main__':
     parser()

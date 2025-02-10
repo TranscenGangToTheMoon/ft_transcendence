@@ -28,7 +28,7 @@ class PongCLI(App):
     @work
     async def SSE(self):
         if (not self.SSEConnected):
-            async with httpx.AsyncClient(verify=Config.SSL.CRT) as client:
+            async with httpx.AsyncClient(verify=Config.SSL.verify) as client:
                 headers = {
                     'Content-Type': 'text/event-stream',
                     'Authorization': f'Bearer {User.accessToken}',

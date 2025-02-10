@@ -1,5 +1,6 @@
 # Python imports
 import os
+import subprocess
 import requests
 from urllib.parse import urlparse
 
@@ -52,25 +53,44 @@ class LoginPage(Screen):
     def getSSLAndJSON(self):
         User.host = urlparse(User.URI).hostname
         User.port = urlparse(User.URI).port
-        User.server = f"{User.host}:{User.port}"
-        if (User.host and User.port):
-            os.system(f"echo | openssl s_client -connect {User.host}:{User.port} -servername {User.host} 2>/dev/null | sed -ne '/-----BEGIN CERTIFICATE-----/,/-----END CERTIFICATE-----/p' > {Config.SSL.CRT}")
+        if (User.port is None):
+            User.port = 443
 
-            result = os.system(f"openssl x509 -in {Config.SSL.CRT} -noout 2>/dev/null")
-            if (result != 0):
+        User.server = f"{User.host}:{User.port}"
+        if (User.host):
+            os.system(f"echo | timeout 5 openssl s_client -connect {User.host}:{User.port} -servername {User.host} -showcerts > {Config.SSL.CRT} 2>/dev/null")
+            result = subprocess.run(
+                f"openssl x509 -in {Config.SSL.CRT} -noout -issuer -subject",
+                shell=True,
+                capture_output=True,
+                text=True
+            )
+
+            if (result.returncode != 0):
                 raise (Exception(f"Certificate retrieval failed"))
+
+            issuer = result.stdout.split("\n")[0].replace("issuer=", "").strip()
+            subject = result.stdout.split("\n")[1].replace("subject=", "").strip()
+
+            if (issuer == subject):
+                print("Certificate is self-signed")
+                Config.SSL.verify = Config.SSL.CRT
+
         jsonData = {}
 
         response = requests.get(
             url=f"https://{User.server}/gameConfig.json",
-            verify=Config.SSL.CRT
+            verify=Config.SSL.verify,
+            timeout=5
         )
+
         if (
             response is not None
             and response.status_code == 200
             and response.headers["Content-Type"] == "application/json"
         ):
             jsonData = response.json()
+
         Config.load(jsonData)
 
     @on(Button.Pressed, "#loginButton")

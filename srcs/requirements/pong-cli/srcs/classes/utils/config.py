@@ -131,4 +131,5 @@ class Config:
         SERVER_DISCONNECT = 'server-disconnect'
 
     class SSL:
+        verify: bool | str = True
         CRT = "ft_transcendence.crt"
