@@ -25,7 +25,7 @@ services:
     depends_on:
       auth-db:
         condition: service_healthy
-    restart: on-failure
+    restart: unless-stopped
     environment:
       <<: *django-env
       POSTGRES_DB: ${POSTGRES_AUTH_DB_NAME}
@@ -44,7 +44,7 @@ services:
     depends_on:
       chat-db:
         condition: service_healthy
-    restart: on-failure
+    restart: unless-stopped
     ports:
       - "8002:8000"
     environment:
@@ -62,7 +62,7 @@ services:
     build:
       context: "requirements/frontend"
       target: production
-    restart: on-failure
+    restart: unless-stopped
     ports:
       - "4443:443"
       - "8080:80"
@@ -81,7 +81,7 @@ services:
     depends_on:
       game-db:
         condition: service_healthy
-    restart: on-failure
+    restart: unless-stopped
     ports:
       - "8003:8000"
     environment:
@@ -104,7 +104,7 @@ services:
     depends_on:
       matchmaking-db:
         condition: service_healthy
-    restart: on-failure
+    restart: unless-stopped
     environment:
       <<: *django-env
       POSTGRES_DB: ${POSTGRES_MATCHMAKING_DB_NAME}
@@ -125,7 +125,7 @@ services:
         condition: service_healthy
       event-queue:
         condition: service_healthy
-    restart: on-failure
+    restart: unless-stopped
     ports:
       - "8005:8000"
     environment:
@@ -142,7 +142,7 @@ services:
 
 ##### ========== Event-queue ============================================= #####
   event-queue:
-    restart: on-failure
+    restart: unless-stopped
     image: redis:alpine
     networks:
         - redis-network
@@ -155,7 +155,7 @@ services:
 ##### ========== Database ================================================ #####
   auth-db:
     image: postgres:14
-    restart: on-failure
+    restart: unless-stopped
     volumes:
       - auth-db-volume:/var/lib/postgresql/data
     environment:
@@ -169,7 +169,7 @@ services:
 
   chat-db:
     image: postgres:14
-    restart: on-failure
+    restart: unless-stopped
     volumes:
       - chat-db-volume:/var/lib/postgresql/data
     environment:
@@ -183,7 +183,7 @@ services:
 
   game-db:
     image: postgres:14
-    restart: on-failure
+    restart: unless-stopped
     volumes:
       - game-db-volume:/var/lib/postgresql/data
     environment:
@@ -197,7 +197,7 @@ services:
 
   matchmaking-db:
     image: postgres:14
-    restart: on-failure
+    restart: unless-stopped
     volumes:
       - matchmaking-db-volume:/var/lib/postgresql/data
     environment:
@@ -211,7 +211,7 @@ services:
 
   users-db:
     image: postgres:14
-    restart: on-failure
+    restart: unless-stopped
     volumes:
       - users-db-volume:/var/lib/postgresql/data
     environment:
